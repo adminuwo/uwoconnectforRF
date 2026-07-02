@@ -3,13 +3,13 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { 
-  LayoutDashboard, 
-  Link2, 
-  Zap, 
-  GitBranch, 
-  MessageSquare, 
-  Settings, 
+import {
+  LayoutDashboard,
+  Link2,
+  Zap,
+  GitBranch,
+  MessageSquare,
+  Settings,
   LogOut,
   ChevronRight,
   Zap as ZapIcon,
@@ -76,13 +76,13 @@ const Sidebar = ({ role }) => {
           const isActive = pathname === link.href;
           const Icon = link.icon;
           return (
-            <Link 
-              key={link.href} 
+            <Link
+              key={link.href}
               href={link.href}
               className={cn(
                 "group flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all duration-300 relative overflow-hidden",
-                isActive 
-                  ? "bg-gradient-to-r from-blue-50/80 to-indigo-50/30 text-blue-700 shadow-[0_8px_20px_rgba(37,99,235,0.06)] border border-blue-100/50" 
+                isActive
+                  ? "bg-gradient-to-r from-blue-50/80 to-indigo-50/30 text-blue-700 shadow-[0_8px_20px_rgba(37,99,235,0.06)] border border-blue-100/50"
                   : "text-slate-500 hover:text-slate-900 hover:bg-slate-50 hover:shadow-md hover:shadow-slate-200/20 hover:-translate-y-0.5"
               )}
             >
@@ -101,7 +101,7 @@ const Sidebar = ({ role }) => {
 
       {/* User Session Footer */}
       <div className="p-6">
-        <button 
+        <button
           onClick={handleLogout}
           className="w-full flex items-center gap-3 px-4 py-3.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-2xl transition-all group font-bold mb-4"
         >

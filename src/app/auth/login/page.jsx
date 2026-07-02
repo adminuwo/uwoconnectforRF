@@ -1,245 +1,264 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
-import { Shield, Mail, Lock, Loader2, ChevronRight, User, ShieldCheck, Zap, FileText, X } from 'lucide-react';
-import axios from 'axios';
 import { useRouter } from 'next/navigation';
-import { cn } from '@/lib/utils';
-import { motion, AnimatePresence } from 'framer-motion';
-
-const LegalModal = ({ isOpen, onClose, title, content, fileUrl }) => {
-  if (!isOpen) return null;
-  return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
-      <motion.div 
-        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-        onClick={onClose} className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" 
-      />
-      <motion.div 
-        initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }}
-        className="relative bg-white w-full max-w-4xl max-h-[90vh] rounded-[32px] shadow-2xl overflow-hidden flex flex-col"
-      >
-        <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-white sticky top-0 z-10">
-          <div>
-            <h2 className="text-xl font-black text-slate-900 uppercase italic tracking-tight">{title}</h2>
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Official Legal Documentation</p>
-          </div>
-          <button onClick={onClose} className="p-2 hover:bg-slate-50 rounded-xl transition-colors text-slate-400 hover:text-slate-900">
-            <X size={24} />
-          </button>
-        </div>
-
-        <div className="flex-1 overflow-y-auto p-8 sm:p-12 space-y-10 custom-scrollbar">
-          <div 
-            className="prose prose-slate max-w-none prose-sm sm:prose-base"
-            dangerouslySetInnerHTML={{ __html: content || '<p class="italic text-slate-400 text-center py-20">Our Legal Policy is currently being updated. Please check back shortly.</p>' }}
-          />
-        </div>
-
-        <div className="p-6 border-t border-slate-100 bg-slate-50/50 flex justify-end">
-          <button onClick={onClose} className="px-8 py-3 bg-slate-900 text-white rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-black transition-all">
-            Close Viewer
-          </button>
-        </div>
-      </motion.div>
-    </div>
-  );
-};
+import { Mail, Lock, Loader2, ArrowRight, Check, Sparkles } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 const LoginPage = () => {
-  const [role, setRole] = useState('CLIENT');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [legalData, setLegalData] = useState({ 
-    privacy: { value: '', file: null }, 
-    terms: { value: '', file: null } 
-  });
-  const [activeModal, setActiveModal] = useState(null);
+  const [rememberMe, setRememberMe] = useState(false);
   const router = useRouter();
-
-  useEffect(() => {
-    const fetchLegal = async () => {
-      try {
-        const [privRes, termsRes] = await Promise.all([
-          axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/admin/settings/global?key=privacy_policy`),
-          axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/admin/settings/global?key=terms_of_service`)
-        ]);
-        setLegalData({
-          privacy: privRes.data,
-          terms: termsRes.data
-        });
-      } catch (err) {
-        console.error("Failed to fetch legal files for modals");
-      }
-    };
-    fetchLegal();
-  }, []);
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
-    try {
-      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/auth/login`, { email, password, role });
-      localStorage.setItem('token', response.data.token);
-      localStorage.setItem('user', JSON.stringify(response.data.user));
-      if (role === 'ADMIN') {
+    // Simulate auth API call
+    setTimeout(() => {
+      setLoading(false);
+      if (email.toLowerCase().includes('admin')) {
         router.push('/admin');
       } else {
         router.push('/client');
       }
-    } catch (err) {
-      setError(err.response?.data?.message || 'Login failed. Please check your credentials.');
-    } finally {
-      setLoading(false);
-    }
+    }, 1500);
   };
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] flex flex-col items-center justify-center p-6 relative overflow-hidden font-sans text-slate-900">
-      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-50/50 blur-[120px] -mr-32 -mt-32 rounded-full" />
-      <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-blue-100/30 blur-[100px] -ml-24 -mb-24 rounded-full" />
+    <div className="flex min-h-screen bg-[#FAFAFA] font-sans selection:bg-[#15803D]/20 selection:text-[#2B2B2B] overflow-hidden relative">
+      {/* Background blobs/glows */}
+      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+        <motion.div
+          animate={{
+            scale: [1, 1.15, 1],
+            x: [0, 30, 0],
+            y: [0, -20, 0]
+          }}
+          transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute -top-[10%] -left-[10%] w-[50%] h-[50%] rounded-full bg-[#15803D]/10 blur-[120px]"
+        />
+        <motion.div
+          animate={{
+            scale: [1, 1.2, 1],
+            x: [0, -30, 0],
+            y: [0, 40, 0]
+          }}
+          transition={{ duration: 18, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+          className="absolute -bottom-[10%] right-[10%] w-[60%] h-[60%] rounded-full bg-[#DCFCE7]/30 blur-[100px]"
+        />
+      </div>
 
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="relative z-10 w-full max-w-[420px]"
-      >
-        <div className="flex flex-col items-center mb-10">
-          <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-200 mb-6">
-            <Zap className="text-white" size={32} strokeWidth={2.5} fill="currentColor" />
+      {/* LEFT PANEL - Playful 3D Character (55%) */}
+      <div className="hidden lg:flex flex-col w-[55%] relative overflow-hidden z-10 p-16 xl:p-24 justify-between">
+        {/* Soft studio light overlay */}
+        <div className="absolute inset-0 bg-gradient-to-tr from-[#FAFAFA]/80 via-[#DCFCE7]/10 to-[#166534]/5 pointer-events-none" />
+
+        {/* Brand Logo */}
+        <motion.div
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          className="flex items-center gap-3 relative z-10"
+        >
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#14532D] via-[#166534] to-[#15803D] flex items-center justify-center shadow-sm border border-white/50">
+            <Sparkles className="text-white" size={18} strokeWidth={2.5} />
           </div>
-          <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight mb-2">AisaConnect<span className="text-blue-600">.</span></h1>
-          <p className="text-slate-500 font-semibold uppercase tracking-widest text-[10px]">Cloud Messaging Infrastructure</p>
+          <span className="text-[#2B2B2B] font-bold text-xl tracking-tight">EFV Unified.</span>
+        </motion.div>
+
+        {/* Character & Message Wrapper */}
+        <div className="relative flex flex-col items-center my-auto w-full max-w-xl mx-auto z-10">
+          {/* Pixar character illustration */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{
+              opacity: 1,
+              y: [0, -12, 0]
+            }}
+            transition={{
+              opacity: { duration: 0.8 },
+              y: { duration: 6, repeat: Infinity, ease: "easeInOut" }
+            }}
+            className="w-full max-w-[340px] aspect-[2/3] relative mb-10 drop-shadow-[0_20px_40px_rgba(20,83,45,0.06)]"
+          >
+            <img
+              src="/character.png"
+              alt="EFV Character"
+              className="w-full h-full object-contain rounded-3xl"
+            />
+            {/* Floating abstract decorative elements */}
+            <motion.div
+              animate={{ y: [0, -10, 0], rotate: [0, 10, 0] }}
+              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+              className="absolute -top-4 -right-4 w-12 h-12 rounded-2xl bg-white/60 backdrop-blur-md shadow-md border border-white flex items-center justify-center"
+            >
+              <Sparkles className="text-[#14532D]" size={20} />
+            </motion.div>
+            <motion.div
+              animate={{ y: [0, 8, 0], rotate: [0, -8, 0] }}
+              transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+              className="absolute bottom-10 -left-6 w-10 h-10 rounded-full bg-[#15803D]/85 backdrop-blur-md shadow-md flex items-center justify-center text-lg"
+            >
+              👋
+            </motion.div>
+          </motion.div>
+
+          <div className="text-center">
+            <motion.h1
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="text-4xl xl:text-5xl font-black text-[#2B2B2B] tracking-tight mb-4"
+            >
+              Welcome Back!
+            </motion.h1>
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.4 }}
+              className="text-slate-600 font-medium text-sm xl:text-base leading-relaxed"
+            >
+              Your AI-powered workspace for CRM, Marketing, Social Media, Projects and Business Automation.
+            </motion.p>
+          </div>
         </div>
 
-        <div className="bg-white border border-slate-200 rounded-[32px] p-2 shadow-[0_20px_50px_rgba(0,0,0,0.05)]">
-          <div className="flex p-1.5 gap-1.5 bg-slate-50 rounded-[24px] mb-8">
-            <button
-              onClick={() => setRole('CLIENT')}
-              className={cn(
-                "flex-1 flex items-center justify-center gap-2 py-3 rounded-[18px] transition-all font-bold text-[11px] uppercase tracking-wider",
-                role === 'CLIENT' ? "bg-white text-blue-600 shadow-sm border border-slate-100" : "text-slate-400 hover:text-slate-600"
-              )}
-            >
-              <User size={16} strokeWidth={2.5} />
-              Partner
-            </button>
-            <button
-              onClick={() => setRole('ADMIN')}
-              className={cn(
-                "flex-1 flex items-center justify-center gap-2 py-3 rounded-[18px] transition-all font-bold text-[11px] uppercase tracking-wider",
-                role === 'ADMIN' ? "bg-white text-blue-600 shadow-sm border border-slate-100" : "text-slate-400 hover:text-slate-600"
-              )}
-            >
-              <Shield size={16} strokeWidth={2.5} />
-              Admin
-            </button>
-          </div>
+        {/* Footer */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 1, delay: 0.6 }}
+          className="text-xs font-semibold text-slate-400 uppercase tracking-wider text-center relative z-10"
+        >
+          © 2026 EFV Unified Platform
+        </motion.div>
+      </div>
 
-          <form onSubmit={handleLogin} className="px-8 pb-8 space-y-6">
-            <div className="space-y-2">
-              <label className="text-[11px] font-bold text-slate-700 uppercase tracking-wide ml-1">Email Address</label>
-              <div className="relative group">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors" size={18} />
-                <input
-                  type="email" value={email} onChange={(e) => setEmail(e.target.value)}
-                  placeholder="name@company.com" required
-                  className="w-full bg-slate-50 border border-slate-200 rounded-[18px] py-4 pl-12 pr-6 text-slate-900 outline-none focus:border-blue-500 focus:bg-white transition-all font-medium text-sm"
-                />
+      {/* RIGHT PANEL - Authentication (45%) */}
+      <div className="w-full lg:w-[45%] relative flex items-center justify-center p-6 sm:p-12 z-10">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+          className="w-full max-w-[440px]"
+        >
+          {/* Glass Card */}
+          <div className="bg-white/75 backdrop-blur-[25px] border border-white/50 rounded-[28px] p-8 sm:p-10 shadow-[0_20px_40px_rgba(43,43,43,0.04)] hover:shadow-[0_20px_40px_rgba(20,83,45,0.05)] transition-all duration-300 relative overflow-hidden">
+            {/* Top Shine */}
+            <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white to-transparent" />
+
+            <div className="flex flex-col items-center mb-8">
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-[#14532D] via-[#166534] to-[#15803D] flex items-center justify-center shadow-sm border border-white/50 mb-4">
+                <Sparkles className="text-white" size={22} />
               </div>
+              <h2 className="text-2xl font-bold text-[#2B2B2B] tracking-tight">Sign In</h2>
+              <p className="text-slate-500 text-xs font-medium mt-1">Access your platform dashboard.</p>
             </div>
 
-            <div className="space-y-2">
-              <label className="text-[11px] font-bold text-slate-700 uppercase tracking-wide ml-1">Access Password</label>
-              <div className="relative group">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors" size={18} />
-                <input
-                  type="password" value={password} onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••" required
-                  className="w-full bg-slate-50 border border-slate-200 rounded-[18px] py-4 pl-12 pr-6 text-slate-900 outline-none focus:border-blue-500 focus:bg-white transition-all font-medium text-sm"
-                />
+            <form onSubmit={handleLogin} className="space-y-4">
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Email</label>
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <Mail className="h-4 w-4 text-slate-400 group-focus-within:text-[#14532D] transition-colors" />
+                  </div>
+                  <input
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="name@company.com"
+                    className="w-full bg-white border border-slate-200/80 rounded-full py-3.5 pl-11 pr-6 text-[#2B2B2B] placeholder-slate-400 outline-none focus:border-[#14532D] focus:ring-4 focus:ring-[#14532D]/10 transition-all duration-300 font-medium text-sm shadow-sm"
+                  />
+                </div>
               </div>
-            </div>
 
-            {error && (
-              <div className="bg-red-50 border border-red-100 p-4 rounded-2xl flex items-center gap-3 text-red-600">
-                <ShieldCheck size={18} className="shrink-0" />
-                <p className="text-xs font-semibold">{error}</p>
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Password</label>
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <Lock className="h-4 w-4 text-slate-400 group-focus-within:text-[#14532D] transition-colors" />
+                  </div>
+                  <input
+                    type="password"
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="w-full bg-white border border-slate-200/80 rounded-full py-3.5 pl-11 pr-6 text-[#2B2B2B] placeholder-slate-400 outline-none focus:border-[#14532D] focus:ring-4 focus:ring-[#14532D]/10 transition-all duration-300 font-medium text-sm shadow-sm"
+                  />
+                </div>
               </div>
-            )}
 
-            <button
-              type="submit" disabled={loading}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-[18px] font-bold uppercase tracking-widest text-[12px] transition-all flex items-center justify-center gap-3 shadow-lg shadow-blue-100 active:scale-[0.98] disabled:opacity-50"
-            >
-              {loading ? <Loader2 className="animate-spin" size={20} /> : (
-                <>Launch Session<ChevronRight size={18} strokeWidth={3} /></>
-              )}
-            </button>
+              <div className="flex items-center justify-between pt-1">
+                <label className="flex items-center gap-2 cursor-pointer group">
+                  <div className="relative w-4 h-4 rounded border border-slate-200 bg-white flex items-center justify-center group-hover:border-[#14532D] transition-colors">
+                    <input
+                      type="checkbox"
+                      className="sr-only"
+                      checked={rememberMe}
+                      onChange={(e) => setRememberMe(e.target.checked)}
+                    />
+                    {rememberMe && <Check size={12} className="text-[#14532D]" strokeWidth={4} />}
+                  </div>
+                  <span className="text-xs font-semibold text-slate-500 group-hover:text-slate-600 transition-colors">Remember me</span>
+                </label>
+                <Link href="#" className="text-xs font-semibold text-[#14532D] hover:text-[#166534] transition-colors">
+                  Forgot Password?
+                </Link>
+              </div>
 
-            {role === 'CLIENT' && (
-              <p className="text-center text-[11px] font-bold text-slate-400 uppercase tracking-widest">
-                Don't have an account? <Link href="/auth/register" className="text-blue-600 hover:underline">Create Account</Link>
-              </p>
-            )}
-          </form>
-
-          <div className="p-6 bg-slate-50/50 border-t border-slate-100 flex items-center justify-center gap-2">
-            <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Network Status: Online</p>
-          </div>
-        </div>
-
-        <div className="mt-10 flex flex-col items-center gap-4">
-          <p className="text-slate-400 text-[11px] font-semibold uppercase tracking-widest">
-            &copy; 2026 Aisaconnect Infrastructure
-          </p>
-          <div className="flex items-center gap-6">
-            {(legalData.privacy.value || legalData.privacy.file) && (
-              <>
-                <button 
-                  onClick={() => setActiveModal('privacy')}
-                  className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] hover:text-blue-600 transition-colors"
+              <div className="pt-3">
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="relative w-full rounded-full py-3.5 px-6 text-white font-bold text-[12px] uppercase tracking-wider overflow-hidden group shadow-[0_8px_20px_rgba(20,83,45,0.2)] hover:scale-[1.03] active:scale-[0.98] transition-all duration-300"
                 >
-                  Privacy Policy
+                  <div className="absolute inset-0 bg-gradient-to-r from-[#14532D] via-[#166534] to-[#15803D] group-hover:opacity-90 transition-opacity" />
+                  <span className="relative z-10 flex items-center justify-center gap-2">
+                    {loading ? <Loader2 className="animate-spin" size={18} /> : (
+                      <>Continue <ArrowRight size={16} strokeWidth={3} className="group-hover:translate-x-1 transition-transform" /></>
+                    )}
+                  </span>
                 </button>
-                {(legalData.terms.value || legalData.terms.file) && <div className="w-1 h-1 bg-slate-300 rounded-full" />}
-              </>
-            )}
-            {(legalData.terms.value || legalData.terms.file) && (
-              <button 
-                onClick={() => setActiveModal('terms')}
-                className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] hover:text-blue-600 transition-colors"
-              >
-                Terms of Service
-              </button>
-            )}
-          </div>
-        </div>
-      </motion.div>
+              </div>
+            </form>
 
-      <AnimatePresence>
-        {activeModal === 'privacy' && (
-          <LegalModal 
-            isOpen={true} onClose={() => setActiveModal(null)} 
-            title="Privacy Policy" 
-            content={legalData.privacy.value} 
-            fileUrl={legalData.privacy.file} 
-          />
-        )}
-        {activeModal === 'terms' && (
-          <LegalModal 
-            isOpen={true} onClose={() => setActiveModal(null)} 
-            title="Terms of Service" 
-            content={legalData.terms.value} 
-            fileUrl={legalData.terms.file} 
-          />
-        )}
-      </AnimatePresence>
+            <div className="mt-6 mb-5 flex items-center gap-4">
+              <div className="h-px flex-1 bg-gradient-to-r from-transparent to-slate-200" />
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Or continue with</span>
+              <div className="h-px flex-1 bg-gradient-to-l from-transparent to-slate-200" />
+            </div>
+
+            <div className="grid grid-cols-3 gap-3">
+              {[
+                { name: 'Google', icon: 'M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z', color: '#4285F4' },
+                { name: 'Microsoft', icon: 'M11.4 24h-11.4v-11.4h11.4v11.4zm12.6 0h-11.4v-11.4h11.4v11.4zm-12.6-12.6h-11.4v-11.4h11.4v11.4zm12.6 0h-11.4v-11.4h11.4v11.4z', color: '#00A4EF' },
+                { name: 'Meta', icon: 'M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z', color: '#1877F2' }
+              ].map((provider) => (
+                <button
+                  key={provider.name}
+                  className="flex items-center justify-center p-3 rounded-2xl border border-slate-200/80 bg-white hover:bg-slate-50 transition-all hover:scale-105 active:scale-95 shadow-[0_4px_12px_rgba(0,0,0,0.02)]"
+                  title={`Login with ${provider.name}`}
+                >
+                  <svg className="w-5 h-5 fill-current text-slate-600" viewBox="0 0 24 24">
+                    <path d={provider.icon} />
+                  </svg>
+                </button>
+              ))}
+            </div>
+
+            <div className="mt-6 text-center">
+              <p className="text-xs font-semibold text-slate-500">
+                Don't have an account? <Link href="/auth/register" className="text-[#14532D] hover:text-[#166534] transition-colors">Sign up</Link>
+              </p>
+            </div>
+          </div>
+        </motion.div>
+      </div>
     </div>
   );
 };
