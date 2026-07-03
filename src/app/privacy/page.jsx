@@ -83,7 +83,7 @@ export default function PrivacyPage() {
                     <p>We retain message data and customer information as long as your account is active. You may request the deletion of your account and all associated data at any time by contacting our support team. Upon deletion, all WhatsApp tokens and message histories are permanently removed from our servers.</p>
                     
                     <h3 class="text-xl font-semibold text-slate-900 mt-6">5. Contact Us</h3>
-                    <p>If you have any questions about this Privacy Policy or our data practices, please contact us at support@aisaconnect.com.</p>
+                    <p>If you have any questions about this Privacy Policy or our data practices, please contact us at admin@uwo24.com.</p>
                   </div>
                 ` 
               }}
