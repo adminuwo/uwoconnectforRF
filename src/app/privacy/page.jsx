@@ -53,8 +53,37 @@ export default function PrivacyPage() {
               className="prose prose-slate max-w-none relative z-10"
               dangerouslySetInnerHTML={{ 
                 __html: content || `
-                  <div class="text-center py-10">
-                    <p class="text-slate-400 italic">Our Privacy Policy is currently being updated by the administration. Please check back shortly.</p>
+                  <div class="space-y-6 text-slate-700">
+                    <h2 class="text-2xl font-bold text-slate-900">AisaConnect Privacy Policy</h2>
+                    <p class="text-sm text-slate-500">Last updated: July 2026</p>
+                    
+                    <h3 class="text-xl font-semibold text-slate-900 mt-6">1. Information We Collect</h3>
+                    <p>We collect information necessary to provide our WhatsApp messaging automation services. This includes:</p>
+                    <ul class="list-disc pl-5 space-y-2">
+                      <li><strong>WhatsApp Account Information:</strong> Your business phone number, WhatsApp Business Account ID, and access tokens required to integrate with the WhatsApp Business API.</li>
+                      <li><strong>End-User Data:</strong> We process incoming and outgoing messages, including phone numbers, profile names, and message content sent between your business and your customers via WhatsApp.</li>
+                    </ul>
+                    
+                    <h3 class="text-xl font-semibold text-slate-900 mt-6">2. How We Use Your Information</h3>
+                    <p>The collected data is exclusively used to:</p>
+                    <ul class="list-disc pl-5 space-y-2">
+                      <li>Facilitate the sending and receiving of WhatsApp messages on behalf of your business.</li>
+                      <li>Provide automated replies and AI-powered responses based on your configured workflows.</li>
+                      <li>Maintain CRM records of your customer interactions within the AisaConnect dashboard.</li>
+                    </ul>
+                    
+                    <h3 class="text-xl font-semibold text-slate-900 mt-6">3. Data Sharing and Third Parties</h3>
+                    <p>We do not sell your data. We share data only with essential third-party service providers, including:</p>
+                    <ul class="list-disc pl-5 space-y-2">
+                      <li><strong>Meta Platforms, Inc:</strong> Data is transmitted through Meta's WhatsApp Business API to deliver messages.</li>
+                      <li><strong>AI Providers:</strong> Message content may be processed by AI providers solely for the purpose of generating automated responses, as configured by you.</li>
+                    </ul>
+                    
+                    <h3 class="text-xl font-semibold text-slate-900 mt-6">4. Data Retention and Deletion</h3>
+                    <p>We retain message data and customer information as long as your account is active. You may request the deletion of your account and all associated data at any time by contacting our support team. Upon deletion, all WhatsApp tokens and message histories are permanently removed from our servers.</p>
+                    
+                    <h3 class="text-xl font-semibold text-slate-900 mt-6">5. Contact Us</h3>
+                    <p>If you have any questions about this Privacy Policy or our data practices, please contact us at support@aisaconnect.com.</p>
                   </div>
                 ` 
               }}
