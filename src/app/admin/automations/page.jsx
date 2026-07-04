@@ -1,9 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Zap, Search, Loader2, ArrowRight, Activity, X } from 'lucide-react';
+import { Zap, Search, Loader2, ArrowRight, X } from 'lucide-react';
 import axios from 'axios';
-import { motion, AnimatePresence } from 'framer-motion';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { cn } from '@/lib/utils';
 
@@ -36,7 +35,7 @@ const AdminAutomationsPage = () => {
       setDetailsLoading(true);
       setIsDetailsModalOpen(true);
       const token = localStorage.getItem('token');
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || `${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}`}/api/clients/${id}/`, {
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/clients/${id}/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setSelectedClientDetails(response.data);
@@ -48,18 +47,6 @@ const AdminAutomationsPage = () => {
   };
 
   useEffect(() => { fetchAutomations(); }, []);
-
-  const handleUpdateStatus = async (id, status) => {
-    try {
-      const token = localStorage.getItem('token');
-      await axios.patch(`${process.env.NEXT_PUBLIC_API_URL || `${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}`}/api/clients/${id}/`, { status }, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      fetchAutomations();
-    } catch (err) {
-      alert('Failed to update status');
-    }
-  };
 
   const filteredAutomations = automations.filter(aut => {
     const matchesSearch = aut.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -74,14 +61,14 @@ const AdminAutomationsPage = () => {
         <div className="flex items-center justify-between mb-10">
           <div>
             <h1 className="text-3xl font-black text-gray-900 tracking-tight flex items-center gap-3">
-              <Zap className="text-yellow-500 fill-yellow-500" size={32} />
+              <Zap className="text-[#059669] fill-[#059669]/20" size={32} />
               All Automations
             </h1>
             <p className="text-gray-500 mt-1 font-medium">See all automatic replies set up by your clients.</p>
           </div>
           <div className="flex items-center gap-4 bg-white p-2 rounded-2xl border border-gray-100 shadow-sm">
-            <div className="px-4 py-2 bg-yellow-50 rounded-xl border border-yellow-100">
-              <p className="text-[10px] font-black text-yellow-600 uppercase tracking-widest leading-none mb-1">Total Active</p>
+            <div className="px-4 py-2 bg-emerald-50 rounded-xl border border-emerald-100">
+              <p className="text-[10px] font-black text-[#059669] uppercase tracking-widest leading-none mb-1">Total Active</p>
               <p className="text-xl font-black text-gray-900 leading-none">{automations.filter(a => a.enabled).length}</p>
             </div>
           </div>
@@ -93,7 +80,7 @@ const AdminAutomationsPage = () => {
             <input
               type="text" placeholder="Search by name or client..." value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-12 pr-4 py-4 bg-white border border-gray-100 rounded-2xl outline-none focus:ring-4 focus:ring-blue-50 transition-all font-medium"
+              className="w-full pl-12 pr-4 py-4 bg-white border border-gray-100 rounded-2xl outline-none focus:ring-4 focus:ring-emerald-50 transition-all font-medium"
             />
           </div>
           <div className="flex bg-white p-1.5 rounded-2xl border border-gray-100 shadow-sm">
@@ -122,7 +109,7 @@ const AdminAutomationsPage = () => {
               {loading ? (
                 <tr><td colSpan={5} className="px-8 py-20 text-center">
                   <div className="flex flex-col items-center gap-3">
-                    <Loader2 className="animate-spin text-blue-600" size={32} />
+                    <Loader2 className="animate-spin text-[#059669]" size={32} />
                     <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Loading data...</p>
                   </div>
                 </td></tr>
@@ -134,7 +121,7 @@ const AdminAutomationsPage = () => {
                 <tr key={aut._id || aut.id} className="hover:bg-gray-50/30 transition-colors">
                   <td className="px-8 py-6">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center font-black text-[10px]">
+                      <div className="w-8 h-8 rounded-lg bg-emerald-50 text-[#059669] flex items-center justify-center font-black text-[10px]">
                         {aut.clientName?.charAt(0).toUpperCase()}
                       </div>
                       <span className="font-bold text-gray-900">{aut.clientName}</span>
@@ -168,19 +155,19 @@ const AdminAutomationsPage = () => {
           </table>
         </div>
 
-        <AnimatePresence>
+        
           {isDetailsModalOpen && (
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              <div
                 className="absolute inset-0 bg-gray-900/60 backdrop-blur-md"
                 onClick={() => setIsDetailsModalOpen(false)}
               />
-              <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              <div
                 className="relative bg-white w-full max-w-2xl rounded-[40px] shadow-2xl overflow-hidden"
               >
                 {detailsLoading ? (
                   <div className="p-20 flex flex-col items-center gap-4">
-                    <Loader2 className="animate-spin text-blue-600" size={40} />
+                    <Loader2 className="animate-spin text-[#059669]" size={40} />
                     <p className="text-xs font-black text-gray-400 uppercase tracking-widest">Loading Client Profile...</p>
                   </div>
                 ) : selectedClientDetails && (
@@ -200,13 +187,15 @@ const AdminAutomationsPage = () => {
                     </div>
                   </>
                 )}
-              </motion.div>
+              </div>
             </div>
           )}
-        </AnimatePresence>
+        
       </div>
     </DashboardLayout>
   );
 };
 
 export default AdminAutomationsPage;
+
+

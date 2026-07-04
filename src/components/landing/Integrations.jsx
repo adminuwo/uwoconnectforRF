@@ -34,7 +34,7 @@ export default function Integrations() {
                 key={idx}
                 className="glass-card rounded-2xl p-6 flex flex-col items-center justify-center text-center aspect-square hover:border-[#16A085]/50 hover:bg-[#16A085]/5 transition-all duration-300 group cursor-pointer"
               >
-                <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform shadow-[0_4px_20px_rgba(0,0,0,0.2)]">
+                <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center mb-3 transition-transform shadow-[0_4px_20px_rgba(0,0,0,0.2)]">
                   {/* Placeholder for actual logo icons */}
                   <span className="text-[#8E99A8] group-hover:text-white font-bold text-lg">{logo.charAt(0)}</span>
                 </div>
@@ -50,3 +50,5 @@ export default function Integrations() {
     </section>
   );
 }
+
+

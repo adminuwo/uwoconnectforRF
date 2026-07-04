@@ -9,8 +9,6 @@ import {
 import axios from 'axios';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { cn } from '@/lib/utils';
-import { motion, AnimatePresence } from 'framer-motion';
-
 const ClientInboxPage = () => {
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -33,7 +31,7 @@ const ClientInboxPage = () => {
           setSelectedConvoId(firstSender);
         }
       } catch (err) {
-        console.error('Failed to fetch messages');
+        console.warn('Failed to fetch messages');
       } finally {
         setLoading(false);
       }
@@ -108,7 +106,7 @@ const ClientInboxPage = () => {
       
       // We don't strictly need to do anything here because the optimistic update is already there.
     } catch (err) {
-      console.error('Failed to send message:', err);
+      console.warn('Failed to send message:', err);
       alert("Failed to send message");
     } finally {
       setIsSending(false);
@@ -151,7 +149,7 @@ const ClientInboxPage = () => {
                 />
               </div>
               <div className="flex items-center gap-2 mt-4">
-                <button className="px-4 py-1.5 bg-slate-900 text-white rounded-xl text-[10px] font-bold uppercase tracking-widest">All</button>
+                <button className="px-4 py-1.5 bg-emerald-600 text-white rounded-xl text-[10px] font-bold uppercase tracking-widest">All</button>
                 <button className="px-4 py-1.5 text-slate-400 hover:bg-slate-100 rounded-xl text-[10px] font-bold uppercase tracking-widest">Unassigned</button>
                 <button className="ml-auto w-8 h-8 flex items-center justify-center text-slate-400 hover:text-slate-900"><Filter size={14} /></button>
               </div>
@@ -170,7 +168,7 @@ const ClientInboxPage = () => {
                   onClick={() => setSelectedConvoId(convo.id)}
                   className={cn(
                     "w-full p-6 text-left border-b border-slate-50 transition-all flex gap-4 hover:bg-slate-50/50",
-                    selectedConvoId === convo.id ? "bg-blue-50/50 border-r-4 border-r-blue-500" : ""
+                    selectedConvoId === convo.id ? "bg-emerald-50/50 border-r-4 border-r-emerald-500" : ""
                   )}
                 >
                   <div className="relative shrink-0">
@@ -233,8 +231,7 @@ const ClientInboxPage = () => {
                   {activeConvo.messages.map((msg, i) => {
                     const isIncoming = msg.message_type === 'INCOMING';
                     return (
-                      <motion.div 
-                        initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+                      <div
                         key={msg.id || i} 
                         className={cn("flex flex-col", isIncoming ? "items-start" : "items-end")}
                       >
@@ -242,7 +239,7 @@ const ClientInboxPage = () => {
                           "max-w-[70%] p-4 rounded-[24px] text-sm leading-relaxed shadow-sm transition-all hover:shadow-md",
                           isIncoming 
                             ? "bg-white text-slate-700 rounded-bl-none border border-slate-100" 
-                            : "bg-blue-600 text-white rounded-br-none shadow-blue-100"
+                            : "bg-emerald-600 text-white rounded-br-none shadow-emerald-100"
                         )}>
                           {msg.body}
                         </div>
@@ -250,9 +247,9 @@ const ClientInboxPage = () => {
                           <p className="text-[9px] font-bold text-slate-300 uppercase">
                             {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                           </p>
-                          {!isIncoming && <CheckCheck size={12} className="text-blue-500" />}
+                          {!isIncoming && <CheckCheck size={12} className="text-emerald-500" />}
                         </div>
-                      </motion.div>
+                      </div>
                     );
                   })}
                 </div>
@@ -279,7 +276,7 @@ const ClientInboxPage = () => {
                         <button className="w-10 h-10 flex items-center justify-center text-slate-400 hover:bg-white rounded-full hover:shadow-sm transition-all"><Smile size={18} /></button>
                         <button className="w-10 h-10 flex items-center justify-center text-slate-400 hover:bg-white rounded-full hover:shadow-sm transition-all"><Paperclip size={18} /></button>
                       </div>
-                      <button onClick={handleSendMessage} disabled={!replyText.trim() || isSending} className={cn("text-white p-4 rounded-2xl transition-all shadow-xl", replyText.trim() && !isSending ? "bg-blue-600 hover:bg-slate-900 shadow-blue-100" : "bg-slate-300 cursor-not-allowed shadow-none")}>
+                      <button onClick={handleSendMessage} disabled={!replyText.trim() || isSending} className={cn("text-white p-4 rounded-2xl transition-all shadow-xl", replyText.trim() && !isSending ? "bg-emerald-600 hover:bg-slate-900 shadow-emerald-100" : "bg-slate-300 cursor-not-allowed shadow-none")}>
                         {isSending ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
                       </button>
                     </div>
@@ -288,7 +285,7 @@ const ClientInboxPage = () => {
               </>
             ) : (
               <div className="flex-1 flex flex-col items-center justify-center text-center p-20">
-                <div className="w-24 h-24 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center mb-6">
+                <div className="w-24 h-24 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center mb-6">
                   <MessageSquare size={40} />
                 </div>
                 <h3 className="text-xl font-bold text-slate-900 mb-2">No Active Thread</h3>
@@ -303,7 +300,7 @@ const ClientInboxPage = () => {
               <div className="space-y-10">
                 {/* Profile Card */}
                 <div className="text-center">
-                  <div className="w-20 h-20 bg-slate-900 text-white rounded-[28px] flex items-center justify-center text-2xl font-bold mx-auto mb-4 shadow-2xl shadow-slate-200">
+                  <div className="w-20 h-20 bg-emerald-600 text-white rounded-[28px] flex items-center justify-center text-2xl font-bold mx-auto mb-4 shadow-2xl shadow-slate-200">
                     {activeConvo.name[0].toUpperCase()}
                   </div>
                   <h3 className="text-lg font-bold text-slate-900 mb-1">{activeConvo.name}</h3>
@@ -342,7 +339,7 @@ const ClientInboxPage = () => {
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-4">Tags</p>
                   <div className="flex flex-wrap gap-2">
                     {['Priority', 'WhatsApp', 'Support'].map(tag => (
-                      <span key={tag} className="px-3 py-1 bg-blue-50 text-blue-600 rounded-lg text-[10px] font-bold uppercase tracking-widest border border-blue-100">
+                      <span key={tag} className="px-3 py-1 bg-emerald-50 text-emerald-600 rounded-lg text-[10px] font-bold uppercase tracking-widest border border-emerald-100">
                         {tag}
                       </span>
                     ))}
@@ -378,3 +375,6 @@ const ClientInboxPage = () => {
 };
 
 export default ClientInboxPage;
+
+
+

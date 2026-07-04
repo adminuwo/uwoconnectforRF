@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import { ShieldCheck, UserCheck, UserX, Loader2, Search, Building2, Mail, Clock } from 'lucide-react';
 import axios from 'axios';
-import { motion, AnimatePresence } from 'framer-motion';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { cn } from '@/lib/utils';
 
@@ -35,7 +34,7 @@ const AdminApprovalsPage = () => {
     setProcessingId(userId);
     try {
       const token = localStorage.getItem('token');
-      await axios.patch(`${process.env.NEXT_PUBLIC_API_URL || `${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}`}/api/admin/users/${userId}`, { status }, {
+      await axios.patch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/admin/users/${userId}`, { status }, {
         headers: { Authorization: `Bearer ${token}` }
       });
       fetchUsers();
@@ -60,7 +59,7 @@ const AdminApprovalsPage = () => {
       <div className="max-w-7xl mx-auto pb-20">
         <div className="mb-10">
           <h1 className="text-3xl font-black text-slate-900 tracking-tight flex items-center gap-3">
-            <ShieldCheck className="text-blue-600" size={32} />
+            <ShieldCheck className="text-[#059669]" size={32} />
             Approve Users
           </h1>
           <p className="text-slate-500 mt-1 font-medium italic">Approve new users who have signed up.</p>
@@ -71,7 +70,7 @@ const AdminApprovalsPage = () => {
           <input 
             type="text" placeholder="Search by name, email or business..."
             value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-12 pr-6 py-4 bg-white border border-slate-200 rounded-[24px] outline-none focus:ring-4 focus:ring-blue-50 transition-all font-bold text-sm shadow-sm"
+            className="w-full pl-12 pr-6 py-4 bg-white border border-slate-200 rounded-[24px] outline-none focus:ring-4 focus:ring-emerald-50 transition-all font-bold text-sm shadow-sm"
           />
         </div>
 
@@ -83,7 +82,7 @@ const AdminApprovalsPage = () => {
           
           {loading ? (
             <div className="py-20 flex flex-col items-center gap-4">
-              <Loader2 className="animate-spin text-blue-600" size={40} />
+              <Loader2 className="animate-spin text-[#059669]" size={40} />
               <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Fetching registrations...</p>
             </div>
           ) : pendingUsers.length === 0 ? (
@@ -92,10 +91,10 @@ const AdminApprovalsPage = () => {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <AnimatePresence>
+              
                 {pendingUsers.map((user, index) => (
-                  <motion.div 
-                    key={user.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.1 }}
+                  <div 
+                    key={user.id}
                     className="bg-white p-8 rounded-[32px] border border-amber-100 shadow-xl shadow-amber-50/50 relative group overflow-hidden"
                   >
                     <div className="absolute top-0 right-0 p-4">
@@ -127,7 +126,7 @@ const AdminApprovalsPage = () => {
                       <button 
                         onClick={() => handleUpdateStatus(user.id, 'APPROVED')}
                         disabled={processingId === user.id}
-                        className="flex-1 bg-blue-600 text-white py-3.5 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-blue-700 transition-all flex items-center justify-center gap-2 shadow-lg shadow-blue-100 disabled:opacity-50"
+                        className="flex-1 bg-[#059669] text-white py-3.5 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-[#047857] transition-all flex items-center justify-center gap-2 shadow-lg shadow-emerald-100 disabled:opacity-50"
                       >
                         {processingId === user.id ? <Loader2 className="animate-spin" size={14} /> : <UserCheck size={14} />}
                         Approve
@@ -140,9 +139,9 @@ const AdminApprovalsPage = () => {
                         <UserX size={14} />
                       </button>
                     </div>
-                  </motion.div>
+                  </div>
                 ))}
-              </AnimatePresence>
+              
             </div>
           )}
         </div>
@@ -165,7 +164,7 @@ const AdminApprovalsPage = () => {
                   <tr key={user.id} className="hover:bg-slate-50/30 transition-colors">
                     <td className="px-8 py-5">
                       <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 rounded-xl bg-slate-100 text-slate-500 flex items-center justify-center font-bold">
+                        <div className="w-10 h-10 rounded-xl bg-emerald-50 text-[#059669] flex items-center justify-center font-bold border border-emerald-100/30">
                           {user.name[0].toUpperCase()}
                         </div>
                         <div>
@@ -190,7 +189,7 @@ const AdminApprovalsPage = () => {
                     <td className="px-8 py-5 text-right">
                       <button 
                         onClick={() => handleUpdateStatus(user.id, user.status === 'SUSPENDED' ? 'APPROVED' : 'SUSPENDED')}
-                        className="text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-blue-600 transition-colors italic"
+                        className="text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-[#059669] transition-colors italic"
                       >
                         {user.status === 'SUSPENDED' ? 'Reactivate' : 'Suspend'}
                       </button>
@@ -207,3 +206,5 @@ const AdminApprovalsPage = () => {
 };
 
 export default AdminApprovalsPage;
+
+

@@ -10,25 +10,25 @@ const AdminSupportPage = () => {
       <div className="max-w-4xl mx-auto pb-20">
         <div className="mb-10">
           <h1 className="text-3xl font-black text-gray-900 tracking-tight flex items-center gap-3">
-            <LifeBuoy className="text-blue-500" size={32} /> Support Center
+            <LifeBuoy className="text-[#059669]" size={32} /> Support Center
           </h1>
           <p className="text-gray-500 mt-1 font-medium italic">Help & documentation for admins</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="bg-white rounded-[32px] border border-slate-200 p-8 shadow-sm hover:shadow-md transition-all group">
-            <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+            <div className="w-12 h-12 bg-emerald-50 text-[#059669] rounded-2xl flex items-center justify-center mb-4 transition-transform">
               <Mail size={24} />
             </div>
             <h3 className="text-xl font-black text-slate-900 mb-2">Email Support</h3>
             <p className="text-slate-500 text-sm mb-4 italic">Get help from our team directly via email.</p>
-            <a href="mailto:support@aisaconnect.com" className="text-blue-600 font-bold text-sm hover:underline">
+            <a href="mailto:support@aisaconnect.com" className="text-[#059669] font-bold text-sm hover:underline">
               support@aisaconnect.com
             </a>
           </div>
 
           <div className="bg-white rounded-[32px] border border-slate-200 p-8 shadow-sm hover:shadow-md transition-all group">
-            <div className="w-12 h-12 bg-green-50 text-green-600 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+            <div className="w-12 h-12 bg-green-50 text-green-600 rounded-2xl flex items-center justify-center mb-4 transition-transform">
               <MessageSquare size={24} />
             </div>
             <h3 className="text-xl font-black text-slate-900 mb-2">WhatsApp Support</h3>
@@ -44,3 +44,5 @@ const AdminSupportPage = () => {
 };
 
 export default AdminSupportPage;
+
+

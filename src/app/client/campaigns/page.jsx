@@ -62,7 +62,7 @@ export default function CampaignsPage() {
         <header className="bg-white border-b border-slate-100 px-8 py-8 shrink-0 flex items-center justify-between">
           <div>
             <div className="flex items-center gap-3 mb-2">
-              <div className="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center shadow-sm">
+              <div className="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center shadow-sm">
                 <Megaphone size={20} />
               </div>
               <h1 className="text-2xl font-black text-slate-900 tracking-tight">Broadcast Campaigns</h1>
@@ -93,18 +93,18 @@ export default function CampaignsPage() {
         <div className="flex-1 overflow-auto p-8 bg-slate-50/50">
           {loading ? (
             <div className="flex justify-center items-center h-full">
-              <Loader2 className="animate-spin text-blue-500" size={32} />
+              <Loader2 className="animate-spin text-emerald-500" size={32} />
             </div>
           ) : campaigns.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-center max-w-sm mx-auto">
-              <div className="w-20 h-20 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center mb-6">
+              <div className="w-20 h-20 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center mb-6">
                 <Megaphone size={32} />
               </div>
               <h3 className="text-xl font-bold text-slate-900 mb-2">No campaigns yet</h3>
               <p className="text-slate-500 text-sm mb-8 leading-relaxed">
                 Start reaching your customers by syncing your Meta templates and creating your first broadcast campaign.
               </p>
-              <button onClick={() => setIsModalOpen(true)} className="px-6 py-3 bg-blue-600 text-white rounded-xl font-bold text-sm shadow-lg shadow-blue-200 hover:bg-blue-700 transition-all">
+              <button onClick={() => setIsModalOpen(true)} className="px-6 py-3 bg-emerald-600 text-white rounded-xl font-bold text-sm shadow-lg shadow-emerald-200 hover:bg-emerald-700 transition-all">
                 Create First Broadcast
               </button>
             </div>
@@ -156,3 +156,4 @@ export default function CampaignsPage() {
     </DashboardLayout>
   );
 }
+

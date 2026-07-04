@@ -1,16 +1,14 @@
 'use client';
 
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-
 export default function FAQ() {
   const [openIdx, setOpenIdx] = useState(null);
 
   const faqs = [
-    { q: "Is the WhatsApp Cloud API integration native?", a: "Yes. EFV connects directly to Meta's developer endpoint. There are no middleware markups, no latency, and you control your phone numbers directly." },
-    { q: "How does the AI Assistant Vector Knowledge Base work?", a: "You upload PDFs, markdown guidelines, or point EFV to web documentation URLs. We parse and index the content. Your assistants use semantic vector search to retrieve accurate information, preventing hallucinations." },
+    { q: "Is the WhatsApp Cloud API integration native?", a: "Yes. Meta Connect connects directly to Meta's developer endpoint. There are no middleware markups, no latency, and you control your phone numbers directly." },
+    { q: "How does the AI Assistant Vector Knowledge Base work?", a: "You upload PDFs, markdown guidelines, or point Meta Connect to web documentation URLs. We parse and index the content. Your assistants use semantic vector search to retrieve accurate information, preventing hallucinations." },
     { q: "Can we transition existing database profiles?", a: "Absolutely. We provide one-click import scripts for HubSpot, Salesforce, Monday.com, Jira, CSV datasets, and SQL files." },
-    { q: "What data security standards does EFV enforce?", a: "We operate on a secure workspace system with end-to-end encryption at rest (AES-256) and transit (TLS 1.3), complete role-based permission matrices, SSO, and strict GDPR and SOC2 standards compliance." }
+    { q: "What data security standards does Meta Connect enforce?", a: "We operate on a secure workspace system with end-to-end encryption at rest (AES-256) and transit (TLS 1.3), complete role-based permission matrices, SSO, and strict GDPR and SOC2 standards compliance." }
   ];
 
   return (
@@ -33,21 +31,20 @@ export default function FAQ() {
                 +
               </span>
             </button>
-            <AnimatePresence>
+            
               {openIdx === idx && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
+                <div
                   className="px-6 pb-6 text-sm text-[#8E99A8] font-medium leading-relaxed"
                 >
                   {faq.a}
-                </motion.div>
+                </div>
               )}
-            </AnimatePresence>
+            
           </div>
         ))}
       </div>
     </section>
   );
 }
+
+

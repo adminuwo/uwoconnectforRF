@@ -38,7 +38,7 @@ const AdminLogsPage = () => {
       <div className="max-w-7xl mx-auto pb-20">
         <div className="mb-10">
           <h1 className="text-3xl font-black text-gray-900 tracking-tight flex items-center gap-3">
-            <Activity className="text-blue-500" size={32} /> Activity Logs
+            <Activity className="text-emerald-500" size={32} /> Activity Logs
           </h1>
           <p className="text-gray-500 mt-1 font-medium">View all activities and changes in the system.</p>
         </div>
@@ -62,7 +62,7 @@ const AdminLogsPage = () => {
             </thead>
             <tbody className="divide-y divide-gray-50">
               {loading ? (
-                <tr><td colSpan={3} className="py-20 text-center"><Loader2 className="animate-spin text-blue-600 mx-auto" /></td></tr>
+                <tr><td colSpan={3} className="py-20 text-center"><Loader2 className="animate-spin text-emerald-600 mx-auto" /></td></tr>
               ) : filteredLogs.length === 0 ? (
                 <tr><td colSpan={3} className="py-20 text-center text-gray-400 italic">No logs found.</td></tr>
               ) : filteredLogs.map((log, i) => (
@@ -83,3 +83,4 @@ const AdminLogsPage = () => {
 };
 
 export default AdminLogsPage;
+

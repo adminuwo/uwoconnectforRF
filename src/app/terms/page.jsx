@@ -29,7 +29,7 @@ export default function TermsPage() {
     <div className="min-h-screen bg-[#f8fafc] py-16 px-4 font-sans">
       <div className="max-w-4xl mx-auto">
         <div className="mb-10 flex items-center justify-between">
-          <Link href="/auth/login" className="text-blue-600 font-bold text-sm hover:underline flex items-center gap-2 italic">
+          <Link href="/auth/login" className="text-emerald-600 font-bold text-sm hover:underline flex items-center gap-2 italic">
             ← Back to Login
           </Link>
           <div className="w-10 h-10 bg-purple-600 rounded-xl flex items-center justify-center text-white font-black shadow-lg shadow-purple-100">A</div>
@@ -69,3 +69,4 @@ export default function TermsPage() {
     </div>
   );
 }
+

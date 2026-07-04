@@ -73,7 +73,7 @@ export default function CreateCampaignModal({ isOpen, onClose, onCreated }) {
       <div className="bg-white rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
         <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center">
+            <div className="w-10 h-10 bg-blue-100 text-emerald-600 rounded-xl flex items-center justify-center">
               <Megaphone size={20} />
             </div>
             <div>
@@ -95,7 +95,7 @@ export default function CreateCampaignModal({ isOpen, onClose, onCreated }) {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. Diwali Offer 2026"
-              className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all text-sm font-medium"
+              className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all text-sm font-medium text-slate-800 placeholder:text-slate-400"
             />
           </div>
 
@@ -104,10 +104,10 @@ export default function CreateCampaignModal({ isOpen, onClose, onCreated }) {
             <select
               value={audienceFilter}
               onChange={(e) => setAudienceFilter(e.target.value)}
-              className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all text-sm font-medium appearance-none"
+              className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all text-sm font-medium appearance-none text-slate-800"
             >
               {STAGES.map(stage => (
-                <option key={stage.id} value={stage.id}>{stage.label}</option>
+                <option key={stage.id} value={stage.id} className="text-slate-800 bg-white">{stage.label}</option>
               ))}
             </select>
           </div>
@@ -126,18 +126,18 @@ export default function CreateCampaignModal({ isOpen, onClose, onCreated }) {
                   required
                   value={templateId}
                   onChange={(e) => setTemplateId(e.target.value)}
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all text-sm font-medium appearance-none"
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all text-sm font-medium appearance-none text-slate-800"
                 >
-                  <option value="" disabled>Select a Template</option>
+                  <option value="" disabled className="text-slate-800 bg-white">Select a Template</option>
                   {templates.map(tmpl => (
-                    <option key={tmpl.id} value={tmpl.id}>{tmpl.name} ({tmpl.language})</option>
+                    <option key={tmpl.id} value={tmpl.id} className="text-slate-800 bg-white">{tmpl.name} ({tmpl.language})</option>
                   ))}
                 </select>
                 
                 {templateId && (
                   <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 text-sm text-slate-600 font-medium whitespace-pre-wrap max-h-40 overflow-y-auto">
                     Preview: <br/>
-                    <span className="italic text-slate-400">
+                    <span className="italic text-slate-500">
                       {templates.find(t => t.id === templateId)?.components?.find(c => c.type === 'BODY')?.text || 'No body text found'}
                     </span>
                   </div>
@@ -153,7 +153,7 @@ export default function CreateCampaignModal({ isOpen, onClose, onCreated }) {
             <button 
               type="submit" 
               disabled={loading || templates.length === 0}
-              className="px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 disabled:cursor-not-allowed text-white font-bold rounded-xl shadow-lg shadow-blue-200 transition-all text-sm flex items-center gap-2"
+              className="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 disabled:bg-blue-300 disabled:cursor-not-allowed text-white font-bold rounded-xl shadow-lg shadow-blue-200 transition-all text-sm flex items-center gap-2"
             >
               {loading && <Loader2 size={16} className="animate-spin" />}
               Send Broadcast
@@ -164,3 +164,4 @@ export default function CreateCampaignModal({ isOpen, onClose, onCreated }) {
     </div>
   );
 }
+

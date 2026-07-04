@@ -32,7 +32,7 @@ export default function WhyEFV() {
       <div className="text-center max-w-2xl mx-auto mb-20">
         <span className="text-[10px] font-bold text-[#20C997] uppercase tracking-widest block mb-3">Core Philosophy</span>
         <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-6 text-white">
-          Why EFV Unified?
+          Why Meta Connect Unified?
         </h2>
         <p className="text-[#8E99A8] text-lg font-medium">
           The traditional SaaS stack is broken. Data is siloed, automation is fragile, and intelligence is bolted on. We built a better way.
@@ -45,7 +45,7 @@ export default function WhyEFV() {
             key={idx}
             className="glass-card rounded-[24px] p-8 hover:border-[#16A085]/30 hover:bg-white/5 transition-all duration-500 flex flex-col group"
           >
-            <div className="w-12 h-12 rounded-2xl bg-[#0F6B52]/20 border border-[#0F6B52]/40 flex items-center justify-center text-[#20C997] mb-8 group-hover:scale-110 transition-transform duration-500">
+            <div className="w-12 h-12 rounded-2xl bg-[#0F6B52]/20 border border-[#0F6B52]/40 flex items-center justify-center text-[#20C997] mb-8 transition-transform duration-500">
               <pillar.icon size={24} strokeWidth={1.5} />
             </div>
             <h3 className="text-lg font-bold mb-3 text-white">{pillar.title}</h3>
@@ -61,3 +61,5 @@ export default function WhyEFV() {
     </section>
   );
 }
+
+

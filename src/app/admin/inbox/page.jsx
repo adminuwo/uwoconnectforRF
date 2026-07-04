@@ -1,9 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { MessageSquare, Search, Loader2, Zap, Activity, X, Globe, Smartphone, MessageCircle } from 'lucide-react';
+import { MessageSquare, Search, Loader2 } from 'lucide-react';
 import axios from 'axios';
-import { motion, AnimatePresence } from 'framer-motion';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { cn } from '@/lib/utils';
 
@@ -12,9 +11,6 @@ const AdminInboxPage = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filter, setFilter] = useState('ALL');
-  const [selectedClientDetails, setSelectedClientDetails] = useState(null);
-  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
-  const [detailsLoading, setDetailsLoading] = useState(false);
 
   useEffect(() => {
     const fetchMessages = async () => {
@@ -47,7 +43,7 @@ const AdminInboxPage = () => {
         <div className="flex items-center justify-between mb-10">
           <div>
             <h1 className="text-3xl font-black text-gray-900 tracking-tight flex items-center gap-3">
-              <MessageSquare className="text-blue-500" size={32} />
+              <MessageSquare className="text-[#059669]" size={32} />
               Messages
             </h1>
             <p className="text-gray-500 mt-1 font-medium">View all messages sent and received by your clients.</p>
@@ -64,7 +60,7 @@ const AdminInboxPage = () => {
             <input
               type="text" placeholder="Search messages..." value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-12 pr-4 py-4 bg-white border border-gray-100 rounded-2xl outline-none focus:ring-4 focus:ring-blue-50 transition-all font-medium"
+              className="w-full pl-12 pr-4 py-4 bg-white border border-gray-100 rounded-2xl outline-none focus:ring-4 focus:ring-emerald-50 transition-all font-medium"
             />
           </div>
           <div className="flex bg-white p-1.5 rounded-2xl border border-gray-100 shadow-sm">
@@ -93,7 +89,7 @@ const AdminInboxPage = () => {
             <tbody className="divide-y divide-gray-50">
               {loading ? (
                 <tr><td colSpan={6} className="px-8 py-20 text-center">
-                  <Loader2 className="animate-spin text-blue-600 mx-auto" size={32} />
+                  <Loader2 className="animate-spin text-[#059669] mx-auto" size={32} />
                 </td></tr>
               ) : filteredMessages.length === 0 ? (
                 <tr><td colSpan={6} className="px-8 py-20 text-center text-gray-400 font-medium italic">
@@ -113,7 +109,7 @@ const AdminInboxPage = () => {
                   </td>
                   <td className="px-8 py-5">
                     <span className={cn("px-2.5 py-1 rounded-lg text-[9px] font-black tracking-widest uppercase border",
-                      msg.message_type === 'INCOMING' ? "bg-blue-50 text-blue-600 border-blue-100" : "bg-purple-50 text-purple-600 border-purple-100"
+                      msg.message_type === 'INCOMING' ? "bg-emerald-50 text-[#059669] border-emerald-100" : "bg-teal-50 text-teal-600 border-teal-100"
                     )}>
                       {msg.message_type || msg.type}
                     </span>
@@ -133,3 +129,4 @@ const AdminInboxPage = () => {
 };
 
 export default AdminInboxPage;
+

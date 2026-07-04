@@ -5,7 +5,7 @@ import React from 'react';
 export default function Testimonials() {
   const testimonials = [
     {
-      quote: "EFV Unified simplified our tech stack completely. We cut down software costs by 40% and automated our complete client intake flow.",
+      quote: "Meta Connect simplified our tech stack completely. We cut down software costs by 40% and automated our complete client intake flow.",
       name: "Sarah Jenkins",
       role: "VP of Operations",
       company: "Retool"
@@ -34,9 +34,9 @@ export default function Testimonials() {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {testimonials.map((t, idx) => (
-          <div key={idx} className="glass-card rounded-[24px] p-8 flex flex-col justify-between hover:-translate-y-1 transition-transform duration-300">
+          <div key={idx} className="glass-card rounded-[24px] p-8 flex flex-col justify-between transition-transform duration-300">
             <div>
-              <div className="flex gap-1 mb-6 text-[#20C997] text-lg">
+              <div className="flex gap-1 mb-6 text-[#10B981] text-lg">
                 ★★★★★
               </div>
               <p className="text-[#8E99A8] text-sm font-medium leading-relaxed italic mb-8">
@@ -58,3 +58,5 @@ export default function Testimonials() {
     </section>
   );
 }
+
+

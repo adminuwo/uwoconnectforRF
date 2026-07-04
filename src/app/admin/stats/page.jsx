@@ -4,7 +4,6 @@ import React, { useState, useEffect } from 'react';
 import { TrendingUp, Users, Zap, GitBranch, Loader2 } from 'lucide-react';
 import axios from 'axios';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
-import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
 const AdminStatsPage = () => {
@@ -29,9 +28,9 @@ const AdminStatsPage = () => {
   }, []);
 
   const cards = [
-    { label: 'Total Clients', value: stats?.totalClients, icon: Users, color: 'blue' },
-    { label: 'Active Automations', value: stats?.activeAutomations, icon: Zap, color: 'yellow' },
-    { label: 'Total Workflows', value: stats?.totalWorkflows, icon: GitBranch, color: 'purple' },
+    { label: 'Total Clients', value: stats?.totalClients, icon: Users, color: 'green' },
+    { label: 'Active Automations', value: stats?.activeAutomations, icon: Zap, color: 'green' },
+    { label: 'Total Workflows', value: stats?.totalWorkflows, icon: GitBranch, color: 'green' },
     { label: 'System Status', value: 'Online', icon: TrendingUp, color: 'green' },
   ];
 
@@ -44,21 +43,20 @@ const AdminStatsPage = () => {
         </div>
 
         {loading ? (
-          <div className="flex justify-center py-24"><Loader2 className="animate-spin text-blue-600" size={40} /></div>
+          <div className="flex justify-center py-24"><Loader2 className="animate-spin text-[#059669]" size={40} /></div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {cards.map((card, i) => (
-              <motion.div
+              <div
                 key={card.label}
-                initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}
                 className="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm hover:shadow-md transition-all group"
               >
-                <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                <div className="w-12 h-12 bg-emerald-50 text-[#059669] rounded-2xl flex items-center justify-center mb-6 transition-transform">
                   <card.icon size={24} strokeWidth={2.5} />
                 </div>
                 <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">{card.label}</p>
                 <h3 className="text-4xl font-black text-slate-900 tracking-tight">{card.value ?? '—'}</h3>
-              </motion.div>
+              </div>
             ))}
           </div>
         )}
@@ -68,3 +66,5 @@ const AdminStatsPage = () => {
 };
 
 export default AdminStatsPage;
+
+

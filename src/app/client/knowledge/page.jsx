@@ -9,8 +9,6 @@ import {
 import axios from 'axios';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { cn } from '@/lib/utils';
-import { motion, AnimatePresence } from 'framer-motion';
-
 const API = `${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api`;
 
 const formatBytes = (bytes) => {
@@ -150,12 +148,9 @@ export default function KnowledgeBasePage() {
       <div className="max-w-5xl mx-auto pb-20 px-8">
 
         {/* Toast */}
-        <AnimatePresence>
+        
           {toast && (
-            <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
+            <div
               className={cn(
                 'fixed top-6 right-6 z-[100] flex items-center gap-3 px-6 py-4 rounded-2xl shadow-xl font-bold text-sm',
                 toast.type === 'error' ? 'bg-red-500 text-white' : 'bg-emerald-500 text-white'
@@ -163,9 +158,9 @@ export default function KnowledgeBasePage() {
             >
               {toast.type === 'error' ? <AlertCircle size={18} /> : <CheckCircle size={18} />}
               {toast.msg}
-            </motion.div>
+            </div>
           )}
-        </AnimatePresence>
+        
 
         {/* Header */}
         <div className="mb-10 flex items-start justify-between">
@@ -256,9 +251,7 @@ export default function KnowledgeBasePage() {
               />
             </div>
           ) : (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
+            <div
               className="space-y-4"
             >
               {/* File preview card */}
@@ -307,7 +300,7 @@ export default function KnowledgeBasePage() {
                   )}
                 </button>
               </div>
-            </motion.div>
+            </div>
           )}
         </div>
 
@@ -345,11 +338,8 @@ export default function KnowledgeBasePage() {
               {docs.map((doc, i) => {
                 const icon = fileIcon(doc.file_type);
                 return (
-                  <motion.div
+                  <div
                     key={doc.id}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: i * 0.04 }}
                     className="flex items-center gap-5 px-8 py-5 hover:bg-slate-50/50 transition-colors group"
                   >
                     {/* File type badge */}
@@ -407,7 +397,7 @@ export default function KnowledgeBasePage() {
                         <Trash2 size={16} />
                       </button>
                     </div>
-                  </motion.div>
+                  </div>
                 );
               })}
             </div>
@@ -416,20 +406,14 @@ export default function KnowledgeBasePage() {
       </div>
 
       {/* Preview Modal */}
-      <AnimatePresence>
+      
         {previewDoc && (
           <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
+            <div
               onClick={() => setPreviewDoc(null)}
               className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
             />
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            <div
               className="relative bg-white w-full max-w-2xl max-h-[80vh] rounded-[40px] shadow-2xl flex flex-col"
             >
               <div className="flex items-center justify-between px-10 py-7 border-b border-slate-50">
@@ -451,10 +435,11 @@ export default function KnowledgeBasePage() {
                   </p>
                 )}
               </div>
-            </motion.div>
+            </div>
           </div>
         )}
-      </AnimatePresence>
+      
     </DashboardLayout>
   );
 }
+

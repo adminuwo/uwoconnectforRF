@@ -44,7 +44,7 @@ export default function CRMPage() {
       setContacts(prev => prev.map(c => c.id === contactId ? { ...c, stage: newStage } : c));
       
       const token = localStorage.getItem('token');
-      await axios.patch(`${process.env.NEXT_PUBLIC_API_URL || `${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}`}/api/contacts/${contactId}/`, { stage: newStage }, {
+      await axios.patch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/contacts/${contactId}/`, { stage: newStage }, {
         headers: { Authorization: `Bearer ${token}` }
       });
     } catch (error) {
@@ -103,12 +103,12 @@ export default function CRMPage() {
 
   return (
     <DashboardLayout role="CLIENT">
-      <div className="bg-slate-50 font-sans flex flex-col h-[calc(100vh-140px)] rounded-[32px] overflow-hidden border border-slate-200 shadow-sm">
+      <div className="bg-slate-50 font-sans flex flex-col h-[calc(100vh-140px)] w-full max-w-full rounded-[32px] overflow-hidden border border-slate-200 shadow-sm">
       {/* Header */}
       <header className="bg-white border-b border-slate-200 px-8 py-6 flex items-center justify-between shrink-0">
         <div>
           <h1 className="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-3">
-            <Users className="text-blue-600" />
+            <Users className="text-emerald-600" />
             Leads Pipeline
           </h1>
           <p className="text-sm text-slate-500 mt-1 font-medium">Manage your AI-captured leads and sales process.</p>
@@ -118,14 +118,14 @@ export default function CRMPage() {
           <div className="flex items-center bg-slate-100/80 p-1 rounded-xl border border-slate-200/60 shadow-inner">
             <button 
               onClick={() => setViewMode('kanban')}
-              className={`p-2 rounded-lg flex items-center justify-center transition-all duration-200 ${viewMode === 'kanban' ? 'bg-white shadow-sm text-blue-600 font-bold' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'}`}
+              className={`p-2 rounded-lg flex items-center justify-center transition-all duration-200 ${viewMode === 'kanban' ? 'bg-white shadow-sm text-emerald-600 font-bold' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'}`}
               title="Kanban View"
             >
               <LayoutGrid size={16} />
             </button>
             <button 
               onClick={() => setViewMode('sheet')}
-              className={`p-2 rounded-lg flex items-center justify-center transition-all duration-200 ${viewMode === 'sheet' ? 'bg-white shadow-sm text-blue-600 font-bold' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'}`}
+              className={`p-2 rounded-lg flex items-center justify-center transition-all duration-200 ${viewMode === 'sheet' ? 'bg-white shadow-sm text-emerald-600 font-bold' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'}`}
               title="Sheet View"
             >
               <Table size={16} />
@@ -139,13 +139,13 @@ export default function CRMPage() {
               placeholder="Search leads..." 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 pr-4 py-2 bg-slate-100 border-transparent focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 rounded-xl outline-none transition-all w-64 text-sm font-medium"
+              className="pl-10 pr-4 py-2 bg-slate-100 border-transparent focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-blue-200 rounded-xl outline-none transition-all w-64 text-sm font-medium"
             />
           </div>
           
           <button 
             onClick={exportToCSV}
-            className="flex items-center gap-2 bg-slate-900 text-white px-4 py-2 rounded-xl text-sm font-bold shadow-md shadow-slate-200 hover:bg-slate-800 transition-all"
+            className="flex items-center gap-2 bg-emerald-600 text-white px-4 py-2 rounded-xl text-sm font-bold shadow-md shadow-slate-200 hover:bg-emerald-700 transition-all"
           >
             <Download size={16} />
             Export to Excel
@@ -154,7 +154,7 @@ export default function CRMPage() {
       </header>
 
       {/* Main Content Area */}
-      <main className="flex-1 overflow-x-auto p-8 custom-scrollbar">
+      <main className="flex-1 overflow-x-auto w-full min-w-0 p-8 custom-scrollbar">
         {loading ? (
           <div className="flex items-center justify-center h-full">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
@@ -223,14 +223,14 @@ export default function CRMPage() {
             </div>
           </div>
         ) : (
-          <div className="flex gap-6 h-full min-w-max pb-4">
+          <div className="flex gap-6 h-full w-max min-w-full pb-4">
             {STAGES.map(stage => {
               const stageContacts = filteredContacts.filter(c => c.stage === stage.id);
               
               return (
                 <div 
                   key={stage.id} 
-                  className="w-80 flex flex-col bg-slate-100/50 rounded-2xl border border-slate-200/60 overflow-hidden"
+                  className="w-80 shrink-0 flex flex-col bg-slate-100/50 rounded-2xl border border-slate-200/60 overflow-hidden"
                   onDragOver={handleDragOver}
                   onDrop={(e) => handleDrop(e, stage.id)}
                 >
@@ -277,7 +277,7 @@ export default function CRMPage() {
                             {stage.label}
                           </div>
                           <button 
-                            className="w-6 h-6 rounded-full bg-slate-50 hover:bg-blue-50 text-slate-400 hover:text-blue-600 flex items-center justify-center transition-colors"
+                            className="w-6 h-6 rounded-full bg-slate-50 hover:bg-emerald-50 text-slate-400 hover:text-emerald-600 flex items-center justify-center transition-colors"
                             title="View Chat"
                           >
                             <MessageSquare size={12} />
@@ -308,3 +308,5 @@ export default function CRMPage() {
     </DashboardLayout>
   );
 }
+
+

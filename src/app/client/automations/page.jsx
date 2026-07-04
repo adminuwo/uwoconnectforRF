@@ -1,16 +1,52 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Plus, Trash2, Loader2, X, Zap, Edit2, Save, MessageSquare, PlusCircle, LayoutGrid, Type } from 'lucide-react';
+import { Plus, Trash2, Loader2, X, Zap, Edit2, Save, MessageSquare, PlusCircle, LayoutGrid, Type, MessageCircle } from 'lucide-react';
 import axios from 'axios';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { cn } from '@/lib/utils';
-import { motion, AnimatePresence } from 'framer-motion';
+
+const FacebookIcon = ({ size = 14, className }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+  >
+    <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
+  </svg>
+);
+
+const InstagramIcon = ({ size = 14, className }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+  >
+    <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
+    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+    <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
+  </svg>
+);
 
 const ClientAutomationsPage = () => {
   const [automations, setAutomations] = useState([]);
   const [client, setClient] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [selectedChannel, setSelectedChannel] = useState('WHATSAPP'); // WHATSAPP, FACEBOOK, INSTAGRAM
   const [isChoiceModalOpen, setIsChoiceModalOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedAuto, setSelectedAuto] = useState(null);
@@ -118,6 +154,7 @@ const ClientAutomationsPage = () => {
         ...formData,
         keywords: formData.keywords.split(',').map(k => k.trim()).filter(Boolean),
         buttons: formData.buttons.filter(b => b.trim()),
+        channels: [selectedChannel],
         enabled: true
       }, {
         headers: { Authorization: `Bearer ${token}` }
@@ -136,7 +173,7 @@ const ClientAutomationsPage = () => {
     try {
       setIsSaving(true);
       const token = localStorage.getItem('token');
-      const res = await axios.patch(`${process.env.NEXT_PUBLIC_API_URL || `${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}`}/api/automations/${selectedAuto.id}/`, {
+      const res = await axios.patch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/automations/${selectedAuto.id}/`, {
         ...editFormData,
         keywords: typeof editFormData.keywords === 'string' ? editFormData.keywords.split(',').map(k => k.trim()).filter(Boolean) : editFormData.keywords,
         buttons: editFormData.buttons.filter(b => b.trim())
@@ -157,7 +194,7 @@ const ClientAutomationsPage = () => {
   const handleToggle = async (id, currentStatus) => {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.patch(`${process.env.NEXT_PUBLIC_API_URL || `${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}`}/api/automations/${id}/`, {
+      const res = await axios.patch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/automations/${id}/`, {
         enabled: !currentStatus
       }, {
         headers: { Authorization: `Bearer ${token}` }
@@ -175,7 +212,7 @@ const ClientAutomationsPage = () => {
     if (!confirm('Are you sure you want to delete this rule?')) return;
     try {
       const token = localStorage.getItem('token');
-      await axios.delete(`${process.env.NEXT_PUBLIC_API_URL || `${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}`}/api/automations/${id}/`, {
+      await axios.delete(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/automations/${id}/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setIsDetailModalOpen(false);
@@ -218,17 +255,54 @@ const ClientAutomationsPage = () => {
     <DashboardLayout role="CLIENT">
       <div className="max-w-full mx-auto pb-20 px-8">
         {/* Header */}
-        <div className="mb-12 flex items-center justify-between">
+        <div className="mb-8 flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-slate-900 tracking-tight mb-2">Auto Replies</h1>
             <p className="text-slate-500 font-medium italic">Manage how your bot responds to customers.</p>
           </div>
           <button
             onClick={() => setIsChoiceModalOpen(true)}
-            className="px-6 py-3 bg-slate-900 text-white rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-blue-600 transition-all shadow-xl shadow-slate-100 flex items-center gap-2"
+            className="px-6 py-3 bg-emerald-600 text-white rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-emerald-700 transition-all shadow-xl shadow-emerald-100 flex items-center gap-2"
           >
             <Plus size={16} />
             New Rule
+          </button>
+        </div>
+
+        {/* Channel Tab Switcher */}
+        <div className="flex gap-2 mb-8 bg-slate-100/50 p-1.5 rounded-2xl border border-slate-100 max-w-md">
+          <button
+            onClick={() => setSelectedChannel('WHATSAPP')}
+            className={cn(
+              "flex-1 py-3 px-4 rounded-xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-2",
+              selectedChannel === 'WHATSAPP' 
+                ? "bg-white text-emerald-600 shadow-sm border border-slate-200/50" 
+                : "text-slate-400 hover:text-slate-600"
+            )}
+          >
+            <MessageCircle size={14} /> WhatsApp
+          </button>
+          <button
+            onClick={() => setSelectedChannel('FACEBOOK')}
+            className={cn(
+              "flex-1 py-3 px-4 rounded-xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-2",
+              selectedChannel === 'FACEBOOK' 
+                ? "bg-white text-blue-600 shadow-sm border border-slate-200/50" 
+                : "text-slate-400 hover:text-slate-600"
+            )}
+          >
+            <FacebookIcon size={14} /> Facebook
+          </button>
+          <button
+            onClick={() => setSelectedChannel('INSTAGRAM')}
+            className={cn(
+              "flex-1 py-3 px-4 rounded-xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-2",
+              selectedChannel === 'INSTAGRAM' 
+                ? "bg-white text-pink-600 shadow-sm border border-slate-200/50" 
+                : "text-slate-400 hover:text-slate-600"
+            )}
+          >
+            <InstagramIcon size={14} /> Instagram
           </button>
         </div>
 
@@ -248,11 +322,14 @@ const ClientAutomationsPage = () => {
               {client && (
                 <tr 
                   onClick={() => setIsGreetingModalOpen(true)}
-                  className="bg-blue-50/10 hover:bg-blue-50/30 cursor-pointer transition-colors group"
+                  className="bg-emerald-50/10 hover:bg-emerald-50/30 cursor-pointer transition-colors group"
                 >
-                  <td className="px-8 py-6 text-sm font-bold text-blue-300 italic">★</td>
+                  <td className="px-8 py-6 text-sm font-bold text-emerald-400 italic">★</td>
                   <td className="px-8 py-6">
-                    <span className="px-2.5 py-1 bg-blue-600 text-white text-[10px] font-bold rounded-lg uppercase tracking-widest">Greeting Message</span>
+                    <span className={cn("px-2.5 py-1 text-white text-[10px] font-bold rounded-lg uppercase tracking-widest",
+                      selectedChannel === 'WHATSAPP' ? 'bg-emerald-600' :
+                      selectedChannel === 'FACEBOOK' ? 'bg-blue-600' : 'bg-pink-600'
+                    )}>Greeting Message</span>
                   </td>
                   <td className="px-8 py-6 text-sm font-semibold text-slate-900 tracking-tight truncate max-w-lg italic">
                     {greetingData.message || 'Click to configure welcome message...'}
@@ -293,17 +370,23 @@ const ClientAutomationsPage = () => {
               )}
 
               {loading ? (
-                <tr><td colSpan="4" className="py-20 text-center"><Loader2 className="animate-spin text-blue-600 mx-auto" /></td></tr>
+                <tr><td colSpan="4" className="py-20 text-center"><Loader2 className="animate-spin text-emerald-600 mx-auto" /></td></tr>
               ) : (
-                automations.map((auto, i) => (
-                  <tr 
-                    key={auto.id} 
-                    onClick={() => openDetail(auto)}
-                    className="hover:bg-slate-50/30 cursor-pointer transition-colors group"
-                  >
-                    <td className="px-8 py-6 text-sm font-bold text-slate-400 italic">{(i + 1).toString().padStart(2, '0')}</td>
-                    <td className="px-8 py-6">
-                      <div className="flex flex-wrap gap-2">
+                automations
+                  .filter(auto => {
+                    const chs = auto.channels || [];
+                    if (chs.length === 0) return selectedChannel === 'WHATSAPP';
+                    return chs.includes(selectedChannel);
+                  })
+                  .map((auto, i) => (
+                    <tr 
+                      key={auto.id} 
+                      onClick={() => openDetail(auto)}
+                      className="hover:bg-slate-50/30 cursor-pointer transition-colors group"
+                    >
+                      <td className="px-8 py-6 text-sm font-bold text-slate-400 italic">{(i + 1).toString().padStart(2, '0')}</td>
+                      <td className="px-8 py-6">
+                        <div className="flex flex-wrap gap-2">
                         {auto.keywords.map(kw => (
                           <span key={kw} className="px-2.5 py-1 bg-slate-50 text-slate-600 text-[11px] font-bold rounded-lg border border-slate-100 group-hover:bg-white transition-colors">{kw}</span>
                         ))}
@@ -328,11 +411,11 @@ const ClientAutomationsPage = () => {
         </div>
 
         {/* Choice Modal (Selection) */}
-        <AnimatePresence>
+        
           {isChoiceModalOpen && (
             <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsChoiceModalOpen(false)} className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" />
-              <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className="relative bg-white w-full max-w-2xl rounded-[40px] shadow-2xl p-10">
+              <div onClick={() => setIsChoiceModalOpen(false)} className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" />
+              <div className="relative bg-white w-full max-w-2xl rounded-[40px] shadow-2xl p-10">
                 <div className="flex items-center justify-between mb-10">
                   <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Create Auto Reply</h2>
                   <button onClick={() => setIsChoiceModalOpen(false)} className="text-slate-300 hover:text-slate-900 transition-colors"><X size={24} /></button>
@@ -341,9 +424,9 @@ const ClientAutomationsPage = () => {
                   {/* Option 1: Greeting */}
                   <button 
                     onClick={() => { setIsChoiceModalOpen(false); setIsGreetingModalOpen(true); }}
-                    className="flex flex-col items-center text-center p-8 bg-blue-50/50 border-2 border-transparent hover:border-blue-600 rounded-[32px] transition-all group"
+                    className="flex flex-col items-center text-center p-8 bg-emerald-50/50 border-2 border-transparent hover:border-emerald-600 rounded-[32px] transition-all group"
                   >
-                    <div className="w-16 h-16 bg-blue-600 text-white rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-blue-100 group-hover:scale-110 transition-transform">
+                    <div className="w-16 h-16 bg-emerald-600 text-white rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-emerald-100 transition-transform">
                       <Zap size={32} />
                     </div>
                     <h3 className="text-lg font-bold text-slate-900 mb-2">Greeting Message</h3>
@@ -353,9 +436,9 @@ const ClientAutomationsPage = () => {
                   {/* Option 2: Keyword */}
                   <button 
                     onClick={() => { setIsChoiceModalOpen(false); setIsModalOpen(true); }}
-                    className="flex flex-col items-center text-center p-8 bg-slate-50 border-2 border-transparent hover:border-slate-900 rounded-[32px] transition-all group"
+                    className="flex flex-col items-center text-center p-8 bg-green-50/50 border-2 border-transparent hover:border-green-600 rounded-[32px] transition-all group"
                   >
-                    <div className="w-16 h-16 bg-slate-900 text-white rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-slate-100 group-hover:scale-110 transition-transform">
+                    <div className="w-16 h-16 bg-green-600 text-white rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-green-100 transition-transform">
                       <Type size={32} />
                     </div>
                     <h3 className="text-lg font-bold text-slate-900 mb-2">Keyword Match</h3>
@@ -365,26 +448,26 @@ const ClientAutomationsPage = () => {
                   {/* Option 3: AI */}
                   <button 
                     onClick={() => { setIsChoiceModalOpen(false); setIsAIModalOpen(true); }}
-                    className="flex flex-col items-center text-center p-8 bg-purple-50/50 border-2 border-transparent hover:border-purple-600 rounded-[32px] transition-all group md:col-span-2"
+                    className="flex flex-col items-center text-center p-8 bg-teal-50/50 border-2 border-transparent hover:border-teal-600 rounded-[32px] transition-all group md:col-span-2"
                   >
-                    <div className="w-16 h-16 bg-purple-600 text-white rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-purple-100 group-hover:scale-110 transition-transform">
+                    <div className="w-16 h-16 bg-teal-600 text-white rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-teal-100 transition-transform">
                       <MessageSquare size={32} />
                     </div>
                     <h3 className="text-lg font-bold text-slate-900 mb-2">AI Smart Assistant</h3>
                     <p className="text-xs text-slate-500 font-medium leading-relaxed">Let OpenAI handle complex customer queries automatically using your business context.</p>
                   </button>
                 </div>
-              </motion.div>
+              </div>
             </div>
           )}
-        </AnimatePresence>
+        
 
         {/* Create Keyword Modal */}
-        <AnimatePresence>
+        
           {isModalOpen && (
             <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsModalOpen(false)} className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" />
-              <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className="relative bg-white w-full max-w-lg rounded-[40px] shadow-2xl p-10">
+              <div onClick={() => setIsModalOpen(false)} className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" />
+              <div className="relative bg-white w-full max-w-lg rounded-[40px] shadow-2xl p-10">
                 <div className="flex items-center justify-between mb-8">
                   <h2 className="text-2xl font-bold text-slate-900 tracking-tight">New Keyword Rule</h2>
                   <button onClick={() => setIsModalOpen(false)} className="text-slate-300 hover:text-slate-900 transition-colors"><X size={24} /></button>
@@ -392,31 +475,31 @@ const ClientAutomationsPage = () => {
                 <form onSubmit={handleCreate} className="space-y-6">
                   <div>
                     <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block ml-1">Rule Name</label>
-                    <input required value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} placeholder="e.g. Price Query" className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-4 outline-none focus:border-blue-500 transition-all font-semibold" />
+                    <input required value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} placeholder="e.g. Price Query" className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-4 outline-none focus:border-emerald-500 transition-all font-semibold" />
                   </div>
                   <div>
                     <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block ml-1">Keywords (comma separated)</label>
-                    <input required value={formData.keywords} onChange={e => setFormData({...formData, keywords: e.target.value})} placeholder="price, cost, how much" className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-4 outline-none focus:border-blue-500 transition-all font-semibold" />
+                    <input required value={formData.keywords} onChange={e => setFormData({...formData, keywords: e.target.value})} placeholder="price, cost, how much" className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-4 outline-none focus:border-emerald-500 transition-all font-semibold" />
                   </div>
                   <div>
                     <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block ml-1">Bot Reply</label>
-                    <textarea required value={formData.response} onChange={e => setFormData({...formData, response: e.target.value})} placeholder="Hi! Our pricing is..." rows={4} className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-4 outline-none focus:border-blue-500 transition-all font-semibold resize-none" />
+                    <textarea required value={formData.response} onChange={e => setFormData({...formData, response: e.target.value})} placeholder="Hi! Our pricing is..." rows={4} className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-4 outline-none focus:border-emerald-500 transition-all font-semibold resize-none" />
                   </div>
-                  <button type="submit" disabled={isSaving} className="w-full py-4 bg-slate-900 text-white rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-blue-600 transition-all shadow-xl shadow-slate-100 flex items-center justify-center gap-2">
+                  <button type="submit" disabled={isSaving} className="w-full py-4 bg-emerald-600 text-white rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-emerald-700 transition-all shadow-xl shadow-emerald-100 flex items-center justify-center gap-2">
                     {isSaving ? <Loader2 size={16} className="animate-spin" /> : 'Create Rule'}
                   </button>
                 </form>
-              </motion.div>
+              </div>
             </div>
           )}
-        </AnimatePresence>
+        
 
         {/* Greeting Message Modal */}
-        <AnimatePresence>
+        
           {isGreetingModalOpen && (
             <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsGreetingModalOpen(false)} className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" />
-              <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className="relative bg-white w-full max-w-lg rounded-[40px] shadow-2xl p-10">
+              <div onClick={() => setIsGreetingModalOpen(false)} className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" />
+              <div className="relative bg-white w-full max-w-lg rounded-[40px] shadow-2xl p-10">
                 <div className="flex items-center justify-between mb-8">
                   <div>
                     <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Greeting Message</h2>
@@ -443,7 +526,7 @@ const ClientAutomationsPage = () => {
                       onChange={e => setGreetingData({...greetingData, message: e.target.value})} 
                       placeholder="Hi! Welcome to AisaConnect..." 
                       rows={4} 
-                      className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-4 outline-none focus:border-blue-500 transition-all font-semibold resize-none" 
+                      className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-4 outline-none focus:border-emerald-500 transition-all font-semibold resize-none" 
                     />
                   </div>
 
@@ -451,7 +534,7 @@ const ClientAutomationsPage = () => {
                     <div className="flex items-center justify-between">
                       <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Action Buttons</label>
                       {greetingData.buttons.length < 3 && (
-                        <button onClick={() => addButton(false, true)} className="text-blue-600 font-bold text-[10px] uppercase tracking-widest flex items-center gap-1 hover:text-blue-700">
+                        <button onClick={() => addButton(false, true)} className="text-emerald-600 font-bold text-[10px] uppercase tracking-widest flex items-center gap-1 hover:text-emerald-700">
                           <PlusCircle size={14} /> Add
                         </button>
                       )}
@@ -471,34 +554,34 @@ const ClientAutomationsPage = () => {
                   <button 
                     onClick={() => handleUpdateGreeting()} 
                     disabled={isSaving}
-                    className="w-full py-4 bg-slate-900 text-white rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-blue-600 transition-all shadow-xl shadow-slate-100 flex items-center justify-center gap-2"
+                    className="w-full py-4 bg-emerald-600 text-white rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-emerald-700 transition-all shadow-xl shadow-emerald-100 flex items-center justify-center gap-2"
                   >
                     {isSaving ? <Loader2 size={16} className="animate-spin" /> : 'Save Greeting Settings'}
                   </button>
                 </div>
-              </motion.div>
+              </div>
             </div>
           )}
-        </AnimatePresence>
+        
 
         {/* AI Assistant Modal */}
-        <AnimatePresence>
+        
           {isAIModalOpen && (
             <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsAIModalOpen(false)} className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" />
-              <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className="relative bg-white w-full max-w-lg rounded-[40px] shadow-2xl p-10">
+              <div onClick={() => setIsAIModalOpen(false)} className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" />
+              <div className="relative bg-white w-full max-w-lg rounded-[40px] shadow-2xl p-10">
                 <div className="flex items-center justify-between mb-8">
                   <div>
-                    <h2 className="text-2xl font-bold text-slate-900 tracking-tight text-purple-600">AI Assistant</h2>
+                    <h2 className="text-2xl font-bold text-slate-900 tracking-tight text-emerald-600">AI Assistant</h2>
                     <p className="text-xs text-slate-400 font-medium">Power your bot with OpenAI Intelligence.</p>
                   </div>
                   <button onClick={() => setIsAIModalOpen(false)} className="text-slate-300 hover:text-slate-900 transition-colors"><X size={24} /></button>
                 </div>
                 
                 <div className="space-y-6">
-                  <div className="flex items-center justify-between p-4 bg-purple-50/30 rounded-2xl border border-purple-100">
+                  <div className="flex items-center justify-between p-4 bg-emerald-50/30 rounded-2xl border border-emerald-100">
                     <div className="flex items-center gap-3">
-                      <div className="p-2 bg-purple-600 rounded-lg text-white">
+                      <div className="p-2 bg-emerald-600 rounded-lg text-white">
                         <Zap size={14} />
                       </div>
                       <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Enable AI Smart Reply</span>
@@ -518,7 +601,7 @@ const ClientAutomationsPage = () => {
                       onChange={e => setAIData({...aiData, context: e.target.value})} 
                       placeholder="e.g. We are a digital agency specializing in WhatsApp marketing. We offer three packages: Basic ($50), Pro ($150), and Enterprise ($500)..." 
                       rows={6} 
-                      className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-4 outline-none focus:border-purple-500 transition-all font-semibold resize-none text-sm" 
+                      className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-4 outline-none focus:border-emerald-500 transition-all font-semibold resize-none text-sm" 
                     />
                     <p className="mt-2 text-[10px] text-slate-400 italic">This info helps the AI answer questions about your business on your behalf.</p>
                   </div>
@@ -526,22 +609,22 @@ const ClientAutomationsPage = () => {
                   <button 
                     onClick={() => handleUpdateAI()} 
                     disabled={isSaving}
-                    className="w-full py-4 bg-purple-600 text-white rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-purple-700 transition-all shadow-xl shadow-purple-100 flex items-center justify-center gap-2"
+                    className="w-full py-4 bg-emerald-600 text-white rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-emerald-700 transition-all shadow-xl shadow-emerald-100 flex items-center justify-center gap-2"
                   >
                     {isSaving ? <Loader2 size={16} className="animate-spin" /> : 'Save AI Settings'}
                   </button>
                 </div>
-              </motion.div>
+              </div>
             </div>
           )}
-        </AnimatePresence>
+        
 
         {/* Detail Modal (Standard Keyword) */}
-        <AnimatePresence>
+        
           {isDetailModalOpen && selectedAuto && (
             <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsDetailModalOpen(false)} className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" />
-              <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className="relative bg-white w-full max-w-lg rounded-[40px] shadow-2xl p-10">
+              <div onClick={() => setIsDetailModalOpen(false)} className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" />
+              <div className="relative bg-white w-full max-w-lg rounded-[40px] shadow-2xl p-10">
                 <div className="flex items-center justify-between mb-8">
                   <h2 className="text-2xl font-bold text-slate-900 tracking-tight">{isEditing ? 'Edit Rule' : selectedAuto.name}</h2>
                   <button onClick={() => setIsDetailModalOpen(false)} className="text-slate-300 hover:text-slate-900 transition-colors"><X size={24} /></button>
@@ -551,15 +634,15 @@ const ClientAutomationsPage = () => {
                   <div className="space-y-6">
                     <div>
                       <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block ml-1">Keywords</label>
-                      <input value={editFormData.keywords} onChange={e => setEditFormData({...editFormData, keywords: e.target.value})} className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-4 font-semibold outline-none focus:border-blue-500" />
+                      <input value={editFormData.keywords} onChange={e => setEditFormData({...editFormData, keywords: e.target.value})} className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-4 font-semibold outline-none focus:border-emerald-500" />
                     </div>
                     <div>
                       <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block ml-1">Reply</label>
-                      <textarea value={editFormData.response} onChange={e => setEditFormData({...editFormData, response: e.target.value})} rows={4} className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-4 font-semibold outline-none focus:border-blue-500" />
+                      <textarea value={editFormData.response} onChange={e => setEditFormData({...editFormData, response: e.target.value})} rows={4} className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-4 font-semibold outline-none focus:border-emerald-500" />
                     </div>
                     <div className="flex justify-end gap-3">
                       <button onClick={() => setIsEditing(false)} className="px-6 py-3 text-slate-400 font-bold text-xs uppercase tracking-widest">Cancel</button>
-                      <button onClick={handleUpdate} className="px-8 py-3 bg-slate-900 text-white rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-blue-600">Save Changes</button>
+                      <button onClick={handleUpdate} className="px-8 py-3 bg-emerald-600 text-white rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-emerald-700">Save Changes</button>
                     </div>
                   </div>
                 ) : (
@@ -580,17 +663,19 @@ const ClientAutomationsPage = () => {
                       <button onClick={() => handleDelete(selectedAuto.id)} className="text-red-500 font-bold text-xs uppercase tracking-widest flex items-center gap-2">
                         <Trash2 size={16} /> Delete Rule
                       </button>
-                      <button onClick={() => setIsEditing(true)} className="px-8 py-3 bg-slate-900 text-white rounded-2xl font-bold text-xs uppercase tracking-widest">Edit Rule</button>
+                      <button onClick={() => setIsEditing(true)} className="px-8 py-3 bg-emerald-600 text-white rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-emerald-700">Edit Rule</button>
                     </div>
                   </div>
                 )}
-              </motion.div>
+              </div>
             </div>
           )}
-        </AnimatePresence>
+        
       </div>
     </DashboardLayout>
   );
 };
 
 export default ClientAutomationsPage;
+
+

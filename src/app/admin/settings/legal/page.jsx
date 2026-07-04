@@ -4,8 +4,6 @@ import React, { useState, useEffect } from 'react';
 import { Shield, Scale, Save, Loader2, CheckCircle2, AlertCircle, FileText, Upload, Trash2, Eye } from 'lucide-react';
 import axios from 'axios';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
-import { motion } from 'framer-motion';
-
 const LegalSettings = () => {
   const [privacy, setPrivacy] = useState('');
   const [terms, setTerms] = useState('');
@@ -110,7 +108,7 @@ const LegalSettings = () => {
         <div className="mb-10 flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-black text-slate-900 tracking-tight flex items-center gap-3">
-              <Scale className="text-blue-600" size={32} />
+              <Scale className="text-[#059669]" size={32} />
               Legal Compliance Settings
             </h1>
             <p className="text-slate-500 mt-2 font-medium italic">Configure the dynamic content and official documents for your platform.</p>
@@ -122,7 +120,7 @@ const LegalSettings = () => {
 
         {loading ? (
           <div className="py-20 flex flex-col items-center gap-4">
-            <Loader2 className="animate-spin text-blue-600" size={40} />
+            <Loader2 className="animate-spin text-[#059669]" size={40} />
             <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Loading legal data...</p>
           </div>
         ) : (
@@ -130,22 +128,21 @@ const LegalSettings = () => {
             
             {/* Status Message */}
             {message.text && (
-              <motion.div 
-                initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
+              <div
                 className={`p-4 rounded-2xl flex items-center gap-3 border ${
                   message.type === 'success' ? 'bg-emerald-50 border-emerald-100 text-emerald-600' : 'bg-red-50 border-red-100 text-red-600'
                 }`}
               >
                 {message.type === 'success' ? <CheckCircle2 size={18} /> : <AlertCircle size={18} />}
                 <p className="text-xs font-bold uppercase tracking-wide">{message.text}</p>
-              </motion.div>
+              </div>
             )}
 
             {/* Privacy Policy Section */}
             <div className="bg-white rounded-[48px] border border-slate-100 p-10 shadow-xl shadow-slate-100/50">
               <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-6">
                 <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 bg-blue-50 text-blue-600 rounded-[20px] flex items-center justify-center shadow-inner shadow-blue-100/50">
+                  <div className="w-14 h-14 bg-emerald-50 text-[#059669] rounded-[20px] flex items-center justify-center shadow-inner shadow-emerald-100/50">
                     <Shield size={28} />
                   </div>
                   <div>
@@ -156,7 +153,7 @@ const LegalSettings = () => {
                 <button 
                   onClick={() => handleSave('privacy_policy', privacy, privacyFile, deletePrivacyFile)}
                   disabled={saving.state}
-                  className="px-8 py-4 bg-blue-600 text-white rounded-2xl font-bold text-xs uppercase tracking-widest flex items-center gap-2 hover:bg-blue-700 transition-all shadow-xl shadow-blue-100 disabled:opacity-50"
+                  className="px-8 py-4 bg-[#059669] text-white rounded-2xl font-bold text-xs uppercase tracking-widest flex items-center gap-2 hover:bg-[#047857] transition-all shadow-xl shadow-emerald-100 disabled:opacity-50"
                 >
                   {saving.state && saving.key === 'privacy_policy' ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />}
                   Publish Changes
@@ -170,14 +167,14 @@ const LegalSettings = () => {
                     value={privacy}
                     onChange={(e) => setPrivacy(e.target.value)}
                     placeholder="Enter Privacy Policy content (HTML allowed)..."
-                    className="w-full h-[400px] bg-slate-50 border border-slate-100 rounded-[32px] p-8 outline-none focus:border-blue-500 focus:bg-white transition-all font-mono text-sm leading-relaxed"
+                    className="w-full h-[400px] bg-slate-50 border border-slate-100 rounded-[32px] p-8 outline-none focus:border-[#059669] focus:bg-white transition-all font-mono text-sm leading-relaxed"
                   />
                 </div>
                 
                 <div className="space-y-6">
                   <div className="p-6 bg-slate-50 rounded-[32px] border border-slate-100 space-y-4">
                     <h3 className="text-xs font-black text-slate-900 uppercase tracking-widest flex items-center gap-2">
-                      <Upload size={14} className="text-blue-600" /> Upload PDF/DOC
+                      <Upload size={14} className="text-[#059669]" /> Upload PDF/DOC
                     </h3>
                     <input 
                       type="file" 
@@ -189,9 +186,9 @@ const LegalSettings = () => {
                     />
                     <label 
                       htmlFor="privacy-file"
-                      className="w-full p-6 border-2 border-dashed border-slate-200 rounded-2xl flex flex-col items-center justify-center gap-2 cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition-all group"
+                      className="w-full p-6 border-2 border-dashed border-slate-200 rounded-2xl flex flex-col items-center justify-center gap-2 cursor-pointer hover:border-[#059669] hover:bg-emerald-50 transition-all group"
                     >
-                      <FileText className="text-slate-300 group-hover:text-blue-600 transition-colors" size={24} />
+                      <FileText className="text-slate-300 group-hover:text-[#059669] transition-colors" size={24} />
                       <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center">
                         {privacyFile ? privacyFile.name : 'Click to Upload'}
                       </span>
@@ -201,9 +198,9 @@ const LegalSettings = () => {
                         <div className="flex flex-col">
                           <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest mb-1 italic">File Attached:</p>
                           <a 
-                            href={privacyFile ? URL.createObjectURL(privacyFile) : `${process.env.NEXT_PUBLIC_API_URL || `${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}`}${currentPrivacyFile}`} 
+                            href={privacyFile ? URL.createObjectURL(privacyFile) : `${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}${currentPrivacyFile}`} 
                             target="_blank" 
-                            className="text-[10px] font-bold text-blue-600 hover:underline flex items-center gap-1"
+                            className="text-[10px] font-bold text-[#059669] hover:underline flex items-center gap-1"
                           >
                             <Eye size={12} /> View
                           </a>
@@ -225,7 +222,7 @@ const LegalSettings = () => {
             <div className="bg-white rounded-[48px] border border-slate-100 p-10 shadow-xl shadow-slate-100/50">
               <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-6">
                 <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 bg-purple-50 text-purple-600 rounded-[20px] flex items-center justify-center shadow-inner shadow-purple-100/50">
+                  <div className="w-14 h-14 bg-emerald-50 text-[#059669] rounded-[20px] flex items-center justify-center shadow-inner shadow-emerald-100/50">
                     <Scale size={28} />
                   </div>
                   <div>
@@ -236,7 +233,7 @@ const LegalSettings = () => {
                 <button 
                   onClick={() => handleSave('terms_of_service', terms, termsFile, deleteTermsFile)}
                   disabled={saving.state}
-                  className="px-8 py-4 bg-purple-600 text-white rounded-2xl font-bold text-xs uppercase tracking-widest flex items-center gap-2 hover:bg-purple-700 transition-all shadow-xl shadow-purple-100 disabled:opacity-50"
+                  className="px-8 py-4 bg-[#059669] text-white rounded-2xl font-bold text-xs uppercase tracking-widest flex items-center gap-2 hover:bg-[#047857] transition-all shadow-xl shadow-emerald-100 disabled:opacity-50"
                 >
                   {saving.state && saving.key === 'terms_of_service' ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />}
                   Publish Changes
@@ -250,14 +247,14 @@ const LegalSettings = () => {
                     value={terms}
                     onChange={(e) => setTerms(e.target.value)}
                     placeholder="Enter Terms of Service content (HTML allowed)..."
-                    className="w-full h-[400px] bg-slate-50 border border-slate-100 rounded-[32px] p-8 outline-none focus:border-purple-500 focus:bg-white transition-all font-mono text-sm leading-relaxed"
+                    className="w-full h-[400px] bg-slate-50 border border-slate-100 rounded-[32px] p-8 outline-none focus:border-[#059669] focus:bg-white transition-all font-mono text-sm leading-relaxed"
                   />
                 </div>
                 
                 <div className="space-y-6">
                   <div className="p-6 bg-slate-50 rounded-[32px] border border-slate-100 space-y-4">
                     <h3 className="text-xs font-black text-slate-900 uppercase tracking-widest flex items-center gap-2">
-                      <Upload size={14} className="text-purple-600" /> Upload PDF/DOC
+                      <Upload size={14} className="text-[#059669]" /> Upload PDF/DOC
                     </h3>
                     <input 
                       type="file" 
@@ -269,9 +266,9 @@ const LegalSettings = () => {
                     />
                     <label 
                       htmlFor="terms-file"
-                      className="w-full p-6 border-2 border-dashed border-slate-200 rounded-2xl flex flex-col items-center justify-center gap-2 cursor-pointer hover:border-purple-400 hover:bg-purple-50 transition-all group"
+                      className="w-full p-6 border-2 border-dashed border-slate-200 rounded-2xl flex flex-col items-center justify-center gap-2 cursor-pointer hover:border-[#059669] hover:bg-emerald-50 transition-all group"
                     >
-                      <FileText className="text-slate-300 group-hover:text-purple-600 transition-colors" size={24} />
+                      <FileText className="text-slate-300 group-hover:text-[#059669] transition-colors" size={24} />
                       <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center">
                         {termsFile ? termsFile.name : 'Click to Upload'}
                       </span>
@@ -281,9 +278,9 @@ const LegalSettings = () => {
                         <div className="flex flex-col">
                           <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest mb-1 italic">File Attached:</p>
                           <a 
-                            href={termsFile ? URL.createObjectURL(termsFile) : `${process.env.NEXT_PUBLIC_API_URL || `${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}`}${currentTermsFile}`} 
+                            href={termsFile ? URL.createObjectURL(termsFile) : `${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}${currentTermsFile}`} 
                             target="_blank" 
-                            className="text-[10px] font-bold text-purple-600 hover:underline flex items-center gap-1"
+                            className="text-[10px] font-bold text-[#059669] hover:underline flex items-center gap-1"
                           >
                             <Eye size={12} /> View
                           </a>
@@ -304,7 +301,7 @@ const LegalSettings = () => {
             {/* Help Note */}
             <div className="bg-slate-900 rounded-[32px] p-8 text-white flex items-center gap-6">
               <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center shrink-0">
-                <AlertCircle size={24} className="text-blue-400" />
+                <AlertCircle size={24} className="text-emerald-400" />
               </div>
               <div>
                 <p className="text-xs font-bold uppercase tracking-[0.2em] mb-1 opacity-60">Pro Tip</p>
@@ -322,3 +319,4 @@ const LegalSettings = () => {
 };
 
 export default LegalSettings;
+

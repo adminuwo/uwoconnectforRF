@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import { motion } from 'framer-motion';
 import { Users, TrendingUp, Mail, MessageSquare, Layers, Award, DollarSign, Activity, FileText, Headphones } from 'lucide-react';
 
 export default function PlatformModules() {
@@ -41,9 +40,8 @@ export default function PlatformModules() {
 
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
           {modules.map((mod, idx) => (
-            <motion.div
+            <div
               key={idx}
-              whileHover={{ y: -5, scale: 1.02 }}
               className={`glass-card rounded-2xl p-5 border ${mod.status === 'Active' ? 'border-white/10 hover:border-[#16A085]/50' : 'border-white/5 opacity-60'} flex flex-col items-center justify-center text-center cursor-pointer`}
             >
               <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-4 ${mod.status === 'Active' ? 'bg-[#0F6B52]/20 text-[#20C997]' : 'bg-white/5 text-[#8E99A8]'}`}>
@@ -53,7 +51,7 @@ export default function PlatformModules() {
               <span className={`text-[9px] uppercase tracking-wider font-bold ${mod.status === 'Active' ? 'text-[#16A085]' : 'text-[#8E99A8]'}`}>
                 {mod.status}
               </span>
-            </motion.div>
+            </div>
           ))}
           
           <div className="glass-card rounded-2xl p-5 border border-white/5 border-dashed flex flex-col items-center justify-center text-center opacity-50 hover:opacity-100 transition-opacity cursor-pointer">
@@ -68,3 +66,5 @@ export default function PlatformModules() {
     </section>
   );
 }
+
+

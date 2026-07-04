@@ -21,7 +21,8 @@ import {
 } from 'lucide-react';
 import axios from 'axios';
 import { useParams, useRouter } from 'next/navigation';
-import { motion, AnimatePresence } from 'framer-motion';
+import { templateData } from '../../templateData';
+
 
 const cn = (...classes) => classes.filter(Boolean).join(' ');
 
@@ -56,7 +57,7 @@ const NodeContainer = ({ children, title, icon: Icon, color, id, isTrigger }) =>
 // --- NODE TYPES ---
 
 const TriggerNode = ({ id, data = {} }) => (
-  <div className="bg-slate-900 rounded-xl shadow-2xl p-5 w-64 border-b-4 border-b-emerald-500 group relative">
+  <div className="bg-emerald-600 rounded-xl shadow-2xl p-5 w-64 border-b-4 border-b-emerald-500 group relative">
     <div className="flex items-center gap-3 mb-3">
       <div className="w-8 h-8 bg-emerald-500 text-white rounded-lg flex items-center justify-center"><Zap size={16} fill="currentColor" /></div>
       <h4 className="text-[10px] font-black text-white uppercase tracking-widest">Start Flow</h4>
@@ -69,10 +70,10 @@ const TriggerNode = ({ id, data = {} }) => (
 );
 
 const PlainNode = ({ id, data = {} }) => (
-  <NodeContainer id={id} title="Message" icon={MessageSquare} color="bg-blue-600">
+  <NodeContainer id={id} title="Message" icon={MessageSquare} color="bg-emerald-600">
     <p className="text-xs font-semibold text-slate-700 leading-relaxed line-clamp-3">"{data.message || 'Enter message...'}"</p>
     <Handle type="target" position={Position.Top} className="w-2.5 h-2.5 bg-slate-400 border-2 border-white -top-1" />
-    <Handle type="source" position={Position.Bottom} className="w-2.5 h-2.5 bg-blue-600 border-2 border-white -bottom-1" />
+    <Handle type="source" position={Position.Bottom} className="w-2.5 h-2.5 bg-emerald-600 border-2 border-white -bottom-1" />
   </NodeContainer>
 );
 
@@ -182,6 +183,7 @@ const WorkflowBuilderInner = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [loading, setLoading] = useState(true);
   const [selectedNode, setSelectedNode] = useState(null);
+  const [deploymentChannels, setDeploymentChannels] = useState(['WHATSAPP']); // WHATSAPP, INSTAGRAM, FACEBOOK
   
   const { screenToFlowPosition } = useReactFlow();
 
@@ -198,28 +200,52 @@ const WorkflowBuilderInner = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
-      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || `${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}`}/api/workflows/${id}/`, { headers: { Authorization: `Bearer ${token}` } });
-      setWorkflow(res.data);
-      let steps = res.data.steps;
-      if (typeof steps === 'string') try { steps = JSON.parse(steps); } catch(e) { steps = {}; }
-      if (steps && Array.isArray(steps.nodes) && steps.nodes.length > 0) {
-        setNodes(steps.nodes.map(n => ({ 
-          ...n, 
-          data: n.data || {}, 
-          position: n.position || {x:0, y:0}, 
-          type: (!n.type || n.type === 'default') ? 'plain' : n.type 
-        })));
-        setEdges(Array.isArray(steps.edges) ? steps.edges : []);
+      if (id === 'new') {
+        const params = new URLSearchParams(window.location.search);
+        const name = params.get('name') || 'Untitled Workflow';
+        const template = params.get('template') || '';
+        const channel = params.get('channel') || 'WHATSAPP';
+        
+        setWorkflow({ name, enabled: false, channels: [channel] });
+        setDeploymentChannels([channel]);
+        
+        if (template && templateData[template]) {
+          const tData = templateData[template];
+          setNodes(tData.nodes.map(n => ({
+            ...n,
+            data: n.data || {},
+            position: n.position || {x:0, y:0},
+            type: (!n.type || n.type === 'default') ? 'plain' : n.type
+          })));
+          setEdges(Array.isArray(tData.edges) ? tData.edges : []);
+        } else {
+          setNodes([{ id: 'start', type: 'trigger', position: {x:250, y:50}, data: { keyword: 'Any Keyword' } }]);
+        }
       } else {
-        setNodes([{ id: 'start', type: 'trigger', position: {x:250, y:50}, data: { keyword: 'Any Keyword' } }]);
+        const token = localStorage.getItem('token');
+        const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/workflows/${id}/`, { headers: { Authorization: `Bearer ${token}` } });
+        setWorkflow(res.data);
+        setDeploymentChannels(res.data.channels || ['WHATSAPP']);
+        let steps = res.data.steps;
+        if (typeof steps === 'string') try { steps = JSON.parse(steps); } catch(e) { steps = {}; }
+        if (steps && Array.isArray(steps.nodes) && steps.nodes.length > 0) {
+          setNodes(steps.nodes.map(n => ({ 
+            ...n, 
+            data: n.data || {}, 
+            position: n.position || {x:0, y:0}, 
+            type: (!n.type || n.type === 'default') ? 'plain' : n.type 
+          })));
+          setEdges(Array.isArray(steps.edges) ? steps.edges : []);
+        } else {
+          setNodes([{ id: 'start', type: 'trigger', position: {x:250, y:50}, data: { keyword: 'Any Keyword' } }]);
+        }
       }
     } catch (err) { console.error(err); } finally { setLoading(false); }
   };
 
   useEffect(() => { fetchData(); }, [id]);
 
-  const onConnect = useCallback((p) => setEdges((eds) => addEdge({ ...p, animated: true, style: { stroke: '#94a3b8', strokeWidth: 2 } }, eds)), [setEdges]);
+  const onConnect = useCallback((p) => setEdges((eds) => addEdge({ ...p, animated: false, style: { stroke: '#94a3b8', strokeWidth: 2 } }, eds)), [setEdges]);
 
   const handleSave = async () => {
     try {
@@ -234,14 +260,36 @@ const WorkflowBuilderInner = () => {
         trigger_value = triggerNode.data.keyword.split(',').map(k => k.trim()).filter(k => k);
       }
 
-      await axios.patch(
-        `${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/workflows/${id}/`, 
-        { 
-          steps: { nodes, edges },
-          trigger_value: trigger_value
-        }, 
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      if (id === 'new') {
+        const params = new URLSearchParams(window.location.search);
+        const channel = params.get('channel') || 'WHATSAPP';
+        const res = await axios.post(
+          `${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/workflows/`, 
+          { 
+            name: workflow.name,
+            trigger_type: 'KEYWORD',
+            trigger_value: trigger_value,
+            steps: { nodes, edges },
+            channels: deploymentChannels,
+            is_shared: deploymentChannels.length > 1,
+            enabled: false
+          }, 
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        // Redirect to edit mode of the newly created workflow
+        window.location.href = `/client/workflows/builder/${res.data.id}`;
+      } else {
+        await axios.patch(
+          `${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/workflows/${id}/`, 
+          { 
+            steps: { nodes, edges },
+            trigger_value: trigger_value,
+            channels: deploymentChannels,
+            is_shared: deploymentChannels.length > 1 || (workflow && workflow.is_shared)
+          }, 
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+      }
     } catch (err) { alert('Save failed'); } finally { setIsSaving(false); }
   };
 
@@ -270,7 +318,9 @@ const WorkflowBuilderInner = () => {
     setSelectedNode(null);
   };
 
-  if (loading) return <div className="h-screen flex items-center justify-center bg-slate-50"><Loader2 className="animate-spin text-blue-600" size={30} /></div>;
+  if (loading) return <div className="h-screen flex items-center justify-center bg-slate-50"><Loader2 className="animate-spin text-emerald-600" size={30} /></div>;
+
+  const isShared = deploymentChannels.length > 1 || (workflow && workflow.is_shared);
 
   return (
     <div className="h-screen w-full bg-[#f8fafc] flex flex-col overflow-hidden font-sans text-slate-900">
@@ -278,9 +328,76 @@ const WorkflowBuilderInner = () => {
         <div className="flex items-center gap-6">
           <button onClick={() => router.push('/client/workflows')} className="flex items-center gap-2 text-slate-500 hover:text-slate-900 text-xs font-bold uppercase tracking-widest transition-colors"><ArrowLeft size={14} /> Go back</button>
           <div className="h-6 w-px bg-slate-200" />
-          <h1 className="text-sm font-black tracking-tight text-slate-800 uppercase tracking-[0.1em]">{workflow?.name}</h1>
+          <div className="flex items-center gap-3">
+            <h1 className="text-sm font-bold tracking-tight text-slate-800 uppercase tracking-[0.05em]">{workflow?.name}</h1>
+            {isShared && (
+              <span className="text-[9px] font-black uppercase bg-slate-900 text-white px-2 py-0.5 rounded tracking-wider">
+                Shared Workflow
+              </span>
+            )}
+          </div>
         </div>
-        <button onClick={handleSave} className="px-8 py-3 bg-[#065f46] text-white rounded-lg font-black text-[10px] uppercase tracking-[0.2em] hover:bg-emerald-900 transition-all shadow-xl shadow-emerald-100 flex items-center gap-2">{isSaving ? <Loader2 size={12} className="animate-spin" /> : <Save size={14} />} Save Workflow</button>
+
+        {/* Current Deployment Selector */}
+        <div className="flex items-center gap-4 bg-slate-50 border border-slate-100 rounded-xl px-4 py-1.5">
+          <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Current Deployment:</span>
+          <label className="flex items-center gap-1.5 text-xs font-bold text-slate-700 cursor-pointer">
+            <input 
+              type="checkbox" 
+              checked={deploymentChannels.includes('WHATSAPP')} 
+              onChange={(e) => {
+                const checked = e.target.checked;
+                let updated = [...deploymentChannels];
+                if (checked) {
+                  if (!updated.includes('WHATSAPP')) updated.push('WHATSAPP');
+                } else {
+                  if (updated.length > 1) updated = updated.filter(c => c !== 'WHATSAPP');
+                }
+                setDeploymentChannels(updated);
+              }}
+              className="accent-emerald-600 rounded" 
+            />
+            <span>🟢 WhatsApp</span>
+          </label>
+          <label className="flex items-center gap-1.5 text-xs font-bold text-slate-700 cursor-pointer">
+            <input 
+              type="checkbox" 
+              checked={deploymentChannels.includes('INSTAGRAM')} 
+              onChange={(e) => {
+                const checked = e.target.checked;
+                let updated = [...deploymentChannels];
+                if (checked) {
+                  if (!updated.includes('INSTAGRAM')) updated.push('INSTAGRAM');
+                } else {
+                  if (updated.length > 1) updated = updated.filter(c => c !== 'INSTAGRAM');
+                }
+                setDeploymentChannels(updated);
+              }}
+              className="accent-emerald-600 rounded" 
+            />
+            <span>🟣 Instagram</span>
+          </label>
+          <label className="flex items-center gap-1.5 text-xs font-bold text-slate-700 cursor-pointer">
+            <input 
+              type="checkbox" 
+              checked={deploymentChannels.includes('FACEBOOK')} 
+              onChange={(e) => {
+                const checked = e.target.checked;
+                let updated = [...deploymentChannels];
+                if (checked) {
+                  if (!updated.includes('FACEBOOK')) updated.push('FACEBOOK');
+                } else {
+                  if (updated.length > 1) updated = updated.filter(c => c !== 'FACEBOOK');
+                }
+                setDeploymentChannels(updated);
+              }}
+              className="accent-emerald-600 rounded" 
+            />
+            <span>🔵 Facebook</span>
+          </label>
+        </div>
+
+        <button onClick={handleSave} className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs uppercase tracking-wider transition-all shadow-md shadow-emerald-50 flex items-center gap-2 cursor-pointer">{isSaving ? <Loader2 size={12} className="animate-spin" /> : <Save size={14} />} Save Workflow</button>
       </div>
 
       <div className="flex-1 flex overflow-hidden">
@@ -307,19 +424,17 @@ const WorkflowBuilderInner = () => {
         </div>
 
         {/* Edit Drawer (Truncated logic for brevity) */}
-        <AnimatePresence>
-          {selectedNode && (
-            <motion.div initial={{ x: 400 }} animate={{ x: 0 }} exit={{ x: 400 }} className="w-[400px] bg-white border-l border-slate-200 shadow-2xl flex flex-col z-20">
+        {selectedNode && (
+            <div className="w-[400px] bg-white border-l border-slate-200 shadow-2xl flex flex-col z-20">
               <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
                 <h3 className="text-sm font-black uppercase tracking-widest">Edit Step</h3>
                 <button onClick={() => setSelectedNode(null)}><X size={20} /></button>
               </div>
               <div className="p-8">
-                <MessageForm data={selectedNode.data} type={selectedNode.type} onSave={(d) => updateNodeData(selectedNode.id, d)} />
+                <MessageForm key={selectedNode.id} data={selectedNode.data} type={selectedNode.type} onSave={(d) => updateNodeData(selectedNode.id, d)} />
               </div>
-            </motion.div>
+            </div>
           )}
-        </AnimatePresence>
       </div>
     </div>
   );
@@ -331,6 +446,10 @@ const MessageForm = ({ data, type, onSave }) => {
   const [buttons, setButtons] = useState(data.buttons || ['Option 1']);
   const [mediaUrl, setMediaUrl] = useState(data.mediaUrl || null);
   const [keyword, setKeyword] = useState(data.keyword || '');
+  const [conditionField, setConditionField] = useState(data.conditionField || 'tag');
+  const [conditionOperator, setConditionOperator] = useState(data.conditionOperator || '=');
+  const [conditionValue, setConditionValue] = useState(data.conditionValue || '');
+  const [condition, setCondition] = useState(data.condition || '');
 
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
@@ -357,17 +476,69 @@ const MessageForm = ({ data, type, onSave }) => {
     setButtons(newButtons);
   };
 
+  // Build condition string from parts
+  const buildCondition = () => {
+    return `IF ${conditionField.toUpperCase()} ${conditionOperator} ${conditionValue}`;
+  };
+
   return (<div className="space-y-6">
     {type === 'trigger' ? (
       <div>
         <label className="text-[10px] font-black uppercase text-slate-400 mb-2 block">Trigger Keywords</label>
         <p className="text-[10px] text-slate-500 mb-2">Enter keywords separated by commas (e.g. mall, offer, hi)</p>
-        <input value={keyword} onChange={e => setKeyword(e.target.value)} className="w-full bg-slate-50 border p-4 rounded-xl text-sm font-bold focus:border-blue-600 outline-none" placeholder="Enter keywords..." />
+        <input value={keyword} onChange={e => setKeyword(e.target.value)} className="w-full bg-slate-50 border p-4 rounded-xl text-sm font-bold focus:border-emerald-500 outline-none text-slate-800 placeholder:text-slate-400" placeholder="Enter keywords..." />
+      </div>
+    ) : type === 'condition' ? (
+      <div className="space-y-4">
+        <div>
+          <label className="text-[10px] font-black uppercase text-slate-400 mb-2 block">Condition Field</label>
+          <select 
+            value={conditionField} 
+            onChange={e => setConditionField(e.target.value)} 
+            className="w-full bg-slate-50 border border-slate-200 p-3 rounded-xl text-sm font-bold text-slate-700 focus:border-emerald-500 outline-none"
+          >
+            <option value="tag" className="text-slate-700 bg-white">Tag</option>
+            <option value="name" className="text-slate-700 bg-white">Name</option>
+            <option value="phone" className="text-slate-700 bg-white">Phone</option>
+            <option value="message" className="text-slate-700 bg-white">Message</option>
+            <option value="keyword" className="text-slate-700 bg-white">Keyword</option>
+            <option value="custom" className="text-slate-700 bg-white">Custom Field</option>
+          </select>
+        </div>
+        <div>
+          <label className="text-[10px] font-black uppercase text-slate-400 mb-2 block">Operator</label>
+          <select 
+            value={conditionOperator} 
+            onChange={e => setConditionOperator(e.target.value)} 
+            className="w-full bg-slate-50 border border-slate-200 p-3 rounded-xl text-sm font-bold text-slate-700 focus:border-emerald-500 outline-none"
+          >
+            <option value="=" className="text-slate-700 bg-white">=  (Equals)</option>
+            <option value="!=" className="text-slate-700 bg-white">!=  (Not Equals)</option>
+            <option value="contains" className="text-slate-700 bg-white">Contains</option>
+            <option value="starts_with" className="text-slate-700 bg-white">Starts With</option>
+            <option value="ends_with" className="text-slate-700 bg-white">Ends With</option>
+            <option value="is_empty" className="text-slate-700 bg-white">Is Empty</option>
+            <option value="is_not_empty" className="text-slate-700 bg-white">Is Not Empty</option>
+          </select>
+        </div>
+        <div>
+          <label className="text-[10px] font-black uppercase text-slate-400 mb-2 block">Value</label>
+          <input 
+            value={conditionValue} 
+            onChange={e => setConditionValue(e.target.value)} 
+            className="w-full bg-slate-50 border border-slate-200 p-3 rounded-xl text-sm font-bold text-slate-700 focus:border-emerald-500 outline-none" 
+            placeholder="e.g. VIP, Premium, etc." 
+          />
+        </div>
+        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
+          <p className="text-[10px] font-black uppercase text-amber-600 mb-1">Preview</p>
+          <p className="text-sm font-bold text-amber-800">{buildCondition()}</p>
+        </div>
       </div>
     ) : (
       <div>
         <label className="text-[10px] font-black uppercase text-slate-400 mb-2 block">Message Content</label>
-        <textarea value={msg} onChange={e => setMsg(e.target.value)} className="w-full bg-slate-50 border p-4 rounded-xl text-sm font-bold focus:border-blue-600 outline-none" rows={4} />
+        <textarea value={msg} onChange={e => setMsg(e.target.value)} className="w-full bg-slate-50 border p-4 rounded-xl text-sm font-bold focus:border-emerald-500 outline-none text-slate-800 placeholder:text-slate-400" rows={4} placeholder="Type your message here..." />
       </div>
     )}
     
@@ -376,7 +547,7 @@ const MessageForm = ({ data, type, onSave }) => {
         <div className="flex justify-between items-center mb-2">
           <label className="text-[10px] font-black uppercase text-slate-400 block mb-0">Buttons</label>
           {buttons.length < 3 && (
-            <button onClick={handleAddButton} className="text-[10px] font-bold text-blue-600 hover:text-blue-700 uppercase tracking-widest flex items-center gap-1">
+            <button onClick={handleAddButton} className="text-[10px] font-bold text-emerald-600 hover:text-emerald-700 uppercase tracking-widest flex items-center gap-1">
               <Plus size={10} strokeWidth={3} /> Add Button
             </button>
           )}
@@ -384,7 +555,7 @@ const MessageForm = ({ data, type, onSave }) => {
         <div className="space-y-3">
           {buttons.map((btn, i) => (
             <div key={i} className="flex items-center gap-2">
-              <input value={btn} onChange={(e) => handleButtonChange(i, e.target.value)} className="flex-1 bg-slate-50 border border-slate-200 p-3 rounded-xl text-xs font-bold text-slate-700 focus:border-blue-600 outline-none" />
+              <input value={btn} onChange={(e) => handleButtonChange(i, e.target.value)} className="flex-1 bg-slate-50 border border-slate-200 p-3 rounded-xl text-xs font-bold text-slate-700 focus:border-emerald-500 outline-none" />
               <button onClick={() => handleRemoveButton(i)} className="p-3 text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors rounded-xl border border-transparent hover:border-red-100">
                 <Trash2 size={16} />
               </button>
@@ -420,13 +591,22 @@ const MessageForm = ({ data, type, onSave }) => {
       </div>
     )}
 
-    <button onClick={() => onSave({ message: msg, buttons, mediaUrl, keyword })} className="w-full py-4 bg-slate-900 text-white rounded-xl font-black uppercase text-[10px] hover:bg-blue-600 hover:shadow-lg hover:shadow-blue-200 transition-all">Save Changes</button>
+    <button onClick={() => onSave({ 
+      message: msg, 
+      buttons, 
+      mediaUrl, 
+      keyword, 
+      condition: type === 'condition' ? buildCondition() : (data.condition || ''),
+      conditionField,
+      conditionOperator,
+      conditionValue
+    })} className="w-full py-4 bg-emerald-600 text-white rounded-xl font-black uppercase text-[10px] hover:bg-emerald-700 hover:shadow-lg hover:shadow-emerald-200 transition-all">Save Changes</button>
   </div>);
 };
 
 const SidebarCategory = ({ title, icon: Icon, expanded, children }) => (
   <div>
-    <div className="w-full p-5 flex items-center gap-3 bg-slate-50/30 text-blue-600">
+    <div className="w-full p-5 flex items-center gap-3 bg-slate-50/30 text-emerald-600">
       <Icon size={18} /><span className="text-xs font-black uppercase tracking-widest">{title}</span>
     </div>
     <div className="overflow-hidden">{children}</div>
@@ -435,7 +615,7 @@ const SidebarCategory = ({ title, icon: Icon, expanded, children }) => (
 
 const SidebarItem = ({ icon: Icon, label, onDragStart, color = "slate" }) => (
   <div draggable={!!onDragStart} onDragStart={onDragStart} className="w-full p-4 pl-12 flex items-center gap-4 group cursor-grab active:cursor-grabbing hover:bg-slate-50 transition-all">
-    <Icon size={16} className={cn("text-slate-400 group-hover:text-blue-600")} />
+    <Icon size={16} className={cn("text-slate-400 group-hover:text-emerald-600")} />
     <span className="text-[11px] font-bold text-slate-500 group-hover:text-slate-900 uppercase tracking-widest">{label}</span>
   </div>
 );
@@ -443,3 +623,5 @@ const SidebarItem = ({ icon: Icon, label, onDragStart, color = "slate" }) => (
 const WorkflowBuilder = () => (<ReactFlowProvider><WorkflowBuilderInner /></ReactFlowProvider>);
 
 export default WorkflowBuilder;
+
+

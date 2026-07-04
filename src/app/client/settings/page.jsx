@@ -4,8 +4,6 @@ import React, { useState, useEffect } from 'react';
 import { User, Mail, Phone, Hash, CreditCard, Lock, Settings, Loader2, ShieldCheck, LogOut } from 'lucide-react';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import axios from 'axios';
-import { motion, AnimatePresence } from 'framer-motion';
-
 const ClientSettingsPage = () => {
   const [client, setClient] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -66,7 +64,7 @@ const ClientSettingsPage = () => {
     }
   };
 
-  if (loading) return <DashboardLayout role="CLIENT"><div className="flex justify-center py-24"><Loader2 className="animate-spin text-blue-600" /></div></DashboardLayout>;
+  if (loading) return <DashboardLayout role="CLIENT"><div className="flex justify-center py-24"><Loader2 className="animate-spin text-emerald-600" /></div></DashboardLayout>;
 
   return (
     <DashboardLayout role="CLIENT">
@@ -77,7 +75,7 @@ const ClientSettingsPage = () => {
             <p className="text-slate-500 font-medium italic">Manage your profile, integration and security.</p>
           </div>
           {!isEditing ? (
-            <button onClick={() => setIsEditing(true)} className="px-6 py-3 bg-slate-900 text-white rounded-2xl font-bold text-xs hover:bg-blue-600 transition-all shadow-xl shadow-slate-100">
+            <button onClick={() => setIsEditing(true)} className="px-6 py-3 bg-emerald-600 text-white rounded-2xl font-bold text-xs hover:bg-emerald-600 transition-all shadow-xl shadow-slate-100">
               Edit Settings
             </button>
           ) : (
@@ -85,7 +83,7 @@ const ClientSettingsPage = () => {
               <button onClick={() => setIsEditing(false)} className="px-6 py-3 bg-slate-100 text-slate-600 rounded-2xl font-bold text-xs hover:bg-slate-200 transition-all">
                 Cancel
               </button>
-              <button onClick={handleUpdate} disabled={isSaving} className="px-6 py-3 bg-blue-600 text-white rounded-2xl font-bold text-xs hover:bg-slate-900 transition-all shadow-xl shadow-blue-100 disabled:opacity-50 flex items-center gap-2">
+              <button onClick={handleUpdate} disabled={isSaving} className="px-6 py-3 bg-emerald-600 text-white rounded-2xl font-bold text-xs hover:bg-emerald-700 transition-all shadow-xl shadow-emerald-100 disabled:opacity-50 flex items-center gap-2">
                 {isSaving ? <Loader2 size={16} className="animate-spin" /> : 'Save Changes'}
               </button>
             </div>
@@ -97,8 +95,8 @@ const ClientSettingsPage = () => {
           <div className="space-y-1">
             <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-4 ml-1">Personal Details</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="flex items-center gap-4 p-5 bg-white border border-slate-100 rounded-3xl transition-all hover:border-blue-100 group">
-                <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center transition-colors group-hover:bg-blue-600 group-hover:text-white">
+              <div className="flex items-center gap-4 p-5 bg-white border border-slate-100 rounded-3xl transition-all hover:border-emerald-100 group">
+                <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center transition-colors group-hover:bg-emerald-600 group-hover:text-white">
                   <User size={22} strokeWidth={2} />
                 </div>
                 <div className="flex-1">
@@ -121,8 +119,8 @@ const ClientSettingsPage = () => {
                 </div>
               </div>
 
-              <div className="flex items-center gap-4 p-5 bg-white border border-slate-100 rounded-3xl transition-all hover:border-blue-100 group">
-                <div className="w-12 h-12 rounded-2xl bg-slate-50 text-slate-400 flex items-center justify-center transition-colors group-hover:bg-blue-600 group-hover:text-white">
+              <div className="flex items-center gap-4 p-5 bg-white border border-slate-100 rounded-3xl transition-all hover:border-emerald-100 group">
+                <div className="w-12 h-12 rounded-2xl bg-slate-50 text-slate-400 flex items-center justify-center transition-colors group-hover:bg-emerald-600 group-hover:text-white">
                   <Phone size={22} strokeWidth={2} />
                 </div>
                 <div className="flex-1">
@@ -148,7 +146,7 @@ const ClientSettingsPage = () => {
                     <input 
                       value={editData.whatsapp_phone_number_id} 
                       onChange={e => setEditData({...editData, whatsapp_phone_number_id: e.target.value})} 
-                      className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-4 outline-none focus:border-blue-500 transition-all font-semibold text-sm" 
+                      className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-4 outline-none focus:border-emerald-500 transition-all font-semibold text-sm" 
                       placeholder="e.g. 1151075064754011"
                     />
                   ) : (
@@ -163,7 +161,7 @@ const ClientSettingsPage = () => {
                     <input 
                       value={editData.whatsapp_waba_id} 
                       onChange={e => setEditData({...editData, whatsapp_waba_id: e.target.value})} 
-                      className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-4 outline-none focus:border-blue-500 transition-all font-semibold text-sm" 
+                      className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-4 outline-none focus:border-emerald-500 transition-all font-semibold text-sm" 
                       placeholder="e.g. 1003621608783022"
                     />
                   ) : (
@@ -180,7 +178,7 @@ const ClientSettingsPage = () => {
                   <textarea 
                     value={editData.whatsapp_access_token} 
                     onChange={e => setEditData({...editData, whatsapp_access_token: e.target.value})} 
-                    className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-4 outline-none focus:border-blue-500 transition-all font-semibold text-sm h-24 resize-none" 
+                    className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-4 outline-none focus:border-emerald-500 transition-all font-semibold text-sm h-24 resize-none" 
                     placeholder="Enter your Meta Access Token here..."
                   />
                 ) : (
@@ -197,7 +195,7 @@ const ClientSettingsPage = () => {
                     <input 
                       value={editData.whatsapp_verify_token} 
                       onChange={e => setEditData({...editData, whatsapp_verify_token: e.target.value})} 
-                      className="flex-1 bg-slate-50 border border-slate-100 rounded-2xl px-5 py-4 outline-none focus:border-blue-500 transition-all font-semibold text-sm" 
+                      className="flex-1 bg-slate-50 border border-slate-100 rounded-2xl px-5 py-4 outline-none focus:border-emerald-500 transition-all font-semibold text-sm" 
                       placeholder="e.g. my_secure_token_123"
                     />
                   ) : (
@@ -251,7 +249,7 @@ const ClientSettingsPage = () => {
                   <p className="text-xs text-slate-400 italic">Next billing on June 01, 2026</p>
                 </div>
               </div>
-              <button className="text-xs font-bold text-blue-600 hover:text-slate-900 transition-colors uppercase tracking-widest px-4 py-2 hover:bg-slate-50 rounded-xl">
+              <button className="text-xs font-bold text-emerald-600 hover:text-slate-900 transition-colors uppercase tracking-widest px-4 py-2 hover:bg-slate-50 rounded-xl">
                 Manage
               </button>
             </div>
@@ -261,8 +259,8 @@ const ClientSettingsPage = () => {
           <div className="space-y-1">
             <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-4 ml-1">Security & Access</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <button onClick={() => setIsPasswordModalOpen(true)} className="flex items-center gap-4 p-5 bg-white border border-slate-100 rounded-3xl hover:border-blue-100 transition-all group">
-                <div className="w-10 h-10 rounded-xl bg-slate-50 text-slate-400 flex items-center justify-center transition-colors group-hover:bg-blue-600 group-hover:text-white">
+              <button onClick={() => setIsPasswordModalOpen(true)} className="flex items-center gap-4 p-5 bg-white border border-slate-100 rounded-3xl hover:border-emerald-100 transition-all group">
+                <div className="w-10 h-10 rounded-xl bg-slate-50 text-slate-400 flex items-center justify-center transition-colors group-hover:bg-emerald-600 group-hover:text-white">
                   <Lock size={18} strokeWidth={2} />
                 </div>
                 <span className="text-sm font-semibold text-slate-900">Change Password</span>
@@ -281,11 +279,11 @@ const ClientSettingsPage = () => {
         </div>
 
         {/* Password Change Modal */}
-        <AnimatePresence>
+        
           {isPasswordModalOpen && (
             <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsPasswordModalOpen(false)} className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" />
-              <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className="relative bg-white w-full max-w-md rounded-[40px] shadow-2xl p-10">
+              <div onClick={() => setIsPasswordModalOpen(false)} className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" />
+              <div className="relative bg-white w-full max-w-md rounded-[40px] shadow-2xl p-10">
                 <div className="mb-8">
                   <h2 className="text-xl font-bold text-slate-900 mb-2">Update Password</h2>
                   <p className="text-sm text-slate-400 italic font-medium">Ensure your account is using a strong password.</p>
@@ -293,23 +291,25 @@ const ClientSettingsPage = () => {
                 <div className="space-y-5">
                   <div>
                     <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block ml-1">New Password</label>
-                    <input type="password" placeholder="••••••••" className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-4 outline-none focus:border-blue-500 transition-all font-semibold" />
+                    <input type="password" placeholder="••••••••" className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-4 outline-none focus:border-emerald-500 transition-all font-semibold" />
                   </div>
                   <div>
                     <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block ml-1">Confirm Password</label>
-                    <input type="password" placeholder="••••••••" className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-4 outline-none focus:border-blue-500 transition-all font-semibold" />
+                    <input type="password" placeholder="••••••••" className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-4 outline-none focus:border-emerald-500 transition-all font-semibold" />
                   </div>
-                  <button className="w-full py-4 bg-slate-900 text-white rounded-2xl font-bold text-xs hover:bg-blue-600 transition-all shadow-xl shadow-slate-100 mt-4">
+                  <button className="w-full py-4 bg-emerald-600 text-white rounded-2xl font-bold text-xs hover:bg-emerald-600 transition-all shadow-xl shadow-slate-100 mt-4">
                     Save New Password
                   </button>
                 </div>
-              </motion.div>
+              </div>
             </div>
           )}
-        </AnimatePresence>
+        
       </div>
     </DashboardLayout>
   );
 };
 
 export default ClientSettingsPage;
+
+

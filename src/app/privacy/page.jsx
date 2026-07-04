@@ -29,10 +29,10 @@ export default function PrivacyPage() {
     <div className="min-h-screen bg-[#f8fafc] py-16 px-4 font-sans">
       <div className="max-w-4xl mx-auto">
         <div className="mb-10 flex items-center justify-between">
-          <Link href="/auth/login" className="text-blue-600 font-bold text-sm hover:underline flex items-center gap-2 italic">
+          <Link href="/auth/login" className="text-emerald-600 font-bold text-sm hover:underline flex items-center gap-2 italic">
             ← Back to Login
           </Link>
-          <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white font-black shadow-lg shadow-blue-100">A</div>
+          <div className="w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center text-white font-black shadow-lg shadow-blue-100">A</div>
         </div>
         
         <div className="mb-12">
@@ -47,7 +47,7 @@ export default function PrivacyPage() {
           </div>
         ) : (
           <div className="bg-white rounded-[48px] border border-slate-100 p-12 md:p-16 shadow-2xl shadow-slate-200/50 relative overflow-hidden group">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-blue-50/50 blur-[100px] -mr-32 -mt-32 rounded-full" />
+            <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-50/50 blur-[100px] -mr-32 -mt-32 rounded-full" />
             
             <div 
               className="prose prose-slate max-w-none relative z-10"
@@ -69,3 +69,4 @@ export default function PrivacyPage() {
     </div>
   );
 }
+

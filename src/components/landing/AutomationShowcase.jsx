@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import { motion } from 'framer-motion';
 import { Settings, ArrowRight, Webhook, Brain, Database, Smartphone } from 'lucide-react';
 
 export default function AutomationShowcase() {
@@ -51,12 +50,8 @@ export default function AutomationShowcase() {
           </div>
 
           {steps.map((step, idx) => (
-            <motion.div 
+            <div 
               key={idx}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: step.delay * 0.2 }}
               className="relative z-10 w-full md:w-auto"
             >
               <div className="glass-card rounded-2xl p-6 flex flex-col items-center justify-center text-center w-full md:w-40 hover:border-[#16A085]/40 transition-colors cursor-pointer group">
@@ -70,10 +65,12 @@ export default function AutomationShowcase() {
                   <ArrowRight size={16} className="md:hidden mt-4 text-[#8E99A8]" />
                 )}
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
       </div>
     </section>
   );
 }
+
+

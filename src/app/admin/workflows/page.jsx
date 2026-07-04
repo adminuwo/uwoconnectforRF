@@ -5,8 +5,6 @@ import { GitBranch, Plus, Loader2, Zap, Trash2 } from 'lucide-react';
 import axios from 'axios';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { cn } from '@/lib/utils';
-import { motion } from 'framer-motion';
-
 const AdminWorkflowsPage = () => {
   const [workflows, setWorkflows] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -41,7 +39,7 @@ const AdminWorkflowsPage = () => {
         </div>
 
         {loading ? (
-          <div className="flex justify-center py-24"><Loader2 className="animate-spin text-blue-600" size={40} /></div>
+          <div className="flex justify-center py-24"><Loader2 className="animate-spin text-emerald-600" size={40} /></div>
         ) : workflows.length === 0 ? (
           <div className="bg-white rounded-[40px] border border-slate-200 p-16 text-center shadow-sm">
             <GitBranch size={48} className="text-slate-200 mx-auto mb-4" />
@@ -51,9 +49,8 @@ const AdminWorkflowsPage = () => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {workflows.map((wf, i) => (
-              <motion.div
+              <div
                 key={wf._id || wf.id}
-                initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
                 className="bg-white p-6 rounded-[28px] border border-slate-200 shadow-sm hover:shadow-md transition-all"
               >
                 <div className="flex items-center gap-3 mb-4">
@@ -71,7 +68,7 @@ const AdminWorkflowsPage = () => {
                   <div className={cn("w-1.5 h-1.5 rounded-full", wf.enabled ? "bg-green-500" : "bg-gray-300")} />
                   {wf.enabled ? 'Active' : 'Paused'}
                 </div>
-              </motion.div>
+              </div>
             ))}
           </div>
         )}
@@ -81,3 +78,5 @@ const AdminWorkflowsPage = () => {
 };
 
 export default AdminWorkflowsPage;
+
+
