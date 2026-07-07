@@ -9,6 +9,7 @@ import axios from 'axios';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { templateData } from './templateData';
 
 const FacebookIcon = ({ size = 14, className }) => (
@@ -48,6 +49,7 @@ const InstagramIcon = ({ size = 14, className }) => (
 );
 
 const ClientWorkflowsPage = () => {
+  const router = useRouter();
   const [workflows, setWorkflows] = useState([]);
   const [loading, setLoading] = useState(true);
   
@@ -109,54 +111,18 @@ const ClientWorkflowsPage = () => {
     if (!newWorkflowName.trim()) return;
 
     try {
-      setIsCreating(true);
-      const token = localStorage.getItem('token');
+      const params = new URLSearchParams();
+      params.set('name', newWorkflowName);
+      params.set('category', newWorkflowCategory);
+      params.set('template', newWorkflowTemplate);
+      params.set('channels', selectedChannels.join(','));
+      params.set('is_shared', isSharedWorkflow);
 
-      if (isSharedWorkflow) {
-        const payload = {
-          name: newWorkflowName,
-          category: newWorkflowCategory,
-          industry: newWorkflowTemplate || 'None',
-          channels: selectedChannels,
-          is_shared: true,
-          trigger_type: 'KEYWORD',
-          trigger_value: ['hello'],
-          steps: newWorkflowTemplate && templateData[newWorkflowTemplate] ? templateData[newWorkflowTemplate] : { nodes: [{ id: 'start', type: 'trigger', position: {x:250, y:50}, data: { keyword: 'hello' } }], edges: [] },
-          enabled: false,
-          version: '1.0'
-        };
-        const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/workflows/`, payload, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        setIsCreateModalOpen(false);
-        resetForm();
-        window.location.href = `/client/workflows/builder/${res.data.id}`;
-      } else {
-        for (const channel of selectedChannels) {
-          const payload = {
-            name: `${newWorkflowName} (${channel})`,
-            category: newWorkflowCategory,
-            industry: newWorkflowTemplate || 'None',
-            channels: [channel],
-            is_shared: false,
-            trigger_type: 'KEYWORD',
-            trigger_value: ['hello'],
-            steps: newWorkflowTemplate && templateData[newWorkflowTemplate] ? templateData[newWorkflowTemplate] : { nodes: [{ id: 'start', type: 'trigger', position: {x:250, y:50}, data: { keyword: 'hello' } }], edges: [] },
-            enabled: false,
-            version: '1.0'
-          };
-          await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/workflows/`, payload, {
-            headers: { Authorization: `Bearer ${token}` }
-          });
-        }
-        setIsCreateModalOpen(false);
-        resetForm();
-        fetchWorkflows();
-      }
+      setIsCreateModalOpen(false);
+      resetForm();
+      router.push(`/client/workflows/builder/new?${params.toString()}`);
     } catch (err) {
-      alert('Failed to create workflow');
-    } finally {
-      setIsCreating(false);
+      console.error('Failed to proceed to builder', err);
     }
   };
 
@@ -173,13 +139,13 @@ const ClientWorkflowsPage = () => {
       setPendingEditWorkflow(flow);
       setIsWarningBannerOpen(true);
     } else {
-      window.location.href = `/client/workflows/builder/${flow.id}`;
+      router.push(`/client/workflows/builder/${flow.id}`);
     }
   };
 
   const proceedWithEditing = () => {
     if (pendingEditWorkflow) {
-      window.location.href = `/client/workflows/builder/${pendingEditWorkflow.id}`;
+      router.push(`/client/workflows/builder/${pendingEditWorkflow.id}`);
     }
   };
 
@@ -271,13 +237,12 @@ const ClientWorkflowsPage = () => {
       if (dateFilter === '7DAYS' && diffDays > 7) return false;
       if (dateFilter === '30DAYS' && diffDays > 30) return false;
     }
-
     return true;
   });
 
   return (
     <DashboardLayout role="CLIENT">
-      <div className="max-w-7xl mx-auto pb-24 px-6 md:px-8">
+      <div className="max-w-7xl mx-auto pb-24 px-2 sm:px-4 md:px-0">
         
         {/* HEADER SECTION */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-10 pb-6 border-b border-slate-100 gap-4">
@@ -287,7 +252,7 @@ const ClientWorkflowsPage = () => {
           </div>
           <button
             onClick={() => { setIsCreateModalOpen(true); setModalStep('templates'); }}
-            className="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs uppercase tracking-wider transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-emerald-100 flex items-center justify-center gap-2 cursor-pointer self-start md:self-auto"
+            className="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs uppercase tracking-wider transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-emerald-100 flex items-center justify-center gap-2 cursor-pointer self-start md:self-auto w-full md:w-auto"
           >
             <Plus size={16} />
             Create Workflow
@@ -295,9 +260,9 @@ const ClientWorkflowsPage = () => {
         </div>
 
         {/* FILTER BAR SECTION */}
-        <div className="bg-white rounded-2xl border border-slate-200/60 p-5 mb-8 shadow-sm space-y-5">
+        <div className="bg-white rounded-2xl border border-slate-200/60 p-4 sm:p-5 mb-8 shadow-sm space-y-5">
           {/* Tabs - Modern Segmented Tab Bar */}
-          <div className="flex flex-wrap gap-1.5 bg-slate-50 p-1.5 rounded-xl border border-slate-100 max-w-2xl">
+          <div className="flex flex-row gap-1.5 bg-slate-50 p-1.5 rounded-xl border border-slate-100 max-w-full overflow-x-auto whitespace-nowrap scrollbar-none">
             {[
               { id: 'ALL', label: 'All Workflows', icon: <Layers size={14} /> },
               { id: 'WHATSAPP', label: 'WhatsApp', icon: <MessageCircle size={14} className="text-emerald-500" /> },
@@ -311,7 +276,7 @@ const ClientWorkflowsPage = () => {
                   key={tab.id}
                   onClick={() => setSelectedTab(tab.id)}
                   className={cn(
-                    "px-4 py-2.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-2",
+                    "px-4 py-2.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap shrink-0",
                     isSelected 
                       ? "bg-white text-slate-800 shadow-sm border border-slate-200/50" 
                       : "text-slate-400 hover:bg-white/40 hover:text-slate-700"
@@ -341,7 +306,7 @@ const ClientWorkflowsPage = () => {
             </div>
 
             {/* Filter Group */}
-            <div className="grid grid-cols-3 md:col-span-2 gap-2.5">
+            <div className="grid grid-cols-1 sm:grid-cols-3 md:col-span-2 gap-2.5">
               {/* Status Selector */}
               <div className="relative">
                 <select
@@ -546,12 +511,12 @@ const ClientWorkflowsPage = () => {
         {isCreateModalOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
             <div onClick={() => setIsCreateModalOpen(false)} className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" />
-            <div className="relative bg-white w-full max-w-xl rounded-2xl shadow-xl flex flex-col max-h-[90vh] overflow-hidden">
+            <div className="relative bg-white w-full max-w-xl rounded-2xl shadow-xl flex flex-col max-h-[92vh] overflow-y-auto border border-slate-200">
               
               {modalStep === 'templates' ? (
-                <div className="flex flex-col h-full max-h-[90vh]">
+                <div className="flex flex-col h-full max-h-[92vh]">
                   {/* Header */}
-                  <div className="flex items-center justify-between p-6 border-b border-slate-100 shrink-0">
+                  <div className="flex items-center justify-between p-4 sm:p-6 border-b border-slate-100 shrink-0">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 bg-slate-50 text-slate-600 rounded-xl flex items-center justify-center">
                          <GitBranch size={20} />
@@ -565,7 +530,7 @@ const ClientWorkflowsPage = () => {
                   </div>
 
                   {/* Body */}
-                  <div className="overflow-y-auto p-6 space-y-6 flex-1 min-h-0">
+                  <div className="overflow-y-auto p-4 sm:p-6 space-y-6 flex-1 min-h-0">
                      <div className="p-4 bg-emerald-50/50 text-emerald-700 rounded-xl text-xs font-semibold border border-emerald-100/50 shrink-0 leading-normal">
                        Looking for a faster and more efficient way to create stunning Workflows? Look no further than our templates!
                      </div>
@@ -589,7 +554,7 @@ const ClientWorkflowsPage = () => {
                   </div>
 
                   {/* Footer */}
-                  <div className="p-6 border-t border-slate-100 flex justify-end bg-slate-50/50 shrink-0">
+                  <div className="p-4 sm:p-6 border-t border-slate-100 flex justify-end bg-slate-50/50 shrink-0">
                      <button 
                        onClick={() => {
                          setNewWorkflowTemplate('');
@@ -604,7 +569,7 @@ const ClientWorkflowsPage = () => {
                   </div>
                 </div>
               ) : (
-                <div className="p-8 max-h-[90vh] overflow-y-auto">
+                <div className="p-4 sm:p-8 max-h-[92vh] overflow-y-auto">
                   <div className="flex items-center justify-between mb-6">
                     <div>
                       <h2 className="text-lg font-bold text-slate-900 tracking-tight">Configure Workflow</h2>
@@ -653,7 +618,7 @@ const ClientWorkflowsPage = () => {
                     {/* Select Channels Checkboxes */}
                     <div>
                       <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-3 block">Select Channels</label>
-                      <div className="grid grid-cols-3 gap-3">
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                         {[
                           { id: 'WHATSAPP', label: 'WhatsApp Business', badge: '🟢' },
                           { id: 'INSTAGRAM', label: 'Instagram', badge: '🟣' },
@@ -666,7 +631,7 @@ const ClientWorkflowsPage = () => {
                               key={channel.id}
                               onClick={() => toggleChannelSelection(channel.id)}
                               className={cn(
-                                "p-3 rounded-xl border text-xs font-bold text-left flex flex-col justify-between h-20 transition-all cursor-pointer",
+                                "p-3 rounded-xl border text-xs font-bold text-left flex flex-row sm:flex-col items-center sm:items-start justify-between sm:h-20 gap-3 sm:gap-0 transition-all cursor-pointer",
                                 isChecked 
                                   ? "bg-slate-50 border-slate-900 text-slate-900" 
                                   : "bg-white border-slate-150 text-slate-400 hover:border-slate-200"
@@ -731,7 +696,7 @@ const ClientWorkflowsPage = () => {
         {isWarningBannerOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
             <div onClick={() => setIsWarningBannerOpen(false)} className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" />
-            <div className="relative bg-white w-full max-w-md rounded-2xl shadow-xl p-8">
+            <div className="relative bg-white w-full max-w-md rounded-2xl shadow-xl p-6 sm:p-8 max-h-[92vh] overflow-y-auto border border-slate-200">
               <div className="w-12 h-12 bg-amber-50 text-amber-600 rounded-full flex items-center justify-center mb-6">
                 <Info size={24} />
               </div>

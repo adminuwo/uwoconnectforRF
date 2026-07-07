@@ -17,7 +17,7 @@ import 'reactflow/dist/style.css';
 import { 
   Save, MessageSquare, Clock, Zap, Loader2, 
   ChevronDown, Image as ImageIcon, Video, List, FileText, Webhook, Tag, BarChart3,
-  MousePointer2, ArrowLeft, CheckCircle2, XCircle, Play, X, Plus, Trash2, Edit3
+  MousePointer2, ArrowLeft, CheckCircle2, XCircle, Play, X, Plus, Trash2, Edit3, User
 } from 'lucide-react';
 import axios from 'axios';
 import { useParams, useRouter } from 'next/navigation';
@@ -171,6 +171,13 @@ const BranchNode = ({ id, data = {} }) => (
   </NodeContainer>
 );
 
+const HandoffNode = ({ id, data = {} }) => (
+  <NodeContainer id={id} title="Talk to Human" icon={User} color="bg-rose-500">
+    <p className="text-xs font-semibold text-slate-700 leading-relaxed line-clamp-3">"{data.message || 'Connecting you to a human agent. Please wait...'}"</p>
+    <Handle type="target" position={Position.Top} className="w-2.5 h-2.5 bg-slate-400 border-2 border-white -top-1" />
+  </NodeContainer>
+);
+
 // --- MAIN BUILDER ---
 
 const WorkflowBuilderInner = () => {
@@ -184,8 +191,27 @@ const WorkflowBuilderInner = () => {
   const [loading, setLoading] = useState(true);
   const [selectedNode, setSelectedNode] = useState(null);
   const [deploymentChannels, setDeploymentChannels] = useState(['WHATSAPP']); // WHATSAPP, INSTAGRAM, FACEBOOK
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   
   const { screenToFlowPosition } = useReactFlow();
+
+  const handleAddNodeDirectly = useCallback((type) => {
+    let defaultMsg = 'Type your message here...';
+    if (type === 'handoff') {
+      defaultMsg = 'Connecting you to a human agent. Please wait...';
+    }
+    const center = typeof window !== 'undefined' 
+      ? { x: window.innerWidth / 2, y: window.innerHeight / 2 }
+      : { x: 250, y: 250 };
+    const position = screenToFlowPosition(center);
+    const newNode = {
+      id: `node_${Date.now()}`,
+      type,
+      position,
+      data: { message: defaultMsg, buttons: ['Option 1'], keyword: 'hello', condition: 'If Tag = VIP' },
+    };
+    setNodes((nds) => nds.concat(newNode));
+  }, [screenToFlowPosition, setNodes]);
 
   const nodeTypes = useMemo(() => ({
     trigger: TriggerNode,
@@ -195,6 +221,7 @@ const WorkflowBuilderInner = () => {
     image: ImageNode,
     video: VideoNode,
     condition: BranchNode,
+    handoff: HandoffNode,
   }), []);
 
   const fetchData = async () => {
@@ -204,10 +231,13 @@ const WorkflowBuilderInner = () => {
         const params = new URLSearchParams(window.location.search);
         const name = params.get('name') || 'Untitled Workflow';
         const template = params.get('template') || '';
-        const channel = params.get('channel') || 'WHATSAPP';
+        const channelsParam = params.get('channels') || params.get('channel') || 'WHATSAPP';
+        const channels = channelsParam.split(',').filter(Boolean);
+        const is_shared = params.get('is_shared') === 'true';
+        const category = params.get('category') || 'General';
         
-        setWorkflow({ name, enabled: false, channels: [channel] });
-        setDeploymentChannels([channel]);
+        setWorkflow({ name, enabled: false, channels, is_shared, category });
+        setDeploymentChannels(channels);
         
         if (template && templateData[template]) {
           const tData = templateData[template];
@@ -262,22 +292,53 @@ const WorkflowBuilderInner = () => {
 
       if (id === 'new') {
         const params = new URLSearchParams(window.location.search);
-        const channel = params.get('channel') || 'WHATSAPP';
-        const res = await axios.post(
-          `${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/workflows/`, 
-          { 
-            name: workflow.name,
-            trigger_type: 'KEYWORD',
-            trigger_value: trigger_value,
-            steps: { nodes, edges },
-            channels: deploymentChannels,
-            is_shared: deploymentChannels.length > 1,
-            enabled: false
-          }, 
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        // Redirect to edit mode of the newly created workflow
-        window.location.href = `/client/workflows/builder/${res.data.id}`;
+        const template = params.get('template') || '';
+        const category = params.get('category') || 'General';
+        const isShared = params.get('is_shared') === 'true' || deploymentChannels.length > 1;
+
+        if (isShared) {
+          const res = await axios.post(
+            `${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/workflows/`, 
+            { 
+              name: workflow.name,
+              category: category,
+              industry: template || 'None',
+              trigger_type: 'KEYWORD',
+              trigger_value: trigger_value,
+              steps: { nodes, edges },
+              channels: deploymentChannels,
+              is_shared: true,
+              enabled: false
+            }, 
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+          router.push(`/client/workflows/builder/${res.data.id}`);
+        } else {
+          let firstSavedId = null;
+          for (const channel of deploymentChannels) {
+            const res = await axios.post(
+              `${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/workflows/`, 
+              { 
+                name: deploymentChannels.length > 1 ? `${workflow.name} (${channel})` : workflow.name,
+                category: category,
+                industry: template || 'None',
+                trigger_type: 'KEYWORD',
+                trigger_value: trigger_value,
+                steps: { nodes, edges },
+                channels: [channel],
+                is_shared: false,
+                enabled: false
+              }, 
+              { headers: { Authorization: `Bearer ${token}` } }
+            );
+            if (!firstSavedId) firstSavedId = res.data.id;
+          }
+          if (firstSavedId) {
+            router.push(`/client/workflows/builder/${firstSavedId}`);
+          } else {
+            router.push('/client/workflows');
+          }
+        }
       } else {
         await axios.patch(
           `${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/workflows/${id}/`, 
@@ -303,11 +364,17 @@ const WorkflowBuilderInner = () => {
     const type = event.dataTransfer.getData('application/reactflow');
     if (!type) return;
     const position = screenToFlowPosition({ x: event.clientX, y: event.clientY });
+    
+    let defaultMsg = 'Type your message here...';
+    if (type === 'handoff') {
+      defaultMsg = 'Connecting you to a human agent. Please wait...';
+    }
+
     const newNode = {
       id: `node_${Date.now()}`,
       type,
       position,
-      data: { message: 'Type your message here...', buttons: ['Option 1'], keyword: 'hello', condition: 'If Tag = VIP' },
+      data: { message: defaultMsg, buttons: ['Option 1'], keyword: 'hello', condition: 'If Tag = VIP' },
     };
     setNodes((nds) => nds.concat(newNode));
   }, [screenToFlowPosition, setNodes]);
@@ -319,28 +386,39 @@ const WorkflowBuilderInner = () => {
   };
 
   if (loading) return <div className="h-screen flex items-center justify-center bg-slate-50"><Loader2 className="animate-spin text-emerald-600" size={30} /></div>;
-
   const isShared = deploymentChannels.length > 1 || (workflow && workflow.is_shared);
 
   return (
     <div className="h-screen w-full bg-[#f8fafc] flex flex-col overflow-hidden font-sans text-slate-900">
-      <div className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 z-10 shadow-sm">
-        <div className="flex items-center gap-6">
-          <button onClick={() => router.push('/client/workflows')} className="flex items-center gap-2 text-slate-500 hover:text-slate-900 text-xs font-bold uppercase tracking-widest transition-colors"><ArrowLeft size={14} /> Go back</button>
-          <div className="h-6 w-px bg-slate-200" />
+      {/* Responsive Top Bar */}
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between p-4 md:px-6 md:py-0 md:h-16 bg-white border-b border-slate-200 z-10 gap-4 shrink-0 shadow-sm">
+        <div className="flex items-center justify-between w-full md:w-auto gap-4">
           <div className="flex items-center gap-3">
-            <h1 className="text-sm font-bold tracking-tight text-slate-800 uppercase tracking-[0.05em]">{workflow?.name}</h1>
-            {isShared && (
-              <span className="text-[9px] font-black uppercase bg-slate-900 text-white px-2 py-0.5 rounded tracking-wider">
-                Shared Workflow
-              </span>
-            )}
+            <button onClick={() => router.push('/client/workflows')} className="flex items-center gap-1.5 text-slate-500 hover:text-slate-900 text-xs font-bold uppercase tracking-widest transition-colors shrink-0">
+              <ArrowLeft size={14} /> <span className="hidden sm:inline">Go back</span>
+            </button>
+            <div className="h-6 w-px bg-slate-200" />
+            <button 
+              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+              className="md:hidden p-2 text-slate-600 hover:text-slate-900 border border-slate-200 rounded-xl bg-slate-50 hover:bg-slate-100 transition-colors shrink-0"
+              title="Toggle actions panel"
+            >
+              <List size={16} />
+            </button>
+            <div className="flex items-center gap-2 min-w-0">
+              <h1 className="text-xs sm:text-sm font-bold tracking-tight text-slate-800 uppercase truncate">{workflow?.name}</h1>
+              {isShared && (
+                <span className="text-[9px] font-black uppercase bg-slate-900 text-white px-2 py-0.5 rounded tracking-wider shrink-0 hidden sm:inline">
+                  Shared
+                </span>
+              )}
+            </div>
           </div>
         </div>
 
         {/* Current Deployment Selector */}
-        <div className="flex items-center gap-4 bg-slate-50 border border-slate-100 rounded-xl px-4 py-1.5">
-          <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Current Deployment:</span>
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 bg-slate-50 border border-slate-100 rounded-xl px-4 py-2 w-full md:w-auto">
+          <span className="text-[9px] font-black text-slate-400 uppercase tracking-wider w-full sm:w-auto">Deployment:</span>
           <label className="flex items-center gap-1.5 text-xs font-bold text-slate-700 cursor-pointer">
             <input 
               type="checkbox" 
@@ -397,44 +475,78 @@ const WorkflowBuilderInner = () => {
           </label>
         </div>
 
-        <button onClick={handleSave} className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs uppercase tracking-wider transition-all shadow-md shadow-emerald-50 flex items-center gap-2 cursor-pointer">{isSaving ? <Loader2 size={12} className="animate-spin" /> : <Save size={14} />} Save Workflow</button>
+        <button onClick={handleSave} className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs uppercase tracking-wider transition-all shadow-md shadow-emerald-50 flex items-center justify-center gap-2 cursor-pointer w-full md:w-auto shrink-0">
+          {isSaving ? <Loader2 size={12} className="animate-spin" /> : <Save size={14} />} Save Workflow
+        </button>
       </div>
 
-      <div className="flex-1 flex overflow-hidden">
-        {/* Left Sidebar */}
-        <div className="w-72 bg-white border-r border-slate-200 flex flex-col overflow-y-auto">
+      <div className="flex-1 flex overflow-hidden relative">
+        {/* Left Sidebar Overlay */}
+        {isSidebarOpen && (
+          <div onClick={() => setIsSidebarOpen(false)} className="fixed inset-0 z-20 bg-slate-900/40 backdrop-blur-xs md:hidden" />
+        )}
+
+        {/* Collapsible Left Sidebar */}
+        <div className={cn(
+          "w-72 bg-white border-r border-slate-200 flex flex-col overflow-y-auto transition-all duration-300 shrink-0",
+          "fixed md:static inset-y-0 left-0 z-30 md:z-auto",
+          isSidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
+        )}>
+          <div className="p-4 border-b border-slate-100 flex items-center justify-between md:hidden bg-slate-50">
+            <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Actions Menu</span>
+            <button onClick={() => setIsSidebarOpen(false)} className="text-slate-400 hover:text-slate-900"><X size={18} /></button>
+          </div>
           <div className="p-5 border-b border-slate-100 bg-slate-50/50"><h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Actions</h3></div>
           <div className="flex-1">
              <SidebarCategory title="Messages" icon={MessageSquare} expanded>
-                <SidebarItem icon={MessageSquare} label="Plain Message" onDragStart={(e) => onDragStart(e, 'plain')} />
-                <SidebarItem icon={MousePointer2} label="Message + Buttons" onDragStart={(e) => onDragStart(e, 'buttons')} />
-                <SidebarItem icon={ImageIcon} label="Message + Image" onDragStart={(e) => onDragStart(e, 'image')} />
-                <SidebarItem icon={Video} label="Message + Video" onDragStart={(e) => onDragStart(e, 'video')} />
+                <SidebarItem icon={MessageSquare} label="Plain Message" onDragStart={(e) => onDragStart(e, 'plain')} onClick={() => { handleAddNodeDirectly('plain'); setIsSidebarOpen(false); }} />
+                <SidebarItem icon={MousePointer2} label="Message + Buttons" onDragStart={(e) => onDragStart(e, 'buttons')} onClick={() => { handleAddNodeDirectly('buttons'); setIsSidebarOpen(false); }} />
+                <SidebarItem icon={ImageIcon} label="Message + Image" onDragStart={(e) => onDragStart(e, 'image')} onClick={() => { handleAddNodeDirectly('image'); setIsSidebarOpen(false); }} />
+                <SidebarItem icon={Video} label="Message + Video" onDragStart={(e) => onDragStart(e, 'video')} onClick={() => { handleAddNodeDirectly('video'); setIsSidebarOpen(false); }} />
              </SidebarCategory>
-             <div className="px-4 py-2 mt-4"><SidebarItem icon={Zap} label="Set a Condition" onDragStart={(e) => onDragStart(e, 'condition')} color="amber" /></div>
+             <div className="px-4 py-2 mt-4">
+               <SidebarItem icon={Zap} label="Set a Condition" onDragStart={(e) => onDragStart(e, 'condition')} onClick={() => { handleAddNodeDirectly('condition'); setIsSidebarOpen(false); }} color="amber" />
+             </div>
+             <div className="px-4 py-2">
+               <SidebarItem icon={User} label="Talk to Human" onDragStart={(e) => onDragStart(e, 'handoff')} onClick={() => { handleAddNodeDirectly('handoff'); setIsSidebarOpen(false); }} color="rose" />
+             </div>
           </div>
         </div>
 
         {/* Canvas Area */}
         <div className="flex-1 relative bg-[#f1f5f9]" ref={reactFlowWrapper}>
-          <ReactFlow nodes={nodes} edges={edges} onNodesChange={onNodesChange} onEdgesChange={onEdgesChange} onConnect={onConnect} nodeTypes={nodeTypes} onDrop={onDrop} onDragOver={(e) => e.preventDefault()} onNodeDoubleClick={onNodeDoubleClick} fitView>
+          <ReactFlow 
+            nodes={nodes} 
+            edges={edges} 
+            onNodesChange={onNodesChange} 
+            onEdgesChange={onEdgesChange} 
+            onConnect={onConnect} 
+            nodeTypes={nodeTypes} 
+            onDrop={onDrop} 
+            onDragOver={(e) => e.preventDefault()} 
+            onNodeDoubleClick={onNodeDoubleClick} 
+            fitView
+          >
             <Background color="#cbd5e1" gap={25} size={1} variant="dots" />
-            <Controls className="bg-white border border-slate-200 shadow-xl rounded-xl overflow-hidden m-8" />
+            <Controls className="bg-white border border-slate-200 shadow-xl rounded-xl overflow-hidden m-4 sm:m-8" />
           </ReactFlow>
         </div>
 
-        {/* Edit Drawer (Truncated logic for brevity) */}
+        {/* Responsive Edit Drawer */}
         {selectedNode && (
-            <div className="w-[400px] bg-white border-l border-slate-200 shadow-2xl flex flex-col z-20">
+          <>
+            <div onClick={() => setSelectedNode(null)} className="fixed inset-0 z-20 bg-slate-900/20 backdrop-blur-xs sm:hidden" />
+            <div className="w-full sm:w-[400px] bg-white border-l border-slate-200 shadow-2xl flex flex-col z-30 fixed sm:absolute inset-y-0 right-0 max-h-screen overflow-y-auto">
               <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
                 <h3 className="text-sm font-black uppercase tracking-widest">Edit Step</h3>
-                <button onClick={() => setSelectedNode(null)}><X size={20} /></button>
+                <button onClick={() => setSelectedNode(null)} className="text-slate-400 hover:text-slate-900"><X size={20} /></button>
               </div>
-              <div className="p-8">
+              <div className="p-6 sm:p-8 flex-1 overflow-y-auto">
                 <MessageForm key={selectedNode.id} data={selectedNode.data} type={selectedNode.type} onSave={(d) => updateNodeData(selectedNode.id, d)} />
               </div>
             </div>
-          )}
+          </>
+        )}
       </div>
     </div>
   );
@@ -613,8 +725,13 @@ const SidebarCategory = ({ title, icon: Icon, expanded, children }) => (
   </div>
 );
 
-const SidebarItem = ({ icon: Icon, label, onDragStart, color = "slate" }) => (
-  <div draggable={!!onDragStart} onDragStart={onDragStart} className="w-full p-4 pl-12 flex items-center gap-4 group cursor-grab active:cursor-grabbing hover:bg-slate-50 transition-all">
+const SidebarItem = ({ icon: Icon, label, onDragStart, onClick, color = "slate" }) => (
+  <div 
+    draggable={!!onDragStart} 
+    onDragStart={onDragStart} 
+    onClick={onClick}
+    className="w-full p-4 pl-12 flex items-center gap-4 group cursor-grab active:cursor-grabbing hover:bg-slate-50 transition-all cursor-pointer"
+  >
     <Icon size={16} className={cn("text-slate-400 group-hover:text-emerald-600")} />
     <span className="text-[11px] font-bold text-slate-500 group-hover:text-slate-900 uppercase tracking-widest">{label}</span>
   </div>

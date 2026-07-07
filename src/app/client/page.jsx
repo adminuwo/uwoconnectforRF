@@ -11,18 +11,41 @@ import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { cn } from '@/lib/utils';
 const ClientOverview = () => {
   const [loading, setLoading] = useState(true);
+  const [statsData, setStatsData] = useState({
+    totalConversations: 0,
+    automationRuns: 0,
+    activeUsers: 0,
+    avgResponse: '14s'
+  });
   const router = useRouter();
 
   useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 1000);
-    return () => clearTimeout(timer);
+    const fetchStats = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const res = await axios.get(
+          `${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/client/stats`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          }
+        );
+        setStatsData(res.data);
+      } catch (err) {
+        console.error("Error fetching stats:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchStats();
   }, []);
 
   const stats = [
-    { name: 'Total Conversations', value: '2,845', icon: MessageSquare, trend: '+12.5%', trendUp: true, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-    { name: 'Automation Runs', value: '14,208', icon: Zap, trend: '+8.2%', trendUp: true, color: 'text-green-600', bg: 'bg-green-50' },
-    { name: 'Active Users', value: '892', icon: Users, trend: '-2.4%', trendUp: false, color: 'text-teal-600', bg: 'bg-teal-50' },
-    { name: 'Avg. Response', value: '14s', icon: Clock, trend: 'Fastest', trendUp: true, color: 'text-emerald-700', bg: 'bg-emerald-100/50' },
+    { name: 'Total Conversations', value: statsData.totalConversations.toLocaleString(), icon: MessageSquare, trend: '+12.5%', trendUp: true, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+    { name: 'Automation Runs', value: statsData.automationRuns.toLocaleString(), icon: Zap, trend: '+8.2%', trendUp: true, color: 'text-green-600', bg: 'bg-green-50' },
+    { name: 'Active Users', value: statsData.activeUsers.toLocaleString(), icon: Users, trend: '-2.4%', trendUp: false, color: 'text-teal-600', bg: 'bg-teal-50' },
+    { name: 'Avg. Response', value: statsData.avgResponse, icon: Clock, trend: 'Fastest', trendUp: true, color: 'text-emerald-700', bg: 'bg-emerald-100/50' },
   ];
 
   const quickActions = [
@@ -43,18 +66,19 @@ const ClientOverview = () => {
 
   return (
     <DashboardLayout role="CLIENT">
-      <div className="max-w-7xl mx-auto pb-20 px-8">
+      <div className="max-w-7xl mx-auto pb-20 px-2 sm:px-4 md:px-0">
         
         {/* Welcome Section */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between mb-16">
+        <div data-tour="dashboard-welcome" className="flex flex-col sm:flex-row sm:items-center justify-between mb-10 sm:mb-16">
           <div>
-            <h1 className="text-4xl font-black text-slate-900 tracking-tight mb-3">Welcome, Devansh</h1>
-            <p className="text-slate-500 font-medium italic">Your automation command center is running smoothly.</p>
+            <h1 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight mb-3">Welcome, Devansh</h1>
+            <p className="text-slate-500 font-medium italic text-xs sm:text-sm">Your automation command center is running smoothly.</p>
           </div>
-          <div className="mt-8 md:mt-0 flex items-center gap-4">
+          <div className="mt-6 sm:mt-0 flex items-center gap-4">
             <button 
+              data-tour="dashboard-launch-btn"
               onClick={() => router.push('/client/workflows')}
-              className="btn-vibrant flex items-center gap-3"
+              className="btn-vibrant flex items-center gap-3 w-full sm:w-auto justify-center"
             >
               <Plus size={18} />
               Launch New Flow
@@ -63,11 +87,11 @@ const ClientOverview = () => {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
+        <div data-tour="dashboard-stats" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-8 mb-10 sm:mb-16">
           {stats.map((stat, i) => (
             <div 
               key={stat.name}
-              className="glass-panel p-8 relative overflow-hidden group"
+              className="glass-panel p-6 sm:p-8 relative overflow-hidden group"
             >
               <div className="absolute -right-6 -top-6 w-24 h-24 bg-gradient-to-br from-white/40 to-transparent rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700" />
               <div className={cn("w-14 h-14 rounded-2xl flex items-center justify-center mb-6 transition-transform duration-500 shadow-lg", stat.bg, stat.color, stat.bg.replace('bg-', 'shadow-').replace('50', '200/50'))}>
@@ -84,16 +108,16 @@ const ClientOverview = () => {
           ))}
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-12">
           {/* Main Activity / Graph Area */}
-          <div className="lg:col-span-2 space-y-12">
-            <div className="glass-panel premium-shadow p-10 relative overflow-hidden">
-              <div className="flex items-center justify-between mb-10">
+          <div className="lg:col-span-2 space-y-6 lg:space-y-12">
+            <div className="glass-panel premium-shadow p-4 sm:p-10 relative overflow-hidden">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-10 gap-4">
                 <div>
                   <h3 className="text-xl font-bold text-slate-900">Automation Performance</h3>
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1 italic">Last 30 Days Growth</p>
                 </div>
-                <button className="flex items-center gap-2 text-xs font-bold text-emerald-600 bg-emerald-50 px-4 py-2 rounded-xl">
+                <button className="flex items-center gap-2 text-xs font-bold text-emerald-600 bg-emerald-50 px-4 py-2 rounded-xl self-start sm:self-auto">
                   Monthly Report <ArrowUpRight size={14} />
                 </button>
               </div>
@@ -101,9 +125,9 @@ const ClientOverview = () => {
               {/* Mock Graph Visualization */}
               <div className="h-64 flex items-end gap-2 px-2">
                 {[40, 60, 45, 90, 65, 80, 50, 85, 100, 75, 95, 110].map((h, i) => (
-                  <div key={i} className="flex-1 flex flex-col items-center group">
+                  <div key={i} className="flex-1 flex flex-col items-center group h-full justify-end">
                     <div
-                      animate={{ height: `${h}%` }}
+                      style={{ height: `${h}%` }}
                       className={cn("w-full rounded-t-xl transition-all group-hover:bg-[#059669]", i === 11 ? "bg-[#059669]" : "bg-slate-100")} 
                     />
                   </div>
@@ -130,9 +154,9 @@ const ClientOverview = () => {
           </div>
 
           {/* Sidebar / Live Feed Area */}
-          <div className="space-y-10">
+          <div className="space-y-6 lg:space-y-10">
             {/* Status Section */}
-            <div className="bg-gradient-to-br from-[#f0fdf4] to-white rounded-[48px] p-10 text-slate-800 premium-shadow relative overflow-hidden border border-emerald-100">
+            <div className="bg-gradient-to-br from-[#f0fdf4] to-white rounded-[32px] sm:rounded-[48px] p-6 sm:p-10 text-slate-800 premium-shadow relative overflow-hidden border border-emerald-100">
               <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none" />
               <h3 className="text-lg font-bold mb-8 flex items-center gap-3 text-slate-900">
                 <Activity size={20} className="text-emerald-600" /> System Live

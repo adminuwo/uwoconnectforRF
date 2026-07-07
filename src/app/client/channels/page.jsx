@@ -137,7 +137,7 @@ const ClientChannelsPage = () => {
 
   return (
     <DashboardLayout role="CLIENT">
-      <div className="max-w-4xl mx-auto pb-20 px-4 relative">
+      <div className="max-w-4xl mx-auto pb-20 px-2 sm:px-4 md:px-0 relative">
         {/* Success/Error Toast */}
         {toast && (
           <div className="fixed top-6 right-6 z-[120] flex items-center gap-3 px-5 py-4 rounded-xl shadow-xl font-bold text-xs bg-emerald-50 border border-emerald-100 text-emerald-800 animate-in fade-in slide-in-from-top-4 duration-300">
@@ -154,12 +154,12 @@ const ClientChannelsPage = () => {
         {loading ? (
           <div className="flex justify-center py-24"><Loader2 className="animate-spin text-[#16A34A]" size={40} /></div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8">
             {channels.map((ch) => {
               // Connected WhatsApp Layout
               if (ch.name === 'WhatsApp' && ch.connected) {
                 return (
-                  <div key={ch.name} className="bg-white rounded-[16px] border border-slate-200/80 p-8 flex flex-col justify-between transition-all duration-300 hover:shadow-xl hover:shadow-slate-100 relative overflow-hidden group min-h-[380px]">
+                  <div key={ch.name} className="bg-white rounded-[24px] border border-slate-200/80 p-6 sm:p-8 flex flex-col justify-between transition-all duration-300 hover:shadow-xl hover:shadow-slate-100 relative overflow-hidden group min-h-[340px] sm:min-h-[380px] max-w-sm mx-auto w-full">
                     <div className="space-y-6">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
@@ -217,7 +217,7 @@ const ClientChannelsPage = () => {
               // Connected Facebook Layout
               if (ch.name === 'Facebook' && ch.connected) {
                 return (
-                  <div key={ch.name} className="bg-white rounded-[16px] border border-slate-200/80 p-8 flex flex-col justify-between transition-all duration-300 hover:shadow-xl hover:shadow-slate-100 relative overflow-hidden group min-h-[380px]">
+                  <div key={ch.name} className="bg-white rounded-[24px] border border-slate-200/80 p-6 sm:p-8 flex flex-col justify-between transition-all duration-300 hover:shadow-xl hover:shadow-slate-100 relative overflow-hidden group min-h-[340px] sm:min-h-[380px] max-w-sm mx-auto w-full">
                     <div className="space-y-6">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
@@ -267,7 +267,7 @@ const ClientChannelsPage = () => {
               // Connected Instagram Layout
               if (ch.name === 'Instagram' && ch.connected) {
                 return (
-                  <div key={ch.name} className="bg-white rounded-[16px] border border-slate-200/80 p-8 flex flex-col justify-between transition-all duration-300 hover:shadow-xl hover:shadow-slate-100 relative overflow-hidden group min-h-[380px]">
+                  <div key={ch.name} className="bg-white rounded-[24px] border border-slate-200/80 p-6 sm:p-8 flex flex-col justify-between transition-all duration-300 hover:shadow-xl hover:shadow-slate-100 relative overflow-hidden group min-h-[340px] sm:min-h-[380px] max-w-sm mx-auto w-full">
                     <div className="space-y-6">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
@@ -317,7 +317,7 @@ const ClientChannelsPage = () => {
               // Standard layout for standard/unconnected channels
               return (
                 <div key={ch.name} className={cn(
-                  "bg-white rounded-[16px] border p-8 flex flex-col items-center text-center transition-all duration-300 group relative overflow-hidden min-h-[380px] justify-between",
+                  "bg-white rounded-[24px] border p-6 sm:p-8 flex flex-col items-center text-center transition-all duration-300 group relative overflow-hidden min-h-[340px] sm:min-h-[380px] justify-between max-w-sm mx-auto w-full",
                   ch.active 
                     ? "border-slate-200/80 hover:shadow-xl hover:shadow-slate-100" 
                     : "border-slate-100 opacity-50 grayscale bg-slate-50/30"

@@ -40,7 +40,7 @@ export default function Footer() {
         <div className="space-y-4">
           <h4 className="text-[10px] font-bold uppercase tracking-widest text-white">Legal</h4>
           <div className="flex flex-col gap-2.5 text-xs font-semibold text-[#8E99A8]">
-            <a href="/privacy" className="hover:text-white transition-colors">Privacy Policy</a>
+            <a href="https://uwo24.com/privacy-policy" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Privacy Policy</a>
             <a href="/terms" className="hover:text-white transition-colors">Terms of Service</a>
             <a href="#" className="hover:text-white transition-colors">GDPR Compliance</a>
           </div>

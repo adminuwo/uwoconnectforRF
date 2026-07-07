@@ -1,10 +1,12 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { User, Mail, Phone, Hash, CreditCard, Lock, Settings, Loader2, ShieldCheck, LogOut } from 'lucide-react';
+import { User, Mail, Phone, Hash, CreditCard, Lock, Settings, Loader2, ShieldCheck, LogOut, MapPin } from 'lucide-react';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import axios from 'axios';
+import { useTour } from '@/lib/TourContext';
 const ClientSettingsPage = () => {
+  const { resetTour } = useTour();
   const [client, setClient] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
@@ -68,26 +70,37 @@ const ClientSettingsPage = () => {
 
   return (
     <DashboardLayout role="CLIENT">
-      <div className="max-w-full mx-auto pb-20 px-8">
-        <div className="mb-12 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto pb-20 px-2 sm:px-4 md:px-0">
+        <div className="mb-8 flex items-center justify-between flex-wrap gap-4">
           <div>
             <h1 className="text-3xl font-bold text-slate-900 tracking-tight mb-2">Account Settings</h1>
             <p className="text-slate-500 font-medium italic">Manage your profile, integration and security.</p>
           </div>
-          {!isEditing ? (
-            <button onClick={() => setIsEditing(true)} className="px-6 py-3 bg-emerald-600 text-white rounded-2xl font-bold text-xs hover:bg-emerald-600 transition-all shadow-xl shadow-slate-100">
-              Edit Settings
+          <div className="flex items-center gap-3 flex-wrap w-full sm:w-auto">
+            {/* Restart Product Tour button */}
+            <button
+              onClick={resetTour}
+              className="flex items-center justify-center gap-2 px-5 py-3 bg-white border-2 border-emerald-200 text-emerald-700 rounded-2xl font-bold text-xs hover:bg-emerald-50 hover:border-emerald-400 transition-all shadow-sm group flex-1 sm:flex-initial text-center"
+              title="Replay the guided product tour"
+            >
+              <MapPin size={15} className="group-hover:animate-bounce" />
+              Restart Tour
             </button>
-          ) : (
-            <div className="flex items-center gap-3">
-              <button onClick={() => setIsEditing(false)} className="px-6 py-3 bg-slate-100 text-slate-600 rounded-2xl font-bold text-xs hover:bg-slate-200 transition-all">
-                Cancel
+            {!isEditing ? (
+              <button onClick={() => setIsEditing(true)} className="px-6 py-3 bg-emerald-600 text-white rounded-2xl font-bold text-xs hover:bg-emerald-700 transition-all shadow-xl shadow-emerald-100 flex-1 sm:flex-initial text-center">
+                Edit Settings
               </button>
-              <button onClick={handleUpdate} disabled={isSaving} className="px-6 py-3 bg-emerald-600 text-white rounded-2xl font-bold text-xs hover:bg-emerald-700 transition-all shadow-xl shadow-emerald-100 disabled:opacity-50 flex items-center gap-2">
-                {isSaving ? <Loader2 size={16} className="animate-spin" /> : 'Save Changes'}
-              </button>
-            </div>
-          )}
+            ) : (
+              <div className="flex items-center gap-3 flex-1 sm:flex-initial w-full sm:w-auto">
+                <button onClick={() => setIsEditing(false)} className="px-6 py-3 bg-slate-100 text-slate-600 rounded-2xl font-bold text-xs hover:bg-slate-200 transition-all flex-1 text-center">
+                  Cancel
+                </button>
+                <button onClick={handleUpdate} disabled={isSaving} className="px-6 py-3 bg-emerald-600 text-white rounded-2xl font-bold text-xs hover:bg-emerald-700 transition-all shadow-xl shadow-emerald-100 disabled:opacity-50 flex items-center justify-center gap-2 flex-1 text-center">
+                  {isSaving ? <Loader2 size={16} className="animate-spin" /> : 'Save'}
+                </button>
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="space-y-10">
@@ -96,39 +109,39 @@ const ClientSettingsPage = () => {
             <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-4 ml-1">Personal Details</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="flex items-center gap-4 p-5 bg-white border border-slate-100 rounded-3xl transition-all hover:border-emerald-100 group">
-                <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center transition-colors group-hover:bg-emerald-600 group-hover:text-white">
+                <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center transition-colors group-hover:bg-emerald-600 group-hover:text-white shrink-0">
                   <User size={22} strokeWidth={2} />
                 </div>
-                <div className="flex-1">
+                <div className="flex-1 min-w-0">
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Full Name</p>
                   {isEditing ? (
                     <input value={editData.name} onChange={e => setEditData({...editData, name: e.target.value})} className="w-full bg-slate-50 border-none p-0 focus:ring-0 font-semibold text-slate-900 text-base" />
                   ) : (
-                    <p className="text-base font-semibold text-slate-900 tracking-tight">{client?.name || user.username}</p>
+                    <p className="text-base font-semibold text-slate-900 tracking-tight truncate">{client?.name || user.username}</p>
                   )}
                 </div>
               </div>
 
               <div className="flex items-center gap-4 p-5 bg-white border border-slate-100 rounded-3xl transition-all opacity-60">
-                <div className="w-12 h-12 rounded-2xl bg-slate-50 text-slate-400 flex items-center justify-center">
+                <div className="w-12 h-12 rounded-2xl bg-slate-50 text-slate-400 flex items-center justify-center shrink-0">
                   <Mail size={22} strokeWidth={2} />
                 </div>
-                <div>
+                <div className="min-w-0">
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Email Address</p>
-                  <p className="text-base font-semibold text-slate-900 tracking-tight">{user.email || 'N/A'}</p>
+                  <p className="text-base font-semibold text-slate-900 tracking-tight truncate">{user.email || 'N/A'}</p>
                 </div>
               </div>
 
               <div className="flex items-center gap-4 p-5 bg-white border border-slate-100 rounded-3xl transition-all hover:border-emerald-100 group">
-                <div className="w-12 h-12 rounded-2xl bg-slate-50 text-slate-400 flex items-center justify-center transition-colors group-hover:bg-emerald-600 group-hover:text-white">
+                <div className="w-12 h-12 rounded-2xl bg-slate-50 text-slate-400 flex items-center justify-center transition-colors group-hover:bg-emerald-600 group-hover:text-white shrink-0">
                   <Phone size={22} strokeWidth={2} />
                 </div>
-                <div className="flex-1">
+                <div className="flex-1 min-w-0">
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Phone Number</p>
                   {isEditing ? (
                     <input value={editData.phone_number} onChange={e => setEditData({...editData, phone_number: e.target.value})} className="w-full bg-slate-50 border-none p-0 focus:ring-0 font-semibold text-slate-900 text-base" placeholder="e.g. +91 9876543210" />
                   ) : (
-                    <p className="text-base font-semibold text-slate-900 tracking-tight">{client?.phone_number || 'Not Linked'}</p>
+                    <p className="text-base font-semibold text-slate-900 tracking-tight truncate">{client?.phone_number || 'Not Linked'}</p>
                   )}
                 </div>
               </div>
@@ -138,8 +151,8 @@ const ClientSettingsPage = () => {
           {/* WhatsApp Integration Section */}
           <div className="space-y-1">
             <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-4 ml-1">WhatsApp Integration</h3>
-            <div className="bg-white border border-slate-100 rounded-[40px] p-8 space-y-8">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="bg-white border border-slate-100 rounded-[24px] sm:rounded-[32px] p-4 sm:p-8 space-y-6 sm:space-y-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
                 <div className="space-y-2">
                   <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Phone Number ID</label>
                   {isEditing ? (
@@ -190,7 +203,7 @@ const ClientSettingsPage = () => {
 
               <div className="space-y-2">
                 <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Webhook Verify Token</label>
-                <div className="flex gap-4">
+                <div className="flex flex-col sm:flex-row gap-4">
                   {isEditing ? (
                     <input 
                       value={editData.whatsapp_verify_token} 
@@ -209,7 +222,7 @@ const ClientSettingsPage = () => {
                       setEditData({...editData, whatsapp_verify_token: token});
                     }}
                     disabled={!isEditing}
-                    className="px-6 bg-slate-100 text-slate-600 rounded-2xl text-[10px] font-bold uppercase tracking-widest hover:bg-slate-200 transition-all disabled:opacity-0"
+                    className="px-6 py-4 bg-slate-100 text-slate-600 rounded-2xl text-[10px] font-bold uppercase tracking-widest hover:bg-slate-200 transition-all disabled:opacity-0"
                   >
                     Generate
                   </button>
@@ -236,20 +249,20 @@ const ClientSettingsPage = () => {
           {/* Subscription Section */}
           <div className="space-y-1">
             <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-4 ml-1">Plan & Billing</h3>
-            <div className="flex items-center justify-between p-5 bg-white border border-slate-100 rounded-3xl group">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 sm:p-5 bg-white border border-slate-100 rounded-3xl gap-4 group">
+              <div className="flex items-center gap-4 min-w-0">
+                <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
                   <CreditCard size={22} strokeWidth={2} />
                 </div>
-                <div>
-                  <div className="flex items-center gap-2">
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-2">
                     <p className="text-base font-semibold text-slate-900 tracking-tight">Pro Subscription</p>
                     <span className="px-2 py-0.5 bg-emerald-50 text-emerald-600 text-[10px] font-bold rounded-full border border-emerald-100 uppercase tracking-widest">Active</span>
                   </div>
                   <p className="text-xs text-slate-400 italic">Next billing on June 01, 2026</p>
                 </div>
               </div>
-              <button className="text-xs font-bold text-emerald-600 hover:text-slate-900 transition-colors uppercase tracking-widest px-4 py-2 hover:bg-slate-50 rounded-xl">
+              <button className="text-xs font-bold text-emerald-600 hover:text-slate-900 transition-colors uppercase tracking-widest px-4 py-2 hover:bg-slate-50 rounded-xl w-full sm:w-auto text-center">
                 Manage
               </button>
             </div>
@@ -258,18 +271,18 @@ const ClientSettingsPage = () => {
           {/* Security Actions */}
           <div className="space-y-1">
             <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-4 ml-1">Security & Access</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <button onClick={() => setIsPasswordModalOpen(true)} className="flex items-center gap-4 p-5 bg-white border border-slate-100 rounded-3xl hover:border-emerald-100 transition-all group">
-                <div className="w-10 h-10 rounded-xl bg-slate-50 text-slate-400 flex items-center justify-center transition-colors group-hover:bg-emerald-600 group-hover:text-white">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <button onClick={() => setIsPasswordModalOpen(true)} className="flex items-center gap-4 p-5 bg-white border border-slate-100 rounded-3xl hover:border-emerald-100 transition-all group text-left">
+                <div className="w-10 h-10 rounded-xl bg-slate-50 text-slate-400 flex items-center justify-center transition-colors group-hover:bg-emerald-600 group-hover:text-white shrink-0">
                   <Lock size={18} strokeWidth={2} />
                 </div>
                 <span className="text-sm font-semibold text-slate-900">Change Password</span>
               </button>
               <button 
                 onClick={() => { localStorage.clear(); window.location.href = '/auth/login'; }}
-                className="flex items-center gap-4 p-5 bg-white border border-slate-100 rounded-3xl hover:border-red-100 transition-all group"
+                className="flex items-center gap-4 p-5 bg-white border border-slate-100 rounded-3xl hover:border-red-100 transition-all group text-left"
               >
-                <div className="w-10 h-10 rounded-xl bg-red-50 text-red-500 flex items-center justify-center transition-colors group-hover:bg-red-600 group-hover:text-white">
+                <div className="w-10 h-10 rounded-xl bg-red-50 text-red-500 flex items-center justify-center transition-colors group-hover:bg-red-600 group-hover:text-white shrink-0">
                   <LogOut size={18} strokeWidth={2} />
                 </div>
                 <span className="text-sm font-semibold text-slate-900">Sign Out Account</span>
@@ -283,7 +296,7 @@ const ClientSettingsPage = () => {
           {isPasswordModalOpen && (
             <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
               <div onClick={() => setIsPasswordModalOpen(false)} className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" />
-              <div className="relative bg-white w-full max-w-md rounded-[40px] shadow-2xl p-10">
+              <div className="relative bg-white w-full max-w-md rounded-[28px] sm:rounded-[32px] shadow-2xl p-6 sm:p-10 max-h-[90vh] overflow-y-auto border border-slate-200">
                 <div className="mb-8">
                   <h2 className="text-xl font-bold text-slate-900 mb-2">Update Password</h2>
                   <p className="text-sm text-slate-400 italic font-medium">Ensure your account is using a strong password.</p>
@@ -291,13 +304,13 @@ const ClientSettingsPage = () => {
                 <div className="space-y-5">
                   <div>
                     <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block ml-1">New Password</label>
-                    <input type="password" placeholder="••••••••" className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-4 outline-none focus:border-emerald-500 transition-all font-semibold" />
+                    <input type="password" placeholder="••••••••" className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-4 outline-none focus:border-emerald-500 transition-all font-semibold text-sm text-slate-800" />
                   </div>
                   <div>
                     <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block ml-1">Confirm Password</label>
-                    <input type="password" placeholder="••••••••" className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-4 outline-none focus:border-emerald-500 transition-all font-semibold" />
+                    <input type="password" placeholder="••••••••" className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-4 outline-none focus:border-emerald-500 transition-all font-semibold text-sm text-slate-800" />
                   </div>
-                  <button className="w-full py-4 bg-emerald-600 text-white rounded-2xl font-bold text-xs hover:bg-emerald-600 transition-all shadow-xl shadow-slate-100 mt-4">
+                  <button className="w-full py-4 bg-emerald-600 text-white rounded-2xl font-bold text-xs hover:bg-emerald-700 transition-all shadow-xl shadow-slate-100 mt-4">
                     Save New Password
                   </button>
                 </div>

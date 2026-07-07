@@ -47,6 +47,7 @@ const PlatformAssistant = () => {
     <>
       {/* Toggle Button */}
       <button 
+        data-tour="platform-assistant"
         onClick={() => setIsOpen(true)}
         className="fixed bottom-8 right-8 w-16 h-16 bg-[#059669] text-white rounded-full flex items-center justify-center shadow-2xl shadow-emerald-200/80 hover:scale-110 hover:bg-emerald-600 transition-all z-40 group"
       >

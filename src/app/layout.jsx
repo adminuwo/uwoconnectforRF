@@ -1,5 +1,6 @@
 import { Inter } from "next/font/google";
 import "./globals.css";
+import { TourProvider } from "@/lib/TourContext";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -18,7 +19,12 @@ export default function RootLayout({ children }) {
       className={`${inter.variable} h-full antialiased`}
       suppressHydrationWarning
     >
-      <body className="min-h-full flex flex-col font-sans" suppressHydrationWarning>{children}</body>
+      <body className="min-h-full flex flex-col font-sans overflow-x-hidden" suppressHydrationWarning>
+        <TourProvider>
+          {children}
+        </TourProvider>
+      </body>
     </html>
   );
 }
+

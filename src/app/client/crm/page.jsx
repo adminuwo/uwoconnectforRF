@@ -103,9 +103,9 @@ export default function CRMPage() {
 
   return (
     <DashboardLayout role="CLIENT">
-      <div className="bg-slate-50 font-sans flex flex-col h-[calc(100vh-140px)] w-full max-w-full rounded-[32px] overflow-hidden border border-slate-200 shadow-sm">
+      <div className="bg-slate-50 font-sans flex flex-col min-h-[calc(100vh-140px)] md:h-[calc(100vh-140px)] w-full max-w-full rounded-[24px] sm:rounded-[32px] overflow-hidden border border-slate-200 shadow-sm">
       {/* Header */}
-      <header className="bg-white border-b border-slate-200 px-8 py-6 flex items-center justify-between shrink-0">
+      <header className="bg-white border-b border-slate-200 px-4 sm:px-8 py-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shrink-0">
         <div>
           <h1 className="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-3">
             <Users className="text-emerald-600" />
@@ -114,7 +114,7 @@ export default function CRMPage() {
           <p className="text-sm text-slate-500 mt-1 font-medium">Manage your AI-captured leads and sales process.</p>
         </div>
         
-        <div className="flex items-center gap-4">
+        <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
           <div className="flex items-center bg-slate-100/80 p-1 rounded-xl border border-slate-200/60 shadow-inner">
             <button 
               onClick={() => setViewMode('kanban')}
@@ -132,20 +132,20 @@ export default function CRMPage() {
             </button>
           </div>
 
-          <div className="relative">
+          <div className="relative flex-1 sm:flex-none">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
             <input 
               type="text" 
               placeholder="Search leads..." 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 pr-4 py-2 bg-slate-100 border-transparent focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-blue-200 rounded-xl outline-none transition-all w-64 text-sm font-medium"
+              className="pl-10 pr-4 py-2 bg-slate-100 border-transparent focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-blue-200 rounded-xl outline-none transition-all w-full sm:w-64 text-sm font-medium"
             />
           </div>
           
           <button 
             onClick={exportToCSV}
-            className="flex items-center gap-2 bg-emerald-600 text-white px-4 py-2 rounded-xl text-sm font-bold shadow-md shadow-slate-200 hover:bg-emerald-700 transition-all"
+            className="flex items-center justify-center gap-2 bg-emerald-600 text-white px-4 py-2 rounded-xl text-sm font-bold shadow-md shadow-slate-200 hover:bg-emerald-700 transition-all w-full sm:w-auto"
           >
             <Download size={16} />
             Export to Excel
@@ -154,10 +154,10 @@ export default function CRMPage() {
       </header>
 
       {/* Main Content Area */}
-      <main className="flex-1 overflow-x-auto w-full min-w-0 p-8 custom-scrollbar">
+      <main className="flex-1 overflow-x-auto w-full min-w-0 p-4 sm:p-8 custom-scrollbar">
         {loading ? (
-          <div className="flex items-center justify-center h-full">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <div className="flex items-center justify-center h-full min-h-[200px]">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600"></div>
           </div>
         ) : viewMode === 'sheet' ? (
           <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden flex flex-col h-full">

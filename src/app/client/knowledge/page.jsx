@@ -145,7 +145,7 @@ export default function KnowledgeBasePage() {
 
   return (
     <DashboardLayout role="CLIENT">
-      <div className="max-w-5xl mx-auto pb-20 px-8">
+      <div className="max-w-5xl mx-auto pb-20 px-2 sm:px-4 md:px-0">
 
         {/* Toast */}
         
@@ -163,62 +163,64 @@ export default function KnowledgeBasePage() {
         
 
         {/* Header */}
-        <div className="mb-10 flex items-start justify-between">
-          <div>
+        <div className="mb-10 flex flex-col md:flex-row items-start justify-between gap-4">
+          <div className="max-w-2xl">
             <div className="flex items-center gap-3 mb-2">
-              <div className="w-10 h-10 bg-gradient-to-br from-violet-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg shadow-purple-200">
+              <div className="w-10 h-10 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-100 shrink-0">
                 <Brain className="text-white" size={20} />
               </div>
               <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Knowledge Base</h1>
             </div>
-            <p className="text-slate-500 font-medium italic ml-1">
+            <p className="text-slate-500 font-medium italic text-xs sm:text-sm">
               Upload your business documents — AI will answer customers based only on these files.
             </p>
           </div>
 
           {/* AI Toggle */}
-          <div className="flex items-center gap-4 bg-white border border-slate-100 rounded-2xl px-6 py-4 shadow-sm">
+          <div className="flex items-center justify-between md:justify-start gap-4 bg-white border border-slate-100 rounded-2xl px-6 py-4 shadow-sm w-full md:w-auto shrink-0">
             <div className="flex items-center gap-2">
-              <Zap size={16} className={aiEnabled ? 'text-purple-600' : 'text-slate-300'} />
+              <Zap size={16} className={aiEnabled ? 'text-emerald-600' : 'text-slate-300'} />
               <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">AI Reply</span>
             </div>
-            <button
-              onClick={handleToggleAI}
-              disabled={togglingAI}
-              className={cn(
-                'w-12 h-6 rounded-full p-1 transition-all relative',
-                aiEnabled ? 'bg-purple-600' : 'bg-slate-200'
-              )}
-            >
-              <div className={cn(
-                'w-4 h-4 bg-white rounded-full transition-all transform shadow-sm',
-                aiEnabled ? 'translate-x-6' : 'translate-x-0'
-              )} />
-            </button>
-            <span className={cn(
-              'text-[10px] font-bold uppercase tracking-widest',
-              aiEnabled ? 'text-purple-600' : 'text-slate-300'
-            )}>
-              {aiEnabled ? 'ON' : 'OFF'}
-            </span>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleToggleAI}
+                disabled={togglingAI}
+                className={cn(
+                  'w-12 h-6 rounded-full p-1 transition-all relative shrink-0',
+                  aiEnabled ? 'bg-emerald-600' : 'bg-slate-200'
+                )}
+              >
+                <div className={cn(
+                  'w-4 h-4 bg-white rounded-full transition-all transform shadow-sm',
+                  aiEnabled ? 'translate-x-6' : 'translate-x-0'
+                )} />
+              </button>
+              <span className={cn(
+                'text-[10px] font-bold uppercase tracking-widest w-8 text-right',
+                aiEnabled ? 'text-emerald-600' : 'text-slate-300'
+              )}>
+                {aiEnabled ? 'ON' : 'OFF'}
+              </span>
+            </div>
           </div>
         </div>
 
         {/* How it works banner */}
-        <div className="mb-8 bg-gradient-to-r from-violet-50 to-purple-50 border border-purple-100 rounded-[28px] p-6 flex items-start gap-4">
-          <BookOpen size={20} className="text-purple-500 mt-0.5 flex-shrink-0" />
+        <div className="mb-8 bg-gradient-to-r from-emerald-50/50 to-emerald-50/10 border border-emerald-100 rounded-[24px] sm:rounded-[28px] p-5 sm:p-6 flex items-start gap-4">
+          <BookOpen size={20} className="text-emerald-600 mt-0.5 flex-shrink-0" />
           <div>
-            <p className="text-xs font-bold text-purple-700 uppercase tracking-widest mb-1">How It Works</p>
-            <p className="text-sm text-slate-600 font-medium leading-relaxed">
-              <span className="font-bold">1.</span> Upload PDF/DOCX/TXT files with your business info (product catalog, FAQ, pricing, policies).&nbsp;
-              <span className="font-bold">2.</span> Documents are <span className="font-bold text-purple-700">chunked &amp; embedded</span> using OpenAI for intelligent search.&nbsp;
-              <span className="font-bold">3.</span> When a customer messages on WhatsApp, AI finds the most relevant chunks and replies <span className="font-bold text-purple-700">only from your documents</span>.
+            <p className="text-xs font-bold text-emerald-700 uppercase tracking-widest mb-1">How It Works</p>
+            <p className="text-xs sm:text-sm text-slate-600 font-medium leading-relaxed">
+              <span className="font-bold">1.</span> Upload PDF/DOCX/TXT files with your business info.&nbsp;
+              <span className="font-bold">2.</span> Documents are <span className="font-bold text-emerald-700">chunked &amp; embedded</span> using OpenAI.&nbsp;
+              <span className="font-bold">3.</span> AI replies <span className="font-bold text-emerald-700">only from your documents</span>.
             </p>
           </div>
         </div>
 
         {/* Upload Section */}
-        <div className="bg-white border border-slate-100 rounded-[32px] p-8 mb-8 shadow-sm">
+        <div className="bg-white border border-slate-100 rounded-[24px] sm:rounded-[32px] p-4 sm:p-8 mb-8 shadow-sm">
           <h2 className="text-base font-bold text-slate-900 tracking-tight mb-6 flex items-center gap-2">
             <Upload size={16} className="text-slate-400" /> Upload New Document
           </h2>
@@ -230,10 +232,10 @@ export default function KnowledgeBasePage() {
               onDrop={handleDrop}
               onClick={() => fileInputRef.current?.click()}
               className={cn(
-                'border-2 border-dashed rounded-[24px] p-12 text-center cursor-pointer transition-all',
+                'border-2 border-dashed rounded-[24px] p-6 sm:p-12 text-center cursor-pointer transition-all',
                 dragOver
-                  ? 'border-purple-400 bg-purple-50'
-                  : 'border-slate-200 hover:border-purple-300 hover:bg-purple-50/30'
+                  ? 'border-emerald-400 bg-emerald-50'
+                  : 'border-slate-200 hover:border-emerald-300 hover:bg-emerald-50/30'
               )}
             >
               <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
@@ -255,7 +257,7 @@ export default function KnowledgeBasePage() {
               className="space-y-4"
             >
               {/* File preview card */}
-              <div className="flex items-center gap-4 p-4 bg-purple-50 rounded-2xl border border-purple-100">
+              <div className="flex items-center gap-4 p-4 bg-emerald-50/50 rounded-2xl border border-emerald-100">
                 <div className={cn('w-12 h-12 rounded-xl flex items-center justify-center text-xs font-black', fileIcon(selectedFile.name.split('.').pop()).bg, fileIcon(selectedFile.name.split('.').pop()).text)}>
                   {fileIcon(selectedFile.name.split('.').pop()).label}
                 </div>
@@ -277,7 +279,7 @@ export default function KnowledgeBasePage() {
                   value={uploadTitle}
                   onChange={(e) => setUploadTitle(e.target.value)}
                   placeholder="e.g. Product Catalog 2024"
-                  className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-4 outline-none focus:border-purple-500 transition-all font-semibold text-sm"
+                  className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-4 outline-none focus:border-emerald-500 transition-all font-semibold text-sm"
                 />
               </div>
 
@@ -291,7 +293,7 @@ export default function KnowledgeBasePage() {
                 <button
                   onClick={handleUpload}
                   disabled={uploading}
-                  className="flex-1 py-4 bg-purple-600 text-white rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-purple-700 transition-all shadow-xl shadow-purple-100 flex items-center justify-center gap-2 disabled:opacity-60"
+                  className="flex-1 py-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-bold text-xs uppercase tracking-widest transition-all shadow-xl shadow-emerald-100 flex items-center justify-center gap-2 disabled:opacity-60"
                 >
                   {uploading ? (
                     <><Loader2 size={16} className="animate-spin" /> Embedding Document...</>
@@ -305,8 +307,8 @@ export default function KnowledgeBasePage() {
         </div>
 
         {/* Documents List */}
-        <div className="bg-white border border-slate-100 rounded-[32px] overflow-hidden shadow-sm">
-          <div className="px-8 py-6 border-b border-slate-50 flex items-center justify-between">
+        <div className="bg-white border border-slate-100 rounded-[24px] sm:rounded-[32px] overflow-hidden shadow-sm">
+          <div className="px-4 sm:px-8 py-6 border-b border-slate-50 flex items-center justify-between">
             <h2 className="text-base font-bold text-slate-900 tracking-tight flex items-center gap-2">
               <File size={16} className="text-slate-400" />
               Uploaded Documents
@@ -315,7 +317,7 @@ export default function KnowledgeBasePage() {
               </span>
             </h2>
             {docs.length > 0 && (
-              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest italic">
+              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest italic hidden sm:block">
                 Combined context for AI
               </p>
             )}
@@ -323,7 +325,7 @@ export default function KnowledgeBasePage() {
 
           {loading ? (
             <div className="py-20 flex items-center justify-center">
-              <Loader2 className="animate-spin text-purple-500" size={28} />
+              <Loader2 className="animate-spin text-emerald-600" size={28} />
             </div>
           ) : docs.length === 0 ? (
             <div className="py-20 text-center">
@@ -340,50 +342,52 @@ export default function KnowledgeBasePage() {
                 return (
                   <div
                     key={doc.id}
-                    className="flex items-center gap-5 px-8 py-5 hover:bg-slate-50/50 transition-colors group"
+                    className="flex flex-col sm:flex-row sm:items-center gap-4 px-4 sm:px-8 py-5 hover:bg-slate-50/50 transition-colors group"
                   >
-                    {/* File type badge */}
-                    <div className={cn('w-11 h-11 rounded-xl flex items-center justify-center text-[10px] font-black flex-shrink-0', icon.bg, icon.text)}>
-                      {icon.label}
-                    </div>
+                    <div className="flex items-center gap-4 flex-1 min-w-0">
+                      {/* File type badge */}
+                      <div className={cn('w-11 h-11 rounded-xl flex items-center justify-center text-[10px] font-black flex-shrink-0', icon.bg, icon.text)}>
+                        {icon.label}
+                      </div>
 
-                    {/* Info */}
-                    <div className="flex-1 min-w-0">
-                      <p className="font-bold text-slate-900 text-sm truncate">{doc.title}</p>
-                      <div className="flex items-center gap-3 mt-0.5">
-                        <span className="text-[11px] text-slate-400 font-medium">{formatBytes(doc.file_size)}</span>
-                        <span className="text-slate-200">·</span>
-                        <span className="text-[11px] text-slate-400 font-medium">{formatDate(doc.created_at)}</span>
-                        {doc.chunks > 0 && (
-                          <>
-                            <span className="text-slate-200">·</span>
-                            <span className="text-[11px] text-slate-400 font-medium">{doc.chunks} chunks</span>
-                          </>
-                        )}
-                        {doc.fully_embedded ? (
-                          <>
-                            <span className="text-slate-200">·</span>
-                            <span className="flex items-center gap-1 text-[10px] font-bold text-emerald-500 uppercase tracking-widest">
-                              <CheckCircle size={10} /> Embedded
-                            </span>
-                          </>
-                        ) : doc.has_text ? (
-                          <>
-                            <span className="text-slate-200">·</span>
-                            <span className="flex items-center gap-1 text-[10px] font-bold text-amber-500 uppercase tracking-widest">
-                              <AlertCircle size={10} /> Partial
-                            </span>
-                          </>
-                        ) : null}
+                      {/* Info */}
+                      <div className="flex-1 min-w-0">
+                        <p className="font-bold text-slate-900 text-sm truncate">{doc.title}</p>
+                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-0.5">
+                          <span className="text-[11px] text-slate-400 font-medium">{formatBytes(doc.file_size)}</span>
+                          <span className="text-slate-200 hidden sm:inline">·</span>
+                          <span className="text-[11px] text-slate-400 font-medium">{formatDate(doc.created_at)}</span>
+                          {doc.chunks > 0 && (
+                            <>
+                              <span className="text-slate-200 hidden sm:inline">·</span>
+                              <span className="text-[11px] text-slate-400 font-medium">{doc.chunks} chunks</span>
+                            </>
+                          )}
+                          {doc.fully_embedded ? (
+                            <>
+                              <span className="text-slate-200 hidden sm:inline">·</span>
+                              <span className="flex items-center gap-1 text-[10px] font-bold text-emerald-500 uppercase tracking-widest">
+                                <CheckCircle size={10} /> Embedded
+                              </span>
+                            </>
+                          ) : doc.has_text ? (
+                            <>
+                              <span className="text-slate-200 hidden sm:inline">·</span>
+                              <span className="flex items-center gap-1 text-[10px] font-bold text-amber-500 uppercase tracking-widest">
+                                <AlertCircle size={10} /> Partial
+                              </span>
+                            </>
+                          ) : null}
+                        </div>
                       </div>
                     </div>
 
                     {/* Actions */}
-                    <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="flex items-center gap-2 justify-end opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                       {doc.has_text && (
                         <button
                           onClick={() => setPreviewDoc(doc)}
-                          className="p-2 text-slate-400 hover:text-purple-600 hover:bg-purple-50 rounded-xl transition-all"
+                          className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-xl transition-all"
                           title="Preview extracted text"
                         >
                           <Eye size={16} />
@@ -414,9 +418,9 @@ export default function KnowledgeBasePage() {
               className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
             />
             <div
-              className="relative bg-white w-full max-w-2xl max-h-[80vh] rounded-[40px] shadow-2xl flex flex-col"
+              className="relative bg-white w-full max-w-2xl max-h-[92vh] rounded-[24px] sm:rounded-[32px] shadow-2xl flex flex-col overflow-hidden border border-slate-200"
             >
-              <div className="flex items-center justify-between px-10 py-7 border-b border-slate-50">
+              <div className="flex items-center justify-between px-6 sm:px-10 py-6 sm:py-7 border-b border-slate-50">
                 <div>
                   <h2 className="text-lg font-bold text-slate-900 tracking-tight">{previewDoc.title}</h2>
                   <p className="text-xs text-slate-400 font-medium mt-0.5">Extracted Text Preview</p>
@@ -425,8 +429,8 @@ export default function KnowledgeBasePage() {
                   <X size={22} />
                 </button>
               </div>
-              <div className="overflow-y-auto flex-1 px-10 py-6">
-                <p className="text-sm text-slate-700 font-medium leading-relaxed whitespace-pre-wrap">
+              <div className="overflow-y-auto flex-1 px-6 sm:px-10 py-6">
+                <p className="text-sm text-slate-700 font-medium leading-relaxed whitespace-pre-wrap text-left">
                   {previewDoc.text_preview}
                 </p>
                 {previewDoc.text_preview?.endsWith('...') && (

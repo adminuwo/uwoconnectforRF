@@ -83,7 +83,7 @@ export default function Home() {
   };
 
   return (
-    <div className={`min-h-screen font-sans overflow-x-hidden relative selection:bg-[#10B981]/30 selection:text-white transition-colors duration-500 ${isDark ? 'bg-[#030712] text-white' : 'light bg-[#F3FBF7] text-[#064E3B]'}`}>
+    <div className={`min-h-screen font-sans overflow-x-hidden relative selection:bg-[#10B981]/30 selection:text-white transition-colors duration-500 ${isDark ? 'bg-[#030712] text-white' : 'light bg-[#F3FBF7] text-[#000000]'}`}>
       
       {/* Global Ambient Background Gradients for Dark Mode */}
       {isDark && (
@@ -97,7 +97,7 @@ export default function Home() {
       <header className={`sticky top-0 z-50 w-full backdrop-blur-[16px] saturate-[180%] border-b transition-colors duration-500 ${
         isDark 
           ? 'bg-[#030712]/75 border-white/[0.06] text-white' 
-          : 'bg-[#F3FBF7]/75 border-[#10B981]/15 text-[#064E3B]'
+          : 'bg-[#F3FBF7]/75 border-[#10B981]/15 text-[#000000]'
       }`}>
         <div className="w-full max-w-7xl mx-auto px-6 md:px-12 h-20 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3 group shrink-0">
@@ -107,7 +107,7 @@ export default function Home() {
                 <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
               </svg>
             </div>
-            <span className={`font-bold text-lg tracking-tight transition-colors duration-300 ${isDark ? 'text-white' : 'text-[#064E3B]'}`}>
+            <span className={`font-bold text-lg tracking-tight transition-colors duration-300 ${isDark ? 'text-white' : 'text-[#000000]'}`}>
               Meta Connect
             </span>
           </Link>
@@ -123,7 +123,7 @@ export default function Home() {
                   className={`relative px-4 py-1.5 text-sm font-medium transition-colors duration-300 rounded-full ${
                     isActive 
                       ? (isDark ? 'text-white' : 'text-white')
-                      : (isDark ? 'text-[#8E99A8] hover:text-white' : 'text-[#059669] hover:text-[#064E3B]')
+                      : (isDark ? 'text-[#8E99A8] hover:text-white' : 'text-[#059669] hover:text-[#000000]')
                   }`}
                 >
                   {isActive && (
@@ -145,7 +145,7 @@ export default function Home() {
               className={`p-2 transition-colors rounded-full ${
                 isDark 
                   ? 'text-[#8E99A8] hover:text-white hover:bg-white/5' 
-                  : 'text-[#059669] hover:text-[#064E3B] hover:bg-[#059669]/10'
+                  : 'text-[#059669] hover:text-[#000000] hover:bg-[#059669]/10'
               }`}
             >
               {isDark ? <Sun size={20} /> : <Moon size={20} />}
@@ -153,7 +153,7 @@ export default function Home() {
             <Link 
               href="/auth/login" 
               className={`text-sm font-medium transition-colors px-4 py-2 ${
-                isDark ? 'text-[#8E99A8] hover:text-white' : 'text-[#059669] hover:text-[#064E3B]'
+                isDark ? 'text-[#8E99A8] hover:text-white' : 'text-[#059669] hover:text-[#000000]'
               }`}
             >
               Login
@@ -183,7 +183,7 @@ export default function Home() {
               className={`md:hidden border-t backdrop-blur-[24px] px-6 py-6 flex flex-col gap-4 overflow-hidden ${
                 isDark 
                   ? 'bg-[#030712]/95 border-white/[0.06] text-white' 
-                  : 'bg-[#F3FBF7]/95 border-[#10B981]/15 text-[#064E3B]'
+                  : 'bg-[#F3FBF7]/95 border-[#10B981]/15 text-[#000000]'
               }`}
             >
               <div className="flex flex-col gap-2">
@@ -200,7 +200,7 @@ export default function Home() {
                       className={`px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 ${
                         isActive 
                           ? (isDark ? 'bg-white/10 text-white' : 'bg-[#059669]/10 text-[#059669]')
-                          : (isDark ? 'text-slate-400 hover:text-white hover:bg-white/5' : 'text-[#059669]/80 hover:text-[#064E3B] hover:bg-[#059669]/5')
+                          : (isDark ? 'text-slate-400 hover:text-white hover:bg-white/5' : 'text-[#059669]/80 hover:text-[#000000] hover:bg-[#059669]/5')
                       }`}
                     >
                       {item.name}

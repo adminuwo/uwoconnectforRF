@@ -70,8 +70,8 @@ export default function CreateCampaignModal({ isOpen, onClose, onCreated }) {
 
   return (
     <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
-        <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+      <div className="bg-white rounded-3xl w-full max-w-lg shadow-2xl overflow-y-auto max-h-[92vh] flex flex-col border border-slate-200">
+        <div className="px-4 sm:px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-blue-100 text-emerald-600 rounded-xl flex items-center justify-center">
               <Megaphone size={20} />
@@ -86,7 +86,7 @@ export default function CreateCampaignModal({ isOpen, onClose, onCreated }) {
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 overflow-y-auto space-y-6">
+        <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-6">
           <div>
             <label className="block text-sm font-bold text-slate-700 mb-2">Campaign Name</label>
             <input 

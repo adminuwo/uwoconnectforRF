@@ -17,10 +17,27 @@ import {
   Scale,
   Brain,
   Users,
-  Megaphone
+  Megaphone,
+  LifeBuoy,
+  Activity
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-const Sidebar = ({ role }) => {
+
+// Tour ID → sidebar link name mapping
+const TOUR_IDS = {
+  'Channels':       'sidebar-channels',
+  'Auto Replies':   'sidebar-automations',
+  'Workflows':      'sidebar-workflows',
+  'Leads (CRM)':    'sidebar-crm',
+  'Messages':       'sidebar-inbox',
+  'Broadcasts':     'sidebar-campaigns',
+  'Knowledge Base': 'sidebar-knowledge',
+  'Settings':       'sidebar-settings',
+  'Dashboard':      'sidebar-dashboard',
+  'Support':        'sidebar-support',
+};
+
+const Sidebar = ({ role, isOpen, onClose }) => {
   const pathname = usePathname();
 
   const adminLinks = [
@@ -29,8 +46,10 @@ const Sidebar = ({ role }) => {
     { name: 'Approvals', href: '/admin/approvals', icon: ShieldCheck },
     { name: 'Automations', href: '/admin/automations', icon: Zap },
     { name: 'Messages', href: '/admin/inbox', icon: MessageSquare },
+    { name: 'Audit Logs', href: '/admin/audit-logs', icon: Activity },
     { name: 'Policy', href: '/admin/settings/legal', icon: Scale },
     { name: 'Analytics', href: '/admin/stats', icon: GitBranch },
+    { name: 'Support', href: '/admin/support', icon: LifeBuoy },
   ];
 
   const clientLinks = [
@@ -43,6 +62,7 @@ const Sidebar = ({ role }) => {
     { name: 'Broadcasts', href: '/client/campaigns', icon: Megaphone },
     { name: 'Knowledge Base', href: '/client/knowledge', icon: Brain },
     { name: 'Settings', href: '/client/settings', icon: Settings },
+    { name: 'Support', href: '/client/support', icon: LifeBuoy },
   ];
 
 
@@ -53,8 +73,23 @@ const Sidebar = ({ role }) => {
     window.location.href = '/auth/login';
   };
 
+
+
   return (
-    <aside className="fixed left-0 top-0 h-screen w-64 bg-white border-r border-slate-100 flex flex-col z-40 font-sans">
+    <>
+      {isOpen && (
+        <div
+          className="fixed inset-0 bg-slate-900/40 z-[35] md:hidden"
+          onClick={onClose}
+        />
+      )}
+      <aside
+        data-tour="sidebar-nav"
+        className={cn(
+          "fixed left-0 top-0 h-screen w-64 bg-white border-r border-slate-100 flex-col z-40 font-sans transition-transform duration-300",
+          isOpen ? "flex translate-x-0" : "hidden md:flex -translate-x-full md:translate-x-0"
+        )}
+      >
       {/* Brand Header */}
       <div className="p-8 pb-4 flex items-center gap-3">
         <div className="w-10 h-10 bg-gradient-to-tr from-[#16A34A] to-[#059669] rounded-2xl flex items-center justify-center shadow-xl shadow-emerald-500/10 relative overflow-hidden group">
@@ -73,10 +108,12 @@ const Sidebar = ({ role }) => {
         {links.map((link) => {
           const isActive = pathname === link.href;
           const Icon = link.icon;
+          const tourId = TOUR_IDS[link.name];
           return (
             <Link
               key={link.href}
               href={link.href}
+              data-tour={tourId}
               className={cn(
                 "group flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all duration-300 relative overflow-hidden",
                 isActive
@@ -99,7 +136,10 @@ const Sidebar = ({ role }) => {
 
       {/* User Session Footer */}
       <div className="p-6">
+
+
         <button
+          data-tour="sidebar-logout"
           onClick={handleLogout}
           className="w-full flex items-center gap-3 px-4 py-3.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-2xl transition-all group font-bold mb-4"
         >
@@ -108,7 +148,7 @@ const Sidebar = ({ role }) => {
         </button>
 
         <div className="px-4 py-4 border-t border-slate-50 flex flex-col gap-2">
-          <Link href="/privacy" className="text-[9px] font-bold text-slate-300 uppercase tracking-widest hover:text-[#059669] transition-colors italic">Privacy Policy</Link>
+          <a href="https://uwo24.com/privacy-policy" target="_blank" rel="noopener noreferrer" className="text-[9px] font-bold text-slate-300 uppercase tracking-widest hover:text-[#059669] transition-colors italic">Privacy Policy</a>
           <Link href="/terms" className="text-[9px] font-bold text-slate-300 uppercase tracking-widest hover:text-[#059669] transition-colors italic">Terms of Service</Link>
         </div>
       </div>
@@ -119,6 +159,7 @@ const Sidebar = ({ role }) => {
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 20px; }
       `}</style>
     </aside>
+    </>
   );
 };
 

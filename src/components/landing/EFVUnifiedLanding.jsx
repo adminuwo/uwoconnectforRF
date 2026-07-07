@@ -74,7 +74,7 @@ export default function EFVUnifiedLanding() {
       <header className={`fixed top-0 left-0 right-0 z-50 backdrop-blur-[16px] saturate-[180%] border-b transition-colors duration-500 ${
         isDark 
           ? 'bg-[#030712]/75 border-white/[0.06] text-white' 
-          : 'bg-white/75 border-[#10B981]/15 text-[#064E3B]'
+          : 'bg-white/75 border-[#10B981]/15 text-[#000000]'
       }`}>
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
           {/* Logo */}
@@ -85,7 +85,7 @@ export default function EFVUnifiedLanding() {
                 <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
               </svg>
             </div>
-            <span className={`font-bold text-lg tracking-tight transition-colors duration-300 ${isDark ? 'text-white' : 'text-[#064E3B]'}`}>
+            <span className={`font-bold text-lg tracking-tight transition-colors duration-300 ${isDark ? 'text-white' : 'text-[#000000]'}`}>
               Meta Connect
             </span>
           </Link>
@@ -102,7 +102,7 @@ export default function EFVUnifiedLanding() {
                   className={`relative px-4 py-1.5 text-sm font-medium transition-colors duration-300 rounded-full ${
                     isActive 
                       ? (isDark ? 'text-white' : 'text-white')
-                      : (isDark ? 'text-[#8E99A8] hover:text-white' : 'text-[#059669] hover:text-[#064E3B]')
+                      : (isDark ? 'text-[#8E99A8] hover:text-white' : 'text-[#059669] hover:text-[#000000]')
                   }`}
                 >
                   {isActive && (
@@ -125,7 +125,7 @@ export default function EFVUnifiedLanding() {
               className={`p-2 transition-colors rounded-full ${
                 isDark 
                   ? 'text-[#8E99A8] hover:text-white hover:bg-white/5' 
-                  : 'text-[#059669] hover:text-[#064E3B] hover:bg-[#059669]/10'
+                  : 'text-[#059669] hover:text-[#000000] hover:bg-[#059669]/10'
               }`}
             >
               {isDark ? <Sun size={20} /> : <Moon size={20} />}
@@ -133,7 +133,7 @@ export default function EFVUnifiedLanding() {
             <Link 
               href="/auth/login" 
               className={`text-sm font-medium transition-colors px-4 py-2 ${
-                isDark ? 'text-[#8E99A8] hover:text-white' : 'text-[#059669] hover:text-[#064E3B]'
+                isDark ? 'text-[#8E99A8] hover:text-white' : 'text-[#059669] hover:text-[#000000]'
               }`}
             >
               Login
@@ -164,7 +164,7 @@ export default function EFVUnifiedLanding() {
               className={`md:hidden border-t backdrop-blur-[24px] px-6 py-6 flex flex-col gap-4 overflow-hidden ${
                 isDark 
                   ? 'bg-[#030712]/95 border-white/[0.06] text-white' 
-                  : 'bg-white/95 border-[#10B981]/15 text-[#064E3B]'
+                  : 'bg-white/95 border-[#10B981]/15 text-[#000000]'
               }`}
             >
               <div className="flex flex-col gap-2">
@@ -181,7 +181,7 @@ export default function EFVUnifiedLanding() {
                       className={`px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 ${
                         isActive 
                           ? (isDark ? 'bg-white/10 text-white' : 'bg-[#059669]/10 text-[#059669]')
-                          : (isDark ? 'text-slate-400 hover:text-white hover:bg-white/5' : 'text-[#059669]/80 hover:text-[#064E3B] hover:bg-[#059669]/5')
+                          : (isDark ? 'text-slate-400 hover:text-white hover:bg-white/5' : 'text-[#059669]/80 hover:text-[#000000] hover:bg-[#059669]/5')
                       }`}
                     >
                       {item.name}
@@ -542,8 +542,8 @@ export default function EFVUnifiedLanding() {
           <footer className="mt-24 pt-8 border-t border-white/[0.08] flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-500">
             <div>© 2026 EFV Unified. All rights reserved.</div>
             <div className="flex gap-6">
-              <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
-              <a href="#" className="hover:text-white transition-colors">Terms of Service</a>
+              <a href="https://uwo24.com/privacy-policy" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Privacy Policy</a>
+              <a href="/terms" className="hover:text-white transition-colors">Terms of Service</a>
             </div>
           </footer>
         </div>

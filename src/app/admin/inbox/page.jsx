@@ -39,8 +39,8 @@ const AdminInboxPage = () => {
 
   return (
     <DashboardLayout role="ADMIN">
-      <div className="max-w-7xl mx-auto pb-20">
-        <div className="flex items-center justify-between mb-10">
+      <div className="max-w-7xl mx-auto pb-20 px-2 sm:px-4 md:px-0">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-10 gap-4">
           <div>
             <h1 className="text-3xl font-black text-gray-900 tracking-tight flex items-center gap-3">
               <MessageSquare className="text-[#059669]" size={32} />
@@ -63,10 +63,10 @@ const AdminInboxPage = () => {
               className="w-full pl-12 pr-4 py-4 bg-white border border-gray-100 rounded-2xl outline-none focus:ring-4 focus:ring-emerald-50 transition-all font-medium"
             />
           </div>
-          <div className="flex bg-white p-1.5 rounded-2xl border border-gray-100 shadow-sm">
+          <div className="flex bg-white p-1.5 rounded-2xl border border-gray-100 shadow-sm overflow-x-auto no-scrollbar whitespace-nowrap max-w-full">
             {['ALL', 'INCOMING', 'OUTGOING', 'WHATSAPP'].map((f) => (
               <button key={f} onClick={() => setFilter(f)}
-                className={cn("px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all",
+                className={cn("px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all shrink-0",
                   filter === f ? "bg-gray-900 text-white shadow-lg" : "text-gray-400 hover:text-gray-600"
                 )}
               >{f}</button>
@@ -74,54 +74,56 @@ const AdminInboxPage = () => {
           </div>
         </div>
 
-        <div className="bg-white rounded-[40px] border border-gray-100 shadow-sm overflow-hidden">
+        <div className="bg-white rounded-2xl md:rounded-[40px] border border-gray-100 shadow-sm overflow-hidden">
+          <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-gray-50/50">
-                <th className="px-8 py-6 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">From</th>
-                <th className="px-8 py-6 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Client</th>
-                <th className="px-8 py-6 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Message</th>
-                <th className="px-8 py-6 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Channel</th>
-                <th className="px-8 py-6 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Type</th>
-                <th className="px-8 py-6 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Time</th>
+                <th className="px-3 sm:px-8 py-4 sm:py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">From</th>
+                <th className="px-3 sm:px-8 py-4 sm:py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] hidden sm:table-cell">Client</th>
+                <th className="px-3 sm:px-8 py-4 sm:py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Message</th>
+                <th className="px-3 sm:px-8 py-4 sm:py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] hidden sm:table-cell">Channel</th>
+                <th className="px-3 sm:px-8 py-4 sm:py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Type</th>
+                <th className="px-3 sm:px-8 py-4 sm:py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Time</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
               {loading ? (
-                <tr><td colSpan={6} className="px-8 py-20 text-center">
+                <tr><td colSpan={6} className="px-3 sm:px-8 py-20 text-center">
                   <Loader2 className="animate-spin text-[#059669] mx-auto" size={32} />
                 </td></tr>
               ) : filteredMessages.length === 0 ? (
-                <tr><td colSpan={6} className="px-8 py-20 text-center text-gray-400 font-medium italic">
+                <tr><td colSpan={6} className="px-3 sm:px-8 py-20 text-center text-gray-400 font-medium italic">
                   No messages found yet.
                 </td></tr>
               ) : filteredMessages.map((msg, i) => (
                 <tr key={msg._id || msg.id || i} className="hover:bg-gray-50/30 transition-colors">
-                  <td className="px-8 py-5 font-bold text-gray-900 text-sm">{msg.from_address || msg.from}</td>
-                  <td className="px-8 py-5 text-gray-500 font-medium text-sm">{msg.clientName || '-'}</td>
-                  <td className="px-8 py-5 max-w-[250px]">
-                    <p className="text-sm text-gray-700 truncate font-medium">{msg.body}</p>
+                  <td className="px-3 sm:px-8 py-4 sm:py-5 font-bold text-gray-900 text-xs sm:text-sm truncate max-w-[80px] sm:max-w-none">{msg.from_address || msg.from}</td>
+                  <td className="px-3 sm:px-8 py-4 sm:py-5 text-gray-500 font-medium text-xs sm:text-sm hidden sm:table-cell">{msg.clientName || '-'}</td>
+                  <td className="px-3 sm:px-8 py-4 sm:py-5 max-w-[120px] sm:max-w-[250px]">
+                    <p className="text-xs sm:text-sm text-gray-700 truncate font-medium">{msg.body}</p>
                   </td>
-                  <td className="px-8 py-5">
+                  <td className="px-3 sm:px-8 py-4 sm:py-5 hidden sm:table-cell">
                     <span className="px-2.5 py-1 rounded-lg text-[9px] font-black tracking-widest uppercase border bg-green-50 text-green-600 border-green-100">
                       {msg.channel || 'WHATSAPP'}
                     </span>
                   </td>
-                  <td className="px-8 py-5">
-                    <span className={cn("px-2.5 py-1 rounded-lg text-[9px] font-black tracking-widest uppercase border",
+                  <td className="px-3 sm:px-8 py-4 sm:py-5">
+                    <span className={cn("px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-lg text-[8px] sm:text-[9px] font-black tracking-widest uppercase border inline-block",
                       msg.message_type === 'INCOMING' ? "bg-emerald-50 text-[#059669] border-emerald-100" : "bg-teal-50 text-teal-600 border-teal-100"
                     )}>
-                      {msg.message_type || msg.type}
+                      {msg.message_type === 'INCOMING' ? 'IN' : 'OUT'}
                     </span>
                   </td>
-                  <td className="px-8 py-5">
+                  <td className="px-3 sm:px-8 py-4 sm:py-5">
                     <p className="text-[10px] font-black text-gray-900">{new Date(msg.created_at || msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
-                    <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">{new Date(msg.created_at || msg.createdAt).toLocaleDateString()}</p>
+                    <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest hidden sm:block">{new Date(msg.created_at || msg.createdAt).toLocaleDateString()}</p>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
+          </div>
         </div>
       </div>
     </DashboardLayout>

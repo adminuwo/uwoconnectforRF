@@ -11,33 +11,62 @@ import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { cn } from '@/lib/utils';
 const ClientInboxPage = () => {
   const [messages, setMessages] = useState([]);
+  const [contacts, setContacts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedConvoId, setSelectedConvoId] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [replyText, setReplyText] = useState('');
   const [isSending, setIsSending] = useState(false);
+  const [mobileShowChat, setMobileShowChat] = useState(false);
   const scrollRef = useRef(null);
+
   useEffect(() => {
-    const fetch = async () => {
+    const fetchData = async () => {
       try {
         const token = localStorage.getItem('token');
-        const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/messages/`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        setMessages(res.data);
-        if (res.data.length > 0 && !selectedConvoId) {
-          // Auto-select first unique sender
-          const firstSender = [...new Set(res.data.map(m => m.from_address))][0];
+        const [msgRes, contactRes] = await Promise.all([
+          axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/messages/`, {
+            headers: { Authorization: `Bearer ${token}` }
+          }),
+          axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/contacts/`, {
+            headers: { Authorization: `Bearer ${token}` }
+          })
+        ]);
+        setMessages(msgRes.data);
+        setContacts(contactRes.data);
+        if (msgRes.data.length > 0 && !selectedConvoId) {
+          const firstSender = [...new Set(msgRes.data.map(m => m.from_address))][0];
           setSelectedConvoId(firstSender);
         }
       } catch (err) {
-        console.warn('Failed to fetch messages');
+        console.warn('Failed to fetch messages and contacts');
       } finally {
         setLoading(false);
       }
     };
-    fetch();
+    fetchData();
   }, [selectedConvoId]);
+
+  const activeContact = contacts.find(
+    c => c.platform_id === selectedConvoId || c.phone_number === selectedConvoId
+  );
+
+  const handleToggleBot = async (contact) => {
+    if (!contact) return;
+    const targetState = !contact.bot_paused;
+    try {
+      const token = localStorage.getItem('token');
+      await axios.patch(
+        `${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/contacts/${contact.id}/`, 
+        { bot_paused: targetState }, 
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setContacts(prev => prev.map(c => c.id === contact.id ? { ...c, bot_paused: targetState } : c));
+    } catch (err) {
+      console.warn('Failed to toggle bot:', err);
+      alert('Failed to toggle bot');
+    }
+  };
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -115,31 +144,31 @@ const ClientInboxPage = () => {
 
   return (
     <DashboardLayout role="CLIENT">
-      <div className="h-[calc(100vh-180px)] flex flex-col">
+      <div className="h-[calc(100vh-140px)] md:h-[calc(100vh-180px)] flex flex-col">
         {/* Page Header (Optional, simplified) */}
-        <div className="mb-6 flex items-center justify-between px-2">
+        <div className="mb-3 md:mb-6 flex items-center justify-between px-2">
           <div>
-            <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Inbox</h1>
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Real-time Customer Support</p>
+            <h1 className="text-lg md:text-2xl font-bold text-slate-900 tracking-tight">Inbox</h1>
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1 hidden sm:block">Real-time Customer Support</p>
           </div>
           <div className="flex items-center gap-3">
-            <div className="flex -space-x-2">
+            <div className="flex -space-x-2 hidden sm:flex">
               {[1,2,3].map(i => (
                 <div key={i} className="w-8 h-8 rounded-full border-2 border-white bg-slate-100 flex items-center justify-center overflow-hidden">
                   <User size={14} className="text-slate-400" />
                 </div>
               ))}
             </div>
-            <span className="text-xs font-bold text-slate-400">+12 agents online</span>
+            <span className="text-xs font-bold text-slate-400 hidden sm:inline">+12 agents online</span>
           </div>
         </div>
 
         {/* Intercom Style Main Container */}
-        <div className="flex-1 flex bg-white rounded-[40px] border border-slate-100 shadow-[0_24px_48px_-12px_rgba(0,0,0,0.05)] overflow-hidden">
+        <div className="flex-1 flex bg-white rounded-2xl md:rounded-[40px] border border-slate-100 shadow-[0_24px_48px_-12px_rgba(0,0,0,0.05)] overflow-hidden">
           
           {/* Column 1: Conversation List */}
-          <aside className="w-96 border-r border-slate-50 flex flex-col bg-white shrink-0">
-            <div className="p-6 border-b border-slate-50 bg-slate-50/30">
+          <aside className={cn("w-full md:w-80 lg:w-96 border-r border-slate-50 flex flex-col bg-white md:shrink-0", mobileShowChat ? "hidden md:flex" : "flex")}>
+            <div className="p-3 md:p-6 border-b border-slate-50 bg-slate-50/30">
               <div className="relative">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={16} />
                 <input 
@@ -165,7 +194,7 @@ const ClientInboxPage = () => {
               ) : convoList.map((convo) => (
                 <button 
                   key={convo.id} 
-                  onClick={() => setSelectedConvoId(convo.id)}
+                  onClick={() => { setSelectedConvoId(convo.id); setMobileShowChat(true); }}
                   className={cn(
                     "w-full p-6 text-left border-b border-slate-50 transition-all flex gap-4 hover:bg-slate-50/50",
                     selectedConvoId === convo.id ? "bg-emerald-50/50 border-r-4 border-r-emerald-500" : ""
@@ -194,12 +223,15 @@ const ClientInboxPage = () => {
           </aside>
 
           {/* Column 2: Active Chat Area */}
-          <main className="flex-1 flex flex-col bg-white">
+          <main className={cn("flex-1 flex flex-col bg-white min-w-0", mobileShowChat ? "flex" : "hidden md:flex")}>
             {activeConvo ? (
               <>
                 {/* Chat Header */}
-                <header className="h-20 border-b border-slate-50 flex items-center justify-between px-8 bg-white/80 backdrop-blur-md sticky top-0 z-10">
-                  <div className="flex items-center gap-4">
+                <header className="h-16 md:h-20 border-b border-slate-50 flex items-center justify-between px-3 md:px-8 bg-white/80 backdrop-blur-md sticky top-0 z-10">
+                  <div className="flex items-center gap-2 md:gap-4">
+                    <button onClick={() => setMobileShowChat(false)} className="md:hidden p-1.5 text-slate-400 hover:text-slate-900 rounded-lg hover:bg-slate-50 transition-colors">
+                      <ArrowLeft size={20} />
+                    </button>
                     <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-400 font-bold">
                       {activeConvo.name[0].toUpperCase()}
                     </div>
@@ -216,11 +248,26 @@ const ClientInboxPage = () => {
                     <button className="hover:text-slate-900 transition-colors"><MoreHorizontal size={18} /></button>
                   </div>
                 </header>
+                
+                {activeContact?.bot_paused && (
+                  <div className="bg-rose-50 border-b border-rose-100 px-8 py-3.5 flex items-center justify-between z-10 animate-in slide-in-from-top duration-350 shrink-0">
+                    <div className="flex items-center gap-2.5">
+                      <span className="text-base">🤖</span>
+                      <span className="text-xs font-black text-rose-700 uppercase tracking-wider">Auto-Bot is Paused — Human Agent Mode Active</span>
+                    </div>
+                    <button 
+                      onClick={() => handleToggleBot(activeContact)}
+                      className="px-4 py-1.5 bg-rose-600 hover:bg-rose-700 text-white text-[10px] font-black uppercase tracking-widest rounded-lg shadow-sm transition-all"
+                    >
+                      Resume Bot
+                    </button>
+                  </div>
+                )}
 
                 {/* Messages Feed */}
                 <div 
                   ref={scrollRef}
-                  className="flex-1 overflow-y-auto p-10 space-y-8 bg-slate-50/20 custom-scrollbar"
+                  className="flex-1 overflow-y-auto p-4 md:p-10 space-y-6 md:space-y-8 bg-slate-50/20 custom-scrollbar"
                 >
                   <div className="flex flex-col items-center mb-10">
                     <span className="px-4 py-1.5 bg-white border border-slate-100 rounded-full text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] shadow-sm">
@@ -236,7 +283,7 @@ const ClientInboxPage = () => {
                         className={cn("flex flex-col", isIncoming ? "items-start" : "items-end")}
                       >
                         <div className={cn(
-                          "max-w-[70%] p-4 rounded-[24px] text-sm leading-relaxed shadow-sm transition-all hover:shadow-md",
+                          "max-w-[85%] md:max-w-[70%] p-3 md:p-4 rounded-[20px] md:rounded-[24px] text-sm leading-relaxed shadow-sm transition-all hover:shadow-md",
                           isIncoming 
                             ? "bg-white text-slate-700 rounded-bl-none border border-slate-100" 
                             : "bg-emerald-600 text-white rounded-br-none shadow-emerald-100"
@@ -255,8 +302,8 @@ const ClientInboxPage = () => {
                 </div>
 
                 {/* Reply Box */}
-                <div className="p-8 border-t border-slate-50 bg-white">
-                  <div className="bg-slate-50 rounded-[32px] p-2 focus-within:ring-2 focus-within:ring-blue-100 transition-all border border-slate-100 shadow-inner">
+                <div className="p-3 md:p-8 border-t border-slate-50 bg-white">
+                  <div className="bg-slate-50 rounded-2xl md:rounded-[32px] p-1.5 md:p-2 focus-within:ring-2 focus-within:ring-blue-100 transition-all border border-slate-100 shadow-inner">
                     <textarea 
                       rows={1}
                       placeholder="Type a message..."
@@ -268,7 +315,7 @@ const ClientInboxPage = () => {
                           handleSendMessage();
                         }
                       }}
-                      className="w-full bg-transparent p-4 text-sm font-medium outline-none resize-none max-h-32"
+                      className="w-full bg-transparent p-2 md:p-4 text-sm font-medium outline-none resize-none max-h-32"
                     />
                     <div className="flex items-center justify-between p-2">
                       <div className="flex items-center gap-2 px-2">
@@ -284,7 +331,7 @@ const ClientInboxPage = () => {
                 </div>
               </>
             ) : (
-              <div className="flex-1 flex flex-col items-center justify-center text-center p-20">
+              <div className="flex-1 flex flex-col items-center justify-center text-center p-8 md:p-20">
                 <div className="w-24 h-24 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center mb-6">
                   <MessageSquare size={40} />
                 </div>
@@ -295,7 +342,7 @@ const ClientInboxPage = () => {
           </main>
 
           {/* Column 3: Customer Details (Intercom Sidebar) */}
-          <aside className="w-80 border-l border-slate-50 bg-white p-8 overflow-y-auto shrink-0 hidden lg:block">
+          <aside className="w-80 border-l border-slate-50 bg-white p-8 overflow-y-auto shrink-0 hidden xl:block">
             {activeConvo ? (
               <div className="space-y-10">
                 {/* Profile Card */}
@@ -329,6 +376,20 @@ const ClientInboxPage = () => {
                   <button className="w-full py-3 px-4 bg-white border border-slate-100 rounded-xl text-xs font-bold text-slate-700 flex items-center gap-3 hover:bg-slate-50 transition-all">
                     <User size={14} className="text-slate-400" /> View Profile
                   </button>
+                  {activeContact && (
+                    <button 
+                      onClick={() => handleToggleBot(activeContact)}
+                      className={cn(
+                        "w-full py-3 px-4 border rounded-xl text-xs font-bold flex items-center gap-3 hover:bg-slate-50 transition-all",
+                        activeContact.bot_paused 
+                          ? "bg-rose-50 border-rose-100 text-rose-600 hover:bg-rose-100/50" 
+                          : "bg-white border-slate-100 text-slate-700 hover:border-slate-200"
+                      )}
+                    >
+                      <Zap size={14} className={activeContact.bot_paused ? "text-rose-600 animate-pulse" : "text-slate-400"} />
+                      {activeContact.bot_paused ? "Resume Auto-Bot" : "Pause Auto-Bot"}
+                    </button>
+                  )}
                   <button className="w-full py-3 px-4 bg-white border border-slate-100 rounded-xl text-xs font-bold text-slate-700 flex items-center gap-3 hover:bg-slate-50 transition-all text-rose-600">
                     <Zap size={14} /> Close Conversation
                   </button>

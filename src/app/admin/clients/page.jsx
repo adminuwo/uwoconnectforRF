@@ -122,24 +122,24 @@ const AdminClients = () => {
       <div className="max-w-7xl mx-auto pb-20 px-4 font-sans" onClick={() => setActiveMenuId(null)}>
         
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-10">
           <div>
             <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight mb-2">Client List</h1>
             <p className="text-slate-500 font-medium italic">Manage your clients and their message settings here.</p>
           </div>
           
-          <div className="flex items-center gap-4">
-            <div className="relative group">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full lg:w-auto">
+            <div className="relative group flex-1 sm:flex-initial">
                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#059669] transition-colors" size={18} />
                <input 
                   type="text" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
                   placeholder="Search clients..."
-                  className="bg-white border border-slate-200 focus:border-[#059669] px-12 py-3.5 rounded-2xl outline-none w-[280px] font-bold text-xs transition-all shadow-sm italic placeholder:text-slate-300"
+                  className="bg-white border border-slate-200 focus:border-[#059669] px-12 py-3.5 rounded-2xl outline-none w-full sm:w-[280px] font-bold text-xs transition-all shadow-sm italic placeholder:text-slate-300"
                />
             </div>
              <button 
                 onClick={() => setIsAddModalOpen(true)}
-                className="p-3.5 bg-[#059669] text-white rounded-2xl hover:bg-[#047857] transition-all shadow-lg shadow-emerald-100 group"
+                className="p-3.5 bg-[#059669] text-white rounded-2xl hover:bg-[#047857] transition-all shadow-lg shadow-emerald-100 group flex items-center justify-center"
              >
                 <Plus size={24} strokeWidth={3} className="group-hover:rotate-90 transition-transform" />
              </button>
@@ -239,9 +239,9 @@ const AdminClients = () => {
         </div>
  
         {/* Footer Hub */}
-        <div className="mt-16 p-10 bg-slate-50 rounded-[40px] border border-slate-200 flex flex-col lg:flex-row lg:items-center justify-between gap-8 group">
+        <div className="mt-16 p-6 sm:p-10 bg-slate-50 rounded-[40px] border border-slate-200 flex flex-col lg:flex-row lg:items-center justify-between gap-8 group">
            <div className="flex items-center gap-6">
-              <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center border border-slate-200 shadow-sm group-hover:rotate-12 transition-transform">
+              <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center border border-slate-200 shadow-sm group-hover:rotate-12 transition-transform shrink-0">
                  <ShieldAlert size={32} className="text-slate-300 group-hover:text-[#059669] transition-colors" />
               </div>
               <div>
@@ -266,9 +266,9 @@ const AdminClients = () => {
                 className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
               />
               <div
-                className="relative bg-white w-full max-w-xl rounded-[40px] shadow-2xl overflow-hidden border border-slate-200"
+                className="relative bg-white w-full max-w-xl rounded-[32px] sm:rounded-[40px] shadow-2xl overflow-hidden border border-slate-200 max-h-[90vh] flex flex-col"
               >
-                <div className="p-10">
+                <div className="p-6 sm:p-10 overflow-y-auto flex-1">
                   <div className="flex items-center justify-between mb-8">
                     <div>
                       <h2 className="text-2xl font-black text-slate-900 tracking-tight uppercase leading-none mb-2">Add Client</h2>
@@ -376,10 +376,10 @@ const AdminClients = () => {
               className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
             />
             <div
-              className="relative bg-white w-full max-w-2xl rounded-[40px] shadow-2xl overflow-hidden border border-slate-200 text-slate-800 animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] flex flex-col"
+              className="relative bg-white w-full max-w-2xl rounded-[32px] sm:rounded-[40px] shadow-2xl overflow-hidden border border-slate-200 text-slate-800 animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] flex flex-col"
               onClick={e => e.stopPropagation()}
             >
-              <div className="p-10 overflow-y-auto flex-1 space-y-8">
+              <div className="p-6 sm:p-10 overflow-y-auto flex-1 space-y-8">
                 <div className="flex items-center justify-between border-b border-slate-100 pb-6">
                   <div>
                     <h2 className="text-2xl font-black text-slate-900 tracking-tight uppercase leading-none mb-2">Client Profile</h2>

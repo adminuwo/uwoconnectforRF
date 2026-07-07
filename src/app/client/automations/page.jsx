@@ -253,16 +253,16 @@ const ClientAutomationsPage = () => {
 
   return (
     <DashboardLayout role="CLIENT">
-      <div className="max-w-full mx-auto pb-20 px-8">
+      <div className="max-w-7xl mx-auto pb-20 px-2 sm:px-4 md:px-0">
         {/* Header */}
-        <div className="mb-8 flex items-center justify-between">
+        <div className="mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
             <h1 className="text-3xl font-bold text-slate-900 tracking-tight mb-2">Auto Replies</h1>
             <p className="text-slate-500 font-medium italic">Manage how your bot responds to customers.</p>
           </div>
           <button
             onClick={() => setIsChoiceModalOpen(true)}
-            className="px-6 py-3 bg-emerald-600 text-white rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-emerald-700 transition-all shadow-xl shadow-emerald-100 flex items-center gap-2"
+            className="px-6 py-3 bg-emerald-600 text-white rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-emerald-700 transition-all shadow-xl shadow-emerald-100 flex items-center justify-center gap-2 w-full sm:w-auto"
           >
             <Plus size={16} />
             New Rule
@@ -270,11 +270,11 @@ const ClientAutomationsPage = () => {
         </div>
 
         {/* Channel Tab Switcher */}
-        <div className="flex gap-2 mb-8 bg-slate-100/50 p-1.5 rounded-2xl border border-slate-100 max-w-md">
+        <div className="flex gap-2 mb-8 bg-slate-100/50 p-1.5 rounded-2xl border border-slate-100 max-w-md overflow-x-auto">
           <button
             onClick={() => setSelectedChannel('WHATSAPP')}
             className={cn(
-              "flex-1 py-3 px-4 rounded-xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-2",
+              "flex-1 py-3 px-4 rounded-xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-2 whitespace-nowrap",
               selectedChannel === 'WHATSAPP' 
                 ? "bg-white text-emerald-600 shadow-sm border border-slate-200/50" 
                 : "text-slate-400 hover:text-slate-600"
@@ -285,7 +285,7 @@ const ClientAutomationsPage = () => {
           <button
             onClick={() => setSelectedChannel('FACEBOOK')}
             className={cn(
-              "flex-1 py-3 px-4 rounded-xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-2",
+              "flex-1 py-3 px-4 rounded-xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-2 whitespace-nowrap",
               selectedChannel === 'FACEBOOK' 
                 ? "bg-white text-blue-600 shadow-sm border border-slate-200/50" 
                 : "text-slate-400 hover:text-slate-600"
@@ -296,7 +296,7 @@ const ClientAutomationsPage = () => {
           <button
             onClick={() => setSelectedChannel('INSTAGRAM')}
             className={cn(
-              "flex-1 py-3 px-4 rounded-xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-2",
+              "flex-1 py-3 px-4 rounded-xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-2 whitespace-nowrap",
               selectedChannel === 'INSTAGRAM' 
                 ? "bg-white text-pink-600 shadow-sm border border-slate-200/50" 
                 : "text-slate-400 hover:text-slate-600"
@@ -308,106 +308,108 @@ const ClientAutomationsPage = () => {
 
         {/* Simplified Table List */}
         <div className="bg-white rounded-[32px] border border-slate-100 overflow-hidden shadow-sm">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-slate-50/50 border-b border-slate-100">
-                <th className="px-8 py-5 text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] w-24">S.No</th>
-                <th className="px-8 py-5 text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">Type / Keywords</th>
-                <th className="px-8 py-5 text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">Response Message</th>
-                <th className="px-8 py-5 text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] text-right">Status</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-50">
-              {/* Global Greeting Row (Always on top if enabled or configured) */}
-              {client && (
-                <tr 
-                  onClick={() => setIsGreetingModalOpen(true)}
-                  className="bg-emerald-50/10 hover:bg-emerald-50/30 cursor-pointer transition-colors group"
-                >
-                  <td className="px-8 py-6 text-sm font-bold text-emerald-400 italic">★</td>
-                  <td className="px-8 py-6">
-                    <span className={cn("px-2.5 py-1 text-white text-[10px] font-bold rounded-lg uppercase tracking-widest",
-                      selectedChannel === 'WHATSAPP' ? 'bg-emerald-600' :
-                      selectedChannel === 'FACEBOOK' ? 'bg-blue-600' : 'bg-pink-600'
-                    )}>Greeting Message</span>
-                  </td>
-                  <td className="px-8 py-6 text-sm font-semibold text-slate-900 tracking-tight truncate max-w-lg italic">
-                    {greetingData.message || 'Click to configure welcome message...'}
-                  </td>
-                  <td className="px-8 py-6 text-right">
-                    <div className="flex items-center justify-end gap-3">
-                      <span className={cn("text-[10px] font-bold uppercase tracking-widest", greetingData.enabled ? "text-emerald-500" : "text-slate-300")}>
-                        {greetingData.enabled ? 'Active' : 'Disabled'}
-                      </span>
-                      <div className={cn("w-2 h-2 rounded-full", greetingData.enabled ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" : "bg-slate-200")} />
-                    </div>
-                  </td>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-slate-50/50 border-b border-slate-100 text-slate-400 text-[10px] uppercase font-bold tracking-wider">
+                  <th className="px-8 py-5 w-24">S.No</th>
+                  <th className="px-8 py-5">Type / Keywords</th>
+                  <th className="px-8 py-5">Response Message</th>
+                  <th className="px-8 py-5 text-right">Status</th>
                 </tr>
-              )}
-
-              {/* AI Assistant Row */}
-              {client && (
-                <tr 
-                  onClick={() => setIsAIModalOpen(true)}
-                  className="bg-purple-50/10 hover:bg-purple-50/30 cursor-pointer transition-colors group"
-                >
-                  <td className="px-8 py-6 text-sm font-bold text-purple-300 italic">✨</td>
-                  <td className="px-8 py-6">
-                    <span className="px-2.5 py-1 bg-purple-600 text-white text-[10px] font-bold rounded-lg uppercase tracking-widest">AI Smart Reply</span>
-                  </td>
-                  <td className="px-8 py-6 text-sm font-semibold text-slate-900 tracking-tight truncate max-w-lg italic">
-                    {aiData.enabled ? `Enabled: ${aiData.context.substring(0, 50)}...` : 'Automate replies using OpenAI...'}
-                  </td>
-                  <td className="px-8 py-6 text-right">
-                    <div className="flex items-center justify-end gap-3">
-                      <span className={cn("text-[10px] font-bold uppercase tracking-widest", aiData.enabled ? "text-emerald-500" : "text-slate-300")}>
-                        {aiData.enabled ? 'Smart' : 'Off'}
-                      </span>
-                      <div className={cn("w-2 h-2 rounded-full", aiData.enabled ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" : "bg-slate-200")} />
-                    </div>
-                  </td>
-                </tr>
-              )}
-
-              {loading ? (
-                <tr><td colSpan="4" className="py-20 text-center"><Loader2 className="animate-spin text-emerald-600 mx-auto" /></td></tr>
-              ) : (
-                automations
-                  .filter(auto => {
-                    const chs = auto.channels || [];
-                    if (chs.length === 0) return selectedChannel === 'WHATSAPP';
-                    return chs.includes(selectedChannel);
-                  })
-                  .map((auto, i) => (
-                    <tr 
-                      key={auto.id} 
-                      onClick={() => openDetail(auto)}
-                      className="hover:bg-slate-50/30 cursor-pointer transition-colors group"
-                    >
-                      <td className="px-8 py-6 text-sm font-bold text-slate-400 italic">{(i + 1).toString().padStart(2, '0')}</td>
-                      <td className="px-8 py-6">
-                        <div className="flex flex-wrap gap-2">
-                        {auto.keywords.map(kw => (
-                          <span key={kw} className="px-2.5 py-1 bg-slate-50 text-slate-600 text-[11px] font-bold rounded-lg border border-slate-100 group-hover:bg-white transition-colors">{kw}</span>
-                        ))}
-                      </div>
+              </thead>
+              <tbody className="divide-y divide-slate-50 text-slate-700 text-xs font-semibold">
+                {/* Global Greeting Row (Always on top if enabled or configured) */}
+                {client && (
+                  <tr 
+                    onClick={() => setIsGreetingModalOpen(true)}
+                    className="bg-emerald-50/10 hover:bg-emerald-50/30 cursor-pointer transition-colors group"
+                  >
+                    <td className="px-8 py-6 text-sm font-bold text-emerald-400 italic">★</td>
+                    <td className="px-8 py-6">
+                      <span className={cn("px-2.5 py-1 text-white text-[10px] font-bold rounded-lg uppercase tracking-widest whitespace-nowrap",
+                        selectedChannel === 'WHATSAPP' ? 'bg-emerald-600' :
+                        selectedChannel === 'FACEBOOK' ? 'bg-blue-600' : 'bg-pink-600'
+                      )}>Greeting Message</span>
                     </td>
-                    <td className="px-8 py-6 text-sm font-semibold text-slate-900 tracking-tight truncate max-w-lg">
-                      {auto.response}
+                    <td className="px-8 py-6 text-sm font-semibold text-slate-900 tracking-tight truncate max-w-lg italic whitespace-nowrap">
+                      {greetingData.message || 'Click to configure welcome message...'}
                     </td>
-                    <td className="px-8 py-6 text-right">
+                    <td className="px-8 py-6 text-right whitespace-nowrap">
                       <div className="flex items-center justify-end gap-3">
-                        <span className={cn("text-[10px] font-bold uppercase tracking-widest", auto.enabled ? "text-emerald-500" : "text-slate-300")}>
-                          {auto.enabled ? 'Active' : 'Paused'}
+                        <span className={cn("text-[10px] font-bold uppercase tracking-widest", greetingData.enabled ? "text-emerald-500" : "text-slate-300")}>
+                          {greetingData.enabled ? 'Active' : 'Disabled'}
                         </span>
-                        <div className={cn("w-2 h-2 rounded-full", auto.enabled ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" : "bg-slate-200")} />
+                        <div className={cn("w-2 h-2 rounded-full", greetingData.enabled ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" : "bg-slate-200")} />
                       </div>
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                )}
+
+                {/* AI Assistant Row */}
+                {client && (
+                  <tr 
+                    onClick={() => setIsAIModalOpen(true)}
+                    className="bg-purple-50/10 hover:bg-purple-50/30 cursor-pointer transition-colors group"
+                  >
+                    <td className="px-8 py-6 text-sm font-bold text-purple-300 italic">✨</td>
+                    <td className="px-8 py-6">
+                      <span className="px-2.5 py-1 bg-purple-600 text-white text-[10px] font-bold rounded-lg uppercase tracking-widest whitespace-nowrap">AI Smart Reply</span>
+                    </td>
+                    <td className="px-8 py-6 text-sm font-semibold text-slate-900 tracking-tight truncate max-w-lg italic whitespace-nowrap">
+                      {aiData.enabled ? `Enabled: ${aiData.context.substring(0, 50)}...` : 'Automate replies using OpenAI...'}
+                    </td>
+                    <td className="px-8 py-6 text-right whitespace-nowrap">
+                      <div className="flex items-center justify-end gap-3">
+                        <span className={cn("text-[10px] font-bold uppercase tracking-widest", aiData.enabled ? "text-emerald-500" : "text-slate-300")}>
+                          {aiData.enabled ? 'Smart' : 'Off'}
+                        </span>
+                        <div className={cn("w-2 h-2 rounded-full", aiData.enabled ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" : "bg-slate-200")} />
+                      </div>
+                    </td>
+                  </tr>
+                )}
+
+                {loading ? (
+                  <tr><td colSpan="4" className="py-20 text-center"><Loader2 className="animate-spin text-emerald-600 mx-auto" /></td></tr>
+                ) : (
+                  automations
+                    .filter(auto => {
+                      const chs = auto.channels || [];
+                      if (chs.length === 0) return selectedChannel === 'WHATSAPP';
+                      return chs.includes(selectedChannel);
+                    })
+                    .map((auto, i) => (
+                      <tr 
+                        key={auto.id} 
+                        onClick={() => openDetail(auto)}
+                        className="hover:bg-slate-50/30 cursor-pointer transition-colors group"
+                      >
+                        <td className="px-8 py-6 text-sm font-bold text-slate-400 italic">{((i + 1).toString().padStart(2, '0'))}</td>
+                        <td className="px-8 py-6">
+                          <div className="flex flex-wrap gap-2">
+                          {auto.keywords.map(kw => (
+                            <span key={kw} className="px-2.5 py-1 bg-slate-50 text-slate-600 text-[11px] font-bold rounded-lg border border-slate-100 group-hover:bg-white transition-colors whitespace-nowrap">{kw}</span>
+                          ))}
+                        </div>
+                      </td>
+                      <td className="px-8 py-6 text-sm font-semibold text-slate-900 tracking-tight truncate max-w-lg whitespace-nowrap">
+                        {auto.response}
+                      </td>
+                      <td className="px-8 py-6 text-right whitespace-nowrap">
+                        <div className="flex items-center justify-end gap-3">
+                          <span className={cn("text-[10px] font-bold uppercase tracking-widest", auto.enabled ? "text-emerald-500" : "text-slate-300")}>
+                            {auto.enabled ? 'Active' : 'Paused'}
+                          </span>
+                          <div className={cn("w-2 h-2 rounded-full", auto.enabled ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" : "bg-slate-200")} />
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
 
         {/* Choice Modal (Selection) */}
@@ -415,16 +417,16 @@ const ClientAutomationsPage = () => {
           {isChoiceModalOpen && (
             <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
               <div onClick={() => setIsChoiceModalOpen(false)} className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" />
-              <div className="relative bg-white w-full max-w-2xl rounded-[40px] shadow-2xl p-10">
-                <div className="flex items-center justify-between mb-10">
-                  <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Create Auto Reply</h2>
+              <div className="relative bg-white w-full max-w-2xl rounded-[32px] sm:rounded-[40px] shadow-2xl p-6 sm:p-10 max-h-[90vh] overflow-y-auto border border-slate-200">
+                <div className="flex items-center justify-between mb-8">
+                  <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">Create Auto Reply</h2>
                   <button onClick={() => setIsChoiceModalOpen(false)} className="text-slate-300 hover:text-slate-900 transition-colors"><X size={24} /></button>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Option 1: Greeting */}
                   <button 
                     onClick={() => { setIsChoiceModalOpen(false); setIsGreetingModalOpen(true); }}
-                    className="flex flex-col items-center text-center p-8 bg-emerald-50/50 border-2 border-transparent hover:border-emerald-600 rounded-[32px] transition-all group"
+                    className="flex flex-col items-center text-center p-6 sm:p-8 bg-emerald-50/50 border-2 border-transparent hover:border-emerald-600 rounded-[24px] sm:rounded-[32px] transition-all group"
                   >
                     <div className="w-16 h-16 bg-emerald-600 text-white rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-emerald-100 transition-transform">
                       <Zap size={32} />
@@ -436,7 +438,7 @@ const ClientAutomationsPage = () => {
                   {/* Option 2: Keyword */}
                   <button 
                     onClick={() => { setIsChoiceModalOpen(false); setIsModalOpen(true); }}
-                    className="flex flex-col items-center text-center p-8 bg-green-50/50 border-2 border-transparent hover:border-green-600 rounded-[32px] transition-all group"
+                    className="flex flex-col items-center text-center p-6 sm:p-8 bg-green-50/50 border-2 border-transparent hover:border-green-600 rounded-[24px] sm:rounded-[32px] transition-all group"
                   >
                     <div className="w-16 h-16 bg-green-600 text-white rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-green-100 transition-transform">
                       <Type size={32} />
@@ -448,7 +450,7 @@ const ClientAutomationsPage = () => {
                   {/* Option 3: AI */}
                   <button 
                     onClick={() => { setIsChoiceModalOpen(false); setIsAIModalOpen(true); }}
-                    className="flex flex-col items-center text-center p-8 bg-teal-50/50 border-2 border-transparent hover:border-teal-600 rounded-[32px] transition-all group md:col-span-2"
+                    className="flex flex-col items-center text-center p-6 sm:p-8 bg-teal-50/50 border-2 border-transparent hover:border-teal-600 rounded-[24px] sm:rounded-[32px] transition-all group md:col-span-2"
                   >
                     <div className="w-16 h-16 bg-teal-600 text-white rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-teal-100 transition-transform">
                       <MessageSquare size={32} />
@@ -467,23 +469,23 @@ const ClientAutomationsPage = () => {
           {isModalOpen && (
             <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
               <div onClick={() => setIsModalOpen(false)} className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" />
-              <div className="relative bg-white w-full max-w-lg rounded-[40px] shadow-2xl p-10">
+              <div className="relative bg-white w-full max-w-lg rounded-[32px] sm:rounded-[40px] shadow-2xl p-6 sm:p-10 max-h-[90vh] overflow-y-auto border border-slate-200">
                 <div className="flex items-center justify-between mb-8">
-                  <h2 className="text-2xl font-bold text-slate-900 tracking-tight">New Keyword Rule</h2>
+                  <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">New Keyword Rule</h2>
                   <button onClick={() => setIsModalOpen(false)} className="text-slate-300 hover:text-slate-900 transition-colors"><X size={24} /></button>
                 </div>
                 <form onSubmit={handleCreate} className="space-y-6">
                   <div>
                     <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block ml-1">Rule Name</label>
-                    <input required value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} placeholder="e.g. Price Query" className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-4 outline-none focus:border-emerald-500 transition-all font-semibold" />
+                    <input required value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} placeholder="e.g. Price Query" className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-4 outline-none focus:border-emerald-500 transition-all font-semibold text-sm" />
                   </div>
                   <div>
                     <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block ml-1">Keywords (comma separated)</label>
-                    <input required value={formData.keywords} onChange={e => setFormData({...formData, keywords: e.target.value})} placeholder="price, cost, how much" className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-4 outline-none focus:border-emerald-500 transition-all font-semibold" />
+                    <input required value={formData.keywords} onChange={e => setFormData({...formData, keywords: e.target.value})} placeholder="price, cost, how much" className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-4 outline-none focus:border-emerald-500 transition-all font-semibold text-sm" />
                   </div>
                   <div>
                     <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block ml-1">Bot Reply</label>
-                    <textarea required value={formData.response} onChange={e => setFormData({...formData, response: e.target.value})} placeholder="Hi! Our pricing is..." rows={4} className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-4 outline-none focus:border-emerald-500 transition-all font-semibold resize-none" />
+                    <textarea required value={formData.response} onChange={e => setFormData({...formData, response: e.target.value})} placeholder="Hi! Our pricing is..." rows={4} className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-4 outline-none focus:border-emerald-500 transition-all font-semibold text-sm resize-none" />
                   </div>
                   <button type="submit" disabled={isSaving} className="w-full py-4 bg-emerald-600 text-white rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-emerald-700 transition-all shadow-xl shadow-emerald-100 flex items-center justify-center gap-2">
                     {isSaving ? <Loader2 size={16} className="animate-spin" /> : 'Create Rule'}
@@ -499,10 +501,10 @@ const ClientAutomationsPage = () => {
           {isGreetingModalOpen && (
             <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
               <div onClick={() => setIsGreetingModalOpen(false)} className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" />
-              <div className="relative bg-white w-full max-w-lg rounded-[40px] shadow-2xl p-10">
+              <div className="relative bg-white w-full max-w-lg rounded-[32px] sm:rounded-[40px] shadow-2xl p-6 sm:p-10 max-h-[90vh] overflow-y-auto border border-slate-200">
                 <div className="flex items-center justify-between mb-8">
                   <div>
-                    <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Greeting Message</h2>
+                    <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">Greeting Message</h2>
                     <p className="text-xs text-slate-400 font-medium">Automatic welcome response for new chats.</p>
                   </div>
                   <button onClick={() => setIsGreetingModalOpen(false)} className="text-slate-300 hover:text-slate-900 transition-colors"><X size={24} /></button>
@@ -526,7 +528,7 @@ const ClientAutomationsPage = () => {
                       onChange={e => setGreetingData({...greetingData, message: e.target.value})} 
                       placeholder="Hi! Welcome to AisaConnect..." 
                       rows={4} 
-                      className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-4 outline-none focus:border-emerald-500 transition-all font-semibold resize-none" 
+                      className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-4 outline-none focus:border-emerald-500 transition-all font-semibold resize-none text-sm" 
                     />
                   </div>
 
@@ -545,8 +547,8 @@ const ClientAutomationsPage = () => {
                           const nb = [...greetingData.buttons];
                           nb[idx] = e.target.value;
                           setGreetingData({...greetingData, buttons: nb});
-                        }} className="flex-1 bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 text-sm font-semibold" placeholder="Button text" />
-                        <button onClick={() => setGreetingData({...greetingData, buttons: greetingData.buttons.filter((_, i) => i !== idx)})} className="p-3 text-red-400 hover:text-red-600"><Trash2 size={18} /></button>
+                        }} className="flex-1 bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 text-sm font-semibold text-slate-700" placeholder="Button text" />
+                        <button onClick={() => setGreetingData({...greetingData, buttons: greetingData.buttons.filter((_, i) => i !== idx)})} className="p-3 text-red-400 hover:text-red-600 shrink-0"><Trash2 size={18} /></button>
                       </div>
                     ))}
                   </div>
@@ -569,10 +571,10 @@ const ClientAutomationsPage = () => {
           {isAIModalOpen && (
             <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
               <div onClick={() => setIsAIModalOpen(false)} className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" />
-              <div className="relative bg-white w-full max-w-lg rounded-[40px] shadow-2xl p-10">
+              <div className="relative bg-white w-full max-w-lg rounded-[32px] sm:rounded-[40px] shadow-2xl p-6 sm:p-10 max-h-[90vh] overflow-y-auto border border-slate-200">
                 <div className="flex items-center justify-between mb-8">
                   <div>
-                    <h2 className="text-2xl font-bold text-slate-900 tracking-tight text-emerald-600">AI Assistant</h2>
+                    <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight text-emerald-600">AI Assistant</h2>
                     <p className="text-xs text-slate-400 font-medium">Power your bot with OpenAI Intelligence.</p>
                   </div>
                   <button onClick={() => setIsAIModalOpen(false)} className="text-slate-300 hover:text-slate-900 transition-colors"><X size={24} /></button>
@@ -601,7 +603,7 @@ const ClientAutomationsPage = () => {
                       onChange={e => setAIData({...aiData, context: e.target.value})} 
                       placeholder="e.g. We are a digital agency specializing in WhatsApp marketing. We offer three packages: Basic ($50), Pro ($150), and Enterprise ($500)..." 
                       rows={6} 
-                      className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-4 outline-none focus:border-emerald-500 transition-all font-semibold resize-none text-sm" 
+                      className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-4 outline-none focus:border-emerald-500 transition-all font-semibold resize-none text-sm text-slate-800" 
                     />
                     <p className="mt-2 text-[10px] text-slate-400 italic">This info helps the AI answer questions about your business on your behalf.</p>
                   </div>
@@ -624,9 +626,9 @@ const ClientAutomationsPage = () => {
           {isDetailModalOpen && selectedAuto && (
             <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
               <div onClick={() => setIsDetailModalOpen(false)} className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" />
-              <div className="relative bg-white w-full max-w-lg rounded-[40px] shadow-2xl p-10">
+              <div className="relative bg-white w-full max-w-lg rounded-[32px] sm:rounded-[40px] shadow-2xl p-6 sm:p-10 max-h-[90vh] overflow-y-auto border border-slate-200">
                 <div className="flex items-center justify-between mb-8">
-                  <h2 className="text-2xl font-bold text-slate-900 tracking-tight">{isEditing ? 'Edit Rule' : selectedAuto.name}</h2>
+                  <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">{isEditing ? 'Edit Rule' : selectedAuto.name}</h2>
                   <button onClick={() => setIsDetailModalOpen(false)} className="text-slate-300 hover:text-slate-900 transition-colors"><X size={24} /></button>
                 </div>
                 
@@ -634,11 +636,11 @@ const ClientAutomationsPage = () => {
                   <div className="space-y-6">
                     <div>
                       <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block ml-1">Keywords</label>
-                      <input value={editFormData.keywords} onChange={e => setEditFormData({...editFormData, keywords: e.target.value})} className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-4 font-semibold outline-none focus:border-emerald-500" />
+                      <input value={editFormData.keywords} onChange={e => setEditFormData({...editFormData, keywords: e.target.value})} className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-4 font-semibold outline-none focus:border-emerald-500 text-sm text-slate-800" />
                     </div>
                     <div>
                       <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block ml-1">Reply</label>
-                      <textarea value={editFormData.response} onChange={e => setEditFormData({...editFormData, response: e.target.value})} rows={4} className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-4 font-semibold outline-none focus:border-emerald-500" />
+                      <textarea value={editFormData.response} onChange={e => setEditFormData({...editFormData, response: e.target.value})} rows={4} className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-4 font-semibold outline-none focus:border-emerald-500 text-sm text-slate-800" />
                     </div>
                     <div className="flex justify-end gap-3">
                       <button onClick={() => setIsEditing(false)} className="px-6 py-3 text-slate-400 font-bold text-xs uppercase tracking-widest">Cancel</button>

@@ -102,16 +102,16 @@ const LegalSettings = () => {
 
   return (
     <DashboardLayout role="ADMIN">
-      <div className="max-w-5xl mx-auto pb-20 px-4 font-sans">
+      <div className="max-w-5xl mx-auto pb-20 px-2 sm:px-4 md:px-0 font-sans">
         
         {/* Header */}
-        <div className="mb-10 flex items-center justify-between">
+        <div className="mb-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-black text-slate-900 tracking-tight flex items-center gap-3">
+            <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight flex items-center gap-3">
               <Scale className="text-[#059669]" size={32} />
               Legal Compliance Settings
             </h1>
-            <p className="text-slate-500 mt-2 font-medium italic">Configure the dynamic content and official documents for your platform.</p>
+            <p className="text-slate-500 mt-2 font-medium italic text-xs sm:text-sm">Configure the dynamic content and official documents for your platform.</p>
           </div>
           <div className="hidden md:block">
             <div className="px-6 py-2 bg-emerald-50 text-emerald-600 rounded-full border border-emerald-100 text-[10px] font-black uppercase tracking-[0.2em] italic">Database Connected</div>
@@ -139,21 +139,21 @@ const LegalSettings = () => {
             )}
 
             {/* Privacy Policy Section */}
-            <div className="bg-white rounded-[48px] border border-slate-100 p-10 shadow-xl shadow-slate-100/50">
-              <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-6">
+            <div className="bg-white rounded-[32px] sm:rounded-[48px] border border-slate-100 p-4 sm:p-10 shadow-xl shadow-slate-100/50">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-6">
                 <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 bg-emerald-50 text-[#059669] rounded-[20px] flex items-center justify-center shadow-inner shadow-emerald-100/50">
+                  <div className="w-14 h-14 bg-emerald-50 text-[#059669] rounded-[20px] flex items-center justify-center shadow-inner shadow-emerald-100/50 shrink-0">
                     <Shield size={28} />
                   </div>
                   <div>
-                    <h2 className="text-xl font-black text-slate-900 uppercase tracking-tight leading-none mb-1">Privacy Policy</h2>
+                    <h2 className="text-lg sm:text-xl font-black text-slate-900 uppercase tracking-tight leading-none mb-1">Privacy Policy</h2>
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest italic">HTML & Document Upload</p>
                   </div>
                 </div>
                 <button 
                   onClick={() => handleSave('privacy_policy', privacy, privacyFile, deletePrivacyFile)}
                   disabled={saving.state}
-                  className="px-8 py-4 bg-[#059669] text-white rounded-2xl font-bold text-xs uppercase tracking-widest flex items-center gap-2 hover:bg-[#047857] transition-all shadow-xl shadow-emerald-100 disabled:opacity-50"
+                  className="px-8 py-4 bg-[#059669] text-white rounded-2xl font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-[#047857] transition-all shadow-xl shadow-emerald-100 disabled:opacity-50 w-full sm:w-auto"
                 >
                   {saving.state && saving.key === 'privacy_policy' ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />}
                   Publish Changes
@@ -167,12 +167,12 @@ const LegalSettings = () => {
                     value={privacy}
                     onChange={(e) => setPrivacy(e.target.value)}
                     placeholder="Enter Privacy Policy content (HTML allowed)..."
-                    className="w-full h-[400px] bg-slate-50 border border-slate-100 rounded-[32px] p-8 outline-none focus:border-[#059669] focus:bg-white transition-all font-mono text-sm leading-relaxed"
+                    className="w-full h-[300px] sm:h-[400px] bg-slate-50 border border-slate-100 rounded-[24px] sm:rounded-[32px] p-4 sm:p-8 outline-none focus:border-[#059669] focus:bg-white transition-all font-mono text-sm leading-relaxed"
                   />
                 </div>
                 
                 <div className="space-y-6">
-                  <div className="p-6 bg-slate-50 rounded-[32px] border border-slate-100 space-y-4">
+                  <div className="p-6 bg-slate-50 rounded-[24px] sm:rounded-[32px] border border-slate-100 space-y-4">
                     <h3 className="text-xs font-black text-slate-900 uppercase tracking-widest flex items-center gap-2">
                       <Upload size={14} className="text-[#059669]" /> Upload PDF/DOC
                     </h3>
@@ -219,21 +219,21 @@ const LegalSettings = () => {
             </div>
 
             {/* Terms of Service Section */}
-            <div className="bg-white rounded-[48px] border border-slate-100 p-10 shadow-xl shadow-slate-100/50">
-              <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-6">
+            <div className="bg-white rounded-[32px] sm:rounded-[48px] border border-slate-100 p-4 sm:p-10 shadow-xl shadow-slate-100/50">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-6">
                 <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 bg-emerald-50 text-[#059669] rounded-[20px] flex items-center justify-center shadow-inner shadow-emerald-100/50">
+                  <div className="w-14 h-14 bg-emerald-50 text-[#059669] rounded-[20px] flex items-center justify-center shadow-inner shadow-emerald-100/50 shrink-0">
                     <Scale size={28} />
                   </div>
                   <div>
-                    <h2 className="text-xl font-black text-slate-900 uppercase tracking-tight leading-none mb-1">Terms of Service</h2>
+                    <h2 className="text-lg sm:text-xl font-black text-slate-900 uppercase tracking-tight leading-none mb-1">Terms of Service</h2>
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest italic">HTML & Document Upload</p>
                   </div>
                 </div>
                 <button 
                   onClick={() => handleSave('terms_of_service', terms, termsFile, deleteTermsFile)}
                   disabled={saving.state}
-                  className="px-8 py-4 bg-[#059669] text-white rounded-2xl font-bold text-xs uppercase tracking-widest flex items-center gap-2 hover:bg-[#047857] transition-all shadow-xl shadow-emerald-100 disabled:opacity-50"
+                  className="px-8 py-4 bg-[#059669] text-white rounded-2xl font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-[#047857] transition-all shadow-xl shadow-emerald-100 disabled:opacity-50 w-full sm:w-auto"
                 >
                   {saving.state && saving.key === 'terms_of_service' ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />}
                   Publish Changes
@@ -247,12 +247,12 @@ const LegalSettings = () => {
                     value={terms}
                     onChange={(e) => setTerms(e.target.value)}
                     placeholder="Enter Terms of Service content (HTML allowed)..."
-                    className="w-full h-[400px] bg-slate-50 border border-slate-100 rounded-[32px] p-8 outline-none focus:border-[#059669] focus:bg-white transition-all font-mono text-sm leading-relaxed"
+                    className="w-full h-[300px] sm:h-[400px] bg-slate-50 border border-slate-100 rounded-[24px] sm:rounded-[32px] p-4 sm:p-8 outline-none focus:border-[#059669] focus:bg-white transition-all font-mono text-sm leading-relaxed"
                   />
                 </div>
                 
                 <div className="space-y-6">
-                  <div className="p-6 bg-slate-50 rounded-[32px] border border-slate-100 space-y-4">
+                  <div className="p-6 bg-slate-50 rounded-[24px] sm:rounded-[32px] border border-slate-100 space-y-4">
                     <h3 className="text-xs font-black text-slate-900 uppercase tracking-widest flex items-center gap-2">
                       <Upload size={14} className="text-[#059669]" /> Upload PDF/DOC
                     </h3>
@@ -299,7 +299,7 @@ const LegalSettings = () => {
             </div>
 
             {/* Help Note */}
-            <div className="bg-slate-900 rounded-[32px] p-8 text-white flex items-center gap-6">
+            <div className="bg-slate-900 rounded-[32px] p-6 sm:p-8 text-white flex items-center gap-6">
               <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center shrink-0">
                 <AlertCircle size={24} className="text-emerald-400" />
               </div>

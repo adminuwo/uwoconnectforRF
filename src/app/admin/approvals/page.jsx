@@ -56,7 +56,7 @@ const AdminApprovalsPage = () => {
 
   return (
     <DashboardLayout role="ADMIN">
-      <div className="max-w-7xl mx-auto pb-20">
+      <div className="max-w-7xl mx-auto pb-20 px-2 sm:px-4 md:px-0">
         <div className="mb-10">
           <h1 className="text-3xl font-black text-slate-900 tracking-tight flex items-center gap-3">
             <ShieldCheck className="text-[#059669]" size={32} />
@@ -150,54 +150,56 @@ const AdminApprovalsPage = () => {
         <div>
           <h2 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em] mb-6 italic">All Users ({otherUsers.length})</h2>
           <div className="bg-white rounded-[40px] border border-slate-100 shadow-sm overflow-hidden">
-            <table className="w-full text-left">
-              <thead>
-                <tr className="bg-slate-50/50">
-                  <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">User</th>
-                  <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Business</th>
-                  <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</th>
-                  <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-50">
-                {otherUsers.map((user) => (
-                  <tr key={user.id} className="hover:bg-slate-50/30 transition-colors">
-                    <td className="px-8 py-5">
-                      <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 rounded-xl bg-emerald-50 text-[#059669] flex items-center justify-center font-bold border border-emerald-100/30">
-                          {user.name[0].toUpperCase()}
-                        </div>
-                        <div>
-                          <p className="font-bold text-slate-900 text-sm">{user.name}</p>
-                          <p className="text-[10px] text-slate-400 font-medium italic">{user.email}</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-8 py-5">
-                      <p className="text-sm font-semibold text-slate-600">{user.businessName}</p>
-                    </td>
-                    <td className="px-8 py-5">
-                      <span className={cn(
-                        "px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border italic",
-                        user.status === 'APPROVED' ? "bg-green-50 text-green-600 border-green-100" : 
-                        user.status === 'REJECTED' ? "bg-red-50 text-red-600 border-red-100" : 
-                        "bg-slate-50 text-slate-400 border-slate-100"
-                      )}>
-                        {user.status}
-                      </span>
-                    </td>
-                    <td className="px-8 py-5 text-right">
-                      <button 
-                        onClick={() => handleUpdateStatus(user.id, user.status === 'SUSPENDED' ? 'APPROVED' : 'SUSPENDED')}
-                        className="text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-[#059669] transition-colors italic"
-                      >
-                        {user.status === 'SUSPENDED' ? 'Reactivate' : 'Suspend'}
-                      </button>
-                    </td>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-slate-50/50">
+                    <th className="px-3 sm:px-8 py-4 sm:py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">User</th>
+                    <th className="px-3 sm:px-8 py-4 sm:py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest hidden sm:table-cell">Business</th>
+                    <th className="px-3 sm:px-8 py-4 sm:py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</th>
+                    <th className="px-3 sm:px-8 py-4 sm:py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-slate-50">
+                  {otherUsers.map((user) => (
+                    <tr key={user.id} className="hover:bg-slate-50/30 transition-colors">
+                      <td className="px-3 sm:px-8 py-4 sm:py-5">
+                        <div className="flex items-center gap-2 sm:gap-4">
+                          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-emerald-50 text-[#059669] flex items-center justify-center font-bold border border-emerald-100/30 shrink-0 text-xs sm:text-sm">
+                            {user.name[0].toUpperCase()}
+                          </div>
+                          <div>
+                            <p className="font-bold text-slate-900 text-xs sm:text-sm truncate max-w-[100px] sm:max-w-none">{user.name}</p>
+                            <p className="text-[9px] sm:text-[10px] text-slate-400 font-medium italic truncate max-w-[100px] sm:max-w-none">{user.email}</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-3 sm:px-8 py-4 sm:py-5 hidden sm:table-cell">
+                        <p className="text-sm font-semibold text-slate-600">{user.businessName}</p>
+                      </td>
+                      <td className="px-3 sm:px-8 py-4 sm:py-5">
+                        <span className={cn(
+                          "px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-lg text-[8px] sm:text-[9px] font-black uppercase tracking-widest border italic inline-block",
+                          user.status === 'APPROVED' ? "bg-green-50 text-green-600 border-green-100" : 
+                          user.status === 'REJECTED' ? "bg-red-50 text-red-600 border-red-100" : 
+                          "bg-slate-50 text-slate-400 border-slate-100"
+                        )}>
+                          {user.status}
+                        </span>
+                      </td>
+                      <td className="px-3 sm:px-8 py-4 sm:py-5 text-right">
+                        <button 
+                          onClick={() => handleUpdateStatus(user.id, user.status === 'SUSPENDED' ? 'APPROVED' : 'SUSPENDED')}
+                          className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-[#059669] transition-colors italic whitespace-nowrap"
+                        >
+                          {user.status === 'SUSPENDED' ? 'Reactivate' : 'Suspend'}
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>
