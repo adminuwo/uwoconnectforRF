@@ -18,6 +18,7 @@ const ClientInboxPage = () => {
   const [replyText, setReplyText] = useState('');
   const [isSending, setIsSending] = useState(false);
   const [mobileShowChat, setMobileShowChat] = useState(false);
+  const [activeFilter, setActiveFilter] = useState('ALL');
   const scrollRef = useRef(null);
 
   useEffect(() => {
@@ -102,6 +103,7 @@ const ClientInboxPage = () => {
 
   const convoList = Object.values(conversations)
     .filter(c => c.id.toLowerCase().includes(searchTerm.toLowerCase()))
+    .filter(c => activeFilter === 'ALL' || c.channel === activeFilter)
     .sort((a, b) => new Date(b.time) - new Date(a.time));
 
   const activeConvo = conversations[selectedConvoId];
@@ -180,10 +182,43 @@ const ClientInboxPage = () => {
                   className="w-full pl-11 pr-4 py-3 bg-white border border-slate-100 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-blue-100 transition-all font-medium"
                 />
               </div>
-              <div className="flex items-center gap-2 mt-4">
-                <button className="px-4 py-1.5 bg-emerald-600 text-white rounded-xl text-[10px] font-bold uppercase tracking-widest">All</button>
-                <button className="px-4 py-1.5 text-slate-400 hover:bg-slate-100 rounded-xl text-[10px] font-bold uppercase tracking-widest">Unassigned</button>
-                <button className="ml-auto w-8 h-8 flex items-center justify-center text-slate-400 hover:text-slate-900"><Filter size={14} /></button>
+              <div className="flex items-center gap-1.5 mt-4 overflow-x-auto pb-1 custom-scrollbar">
+                <button 
+                  onClick={() => setActiveFilter('ALL')}
+                  className={cn(
+                    "px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all",
+                    activeFilter === 'ALL' ? "bg-slate-900 text-white" : "text-slate-400 hover:bg-slate-100"
+                  )}
+                >
+                  All
+                </button>
+                <button 
+                  onClick={() => setActiveFilter('WHATSAPP')}
+                  className={cn(
+                    "px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all",
+                    activeFilter === 'WHATSAPP' ? "bg-emerald-600 text-white" : "text-slate-400 hover:bg-slate-100"
+                  )}
+                >
+                  WhatsApp
+                </button>
+                <button 
+                  onClick={() => setActiveFilter('INSTAGRAM')}
+                  className={cn(
+                    "px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all",
+                    activeFilter === 'INSTAGRAM' ? "bg-pink-500 text-white" : "text-slate-400 hover:bg-slate-100"
+                  )}
+                >
+                  Instagram
+                </button>
+                <button 
+                  onClick={() => setActiveFilter('FACEBOOK')}
+                  className={cn(
+                    "px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all",
+                    activeFilter === 'FACEBOOK' ? "bg-blue-600 text-white" : "text-slate-400 hover:bg-slate-100"
+                  )}
+                >
+                  Facebook
+                </button>
               </div>
             </div>
 
