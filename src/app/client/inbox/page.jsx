@@ -84,6 +84,7 @@ const ClientInboxPage = () => {
         lastMessage: msg.body,
         time: msg.created_at,
         unread: msg.message_type === 'INCOMING' ? 1 : 0,
+        channel: msg.channel || 'WHATSAPP',
         messages: []
       };
     }
@@ -94,6 +95,7 @@ const ClientInboxPage = () => {
     if (new Date(msg.created_at) > new Date(acc[contact].time)) {
       acc[contact].lastMessage = msg.body;
       acc[contact].time = msg.created_at;
+      acc[contact].channel = msg.channel || 'WHATSAPP';
     }
     return acc;
   }, {});
@@ -130,7 +132,8 @@ const ClientInboxPage = () => {
       const token = localStorage.getItem('token');
       await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/messages/`, {
         to_number: activeConvo.id,
-        body: textToSend
+        body: textToSend,
+        channel: activeConvo.channel
       }, { headers: { Authorization: `Bearer ${token}` } });
       
       // We don't strictly need to do anything here because the optimistic update is already there.
@@ -204,7 +207,13 @@ const ClientInboxPage = () => {
                     <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-400 font-bold text-lg">
                       {convo.name[0].toUpperCase()}
                     </div>
-                    <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-4 border-white bg-emerald-500" />
+                    <div className={cn(
+                        "absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-white flex items-center justify-center text-[10px] text-white font-black",
+                        convo.channel === 'FACEBOOK' ? "bg-blue-600" :
+                        convo.channel === 'INSTAGRAM' ? "bg-pink-500" : "bg-emerald-500"
+                      )}>
+                        {convo.channel === 'FACEBOOK' ? 'F' : convo.channel === 'INSTAGRAM' ? 'I' : 'W'}
+                      </div>
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between mb-1">
@@ -236,7 +245,16 @@ const ClientInboxPage = () => {
                       {activeConvo.name[0].toUpperCase()}
                     </div>
                     <div>
-                      <h2 className="text-sm font-bold text-slate-900">{activeConvo.name}</h2>
+                      <div className="flex items-center gap-2">
+                        <h2 className="text-sm font-bold text-slate-900">{activeConvo.name}</h2>
+                        <span className={cn(
+                          "text-[8px] font-black px-1.5 py-0.5 rounded-md text-white uppercase tracking-wider",
+                          activeConvo.channel === 'FACEBOOK' ? "bg-blue-600" :
+                          activeConvo.channel === 'INSTAGRAM' ? "bg-pink-500" : "bg-emerald-600"
+                        )}>
+                          {activeConvo.channel}
+                        </span>
+                      </div>
                       <div className="flex items-center gap-1.5">
                         <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                         <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Online</span>
@@ -353,7 +371,9 @@ const ClientInboxPage = () => {
                   <h3 className="text-lg font-bold text-slate-900 mb-1">{activeConvo.name}</h3>
                   <div className="flex items-center justify-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Active via WhatsApp</p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                      Active via {activeConvo.channel === 'FACEBOOK' ? 'Facebook' : activeConvo.channel === 'INSTAGRAM' ? 'Instagram' : 'WhatsApp'}
+                    </p>
                   </div>
                 </div>
 
