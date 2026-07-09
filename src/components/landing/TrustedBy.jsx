@@ -15,13 +15,15 @@ export default function TrustedBy() {
       </div>
       
       {/* Infinite Logo Marquee */}
-      <div className="flex w-max gap-16 animate-[pulse-line-move_30s_linear_infinite] whitespace-nowrap opacity-70 hover:opacity-100 transition-opacity duration-500">
-        {[...logos, ...logos, ...logos].map((logo, idx) => (
-          <div key={idx} className="inline-flex items-center justify-center font-bold text-lg text-[#8E99A8] px-4 group hover:text-white transition-colors duration-300 cursor-default">
-            <Sparkles size={16} className="text-[#16A085]/40 group-hover:text-[#20C997] transition-colors mr-3" />
-            <span>{logo}</span>
-          </div>
-        ))}
+      <div className="overflow-hidden w-full flex">
+        <div className="flex gap-16 animate-marquee-right whitespace-nowrap opacity-70 hover:opacity-100 transition-opacity duration-500">
+          {[...logos, ...logos, ...logos, ...logos].map((logo, idx) => (
+            <div key={idx} className="inline-flex items-center justify-center font-bold text-lg text-[#8E99A8] px-4 group hover:text-white transition-colors duration-300 cursor-default">
+              <Sparkles size={16} className="text-[#16A085]/40 group-hover:text-[#20C997] transition-colors mr-3" />
+              <span>{logo}</span>
+            </div>
+          ))}
+        </div>
       </div>
     </section>
   );

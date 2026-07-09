@@ -3,7 +3,7 @@
 import React from 'react';
 import { Users, TrendingUp, Mail, MessageSquare, Layers, Award, DollarSign, Activity, FileText, Headphones } from 'lucide-react';
 
-export default function PlatformModules() {
+export default function PlatformModules({ isDark = true }) {
   const modules = [
     { icon: Users, name: "CRM", status: "Active" },
     { icon: TrendingUp, name: "Sales", status: "Active" },
@@ -11,11 +11,11 @@ export default function PlatformModules() {
     { icon: MessageSquare, name: "WhatsApp", status: "Active" },
     { icon: MessageSquare, name: "Email", status: "Active" },
     { icon: Layers, name: "Projects", status: "Active" },
-    { icon: Award, name: "HR", status: "Available" },
-    { icon: DollarSign, name: "Finance", status: "Available" },
+    { icon: Award, name: "HR", status: "Active" },
+    { icon: DollarSign, name: "Finance", status: "Active" },
     { icon: Activity, name: "Analytics", status: "Active" },
     { icon: FileText, name: "Documents", status: "Active" },
-    { icon: Headphones, name: "Support", status: "Available" }
+    { icon: Headphones, name: "Support", status: "Active" }
   ];
 
   return (
@@ -26,10 +26,10 @@ export default function PlatformModules() {
         <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-8">
           <div className="max-w-2xl">
             <span className="text-[10px] font-bold text-[#20C997] uppercase tracking-widest block mb-3">Ecosystem</span>
-            <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-6 text-white">
+            <h2 className={`text-3xl md:text-5xl font-bold tracking-tight mb-6 ${isDark ? 'text-white' : 'text-slate-900'}`}>
               Platform Modules
             </h2>
-            <p className="text-[#8E99A8] text-lg font-medium">
+            <p className={`text-lg font-medium ${isDark ? 'text-[#8E99A8]' : 'text-slate-600'}`}>
               A comprehensive suite of enterprise modules, seamlessly interconnected through our vector intelligence layer.
             </p>
           </div>
@@ -42,24 +42,24 @@ export default function PlatformModules() {
           {modules.map((mod, idx) => (
             <div
               key={idx}
-              className={`glass-card rounded-2xl p-5 border ${mod.status === 'Active' ? 'border-white/10 hover:border-[#16A085]/50' : 'border-white/5 opacity-60'} flex flex-col items-center justify-center text-center cursor-pointer`}
+              className={`glass-card rounded-2xl p-5 border border-white/10 hover:border-[#16A085]/50 flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-300 transform hover:-translate-y-1.5 hover:scale-[1.03] hover:shadow-[0_12px_24px_-10px_rgba(16,185,129,0.3)]`}
             >
-              <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-4 ${mod.status === 'Active' ? 'bg-[#0F6B52]/20 text-[#20C997]' : 'bg-white/5 text-[#8E99A8]'}`}>
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-4 bg-[#0F6B52]/20 text-[#20C997]">
                 <mod.icon size={20} strokeWidth={1.5} />
               </div>
-              <h4 className="text-sm font-bold text-white mb-1">{mod.name}</h4>
-              <span className={`text-[9px] uppercase tracking-wider font-bold ${mod.status === 'Active' ? 'text-[#16A085]' : 'text-[#8E99A8]'}`}>
+              <h4 className={`text-sm font-bold mb-1 ${isDark ? 'text-white' : 'text-slate-800'}`}>{mod.name}</h4>
+              <span className="text-[9px] uppercase tracking-wider font-bold text-[#16A085]">
                 {mod.status}
               </span>
             </div>
           ))}
           
-          <div className="glass-card rounded-2xl p-5 border border-white/5 border-dashed flex flex-col items-center justify-center text-center opacity-50 hover:opacity-100 transition-opacity cursor-pointer">
-            <div className="w-10 h-10 rounded-xl border border-white/20 flex items-center justify-center mb-4 text-white">
+          <div className={`glass-card rounded-2xl p-5 border border-white/10 hover:border-[#16A085]/50 flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-300 transform hover:-translate-y-1.5 hover:scale-[1.03] hover:shadow-[0_12px_24px_-10px_rgba(16,185,129,0.3)]`}>
+            <div className="w-10 h-10 rounded-xl bg-[#0F6B52]/20 text-[#20C997] flex items-center justify-center mb-4">
               +
             </div>
-            <h4 className="text-sm font-bold text-white mb-1">Custom Module</h4>
-            <span className="text-[9px] uppercase tracking-wider font-bold text-[#8E99A8]">API Access</span>
+            <h4 className={`text-sm font-bold mb-1 ${isDark ? 'text-white' : 'text-slate-800'}`}>Custom Module</h4>
+            <span className="text-[9px] uppercase tracking-wider font-bold text-[#16A085]">API Access</span>
           </div>
         </div>
       </div>

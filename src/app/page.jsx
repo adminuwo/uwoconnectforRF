@@ -13,7 +13,6 @@ const WhyEFV = dynamic(() => import('@/components/landing/WhyEFV'));
 const PlatformModules = dynamic(() => import('@/components/landing/PlatformModules'));
 const AutomationShowcase = dynamic(() => import('@/components/landing/AutomationShowcase'));
 const DashboardPreview = dynamic(() => import('@/components/landing/DashboardPreview'));
-const Integrations = dynamic(() => import('@/components/landing/Integrations'));
 const AIAssistant = dynamic(() => import('@/components/landing/AIAssistant'));
 const FeatureComparison = dynamic(() => import('@/components/landing/FeatureComparison'));
 const WorkflowTimeline = dynamic(() => import('@/components/landing/WorkflowTimeline'));
@@ -30,14 +29,13 @@ export default function Home() {
 
   const navItems = [
     { name: 'Platform', id: 'platform' },
-    { name: 'Integrations', id: 'integrations' },
     { name: 'Pricing', id: 'pricing' },
     { name: 'Documentation', id: 'documentation' },
     { name: 'Contact', id: 'contact' },
   ];
 
   useEffect(() => {
-    const sections = ['platform', 'integrations', 'pricing', 'documentation', 'contact'];
+    const sections = ['platform', 'pricing', 'documentation', 'contact'];
     
     const handleScroll = () => {
       const scrollPos = window.scrollY + 120; // Offset for scroll trigger point
@@ -123,7 +121,7 @@ export default function Home() {
                   className={`relative px-4 py-1.5 text-sm font-medium transition-colors duration-300 rounded-full ${
                     isActive 
                       ? (isDark ? 'text-white' : 'text-white')
-                      : (isDark ? 'text-[#8E99A8] hover:text-white' : 'text-[#059669] hover:text-[#000000]')
+                      : (isDark ? 'text-[#8E99A8] hover:text-white' : 'text-slate-800 hover:text-black')
                   }`}
                 >
                   {isActive && (
@@ -145,7 +143,7 @@ export default function Home() {
               className={`p-2 transition-colors rounded-full ${
                 isDark 
                   ? 'text-[#8E99A8] hover:text-white hover:bg-white/5' 
-                  : 'text-[#059669] hover:text-[#000000] hover:bg-[#059669]/10'
+                  : 'text-slate-700 hover:text-black hover:bg-slate-100'
               }`}
             >
               {isDark ? <Sun size={20} /> : <Moon size={20} />}
@@ -153,7 +151,7 @@ export default function Home() {
             <Link 
               href="/auth/login" 
               className={`text-sm font-medium transition-colors px-4 py-2 ${
-                isDark ? 'text-[#8E99A8] hover:text-white' : 'text-[#059669] hover:text-[#000000]'
+                isDark ? 'text-[#8E99A8] hover:text-white' : 'text-slate-800 hover:text-black'
               }`}
             >
               Login
@@ -168,7 +166,7 @@ export default function Home() {
 
           <button 
             className={`md:hidden p-2 rounded-lg transition-colors ${
-              isDark ? 'hover:bg-white/5 text-white' : 'hover:bg-[#059669]/10 text-[#059669]'
+              isDark ? 'hover:bg-white/5 text-white' : 'hover:bg-slate-100 text-slate-800'
             }`} 
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
@@ -199,8 +197,8 @@ export default function Home() {
                       }}
                       className={`px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 ${
                         isActive 
-                          ? (isDark ? 'bg-white/10 text-white' : 'bg-[#059669]/10 text-[#059669]')
-                          : (isDark ? 'text-slate-400 hover:text-white hover:bg-white/5' : 'text-[#059669]/80 hover:text-[#000000] hover:bg-[#059669]/5')
+                          ? (isDark ? 'bg-white/10 text-white' : 'bg-slate-100 text-slate-900')
+                          : (isDark ? 'text-slate-400 hover:text-white hover:bg-white/5' : 'text-slate-800 hover:text-black hover:bg-slate-50')
                       }`}
                     >
                       {item.name}
@@ -208,7 +206,7 @@ export default function Home() {
                   );
                 })}
               </div>
-              <hr className={`my-2 ${isDark ? 'border-white/10' : 'border-[#059669]/15'}`} />
+              <hr className={`my-2 ${isDark ? 'border-white/10' : 'border-slate-100'}`} />
               <div className="flex flex-col gap-3">
                 <button 
                   onClick={() => {
@@ -218,7 +216,7 @@ export default function Home() {
                   className={`w-full py-3 text-center text-sm font-semibold flex items-center justify-center gap-2 border rounded-xl transition-all duration-200 ${
                     isDark 
                       ? 'border-white/10 hover:bg-white/5 text-slate-300' 
-                      : 'border-[#059669]/20 hover:bg-[#059669]/5 text-[#059669]'
+                      : 'border-slate-200 hover:bg-slate-50 text-slate-800'
                   }`}
                 >
                   {isDark ? <Sun size={18} /> : <Moon size={18} />}
@@ -230,7 +228,7 @@ export default function Home() {
                   className={`w-full py-3 text-center text-sm font-semibold border rounded-xl transition-all duration-200 ${
                     isDark 
                       ? 'border-white/10 hover:bg-white/5 text-slate-300' 
-                      : 'border-[#059669]/20 hover:bg-[#059669]/5 text-[#059669]'
+                      : 'border-slate-200 hover:bg-slate-50 text-slate-800'
                   }`}
                 >
                   Login
@@ -250,17 +248,14 @@ export default function Home() {
 
       {/* MAIN SECTIONS */}
       <main className="relative z-10">
-        <HeroSection />
+        <HeroSection isDark={isDark} />
         <TrustedBy />
-        <WhyEFV />
+        <WhyEFV isDark={isDark} />
         <div id="platform">
-          <PlatformModules />
+          <PlatformModules isDark={isDark} />
         </div>
-        <AutomationShowcase />
+        <AutomationShowcase isDark={isDark} />
         <DashboardPreview />
-        <div id="integrations">
-          <Integrations />
-        </div>
         <AIAssistant />
         <div id="documentation">
           <FeatureComparison />

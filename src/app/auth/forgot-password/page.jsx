@@ -63,9 +63,12 @@ const ForgotPasswordPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#d1ebd7] font-sans flex flex-col items-center justify-center p-6 select-none relative overflow-hidden">
-      <div className="w-full max-w-[400px] z-10 flex flex-col items-center">
-        
+    <div className="min-h-screen bg-[#d1ebd7] font-sans flex flex-col items-center justify-center p-4 sm:p-6 select-none relative overflow-hidden">
+      {/* Background organic blur circles for glassmorphism to pop */}
+      <div className="absolute -top-10 -left-10 w-48 h-48 bg-white/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-10 -right-10 w-72 h-72 bg-emerald-400/10 rounded-full blur-3xl pointer-events-none" />
+
+      <div className="w-full max-w-[440px] z-10 bg-white/80 backdrop-blur-[24px] border border-white/50 rounded-[40px] p-6 sm:p-10 shadow-[0_20px_50px_rgba(0,0,0,0.05)] flex flex-col items-center">
         {/* Brand Logo */}
         <div className="flex items-center gap-3 mb-8 bg-white/20 px-6 py-2.5 rounded-full border border-white/30 backdrop-blur-sm shadow-sm">
           <div className="w-9 h-9 rounded-full bg-[#45724c] flex items-center justify-center shadow-md">
@@ -77,13 +80,13 @@ const ForgotPasswordPage = () => {
         </div>
 
         {error && (
-          <div className="w-full mb-6 p-4 bg-red-50 text-red-600 text-xs font-bold rounded-[24px] border border-red-100 text-center">
+          <div className="w-full mb-6 p-4 bg-red-50/80 text-red-600 text-xs font-bold rounded-[24px] border border-red-100 text-center animate-in fade-in duration-300">
             {error}
           </div>
         )}
 
         {message && !error && (
-          <div className="w-full mb-6 p-4 bg-emerald-50/80 text-emerald-800 text-xs font-bold rounded-[24px] border border-emerald-100 text-center">
+          <div className="w-full mb-6 p-4 bg-emerald-50/80 text-emerald-800 text-xs font-bold rounded-[24px] border border-emerald-100 text-center animate-in fade-in duration-300">
             {message}
           </div>
         )}
@@ -185,7 +188,7 @@ const ForgotPasswordPage = () => {
 
           {step === 4 && (
             <div className="text-center">
-              <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-6 text-[#2f593b] shadow-md">
+              <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-6 text-[#2f593b] shadow-md animate-bounce">
                 <Check size={32} />
               </div>
               <h2 className="text-3xl font-black text-[#2f593b] mb-2">Success!</h2>
@@ -206,7 +209,6 @@ const ForgotPasswordPage = () => {
             </p>
           </div>
         )}
-
       </div>
     </div>
   );
