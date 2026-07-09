@@ -10,6 +10,8 @@ export default function WhatsAppConfigModal({ isOpen, onClose, client, onSaved }
   const [countryCode, setCountryCode] = useState('+91');
   const [phoneNumberVal, setPhoneNumberVal] = useState('');
   const [portfolioId, setPortfolioId] = useState('');
+  const [accessToken, setAccessToken] = useState('');
+  const [showAccessToken, setShowAccessToken] = useState(false);
   const [saving, setSaving] = useState(false);
   
   const [errors, setErrors] = useState({});
@@ -22,6 +24,7 @@ export default function WhatsAppConfigModal({ isOpen, onClose, client, onSaved }
       setWabaId(client.whatsapp_waba_id || '');
       setPhoneId(client.whatsapp_phone_number_id || '');
       setPortfolioId(client.settings?.business_portfolio_id || '');
+      setAccessToken(client.whatsapp_access_token || '');
       
       const fullNum = client.phone_number || '';
       const codes = ['+91', '+1', '+44', '+62', '+55', '+52', '+33', '+49', '+61', '+971', '+65'];
@@ -85,7 +88,8 @@ export default function WhatsAppConfigModal({ isOpen, onClose, client, onSaved }
       businessName,
       wabaId,
       phoneId,
-      phoneNumberVal
+      phoneNumberVal,
+      accessToken
     };
     
     let isAllValid = true;
@@ -109,6 +113,7 @@ export default function WhatsAppConfigModal({ isOpen, onClose, client, onSaved }
         phone_number: formattedPhone,
         whatsapp_waba_id: wabaId,
         whatsapp_phone_number_id: phoneId,
+        whatsapp_access_token: accessToken,
         settings: {
           ...(client?.settings || {}),
           business_portfolio_id: portfolioId,
@@ -141,7 +146,8 @@ export default function WhatsAppConfigModal({ isOpen, onClose, client, onSaved }
     businessName && 
     wabaId && 
     phoneId && 
-    phoneNumberVal;
+    phoneNumberVal &&
+    accessToken;
 
   const hasBlockingErrors = Object.keys(errors).some(key => key !== 'form' && errors[key]);
   const isSubmitDisabled = !requiredFieldsFilled || hasBlockingErrors || saving;
@@ -330,6 +336,40 @@ export default function WhatsAppConfigModal({ isOpen, onClose, client, onSaved }
                     className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none text-sm font-medium transition-all duration-200 text-slate-800 placeholder:text-slate-400 focus:bg-white focus:ring-2 focus:ring-emerald-100 focus:border-emerald-600"
                   />
                 </div>
+              </div>
+
+              {/* Access Token */}
+              <div className="space-y-2">
+                <label className="block text-xs font-bold text-slate-700">
+                  System User Access Token <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <input 
+                    type={showAccessToken ? "text" : "password"}
+                    value={accessToken}
+                    onChange={e => handleChange('accessToken', e.target.value, setAccessToken)}
+                    onBlur={e => handleBlur('accessToken', e.target.value)}
+                    placeholder="Enter Meta API Access Token (starts with EAA...)"
+                    className={cn(
+                      "w-full pl-4 pr-12 py-3 bg-slate-50 border rounded-xl outline-none text-sm font-medium transition-all duration-200 text-slate-800 placeholder:text-slate-400 focus:bg-white focus:ring-2",
+                      touched.accessToken && errors.accessToken 
+                        ? "border-red-400 focus:ring-red-100" 
+                        : "border-slate-200 focus:ring-emerald-100 focus:border-emerald-600"
+                    )}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowAccessToken(!showAccessToken)}
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none"
+                  >
+                    {showAccessToken ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
+                {touched.accessToken && errors.accessToken && (
+                  <p className="text-[10px] font-bold text-red-500 flex items-center gap-1 mt-1.5">
+                    <AlertCircle size={10} /> {errors.accessToken}
+                  </p>
+                )}
               </div>
             </div>
             {/* Footer buttons */}

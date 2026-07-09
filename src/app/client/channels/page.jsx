@@ -179,25 +179,25 @@ const ClientChannelsPage = () => {
                       </div>
 
                       <div className="space-y-3.5 text-xs">
-                        <div className="flex justify-between pb-1.5 border-b border-slate-100">
-                          <span className="text-slate-400 font-semibold">Business Name</span>
-                          <span className="font-bold text-slate-700 max-w-[130px] truncate">{client?.business_name || 'N/A'}</span>
+                        <div className="flex justify-between items-center pb-1.5 border-b border-slate-100 gap-4">
+                          <span className="text-slate-400 font-semibold shrink-0">Business Name</span>
+                          <span className="font-bold text-slate-700 truncate text-right" title={client?.business_name}>{client?.business_name || 'N/A'}</span>
                         </div>
-                        <div className="flex justify-between pb-1.5 border-b border-slate-100">
-                          <span className="text-slate-400 font-semibold">Phone Number</span>
-                          <span className="font-bold text-slate-700 max-w-[130px] truncate">{client?.phone_number || 'N/A'}</span>
+                        <div className="flex justify-between items-center pb-1.5 border-b border-slate-100 gap-4">
+                          <span className="text-slate-400 font-semibold shrink-0">Phone Number</span>
+                          <span className="font-bold text-slate-700 truncate text-right" title={client?.phone_number}>{client?.phone_number || 'N/A'}</span>
                         </div>
-                        <div className="flex justify-between pb-1.5 border-b border-slate-100">
-                          <span className="text-slate-400 font-semibold">WABA ID</span>
-                          <span className="font-bold text-slate-700 truncate max-w-[110px]" title={client?.whatsapp_waba_id}>{client?.whatsapp_waba_id || 'N/A'}</span>
+                        <div className="flex justify-between items-center pb-1.5 border-b border-slate-100 gap-4">
+                          <span className="text-slate-400 font-semibold shrink-0">WABA ID</span>
+                          <span className="font-bold text-slate-700 truncate text-right" title={client?.whatsapp_waba_id}>{client?.whatsapp_waba_id || 'N/A'}</span>
                         </div>
-                        <div className="flex justify-between pb-1.5 border-b border-slate-100">
-                          <span className="text-slate-400 font-semibold">Phone Number ID</span>
-                          <span className="font-bold text-slate-700 truncate max-w-[110px]" title={client?.whatsapp_phone_number_id}>{client?.whatsapp_phone_number_id || 'N/A'}</span>
+                        <div className="flex justify-between items-center pb-1.5 border-b border-slate-100 gap-4">
+                          <span className="text-slate-400 font-semibold shrink-0">Phone Number ID</span>
+                          <span className="font-bold text-slate-700 truncate text-right" title={client?.whatsapp_phone_number_id}>{client?.whatsapp_phone_number_id || 'N/A'}</span>
                         </div>
-                        <div className="flex justify-between pb-1.5 border-b border-slate-100">
-                          <span className="text-slate-400 font-semibold">Last Updated</span>
-                          <span className="font-bold text-slate-700">{lastUpdatedText}</span>
+                        <div className="flex justify-between items-center pb-1.5 border-b border-slate-100 gap-4">
+                          <span className="text-slate-400 font-semibold shrink-0">Last Updated</span>
+                          <span className="font-bold text-slate-700 truncate text-right">{lastUpdatedText}</span>
                         </div>
                       </div>
                     </div>
@@ -237,17 +237,17 @@ const ClientChannelsPage = () => {
                       </div>
 
                       <div className="space-y-3.5 text-xs">
-                        <div className="flex justify-between pb-1.5 border-b border-slate-100">
-                          <span className="text-slate-400 font-semibold">Page Name</span>
-                          <span className="font-bold text-slate-700 max-w-[130px] truncate">{client?.facebook_config?.page_name || 'N/A'}</span>
+                        <div className="flex justify-between items-center pb-1.5 border-b border-slate-100 gap-4">
+                          <span className="text-slate-400 font-semibold shrink-0">Page Name</span>
+                          <span className="font-bold text-slate-700 truncate text-right" title={client?.facebook_config?.page_name}>{client?.facebook_config?.page_name || 'N/A'}</span>
                         </div>
-                        <div className="flex justify-between pb-1.5 border-b border-slate-100">
-                          <span className="text-slate-400 font-semibold">Page ID</span>
-                          <span className="font-bold text-slate-700 truncate max-w-[110px]" title={client?.facebook_config?.page_id}>{client?.facebook_config?.page_id || 'N/A'}</span>
+                        <div className="flex justify-between items-center pb-1.5 border-b border-slate-100 gap-4">
+                          <span className="text-slate-400 font-semibold shrink-0">Page ID</span>
+                          <span className="font-bold text-slate-700 truncate text-right" title={client?.facebook_config?.page_id}>{client?.facebook_config?.page_id || 'N/A'}</span>
                         </div>
-                        <div className="flex justify-between pb-1.5 border-b border-slate-100">
-                          <span className="text-slate-400 font-semibold">Last Updated</span>
-                          <span className="font-bold text-slate-700">{formatLastUpdated(client?.facebook_config?.last_updated)}</span>
+                        <div className="flex justify-between items-center pb-1.5 border-b border-slate-100 gap-4">
+                          <span className="text-slate-400 font-semibold shrink-0">Last Updated</span>
+                          <span className="font-bold text-slate-700 truncate text-right">{formatLastUpdated(client?.facebook_config?.last_updated)}</span>
                         </div>
                       </div>
                     </div>
@@ -287,17 +287,17 @@ const ClientChannelsPage = () => {
                       </div>
 
                       <div className="space-y-3.5 text-xs">
-                        <div className="flex justify-between pb-1.5 border-b border-slate-100">
-                          <span className="text-slate-400 font-semibold">Account Name</span>
-                          <span className="font-bold text-slate-700 max-w-[130px] truncate">{client?.instagram_config?.page_name || 'N/A'}</span>
+                        <div className="flex justify-between items-center pb-1.5 border-b border-slate-100 gap-4">
+                          <span className="text-slate-400 font-semibold shrink-0">Account Name</span>
+                          <span className="font-bold text-slate-700 truncate text-right" title={client?.instagram_config?.page_name}>{client?.instagram_config?.page_name || 'N/A'}</span>
                         </div>
-                        <div className="flex justify-between pb-1.5 border-b border-slate-100">
-                          <span className="text-slate-400 font-semibold">Instagram ID</span>
-                          <span className="font-bold text-slate-700 truncate max-w-[110px]" title={client?.instagram_config?.instagram_business_id}>{client?.instagram_config?.instagram_business_id || 'N/A'}</span>
+                        <div className="flex justify-between items-center pb-1.5 border-b border-slate-100 gap-4">
+                          <span className="text-slate-400 font-semibold shrink-0">Instagram ID</span>
+                          <span className="font-bold text-slate-700 truncate text-right" title={client?.instagram_config?.instagram_business_id}>{client?.instagram_config?.instagram_business_id || 'N/A'}</span>
                         </div>
-                        <div className="flex justify-between pb-1.5 border-b border-slate-100">
-                          <span className="text-slate-400 font-semibold">Last Updated</span>
-                          <span className="font-bold text-slate-700">{formatLastUpdated(client?.instagram_config?.last_updated)}</span>
+                        <div className="flex justify-between items-center pb-1.5 border-b border-slate-100 gap-4">
+                          <span className="text-slate-400 font-semibold shrink-0">Last Updated</span>
+                          <span className="font-bold text-slate-700 truncate text-right">{formatLastUpdated(client?.instagram_config?.last_updated)}</span>
                         </div>
                       </div>
                     </div>

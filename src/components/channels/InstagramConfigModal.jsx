@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { X, Loader2, AlertCircle } from 'lucide-react';
+import { X, Loader2, AlertCircle, Eye, EyeOff } from 'lucide-react';
 import axios from 'axios';
 import { cn } from '@/lib/utils';
 
 export default function InstagramConfigModal({ isOpen, onClose, client, onSaved }) {
   const [pageName, setPageName] = useState('');
   const [instagramBusinessId, setInstagramBusinessId] = useState('');
+  const [accessToken, setAccessToken] = useState('');
+  const [showAccessToken, setShowAccessToken] = useState(false);
   const [saving, setSaving] = useState(false);
   
   const [errors, setErrors] = useState({});
@@ -16,6 +18,7 @@ export default function InstagramConfigModal({ isOpen, onClose, client, onSaved 
       const config = client.instagram_config || {};
       setPageName(config.page_name || '');
       setInstagramBusinessId(config.instagram_business_id || '');
+      setAccessToken(config.access_token || '');
       
       setErrors({});
       setTouched({});
@@ -54,7 +57,7 @@ export default function InstagramConfigModal({ isOpen, onClose, client, onSaved 
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    const fieldsToValidate = { pageName, instagramBusinessId };
+    const fieldsToValidate = { pageName, instagramBusinessId, accessToken };
     let isAllValid = true;
     const newTouched = {};
     Object.keys(fieldsToValidate).forEach(key => {
@@ -75,6 +78,7 @@ export default function InstagramConfigModal({ isOpen, onClose, client, onSaved 
         instagram_config: {
           page_name: pageName,
           instagram_business_id: instagramBusinessId,
+          access_token: accessToken,
           last_connected: client?.instagram_config?.instagram_business_id ? (client?.instagram_config?.last_connected || new Date().toISOString()) : new Date().toISOString(),
           last_updated: new Date().toISOString()
         }
@@ -99,7 +103,7 @@ export default function InstagramConfigModal({ isOpen, onClose, client, onSaved 
   const isConnected = !!client?.instagram_config?.instagram_business_id;
   const isEditMode = isConnected;
 
-  const requiredFieldsFilled = pageName && instagramBusinessId;
+  const requiredFieldsFilled = pageName && instagramBusinessId && accessToken;
   const hasBlockingErrors = Object.keys(errors).some(key => key !== 'form' && errors[key]);
   const isSubmitDisabled = !requiredFieldsFilled || hasBlockingErrors || saving;
 
@@ -191,6 +195,40 @@ export default function InstagramConfigModal({ isOpen, onClose, client, onSaved 
                 {touched.instagramBusinessId && errors.instagramBusinessId && (
                   <p className="text-[10px] font-bold text-red-500 flex items-center gap-1 mt-1.5">
                     <AlertCircle size={10} /> {errors.instagramBusinessId}
+                  </p>
+                )}
+              </div>
+
+              {/* Access Token */}
+              <div className="space-y-2">
+                <label className="block text-xs font-bold text-slate-700">
+                  Instagram Access Token <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <input 
+                    type={showAccessToken ? "text" : "password"}
+                    value={accessToken}
+                    onChange={e => handleChange('accessToken', e.target.value, setAccessToken)}
+                    onBlur={e => handleBlur('accessToken', e.target.value)}
+                    placeholder="Enter Instagram Access Token (starts with EAA...)"
+                    className={cn(
+                      "w-full pl-4 pr-12 py-3 bg-slate-50 border rounded-xl outline-none text-sm font-medium transition-all duration-200 text-slate-800 placeholder:text-slate-400 focus:bg-white focus:ring-2",
+                      touched.accessToken && errors.accessToken 
+                        ? "border-red-400 focus:ring-red-100" 
+                        : "border-slate-200 focus:ring-emerald-100 focus:border-emerald-600"
+                    )}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowAccessToken(!showAccessToken)}
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none"
+                  >
+                    {showAccessToken ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
+                {touched.accessToken && errors.accessToken && (
+                  <p className="text-[10px] font-bold text-red-500 flex items-center gap-1 mt-1.5">
+                    <AlertCircle size={10} /> {errors.accessToken}
                   </p>
                 )}
               </div>
