@@ -49,6 +49,7 @@ const Sidebar = ({ role, isOpen, onClose }) => {
     { name: 'Audit Logs', href: '/admin/audit-logs', icon: Activity },
     { name: 'Policy', href: '/admin/settings/legal', icon: Scale },
     { name: 'Analytics', href: '/admin/stats', icon: GitBranch },
+    { name: 'Settings', href: '/admin/settings', icon: Settings },
     { name: 'Support', href: '/admin/support', icon: LifeBuoy },
   ];
 
