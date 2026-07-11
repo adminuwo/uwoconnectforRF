@@ -50,7 +50,7 @@ const RegisterPage = () => {
     
     try {
       const client = window.google.accounts.oauth2.initTokenClient({
-        client_id: googleClientId || process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "870636881729-q7v3r68d8omv35e729s0e890c06180fc.apps.googleusercontent.com",
+        client_id: googleClientId || process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
         scope: "https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile",
         callback: async (tokenResponse) => {
           if (tokenResponse && tokenResponse.access_token) {
