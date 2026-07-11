@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { 
   MessageSquare, Search, Loader2, User, Phone, Mail, 
   MapPin, Send, Plus, MoreHorizontal, Filter, 
-  Smile, Paperclip, Zap, ArrowLeft, Check, CheckCheck 
+  Smile, Paperclip, Zap, ArrowLeft, Check, CheckCheck, Archive, Sparkles, Lock 
 } from 'lucide-react';
 import axios from 'axios';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
@@ -19,6 +19,8 @@ const ClientInboxPage = () => {
   const [isSending, setIsSending] = useState(false);
   const [mobileShowChat, setMobileShowChat] = useState(false);
   const [activeFilter, setActiveFilter] = useState('ALL');
+  const [isInternal, setIsInternal] = useState(false);
+  const [isDrafting, setIsDrafting] = useState(false);
   const scrollRef = useRef(null);
 
   useEffect(() => {
@@ -47,6 +49,39 @@ const ClientInboxPage = () => {
     };
     fetchData();
   }, [selectedConvoId]);
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+
+    let wsUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080';
+    wsUrl = wsUrl.replace(/^http/, 'ws') + `/ws/inbox/?token=${token}`;
+    
+    const ws = new WebSocket(wsUrl);
+
+    ws.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        if (data.type === 'new_message') {
+          setMessages(prev => {
+            // Avoid duplicates
+            if (prev.some(m => m.id === data.message.id)) return prev;
+            return [...prev, data.message];
+          });
+        }
+      } catch (err) {
+        console.error('Failed to parse WebSocket message:', err);
+      }
+    };
+
+    ws.onerror = (err) => {
+      console.warn('WebSocket error:', err);
+    };
+
+    return () => {
+      ws.close();
+    };
+  }, []);
 
   const activeContact = contacts.find(
     c => c.platform_id === selectedConvoId || c.phone_number === selectedConvoId
@@ -112,38 +147,61 @@ const ClientInboxPage = () => {
     if (!replyText.trim() || !activeConvo || isSending) return;
     
     const textToSend = replyText.trim();
-    setReplyText(''); // Optimistically clear input
+    setReplyText(''); // Clear input
     setIsSending(true);
-    
-    // Create temporary message for optimistic UI
-    const tempMessage = {
-      id: `temp_${Date.now()}`,
-      body: textToSend,
-      message_type: 'OUTGOING',
-      created_at: new Date().toISOString()
-    };
-    
-    // Update local state instantly
-    setMessages(prev => [...prev, {
-      ...tempMessage,
-      to_address: activeConvo.id,
-      from_address: 'me'
-    }]);
 
     try {
       const token = localStorage.getItem('token');
       await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/messages/`, {
         to_number: activeConvo.id,
         body: textToSend,
-        channel: activeConvo.channel
+        channel: activeConvo.channel,
+        message_type: isInternal ? 'INTERNAL' : 'OUTGOING'
       }, { headers: { Authorization: `Bearer ${token}` } });
       
-      // We don't strictly need to do anything here because the optimistic update is already there.
+      // If internal, it doesn't come via webhook immediately so fetch again or add optimistically.
+      if (isInternal) {
+        setIsInternal(false);
+      }
     } catch (err) {
       console.warn('Failed to send message:', err);
       alert("Failed to send message");
     } finally {
       setIsSending(false);
+    }
+  };
+
+  const handleSuggestDraft = async () => {
+    if (!activeContact) return;
+    setIsDrafting(true);
+    try {
+      const token = localStorage.getItem('token');
+      const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/messages/suggest_draft/`, {
+        contact_id: activeContact.id
+      }, { headers: { Authorization: `Bearer ${token}` } });
+      
+      setReplyText(res.data.draft || '');
+    } catch (err) {
+      console.warn('Failed to get draft:', err);
+      alert("Failed to generate draft");
+    } finally {
+      setIsDrafting(false);
+    }
+  };
+
+  const handleArchive = async () => {
+    if (!activeContact) return;
+    try {
+      const token = localStorage.getItem('token');
+      const newState = !activeContact.is_archived;
+      await axios.patch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/contacts/${activeContact.id}/`, {
+        is_archived: newState
+      }, { headers: { Authorization: `Bearer ${token}` } });
+      
+      setContacts(prev => prev.map(c => c.id === activeContact.id ? { ...c, is_archived: newState } : c));
+    } catch (err) {
+      console.warn('Failed to archive contact:', err);
+      alert("Failed to archive");
     }
   };
 
@@ -229,7 +287,12 @@ const ClientInboxPage = () => {
                 <div className="p-10 text-center">
                   <p className="text-xs text-slate-300 font-bold uppercase tracking-widest">No conversations</p>
                 </div>
-              ) : convoList.map((convo) => (
+              ) : convoList.filter(c => {
+                const cContact = contacts.find(cont => cont.platform_id === c.id || cont.phone_number === c.id);
+                // Don't show archived by default unless searched
+                if (cContact?.is_archived && !searchTerm) return false;
+                return true;
+              }).map((convo) => (
                 <button 
                   key={convo.id} 
                   onClick={() => { setSelectedConvoId(convo.id); setMobileShowChat(true); }}
@@ -337,10 +400,13 @@ const ClientInboxPage = () => {
                       >
                         <div className={cn(
                           "max-w-[85%] md:max-w-[70%] p-3 md:p-4 rounded-[20px] md:rounded-[24px] text-sm leading-relaxed shadow-sm transition-all hover:shadow-md",
-                          isIncoming 
-                            ? "bg-white text-slate-700 rounded-bl-none border border-slate-100" 
-                            : "bg-emerald-600 text-white rounded-br-none shadow-emerald-100"
+                          msg.message_type === 'INTERNAL' 
+                            ? "bg-amber-100 text-amber-900 rounded-br-none border border-amber-200"
+                            : isIncoming 
+                              ? "bg-white text-slate-700 rounded-bl-none border border-slate-100" 
+                              : "bg-emerald-600 text-white rounded-br-none shadow-emerald-100"
                         )}>
+                          {msg.message_type === 'INTERNAL' && <div className="flex items-center gap-1 text-[10px] uppercase font-bold text-amber-700 mb-1"><Lock size={10} /> Internal Note</div>}
                           {msg.body}
                         </div>
                         <div className="mt-2 flex items-center gap-2 px-1">
@@ -372,11 +438,14 @@ const ClientInboxPage = () => {
                     />
                     <div className="flex items-center justify-between p-2">
                       <div className="flex items-center gap-2 px-2">
-                        <button className="w-10 h-10 flex items-center justify-center text-slate-400 hover:bg-white rounded-full hover:shadow-sm transition-all"><Plus size={18} /></button>
-                        <button className="w-10 h-10 flex items-center justify-center text-slate-400 hover:bg-white rounded-full hover:shadow-sm transition-all"><Smile size={18} /></button>
-                        <button className="w-10 h-10 flex items-center justify-center text-slate-400 hover:bg-white rounded-full hover:shadow-sm transition-all"><Paperclip size={18} /></button>
+                        <button onClick={() => setIsInternal(!isInternal)} className={cn("px-3 py-1.5 flex items-center gap-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all", isInternal ? "bg-amber-100 text-amber-700" : "bg-slate-100 text-slate-400 hover:bg-slate-200")}>
+                          <Lock size={12} /> {isInternal ? 'Internal' : 'Public'}
+                        </button>
+                        <button onClick={handleSuggestDraft} disabled={isDrafting} className="px-3 py-1.5 flex items-center gap-1.5 rounded-full bg-blue-50 text-blue-600 text-[10px] font-bold uppercase tracking-widest hover:bg-blue-100 transition-all">
+                          {isDrafting ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />} AI Draft
+                        </button>
                       </div>
-                      <button onClick={handleSendMessage} disabled={!replyText.trim() || isSending} className={cn("text-white p-4 rounded-2xl transition-all shadow-xl", replyText.trim() && !isSending ? "bg-emerald-600 hover:bg-slate-900 shadow-emerald-100" : "bg-slate-300 cursor-not-allowed shadow-none")}>
+                      <button onClick={handleSendMessage} disabled={!replyText.trim() || isSending} className={cn("text-white p-4 rounded-2xl transition-all shadow-xl", replyText.trim() && !isSending ? (isInternal ? "bg-amber-500 hover:bg-amber-600 shadow-amber-200" : "bg-emerald-600 hover:bg-slate-900 shadow-emerald-100") : "bg-slate-300 cursor-not-allowed shadow-none")}>
                         {isSending ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
                       </button>
                     </div>
@@ -445,9 +514,18 @@ const ClientInboxPage = () => {
                       {activeContact.bot_paused ? "Resume Auto-Bot" : "Pause Auto-Bot"}
                     </button>
                   )}
-                  <button className="w-full py-3 px-4 bg-white border border-slate-100 rounded-xl text-xs font-bold text-slate-700 flex items-center gap-3 hover:bg-slate-50 transition-all text-rose-600">
-                    <Zap size={14} /> Close Conversation
-                  </button>
+                  {activeContact && (
+                    <button 
+                      onClick={handleArchive}
+                      className={cn(
+                        "w-full py-3 px-4 bg-white border border-slate-100 rounded-xl text-xs font-bold flex items-center gap-3 hover:bg-slate-50 transition-all",
+                        activeContact.is_archived ? "text-amber-600" : "text-slate-700"
+                      )}
+                    >
+                      <Archive size={14} className={activeContact.is_archived ? "text-amber-600" : "text-slate-400"} /> 
+                      {activeContact.is_archived ? "Unarchive Conversation" : "Archive Conversation"}
+                    </button>
+                  )}
                 </div>
 
                 {/* Tags */}

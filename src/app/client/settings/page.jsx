@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { User, Mail, Phone, Hash, CreditCard, Lock, Settings, Loader2, ShieldCheck, LogOut, MapPin } from 'lucide-react';
+import { User, Mail, Phone, Hash, CreditCard, Lock, Settings, Loader2, ShieldCheck, LogOut, MapPin, Key, Globe, Paintbrush } from 'lucide-react';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import axios from 'axios';
 import { useTour } from '@/lib/TourContext';
@@ -18,7 +18,10 @@ const ClientSettingsPage = () => {
     whatsapp_access_token: '',
     whatsapp_phone_number_id: '',
     whatsapp_waba_id: '',
-    whatsapp_verify_token: ''
+    whatsapp_verify_token: '',
+    api_key: '',
+    white_label_name: '',
+    white_label_domain: ''
   });
   
   const user = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('user') || '{}') : {};
@@ -37,7 +40,10 @@ const ClientSettingsPage = () => {
         whatsapp_access_token: res.data.client.whatsapp_access_token || '',
         whatsapp_phone_number_id: res.data.client.whatsapp_phone_number_id || '',
         whatsapp_waba_id: res.data.client.whatsapp_waba_id || '',
-        whatsapp_verify_token: res.data.client.whatsapp_verify_token || ''
+        whatsapp_verify_token: res.data.client.whatsapp_verify_token || '',
+        api_key: res.data.client.api_key || '',
+        white_label_name: res.data.client.white_label_name || '',
+        white_label_domain: res.data.client.white_label_domain || ''
       });
     } catch (err) {
       console.error('Failed to fetch profile');
@@ -242,6 +248,73 @@ const ClientSettingsPage = () => {
               <div>
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Profile ID</p>
                 <p className="text-base font-semibold text-slate-700 tracking-tight italic">#KB-{client?.id || '0000'}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Enterprise Features */}
+          <div className="space-y-1">
+            <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-4 ml-1">Enterprise Features</h3>
+            <div className="bg-white border border-slate-100 rounded-[24px] sm:rounded-[32px] p-4 sm:p-8 space-y-6 sm:space-y-8">
+              <div className="space-y-2">
+                <label className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1"><Key size={12}/> API Key</label>
+                <div className="flex flex-col sm:flex-row gap-4">
+                  {isEditing ? (
+                    <input 
+                      value={editData.api_key} 
+                      onChange={e => setEditData({...editData, api_key: e.target.value})} 
+                      className="flex-1 bg-slate-50 border border-slate-100 rounded-2xl px-5 py-4 outline-none focus:border-emerald-500 transition-all font-semibold text-sm" 
+                      placeholder="e.g. sk_live_xxxxxxxxxx"
+                    />
+                  ) : (
+                    <div className="flex-1 bg-slate-50 rounded-2xl px-5 py-4 font-mono text-slate-700 text-sm border border-transparent">
+                      {client?.api_key || 'No API Key generated'}
+                    </div>
+                  )}
+                  <button 
+                    onClick={() => {
+                      const uuid = crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+                      setEditData({...editData, api_key: 'ak_' + uuid.replace(/-/g, '')});
+                    }}
+                    disabled={!isEditing}
+                    className="px-6 py-4 bg-slate-100 text-slate-600 rounded-2xl text-[10px] font-bold uppercase tracking-widest hover:bg-slate-200 transition-all disabled:opacity-0"
+                  >
+                    Generate
+                  </button>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
+                <div className="space-y-2">
+                  <label className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1"><Paintbrush size={12}/> White-label Name</label>
+                  {isEditing ? (
+                    <input 
+                      value={editData.white_label_name} 
+                      onChange={e => setEditData({...editData, white_label_name: e.target.value})} 
+                      className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-4 outline-none focus:border-emerald-500 transition-all font-semibold text-sm" 
+                      placeholder="e.g. My Agency"
+                    />
+                  ) : (
+                    <div className="bg-slate-50 rounded-2xl px-5 py-4 font-semibold text-slate-700 text-sm border border-transparent">
+                      {client?.white_label_name || 'Not configured'}
+                    </div>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <label className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1"><Globe size={12}/> White-label Domain</label>
+                  {isEditing ? (
+                    <input 
+                      value={editData.white_label_domain} 
+                      onChange={e => setEditData({...editData, white_label_domain: e.target.value})} 
+                      className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-4 outline-none focus:border-emerald-500 transition-all font-semibold text-sm" 
+                      placeholder="e.g. app.myagency.com"
+                    />
+                  ) : (
+                    <div className="bg-slate-50 rounded-2xl px-5 py-4 font-semibold text-slate-700 text-sm border border-transparent">
+                      {client?.white_label_domain || 'Not configured'}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>

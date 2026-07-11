@@ -44,6 +44,7 @@ const InstagramIcon = ({ size = 14, className }) => (
 
 const ClientAutomationsPage = () => {
   const [automations, setAutomations] = useState([]);
+  const [workflows, setWorkflows] = useState([]);
   const [client, setClient] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedChannel, setSelectedChannel] = useState('WHATSAPP'); // WHATSAPP, FACEBOOK, INSTAGRAM
@@ -73,6 +74,11 @@ const ClientAutomationsPage = () => {
         headers: { Authorization: `Bearer ${token}` }
       });
       setAutomations(autoRes.data);
+
+      const wfRes = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/workflows/`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setWorkflows(wfRes.data);
 
       const profileRes = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/profile`, {
         headers: { Authorization: `Bearer ${token}` }
@@ -212,17 +218,28 @@ const ClientAutomationsPage = () => {
     if (!confirm('Are you sure you want to delete this rule?')) return;
     try {
       const token = localStorage.getItem('token');
-      await axios.delete(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/automations/${id}/`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      if (id.startsWith('wf_')) {
+        const realId = id.replace('wf_', '');
+        await axios.delete(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/workflows/${realId}/`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+      } else {
+        await axios.delete(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/automations/${id}/`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+      }
       setIsDetailModalOpen(false);
       fetchData();
     } catch (err) {
-      console.error('Delete failed');
+      console.error('Delete failed', err);
     }
   };
 
   const openDetail = (auto) => {
+    if (auto.is_workflow) {
+      window.location.href = `/client/automations/builder/${auto.id}`;
+      return;
+    }
     setSelectedAuto(auto);
     setEditFormData({
       name: auto.name,
@@ -379,17 +396,32 @@ const ClientAutomationsPage = () => {
                       if (chs.length === 0) return selectedChannel === 'WHATSAPP';
                       return chs.includes(selectedChannel);
                     })
+                    .map(auto => ({ ...auto, is_workflow: false }))
+                    .concat(
+                      workflows
+                        .filter(wf => {
+                          const chs = wf.channels || [];
+                          if (chs.length === 0) return selectedChannel === 'WHATSAPP';
+                          return chs.includes(selectedChannel);
+                        })
+                        .map(wf => ({ ...wf, is_workflow: true, keywords: wf.trigger_value || [], response: 'Visual Workflow' }))
+                    )
                     .map((auto, i) => (
                       <tr 
-                        key={auto.id} 
+                        key={auto.is_workflow ? `wf_${auto.id}` : auto.id} 
                         onClick={() => openDetail(auto)}
                         className="hover:bg-slate-50/30 cursor-pointer transition-colors group"
                       >
                         <td className="px-8 py-6 text-sm font-bold text-slate-400 italic">{((i + 1).toString().padStart(2, '0'))}</td>
                         <td className="px-8 py-6">
-                          <div className="flex flex-wrap gap-2">
-                          {auto.keywords.map(kw => (
-                            <span key={kw} className="px-2.5 py-1 bg-slate-50 text-slate-600 text-[11px] font-bold rounded-lg border border-slate-100 group-hover:bg-white transition-colors whitespace-nowrap">{kw}</span>
+                          <div className="flex flex-wrap gap-2 items-center">
+                          {auto.is_workflow && (
+                            <span className="px-2 py-0.5 bg-blue-100 text-blue-700 text-[10px] font-bold uppercase rounded flex items-center gap-1">
+                              <LayoutGrid size={12} /> Workflow
+                            </span>
+                          )}
+                          {auto.keywords.map((kw, idx) => (
+                            <span key={idx} className="px-2.5 py-1 bg-slate-50 text-slate-600 text-[11px] font-bold rounded-lg border border-slate-100 group-hover:bg-white transition-colors whitespace-nowrap">{kw}</span>
                           ))}
                         </div>
                       </td>
@@ -447,7 +479,19 @@ const ClientAutomationsPage = () => {
                     <p className="text-xs text-slate-500 font-medium leading-relaxed">Respond automatically when specific words or phrases are found in a message.</p>
                   </button>
 
-                  {/* Option 3: AI */}
+                  {/* Option 3: Visual Workflow */}
+                  <a 
+                    href="/client/automations/builder/new"
+                    className="flex flex-col items-center text-center p-6 sm:p-8 bg-blue-50/50 border-2 border-transparent hover:border-blue-600 rounded-[24px] sm:rounded-[32px] transition-all group md:col-span-2"
+                  >
+                    <div className="w-16 h-16 bg-blue-600 text-white rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-blue-100 transition-transform">
+                      <LayoutGrid size={32} />
+                    </div>
+                    <h3 className="text-lg font-bold text-slate-900 mb-2">Visual Workflow Builder</h3>
+                    <p className="text-xs text-slate-500 font-medium leading-relaxed">Drag and drop blocks to build complex Chatbots with buttons, conditions, and agent handoffs.</p>
+                  </a>
+
+                  {/* Option 4: AI */}
                   <button 
                     onClick={() => { setIsChoiceModalOpen(false); setIsAIModalOpen(true); }}
                     className="flex flex-col items-center text-center p-6 sm:p-8 bg-teal-50/50 border-2 border-transparent hover:border-teal-600 rounded-[24px] sm:rounded-[32px] transition-all group md:col-span-2"

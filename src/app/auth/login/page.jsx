@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Loader2, Check, Sparkles } from 'lucide-react';
+import { Loader2, Check, Sparkles, Eye, EyeOff } from 'lucide-react';
 import axios from 'axios';
 
 const LoginPage = () => {
@@ -11,6 +11,7 @@ const LoginPage = () => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [googleClientId, setGoogleClientId] = useState('');
   const router = useRouter();
@@ -57,7 +58,7 @@ const LoginPage = () => {
               localStorage.setItem('token', token);
               localStorage.setItem('user', JSON.stringify(user));
 
-              if (user.role !== 'ADMIN' && !localStorage.getItem('aisa_tour_completed')) {
+              if (user.role === 'CLIENT' && !localStorage.getItem('aisa_tour_completed')) {
                 localStorage.setItem('aisa_tour_pending', 'true');
                 localStorage.removeItem('aisa_tour_step');
               }
@@ -99,7 +100,7 @@ const LoginPage = () => {
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(user));
 
-      if (user.role !== 'ADMIN' && !localStorage.getItem('aisa_tour_completed')) {
+      if (user.role === 'CLIENT' && !localStorage.getItem('aisa_tour_completed')) {
         localStorage.setItem('aisa_tour_pending', 'true');
         localStorage.removeItem('aisa_tour_step');
       }
@@ -162,15 +163,22 @@ const LoginPage = () => {
             />
           </div>
 
-          <div className="space-y-1">
+          <div className="space-y-1 relative">
             <input
-              type="password"
+              type={showPassword ? "text" : "password"}
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Password"
-              className="w-full bg-[#96b39d]/90 text-white placeholder-[#4d6a54] outline-none rounded-full py-4.5 px-8 font-bold text-sm transition-all shadow-inner focus:bg-[#8ca893]"
+              className="w-full bg-[#96b39d]/90 text-white placeholder-[#4d6a54] outline-none rounded-full py-4.5 pl-8 pr-12 font-bold text-sm transition-all shadow-inner focus:bg-[#8ca893]"
             />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-[#4d6a54] hover:text-[#2f593b] transition-colors focus:outline-none"
+            >
+              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+            </button>
           </div>
 
           {/* Remember me & Forgot Password */}

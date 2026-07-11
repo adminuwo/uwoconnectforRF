@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import CreateCampaignModal from '@/components/campaigns/CreateCampaignModal';
-import { Megaphone, RefreshCw, Loader2, Play, Users, CheckCircle2, XCircle, AlertCircle } from 'lucide-react';
+import { Megaphone, RefreshCw, Loader2, Play, Users, CheckCircle2, XCircle, AlertCircle, Eye, CheckCheck } from 'lucide-react';
 import axios from 'axios';
 
 export default function CampaignsPage() {
@@ -126,21 +126,29 @@ export default function CampaignsPage() {
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between sm:justify-end gap-6 w-full sm:w-auto border-t sm:border-t-0 pt-3 sm:pt-0">
-                    <div className="flex gap-6 text-sm">
-                      <div className="text-center">
-                        <p className="text-slate-400 font-bold text-[10px] uppercase tracking-widest mb-1">Sent</p>
-                        <p className="font-black text-slate-900 flex items-center justify-center gap-1"><CheckCircle2 size={14} className="text-slate-400"/> {campaign.total_sent}</p>
+                    <div className="flex items-center justify-between sm:justify-end gap-6 w-full sm:w-auto border-t sm:border-t-0 pt-3 sm:pt-0">
+                      <div className="flex gap-4 sm:gap-6 text-sm">
+                        <div className="text-center">
+                          <p className="text-slate-400 font-bold text-[10px] uppercase tracking-widest mb-1">Sent</p>
+                          <p className="font-black text-slate-900 flex items-center justify-center gap-1"><CheckCircle2 size={14} className="text-slate-400"/> {campaign.total_sent}</p>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-slate-400 font-bold text-[10px] uppercase tracking-widest mb-1">Delivered</p>
+                          <p className="font-black text-slate-900 flex items-center justify-center gap-1"><CheckCheck size={14} className="text-emerald-400"/> {campaign.total_delivered}</p>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-slate-400 font-bold text-[10px] uppercase tracking-widest mb-1">Read</p>
+                          <p className="font-black text-slate-900 flex items-center justify-center gap-1"><Eye size={14} className="text-blue-400"/> {campaign.total_read}</p>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-slate-400 font-bold text-[10px] uppercase tracking-widest mb-1">Failed</p>
+                          <p className="font-black text-slate-900 flex items-center justify-center gap-1"><XCircle size={14} className="text-rose-400"/> {campaign.total_failed}</p>
+                        </div>
                       </div>
-                      <div className="text-center">
-                        <p className="text-slate-400 font-bold text-[10px] uppercase tracking-widest mb-1">Failed</p>
-                        <p className="font-black text-slate-900 flex items-center justify-center gap-1"><XCircle size={14} className="text-rose-400"/> {campaign.total_failed}</p>
+                      <div className={`px-4 py-1.5 rounded-lg border text-xs font-bold tracking-widest uppercase shrink-0 ${getStatusColor(campaign.status)}`}>
+                        {campaign.status}
                       </div>
                     </div>
-                    <div className={`px-4 py-1.5 rounded-lg border text-xs font-bold tracking-widest uppercase shrink-0 ${getStatusColor(campaign.status)}`}>
-                      {campaign.status}
-                    </div>
-                  </div>
                 </div>
               ))}
             </div>

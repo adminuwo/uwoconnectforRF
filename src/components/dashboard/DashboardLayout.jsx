@@ -5,14 +5,16 @@ import React, { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import Sidebar from './Sidebar';
 
-import { ShieldAlert, Menu } from 'lucide-react';
+import { ShieldAlert, Menu, MessageCircle } from 'lucide-react';
 
 const PlatformAssistant = dynamic(() => import('./PlatformAssistant'), { ssr: false });
 const ProductTour       = dynamic(() => import('@/components/tour/ProductTour'), { ssr: false });
+const TeamChatDrawer    = dynamic(() => import('@/components/team/TeamChatDrawer'), { ssr: false });
 
 
 const DashboardLayout = ({ children, role: initialRole }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [chatOpen, setChatOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [user, setUser] = useState(null);
 
@@ -34,11 +36,19 @@ const DashboardLayout = ({ children, role: initialRole }) => {
     }, 100);
 
     const storedUser = localStorage.getItem('user');
+    const token = localStorage.getItem('token');
+    
+    if (!token || !storedUser) {
+      window.location.href = '/auth/login';
+      return;
+    }
+    
     if (storedUser) {
       try {
         setUser(JSON.parse(storedUser));
       } catch (e) {
         console.warn('Failed to parse user data');
+        window.location.href = '/auth/login';
       }
     }
     return () => clearTimeout(t);
@@ -75,7 +85,15 @@ const DashboardLayout = ({ children, role: initialRole }) => {
 
           <div className="flex items-center gap-6">
             {mounted && (
-              <div className="flex items-center gap-2 sm:gap-4 group cursor-pointer hover:bg-slate-50/50 p-1.5 sm:p-2 pr-3 sm:pr-6 rounded-full transition-all duration-300 border border-transparent hover:border-slate-100">
+              <>
+                <button
+                  onClick={() => setChatOpen(true)}
+                  className="p-2 text-slate-500 hover:text-indigo-600 bg-slate-50 hover:bg-indigo-50 rounded-full transition-colors relative"
+                  title="Team Chat"
+                >
+                  <MessageCircle size={20} />
+                </button>
+                <div className="flex items-center gap-2 sm:gap-4 group cursor-pointer hover:bg-slate-50/50 p-1.5 sm:p-2 pr-3 sm:pr-6 rounded-full transition-all duration-300 border border-transparent hover:border-slate-100">
                 <div className="text-right hidden sm:block">
                   <p className="text-sm font-black text-slate-900 leading-none mb-1 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-[#16A34A] group-hover:to-[#059669] transition-all">{displayName}</p>
                   <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest leading-none">{displayRole}</p>
@@ -85,6 +103,7 @@ const DashboardLayout = ({ children, role: initialRole }) => {
                   <span className="relative z-10">{displayName[0].toUpperCase()}</span>
                 </div>
               </div>
+              </>
             )}
           </div>
         </header>
@@ -101,6 +120,7 @@ const DashboardLayout = ({ children, role: initialRole }) => {
       </main>
       <PlatformAssistant />
       <ProductTour />
+      <TeamChatDrawer isOpen={chatOpen} onClose={() => setChatOpen(false)} />
       </div>
     </div>
   );

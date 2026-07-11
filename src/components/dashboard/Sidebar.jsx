@@ -62,12 +62,20 @@ const Sidebar = ({ role, isOpen, onClose }) => {
     { name: 'Messages', href: '/client/inbox', icon: MessageSquare },
     { name: 'Broadcasts', href: '/client/campaigns', icon: Megaphone },
     { name: 'Knowledge Base', href: '/client/knowledge', icon: Brain },
+    { name: 'Team', href: '/client/team', icon: ShieldCheck },
     { name: 'Settings', href: '/client/settings', icon: Settings },
     { name: 'Support', href: '/client/support', icon: LifeBuoy },
   ];
 
+  const agentLinks = [
+    { name: 'Dashboard', href: '/client', icon: LayoutDashboard },
+    { name: 'Leads (CRM)', href: '/client/crm', icon: Users },
+    { name: 'Messages', href: '/client/inbox', icon: MessageSquare },
+    { name: 'Knowledge Base', href: '/client/knowledge', icon: Brain },
+    { name: 'Support', href: '/client/support', icon: LifeBuoy },
+  ];
 
-  const links = role === 'ADMIN' ? adminLinks : clientLinks;
+  const links = role === 'ADMIN' ? adminLinks : role === 'AGENT' ? agentLinks : clientLinks;
 
   const handleLogout = () => {
     localStorage.removeItem('token');

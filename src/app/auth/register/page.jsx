@@ -2,23 +2,28 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { Loader2, CheckCircle2, Clock, Sparkles } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Loader2, CheckCircle2, Clock, Sparkles, Eye, EyeOff } from 'lucide-react';
 import axios from 'axios';
 import TermsModal from '@/components/TermsModal';
 
 const RegisterPage = () => {
+  const searchParams = useSearchParams();
+  const inviteToken = searchParams?.get('invite_token');
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     businessName: '',
-    password: ''
+    password: '',
+    invite_token: inviteToken || ''
   });
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [showTerms, setShowTerms] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [googleClientId, setGoogleClientId] = useState('');
   const router = useRouter();
 
@@ -56,7 +61,8 @@ const RegisterPage = () => {
           if (tokenResponse && tokenResponse.access_token) {
             try {
               const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/auth/google-login`, {
-                access_token: tokenResponse.access_token
+                access_token: tokenResponse.access_token,
+                invite_token: inviteToken
               });
               
               if (res.status === 201) {
@@ -109,7 +115,18 @@ const RegisterPage = () => {
       await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/auth/register`, formData);
       setSuccess(true);
     } catch (err) {
-      setError(err.response?.data?.message || 'Registration failed');
+      if (err.response?.data) {
+        if (err.response.data.message) {
+          setError(err.response.data.message);
+        } else {
+          // Handle DRF ValidationError dictionary
+          const firstErrorKey = Object.keys(err.response.data)[0];
+          const firstErrorVal = err.response.data[firstErrorKey];
+          setError(Array.isArray(firstErrorVal) ? firstErrorVal[0] : firstErrorVal);
+        }
+      } else {
+        setError('Registration failed');
+      }
     } finally {
       setLoading(false);
     }
@@ -180,16 +197,18 @@ const RegisterPage = () => {
             />
           </div>
 
-          <div className="space-y-1">
-            <input
-              type="text"
-              required
-              value={formData.businessName}
-              onChange={(e) => setFormData({ ...formData, businessName: e.target.value })}
-              placeholder="Business Name"
-              className="w-full bg-[#96b39d]/90 text-white placeholder-[#4d6a54] outline-none rounded-full py-4.5 px-8 font-bold text-sm transition-all shadow-inner focus:bg-[#8ca893]"
-            />
-          </div>
+          {!inviteToken && (
+            <div className="space-y-1">
+              <input
+                type="text"
+                required
+                value={formData.businessName}
+                onChange={(e) => setFormData({ ...formData, businessName: e.target.value })}
+                placeholder="Business Name"
+                className="w-full bg-[#96b39d]/90 text-white placeholder-[#4d6a54] outline-none rounded-full py-4.5 px-8 font-bold text-sm transition-all shadow-inner focus:bg-[#8ca893]"
+              />
+            </div>
+          )}
 
           <div className="space-y-1">
             <input
@@ -202,15 +221,22 @@ const RegisterPage = () => {
             />
           </div>
 
-          <div className="space-y-1">
+          <div className="space-y-1 relative">
             <input
-              type="password"
+              type={showPassword ? "text" : "password"}
               required
               value={formData.password}
               onChange={(e) => setFormData({ ...formData, password: e.target.value })}
               placeholder="Password"
-              className="w-full bg-[#96b39d]/90 text-white placeholder-[#4d6a54] outline-none rounded-full py-4.5 px-8 font-bold text-sm transition-all shadow-inner focus:bg-[#8ca893]"
+              className="w-full bg-[#96b39d]/90 text-white placeholder-[#4d6a54] outline-none rounded-full py-4.5 pl-8 pr-12 font-bold text-sm transition-all shadow-inner focus:bg-[#8ca893]"
             />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-[#4d6a54] hover:text-[#2f593b] transition-colors focus:outline-none"
+            >
+              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+            </button>
           </div>
 
           {/* Terms checkbox */}

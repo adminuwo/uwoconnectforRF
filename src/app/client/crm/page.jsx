@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Users, Search, MoreVertical, Phone, Mail, MessageSquare, Download, LayoutGrid, Table } from 'lucide-react';
 import axios from 'axios';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
+import ContactDetailsModal from '@/components/crm/ContactDetailsModal';
 
 const STAGES = [
   { id: 'NEW', label: 'New Lead', color: 'bg-blue-100 text-blue-700 border-blue-200' },
@@ -19,10 +20,7 @@ export default function CRMPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [draggedContactId, setDraggedContactId] = useState(null);
   const [viewMode, setViewMode] = useState('kanban'); // 'kanban' or 'sheet'
-
-  useEffect(() => {
-    fetchContacts();
-  }, []);
+  const [selectedContact, setSelectedContact] = useState(null);
 
   const fetchContacts = async () => {
     try {
@@ -36,6 +34,35 @@ export default function CRMPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  useEffect(() => {
+    fetchContacts();
+  }, []);
+
+  const handleImport = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const token = localStorage.getItem('token');
+      const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/contacts/import_csv/`, formData, {
+        headers: { 
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      alert(res.data.message || 'Contacts imported successfully!');
+      fetchContacts();
+    } catch (error) {
+      console.error("Error importing contacts:", error);
+      alert(error.response?.data?.message || 'Failed to import contacts');
+    }
+    // Reset file input
+    e.target.value = '';
   };
 
   const updateContactStage = async (contactId, newStage) => {
@@ -143,13 +170,20 @@ export default function CRMPage() {
             />
           </div>
           
-          <button 
-            onClick={exportToCSV}
-            className="flex items-center justify-center gap-2 bg-emerald-600 text-white px-4 py-2 rounded-xl text-sm font-bold shadow-md shadow-slate-200 hover:bg-emerald-700 transition-all w-full sm:w-auto"
-          >
-            <Download size={16} />
-            Export to Excel
-          </button>
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <label className="flex items-center justify-center gap-2 bg-slate-800 text-white px-4 py-2 rounded-xl text-sm font-bold shadow-md shadow-slate-200 hover:bg-slate-700 transition-all cursor-pointer flex-1 sm:flex-none">
+              <input type="file" accept=".csv" className="hidden" onChange={handleImport} />
+              <Download size={16} className="rotate-180" />
+              Import CSV
+            </label>
+            <button 
+              onClick={exportToCSV}
+              className="flex items-center justify-center gap-2 bg-emerald-600 text-white px-4 py-2 rounded-xl text-sm font-bold shadow-md shadow-slate-200 hover:bg-emerald-700 transition-all flex-1 sm:flex-none"
+            >
+              <Download size={16} />
+              Export to Excel
+            </button>
+          </div>
         </div>
       </header>
 
@@ -174,7 +208,16 @@ export default function CRMPage() {
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {filteredContacts.map(contact => (
-                    <tr key={contact.id} className="hover:bg-slate-50/80 transition-colors group">
+                    <tr 
+                      key={contact.id} 
+                      className="hover:bg-slate-50/80 transition-colors group cursor-pointer"
+                      onClick={(e) => {
+                        // Prevent opening modal when clicking on the select dropdown
+                        if (e.target.tagName !== 'SELECT' && e.target.tagName !== 'OPTION') {
+                          setSelectedContact(contact);
+                        }
+                      }}
+                    >
                       <td className="py-4 px-6">
                         <div className="font-bold text-slate-800">{contact.name !== 'Unknown' ? contact.name : 'Unknown User'}</div>
                       </td>
@@ -247,6 +290,7 @@ export default function CRMPage() {
                         key={contact.id}
                         draggable
                         onDragStart={(e) => handleDragStart(e, contact.id)}
+                        onClick={() => setSelectedContact(contact)}
                         className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 cursor-grab active:cursor-grabbing hover:shadow-md transition-shadow group relative"
                       >
                         <div className="flex justify-between items-start mb-2">
@@ -298,6 +342,16 @@ export default function CRMPage() {
           </div>
         )}
       </main>
+
+      {/* Modals */}
+      <ContactDetailsModal 
+        isOpen={!!selectedContact} 
+        contact={selectedContact} 
+        onClose={() => setSelectedContact(null)}
+        onUpdated={(updatedContact) => {
+          setContacts(prev => prev.map(c => c.id === updatedContact.id ? updatedContact : c));
+        }}
+      />
 
       <style jsx>{`
         .custom-scrollbar::-webkit-scrollbar { height: 6px; width: 4px; }
