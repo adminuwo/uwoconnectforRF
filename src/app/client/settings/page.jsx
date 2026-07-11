@@ -279,7 +279,7 @@ const ClientSettingsPage = () => {
                 <span className="text-sm font-semibold text-slate-900">Change Password</span>
               </button>
               <button 
-                onClick={() => { localStorage.clear(); window.location.href = '/auth/login'; }}
+                onClick={() => { localStorage.removeItem('token'); localStorage.removeItem('user'); window.location.href = '/auth/login'; }}
                 className="flex items-center gap-4 p-5 bg-white border border-slate-100 rounded-3xl hover:border-red-100 transition-all group text-left"
               >
                 <div className="w-10 h-10 rounded-xl bg-red-50 text-red-500 flex items-center justify-center transition-colors group-hover:bg-red-600 group-hover:text-white shrink-0">

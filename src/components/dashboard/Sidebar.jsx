@@ -70,7 +70,8 @@ const Sidebar = ({ role, isOpen, onClose }) => {
   const links = role === 'ADMIN' ? adminLinks : clientLinks;
 
   const handleLogout = () => {
-    localStorage.clear();
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
     window.location.href = '/auth/login';
   };
 
