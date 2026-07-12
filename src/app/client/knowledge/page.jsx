@@ -20,7 +20,7 @@ const KnowledgeBasePage = () => {
       });
       setDocuments(res.data);
     } catch (err) {
-      console.error('Failed to fetch knowledge base documents');
+      console.error('Failed to fetch knowledge base documents', err.response?.data || err.message);
     } finally {
       setLoading(false);
     }

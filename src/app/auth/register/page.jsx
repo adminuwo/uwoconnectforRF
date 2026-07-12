@@ -157,35 +157,35 @@ const RegisterPage = () => {
       <div className="absolute -top-10 -left-10 w-48 h-48 bg-white/10 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute -bottom-10 -right-10 w-72 h-72 bg-emerald-400/10 rounded-full blur-3xl pointer-events-none" />
 
-      <div className="w-full max-w-[440px] z-10 bg-white/80 backdrop-blur-[24px] border border-white/50 rounded-[40px] p-6 sm:p-10 shadow-[0_20px_50px_rgba(0,0,0,0.05)] flex flex-col items-center">
+      <div className="w-full max-w-[400px] z-10 bg-white/80 backdrop-blur-[24px] border border-white/50 rounded-[36px] p-5 sm:py-5 sm:px-8 shadow-[0_20px_50px_rgba(0,0,0,0.05)] flex flex-col items-center">
         {/* Brand Logo */}
-        <div className="flex items-center gap-3 mb-8 bg-white/20 px-6 py-2.5 rounded-full border border-white/30 backdrop-blur-sm shadow-sm">
-          <div className="w-9 h-9 rounded-full bg-[#45724c] flex items-center justify-center shadow-md">
-            <Sparkles className="text-white animate-pulse" size={16} strokeWidth={2.5} />
+        <div className="flex items-center gap-2.5 mb-4 bg-white/20 px-5 py-2 rounded-full border border-white/30 backdrop-blur-sm shadow-sm">
+          <div className="w-7 h-7 rounded-full bg-[#45724c] flex items-center justify-center shadow-md">
+            <Sparkles className="text-white animate-pulse" size={13} strokeWidth={2.5} />
           </div>
-          <span className="text-[#2f593b] font-black text-lg tracking-tight uppercase">
+          <span className="text-[#2f593b] font-black text-base tracking-tight uppercase">
             AisaConnect
           </span>
         </div>
 
         {/* Title Section */}
-        <div className="text-center mb-8">
-          <h1 className="text-5xl font-black text-[#2f593b] tracking-tight leading-none mb-3">
+        <div className="text-center mb-4">
+          <h1 className="text-3xl font-black text-[#2f593b] tracking-tight leading-none mb-1">
             Register
           </h1>
-          <p className="text-[#5d7c66] text-xs font-bold uppercase tracking-widest italic">
+          <p className="text-[#5d7c66] text-[10px] font-bold uppercase tracking-widest italic">
             Create your account
           </p>
         </div>
 
         {error && (
-          <div className="w-full mb-6 p-4 bg-red-50/80 text-red-600 text-xs font-bold rounded-[24px] border border-red-100 text-center animate-in fade-in duration-300">
+          <div className="w-full mb-4 p-3 bg-red-50/80 text-red-600 text-xs font-bold rounded-[20px] border border-red-100 text-center animate-in fade-in duration-300">
             {error}
           </div>
         )}
 
         {/* Form */}
-        <form onSubmit={handleRegister} className="w-full space-y-4.5">
+        <form onSubmit={handleRegister} className="w-full space-y-2.5">
           <div className="space-y-1">
             <input
               type="text"
@@ -193,7 +193,7 @@ const RegisterPage = () => {
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               placeholder="Your Name"
-              className="w-full bg-[#96b39d]/90 text-white placeholder-[#4d6a54] outline-none rounded-full py-4.5 px-8 font-bold text-sm transition-all shadow-inner focus:bg-[#8ca893]"
+              className="w-full bg-[#96b39d]/90 text-white placeholder-[#4d6a54] outline-none rounded-full py-2.5 px-7 font-bold text-sm transition-all shadow-inner focus:bg-[#8ca893]"
             />
           </div>
 
@@ -205,7 +205,7 @@ const RegisterPage = () => {
                 value={formData.businessName}
                 onChange={(e) => setFormData({ ...formData, businessName: e.target.value })}
                 placeholder="Business Name"
-                className="w-full bg-[#96b39d]/90 text-white placeholder-[#4d6a54] outline-none rounded-full py-4.5 px-8 font-bold text-sm transition-all shadow-inner focus:bg-[#8ca893]"
+                className="w-full bg-[#96b39d]/90 text-white placeholder-[#4d6a54] outline-none rounded-full py-2.5 px-7 font-bold text-sm transition-all shadow-inner focus:bg-[#8ca893]"
               />
             </div>
           )}
@@ -217,7 +217,7 @@ const RegisterPage = () => {
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               placeholder="username@mail.com"
-              className="w-full bg-[#96b39d]/90 text-white placeholder-[#4d6a54] outline-none rounded-full py-4.5 px-8 font-bold text-sm transition-all shadow-inner focus:bg-[#8ca893]"
+              className="w-full bg-[#96b39d]/90 text-white placeholder-[#4d6a54] outline-none rounded-full py-2.5 px-7 font-bold text-sm transition-all shadow-inner focus:bg-[#8ca893]"
             />
           </div>
 
@@ -228,7 +228,7 @@ const RegisterPage = () => {
               value={formData.password}
               onChange={(e) => setFormData({ ...formData, password: e.target.value })}
               placeholder="Password"
-              className="w-full bg-[#96b39d]/90 text-white placeholder-[#4d6a54] outline-none rounded-full py-4.5 pl-8 pr-12 font-bold text-sm transition-all shadow-inner focus:bg-[#8ca893]"
+              className="w-full bg-[#96b39d]/90 text-white placeholder-[#4d6a54] outline-none rounded-full py-2.5 pl-7 pr-12 font-bold text-sm transition-all shadow-inner focus:bg-[#8ca893]"
             />
             <button
               type="button"
@@ -240,9 +240,9 @@ const RegisterPage = () => {
           </div>
 
           {/* Terms checkbox */}
-          <div className="flex items-start gap-3 px-3 text-[#2f593b] text-xs font-black select-none leading-relaxed">
+          <div className="flex items-start gap-3 px-1.5 text-[#2f593b] text-xs font-black select-none leading-relaxed">
             <label className="flex items-center gap-2.5 cursor-pointer mt-0.5 shrink-0">
-              <div className="relative w-4.5 h-4.5 rounded-full border-2 border-[#2f593b] flex items-center justify-center transition-all bg-transparent">
+              <div className="relative w-4 h-4 rounded-full border-2 border-[#2f593b] flex items-center justify-center transition-all bg-transparent">
                 <input
                   type="checkbox"
                   className="sr-only"
@@ -265,11 +265,11 @@ const RegisterPage = () => {
           </div>
 
           {/* Register Button */}
-          <div className="pt-3">
+          <div className="pt-1">
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-4.5 bg-[#45724c] hover:bg-[#3b6342] text-white font-black text-sm uppercase tracking-widest rounded-full transition-all duration-300 shadow-lg shadow-emerald-950/10 flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
+              className="w-full py-2.5 bg-[#45724c] hover:bg-[#3b6342] text-white font-black text-sm uppercase tracking-widest rounded-full transition-all duration-300 shadow-lg shadow-emerald-950/10 flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
             >
               {loading ? <Loader2 className="animate-spin text-white" size={18} /> : 'Sign Up'}
             </button>
@@ -277,29 +277,29 @@ const RegisterPage = () => {
         </form>
 
         {/* Divider */}
-        <div className="w-full flex items-center gap-4 my-10">
+        <div className="w-full flex items-center gap-4 my-3">
           <div className="h-[1px] bg-[#2f593b]/20 flex-1" />
-          <span className="text-[#2f593b] text-xs font-black uppercase tracking-wider">Or continue with</span>
+          <span className="text-[#2f593b] text-[10px] font-black uppercase tracking-wider">Or continue with</span>
           <div className="h-[1px] bg-[#2f593b]/20 flex-1" />
         </div>
 
         {/* Social logins */}
         <div className="flex items-center justify-center">
-          <button onClick={handleGoogleLogin} className="w-14 h-14 bg-white rounded-full flex items-center justify-center shadow-lg shadow-emerald-950/5 hover:scale-105 transition-all cursor-pointer">
-            <svg className="w-6 h-6 text-slate-800" viewBox="0 0 24 24" fill="currentColor">
+          <button onClick={handleGoogleLogin} className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-lg shadow-emerald-950/5 hover:scale-105 transition-all cursor-pointer">
+            <svg className="w-5 h-5 text-slate-800" viewBox="0 0 24 24" fill="currentColor">
               <path d="M12.24 10.285V14.4h6.887c-.648 2.41-2.519 4.114-6.887 4.114-4.78 0-8.67-3.89-8.67-8.67s3.89-8.67 8.67-8.67c2.14 0 4.09.78 5.61 2.07l3.22-3.22C18.3 1.34 15.42 0 12.24 0 5.48 0 0 5.48 0 12.24s5.48 12.24 12.24 12.24c6.9 0 11.5-4.86 11.5-11.7 0-.79-.07-1.56-.2-2.3H12.24z"/>
             </svg>
           </button>
         </div>
 
         {/* Toggle to login */}
-        <div className="mt-10 text-center">
+        <div className="mt-3 text-center">
           <p className="text-xs font-bold text-[#5d7c66]">
             Already have an account? <Link href="/auth/login" className="text-[#2f593b] font-black underline">Log In</Link>
           </p>
         </div>
       </div>
-      
+
       <TermsModal isOpen={showTerms} onClose={() => setShowTerms(false)} />
     </div>
   );

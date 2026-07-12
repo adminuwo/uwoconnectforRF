@@ -11,6 +11,8 @@ import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { cn } from '@/lib/utils';
 const ClientOverview = () => {
   const [loading, setLoading] = useState(true);
+  const [userName, setUserName] = useState('User');
+  const [contacts, setContacts] = useState([]);
   const [statsData, setStatsData] = useState({
     totalConversations: 0,
     automationRuns: 0,
@@ -20,25 +22,42 @@ const ClientOverview = () => {
   const router = useRouter();
 
   useEffect(() => {
-    const fetchStats = async () => {
+    // Load user name from localStorage
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      try {
+        const parsed = JSON.parse(storedUser);
+        setUserName(parsed.name || 'User');
+      } catch (e) {
+        console.warn('Failed to parse user data');
+      }
+    }
+
+    const fetchDashboardData = async () => {
       try {
         const token = localStorage.getItem('token');
+        const headers = { Authorization: `Bearer ${token}` };
+        
+        // Fetch stats
         const res = await axios.get(
           `${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/client/stats`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`
-            }
-          }
+          { headers }
         );
         setStatsData(res.data);
+
+        // Fetch contacts
+        const contactsRes = await axios.get(
+          `${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/contacts/`,
+          { headers }
+        );
+        setContacts(contactsRes.data || []);
       } catch (err) {
-        console.error("Error fetching stats:", err);
+        console.error("Error fetching dashboard data:", err);
       } finally {
         setLoading(false);
       }
     };
-    fetchStats();
+    fetchDashboardData();
   }, []);
 
   const stats = [
@@ -71,7 +90,7 @@ const ClientOverview = () => {
         {/* Welcome Section */}
         <div data-tour="dashboard-welcome" className="flex flex-col sm:flex-row sm:items-center justify-between mb-10 sm:mb-16">
           <div>
-            <h1 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight mb-3">Welcome, Devansh</h1>
+            <h1 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight mb-3">Welcome, {userName}</h1>
             <p className="text-slate-500 font-medium italic text-xs sm:text-sm">Your automation command center is running smoothly.</p>
           </div>
           <div className="mt-6 sm:mt-0 flex items-center gap-4">
@@ -192,18 +211,28 @@ const ClientOverview = () => {
             {/* Recent Conversation Activity */}
             <div className="space-y-6">
               <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] ml-2 italic opacity-60">Live Conversations</p>
-              {[1,2,3].map(i => (
-                <div key={i} className="flex items-center gap-4 p-4 glass-panel hover-lift group cursor-pointer border border-white/60">
-                  <div className="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-emerald-50 group-hover:text-emerald-600 transition-all">
-                    <Smartphone size={20} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-bold text-slate-900">+91 98765 43210</p>
-                    <p className="text-[10px] text-slate-400 truncate italic">Query about Gas Booking...</p>
-                  </div>
-                  <ChevronRight size={14} className="text-slate-200 group-hover:text-slate-900 transition-all" />
+              {contacts.length === 0 ? (
+                <div className="text-center py-8 glass-panel border border-dashed border-slate-200">
+                  <p className="text-xs font-semibold text-slate-400 italic">No active conversations</p>
                 </div>
-              ))}
+              ) : (
+                contacts.slice(0, 3).map((contact) => (
+                  <div 
+                    key={contact.id || contact._id} 
+                    onClick={() => router.push('/client/inbox')}
+                    className="flex items-center gap-4 p-4 glass-panel hover-lift group cursor-pointer border border-white/60"
+                  >
+                    <div className="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-emerald-50 group-hover:text-emerald-600 transition-all">
+                      <Smartphone size={20} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-bold text-slate-900">{contact.name || contact.phone_number || 'Unknown'}</p>
+                      <p className="text-[10px] text-slate-400 truncate italic">{contact.phone_number || contact.platform_id}</p>
+                    </div>
+                    <ChevronRight size={14} className="text-slate-200 group-hover:text-slate-900 transition-all" />
+                  </div>
+                ))
+              )}
             </div>
           </div>
         </div>

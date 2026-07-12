@@ -19,7 +19,9 @@ import {
   Users,
   Megaphone,
   LifeBuoy,
-  Activity
+  Activity,
+  ShoppingBag,
+  Receipt
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -32,6 +34,9 @@ const TOUR_IDS = {
   'Messages':       'sidebar-inbox',
   'Broadcasts':     'sidebar-campaigns',
   'Knowledge Base': 'sidebar-knowledge',
+  'Catalog':        'sidebar-catalog',
+  'Orders':         'sidebar-orders',
+  'Team':           'sidebar-team',
   'Settings':       'sidebar-settings',
   'Dashboard':      'sidebar-dashboard',
   'Support':        'sidebar-support',
@@ -62,6 +67,8 @@ const Sidebar = ({ role, isOpen, onClose }) => {
     { name: 'Messages', href: '/client/inbox', icon: MessageSquare },
     { name: 'Broadcasts', href: '/client/campaigns', icon: Megaphone },
     { name: 'Knowledge Base', href: '/client/knowledge', icon: Brain },
+    { name: 'Catalog', href: '/client/catalog', icon: ShoppingBag },
+    { name: 'Orders', href: '/client/orders', icon: Receipt },
     { name: 'Team', href: '/client/team', icon: ShieldCheck },
     { name: 'Settings', href: '/client/settings', icon: Settings },
     { name: 'Support', href: '/client/support', icon: LifeBuoy },
@@ -72,6 +79,8 @@ const Sidebar = ({ role, isOpen, onClose }) => {
     { name: 'Leads (CRM)', href: '/client/crm', icon: Users },
     { name: 'Messages', href: '/client/inbox', icon: MessageSquare },
     { name: 'Knowledge Base', href: '/client/knowledge', icon: Brain },
+    { name: 'Catalog', href: '/client/catalog', icon: ShoppingBag },
+    { name: 'Orders', href: '/client/orders', icon: Receipt },
     { name: 'Support', href: '/client/support', icon: LifeBuoy },
   ];
 
@@ -101,20 +110,20 @@ const Sidebar = ({ role, isOpen, onClose }) => {
         )}
       >
       {/* Brand Header */}
-      <div className="p-8 pb-4 flex items-center gap-3">
-        <div className="w-10 h-10 bg-gradient-to-tr from-[#16A34A] to-[#059669] rounded-2xl flex items-center justify-center shadow-xl shadow-emerald-500/10 relative overflow-hidden group">
+      <div className="p-5 pb-2 flex items-center gap-3">
+        <div className="w-8 h-8 bg-gradient-to-tr from-[#16A34A] to-[#059669] rounded-xl flex items-center justify-center shadow-xl shadow-emerald-500/10 relative overflow-hidden group">
           <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-          <ZapIcon className="text-white relative z-10" size={20} strokeWidth={3} fill="currentColor" />
+          <ZapIcon className="text-white relative z-10" size={16} strokeWidth={3} fill="currentColor" />
         </div>
         <div>
-          <h1 className="text-base font-black text-slate-900 tracking-tight leading-none">AisaConnect</h1>
-          <span className="text-[8px] font-black text-[#059669] uppercase tracking-[0.2em] mt-1 block">V1.0 {role}</span>
+          <h1 className="text-sm font-black text-slate-900 tracking-tight leading-none">AisaConnect</h1>
+          <span className="text-[7px] font-black text-[#059669] uppercase tracking-[0.2em] mt-0.5 block">V1.0 {role}</span>
         </div>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 px-4 space-y-1 mt-8 overflow-y-auto custom-scrollbar">
-        <p className="px-4 text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4 italic opacity-70">Menu</p>
+      <nav className="flex-1 px-3 space-y-0.5 mt-4 overflow-y-auto custom-scrollbar">
+        <p className="px-3 text-[8px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 italic opacity-70">Menu</p>
         {links.map((link) => {
           const isActive = pathname === link.href;
           const Icon = link.icon;
@@ -125,18 +134,18 @@ const Sidebar = ({ role, isOpen, onClose }) => {
               href={link.href}
               data-tour={tourId}
               className={cn(
-                "group flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all duration-300 relative overflow-hidden",
+                "group flex items-center gap-2.5 px-3 py-2.5 rounded-xl transition-all duration-300 relative overflow-hidden",
                 isActive
-                  ? "bg-gradient-to-r from-emerald-50/80 to-emerald-50/10 text-[#047857] shadow-[0_8px_20px_rgba(5,150,105,0.04)] border border-[#059669]/10"
-                  : "text-slate-500 hover:text-slate-900 hover:bg-slate-50 hover:shadow-md hover:shadow-slate-200/20 hover:-translate-y-0.5"
+                  ? "bg-gradient-to-r from-emerald-50/80 to-emerald-50/10 text-[#047857] shadow-[0_4px_12px_rgba(5,150,105,0.02)] border border-[#059669]/5"
+                  : "text-slate-500 hover:text-slate-900 hover:bg-slate-50 hover:shadow-sm hover:shadow-slate-200/10 hover:-translate-y-0.5"
               )}
             >
-              <Icon size={18} strokeWidth={isActive ? 2.5 : 2} className={cn("transition-all duration-300", isActive ? "text-[#059669] scale-110 drop-shadow-md" : "text-slate-400 group-hover:text-slate-600")} />
-              <span className={cn("text-[13px] tracking-tight font-bold z-10 relative", isActive ? "text-[#047857]" : "text-slate-500")}>{link.name}</span>
+              <Icon size={16} strokeWidth={isActive ? 2.5 : 2} className={cn("transition-all duration-300", isActive ? "text-[#059669] scale-110 drop-shadow-md" : "text-slate-400 group-hover:text-slate-600")} />
+              <span className={cn("text-[12px] tracking-tight font-bold z-10 relative", isActive ? "text-[#047857]" : "text-slate-500")}>{link.name}</span>
               {isActive && (
                 <>
-                  <div className="absolute left-0 w-1.5 h-6 bg-gradient-to-b from-[#16A34A] to-[#059669] rounded-r-full shadow-[0_0_10px_rgba(5,150,105,0.3)]" />
-                  <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-white/40 to-transparent pointer-events-none" />
+                  <div className="absolute left-0 w-1 h-5 bg-gradient-to-b from-[#16A34A] to-[#059669] rounded-r-full shadow-[0_0_10px_rgba(5,150,105,0.3)]" />
+                  <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-white/40 to-transparent pointer-events-none" />
                 </>
               )}
             </Link>
@@ -145,21 +154,19 @@ const Sidebar = ({ role, isOpen, onClose }) => {
       </nav>
 
       {/* User Session Footer */}
-      <div className="p-6">
-
-
+      <div className="p-4">
         <button
           data-tour="sidebar-logout"
           onClick={handleLogout}
-          className="w-full flex items-center gap-3 px-4 py-3.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-2xl transition-all group font-bold mb-4"
+          className="w-full flex items-center gap-2.5 px-3 py-2.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all group font-bold mb-2"
         >
-          <LogOut size={18} className="group-hover:-translate-x-1 transition-transform" />
-          <span className="text-xs uppercase tracking-widest">Logout</span>
+          <LogOut size={16} className="group-hover:-translate-x-1 transition-transform" />
+          <span className="text-[10px] uppercase tracking-widest">Logout</span>
         </button>
 
-        <div className="px-4 py-4 border-t border-slate-50 flex flex-col gap-2">
-          <a href="https://uwo24.com/privacy-policy" target="_blank" rel="noopener noreferrer" className="text-[9px] font-bold text-slate-300 uppercase tracking-widest hover:text-[#059669] transition-colors italic">Privacy Policy</a>
-          <Link href="/terms" className="text-[9px] font-bold text-slate-300 uppercase tracking-widest hover:text-[#059669] transition-colors italic">Terms of Service</Link>
+        <div className="px-3 py-2 border-t border-slate-50 flex flex-col gap-1 mt-auto">
+          <a href="https://uwo24.com/privacy-policy" target="_blank" rel="noopener noreferrer" className="text-[8px] font-bold text-slate-400 uppercase tracking-widest hover:text-[#059669] transition-colors italic">Privacy Policy</a>
+          <Link href="/terms" className="text-[8px] font-bold text-slate-400 uppercase tracking-widest hover:text-[#059669] transition-colors italic">Terms of Service</Link>
         </div>
       </div>
 

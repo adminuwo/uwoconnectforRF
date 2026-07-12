@@ -87,8 +87,9 @@ const DashboardLayout = ({ children, role: initialRole }) => {
             {mounted && (
               <>
                 <button
+                  data-tour="header-team-chat"
                   onClick={() => setChatOpen(true)}
-                  className="p-2 text-slate-500 hover:text-indigo-600 bg-slate-50 hover:bg-indigo-50 rounded-full transition-colors relative"
+                  className="p-2 text-slate-500 hover:text-[#10B981] bg-slate-50 hover:bg-emerald-50 rounded-full transition-colors relative"
                   title="Team Chat"
                 >
                   <MessageCircle size={20} />

@@ -21,7 +21,10 @@ const ClientSettingsPage = () => {
     whatsapp_verify_token: '',
     api_key: '',
     white_label_name: '',
-    white_label_domain: ''
+    white_label_domain: '',
+    google_sheets_enabled: false,
+    google_spreadsheet_id: '',
+    google_access_token: ''
   });
   
   const user = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('user') || '{}') : {};
@@ -34,6 +37,10 @@ const ClientSettingsPage = () => {
         headers: { Authorization: `Bearer ${token}` }
       });
       setClient(res.data.client);
+      
+      const clientSettings = res.data.client.settings || {};
+      const sheetsConfig = clientSettings.google_sheets || {};
+      
       setEditData({
         name: res.data.user.name,
         phone_number: res.data.client.phone_number || '',
@@ -43,7 +50,10 @@ const ClientSettingsPage = () => {
         whatsapp_verify_token: res.data.client.whatsapp_verify_token || '',
         api_key: res.data.client.api_key || '',
         white_label_name: res.data.client.white_label_name || '',
-        white_label_domain: res.data.client.white_label_domain || ''
+        white_label_domain: res.data.client.white_label_domain || '',
+        google_sheets_enabled: sheetsConfig.enabled || false,
+        google_spreadsheet_id: sheetsConfig.spreadsheet_id || '',
+        google_access_token: sheetsConfig.access_token || ''
       });
     } catch (err) {
       console.error('Failed to fetch profile');
@@ -60,7 +70,23 @@ const ClientSettingsPage = () => {
     try {
       setIsSaving(true);
       const token = localStorage.getItem('token');
-      await axios.patch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/profile`, editData, {
+      
+      // Build client settings payload matching backend structure
+      const updatedSettings = {
+        ...(client?.settings || {}),
+        google_sheets: {
+          enabled: editData.google_sheets_enabled,
+          spreadsheet_id: editData.google_spreadsheet_id,
+          access_token: editData.google_access_token
+        }
+      };
+
+      const payload = {
+        ...editData,
+        settings: updatedSettings
+      };
+
+      await axios.patch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/profile`, payload, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setIsEditing(false);
@@ -316,6 +342,65 @@ const ClientSettingsPage = () => {
                   )}
                 </div>
               </div>
+            </div>
+          </div>
+
+          {/* Google Sheets Integration Section */}
+          <div className="space-y-1">
+            <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-4 ml-1">Integrations & Sync</h3>
+            <div className="bg-white border border-slate-100 rounded-[24px] sm:rounded-[32px] p-4 sm:p-8 space-y-6 sm:space-y-8">
+              <div className="flex items-center justify-between p-1">
+                <div>
+                  <h4 className="text-sm font-bold text-slate-900">Google Sheets Sync</h4>
+                  <p className="text-[10px] text-slate-400 italic mt-0.5">Automatically sync newly captured leads to a Google Spreadsheet.</p>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input 
+                    type="checkbox" 
+                    checked={editData.google_sheets_enabled}
+                    disabled={!isEditing}
+                    onChange={e => setEditData({...editData, google_sheets_enabled: e.target.checked})}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
+                </label>
+              </div>
+
+              {editData.google_sheets_enabled && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 pt-2">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Spreadsheet ID</label>
+                    {isEditing ? (
+                      <input 
+                        value={editData.google_spreadsheet_id} 
+                        onChange={e => setEditData({...editData, google_spreadsheet_id: e.target.value})} 
+                        className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-4 outline-none focus:border-emerald-500 transition-all font-semibold text-sm" 
+                        placeholder="e.g. 1a2b3c4d5e6f7g8h9i0j..."
+                      />
+                    ) : (
+                      <div className="bg-slate-50 rounded-2xl px-5 py-4 font-semibold text-slate-700 text-sm border border-transparent truncate">
+                        {editData.google_spreadsheet_id || 'Not configured'}
+                      </div>
+                    )}
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Google OAuth Access Token</label>
+                    {isEditing ? (
+                      <input 
+                        type="password"
+                        value={editData.google_access_token} 
+                        onChange={e => setEditData({...editData, google_access_token: e.target.value})} 
+                        className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-4 outline-none focus:border-emerald-500 transition-all font-semibold text-sm" 
+                        placeholder="Paste your access token..."
+                      />
+                    ) : (
+                      <div className="bg-slate-50 rounded-2xl px-5 py-4 font-semibold text-slate-500 text-sm border border-transparent truncate">
+                        {editData.google_access_token ? '••••••••••••••••••••••••••••••••' : 'Not configured'}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 

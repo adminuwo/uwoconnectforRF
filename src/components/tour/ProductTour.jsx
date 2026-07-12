@@ -65,8 +65,8 @@ function computeTooltipPosition(rect, placement, windowW, windowH) {
       break;
   }
 
-  // Vertical clamping
-  const tooltipH = 320;
+  // Vertical clamping — use 85% of viewport as safe max height estimate
+  const tooltipH = Math.min(420, windowH * 0.85);
   if (top + tooltipH > windowH - 16) top = windowH - tooltipH - 16;
   if (top < 16) top = 16;
 
@@ -225,7 +225,7 @@ const ProductTour = () => {
         retryRef.current = setTimeout(positionOnElement, 200);
       } else {
         if (process.env.NODE_ENV === 'development') {
-          console.error(`[Tour Debug] Error: Target element missing for selector: ${step.selector}`);
+          console.warn(`[Tour Debug] Error: Target element missing for selector: ${step.selector}`);
         }
         // Auto-skip this step if element isn't found
         nextStep();
@@ -238,18 +238,33 @@ const ProductTour = () => {
     }
     retryCount.current = -1; // Prevent multiple logs for same step if resize triggers it
 
-    // Smooth-scroll element into view if it is not fixed or inside a fixed container
-    let isFixed = false;
-    let currentEl = el;
-    while (currentEl && currentEl !== document.body) {
-      if (window.getComputedStyle(currentEl).position === 'fixed') {
-        isFixed = true;
+    // Smooth-scroll element into view — check if it has a scrollable parent (e.g. sidebar nav)
+    let parent = el.parentElement;
+    let scrolledParent = false;
+    while (parent && parent !== document.body) {
+      const style = window.getComputedStyle(parent);
+      if (style.overflowY === 'auto' || style.overflowY === 'scroll') {
+        el.scrollIntoView({ behavior: 'auto', block: 'nearest' });
+        scrolledParent = true;
         break;
       }
-      currentEl = currentEl.parentElement;
+      parent = parent.parentElement;
     }
-    if (!isFixed) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
+    
+    // If not in a scrollable sub-container, scroll window if it is not a fixed layout component
+    if (!scrolledParent) {
+      let isFixed = false;
+      let currentEl = el;
+      while (currentEl && currentEl !== document.body) {
+        if (window.getComputedStyle(currentEl).position === 'fixed') {
+          isFixed = true;
+          break;
+        }
+        currentEl = currentEl.parentElement;
+      }
+      if (!isFixed) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
+      }
     }
 
     // Wait for scroll to settle then measure
@@ -272,7 +287,7 @@ const ProductTour = () => {
 
       // Animate in
       setTimeout(() => setTooltipVisible(true), 80);
-    }, 350);
+    }, 450);
 
     return () => clearTimeout(t);
   }, [isActive, step, isNavigating, nextStep]);
