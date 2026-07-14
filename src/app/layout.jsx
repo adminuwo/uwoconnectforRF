@@ -1,7 +1,6 @@
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { TourProvider } from "@/lib/TourContext";
-import Script from "next/script";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -9,7 +8,7 @@ const inter = Inter({
 });
 
 export const metadata = {
-  title: "AisaConnect Automation",
+  title: "UwoConnect Automation",
   description: "Multi-channel automation platform",
 };
 
@@ -20,12 +19,6 @@ export default function RootLayout({ children }) {
       className={`${inter.variable} h-full antialiased`}
       suppressHydrationWarning
     >
-      <head>
-        <Script
-          src="https://accounts.google.com/gsi/client"
-          strategy="beforeInteractive"
-        />
-      </head>
       <body className="min-h-full flex flex-col font-sans overflow-x-hidden" suppressHydrationWarning>
         <TourProvider>
           {children}

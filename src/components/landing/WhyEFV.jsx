@@ -58,7 +58,7 @@ export default function WhyEFV({ isDark = true }) {
       <div className="text-center max-w-2xl mx-auto mb-20">
         <span className="text-[10px] font-bold text-[#20C997] uppercase tracking-widest block mb-3">Core Philosophy</span>
         <h2 className={`text-3xl md:text-5xl font-bold tracking-tight mb-6 ${isDark ? 'text-white' : 'text-slate-900'}`}>
-          Why Meta Connect Unified?
+          Why Uwo Connect Unified?
         </h2>
         <p className={`text-lg font-medium ${isDark ? 'text-[#8E99A8]' : 'text-slate-600'}`}>
           The traditional SaaS stack is broken. Data is siloed, automation is fragile, and intelligence is boiled on. We built a better way.

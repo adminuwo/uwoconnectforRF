@@ -89,7 +89,7 @@ const AdminClients = () => {
   };
 
   const handleMessageClient = (email) => {
-    window.location.href = `mailto:${email}?subject=AisaConnect%20Support`;
+    window.location.href = `mailto:${email}?subject=UwoConnect%20Support`;
     setActiveMenuId(null);
   };
 

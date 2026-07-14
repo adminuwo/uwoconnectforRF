@@ -1,6 +1,6 @@
-# AisaConnect Pre-Built Workflow Templates
+# UwoConnect Pre-Built Workflow Templates
 
-This document provides a concise overview of the conversational workflow templates available in the AisaConnect platform.
+This document provides a concise overview of the conversational workflow templates available in the UwoConnect platform.
 
 ---
 

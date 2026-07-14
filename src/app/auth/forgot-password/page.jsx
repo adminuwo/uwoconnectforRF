@@ -3,60 +3,32 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { Loader2, Check, Sparkles } from 'lucide-react';
-import axios from 'axios';
+import { auth, sendPasswordResetEmail } from '@/lib/firebase';
 
 const ForgotPasswordPage = () => {
-  const [step, setStep] = useState(1); // 1: Email, 2: OTP, 3: Reset, 4: Success
   const [email, setEmail] = useState('');
-  const [otp, setOtp] = useState('');
-  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [message, setMessage] = useState('');
+  const [success, setSuccess] = useState(false);
 
-  const handleSendOtp = async (e) => {
+  const handleSendResetEmail = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
-    setMessage('');
     try {
-      const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/auth/forgot-password/send-otp`, { email });
-      setMessage(res.data.message);
-      setStep(2);
+      await sendPasswordResetEmail(auth, email);
+      setSuccess(true);
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to send OTP. Please check your email.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleVerifyOtp = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
-    setMessage('');
-    try {
-      const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/auth/forgot-password/verify-otp`, { email, otp });
-      setMessage(res.data.message);
-      setStep(3);
-    } catch (err) {
-      setError(err.response?.data?.message || 'Invalid or expired OTP.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleResetPassword = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
-    setMessage('');
-    try {
-      const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/auth/forgot-password/reset`, { email, password });
-      setMessage(res.data.message);
-      setStep(4);
-    } catch (err) {
-      setError(err.response?.data?.message || 'Failed to reset password.');
+      console.error('Password reset error:', err);
+      if (err.code === 'auth/user-not-found') {
+        setError('No account found with this email address.');
+      } else if (err.code === 'auth/invalid-email') {
+        setError('Please enter a valid email address.');
+      } else if (err.code === 'auth/too-many-requests') {
+        setError('Too many requests. Please try again later.');
+      } else {
+        setError(err.message || 'Failed to send reset email. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -75,7 +47,7 @@ const ForgotPasswordPage = () => {
             <Sparkles className="text-white animate-pulse" size={13} strokeWidth={2.5} />
           </div>
           <span className="text-[#2f593b] font-black text-base tracking-tight uppercase">
-            AisaConnect
+            UwoConnect
           </span>
         </div>
 
@@ -85,24 +57,18 @@ const ForgotPasswordPage = () => {
           </div>
         )}
 
-        {message && !error && (
-          <div className="w-full mb-4 p-3 bg-emerald-50/80 text-emerald-800 text-xs font-bold rounded-[20px] border border-emerald-100 text-center animate-in fade-in duration-300">
-            {message}
-          </div>
-        )}
-
         <div className="w-full">
-          {step === 1 && (
+          {!success ? (
             <div>
               <div className="text-center mb-5">
                 <h1 className="text-3xl font-black text-[#2f593b] tracking-tight leading-none mb-1.5">
                   Forgot Password
                 </h1>
                 <p className="text-[#5d7c66] text-[10px] font-bold uppercase tracking-widest italic">
-                  Enter email to get OTP
+                  Enter email to get reset link
                 </p>
               </div>
-              <form onSubmit={handleSendOtp} className="space-y-3.5">
+              <form onSubmit={handleSendResetEmail} className="space-y-3.5">
                 <input
                   type="email"
                   required
@@ -116,81 +82,18 @@ const ForgotPasswordPage = () => {
                   disabled={loading}
                   className="w-full py-3 bg-[#45724c] hover:bg-[#3b6342] text-white font-black text-sm uppercase tracking-widest rounded-full transition-all duration-300 shadow-lg flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
                 >
-                  {loading ? <Loader2 className="animate-spin text-white" size={18} /> : 'Send OTP'}
+                  {loading ? <Loader2 className="animate-spin text-white" size={18} /> : 'Send Reset Link'}
                 </button>
               </form>
             </div>
-          )}
-
-          {step === 2 && (
-            <div>
-              <div className="text-center mb-5">
-                <h1 className="text-3xl font-black text-[#2f593b] tracking-tight leading-none mb-1.5">
-                  Verify Email
-                </h1>
-                <p className="text-[#5d7c66] text-[10px] font-bold uppercase tracking-widest italic">
-                  Enter 6-digit OTP code
-                </p>
-              </div>
-              <form onSubmit={handleVerifyOtp} className="space-y-3.5">
-                <input
-                  type="text"
-                  required
-                  maxLength={6}
-                  value={otp}
-                  onChange={(e) => setOtp(e.target.value)}
-                  placeholder="OTP Code"
-                  className="w-full bg-[#96b39d]/90 text-white placeholder-[#4d6a54] outline-none rounded-full py-3 px-7 font-bold text-sm transition-all shadow-inner focus:bg-[#8ca893] text-center tracking-[0.2em]"
-                />
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full py-3 bg-[#45724c] hover:bg-[#3b6342] text-white font-black text-sm uppercase tracking-widest rounded-full transition-all duration-300 shadow-lg flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
-                >
-                  {loading ? <Loader2 className="animate-spin text-white" size={18} /> : 'Verify OTP'}
-                </button>
-              </form>
-            </div>
-          )}
-
-          {step === 3 && (
-            <div>
-              <div className="text-center mb-5">
-                <h1 className="text-3xl font-black text-[#2f593b] tracking-tight leading-none mb-1.5">
-                  Reset Password
-                </h1>
-                <p className="text-[#5d7c66] text-[10px] font-bold uppercase tracking-widest italic">
-                  Choose a new password
-                </p>
-              </div>
-              <form onSubmit={handleResetPassword} className="space-y-3.5">
-                <input
-                  type="password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="New Password"
-                  className="w-full bg-[#96b39d]/90 text-white placeholder-[#4d6a54] outline-none rounded-full py-3 px-7 font-bold text-sm transition-all shadow-inner focus:bg-[#8ca893]"
-                />
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full py-3 bg-[#45724c] hover:bg-[#3b6342] text-white font-black text-sm uppercase tracking-widest rounded-full transition-all duration-300 shadow-lg flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
-                >
-                  {loading ? <Loader2 className="animate-spin text-white" size={18} /> : 'Reset Password'}
-                </button>
-              </form>
-            </div>
-          )}
-
-          {step === 4 && (
+          ) : (
             <div className="text-center py-2">
               <div className="w-14 h-14 bg-white rounded-full flex items-center justify-center mx-auto mb-4 text-[#2f593b] shadow-md animate-bounce">
                 <Check size={28} />
               </div>
-              <h2 className="text-2xl font-black text-[#2f593b] mb-1.5">Success!</h2>
+              <h2 className="text-2xl font-black text-[#2f593b] mb-1.5">Check Your Email!</h2>
               <p className="text-[#5d7c66] mb-6 text-sm font-semibold italic">
-                Your password has been reset successfully.
+                We&apos;ve sent a password reset link to <strong>{email}</strong>. Click the link in the email to reset your password.
               </p>
               <Link href="/auth/login" className="block w-full py-3 bg-[#45724c] hover:bg-[#3b6342] text-white rounded-full font-black text-sm uppercase tracking-widest transition-all text-center active:scale-[0.98]">
                 Back to Login
@@ -199,7 +102,7 @@ const ForgotPasswordPage = () => {
           )}
         </div>
 
-        {step < 4 && (
+        {!success && (
           <div className="mt-4 text-center">
             <p className="text-xs font-bold text-[#5d7c66]">
               Remember your password? <Link href="/auth/login" className="text-[#2f593b] font-black underline">Log In</Link>

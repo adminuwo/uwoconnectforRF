@@ -12,7 +12,7 @@ export default function Footer() {
             <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-[#0F6B52] to-[#16A085] flex items-center justify-center shadow-[0_0_15px_rgba(22,160,133,0.3)]">
               <Sparkles className="text-white" size={16} />
             </div>
-            <span className="font-bold text-base tracking-tight text-white">Meta Connect.</span>
+            <span className="font-bold text-base tracking-tight text-white">Uwo Connect.</span>
           </div>
           <p className="text-xs text-[#8E99A8] leading-relaxed font-semibold max-w-xs">
             The next-generation business operating system. Unified CRM, messaging, automation, and AI.
@@ -48,7 +48,7 @@ export default function Footer() {
       </div>
 
       <div className="max-w-7xl mx-auto px-6 border-t border-white/5 pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-xs font-semibold text-[#8E99A8]">
-        <p>© 2026 Meta Connect Platform. All rights reserved.</p>
+        <p>© 2026 Uwo Connect Platform. All rights reserved.</p>
         <div className="flex items-center gap-6">
           <a href="#" className="hover:text-white transition-colors">X / Twitter</a>
           <a href="#" className="hover:text-white transition-colors">GitHub</a>

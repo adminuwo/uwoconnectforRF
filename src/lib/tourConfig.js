@@ -1,5 +1,5 @@
 /**
- * AisaConnect Product Tour Configuration
+ * UwoConnect Product Tour Configuration
  * ----------------------------------------
  * Each step has been shortened to keep cards clean and readable.
  */
@@ -9,7 +9,7 @@ const tourSteps = [
     id: 'welcome',
     page: '/client',
     selector: '[data-tour="dashboard-welcome"]',
-    title: '👋 Welcome to AisaConnect!',
+    title: '👋 Welcome to UwoConnect!',
     description: 'This is your automation command center. We will quickly show you around in 1 minute.',
     why: 'Helps you set up and run automations much faster.',
     tip: 'Press ESC to exit, or use the buttons below to navigate.',

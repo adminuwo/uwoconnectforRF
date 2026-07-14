@@ -116,7 +116,7 @@ const Sidebar = ({ role, isOpen, onClose }) => {
           <ZapIcon className="text-white relative z-10" size={16} strokeWidth={3} fill="currentColor" />
         </div>
         <div>
-          <h1 className="text-sm font-black text-slate-900 tracking-tight leading-none">AisaConnect</h1>
+          <h1 className="text-sm font-black text-slate-900 tracking-tight leading-none">UwoConnect</h1>
           <span className="text-[7px] font-black text-[#059669] uppercase tracking-[0.2em] mt-0.5 block">V1.0 {role}</span>
         </div>
       </div>

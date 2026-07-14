@@ -54,7 +54,7 @@ export default function PrivacyPage() {
               dangerouslySetInnerHTML={{ 
                 __html: content || `
                   <div class="space-y-6 text-slate-700">
-                    <h2 class="text-2xl font-bold text-slate-900">AisaConnect Privacy Policy</h2>
+                    <h2 class="text-2xl font-bold text-slate-900">UwoConnect Privacy Policy</h2>
                     <p class="text-sm text-slate-500">Last updated: July 2026</p>
                     
                     <h3 class="text-xl font-semibold text-slate-900 mt-6">1. Information We Collect</h3>
@@ -69,7 +69,7 @@ export default function PrivacyPage() {
                     <ul class="list-disc pl-5 space-y-2">
                       <li>Facilitate the sending and receiving of WhatsApp messages on behalf of your business.</li>
                       <li>Provide automated replies and AI-powered responses based on your configured workflows.</li>
-                      <li>Maintain CRM records of your customer interactions within the AisaConnect dashboard.</li>
+                      <li>Maintain CRM records of your customer interactions within the UwoConnect dashboard.</li>
                     </ul>
                     
                     <h3 class="text-xl font-semibold text-slate-900 mt-6">3. Data Sharing and Third Parties</h3>

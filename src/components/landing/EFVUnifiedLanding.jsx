@@ -86,7 +86,7 @@ export default function EFVUnifiedLanding() {
               </svg>
             </div>
             <span className={`font-bold text-lg tracking-tight transition-colors duration-300 ${isDark ? 'text-white' : 'text-[#000000]'}`}>
-              Meta Connect
+              Uwo Connect
             </span>
           </Link>
 

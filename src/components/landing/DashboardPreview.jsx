@@ -59,7 +59,7 @@ export default function DashboardPreview() {
               <div className="w-3 h-3 rounded-full bg-emerald-500/80 shadow-[0_0_8px_rgba(16,185,129,0.4)]" />
             </div>
             <div className="bg-white/5 border border-white/10 px-4 py-1.5 rounded-full text-[10px] text-[#8E99A8] font-bold tracking-wider">
-              workspace.aisaconnect.local
+              workspace.uwoconnect.local
             </div>
             <div className="w-16" /> {/* Spacer */}
           </div>
@@ -417,7 +417,7 @@ export default function DashboardPreview() {
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-white/5 border border-white/5 rounded-2xl gap-3">
                           <div>
                             <span className="text-[8px] font-black text-[#8E99A8] uppercase tracking-widest block mb-0.5">WABA Endpoint Webhook URL</span>
-                            <span className="text-[10px] text-white font-mono">https://api.metaconnect.app/v1/webhook</span>
+                            <span className="text-[10px] text-white font-mono">https://api.uwoconnect.app/v1/webhook</span>
                           </div>
                           <button 
                             onClick={handleCopy} 
@@ -441,7 +441,7 @@ export default function DashboardPreview() {
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-white/5 border border-white/5 rounded-2xl gap-3">
                           <div>
                             <span className="text-[8px] font-black text-[#8E99A8] uppercase tracking-widest block mb-0.5">Google Cloud Storage Media Bucket</span>
-                            <span className="text-[10px] text-white font-mono">gs://aisaconnect-media-bucket-prod</span>
+                            <span className="text-[10px] text-white font-mono">gs://uwoconnect-media-bucket-prod</span>
                           </div>
                           <span className="text-[9px] font-bold text-[#20C997] uppercase bg-[#20C997]/10 px-2 py-1 rounded-lg self-start sm:self-auto">Storage: GCS</span>
                         </div>

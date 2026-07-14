@@ -79,7 +79,7 @@ const ClientSupportPage = () => {
             <h1 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
               <LifeBuoy className="text-emerald-500" size={24} /> Support Help Desk
             </h1>
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Talk to human admins of AisaConnect</p>
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Talk to human admins of UwoConnect</p>
           </div>
           <div className="flex items-center gap-2 text-xs font-bold text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-100 self-start sm:self-auto">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />

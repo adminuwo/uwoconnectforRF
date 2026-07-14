@@ -570,7 +570,7 @@ const ClientAutomationsPage = () => {
                     <textarea 
                       value={greetingData.message} 
                       onChange={e => setGreetingData({...greetingData, message: e.target.value})} 
-                      placeholder="Hi! Welcome to AisaConnect..." 
+                      placeholder="Hi! Welcome to UwoConnect..." 
                       rows={4} 
                       className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-4 outline-none focus:border-emerald-500 transition-all font-semibold resize-none text-sm" 
                     />
