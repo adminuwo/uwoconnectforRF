@@ -123,15 +123,27 @@ const LoginPage = () => {
     setLoading(true);
     setError('');
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      await handleBackendAuth(userCredential.user);
+      const res = await axios.post(`${API_URL}/api/auth/login`, {
+        email,
+        password
+      });
+
+      const { token, user } = res.data;
+      storeUserSession(token, user);
+
+      if (user.role === 'CLIENT' && !localStorage.getItem('aisa_tour_completed')) {
+        localStorage.setItem('aisa_tour_pending', 'true');
+        localStorage.removeItem('aisa_tour_step');
+      }
+
+      if (user.role === 'ADMIN') {
+        router.push('/admin');
+      } else {
+        router.push('/client');
+      }
     } catch (err) {
       console.error('Login error:', err);
-      if (err.code === 'auth/invalid-credential' || err.code === 'auth/wrong-password' || err.code === 'auth/user-not-found') {
-        setError('Invalid email or password.');
-      } else if (err.code === 'auth/too-many-requests') {
-        setError('Too many failed attempts. Please try again later.');
-      } else if (err.response?.data?.message) {
+      if (err.response?.data?.message) {
         setError(err.response.data.message);
       } else {
         setError(err.message || 'Login failed.');

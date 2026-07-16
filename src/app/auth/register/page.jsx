@@ -155,22 +155,36 @@ const RegisterPage = () => {
     setLoading(true);
     setError('');
     try {
-      // Create user in Firebase first
-      const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
-      // Then register in backend
-      await handleBackendAuth(userCredential.user, {
+      const res = await axios.post(`${API_URL}/api/auth/register`, {
         name: formData.name,
         businessName: formData.businessName,
+        email: formData.email,
+        password: formData.password,
+        invite_token: inviteToken || '',
       });
+
+      if (res.status === 201 && res.data.token) {
+        // User is APPROVED and we got a token
+        const { token, user } = res.data;
+        storeUserSession(token, user);
+
+        if (user.role !== 'ADMIN' && !localStorage.getItem('aisa_tour_completed')) {
+          localStorage.setItem('aisa_tour_pending', 'true');
+          localStorage.removeItem('aisa_tour_step');
+        }
+
+        if (user.role === 'ADMIN') {
+          router.push('/admin');
+        } else {
+          router.push('/client');
+        }
+      } else {
+        // User is PENDING
+        setSuccess(true);
+      }
     } catch (err) {
       console.error('Registration error:', err);
-      if (err.code === 'auth/email-already-in-use') {
-        setError('An account with this email already exists. Please login instead.');
-      } else if (err.code === 'auth/weak-password') {
-        setError('Password should be at least 6 characters.');
-      } else if (err.code === 'auth/invalid-email') {
-        setError('Please enter a valid email address.');
-      } else if (err.response?.data) {
+      if (err.response?.data) {
         if (err.response.data.message) {
           setError(err.response.data.message);
         } else {

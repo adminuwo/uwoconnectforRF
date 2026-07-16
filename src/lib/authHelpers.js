@@ -1,23 +1,9 @@
 import { auth } from './firebase';
 
 /**
- * Get the current Firebase user's ID token.
- * This refreshes automatically if expired.
- * Falls back to localStorage token for backward compatibility.
+ * Get the current JWT token from localStorage.
  */
 export async function getFirebaseToken() {
-  const user = auth.currentUser;
-  if (user) {
-    try {
-      const token = await user.getIdToken(/* forceRefresh */ false);
-      // Keep localStorage in sync so existing code still works
-      localStorage.setItem('token', token);
-      return token;
-    } catch (err) {
-      console.error('Failed to get Firebase ID token:', err);
-    }
-  }
-  // Fallback to stored token
   return localStorage.getItem('token');
 }
 
