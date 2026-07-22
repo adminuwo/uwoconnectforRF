@@ -6,7 +6,7 @@ import React, {
   useState,
   useCallback,
 } from 'react';
-import { useTour } from '@/lib/TourContext';
+import { useTour } from '@/context/TourContext';
 import {
   ChevronLeft,
   ChevronRight,

@@ -13,7 +13,7 @@ import {
   signInWithEmailAndPassword,
   signInWithPopup,
 } from '@/lib/firebase';
-import { storeUserSession } from '@/lib/authHelpers';
+import { storeUserSession } from '@/features/auth/authHelpers';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');

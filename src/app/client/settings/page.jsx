@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { User, Mail, Phone, Hash, CreditCard, Lock, Settings, Loader2, ShieldCheck, LogOut, MapPin, Key, Globe, Paintbrush } from 'lucide-react';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import axios from 'axios';
-import { useTour } from '@/lib/TourContext';
+import { useTour } from '@/context/TourContext';
 const ClientSettingsPage = () => {
   const { resetTour } = useTour();
   const [client, setClient] = useState(null);
