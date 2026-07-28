@@ -15,7 +15,7 @@ export default function Footer() {
             <span className="font-bold text-base tracking-tight text-white">Uwo Connect.</span>
           </div>
           <p className="text-xs text-[#8E99A8] leading-relaxed font-semibold max-w-xs">
-            The next-generation business operating system. Unified CRM, messaging, automation, and AI.
+            One Platform. Endless Connections. Connect conversations. Empower teams. Automate workflows. Build stronger customer relationships.
           </p>
         </div>
 
