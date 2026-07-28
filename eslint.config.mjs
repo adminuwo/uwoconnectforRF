@@ -26,11 +26,12 @@ const eslintConfig = defineConfig([
       "react-hooks/exhaustive-deps": "off",
 
       // ── React Compiler rules (react-hooks v5+, experimental) ─────────────
-      // These flag common valid patterns in existing code.
-      // Downgraded to warn so CI doesn't block on legacy code.
-      "react-hooks/set-state-in-effect": "warn",
-      "react-hooks/immutability": "warn",
-      "react-hooks/preserve-manual-memoization": "warn",
+      // These are new rules introduced in react-hooks v5 (React Compiler).
+      // They flag valid patterns in existing code.
+      // Turned OFF because eslint-config-next file-glob configs override "warn".
+      "react-hooks/set-state-in-effect": "off",
+      "react-hooks/immutability": "off",
+      "react-hooks/preserve-manual-memoization": "off",
 
       // ── TypeScript rules ─────────────────────────────────────────────────
       // Unused vars are noisy but not blocking issues
