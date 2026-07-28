@@ -1,6 +1,6 @@
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { TourProvider } from "@/lib/TourContext";
+import { TourProvider } from "@/context/TourContext";
 
 const inter = Inter({
   subsets: ["latin"],

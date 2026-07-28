@@ -9,7 +9,7 @@ import React, {
   useRef,
 } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import tourSteps from './tourConfig';
+import tourSteps from '@/lib/tourConfig';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 const TOUR_COMPLETED_KEY = 'aisa_tour_completed';

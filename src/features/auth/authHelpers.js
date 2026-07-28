@@ -1,4 +1,4 @@
-import { auth } from './firebase';
+import { auth } from '@/lib/firebase';
 
 /**
  * Get the current JWT token from localStorage.

@@ -1,0 +1,188 @@
+Folder PATH listing
+Volume serial number is 0000005A F6FE:B896
+C:\USERS\USER\DESKTOP\WHATSAPP\METAF\SRC
++---app
+|   |   favicon.ico
+|   |   globals.css
+|   |   layout.jsx
+|   |   loading.jsx
+|   |   page.jsx
+|   |   
+|   +---admin
+|   |   |   loading.jsx
+|   |   |   page.jsx
+|   |   |   
+|   |   +---approvals
+|   |   |       page.jsx
+|   |   |       
+|   |   +---audit-logs
+|   |   |       page.jsx
+|   |   |       
+|   |   +---automations
+|   |   |       page.jsx
+|   |   |       
+|   |   +---clients
+|   |   |   |   page.jsx
+|   |   |   |   
+|   |   |   \---[id]
+|   |   |           page.jsx
+|   |   |           
+|   |   +---inbox
+|   |   |       page.jsx
+|   |   |       
+|   |   +---logs
+|   |   |       page.jsx
+|   |   |       
+|   |   +---settings
+|   |   |   |   page.jsx
+|   |   |   |   
+|   |   |   \---legal
+|   |   |           page.jsx
+|   |   |           
+|   |   +---stats
+|   |   |       page.jsx
+|   |   |       
+|   |   +---support
+|   |   |       page.jsx
+|   |   |       
+|   |   \---workflows
+|   |           page.jsx
+|   |           
+|   +---auth
+|   |   |   loading.jsx
+|   |   |   
+|   |   +---forgot-password
+|   |   |       page.jsx
+|   |   |       
+|   |   +---login
+|   |   |       page.jsx
+|   |   |       
+|   |   \---register
+|   |           page.jsx
+|   |           
+|   +---client
+|   |   |   loading.jsx
+|   |   |   page.jsx
+|   |   |   
+|   |   +---automations
+|   |   |   |   page.jsx
+|   |   |   |   
+|   |   |   \---builder
+|   |   |       \---[id]
+|   |   |               page.jsx
+|   |   |               
+|   |   +---campaigns
+|   |   |       page.jsx
+|   |   |       
+|   |   +---catalog
+|   |   |       page.jsx
+|   |   |       
+|   |   +---channels
+|   |   |       page.jsx
+|   |   |       
+|   |   +---crm
+|   |   |       page.jsx
+|   |   |       
+|   |   +---inbox
+|   |   |       page.jsx
+|   |   |       
+|   |   +---knowledge
+|   |   |       page.jsx
+|   |   |       
+|   |   +---orders
+|   |   |       page.jsx
+|   |   |       
+|   |   +---settings
+|   |   |       page.jsx
+|   |   |       
+|   |   +---support
+|   |   |       page.jsx
+|   |   |       
+|   |   +---team
+|   |   |       page.jsx
+|   |   |       
+|   |   \---workflows
+|   |       |   page.jsx
+|   |       |   templateData.js
+|   |       |   
+|   |       \---builder
+|   |           \---[id]
+|   |                   page.jsx
+|   |                   
+|   +---dashboard
+|   |   |   page.jsx
+|   |   |   
+|   |   +---automations
+|   |   |       page.jsx
+|   |   |       
+|   |   +---inbox
+|   |   |       page.jsx
+|   |   |       
+|   |   +---settings
+|   |   |       page.jsx
+|   |   |       
+|   |   \---support
+|   |           page.jsx
+|   |           
+|   +---privacy
+|   |       page.jsx
+|   |       
+|   \---terms
+|           page.jsx
+|           
++---components
+|   |   TermsModal.jsx
+|   |   
+|   +---builder
+|   |       CustomNodes.jsx
+|   |       PropertiesPanel.jsx
+|   |       Sidebar.jsx
+|   |       
+|   +---campaigns
+|   |       CreateCampaignModal.jsx
+|   |       
+|   +---channels
+|   |       FacebookConfigModal.jsx
+|   |       InstagramConfigModal.jsx
+|   |       WhatsAppConfigModal.jsx
+|   |       
+|   +---crm
+|   |       ContactDetailsModal.jsx
+|   |       
+|   +---dashboard
+|   |       DashboardLayout.jsx
+|   |       PlatformAssistant.jsx
+|   |       Sidebar.jsx
+|   |       
+|   +---landing
+|   |       AIAssistant.jsx
+|   |       AutomationShowcase.jsx
+|   |       CTABanner.jsx
+|   |       DashboardPreview.jsx
+|   |       EFVUnifiedLanding.jsx
+|   |       FAQ.jsx
+|   |       FeatureComparison.jsx
+|   |       Footer.jsx
+|   |       HeroSection.jsx
+|   |       Integrations.jsx
+|   |       PlatformModules.jsx
+|   |       Pricing.jsx
+|   |       Testimonials.jsx
+|   |       TrustedBy.jsx
+|   |       WhyEFV.jsx
+|   |       WorkflowTimeline.jsx
+|   |       
+|   +---team
+|   |       TeamChatDrawer.jsx
+|   |       
+|   \---tour
+|           ProductTour.jsx
+|           
+\---lib
+        apiConfig.js
+        authHelpers.js
+        firebase.js
+        tourConfig.js
+        TourContext.jsx
+        utils.js
+        

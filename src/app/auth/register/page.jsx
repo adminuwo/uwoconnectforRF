@@ -14,7 +14,7 @@ import {
   createUserWithEmailAndPassword,
   signInWithPopup,
 } from '@/lib/firebase';
-import { storeUserSession } from '@/lib/authHelpers';
+import { storeUserSession } from '@/features/auth/authHelpers';
 
 const RegisterPage = () => {
   const searchParams = useSearchParams();
