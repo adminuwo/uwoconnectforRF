@@ -357,7 +357,9 @@ const ClientChannelsPage = () => {
                     {ch.active ? (
                       <button 
                         onClick={() => {
-                          if (ch.name === 'WhatsApp') setIsConfigModalOpen(true);
+                          if (ch.name === 'WhatsApp') {
+                            window.location.href = "https://business.facebook.com/messaging/whatsapp/onboard/?app_id=991147863536661&config_id=1048515390903125&extras=%7B%22version%22%3A%22v4%22%2C%22sessionInfoVersion%22%3A%223%22%2C%22featureType%22%3A%22whatsapp_business_app_onboarding%22%7D&redirect_uri=https%3A%2F%2Fuwoconnect.aisa24.com%2Fsettings";
+                          }
                           else if (ch.name === 'Facebook') setIsFacebookConfigModalOpen(true);
                           else if (ch.name === 'Instagram') setIsInstagramConfigModalOpen(true);
                         }}
