@@ -10,10 +10,10 @@
   --color-glow-green: var(--green-glow);
   --color-text-secondary: var(--secondary-text);
   --color-border-base: var(--border);
-  
 
 
-  --font-sans: "Times New Roman", Times, serif;
+
+  --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
 :root {
@@ -30,13 +30,11 @@
 }
 
 @layer base {
-  * {
-    font-family: "Times New Roman", Times, serif !important;
-  }
-  html, body {
+  html,
+  body {
     background-color: var(--background);
     color: var(--foreground);
-    font-family: "Times New Roman", Times, serif !important;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     @apply antialiased transition-colors duration-300;
     overflow-x: hidden !important;
     max-width: 100% !important;
@@ -46,6 +44,7 @@
 
 
 @layer components {
+
   /* Premium Glass Cards in Dark Mode */
   .glass-card {
     background: rgba(17, 24, 39, 0.6);
@@ -82,7 +81,7 @@
 
   /* Grid Overlay Pattern for Dark Mode */
   .grid-pattern {
-    background-image: 
+    background-image:
       linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
       linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
     background-size: 50px 50px;
@@ -125,23 +124,30 @@
 
 /* Custom styles - animation keyframes */
 @keyframes float {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(0) rotate(0deg);
   }
+
   50% {
     transform: translateY(-10px) rotate(0.5deg);
   }
 }
 
 @keyframes slow-glow {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: scale(1) translate(0, 0);
     opacity: 0.8;
   }
+
   33% {
     transform: scale(1.1) translate(30px, -20px);
     opacity: 0.95;
   }
+
   66% {
     transform: scale(0.95) translate(-15px, 15px);
     opacity: 0.85;
@@ -153,6 +159,7 @@
     opacity: 0;
     transform: translateY(24px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -163,6 +170,7 @@
   0% {
     transform: translateX(-50%);
   }
+
   100% {
     transform: translateX(0);
   }
@@ -191,14 +199,37 @@
 }
 
 /* Global Font Scaling Overrides for Legibility */
-.text-\[8px\] { font-size: 10px !important; }
-.text-\[9px\] { font-size: 11px !important; }
-.text-\[10px\] { font-size: 13px !important; }
-.text-\[11px\] { font-size: 14px !important; }
-.text-xs { font-size: 14px !important; }
-.text-sm { font-size: 16px !important; }
-.text-base { font-size: 18px !important; }
-.text-xl { font-size: 22px !important; }
+.text-\[8px\] {
+  font-size: 10px !important;
+}
+
+.text-\[9px\] {
+  font-size: 11px !important;
+}
+
+.text-\[10px\] {
+  font-size: 13px !important;
+}
+
+.text-\[11px\] {
+  font-size: 14px !important;
+}
+
+.text-xs {
+  font-size: 14px !important;
+}
+
+.text-sm {
+  font-size: 16px !important;
+}
+
+.text-base {
+  font-size: 18px !important;
+}
+
+.text-xl {
+  font-size: 22px !important;
+}
 
 /* Light Mode Overrides */
 .light .glass-card {
@@ -251,10 +282,15 @@
 }
 
 /* Ensure buttons keep their white text in light mode */
-.light .btn-accent, .light .bg-\[\#16A085\], .light .bg-gradient-to-r.from-\[\#10B981\] {
+.light .btn-accent,
+.light .bg-\[\#16A085\],
+.light .bg-gradient-to-r.from-\[\#10B981\] {
   color: #ffffff !important;
 }
-.light .btn-accent .text-white, .light .bg-\[\#16A085\] .text-white, .light .bg-gradient-to-r.from-\[\#10B981\] .text-white {
+
+.light .btn-accent .text-white,
+.light .bg-\[\#16A085\] .text-white,
+.light .bg-gradient-to-r.from-\[\#10B981\] .text-white {
   color: #ffffff !important;
 }
 
@@ -311,10 +347,12 @@
   box-shadow: 0 4px 14px rgba(5, 150, 105, 0.25);
   transition: all 0.3s ease;
 }
+
 .btn-vibrant:hover {
   opacity: 0.92;
   box-shadow: 0 6px 20px rgba(5, 150, 105, 0.35);
 }
+
 .btn-vibrant:active {
   /* static */
 }
@@ -338,19 +376,18 @@
 .tour-overlay.tour-overlay-spotlight {
   /* Use clip-path to cut the overlay around the spotlight */
   clip-path: polygon(
-    /* outer rectangle (full screen) */
-    0% 0%,
-    100% 0%,
-    100% 100%,
-    0% 100%,
-    0% 0%,
-    /* inner cut-out (spotlight hole) */
-    var(--spot-left) var(--spot-top),
-    var(--spot-left) calc(var(--spot-top) + var(--spot-height)),
-    calc(var(--spot-left) + var(--spot-width)) calc(var(--spot-top) + var(--spot-height)),
-    calc(var(--spot-left) + var(--spot-width)) var(--spot-top),
-    var(--spot-left) var(--spot-top)
-  );
+      /* outer rectangle (full screen) */
+      0% 0%,
+      100% 0%,
+      100% 100%,
+      0% 100%,
+      0% 0%,
+      /* inner cut-out (spotlight hole) */
+      var(--spot-left) var(--spot-top),
+      var(--spot-left) calc(var(--spot-top) + var(--spot-height)),
+      calc(var(--spot-left) + var(--spot-width)) calc(var(--spot-top) + var(--spot-height)),
+      calc(var(--spot-left) + var(--spot-width)) var(--spot-top),
+      var(--spot-left) var(--spot-top));
   background: rgba(2, 6, 23, 0.78);
   transition: clip-path 0.4s cubic-bezier(0.4, 0, 0.2, 1), background 0.35s ease;
 }
@@ -371,8 +408,15 @@
 }
 
 @keyframes tour-ring-pulse {
-  0%, 100% { box-shadow: 0 0 0 4px rgba(16, 163, 74, 0.15), 0 0 24px rgba(5, 150, 105, 0.35); }
-  50%       { box-shadow: 0 0 0 8px rgba(16, 163, 74, 0.08), 0 0 40px rgba(5, 150, 105, 0.50); }
+
+  0%,
+  100% {
+    box-shadow: 0 0 0 4px rgba(16, 163, 74, 0.15), 0 0 24px rgba(5, 150, 105, 0.35);
+  }
+
+  50% {
+    box-shadow: 0 0 0 8px rgba(16, 163, 74, 0.08), 0 0 40px rgba(5, 150, 105, 0.50);
+  }
 }
 
 /* ── Tooltip Card ────────────────────────────────────────────────────────────── */
@@ -383,9 +427,9 @@
   border-radius: 24px;
   box-shadow:
     0 0 0 1px rgba(16, 163, 74, 0.12),
-    0 4px 6px -1px rgba(0,0,0,0.07),
-    0 20px 40px -8px rgba(0,0,0,0.14),
-    0 40px 80px -16px rgba(0,0,0,0.08);
+    0 4px 6px -1px rgba(0, 0, 0, 0.07),
+    0 20px 40px -8px rgba(0, 0, 0, 0.14),
+    0 40px 80px -16px rgba(0, 0, 0, 0.08);
   overflow: hidden;
   pointer-events: all;
   opacity: 0;
@@ -511,6 +555,7 @@
   transition: all 0.2s ease;
   margin-top: 2px;
 }
+
 .tour-skip-x:hover {
   background: #fee2e2;
   border-color: #fca5a5;
@@ -624,7 +669,10 @@
   font-family: inherit !important;
   white-space: nowrap;
 }
-.tour-btn-skip:hover { color: #ef4444; }
+
+.tour-btn-skip:hover {
+  color: #ef4444;
+}
 
 .tour-btn-prev {
   display: flex;
@@ -641,6 +689,7 @@
   transition: all 0.2s ease;
   font-family: inherit !important;
 }
+
 .tour-btn-prev:hover {
   background: #f1f5f9;
   color: #334155;
@@ -663,6 +712,7 @@
   box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
   font-family: inherit !important;
 }
+
 .tour-btn-next:hover {
   box-shadow: 0 6px 16px rgba(5, 150, 105, 0.4);
   transform: translateY(-1px);
@@ -687,8 +737,15 @@
 }
 
 @keyframes tour-finish-pulse {
-  0%, 100% { box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3); }
-  50%       { box-shadow: 0 4px 20px rgba(5, 150, 105, 0.5); }
+
+  0%,
+  100% {
+    box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
+  }
+
+  50% {
+    box-shadow: 0 4px 20px rgba(5, 150, 105, 0.5);
+  }
 }
 
 /* ── Page-navigation loading ─────────────────────────────────────────────────── */
@@ -705,7 +762,7 @@
   border: 1px solid #e2e8f0;
   border-radius: 99px;
   padding: 12px 22px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
   font-size: 13px !important;
   font-weight: 600;
   color: #475569;
@@ -721,8 +778,18 @@
 }
 
 @keyframes tour-dot-bounce {
-  0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
-  40%            { transform: scale(1.0); opacity: 1; }
+
+  0%,
+  80%,
+  100% {
+    transform: scale(0.6);
+    opacity: 0.4;
+  }
+
+  40% {
+    transform: scale(1.0);
+    opacity: 1;
+  }
 }
 
 /* ── Responsive ────────────────────────────────────────────────────────────────── */
@@ -731,7 +798,10 @@
     width: calc(100vw - 32px) !important;
     left: 16px !important;
   }
-  .tour-tooltip::before { display: none; }
+
+  .tour-tooltip::before {
+    display: none;
+  }
 }
 
 /* ── Dashboard Layout Margins ── */
@@ -752,12 +822,15 @@
 
 /* Hide scrollbar for IE, Edge and Firefox */
 .no-scrollbar {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
+  -ms-overflow-style: none;
+  /* IE and Edge */
+  scrollbar-width: none;
+  /* Firefox */
 }
 
 /* ── Landing Page Mobile Responsive Overrides ── */
 @media (max-width: 1024px) {
+
   /* Hero section & general sections adaptations */
   section {
     padding-top: 5rem !important;
@@ -766,13 +839,13 @@
     gap: 2.5rem !important;
     text-align: center !important;
   }
-  
+
   /* Hero title line spacing and size scaling */
   h1 {
     font-size: 2.5rem !important;
     line-height: 1.2 !important;
   }
-  
+
   h2 {
     font-size: 2rem !important;
     line-height: 1.2 !important;
@@ -782,26 +855,27 @@
   .perspective-1000 {
     perspective: none !important;
   }
-  
-  .perspective-1000 > div {
+
+  .perspective-1000>div {
     transform: none !important;
     max-width: 100% !important;
     border-radius: 20px !important;
     padding: 1rem !important;
   }
-  
+
   .perspective-1000 img {
     border-radius: 12px !important;
   }
 }
 
 @media (max-width: 768px) {
+
   /* Padding clamp for extreme small mobile screens */
   .max-w-7xl {
     padding-left: 1.25rem !important;
     padding-right: 1.25rem !important;
   }
-  
+
   /* Flex items layout wrap */
   .flex-wrap {
     justify-content: center !important;
@@ -817,10 +891,12 @@
   header h1 {
     font-size: 1.25rem !important;
   }
-  
+
   /* Buttons dynamic blocks */
-  .btn-accent, .btn-secondary, button {
+  .btn-accent,
+  .btn-secondary,
+  button {
     width: 100% !important;
     justify-content: center !important;
   }
-}
+}

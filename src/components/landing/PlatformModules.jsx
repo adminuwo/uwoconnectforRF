@@ -40,7 +40,7 @@ export default function PlatformModules({ isDark = true }) {
   return (
     <section className="bg-[#171A20]/40 border-y border-white/5 py-24 md:py-32 relative overflow-hidden">
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-[#0F6B52]/10 rounded-full blur-[150px] pointer-events-none" />
-      
+
       <div className="max-w-7xl mx-auto px-6 relative z-10">
         <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-8">
           <div className="max-w-2xl">
@@ -66,6 +66,14 @@ export default function PlatformModules({ isDark = true }) {
               </p>
             </div>
           ))}
+
+          <div className={`glass-card rounded-2xl p-5 border border-white/10 hover:border-[#16A085]/50 flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-300 transform hover:-translate-y-1.5 hover:scale-[1.03] hover:shadow-[0_12px_24px_-10px_rgba(16,185,129,0.3)]`}>
+            <div className="w-10 h-10 rounded-xl bg-[#0F6B52]/20 text-[#20C997] flex items-center justify-center mb-4">
+              +
+            </div>
+            <h4 className={`text-sm font-bold mb-1 ${isDark ? 'text-white' : 'text-slate-800'}`}>Custom Module</h4>
+            <span className="text-[9px] uppercase tracking-wider font-bold text-[#16A085]">API Access</span>
+          </div>
         </div>
       </div>
     </section>

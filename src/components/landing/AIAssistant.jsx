@@ -5,14 +5,14 @@ import { Sparkles, Send } from 'lucide-react';
 
 export default function AIAssistant() {
   const [messages, setMessages] = useState([
-    { 
-      type: 'user', 
-      content: "Generate a revenue report for Q3 and draft an update email to the board." 
+    {
+      type: 'user',
+      content: "Generate a revenue report for Q3 and draft an update email to the board."
     },
-    { 
-      type: 'assistant', 
+    {
+      type: 'assistant',
       header: "Analyzing Financial Ledger...",
-      content: "Q3 Revenue closed at $1.48M (+24.8% YoY). I have generated the PDF report and drafted the email. \n\nShall I send it to the board alias?" 
+      content: "Q3 Revenue closed at $1.48M (+24.8% YoY). I have generated the PDF report and drafted the email. \n\nShall I send it to the board alias?"
     }
   ]);
   const [isTyping, setIsTyping] = useState(false);
@@ -51,14 +51,14 @@ export default function AIAssistant() {
   return (
     <section className="bg-[#171A20]/20 border-y border-white/5 py-24 md:py-32 relative">
       <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center gap-16">
-        
+
         {/* Left Side: Chat UI Mockup */}
         <div className="flex-1 w-full max-w-md relative z-10 perspective-1000">
           <div
             className="glass-card rounded-[32px] p-6 shadow-2xl relative overflow-hidden"
           >
             <div className="absolute top-0 right-0 w-32 h-32 bg-[#20C997]/10 rounded-full blur-2xl pointer-events-none" />
-            
+
             {/* Header */}
             <div className="flex items-center gap-3 border-b border-white/5 pb-4 mb-6">
               <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#0F6B52] to-[#16A085] flex items-center justify-center border border-white/10 shadow-[0_0_15px_rgba(22,160,133,0.3)]">
@@ -73,9 +73,9 @@ export default function AIAssistant() {
             {/* Chat History */}
             <div ref={chatContainerRef} className="space-y-4 mb-6 max-h-72 overflow-y-auto pr-1 flex flex-col select-none custom-scrollbar">
               {messages.map((msg, i) => (
-                <div 
-                  key={i} 
-                  className={msg.type === 'user' 
+                <div
+                  key={i}
+                  className={msg.type === 'user'
                     ? "bg-white/5 p-4 rounded-2xl rounded-tr-none text-xs text-white max-w-[85%] self-end ml-auto"
                     : "bg-[#171A20] border border-white/5 p-4 rounded-2xl rounded-tl-none text-xs text-[#8E99A8] max-w-[90%]"
                   }
@@ -88,7 +88,7 @@ export default function AIAssistant() {
                   <div className="whitespace-pre-line leading-relaxed">{msg.content}</div>
                 </div>
               ))}
-              
+
               {isTyping && (
                 <div className="bg-[#171A20] border border-white/5 p-4 rounded-2xl rounded-tl-none text-xs text-[#8E99A8] max-w-[90%]">
                   <div className="flex items-center gap-2 mb-2 text-[10px] text-[#20C997] uppercase tracking-wider font-bold">
@@ -105,9 +105,9 @@ export default function AIAssistant() {
 
             {/* Input area */}
             <div className="relative">
-              <input 
-                type="text" 
-                placeholder="Ask your data anything..." 
+              <input
+                type="text"
+                placeholder="Ask your data anything..."
                 className="w-full bg-[#171A20] border border-white/10 rounded-xl py-3 px-4 pr-12 text-xs text-white placeholder:text-[#8E99A8] outline-none focus:border-[#20C997]"
                 disabled
               />
@@ -139,9 +139,10 @@ export default function AIAssistant() {
               "Help support agents",
               "Deliver business insights"
             ].map((item, idx) => (
-              <li 
-                key={idx} 
-                className="flex items-center gap-3 text-sm font-bold text-white hover:bg-[#16A085]/10 hover:border-[#16A085]/30 border border-transparent transition-all p-2 rounded-xl"
+              <li
+                key={idx}
+                onClick={() => triggerInteraction(item)}
+                className="flex items-center gap-3 text-sm font-bold text-white hover:bg-[#16A085]/10 hover:border-[#16A085]/30 border border-transparent transition-all p-3 rounded-2xl cursor-pointer group"
               >
                 <div className="w-5 h-5 rounded-full bg-[#0F6B52]/20 border border-[#0F6B52]/30 flex items-center justify-center text-[#20C997] shrink-0 transition-transform">
                   ✓
@@ -154,9 +155,9 @@ export default function AIAssistant() {
             AI isn't an add-on. It's built into every workflow.
           </p>
         </div>
-        
+
       </div>
-      
+
       <style jsx>{`
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
