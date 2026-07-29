@@ -1,0 +1,244 @@
+﻿
+D:\ALPHA\AISA_CON_M-F\src\app\admin\approvals\page.jsx
+  95:42  warning  'index' is defined but never used  @typescript-eslint/no-unused-vars
+
+D:\ALPHA\AISA_CON_M-F\src\app\admin\audit-logs\page.jsx
+  13:3   warning  'ShieldCheck' is defined but never used  @typescript-eslint/no-unused-vars
+  39:14  warning  'err' is defined but never used          @typescript-eslint/no-unused-vars
+
+D:\ALPHA\AISA_CON_M-F\src\app\admin\automations\page.jsx
+  26:14  warning  'err' is defined but never used  @typescript-eslint/no-unused-vars
+  42:14  warning  'err' is defined but never used  @typescript-eslint/no-unused-vars
+
+D:\ALPHA\AISA_CON_M-F\src\app\admin\clients\[id]\page.jsx
+  1:0  error  Parsing error: Invalid character
+
+D:\ALPHA\AISA_CON_M-F\src\app\admin\clients\page.jsx
+    5:3   warning  'Users' is defined but never used        @typescript-eslint/no-unused-vars
+   10:3   warning  'ShieldCheck' is defined but never used  @typescript-eslint/no-unused-vars
+   16:3   warning  'Activity' is defined but never used     @typescript-eslint/no-unused-vars
+   22:3   warning  'Lock' is defined but never used         @typescript-eslint/no-unused-vars
+   52:14  warning  'err' is defined but never used          @typescript-eslint/no-unused-vars
+   71:14  warning  'err' is defined but never used          @typescript-eslint/no-unused-vars
+   85:14  warning  'err' is defined but never used          @typescript-eslint/no-unused-vars
+  107:14  warning  'err' is defined but never used          @typescript-eslint/no-unused-vars
+  164:44  warning  'index' is defined but never used        @typescript-eslint/no-unused-vars
+
+D:\ALPHA\AISA_CON_M-F\src\app\admin\logs\page.jsx
+   7:10  warning  'cn' is defined but never used   @typescript-eslint/no-unused-vars
+  22:16  warning  'err' is defined but never used  @typescript-eslint/no-unused-vars
+
+D:\ALPHA\AISA_CON_M-F\src\app\admin\page.jsx
+   6:3   warning  'Zap' is defined but never used           @typescript-eslint/no-unused-vars
+  11:3   warning  'Star' is defined but never used          @typescript-eslint/no-unused-vars
+  13:3   warning  'ShieldAlert' is defined but never used   @typescript-eslint/no-unused-vars
+  16:3   warning  'ChevronRight' is defined but never used  @typescript-eslint/no-unused-vars
+  18:3   warning  'GitBranch' is defined but never used     @typescript-eslint/no-unused-vars
+  38:16  warning  'err' is defined but never used           @typescript-eslint/no-unused-vars
+  90:33  warning  'index' is defined but never used         @typescript-eslint/no-unused-vars
+
+D:\ALPHA\AISA_CON_M-F\src\app\admin\settings\legal\page.jsx
+  37:16  warning  'err' is defined but never used  @typescript-eslint/no-unused-vars
+  83:14  warning  'err' is defined but never used  @typescript-eslint/no-unused-vars
+
+D:\ALPHA\AISA_CON_M-F\src\app\admin\stats\page.jsx
+   7:10  warning  'cn' is defined but never used   @typescript-eslint/no-unused-vars
+  21:16  warning  'err' is defined but never used  @typescript-eslint/no-unused-vars
+  49:31  warning  'i' is defined but never used    @typescript-eslint/no-unused-vars
+
+D:\ALPHA\AISA_CON_M-F\src\app\admin\support\page.jsx
+    4:35  warning  'User' is defined but never used    @typescript-eslint/no-unused-vars
+    4:49  warning  'Filter' is defined but never used  @typescript-eslint/no-unused-vars
+   32:14  warning  'err' is defined but never used     @typescript-eslint/no-unused-vars
+   48:14  warning  'err' is defined but never used     @typescript-eslint/no-unused-vars
+  110:14  warning  'err' is defined but never used     @typescript-eslint/no-unused-vars
+
+D:\ALPHA\AISA_CON_M-F\src\app\admin\workflows\page.jsx
+   4:21  warning  'Plus' is defined but never used    @typescript-eslint/no-unused-vars
+   4:36  warning  'Zap' is defined but never used     @typescript-eslint/no-unused-vars
+   4:41  warning  'Trash2' is defined but never used  @typescript-eslint/no-unused-vars
+  20:16  warning  'err' is defined but never used     @typescript-eslint/no-unused-vars
+  51:33  warning  'i' is defined but never used       @typescript-eslint/no-unused-vars
+
+D:\ALPHA\AISA_CON_M-F\src\app\auth\login\page.jsx
+  13:3  warning  'signInWithEmailAndPassword' is defined but never used  @typescript-eslint/no-unused-vars
+
+D:\ALPHA\AISA_CON_M-F\src\app\auth\register\page.jsx
+  14:3  warning  'createUserWithEmailAndPassword' is defined but never used  @typescript-eslint/no-unused-vars
+
+D:\ALPHA\AISA_CON_M-F\src\app\client\automations\page.jsx
+    4:41  warning  'Edit2' is defined but never used                                                                                                                                                     @typescript-eslint/no-unused-vars
+    4:48  warning  'Save' is defined but never used                                                                                                                                                      @typescript-eslint/no-unused-vars
+   96:14  warning  'err' is defined but never used                                                                                                                                                       @typescript-eslint/no-unused-vars
+  123:14  warning  'err' is defined but never used                                                                                                                                                       @typescript-eslint/no-unused-vars
+  147:14  warning  'err' is defined but never used                                                                                                                                                       @typescript-eslint/no-unused-vars
+  171:14  warning  'err' is defined but never used                                                                                                                                                       @typescript-eslint/no-unused-vars
+  193:14  warning  'err' is defined but never used                                                                                                                                                       @typescript-eslint/no-unused-vars
+  200:9   warning  'handleToggle' is assigned a value but never used                                                                                                                                     @typescript-eslint/no-unused-vars
+  212:14  warning  'err' is defined but never used                                                                                                                                                       @typescript-eslint/no-unused-vars
+  483:19  error    Do not use an `<a>` element to navigate to `/client/automations/builder/new/`. Use `<Link />` from `next/link` instead. See: https://nextjs.org/docs/messages/no-html-link-for-pages  @next/next/no-html-link-for-pages
+
+D:\ALPHA\AISA_CON_M-F\src\app\client\campaigns\page.jsx
+  6:77  warning  'AlertCircle' is defined but never used  @typescript-eslint/no-unused-vars
+
+D:\ALPHA\AISA_CON_M-F\src\app\client\catalog\page.jsx
+   4:46  warning  'Tag' is defined but never used         @typescript-eslint/no-unused-vars
+   4:58  warning  'DollarSign' is defined but never used  @typescript-eslint/no-unused-vars
+   4:78  warning  'FileText' is defined but never used    @typescript-eslint/no-unused-vars
+  56:14  warning  'err' is defined but never used         @typescript-eslint/no-unused-vars
+  71:14  warning  'err' is defined but never used         @typescript-eslint/no-unused-vars
+
+D:\ALPHA\AISA_CON_M-F\src\app\client\channels\page.jsx
+   4:25  warning  'Lock' is defined but never used             @typescript-eslint/no-unused-vars
+   4:31  warning  'CheckCircle' is defined but never used      @typescript-eslint/no-unused-vars
+   4:67  warning  'AlertCircle' is defined but never used      @typescript-eslint/no-unused-vars
+  50:9   warning  'router' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  68:14  warning  'err' is defined but never used              @typescript-eslint/no-unused-vars
+
+D:\ALPHA\AISA_CON_M-F\src\app\client\inbox\page.jsx
+   5:48  warning  'Mail' is defined but never used       @typescript-eslint/no-unused-vars
+   6:17  warning  'Plus' is defined but never used       @typescript-eslint/no-unused-vars
+   6:39  warning  'Filter' is defined but never used     @typescript-eslint/no-unused-vars
+   7:3   warning  'Smile' is defined but never used      @typescript-eslint/no-unused-vars
+   7:10  warning  'Paperclip' is defined but never used  @typescript-eslint/no-unused-vars
+   7:37  warning  'Check' is defined but never used      @typescript-eslint/no-unused-vars
+  44:16  warning  'err' is defined but never used        @typescript-eslint/no-unused-vars
+
+D:\ALPHA\AISA_CON_M-F\src\app\client\knowledge\page.jsx
+  68:14  warning  'err' is defined but never used  @typescript-eslint/no-unused-vars
+
+D:\ALPHA\AISA_CON_M-F\src\app\client\orders\page.jsx
+   4:28  warning  'DollarSign' is defined but never used   @typescript-eslint/no-unused-vars
+   4:40  warning  'User' is defined but never used         @typescript-eslint/no-unused-vars
+   4:46  warning  'Calendar' is defined but never used     @typescript-eslint/no-unused-vars
+   4:56  warning  'Tag' is defined but never used          @typescript-eslint/no-unused-vars
+   4:61  warning  'ShieldAlert' is defined but never used  @typescript-eslint/no-unused-vars
+  20:14  warning  'err' is defined but never used          @typescript-eslint/no-unused-vars
+
+D:\ALPHA\AISA_CON_M-F\src\app\client\page.jsx
+    5:23  warning  'TrendingUp' is defined but never used   @typescript-eslint/no-unused-vars
+    5:69  warning  'ShieldCheck' is defined but never used  @typescript-eslint/no-unused-vars
+    6:3   warning  'Target' is defined but never used       @typescript-eslint/no-unused-vars
+    6:57  warning  'BarChart3' is defined but never used    @typescript-eslint/no-unused-vars
+   31:16  warning  'e' is defined but never used            @typescript-eslint/no-unused-vars
+  110:29  warning  'i' is defined but never used            @typescript-eslint/no-unused-vars
+
+D:\ALPHA\AISA_CON_M-F\src\app\client\settings\page.jsx
+   4:53  warning  'Settings' is defined but never used     @typescript-eslint/no-unused-vars
+   4:72  warning  'ShieldCheck' is defined but never used  @typescript-eslint/no-unused-vars
+  58:14  warning  'err' is defined but never used          @typescript-eslint/no-unused-vars
+  94:14  warning  'err' is defined but never used          @typescript-eslint/no-unused-vars
+
+D:\ALPHA\AISA_CON_M-F\src\app\client\support\page.jsx
+   4:35  warning  'User' is defined but never used        @typescript-eslint/no-unused-vars
+   4:41  warning  'HelpCircle' is defined but never used  @typescript-eslint/no-unused-vars
+  23:14  warning  'err' is defined but never used         @typescript-eslint/no-unused-vars
+  65:14  warning  'err' is defined but never used         @typescript-eslint/no-unused-vars
+
+D:\ALPHA\AISA_CON_M-F\src\app\client\team\page.jsx
+  64:14  warning  'err' is defined but never used  @typescript-eslint/no-unused-vars
+
+D:\ALPHA\AISA_CON_M-F\src\app\client\workflows\builder\[id]\page.jsx
+   10:3   warning  'Panel' is defined but never used                  @typescript-eslint/no-unused-vars
+   18:24  warning  'Clock' is defined but never used                  @typescript-eslint/no-unused-vars
+   19:3   warning  'ChevronDown' is defined but never used            @typescript-eslint/no-unused-vars
+   19:49  warning  'FileText' is defined but never used               @typescript-eslint/no-unused-vars
+   19:59  warning  'Webhook' is defined but never used                @typescript-eslint/no-unused-vars
+   19:68  warning  'Tag' is defined but never used                    @typescript-eslint/no-unused-vars
+   19:73  warning  'BarChart3' is defined but never used              @typescript-eslint/no-unused-vars
+   20:52  warning  'Play' is defined but never used                   @typescript-eslint/no-unused-vars
+   20:75  warning  'Edit3' is defined but never used                  @typescript-eslint/no-unused-vars
+   59:24  warning  'id' is defined but never used                     @typescript-eslint/no-unused-vars
+  260:81  warning  'e' is defined but never used                      @typescript-eslint/no-unused-vars
+  354:14  warning  'err' is defined but never used                    @typescript-eslint/no-unused-vars
+  564:10  warning  'condition' is assigned a value but never used     @typescript-eslint/no-unused-vars
+  564:21  warning  'setCondition' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  719:47  warning  'expanded' is defined but never used               @typescript-eslint/no-unused-vars
+  728:65  warning  'color' is assigned a value but never used         @typescript-eslint/no-unused-vars
+
+D:\ALPHA\AISA_CON_M-F\src\app\client\workflows\page.jsx
+    5:9   warning  'Trash2' is defined but never used                  @typescript-eslint/no-unused-vars
+    5:52  warning  'Play' is defined but never used                    @typescript-eslint/no-unused-vars
+    5:58  warning  'Pause' is defined but never used                   @typescript-eslint/no-unused-vars
+    6:11  warning  'Filter' is defined but never used                  @typescript-eslint/no-unused-vars
+    6:32  warning  'Check' is defined but never used                   @typescript-eslint/no-unused-vars
+    6:45  warning  'Copy' is defined but never used                    @typescript-eslint/no-unused-vars
+    6:59  warning  'Eye' is defined but never used                     @typescript-eslint/no-unused-vars
+    6:64  warning  'Calendar' is defined but never used                @typescript-eslint/no-unused-vars
+    6:82  warning  'CheckSquare' is defined but never used             @typescript-eslint/no-unused-vars
+   11:8   warning  'Link' is defined but never used                    @typescript-eslint/no-unused-vars
+   13:10  warning  'templateData' is defined but never used            @typescript-eslint/no-unused-vars
+   70:22  warning  'setIsCreating' is assigned a value but never used  @typescript-eslint/no-unused-vars
+   98:14  warning  'err' is defined but never used                     @typescript-eslint/no-unused-vars
+  161:14  warning  'err' is defined but never used                     @typescript-eslint/no-unused-vars
+  185:14  warning  'err' is defined but never used                     @typescript-eslint/no-unused-vars
+  199:14  warning  'err' is defined but never used                     @typescript-eslint/no-unused-vars
+
+D:\ALPHA\AISA_CON_M-F\src\app\privacy\page.jsx
+   6:19  warning  'FileText' is defined but never used          @typescript-eslint/no-unused-vars
+   6:29  warning  'Shield' is defined but never used            @typescript-eslint/no-unused-vars
+  10:10  warning  'fileUrl' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  19:16  warning  'err' is defined but never used               @typescript-eslint/no-unused-vars
+
+D:\ALPHA\AISA_CON_M-F\src\app\terms\page.jsx
+   6:19  warning  'FileText' is defined but never used          @typescript-eslint/no-unused-vars
+  10:10  warning  'fileUrl' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  19:16  warning  'err' is defined but never used               @typescript-eslint/no-unused-vars
+
+D:\ALPHA\AISA_CON_M-F\src\components\TermsModal.jsx
+  17:16  warning  'err' is defined but never used  @typescript-eslint/no-unused-vars
+
+D:\ALPHA\AISA_CON_M-F\src\components\builder\CustomNodes.jsx
+  145:31  warning  'data' is defined but never used  @typescript-eslint/no-unused-vars
+
+D:\ALPHA\AISA_CON_M-F\src\components\channels\WhatsAppConfigModal.jsx
+  2:26  warning  'Copy' is defined but never used   @typescript-eslint/no-unused-vars
+  2:32  warning  'Check' is defined but never used  @typescript-eslint/no-unused-vars
+
+D:\ALPHA\AISA_CON_M-F\src\components\crm\ContactDetailsModal.jsx
+  53:14  warning  'err' is defined but never used  @typescript-eslint/no-unused-vars
+
+D:\ALPHA\AISA_CON_M-F\src\components\dashboard\DashboardLayout.jsx
+   8:10  warning  'ShieldAlert' is defined but never used  @typescript-eslint/no-unused-vars
+  49:16  warning  'e' is defined but never used            @typescript-eslint/no-unused-vars
+
+D:\ALPHA\AISA_CON_M-F\src\components\dashboard\PlatformAssistant.jsx
+   4:10  warning  'MessageSquare' is defined but never used  @typescript-eslint/no-unused-vars
+  39:14  warning  'err' is defined but never used            @typescript-eslint/no-unused-vars
+
+D:\ALPHA\AISA_CON_M-F\src\components\dashboard\Sidebar.jsx
+  14:3  warning  'ChevronRight' is defined but never used  @typescript-eslint/no-unused-vars
+
+D:\ALPHA\AISA_CON_M-F\src\components\landing\AIAssistant.jsx
+  31:9  warning  'triggerInteraction' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+D:\ALPHA\AISA_CON_M-F\src\components\landing\DashboardPreview.jsx
+   8:3   warning  'Database' is defined but never used         @typescript-eslint/no-unused-vars
+   8:19  warning  'MapPin' is defined but never used           @typescript-eslint/no-unused-vars
+   8:27  warning  'User' is defined but never used             @typescript-eslint/no-unused-vars
+   8:49  warning  'HelpCircle' is defined but never used       @typescript-eslint/no-unused-vars
+  12:9   warning  'router' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+D:\ALPHA\AISA_CON_M-F\src\components\landing\HeroSection.jsx
+  4:52  warning  'TrendingUp' is defined but never used  @typescript-eslint/no-unused-vars
+  4:64  warning  'Layers' is defined but never used      @typescript-eslint/no-unused-vars
+  4:72  warning  'Mail' is defined but never used        @typescript-eslint/no-unused-vars
+  4:88  warning  'Play' is defined but never used        @typescript-eslint/no-unused-vars
+
+D:\ALPHA\AISA_CON_M-F\src\components\landing\PlatformModules.jsx
+  4:30  warning  'Users' is defined but never used  @typescript-eslint/no-unused-vars
+
+D:\ALPHA\AISA_CON_M-F\src\components\tour\ProductTour.jsx
+  16:3  warning  'HelpCircle' is defined but never used  @typescript-eslint/no-unused-vars
+  18:3  warning  'MapPin' is defined but never used      @typescript-eslint/no-unused-vars
+
+D:\ALPHA\AISA_CON_M-F\src\context\TourContext.jsx
+   78:3  warning  Unused eslint-disable directive (no problems were reported from 'react-hooks/exhaustive-deps')
+  134:3  warning  Unused eslint-disable directive (no problems were reported from 'react-hooks/exhaustive-deps')
+
+D:\ALPHA\AISA_CON_M-F\src\features\auth\authHelpers.js
+  1:10  warning  'auth' is defined but never used  @typescript-eslint/no-unused-vars
+
+Γ£û 156 problems (2 errors, 154 warnings)
+  0 errors and 2 warnings potentially fixable with the `--fix` option.
+
