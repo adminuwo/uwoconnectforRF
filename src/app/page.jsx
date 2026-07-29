@@ -3,12 +3,14 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
-import { Menu, X, Sun, Moon } from 'lucide-react';
+import { Menu, X, Sun, Moon, Sparkles } from 'lucide-react';
 // Above-the-fold — load eagerly
 import HeroSection from '@/components/landing/HeroSection';
 
 // Below-the-fold — lazy load for fast initial page render
 const TrustedBy = dynamic(() => import('@/components/landing/TrustedBy'));
+const BeforeAfterSection = dynamic(() => import('@/components/landing/BeforeAfterSection'));
+const DailyImpactSection = dynamic(() => import('@/components/landing/DailyImpactSection'));
 const WhyEFV = dynamic(() => import('@/components/landing/WhyEFV'));
 const PlatformModules = dynamic(() => import('@/components/landing/PlatformModules'));
 const AutomationShowcase = dynamic(() => import('@/components/landing/AutomationShowcase'));
@@ -29,13 +31,14 @@ export default function Home() {
 
   const navItems = [
     { name: 'Platform', id: 'platform' },
+    { name: 'Transformation', id: 'transformation' },
+    { name: 'Impact', id: 'impact' },
     { name: 'Pricing', id: 'pricing' },
-    { name: 'Documentation', id: 'documentation' },
     { name: 'Contact', id: 'contact' },
   ];
 
   useEffect(() => {
-    const sections = ['platform', 'pricing', 'documentation', 'contact'];
+    const sections = ['platform', 'transformation', 'impact', 'pricing', 'contact'];
 
     const handleScroll = () => {
       const scrollPos = window.scrollY + 120; // Offset for scroll trigger point
@@ -98,166 +101,127 @@ export default function Home() {
         }`}>
         <div className="w-full max-w-7xl mx-auto px-6 md:px-12 h-20 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3 group shrink-0">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#059669] to-[#047857] flex items-center justify-center shadow-[0_0_15px_rgba(5,150,105,0.3)] group-hover:shadow-[0_0_25px_rgba(5,150,105,0.5)] transition-all">
-              <svg className="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
-                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
-              </svg>
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#10B981] to-[#059669] flex items-center justify-center text-black font-black shadow-[0_0_20px_rgba(16,185,129,0.4)] group-hover:shadow-[0_0_30px_rgba(16,185,129,0.6)] transition-all">
+              <Sparkles size={20} />
             </div>
-            <span className={`font-bold text-lg tracking-tight transition-colors duration-300 ${isDark ? 'text-white' : 'text-[#000000]'}`}>
-              Uwo Connect
-            </span>
+            <span className="text-xl font-bold tracking-tight text-white">UWO Connect</span>
           </Link>
 
-          <nav className="hidden md:flex items-center gap-1 bg-white/[0.03] dark:bg-white/[0.02] border border-white/[0.05] dark:border-white/[0.03] rounded-full px-2 py-1.5 backdrop-blur-md">
-            {navItems.map((item) => {
-              const isActive = activeSection === item.id;
-              return (
-                <a
-                  key={item.name}
-                  href={`#${item.id}`}
-                  onClick={(e) => handleNavClick(e, item.id)}
-                  className={`relative px-4 py-1.5 text-sm font-medium transition-colors duration-300 rounded-full ${isActive
-                      ? (isDark ? 'text-white' : 'text-white')
-                      : (isDark ? 'text-[#8E99A8] hover:text-white' : 'text-slate-800 hover:text-black')
-                    }`}
-                >
-                  {isActive && (
-                    <div
-                      className={`absolute inset-0 rounded-full -z-10 ${isDark ? 'bg-white/[0.08]' : 'bg-[#059669]'
-                        }`}
-                    />
-                  )}
-                  {item.name}
-                </a>
-              );
-            })}
+          {/* Desktop Nav Items */}
+          <nav className="hidden md:flex items-center gap-8">
+            {navItems.map((item) => (
+              <a
+                key={item.id}
+                href={`#${item.id}`}
+                onClick={(e) => handleNavClick(e, item.id)}
+                className={`text-xs font-bold uppercase tracking-wider transition-colors hover:text-[#10B981] ${
+                  activeSection === item.id ? 'text-[#10B981]' : isDark ? 'text-slate-300' : 'text-slate-700'
+                }`}
+              >
+                {item.name}
+              </a>
+            ))}
           </nav>
 
-          <div className="hidden md:flex items-center gap-4 shrink-0">
-            <button
-              onClick={() => setIsDark(!isDark)}
-              className={`p-2 transition-colors rounded-full ${isDark
-                  ? 'text-[#8E99A8] hover:text-white hover:bg-white/5'
-                  : 'text-slate-700 hover:text-black hover:bg-slate-100'
-                }`}
-            >
-              {isDark ? <Sun size={20} /> : <Moon size={20} />}
-            </button>
+          {/* Action CTAs */}
+          <div className="hidden md:flex items-center gap-4">
             <Link
               href="/auth/login"
-              className={`text-sm font-medium transition-colors px-4 py-2 ${isDark ? 'text-[#8E99A8] hover:text-white' : 'text-slate-800 hover:text-black'
-                }`}
+              className="text-xs font-bold uppercase tracking-wider text-slate-300 hover:text-white transition-colors"
             >
               Login
             </Link>
             <Link
               href="/auth/register"
-              className="px-6 py-2.5 bg-[#059669] text-white font-semibold text-sm rounded-full shadow-[0_0_20px_rgba(5,150,105,0.2)] hover:shadow-[0_0_30px_rgba(5,150,105,0.4)] hover:bg-[#047857] transition-all duration-300"
+              className="px-6 py-2.5 bg-gradient-to-r from-[#10B981] to-[#059669] text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-[0_0_15px_rgba(16,185,129,0.3)] hover:shadow-[0_0_25px_rgba(16,185,129,0.5)] transition-all"
             >
-              Sign Up
+              Start Free
             </Link>
           </div>
 
+          {/* Mobile Hamburger Toggle */}
           <button
-            className={`md:hidden p-2 rounded-lg transition-colors ${isDark ? 'hover:bg-white/5 text-white' : 'hover:bg-slate-100 text-slate-800'
-              }`}
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="md:hidden p-2 text-slate-300 hover:text-white"
           >
             {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>
 
         {/* Mobile Menu Dropdown */}
-
         {mobileMenuOpen && (
-          <div
-            className={`md:hidden border-t backdrop-blur-[24px] px-6 py-6 flex flex-col gap-4 overflow-hidden ${isDark
-                ? 'bg-[#030712]/95 border-white/[0.06] text-white'
-                : 'bg-[#F3FBF7]/95 border-[#10B981]/15 text-[#000000]'
-              }`}
-          >
-            <div className="flex flex-col gap-2">
-              {navItems.map((item) => {
-                const isActive = activeSection === item.id;
-                return (
-                  <a
-                    key={item.name}
-                    href={`#${item.id}`}
-                    onClick={(e) => {
-                      handleNavClick(e, item.id);
-                      setMobileMenuOpen(false);
-                    }}
-                    className={`px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 ${isActive
-                        ? (isDark ? 'bg-white/10 text-white' : 'bg-slate-100 text-slate-900')
-                        : (isDark ? 'text-slate-400 hover:text-white hover:bg-white/5' : 'text-slate-800 hover:text-black hover:bg-slate-50')
-                      }`}
-                  >
-                    {item.name}
-                  </a>
-                );
-              })}
-            </div>
-            <hr className={`my-2 ${isDark ? 'border-white/10' : 'border-slate-100'}`} />
+          <div className="md:hidden bg-[#0B0D11] border-b border-white/10 p-6 space-y-4">
             <div className="flex flex-col gap-3">
-              <button
-                onClick={() => {
-                  setIsDark(!isDark);
-                  setMobileMenuOpen(false);
-                }}
-                className={`w-full py-3 text-center text-sm font-semibold flex items-center justify-center gap-2 border rounded-xl transition-all duration-200 ${isDark
-                    ? 'border-white/10 hover:bg-white/5 text-slate-300'
-                    : 'border-slate-200 hover:bg-slate-50 text-slate-800'
-                  }`}
-              >
-                {isDark ? <Sun size={18} /> : <Moon size={18} />}
-                {isDark ? 'Light Mode' : 'Dark Mode'}
-              </button>
+              {navItems.map((item) => (
+                <a
+                  key={item.id}
+                  href={`#${item.id}`}
+                  onClick={(e) => {
+                    handleNavClick(e, item.id);
+                    setMobileMenuOpen(false);
+                  }}
+                  className="text-sm font-bold text-slate-300 hover:text-[#10B981]"
+                >
+                  {item.name}
+                </a>
+              ))}
+            </div>
+            <div className="pt-4 border-t border-white/10 flex flex-col gap-3">
               <Link
                 href="/auth/login"
-                onClick={() => setMobileMenuOpen(false)}
-                className={`w-full py-3 text-center text-sm font-semibold border rounded-xl transition-all duration-200 ${isDark
-                    ? 'border-white/10 hover:bg-white/5 text-slate-300'
-                    : 'border-slate-200 hover:bg-slate-50 text-slate-800'
-                  }`}
+                className="w-full py-3 text-center text-xs font-bold text-white bg-white/5 border border-white/10 rounded-xl"
               >
                 Login
               </Link>
               <Link
                 href="/auth/register"
-                onClick={() => setMobileMenuOpen(false)}
-                className="w-full py-3 text-center text-sm font-bold bg-[#059669] text-white rounded-xl hover:bg-[#047857] transition-all hover:shadow-[0_0_20px_rgba(5,150,105,0.3)]"
+                className="w-full py-3 text-center text-xs font-bold text-white bg-[#10B981] rounded-xl"
               >
-                Sign Up
+                Start Free Trial
               </Link>
             </div>
           </div>
         )}
-
       </header>
 
       {/* MAIN SECTIONS */}
       <main className="relative z-10">
         <HeroSection isDark={isDark} />
         <TrustedBy isDark={isDark} />
+        
+        <div id="transformation">
+          <BeforeAfterSection isDark={isDark} />
+        </div>
+
+        <div id="impact">
+          <DailyImpactSection isDark={isDark} />
+        </div>
+
         <WhyEFV isDark={isDark} />
+        
         <div id="platform">
           <PlatformModules isDark={isDark} />
         </div>
+        
         <AutomationShowcase isDark={isDark} />
         <DashboardPreview />
         <AIAssistant />
+        
         <div id="documentation">
           <FeatureComparison />
         </div>
+        
         <WorkflowTimeline />
         <Testimonials />
+        
         <div id="pricing">
           <Pricing />
         </div>
+        
         <div id="contact">
           <FAQ />
         </div>
+        
         <CTABanner />
       </main>
 
@@ -266,5 +230,3 @@ export default function Home() {
     </div>
   );
 }
-
-
