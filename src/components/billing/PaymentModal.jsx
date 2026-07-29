@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { ShieldCheck, CreditCard, CheckCircle2, AlertCircle, Loader2, X, Lock, Zap } from 'lucide-react';
 import axios from 'axios';
-import { initiateCashfreeCheckout } from '@/utils/cashfree';
+import { initiateRazorpayCheckout } from '@/utils/razorpay';
 
 const PLAN_DETAILS = {
   STARTER: {
@@ -59,36 +59,56 @@ export default function PaymentModal({ isOpen, onClose, selectedPlan = 'GROWTH',
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      const { order_id, payment_session_id, cf_environment, is_mock } = res.data;
+      const {
+        order_id,
+        razorpay_order_id,
+        razorpay_key_id,
+        amount_paise,
+        customer_name,
+        customer_email,
+        customer_phone,
+        is_mock
+      } = res.data;
 
       if (is_mock) {
-        // Show local sandbox mock dialog for testing without production credentials
-        setMockSession({ order_id, payment_session_id });
+        setMockSession({ order_id, razorpay_order_id });
         setLoading(false);
         return;
       }
 
-      // Launch Cashfree SDK Modal
-      await initiateCashfreeCheckout({
-        paymentSessionId: payment_session_id,
-        env: cf_environment,
-        onComplete: async (details) => {
-          await verifyOrder(order_id);
+      // Launch Razorpay SDK Popup
+      await initiateRazorpayCheckout({
+        keyId: razorpay_key_id,
+        orderId: razorpay_order_id,
+        amount: amount_paise,
+        currency: 'INR',
+        name: 'Uwo Connect',
+        description: `${planInfo.name} (${billingCycle})`,
+        customerName: customer_name,
+        customerEmail: customer_email,
+        customerPhone: customer_phone,
+        onSuccess: async (rzpPayload) => {
+          await verifyOrder({
+            order_id,
+            razorpay_order_id: rzpPayload.razorpay_order_id,
+            razorpay_payment_id: rzpPayload.razorpay_payment_id,
+            razorpay_signature: rzpPayload.razorpay_signature
+          });
         },
-        onFailure: (err) => {
-          setError(err.message || 'Payment was cancelled or failed.');
+        onDismiss: () => {
+          setError('Payment was cancelled.');
           setLoading(false);
         }
       });
       setLoading(false);
     } catch (err) {
       console.error('Payment initiation error:', err);
-      setError(err.response?.data?.error || 'Failed to initialize Cashfree payment session.');
+      setError(err.response?.data?.error || 'Failed to initialize Razorpay payment session.');
       setLoading(false);
     }
   };
 
-  const verifyOrder = async (order_id, forceMock = false) => {
+  const verifyOrder = async ({ order_id, razorpay_order_id, razorpay_payment_id, razorpay_signature, forceMock = false }) => {
     try {
       setVerifying(true);
       setError('');
@@ -97,7 +117,13 @@ export default function PaymentModal({ isOpen, onClose, selectedPlan = 'GROWTH',
 
       const res = await axios.post(
         `${API_URL}/api/payments/verify-order`,
-        { order_id, force_mock_success: forceMock },
+        {
+          order_id,
+          razorpay_order_id,
+          razorpay_payment_id,
+          razorpay_signature,
+          force_mock_success: forceMock
+        },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
@@ -151,17 +177,17 @@ export default function PaymentModal({ isOpen, onClose, selectedPlan = 'GROWTH',
             <div className="w-12 h-12 bg-amber-500/20 border border-amber-500/40 rounded-full flex items-center justify-center mx-auto mb-3 text-amber-400">
               <Zap size={24} />
             </div>
-            <h4 className="text-lg font-bold text-white mb-1">Cashfree Sandbox Test Mode</h4>
+            <h4 className="text-lg font-bold text-white mb-1">Razorpay Sandbox Test Mode</h4>
             <p className="text-xs text-slate-400 mb-6">
-              Order ID: <code className="text-slate-200">{mockSession.order_id}</code>
+              Order Receipt: <code className="text-slate-200">{mockSession.order_id}</code>
               <br />
-              (Simulate a successful Cashfree payment transaction)
+              (Simulate a successful Razorpay payment transaction)
             </p>
 
             <div className="space-y-3">
               <button
                 disabled={verifying}
-                onClick={() => verifyOrder(mockSession.order_id, true)}
+                onClick={() => verifyOrder({ order_id: mockSession.order_id, forceMock: true })}
                 className="w-full py-3.5 bg-gradient-to-r from-[#10B981] to-[#059669] text-white font-bold rounded-2xl transition-all cursor-pointer flex items-center justify-center gap-2 shadow-lg"
               >
                 {verifying ? <Loader2 className="animate-spin" size={18} /> : <CheckCircle2 size={18} />}
@@ -183,7 +209,7 @@ export default function PaymentModal({ isOpen, onClose, selectedPlan = 'GROWTH',
               </div>
               <div>
                 <h3 className="text-lg font-bold text-white">Checkout</h3>
-                <p className="text-xs text-[#8E99A8]">Secured by Cashfree Payments</p>
+                <p className="text-xs text-[#8E99A8]">Secured by Razorpay Payments</p>
               </div>
             </div>
 
@@ -223,11 +249,11 @@ export default function PaymentModal({ isOpen, onClose, selectedPlan = 'GROWTH',
               {loading ? (
                 <>
                   <Loader2 className="animate-spin" size={18} />
-                  Initializing Cashfree...
+                  Initializing Razorpay...
                 </>
               ) : (
                 <>
-                  <Lock size={16} /> Pay ₹{totalAmount.toLocaleString('en-IN')} via Cashfree
+                  <Lock size={16} /> Pay ₹{totalAmount.toLocaleString('en-IN')} via Razorpay
                 </>
               )}
             </button>

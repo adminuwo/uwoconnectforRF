@@ -40,7 +40,7 @@ export default function RefundPolicyPage() {
 
           <h2 className="text-xl font-bold text-white pt-4">3. Refund Processing Time & Payment Gateway</h2>
           <p>
-            All approved refunds are processed via our payment gateway provider (<strong>Cashfree Payments</strong>) to the original payment method used during checkout (Credit/Debit Card, UPI, Netbanking, or Wallet).
+            All approved refunds are processed via our payment gateway provider (<strong>Razorpay Payments</strong>) to the original payment method used during checkout (Credit/Debit Card, UPI, Netbanking, or Wallet).
           </p>
           <p>
             Once initiated, refunds typically reflect in your bank account or card statement within <strong>5 to 7 business days</strong>, depending on your card issuer or banking provider.

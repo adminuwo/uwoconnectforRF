@@ -99,7 +99,7 @@ export default function Pricing() {
                   </span>
                   <span className="text-xs text-[#8E99A8] font-medium"> (${annual ? plan.annual : plan.monthly}/mo)</span>
                 </div>
-                <span className="text-xs text-[#8E99A8] font-medium"> Billed {annual ? 'annually' : 'monthly'} via Cashfree</span>
+                <span className="text-xs text-[#8E99A8] font-medium"> Billed {annual ? 'annually' : 'monthly'} via Razorpay</span>
               </div>
               <ul className="space-y-4 mb-8 flex-1">
                 {plan.features.map((f, i) => (
