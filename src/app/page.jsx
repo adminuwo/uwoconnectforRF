@@ -239,7 +239,7 @@ export default function Home() {
       {/* MAIN SECTIONS */}
       <main className="relative z-10">
         <HeroSection isDark={isDark} />
-        <TrustedBy />
+        <TrustedBy isDark={isDark} />
         <WhyEFV isDark={isDark} />
         <div id="platform">
           <PlatformModules isDark={isDark} />

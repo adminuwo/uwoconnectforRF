@@ -13,7 +13,7 @@
 
 
 
-  --font-sans: "Times New Roman", Times, serif;
+  --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
 :root {
@@ -30,15 +30,11 @@
 }
 
 @layer base {
-  * {
-    font-family: "Times New Roman", Times, serif !important;
-  }
-
   html,
   body {
     background-color: var(--background);
     color: var(--foreground);
-    font-family: "Times New Roman", Times, serif !important;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     @apply antialiased transition-colors duration-300;
     overflow-x: hidden !important;
     max-width: 100% !important;
