@@ -5,6 +5,7 @@ import { Plus, Trash2, Loader2, X, Zap, Edit2, Save, MessageSquare, PlusCircle, 
 import axios from 'axios';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { cn } from '@/lib/utils';
+import Link from 'next/link';
 
 const FacebookIcon = ({ size = 14, className }) => (
   <svg
@@ -480,7 +481,7 @@ const ClientAutomationsPage = () => {
                   </button>
 
                   {/* Option 3: Visual Workflow */}
-                  <a 
+                  <Link 
                     href="/client/automations/builder/new"
                     className="flex flex-col items-center text-center p-6 sm:p-8 bg-blue-50/50 border-2 border-transparent hover:border-blue-600 rounded-[24px] sm:rounded-[32px] transition-all group md:col-span-2"
                   >
@@ -489,7 +490,7 @@ const ClientAutomationsPage = () => {
                     </div>
                     <h3 className="text-lg font-bold text-slate-900 mb-2">Visual Workflow Builder</h3>
                     <p className="text-xs text-slate-500 font-medium leading-relaxed">Drag and drop blocks to build complex Chatbots with buttons, conditions, and agent handoffs.</p>
-                  </a>
+                  </Link>
 
                   {/* Option 4: AI */}
                   <button 

@@ -17,18 +17,18 @@ export default function CTABanner() {
         </div>
         
         <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-6 text-white max-w-2xl mx-auto">
-          Ready to initialize your enterprise kernel?
+          Connect More. Automate More. Grow More.
         </h2>
         <p className="text-[#8E99A8] text-lg font-medium mb-10 max-w-xl mx-auto leading-relaxed">
-          Create your workspace in 30 seconds. Connect your data, activate your AI assistants, and let the system run.
+          Your customers are everywhere. Your business should be too. Bring every conversation, every customer, and every workflow together in one intelligent platform designed for the future of customer engagement.
         </p>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 relative z-10">
-          <button className="btn-accent px-10 py-5 w-full sm:w-auto">
-            Start Free Trial Now
+          <button className="btn-accent px-10 py-5 w-full sm:w-auto text-sm">
+            🚀 Start Free Today
           </button>
-          <button className="btn-secondary px-10 py-5 w-full sm:w-auto">
-            Talk to Engineering
+          <button className="btn-secondary px-10 py-5 w-full sm:w-auto text-sm">
+            📅 Schedule a Personalized Demo
           </button>
         </div>
       </div>

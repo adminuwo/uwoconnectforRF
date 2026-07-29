@@ -16,20 +16,26 @@ export default function HeroSection({ isDark = true }) {
           className={`inline-flex items-center gap-2 px-4 py-2 rounded-full border shadow-lg text-[10px] uppercase tracking-widest font-bold text-[#20C997] mb-8 backdrop-blur-md ${isDark ? 'bg-white/5 border-white/10' : 'bg-[#059669]/5 border-[#059669]/20'}`}
         >
           <Sparkles size={14} className="" />
-          <span>The Next Generation OS</span>
+          <span>Omnichannel • AI Agents • CRM • Workflow Automation • Enterprise Ready</span>
         </div>
 
         <h1
           className={`text-5xl md:text-6xl xl:text-7xl font-bold tracking-tight leading-[1.1] mb-6 drop-shadow-[0_0_15px_rgba(255,255,255,0.05)] ${isDark ? 'text-white' : 'text-slate-900'}`}
         >
-          One AI Platform.<br />
-          <span className={`bg-gradient-to-r bg-clip-text text-transparent drop-shadow-[0_0_20px_rgba(16,185,129,0.2)] ${isDark ? 'from-white to-emerald-400' : 'from-slate-900 to-emerald-700'}`}>Every Business Operation.</span>
+          One Platform. <br />
+          <span className={`text-5xl md:text-6xl bg-gradient-to-r bg-clip-text text-transparent drop-shadow-[0_0_20px_rgba(16,185,129,0.2)] ${isDark ? 'from-white to-emerald-400' : 'from-slate-900 to-emerald-700'}`}>Endless Connections.</span>
         </h1>
 
         <p
-          className={`text-lg md:text-xl font-medium leading-relaxed mb-10 max-w-xl mx-auto lg:mx-0 ${isDark ? 'text-slate-300' : 'text-slate-800'}`}
+          className={`text-lg md:text-xl font-medium leading-relaxed mb-6 max-w-xl mx-auto lg:mx-0 ${isDark ? 'text-slate-300' : 'text-slate-800'}`}
         >
-          Run your CRM, Marketing, Sales, Projects, Finance, HR, AI Automation, Communication, and Analytics from a single, unified enterprise intelligence kernel.
+          Connect conversations, customers, AI, and automation into one intelligent platform that helps your business engage faster, automate smarter, and grow effortlessly.
+        </p>
+
+        <p
+          className={`text-md md:text-lg font-medium leading-relaxed mb-10 max-w-xl mx-auto lg:mx-0 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}
+        >
+          Whether your customers reach you through WhatsApp, Instagram, Email, or Web Chat, UWO Connect brings every interaction together—empowering your team with AI-driven conversations, seamless collaboration, and intelligent automation.
         </p>
 
         <div
@@ -40,7 +46,7 @@ export default function HeroSection({ isDark = true }) {
             <Sparkles size={14} />
           </button>
           <button className="btn-secondary text-[12px] px-10 py-5">
-            Book Demo
+            Book a Demo
           </button>
         </div>
       </div>

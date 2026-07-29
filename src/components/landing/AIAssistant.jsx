@@ -120,31 +120,40 @@ export default function AIAssistant() {
 
         {/* Right Side Content */}
         <div className="flex-1 text-center md:text-left">
-          <span className="text-[10px] font-bold text-[#20C997] uppercase tracking-widest block mb-3">Vector Intelligence</span>
+          <span className="text-[10px] font-bold text-[#20C997] uppercase tracking-widest block mb-3">Native Intelligence</span>
           <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-6 text-white">
-            Conversational AI mapped to your data.
+            AI That Understands Your Business.
           </h2>
-          <p className="text-[#8E99A8] text-lg font-medium mb-8">
-            Upload PDFs, connect databases, and sync CRM records. Click the interactive capabilities below to simulate queries in our sandbox.
+          <p className="text-[#8E99A8] text-lg font-medium mb-4">
+            Unlike traditional automation platforms, UWO Connect uses AI throughout the customer journey. Your AI can:
           </p>
-          <ul className="space-y-3 mb-8 select-none">
+          <ul className="grid grid-cols-2 gap-3 mb-8 select-none">
             {[
-              { label: "Semantic Search across all files", query: "Can you search my files for GDPR compliance terms?", header: "Searching document repository...", reply: "Found 3 matching files:\n• customer_agreement_2026.pdf (94% match)\n• terms_of_service.md (82% match)\n• privacy_policy.txt (78% match)\n\nGDPR retention policies are covered under Section 9. Would you like to view the excerpt?" },
-              { label: "Autonomous task execution", query: "Automate: Sync Sarah Jenkins to HubSpot and alert Slack", header: "Executing multi-step workflow...", reply: "Automation executed successfully:\n✓ Created HubSpot lead for 'Sarah Jenkins'\n✓ Synced contact timeline activity\n✓ Sent confirmation card to Slack #sales-alerts." },
-              { label: "Secure role-based knowledge boundaries", query: "Does a support agent have access to the payroll sheet?", header: "Checking access control boundaries...", reply: "Access Blocked.\n\nSupport agents only have access to the 'Customer FAQ' and 'Support Guide' scopes. The 'Payroll Ledger' is restricted to Finance/Admin roles only." }
+              "Understand customer intent",
+              "Respond naturally",
+              "Qualify leads",
+              "Trigger workflows",
+              "Generate summaries",
+              "Recommend next actions",
+              "Assist sales teams",
+              "Help support agents",
+              "Deliver business insights"
             ].map((item, idx) => (
               <li
                 key={idx}
                 onClick={() => triggerInteraction(item)}
                 className="flex items-center gap-3 text-sm font-bold text-white hover:bg-[#16A085]/10 hover:border-[#16A085]/30 border border-transparent transition-all p-3 rounded-2xl cursor-pointer group"
               >
-                <div className="w-6 h-6 rounded-full bg-[#0F6B52]/20 border border-[#0F6B52]/30 flex items-center justify-center text-[#20C997] shrink-0 transition-transform">
+                <div className="w-5 h-5 rounded-full bg-[#0F6B52]/20 border border-[#0F6B52]/30 flex items-center justify-center text-[#20C997] shrink-0 transition-transform">
                   ✓
                 </div>
-                <span className="group-hover:text-[#20C997] transition-colors">{item.label}</span>
+                <span className="text-xs text-[#8E99A8]">{item}</span>
               </li>
             ))}
           </ul>
+          <p className="text-[#20C997] font-bold text-lg">
+            AI isn't an add-on. It's built into every workflow.
+          </p>
         </div>
 
       </div>

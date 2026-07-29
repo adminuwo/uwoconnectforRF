@@ -1,21 +1,40 @@
 'use client';
 
 import React from 'react';
-import { Users, TrendingUp, Mail, MessageSquare, Layers, Award, DollarSign, Activity, FileText, Headphones } from 'lucide-react';
+import { MessageSquare, Bot, Users, Database, Zap, Megaphone, BarChart3 } from 'lucide-react';
 
 export default function PlatformModules({ isDark = true }) {
   const modules = [
-    { icon: Users, name: "CRM", status: "Active" },
-    { icon: TrendingUp, name: "Sales", status: "Active" },
-    { icon: Mail, name: "Marketing", status: "Active" },
-    { icon: MessageSquare, name: "WhatsApp", status: "Active" },
-    { icon: MessageSquare, name: "Email", status: "Active" },
-    { icon: Layers, name: "Projects", status: "Active" },
-    { icon: Award, name: "HR", status: "Active" },
-    { icon: DollarSign, name: "Finance", status: "Active" },
-    { icon: Activity, name: "Analytics", status: "Active" },
-    { icon: FileText, name: "Documents", status: "Active" },
-    { icon: Headphones, name: "Support", status: "Active" }
+    { 
+      icon: MessageSquare, 
+      name: "Omnichannel Conversations", 
+      desc: "Manage customer conversations across WhatsApp, Instagram, Email, and Web Chat from one shared inbox."
+    },
+    { 
+      icon: Bot, 
+      name: "AI That Works Alongside Your Team", 
+      desc: "Automate routine conversations, answer questions, qualify leads, and escalate to the right team member."
+    },
+    { 
+      icon: Database, 
+      name: "Customer CRM", 
+      desc: "Keep track of every interaction, purchase, and follow-up in one centralized CRM for a 360° customer view."
+    },
+    { 
+      icon: Zap, 
+      name: "Intelligent Automation", 
+      desc: "Transform conversations into automated actions. Capture leads, assign tasks, and trigger campaigns with zero code."
+    },
+    { 
+      icon: Megaphone, 
+      name: "Campaigns That Connect", 
+      desc: "Reach the right audience with personalized campaigns across supported channels and measure engagement in real-time."
+    },
+    { 
+      icon: BarChart3, 
+      name: "Insights That Drive Growth", 
+      desc: "Track customer engagement, team performance, campaign results, and AI metrics from one intuitive dashboard."
+    }
   ];
 
   return (
@@ -25,32 +44,26 @@ export default function PlatformModules({ isDark = true }) {
       <div className="max-w-7xl mx-auto px-6 relative z-10">
         <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-8">
           <div className="max-w-2xl">
-            <span className="text-[10px] font-bold text-[#20C997] uppercase tracking-widest block mb-3">Ecosystem</span>
+            <span className="text-[10px] font-bold text-[#20C997] uppercase tracking-widest block mb-3">Core Capabilities</span>
             <h2 className={`text-3xl md:text-5xl font-bold tracking-tight mb-6 ${isDark ? 'text-white' : 'text-slate-900'}`}>
-              Platform Modules
+              Built to Connect Your Business
             </h2>
-            <p className={`text-lg font-medium ${isDark ? 'text-[#8E99A8]' : 'text-slate-600'}`}>
-              A comprehensive suite of enterprise modules, seamlessly interconnected through our vector intelligence layer.
-            </p>
           </div>
-          <button className="btn-secondary px-6 py-3 whitespace-nowrap">
-            View All Capabilities
-          </button>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {modules.map((mod, idx) => (
             <div
               key={idx}
-              className={`glass-card rounded-2xl p-5 border border-white/10 hover:border-[#16A085]/50 flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-300 transform hover:-translate-y-1.5 hover:scale-[1.03] hover:shadow-[0_12px_24px_-10px_rgba(16,185,129,0.3)]`}
+              className={`glass-card rounded-2xl p-6 border border-white/10 hover:border-[#16A085]/50 flex flex-col items-start cursor-pointer transition-all duration-300 transform hover:-translate-y-1 hover:shadow-[0_12px_24px_-10px_rgba(16,185,129,0.3)]`}
             >
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-4 bg-[#0F6B52]/20 text-[#20C997]">
-                <mod.icon size={20} strokeWidth={1.5} />
+              <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-6 bg-[#0F6B52]/20 text-[#20C997]">
+                <mod.icon size={24} strokeWidth={1.5} />
               </div>
-              <h4 className={`text-sm font-bold mb-1 ${isDark ? 'text-white' : 'text-slate-800'}`}>{mod.name}</h4>
-              <span className="text-[9px] uppercase tracking-wider font-bold text-[#16A085]">
-                {mod.status}
-              </span>
+              <h4 className={`text-lg font-bold mb-3 ${isDark ? 'text-white' : 'text-slate-800'}`}>{mod.name}</h4>
+              <p className={`text-sm font-medium leading-relaxed ${isDark ? 'text-[#8E99A8]' : 'text-slate-600'}`}>
+                {mod.desc}
+              </p>
             </div>
           ))}
 
@@ -66,5 +79,3 @@ export default function PlatformModules({ isDark = true }) {
     </section>
   );
 }
-
-
