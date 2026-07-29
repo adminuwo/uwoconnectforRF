@@ -18,14 +18,13 @@ export default function AutomationShowcase({ isDark = true }) {
         </p>
       </div>
 
-      <div className={`max-w-5xl mx-auto rounded-[32px] p-8 md:p-12 relative overflow-hidden border ${
-        isDark 
-          ? 'bg-slate-950/40 border-white/5 shadow-2xl' 
+      <div className={`max-w-5xl mx-auto rounded-[32px] p-8 md:p-12 relative overflow-hidden border ${isDark
+          ? 'bg-slate-950/40 border-white/5 shadow-2xl'
           : 'bg-white/60 border-[#059669]/10 backdrop-blur-xl shadow-xl'
-      }`}>
+        }`}>
         {/* Background Gradients */}
         <div className="absolute top-0 right-0 w-64 h-64 bg-[#16A085]/10 rounded-full blur-[80px]" />
-        
+
         {/* UI Mockup Header */}
         <div className={`flex justify-between items-center mb-12 border-b pb-6 ${isDark ? 'border-white/5' : 'border-[#059669]/10'}`}>
           <div className="flex items-center gap-4">
@@ -45,15 +44,13 @@ export default function AutomationShowcase({ isDark = true }) {
           {/* Row 1: Pipeline Inbound */}
           <div className="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-12 relative">
             {/* Connection Line Desktop */}
-            <div className={`hidden md:block absolute top-1/2 left-[10%] right-[10%] h-0.5 -translate-y-1/2 z-0 ${
-              isDark ? 'bg-gradient-to-r from-emerald-500/10 via-emerald-500/40 to-emerald-500/10' : 'bg-gradient-to-r from-[#059669]/10 via-[#059669]/30 to-[#059669]/10'
-            }`} />
-            
+            <div className={`hidden md:block absolute top-1/2 left-[10%] right-[10%] h-0.5 -translate-y-1/2 z-0 ${isDark ? 'bg-gradient-to-r from-emerald-500/10 via-emerald-500/40 to-emerald-500/10' : 'bg-gradient-to-r from-[#059669]/10 via-[#059669]/30 to-[#059669]/10'
+              }`} />
+
             {/* Step 1: Webhook */}
             <div className="relative z-10 group" onMouseEnter={() => setHoveredNode('webhook')} onMouseLeave={() => setHoveredNode(null)}>
-              <div className={`rounded-2xl p-5 w-52 border transition-all duration-300 transform hover:-translate-y-1 hover:scale-[1.02] ${
-                isDark ? 'bg-slate-900/40 border-white/10' : 'border-[#059669]/15 bg-white shadow-sm'
-              }`}>
+              <div className={`rounded-2xl p-5 w-52 border transition-all duration-300 transform hover:-translate-y-1 hover:scale-[1.02] ${isDark ? 'bg-slate-900/40 border-white/10' : 'border-[#059669]/15 bg-white shadow-sm'
+                }`}>
                 <div className="flex items-center gap-3 mb-3">
                   <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-[#20C997]">
                     <Webhook size={18} />
@@ -71,9 +68,8 @@ export default function AutomationShowcase({ isDark = true }) {
 
             {/* Step 2: AI Screening */}
             <div className="relative z-10 group" onMouseEnter={() => setHoveredNode('ai')} onMouseLeave={() => setHoveredNode(null)}>
-              <div className={`rounded-2xl p-5 w-52 border transition-all duration-300 transform hover:-translate-y-1 hover:scale-[1.02] ${
-                isDark ? 'bg-slate-900/40 border-white/10' : 'border-[#059669]/15 bg-white shadow-sm'
-              }`}>
+              <div className={`rounded-2xl p-5 w-52 border transition-all duration-300 transform hover:-translate-y-1 hover:scale-[1.02] ${isDark ? 'bg-slate-900/40 border-white/10' : 'border-[#059669]/15 bg-white shadow-sm'
+                }`}>
                 <div className="flex items-center gap-3 mb-3">
                   <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400">
                     <Brain size={18} />
@@ -91,9 +87,8 @@ export default function AutomationShowcase({ isDark = true }) {
 
             {/* Step 3: Decision Gate */}
             <div className="relative z-10 group" onMouseEnter={() => setHoveredNode('gate')} onMouseLeave={() => setHoveredNode(null)}>
-              <div className={`rounded-2xl p-5 w-52 border transition-all duration-300 transform hover:-translate-y-1 hover:scale-[1.02] ${
-                isDark ? 'bg-slate-900/40 border-[#20C997]/30' : 'border-[#059669]/30 bg-white shadow-sm'
-              }`}>
+              <div className={`rounded-2xl p-5 w-52 border transition-all duration-300 transform hover:-translate-y-1 hover:scale-[1.02] ${isDark ? 'bg-slate-900/40 border-[#20C997]/30' : 'border-[#059669]/30 bg-white shadow-sm'
+                }`}>
                 <div className="flex items-center gap-3 mb-3">
                   <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-500">
                     <GitBranch size={18} />
@@ -112,25 +107,22 @@ export default function AutomationShowcase({ isDark = true }) {
           <div className="hidden md:flex justify-around px-24 relative -my-6 h-12 z-0">
             {/* Yes branch line */}
             <div className="w-1/2 border-l-2 border-dashed border-emerald-500/20 flex flex-col justify-end items-start pl-4">
-              <span className={`text-[9px] uppercase tracking-wider text-emerald-500 font-bold px-2 py-0.5 rounded border ${
-                isDark ? 'bg-[#030712] border-emerald-500/10' : 'bg-[#F3FBF7] border-emerald-500/20'
-              }`}>Yes (Qualified)</span>
+              <span className={`text-[9px] uppercase tracking-wider text-emerald-500 font-bold px-2 py-0.5 rounded border ${isDark ? 'bg-[#030712] border-emerald-500/10' : 'bg-[#F3FBF7] border-emerald-500/20'
+                }`}>Yes (Qualified)</span>
             </div>
             {/* No branch line */}
             <div className="w-1/2 border-r-2 border-dashed border-rose-500/20 flex flex-col justify-end items-end pr-4">
-              <span className={`text-[9px] uppercase tracking-wider text-rose-500 font-bold px-2 py-0.5 rounded border ${
-                isDark ? 'bg-[#030712] border-rose-500/10' : 'bg-[#F3FBF7] border-rose-500/20'
-              }`}>No (Not Qualified)</span>
+              <span className={`text-[9px] uppercase tracking-wider text-rose-500 font-bold px-2 py-0.5 rounded border ${isDark ? 'bg-[#030712] border-rose-500/10' : 'bg-[#F3FBF7] border-rose-500/20'
+                }`}>No (Not Qualified)</span>
             </div>
           </div>
 
           {/* Row 2: Branch Paths */}
           <div className="flex flex-col md:flex-row gap-12">
-            
+
             {/* Branch YES Container */}
-            <div className={`flex-1 rounded-3xl p-6 border flex flex-col gap-4 relative overflow-hidden ${
-              isDark ? 'bg-slate-900/20 border-emerald-500/10' : 'bg-[#eefcf7] border-[#059669]/15 shadow-sm'
-            }`}>
+            <div className={`flex-1 rounded-3xl p-6 border flex flex-col gap-4 relative overflow-hidden ${isDark ? 'bg-slate-900/20 border-emerald-500/10' : 'bg-[#eefcf7] border-[#059669]/15 shadow-sm'
+              }`}>
               <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full blur-2xl" />
               <div className="flex items-center justify-between mb-2">
                 <span className="text-[9px] uppercase tracking-wider text-emerald-500 font-bold">Qualified Path</span>
@@ -175,9 +167,8 @@ export default function AutomationShowcase({ isDark = true }) {
             </div>
 
             {/* Branch NO Container */}
-            <div className={`w-full md:w-80 rounded-3xl p-6 border flex flex-col gap-4 relative overflow-hidden ${
-              isDark ? 'bg-slate-900/20 border-rose-500/10' : 'bg-[#fff5f5] border-rose-500/15 shadow-sm'
-            }`}>
+            <div className={`w-full md:w-80 rounded-3xl p-6 border flex flex-col gap-4 relative overflow-hidden ${isDark ? 'bg-slate-900/20 border-rose-500/10' : 'bg-[#fff5f5] border-rose-500/15 shadow-sm'
+              }`}>
               <div className="absolute top-0 right-0 w-32 h-32 bg-rose-500/5 rounded-full blur-2xl" />
               <div className="flex items-center justify-between mb-2">
                 <span className="text-[9px] uppercase tracking-wider text-rose-400 font-bold">Unqualified Path</span>

@@ -5,7 +5,7 @@ import { Sparkles } from 'lucide-react';
 
 export default function TrustedBy() {
   const logos = ["Stripe", "Linear", "Vercel", "Framer", "Notion", "Slack", "Retool", "Attio"];
-  
+
   return (
     <section className="bg-[#171A20]/30 border-y border-white/5 py-10 overflow-hidden relative">
       <div className="max-w-7xl mx-auto px-6 mb-6">
@@ -13,7 +13,7 @@ export default function TrustedBy() {
           Trusted by Next-Generation Enterprise Teams
         </p>
       </div>
-      
+
       {/* Infinite Logo Marquee */}
       <div className="overflow-hidden w-full flex">
         <div className="flex gap-16 animate-marquee-right whitespace-nowrap opacity-70 hover:opacity-100 transition-opacity duration-500">

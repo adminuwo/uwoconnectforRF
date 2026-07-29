@@ -28,7 +28,7 @@ export default function FeatureComparison() {
           <div className="flex-1 text-[#8E99A8] pl-6 border-l border-transparent">Traditional Stack</div>
           <div className="flex-1 text-[#10B981] pl-6 border-l border-white/5 bg-[#10B981]/[0.01]">EFV UNIFIED PLATFORM</div>
         </div>
-        
+
         {/* Rows */}
         <div className="flex flex-col">
           {comparisons.map((item, idx) => (

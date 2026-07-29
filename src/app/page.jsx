@@ -36,10 +36,10 @@ export default function Home() {
 
   useEffect(() => {
     const sections = ['platform', 'pricing', 'documentation', 'contact'];
-    
+
     const handleScroll = () => {
       const scrollPos = window.scrollY + 120; // Offset for scroll trigger point
-      
+
       // Set to hero/top if close to the start
       if (window.scrollY < 100) {
         setActiveSection('hero');
@@ -71,7 +71,7 @@ export default function Home() {
       const offset = 80; // height of sticky navbar
       const elementPosition = el.getBoundingClientRect().top;
       const offsetPosition = elementPosition + window.scrollY - offset;
-      
+
       window.scrollTo({
         top: offsetPosition,
         behavior: 'smooth'
@@ -82,7 +82,7 @@ export default function Home() {
 
   return (
     <div className={`min-h-screen font-sans overflow-x-hidden relative selection:bg-[#10B981]/30 selection:text-white transition-colors duration-500 ${isDark ? 'bg-[#030712] text-white' : 'light bg-[#F3FBF7] text-[#000000]'}`}>
-      
+
       {/* Global Ambient Background Gradients for Dark Mode */}
       {isDark && (
         <>
@@ -92,11 +92,10 @@ export default function Home() {
       )}
 
       {/* HEADER */}
-      <header className={`sticky top-0 z-50 w-full backdrop-blur-[16px] saturate-[180%] border-b transition-colors duration-500 ${
-        isDark 
-          ? 'bg-[#030712]/75 border-white/[0.06] text-white' 
+      <header className={`sticky top-0 z-50 w-full backdrop-blur-[16px] saturate-[180%] border-b transition-colors duration-500 ${isDark
+          ? 'bg-[#030712]/75 border-white/[0.06] text-white'
           : 'bg-[#F3FBF7]/75 border-[#10B981]/15 text-[#000000]'
-      }`}>
+        }`}>
         <div className="w-full max-w-7xl mx-auto px-6 md:px-12 h-20 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3 group shrink-0">
             <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#059669] to-[#047857] flex items-center justify-center shadow-[0_0_15px_rgba(5,150,105,0.3)] group-hover:shadow-[0_0_25px_rgba(5,150,105,0.5)] transition-all">
@@ -118,17 +117,15 @@ export default function Home() {
                   key={item.name}
                   href={`#${item.id}`}
                   onClick={(e) => handleNavClick(e, item.id)}
-                  className={`relative px-4 py-1.5 text-sm font-medium transition-colors duration-300 rounded-full ${
-                    isActive 
+                  className={`relative px-4 py-1.5 text-sm font-medium transition-colors duration-300 rounded-full ${isActive
                       ? (isDark ? 'text-white' : 'text-white')
                       : (isDark ? 'text-[#8E99A8] hover:text-white' : 'text-slate-800 hover:text-black')
-                  }`}
+                    }`}
                 >
                   {isActive && (
                     <div
-                      className={`absolute inset-0 rounded-full -z-10 ${
-                        isDark ? 'bg-white/[0.08]' : 'bg-[#059669]'
-                      }`}
+                      className={`absolute inset-0 rounded-full -z-10 ${isDark ? 'bg-white/[0.08]' : 'bg-[#059669]'
+                        }`}
                     />
                   )}
                   {item.name}
@@ -138,36 +135,33 @@ export default function Home() {
           </nav>
 
           <div className="hidden md:flex items-center gap-4 shrink-0">
-            <button 
+            <button
               onClick={() => setIsDark(!isDark)}
-              className={`p-2 transition-colors rounded-full ${
-                isDark 
-                  ? 'text-[#8E99A8] hover:text-white hover:bg-white/5' 
+              className={`p-2 transition-colors rounded-full ${isDark
+                  ? 'text-[#8E99A8] hover:text-white hover:bg-white/5'
                   : 'text-slate-700 hover:text-black hover:bg-slate-100'
-              }`}
+                }`}
             >
               {isDark ? <Sun size={20} /> : <Moon size={20} />}
             </button>
-            <Link 
-              href="/auth/login" 
-              className={`text-sm font-medium transition-colors px-4 py-2 ${
-                isDark ? 'text-[#8E99A8] hover:text-white' : 'text-slate-800 hover:text-black'
-              }`}
+            <Link
+              href="/auth/login"
+              className={`text-sm font-medium transition-colors px-4 py-2 ${isDark ? 'text-[#8E99A8] hover:text-white' : 'text-slate-800 hover:text-black'
+                }`}
             >
               Login
             </Link>
-            <Link 
-              href="/auth/register" 
+            <Link
+              href="/auth/register"
               className="px-6 py-2.5 bg-[#059669] text-white font-semibold text-sm rounded-full shadow-[0_0_20px_rgba(5,150,105,0.2)] hover:shadow-[0_0_30px_rgba(5,150,105,0.4)] hover:bg-[#047857] transition-all duration-300"
             >
               Sign Up
             </Link>
           </div>
 
-          <button 
-            className={`md:hidden p-2 rounded-lg transition-colors ${
-              isDark ? 'hover:bg-white/5 text-white' : 'hover:bg-slate-100 text-slate-800'
-            }`} 
+          <button
+            className={`md:hidden p-2 rounded-lg transition-colors ${isDark ? 'hover:bg-white/5 text-white' : 'hover:bg-slate-100 text-slate-800'
+              }`}
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
             {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -175,75 +169,71 @@ export default function Home() {
         </div>
 
         {/* Mobile Menu Dropdown */}
-        
-          {mobileMenuOpen && (
-            <div
-              className={`md:hidden border-t backdrop-blur-[24px] px-6 py-6 flex flex-col gap-4 overflow-hidden ${
-                isDark 
-                  ? 'bg-[#030712]/95 border-white/[0.06] text-white' 
-                  : 'bg-[#F3FBF7]/95 border-[#10B981]/15 text-[#000000]'
+
+        {mobileMenuOpen && (
+          <div
+            className={`md:hidden border-t backdrop-blur-[24px] px-6 py-6 flex flex-col gap-4 overflow-hidden ${isDark
+                ? 'bg-[#030712]/95 border-white/[0.06] text-white'
+                : 'bg-[#F3FBF7]/95 border-[#10B981]/15 text-[#000000]'
               }`}
-            >
-              <div className="flex flex-col gap-2">
-                {navItems.map((item) => {
-                  const isActive = activeSection === item.id;
-                  return (
-                    <a 
-                      key={item.name} 
-                      href={`#${item.id}`} 
-                      onClick={(e) => {
-                        handleNavClick(e, item.id);
-                        setMobileMenuOpen(false);
-                      }}
-                      className={`px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 ${
-                        isActive 
-                          ? (isDark ? 'bg-white/10 text-white' : 'bg-slate-100 text-slate-900')
-                          : (isDark ? 'text-slate-400 hover:text-white hover:bg-white/5' : 'text-slate-800 hover:text-black hover:bg-slate-50')
+          >
+            <div className="flex flex-col gap-2">
+              {navItems.map((item) => {
+                const isActive = activeSection === item.id;
+                return (
+                  <a
+                    key={item.name}
+                    href={`#${item.id}`}
+                    onClick={(e) => {
+                      handleNavClick(e, item.id);
+                      setMobileMenuOpen(false);
+                    }}
+                    className={`px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 ${isActive
+                        ? (isDark ? 'bg-white/10 text-white' : 'bg-slate-100 text-slate-900')
+                        : (isDark ? 'text-slate-400 hover:text-white hover:bg-white/5' : 'text-slate-800 hover:text-black hover:bg-slate-50')
                       }`}
-                    >
-                      {item.name}
-                    </a>
-                  );
-                })}
-              </div>
-              <hr className={`my-2 ${isDark ? 'border-white/10' : 'border-slate-100'}`} />
-              <div className="flex flex-col gap-3">
-                <button 
-                  onClick={() => {
-                    setIsDark(!isDark);
-                    setMobileMenuOpen(false);
-                  }}
-                  className={`w-full py-3 text-center text-sm font-semibold flex items-center justify-center gap-2 border rounded-xl transition-all duration-200 ${
-                    isDark 
-                      ? 'border-white/10 hover:bg-white/5 text-slate-300' 
-                      : 'border-slate-200 hover:bg-slate-50 text-slate-800'
-                  }`}
-                >
-                  {isDark ? <Sun size={18} /> : <Moon size={18} />}
-                  {isDark ? 'Light Mode' : 'Dark Mode'}
-                </button>
-                <Link 
-                  href="/auth/login" 
-                  onClick={() => setMobileMenuOpen(false)}
-                  className={`w-full py-3 text-center text-sm font-semibold border rounded-xl transition-all duration-200 ${
-                    isDark 
-                      ? 'border-white/10 hover:bg-white/5 text-slate-300' 
-                      : 'border-slate-200 hover:bg-slate-50 text-slate-800'
-                  }`}
-                >
-                  Login
-                </Link>
-                <Link 
-                  href="/auth/register" 
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="w-full py-3 text-center text-sm font-bold bg-[#059669] text-white rounded-xl hover:bg-[#047857] transition-all hover:shadow-[0_0_20px_rgba(5,150,105,0.3)]"
-                >
-                  Sign Up
-                </Link>
-              </div>
+                  >
+                    {item.name}
+                  </a>
+                );
+              })}
             </div>
-          )}
-        
+            <hr className={`my-2 ${isDark ? 'border-white/10' : 'border-slate-100'}`} />
+            <div className="flex flex-col gap-3">
+              <button
+                onClick={() => {
+                  setIsDark(!isDark);
+                  setMobileMenuOpen(false);
+                }}
+                className={`w-full py-3 text-center text-sm font-semibold flex items-center justify-center gap-2 border rounded-xl transition-all duration-200 ${isDark
+                    ? 'border-white/10 hover:bg-white/5 text-slate-300'
+                    : 'border-slate-200 hover:bg-slate-50 text-slate-800'
+                  }`}
+              >
+                {isDark ? <Sun size={18} /> : <Moon size={18} />}
+                {isDark ? 'Light Mode' : 'Dark Mode'}
+              </button>
+              <Link
+                href="/auth/login"
+                onClick={() => setMobileMenuOpen(false)}
+                className={`w-full py-3 text-center text-sm font-semibold border rounded-xl transition-all duration-200 ${isDark
+                    ? 'border-white/10 hover:bg-white/5 text-slate-300'
+                    : 'border-slate-200 hover:bg-slate-50 text-slate-800'
+                  }`}
+              >
+                Login
+              </Link>
+              <Link
+                href="/auth/register"
+                onClick={() => setMobileMenuOpen(false)}
+                className="w-full py-3 text-center text-sm font-bold bg-[#059669] text-white rounded-xl hover:bg-[#047857] transition-all hover:shadow-[0_0_20px_rgba(5,150,105,0.3)]"
+              >
+                Sign Up
+              </Link>
+            </div>
+          </div>
+        )}
+
       </header>
 
       {/* MAIN SECTIONS */}

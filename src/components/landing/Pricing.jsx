@@ -39,14 +39,14 @@ export default function Pricing() {
           <p className="text-[#8E99A8] text-lg font-medium mb-10">
             Choose the workspace scale suited specifically to fit your transaction volumes.
           </p>
-          
+
           <div className="flex items-center justify-center gap-4">
             <span className={`text-[10px] font-bold uppercase tracking-wider ${!annual ? 'text-white' : 'text-[#8E99A8]'}`}>Monthly</span>
-            <button 
+            <button
               onClick={() => setAnnual(!annual)}
               className="w-12 h-6 rounded-full bg-white/10 border border-white/20 p-0.5 relative transition-colors cursor-pointer hover:bg-white/20"
             >
-              <div 
+              <div
                 className={`w-5 h-5 rounded-full transition-all duration-200 ${annual ? 'bg-[#10B981] ml-auto' : 'bg-[#8E99A8]'}`}
               />
             </button>
@@ -56,8 +56,8 @@ export default function Pricing() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 max-w-6xl mx-auto items-stretch">
           {plans.map((plan, idx) => (
-            <div 
-              key={idx} 
+            <div
+              key={idx}
               className={`glass-card rounded-[32px] p-8 flex flex-col relative ${plan.popular ? 'border-2 border-[#10B981] shadow-[0_0_40px_rgba(16,185,129,0.2)] scale-105 z-10 bg-[#111827]/80' : 'border border-white/10 bg-[#111827]/40'}`}
             >
               {plan.popular && (

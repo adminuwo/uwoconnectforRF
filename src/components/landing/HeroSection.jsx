@@ -48,11 +48,10 @@ export default function HeroSection({ isDark = true }) {
       {/* Right Content - 3D Glass Dashboard */}
       <div className="flex-1 w-full max-w-[640px] relative z-10 perspective-1000 animate-float">
         <div
-          className={`rounded-[32px] p-6 shadow-2xl relative overflow-hidden group transition-all duration-500 transform-gpu border ${
-            isDark 
-              ? 'bg-slate-950/40 border-white/5 backdrop-blur-xl' 
+          className={`rounded-[32px] p-6 shadow-2xl relative overflow-hidden group transition-all duration-500 transform-gpu border ${isDark
+              ? 'bg-slate-950/40 border-white/5 backdrop-blur-xl'
               : 'bg-white/60 border-[#059669]/10 backdrop-blur-xl'
-          }`}
+            }`}
         >
           {/* Dashboard Header */}
           <div className={`flex items-center justify-between pb-6 border-b mb-6 ${isDark ? 'border-white/5' : 'border-[#059669]/10'}`}>
@@ -88,11 +87,10 @@ export default function HeroSection({ isDark = true }) {
             {/* Central Screen */}
             <div className="flex-1 grid grid-cols-2 gap-4">
               {/* Sales Revenue */}
-              <div className={`col-span-2 border p-4 rounded-2xl relative overflow-hidden backdrop-blur-md transition-all ${
-                isDark
+              <div className={`col-span-2 border p-4 rounded-2xl relative overflow-hidden backdrop-blur-md transition-all ${isDark
                   ? 'bg-slate-900/60 border-white/5 text-white'
                   : 'bg-white/40 border-[#059669]/15 text-[#0f2d19] shadow-sm'
-              }`}>
+                }`}>
                 <div className="flex justify-between items-start mb-4">
                   <div>
                     <span className={`text-[10px] uppercase tracking-widest font-bold ${isDark ? 'text-[#8E99A8]' : 'text-slate-500'}`}>Q3 Revenue Projection</span>
@@ -104,7 +102,7 @@ export default function HeroSection({ isDark = true }) {
                 </div>
                 <div className="h-12 w-full flex items-end gap-2">
                   {[40, 60, 45, 80, 55, 90, 75, 100].map((height, i) => (
-                    <div 
+                    <div
                       key={i}
                       style={{ height: `${height}%` }}
                       className="flex-1 bg-gradient-to-t from-[#10B981] to-[#20C997] rounded-t-sm opacity-80 hover:opacity-100 transition-all duration-300 hover:scale-y-110"
@@ -114,11 +112,10 @@ export default function HeroSection({ isDark = true }) {
               </div>
 
               {/* Live WhatsApp Queue */}
-              <div className={`col-span-2 border p-4 rounded-2xl backdrop-blur-md ${
-                isDark
+              <div className={`col-span-2 border p-4 rounded-2xl backdrop-blur-md ${isDark
                   ? 'bg-slate-900/60 border-white/5 text-white'
                   : 'bg-white/40 border-[#059669]/15 text-[#0f2d19] shadow-sm'
-              }`}>
+                }`}>
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
                     <div className="relative flex h-2 w-2">
@@ -151,11 +148,10 @@ export default function HeroSection({ isDark = true }) {
               </div>
 
               {/* CRM Stats */}
-              <div className={`col-span-2 border p-4 rounded-2xl flex items-center justify-between backdrop-blur-md ${
-                isDark
+              <div className={`col-span-2 border p-4 rounded-2xl flex items-center justify-between backdrop-blur-md ${isDark
                   ? 'bg-slate-900/60 border-white/5 text-white'
                   : 'bg-white/40 border-[#059669]/15 text-[#0f2d19] shadow-sm'
-              }`}>
+                }`}>
                 <div className="flex items-center gap-3">
                   <div className={`p-2 rounded-xl border ${isDark ? 'bg-[#10B981]/20 border-[#10B981]/30 text-[#10B981]' : 'bg-[#059669]/10 border-[#059669]/20 text-[#059669]'}`}>
                     <Users size={16} />
@@ -166,7 +162,7 @@ export default function HeroSection({ isDark = true }) {
                   </div>
                 </div>
                 <div className="flex -space-x-2">
-                  {[1,2,3].map(i => (
+                  {[1, 2, 3].map(i => (
                     <div key={i} className={`w-8 h-8 rounded-full border-2 overflow-hidden ${isDark ? 'bg-[#171A20] border-[#101B2D]' : 'bg-white border-[#f0fdf4]'}`}>
                       <div className="w-full h-full bg-gradient-to-br from-[#10B981] to-[#059669] opacity-70" />
                     </div>

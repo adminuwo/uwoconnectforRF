@@ -31,15 +31,15 @@ export default function FAQ() {
                 +
               </span>
             </button>
-            
-              {openIdx === idx && (
-                <div
-                  className="px-6 pb-6 text-sm text-[#8E99A8] font-medium leading-relaxed"
-                >
-                  {faq.a}
-                </div>
-              )}
-            
+
+            {openIdx === idx && (
+              <div
+                className="px-6 pb-6 text-sm text-[#8E99A8] font-medium leading-relaxed"
+              >
+                {faq.a}
+              </div>
+            )}
+
           </div>
         ))}
       </div>
