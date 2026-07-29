@@ -1,11 +1,13 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { User, Mail, Phone, Hash, CreditCard, Lock, Settings, Loader2, ShieldCheck, LogOut, MapPin, Key, Globe, Paintbrush } from 'lucide-react';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import axios from 'axios';
 import { useTour } from '@/context/TourContext';
 const ClientSettingsPage = () => {
+  const searchParams = useSearchParams();
   const { resetTour } = useTour();
   const [client, setClient] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -65,6 +67,28 @@ const ClientSettingsPage = () => {
   useEffect(() => {
     fetchProfile();
   }, []);
+
+  useEffect(() => {
+    const code = searchParams.get('code');
+    if (code) {
+      const processWhatsAppCode = async () => {
+        try {
+          const token = localStorage.getItem('token');
+          await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/auth/whatsapp/embedded-signup`, { code }, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          alert("WhatsApp Embedded Signup successful!");
+          fetchProfile();
+          // Optional: clear the code from the URL
+          window.history.replaceState({}, document.title, window.location.pathname);
+        } catch (err) {
+          console.error('Failed to process WhatsApp code', err);
+          alert("Failed to complete WhatsApp signup. Check console for details.");
+        }
+      };
+      processWhatsAppCode();
+    }
+  }, [searchParams]);
 
   const handleUpdate = async () => {
     try {
