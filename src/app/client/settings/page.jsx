@@ -1,10 +1,12 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { User, Mail, Phone, Hash, CreditCard, Lock, Settings, Loader2, ShieldCheck, LogOut, MapPin, Key, Globe, Paintbrush } from 'lucide-react';
+import { User, Mail, Phone, Hash, CreditCard, Lock, Settings, Loader2, ShieldCheck, LogOut, MapPin, Key, Globe, Paintbrush, Sparkles, Calendar, ArrowUpRight } from 'lucide-react';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import axios from 'axios';
 import { useTour } from '@/context/TourContext';
+import PaymentModal from '@/components/billing/PaymentModal';
+
 const ClientSettingsPage = () => {
   const { resetTour } = useTour();
   const [client, setClient] = useState(null);
@@ -12,6 +14,8 @@ const ClientSettingsPage = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+  const [paymentOrders, setPaymentOrders] = useState([]);
+  const [selectedPlanModal, setSelectedPlanModal] = useState(null);
   const [editData, setEditData] = useState({ 
     name: '', 
     phone_number: '',
@@ -62,8 +66,21 @@ const ClientSettingsPage = () => {
     }
   };
 
+  const fetchPaymentHistory = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/payments/history`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setPaymentOrders(res.data.orders || []);
+    } catch (err) {
+      console.error('Failed to fetch payment history', err);
+    }
+  };
+
   useEffect(() => {
     fetchProfile();
+    fetchPaymentHistory();
   }, []);
 
   const handleUpdate = async () => {
@@ -404,27 +421,104 @@ const ClientSettingsPage = () => {
             </div>
           </div>
 
-          {/* Subscription Section */}
-          <div className="space-y-1">
-            <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-4 ml-1">Plan & Billing</h3>
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 sm:p-5 bg-white border border-slate-100 rounded-3xl gap-4 group">
-              <div className="flex items-center gap-4 min-w-0">
-                <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
-                  <CreditCard size={22} strokeWidth={2} />
-                </div>
-                <div className="min-w-0">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <p className="text-base font-semibold text-slate-900 tracking-tight">Pro Subscription</p>
-                    <span className="px-2 py-0.5 bg-emerald-50 text-emerald-600 text-[10px] font-bold rounded-full border border-emerald-100 uppercase tracking-widest">Active</span>
+          {/* Subscription & Billing Section */}
+          <div className="space-y-4">
+            <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] ml-1">Plan & Billing</h3>
+            
+            {/* Active Plan Card */}
+            <div className="bg-gradient-to-br from-slate-900 via-[#111827] to-slate-900 border border-slate-800 text-white rounded-[24px] sm:rounded-[32px] p-6 sm:p-8 relative overflow-hidden shadow-xl">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-[#10B981]/10 rounded-full blur-3xl pointer-events-none" />
+              
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
+                <div className="space-y-2">
+                  <div className="flex items-center gap-3">
+                    <span className="px-3 py-1 bg-[#10B981]/20 border border-[#10B981]/40 text-[#10B981] text-[10px] font-bold uppercase tracking-widest rounded-full">
+                      Current Active Plan
+                    </span>
+                    <span className="text-xs text-slate-400">Cashfree Billing</span>
                   </div>
-                  <p className="text-xs text-slate-400 italic">Next billing on June 01, 2026</p>
+                  <h4 className="text-3xl font-extrabold text-white tracking-tight capitalize">
+                    {client?.plan || 'Free'} Plan
+                  </h4>
+                  <p className="text-xs text-slate-400 max-w-md">
+                    Full access to automated messaging, WhatsApp Meta API, and AI integrations for your business.
+                  </p>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-3">
+                  <button
+                    onClick={() => setSelectedPlanModal('STARTER')}
+                    className="px-5 py-3 bg-white/10 hover:bg-white/20 text-white text-xs font-bold rounded-2xl transition-all cursor-pointer border border-white/10"
+                  >
+                    Starter (₹3,999)
+                  </button>
+                  <button
+                    onClick={() => setSelectedPlanModal('GROWTH')}
+                    className="px-5 py-3 bg-[#10B981] hover:bg-[#059669] text-black font-bold text-xs rounded-2xl transition-all cursor-pointer shadow-[0_0_20px_rgba(16,185,129,0.3)] flex items-center gap-1.5"
+                  >
+                    <Sparkles size={14} /> Upgrade to Growth
+                  </button>
+                  <button
+                    onClick={() => setSelectedPlanModal('ENTERPRISE')}
+                    className="px-5 py-3 bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold rounded-2xl transition-all cursor-pointer border border-slate-700"
+                  >
+                    Enterprise
+                  </button>
                 </div>
               </div>
-              <button className="text-xs font-bold text-emerald-600 hover:text-slate-900 transition-colors uppercase tracking-widest px-4 py-2 hover:bg-slate-50 rounded-xl w-full sm:w-auto text-center">
-                Manage
-              </button>
+            </div>
+
+            {/* Payment History Table */}
+            <div className="bg-white border border-slate-100 rounded-[24px] sm:rounded-[32px] p-6 space-y-4">
+              <div className="flex items-center justify-between">
+                <h4 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                  <CreditCard size={16} className="text-emerald-600" /> Payment & Order History
+                </h4>
+                <span className="text-xs text-slate-400 font-medium">{paymentOrders.length} transactions</span>
+              </div>
+
+              {paymentOrders.length === 0 ? (
+                <div className="text-center py-8 bg-slate-50 rounded-2xl border border-slate-100">
+                  <p className="text-xs text-slate-400 font-medium italic">No past Cashfree payment transactions found.</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs">
+                    <thead>
+                      <tr className="border-b border-slate-100 text-slate-400 font-bold uppercase tracking-wider text-[10px]">
+                        <th className="pb-3">Order ID</th>
+                        <th className="pb-3">Plan</th>
+                        <th className="pb-3">Cycle</th>
+                        <th className="pb-3">Amount</th>
+                        <th className="pb-3">Date</th>
+                        <th className="pb-3 text-right">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {paymentOrders.map((order) => (
+                        <tr key={order.id} className="hover:bg-slate-50/50 transition-colors">
+                          <td className="py-3 font-mono font-medium text-slate-700">{order.order_id}</td>
+                          <td className="py-3 font-bold text-slate-900">{order.plan}</td>
+                          <td className="py-3 text-slate-500 capitalize">{order.billing_cycle?.toLowerCase()}</td>
+                          <td className="py-3 font-bold text-emerald-600">₹{parseFloat(order.amount).toLocaleString('en-IN')}</td>
+                          <td className="py-3 text-slate-400">{new Date(order.created_at).toLocaleDateString()}</td>
+                          <td className="py-3 text-right">
+                            <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                              order.status === 'PAID' ? 'bg-emerald-100 text-emerald-700' :
+                              order.status === 'PENDING' ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700'
+                            }`}>
+                              {order.status}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           </div>
+
 
           {/* Security Actions */}
           <div className="space-y-1">
@@ -475,12 +569,26 @@ const ClientSettingsPage = () => {
               </div>
             </div>
           )}
-        
+
+        {/* Payment Modal */}
+        {selectedPlanModal && (
+          <PaymentModal
+            isOpen={!!selectedPlanModal}
+            onClose={() => setSelectedPlanModal(null)}
+            selectedPlan={selectedPlanModal}
+            billingCycle="MONTHLY"
+            onSuccess={() => {
+              fetchProfile();
+              fetchPaymentHistory();
+            }}
+          />
+        )}
       </div>
     </DashboardLayout>
   );
 };
 
 export default ClientSettingsPage;
+
 
 

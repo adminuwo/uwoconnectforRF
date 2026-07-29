@@ -1,33 +1,56 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import PaymentModal from '@/components/billing/PaymentModal';
+
 export default function Pricing() {
+  const router = useRouter();
   const [annual, setAnnual] = useState(true);
+  const [selectedPlanForPayment, setSelectedPlanForPayment] = useState(null);
 
   const plans = [
     {
       name: "Starter",
+      id: "STARTER",
       desc: "For early stage startups.",
       monthly: 49,
       annual: 39,
+      monthlyInr: 3999,
+      annualInr: 3199,
       features: ["5 User Licenses", "10,000 CRM Contacts", "WhatsApp Meta API", "Basic AI Chat Assistant"]
     },
     {
       name: "Growth",
+      id: "GROWTH",
       desc: "Perfect for scaling operations.",
       monthly: 99,
       annual: 79,
+      monthlyInr: 7999,
+      annualInr: 6399,
       popular: true,
       features: ["25 User Licenses", "100,000 CRM Contacts", "3 Custom AI Assistants", "Unified Financial Ledger", "Granular Roles"]
     },
     {
       name: "Enterprise",
+      id: "ENTERPRISE",
       desc: "Custom scale cluster deployment.",
       monthly: 299,
       annual: 239,
+      monthlyInr: 23999,
+      annualInr: 19199,
       features: ["Unlimited Licenses", "Unlimited CRM Contacts", "Dedicated Vector DB", "Custom Webhooks", "99.99% SLA"]
     }
   ];
+
+  const handleSelectPlan = (planId) => {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+    if (!token) {
+      router.push('/auth/login?redirect=pricing');
+    } else {
+      setSelectedPlanForPayment(planId);
+    }
+  };
 
   return (
     <section className="bg-[#171A20]/40 border-y border-white/5 py-24 md:py-32 relative">
@@ -70,8 +93,13 @@ export default function Pricing() {
                 <p className="text-sm text-[#8E99A8] font-medium">{plan.desc}</p>
               </div>
               <div className="mb-8">
-                <span className="text-4xl font-bold text-white">${annual ? plan.annual : plan.monthly}</span>
-                <span className="text-sm text-[#8E99A8] font-medium"> / month</span>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-4xl font-bold text-white">
+                    ₹{(annual ? plan.annualInr : plan.monthlyInr).toLocaleString('en-IN')}
+                  </span>
+                  <span className="text-xs text-[#8E99A8] font-medium"> (${annual ? plan.annual : plan.monthly}/mo)</span>
+                </div>
+                <span className="text-xs text-[#8E99A8] font-medium"> Billed {annual ? 'annually' : 'monthly'} via Cashfree</span>
               </div>
               <ul className="space-y-4 mb-8 flex-1">
                 {plan.features.map((f, i) => (
@@ -83,16 +111,29 @@ export default function Pricing() {
                   </li>
                 ))}
               </ul>
-              <button className={`w-full py-4 px-2 rounded-2xl font-bold uppercase tracking-widest text-[11px] md:text-[10px] lg:text-[11px] whitespace-normal md:whitespace-nowrap transition-all duration-300 hover:shadow-lg cursor-pointer ${plan.popular ? 'bg-gradient-to-r from-[#10B981] to-[#059669] text-white shadow-[0_4px_20px_rgba(16,185,129,0.3)] hover:shadow-[0_8px_30px_rgba(16,185,129,0.5)]' : 'bg-white/5 text-white border border-white/10 hover:bg-white/10 hover:border-white/20'}`}>
+              <button
+                onClick={() => handleSelectPlan(plan.id)}
+                className={`w-full py-4 px-2 rounded-2xl font-bold uppercase tracking-widest text-[11px] md:text-[10px] lg:text-[11px] whitespace-normal md:whitespace-nowrap transition-all duration-300 hover:shadow-lg cursor-pointer ${plan.popular ? 'bg-gradient-to-r from-[#10B981] to-[#059669] text-white shadow-[0_4px_20px_rgba(16,185,129,0.3)] hover:shadow-[0_8px_30px_rgba(16,185,129,0.5)]' : 'bg-white/5 text-white border border-white/10 hover:bg-white/10 hover:border-white/20'}`}
+              >
                 Get Started
               </button>
             </div>
           ))}
         </div>
       </div>
+
+      {/* Cashfree Payment Modal */}
+      {selectedPlanForPayment && (
+        <PaymentModal
+          isOpen={!!selectedPlanForPayment}
+          onClose={() => setSelectedPlanForPayment(null)}
+          selectedPlan={selectedPlanForPayment}
+          billingCycle={annual ? 'ANNUAL' : 'MONTHLY'}
+          onSuccess={() => {
+            router.push('/client/settings');
+          }}
+        />
+      )}
     </section>
   );
 }
-
-
-

@@ -540,10 +540,13 @@ export default function EFVUnifiedLanding() {
           </div>
           
           <footer className="mt-24 pt-8 border-t border-white/[0.08] flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-500">
-            <div>© 2026 EFV Unified. All rights reserved.</div>
-            <div className="flex gap-6">
-              <a href="https://uwo24.com/privacy-policy" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Privacy Policy</a>
+            <div>© 2026 Uwo Connect Platform (Aisa Technologies). All rights reserved.</div>
+            <div className="flex flex-wrap gap-6">
+              <a href="/about" className="hover:text-white transition-colors">About Us</a>
+              <a href="/contact" className="hover:text-white transition-colors">Contact Us</a>
+              <a href="/privacy" className="hover:text-white transition-colors">Privacy Policy</a>
               <a href="/terms" className="hover:text-white transition-colors">Terms of Service</a>
+              <a href="/refund-policy" className="hover:text-white transition-colors text-[#10B981]">Cancellation & Refund Policy</a>
             </div>
           </footer>
         </div>
