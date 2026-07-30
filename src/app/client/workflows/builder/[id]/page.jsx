@@ -56,18 +56,23 @@ const NodeContainer = ({ children, title, icon: Icon, color, id, isTrigger }) =>
 
 // --- NODE TYPES ---
 
-const TriggerNode = ({ id, data = {} }) => (
-  <div className="bg-emerald-600 rounded-xl shadow-2xl p-5 w-64 border-b-4 border-b-emerald-500 group relative">
-    <div className="flex items-center gap-3 mb-3">
-      <div className="w-8 h-8 bg-emerald-500 text-white rounded-lg flex items-center justify-center"><Zap size={16} fill="currentColor" /></div>
-      <h4 className="text-[10px] font-black text-white uppercase tracking-widest">Start Flow</h4>
+const TriggerNode = ({ id, data = {} }) => {
+  const isAnyMessage = data.triggerMode === 'ALL' || data.keyword === '*' || data.isAnyMessage;
+  return (
+    <div className="bg-emerald-600 rounded-xl shadow-2xl p-5 w-64 border-b-4 border-b-emerald-500 group relative">
+      <div className="flex items-center gap-3 mb-3">
+        <div className="w-8 h-8 bg-emerald-500 text-white rounded-lg flex items-center justify-center"><Zap size={16} fill="currentColor" /></div>
+        <h4 className="text-[10px] font-black text-white uppercase tracking-widest">Start Flow</h4>
+      </div>
+      <div className="bg-slate-800 rounded-lg p-2.5 border border-slate-700">
+        <p className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest truncate">
+          {isAnyMessage ? '⚡ Any Incoming Message' : `"${data.keyword || 'Any Keyword'}"`}
+        </p>
+      </div>
+      <Handle type="source" position={Position.Bottom} className="w-2.5 h-2.5 bg-emerald-500 border-2 border-slate-900 -bottom-1" />
     </div>
-    <div className="bg-slate-800 rounded-lg p-2.5 border border-slate-700">
-      <p className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest truncate">"{data.keyword || 'Any Keyword'}"</p>
-    </div>
-    <Handle type="source" position={Position.Bottom} className="w-2.5 h-2.5 bg-emerald-500 border-2 border-slate-900 -bottom-1" />
-  </div>
-);
+  );
+};
 
 const PlainNode = ({ id, data = {} }) => (
   <NodeContainer id={id} title="Message" icon={MessageSquare} color="bg-emerald-600">
@@ -563,6 +568,8 @@ const MessageForm = ({ data, type, onSave }) => {
   const [conditionValue, setConditionValue] = useState(data.conditionValue || '');
   const [condition, setCondition] = useState(data.condition || '');
 
+  const [triggerMode, setTriggerMode] = useState(data.triggerMode || (data.keyword === '*' ? 'ALL' : 'KEYWORDS'));
+
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -595,10 +602,65 @@ const MessageForm = ({ data, type, onSave }) => {
 
   return (<div className="space-y-6">
     {type === 'trigger' ? (
-      <div>
-        <label className="text-[10px] font-black uppercase text-slate-400 mb-2 block">Trigger Keywords</label>
-        <p className="text-[10px] text-slate-500 mb-2">Enter keywords separated by commas (e.g. mall, offer, hi)</p>
-        <input value={keyword} onChange={e => setKeyword(e.target.value)} className="w-full bg-slate-50 border p-4 rounded-xl text-sm font-bold focus:border-emerald-500 outline-none text-slate-800 placeholder:text-slate-400" placeholder="Enter keywords..." />
+      <div className="space-y-4">
+        <div>
+          <label className="text-[10px] font-black uppercase text-slate-400 mb-2 block">Trigger Event</label>
+          <div className="grid grid-cols-2 gap-2 p-1 bg-slate-100 rounded-xl border border-slate-200">
+            <button
+              type="button"
+              onClick={() => {
+                setTriggerMode('KEYWORDS');
+                if (keyword === '*') setKeyword('hi, hello');
+              }}
+              className={cn(
+                "py-2.5 px-3 rounded-lg text-xs font-bold transition-all",
+                triggerMode === 'KEYWORDS' 
+                  ? "bg-white text-emerald-600 shadow-sm border border-slate-200" 
+                  : "text-slate-500 hover:text-slate-900"
+              )}
+            >
+              Specific Keywords
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setTriggerMode('ALL');
+                setKeyword('*');
+              }}
+              className={cn(
+                "py-2.5 px-3 rounded-lg text-xs font-bold transition-all",
+                triggerMode === 'ALL' 
+                  ? "bg-white text-emerald-600 shadow-sm border border-slate-200" 
+                  : "text-slate-500 hover:text-slate-900"
+              )}
+            >
+              ⚡ Any Message
+            </button>
+          </div>
+        </div>
+
+        {triggerMode === 'KEYWORDS' ? (
+          <div>
+            <label className="text-[10px] font-black uppercase text-slate-400 mb-2 block">Trigger Keywords</label>
+            <p className="text-[10px] text-slate-500 mb-2">Enter keywords separated by commas (e.g. mall, offer, hi)</p>
+            <input 
+              value={keyword === '*' ? '' : keyword} 
+              onChange={e => setKeyword(e.target.value)} 
+              className="w-full bg-slate-50 border p-4 rounded-xl text-sm font-bold focus:border-emerald-500 outline-none text-slate-800 placeholder:text-slate-400" 
+              placeholder="e.g. hi, hello, hospital..." 
+            />
+          </div>
+        ) : (
+          <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4">
+            <p className="text-xs font-bold text-emerald-800 flex items-center gap-1.5 mb-1">
+              <Zap size={14} className="text-emerald-600 fill-emerald-600" />
+              All Messages Trigger Enabled
+            </p>
+            <p className="text-[11px] text-emerald-700 leading-relaxed">
+              This workflow will automatically trigger whenever a customer sends <strong>ANY message</strong> on the selected channels.
+            </p>
+          </div>
+        )}
       </div>
     ) : type === 'condition' ? (
       <div className="space-y-4">
@@ -707,7 +769,8 @@ const MessageForm = ({ data, type, onSave }) => {
       message: msg, 
       buttons, 
       mediaUrl, 
-      keyword, 
+      keyword: triggerMode === 'ALL' ? '*' : keyword, 
+      triggerMode,
       condition: type === 'condition' ? buildCondition() : (data.condition || ''),
       conditionField,
       conditionOperator,

@@ -27,6 +27,7 @@ const ClientInboxPage = () => {
     const fetchData = async () => {
       try {
         const token = localStorage.getItem('token');
+        if (!token) return;
         const [msgRes, contactRes] = await Promise.all([
           axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/messages/`, {
             headers: { Authorization: `Bearer ${token}` }
@@ -47,7 +48,12 @@ const ClientInboxPage = () => {
         setLoading(false);
       }
     };
+
     fetchData();
+
+    // Auto-poll every 3 seconds so new messages load live without page refresh
+    const interval = setInterval(fetchData, 3000);
+    return () => clearInterval(interval);
   }, [selectedConvoId]);
 
   useEffect(() => {

@@ -13,7 +13,8 @@
 
 
 
-  --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-sans: "Times New Roman", Times, Georgia, serif;
+  --font-serif: "Times New Roman", Times, Georgia, serif;
 }
 
 :root {
@@ -30,11 +31,20 @@
 }
 
 @layer base {
+  *,
+  html,
+  body,
+  button,
+  input,
+  select,
+  textarea {
+    font-family: "Times New Roman", Times, Georgia, serif !important;
+  }
+
   html,
   body {
     background-color: var(--background);
     color: var(--foreground);
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     @apply antialiased transition-colors duration-300;
     overflow-x: hidden !important;
     max-width: 100% !important;

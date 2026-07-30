@@ -1,16 +1,24 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { MessageCircle, Lock, CheckCircle, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
+import { 
+  MessageCircle, 
+  CheckCircle2, 
+  Loader2, 
+  Copy, 
+  Check, 
+  Settings, 
+  RefreshCw,
+  Plus
+} from 'lucide-react';
 import axios from 'axios';
-import { useRouter } from 'next/navigation';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { cn } from '@/lib/utils';
 import WhatsAppConfigModal from '@/components/channels/WhatsAppConfigModal';
 import FacebookConfigModal from '@/components/channels/FacebookConfigModal';
 import InstagramConfigModal from '@/components/channels/InstagramConfigModal';
 
-const FacebookIcon = ({ size = 24, strokeWidth = 2, className }) => (
+const FacebookIcon = ({ size = 22, className }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     width={size}
@@ -18,7 +26,7 @@ const FacebookIcon = ({ size = 24, strokeWidth = 2, className }) => (
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
-    strokeWidth={strokeWidth}
+    strokeWidth="2"
     strokeLinecap="round"
     strokeLinejoin="round"
     className={className}
@@ -27,7 +35,7 @@ const FacebookIcon = ({ size = 24, strokeWidth = 2, className }) => (
   </svg>
 );
 
-const InstagramIcon = ({ size = 24, strokeWidth = 2, className }) => (
+const InstagramIcon = ({ size = 22, className }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     width={size}
@@ -35,7 +43,7 @@ const InstagramIcon = ({ size = 24, strokeWidth = 2, className }) => (
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
-    strokeWidth={strokeWidth}
+    strokeWidth="2"
     strokeLinecap="round"
     strokeLinejoin="round"
     className={className}
@@ -46,10 +54,32 @@ const InstagramIcon = ({ size = 24, strokeWidth = 2, className }) => (
   </svg>
 );
 
+const CopyButton = ({ text }) => {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = (e) => {
+    e.stopPropagation();
+    if (!text || text === 'N/A') return;
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <button
+      onClick={handleCopy}
+      title="Copy"
+      className="p-1 text-slate-300 hover:text-slate-600 rounded transition-colors cursor-pointer shrink-0"
+    >
+      {copied ? <Check size={12} className="text-emerald-600 stroke-[2.5]" /> : <Copy size={12} />}
+    </button>
+  );
+};
+
 const ClientChannelsPage = () => {
-  const router = useRouter();
   const [client, setClient] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   
   const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
   const [isFacebookConfigModalOpen, setIsFacebookConfigModalOpen] = useState(false);
@@ -57,18 +87,25 @@ const ClientChannelsPage = () => {
   
   const [toast, setToast] = useState(null);
 
-  const fetchClient = async () => {
+  const fetchClient = async (isManualRefresh = false) => {
+    if (isManualRefresh) setRefreshing(true);
     try {
       const token = localStorage.getItem('token');
       const user = JSON.parse(localStorage.getItem('user') || '{}');
+      if (!user.client) return;
       const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/clients/${user.client}/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setClient(res.data);
+      if (isManualRefresh) {
+        setToast({ msg: 'Channels updated', type: 'success' });
+        setTimeout(() => setToast(null), 3000);
+      }
     } catch (err) {
-      console.error('Failed to fetch client');
+      console.error('Failed to fetch client', err);
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   };
 
@@ -78,308 +115,282 @@ const ClientChannelsPage = () => {
 
   const handleWhatsAppSaved = (updatedClient) => {
     setClient(updatedClient);
-    setToast({ msg: 'WhatsApp Business configured successfully.', type: 'success' });
-    setTimeout(() => setToast(null), 4000);
+    setToast({ msg: 'WhatsApp configured', type: 'success' });
+    setTimeout(() => setToast(null), 3000);
   };
 
   const handleFacebookSaved = (updatedClient) => {
     setClient(updatedClient);
-    setToast({ msg: 'Facebook Messenger configured successfully.', type: 'success' });
-    setTimeout(() => setToast(null), 4000);
+    setToast({ msg: 'Facebook configured', type: 'success' });
+    setTimeout(() => setToast(null), 3000);
   };
 
   const handleInstagramSaved = (updatedClient) => {
     setClient(updatedClient);
-    setToast({ msg: 'Instagram configured successfully.', type: 'success' });
-    setTimeout(() => setToast(null), 4000);
+    setToast({ msg: 'Instagram configured', type: 'success' });
+    setTimeout(() => setToast(null), 3000);
   };
 
-  const channels = [
-    {
-      name: 'WhatsApp',
-      icon: MessageCircle,
-      color: 'green',
-      active: true,
-      connected: !!client?.whatsapp_phone_number_id,
-      detail: client?.whatsapp_phone_number_id || 'Not configured',
-      description: 'Send automatic replies on WhatsApp.'
-    },
-    {
-      name: 'Facebook',
-      icon: FacebookIcon,
-      color: 'blue',
-      active: true,
-      connected: !!client?.facebook_config?.page_id,
-      detail: client?.facebook_config?.page_id || 'Not configured',
-      description: 'Connect your Facebook Page for auto replies.'
-    },
-    {
-      name: 'Instagram',
-      icon: InstagramIcon,
-      color: 'pink',
-      active: true,
-      connected: !!client?.instagram_config?.instagram_business_id,
-      detail: client?.instagram_config?.instagram_business_id || 'Not configured',
-      description: 'Automate Instagram DMs and replies.'
-    },
-  ];
+  const isWhatsAppConnected = !!client?.whatsapp_phone_number_id;
+  const isFacebookConnected = !!client?.facebook_config?.page_id;
+  const isInstagramConnected = !!client?.instagram_config?.instagram_business_id;
 
-  const formatLastUpdated = (dateString) => {
-    if (!dateString) return 'Never';
-    return new Date(dateString).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-  };
-
-  const lastUpdatedText = client?.settings?.last_updated 
-    ? formatLastUpdated(client.settings.last_updated)
-    : client?.updated_at
-      ? formatLastUpdated(client.updated_at)
-      : 'Never';
+  const connectedCount = [isWhatsAppConnected, isFacebookConnected, isInstagramConnected].filter(Boolean).length;
 
   return (
     <DashboardLayout role="CLIENT">
-      <div className="max-w-4xl mx-auto pb-20 px-2 sm:px-4 md:px-0 relative">
-        {/* Success/Error Toast */}
+      <div className="max-w-5xl mx-auto pb-16 px-4 sm:px-6 relative font-['Times_New_Roman',_Georgia,_serif]">
+        {/* Toast Alert */}
         {toast && (
-          <div className="fixed top-6 right-6 z-[120] flex items-center gap-3 px-5 py-4 rounded-xl shadow-xl font-bold text-xs bg-emerald-50 border border-emerald-100 text-emerald-800 animate-in fade-in slide-in-from-top-4 duration-300">
-            <CheckCircle2 size={16} className="text-[#16A34A] stroke-[2.5]" />
+          <div className="fixed top-6 right-6 z-[120] flex items-center gap-2.5 px-4 py-2.5 rounded-xl shadow-lg font-medium text-xs bg-slate-900 text-white animate-in fade-in duration-200">
+            <CheckCircle2 size={15} className="text-emerald-400" />
             <span>{toast.msg}</span>
           </div>
         )}
 
-        <div className="mb-10">
-          <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight mb-2">My Channels</h1>
-          <p className="text-slate-500 font-medium italic">Connected platforms and their status.</p>
+        {/* Clean Header */}
+        <div className="py-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 border-b border-slate-100">
+          <div>
+            <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Channels</h1>
+            <p className="text-slate-400 text-xs mt-0.5 font-normal">Connect your social messaging accounts to automate replies.</p>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <span className="text-xs text-slate-400 font-medium">
+              <strong className="text-slate-700">{connectedCount}</strong> of 3 connected
+            </span>
+            <button
+              onClick={() => fetchClient(true)}
+              disabled={refreshing}
+              className="p-2 text-slate-400 hover:text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-lg transition-colors cursor-pointer disabled:opacity-50"
+              title="Refresh"
+            >
+              <RefreshCw size={14} className={cn(refreshing && "animate-spin text-emerald-600")} />
+            </button>
+          </div>
         </div>
 
+        {/* Loading State */}
         {loading ? (
-          <div className="flex justify-center py-24"><Loader2 className="animate-spin text-[#16A34A]" size={40} /></div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 py-8">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-64 bg-slate-50/60 rounded-2xl border border-slate-100 animate-pulse" />
+            ))}
+          </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8">
-            {channels.map((ch) => {
-              // Connected WhatsApp Layout
-              if (ch.name === 'WhatsApp' && ch.connected) {
-                return (
-                  <div key={ch.name} className="bg-white rounded-[24px] border border-slate-200/80 p-6 sm:p-8 flex flex-col justify-between transition-all duration-300 hover:shadow-xl hover:shadow-slate-100 relative overflow-hidden group min-h-[340px] sm:min-h-[380px] max-w-sm mx-auto w-full">
-                    <div className="space-y-6">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <div className="w-12 h-12 rounded-xl bg-emerald-50 text-[#16A34A] flex items-center justify-center border border-emerald-100/50">
-                            <MessageCircle size={24} strokeWidth={2} />
-                          </div>
-                          <div>
-                            <h3 className="font-bold text-slate-900 text-base tracking-tight">WhatsApp</h3>
-                            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Cloud API</p>
-                          </div>
-                        </div>
-                        
-                        <div className="px-2.5 py-1 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-full flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-wider">
-                          <CheckCircle2 size={10} className="stroke-[3]" />
-                          Connected
-                        </div>
-                      </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
 
-                      <div className="space-y-3.5 text-xs">
-                        <div className="flex justify-between items-center pb-1.5 border-b border-slate-100 gap-4">
-                          <span className="text-slate-400 font-semibold shrink-0">Business Name</span>
-                          <span className="font-bold text-slate-700 truncate text-right" title={client?.business_name}>{client?.business_name || 'N/A'}</span>
-                        </div>
-                        <div className="flex justify-between items-center pb-1.5 border-b border-slate-100 gap-4">
-                          <span className="text-slate-400 font-semibold shrink-0">Phone Number</span>
-                          <span className="font-bold text-slate-700 truncate text-right" title={client?.phone_number}>{client?.phone_number || 'N/A'}</span>
-                        </div>
-                        <div className="flex justify-between items-center pb-1.5 border-b border-slate-100 gap-4">
-                          <span className="text-slate-400 font-semibold shrink-0">WABA ID</span>
-                          <span className="font-bold text-slate-700 truncate text-right" title={client?.whatsapp_waba_id}>{client?.whatsapp_waba_id || 'N/A'}</span>
-                        </div>
-                        <div className="flex justify-between items-center pb-1.5 border-b border-slate-100 gap-4">
-                          <span className="text-slate-400 font-semibold shrink-0">Phone Number ID</span>
-                          <span className="font-bold text-slate-700 truncate text-right" title={client?.whatsapp_phone_number_id}>{client?.whatsapp_phone_number_id || 'N/A'}</span>
-                        </div>
-                        <div className="flex justify-between items-center pb-1.5 border-b border-slate-100 gap-4">
-                          <span className="text-slate-400 font-semibold shrink-0">Last Updated</span>
-                          <span className="font-bold text-slate-700 truncate text-right">{lastUpdatedText}</span>
-                        </div>
-                      </div>
+            {/* --- WHATSAPP CARD --- */}
+            <div className="bg-white rounded-2xl border border-slate-200/80 p-7 flex flex-col justify-between hover:border-slate-300 transition-all shadow-xs min-h-[360px]">
+              <div>
+                {/* Header */}
+                <div className="flex items-center justify-between mb-5">
+                  <div className="flex items-center gap-3.5">
+                    <div className="w-11 h-11 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100/80 shrink-0">
+                      <MessageCircle size={22} strokeWidth={2} />
                     </div>
-
-                    <div className="mt-8">
-                      <button 
-                        onClick={() => setIsConfigModalOpen(true)}
-                        className="w-full py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold tracking-wide transition-all shadow-md hover:shadow-lg cursor-pointer"
-                      >
-                        Edit Configuration
-                      </button>
-                    </div>
-                  </div>
-                );
-              }
-
-              // Connected Facebook Layout
-              if (ch.name === 'Facebook' && ch.connected) {
-                return (
-                  <div key={ch.name} className="bg-white rounded-[24px] border border-slate-200/80 p-6 sm:p-8 flex flex-col justify-between transition-all duration-300 hover:shadow-xl hover:shadow-slate-100 relative overflow-hidden group min-h-[340px] sm:min-h-[380px] max-w-sm mx-auto w-full">
-                    <div className="space-y-6">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100/50">
-                            <FacebookIcon size={24} strokeWidth={2} />
-                          </div>
-                          <div>
-                            <h3 className="font-bold text-slate-900 text-base tracking-tight">Facebook</h3>
-                            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Messenger</p>
-                          </div>
-                        </div>
-                        
-                        <div className="px-2.5 py-1 bg-blue-50 text-blue-700 border border-blue-100 rounded-full flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-wider">
-                          <CheckCircle2 size={10} className="stroke-[3]" />
-                          Connected
-                        </div>
-                      </div>
-
-                      <div className="space-y-3.5 text-xs">
-                        <div className="flex justify-between items-center pb-1.5 border-b border-slate-100 gap-4">
-                          <span className="text-slate-400 font-semibold shrink-0">Page Name</span>
-                          <span className="font-bold text-slate-700 truncate text-right" title={client?.facebook_config?.page_name}>{client?.facebook_config?.page_name || 'N/A'}</span>
-                        </div>
-                        <div className="flex justify-between items-center pb-1.5 border-b border-slate-100 gap-4">
-                          <span className="text-slate-400 font-semibold shrink-0">Page ID</span>
-                          <span className="font-bold text-slate-700 truncate text-right" title={client?.facebook_config?.page_id}>{client?.facebook_config?.page_id || 'N/A'}</span>
-                        </div>
-                        <div className="flex justify-between items-center pb-1.5 border-b border-slate-100 gap-4">
-                          <span className="text-slate-400 font-semibold shrink-0">Last Updated</span>
-                          <span className="font-bold text-slate-700 truncate text-right">{formatLastUpdated(client?.facebook_config?.last_updated)}</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="mt-8">
-                      <button 
-                        onClick={() => setIsFacebookConfigModalOpen(true)}
-                        className="w-full py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold tracking-wide transition-all shadow-md hover:shadow-lg cursor-pointer"
-                      >
-                        Edit Configuration
-                      </button>
-                    </div>
-                  </div>
-                );
-              }
-
-              // Connected Instagram Layout
-              if (ch.name === 'Instagram' && ch.connected) {
-                return (
-                  <div key={ch.name} className="bg-white rounded-[24px] border border-slate-200/80 p-6 sm:p-8 flex flex-col justify-between transition-all duration-300 hover:shadow-xl hover:shadow-slate-100 relative overflow-hidden group min-h-[340px] sm:min-h-[380px] max-w-sm mx-auto w-full">
-                    <div className="space-y-6">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <div className="w-12 h-12 rounded-xl bg-pink-50 text-pink-500 flex items-center justify-center border border-pink-100/50">
-                            <InstagramIcon size={24} strokeWidth={2} />
-                          </div>
-                          <div>
-                            <h3 className="font-bold text-slate-900 text-base tracking-tight">Instagram</h3>
-                            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Direct Message</p>
-                          </div>
-                        </div>
-                        
-                        <div className="px-2.5 py-1 bg-pink-50 text-pink-700 border border-pink-100 rounded-full flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-wider">
-                          <CheckCircle2 size={10} className="stroke-[3]" />
-                          Connected
-                        </div>
-                      </div>
-
-                      <div className="space-y-3.5 text-xs">
-                        <div className="flex justify-between items-center pb-1.5 border-b border-slate-100 gap-4">
-                          <span className="text-slate-400 font-semibold shrink-0">Account Name</span>
-                          <span className="font-bold text-slate-700 truncate text-right" title={client?.instagram_config?.page_name}>{client?.instagram_config?.page_name || 'N/A'}</span>
-                        </div>
-                        <div className="flex justify-between items-center pb-1.5 border-b border-slate-100 gap-4">
-                          <span className="text-slate-400 font-semibold shrink-0">Instagram ID</span>
-                          <span className="font-bold text-slate-700 truncate text-right" title={client?.instagram_config?.instagram_business_id}>{client?.instagram_config?.instagram_business_id || 'N/A'}</span>
-                        </div>
-                        <div className="flex justify-between items-center pb-1.5 border-b border-slate-100 gap-4">
-                          <span className="text-slate-400 font-semibold shrink-0">Last Updated</span>
-                          <span className="font-bold text-slate-700 truncate text-right">{formatLastUpdated(client?.instagram_config?.last_updated)}</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="mt-8">
-                      <button 
-                        onClick={() => setIsInstagramConfigModalOpen(true)}
-                        className="w-full py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold tracking-wide transition-all shadow-md hover:shadow-lg cursor-pointer"
-                      >
-                        Edit Configuration
-                      </button>
-                    </div>
-                  </div>
-                );
-              }
-
-              // Standard layout for standard/unconnected channels
-              return (
-                <div key={ch.name} className={cn(
-                  "bg-white rounded-[24px] border p-6 sm:p-8 flex flex-col items-center text-center transition-all duration-300 group relative overflow-hidden min-h-[340px] sm:min-h-[380px] justify-between max-w-sm mx-auto w-full",
-                  ch.active 
-                    ? "border-slate-200/80 hover:shadow-xl hover:shadow-slate-100" 
-                    : "border-slate-100 opacity-50 grayscale bg-slate-50/30"
-                )}>
-                  <div className="absolute top-6 right-6">
-                    {ch.active && ch.connected ? (
-                      <div className="w-2 h-2 rounded-full bg-[#16A34A] shadow-md shadow-emerald-200" />
-                    ) : (
-                      <div className="w-2 h-2 rounded-full bg-slate-200" />
-                    )}
-                  </div>
-
-                  <div className="flex flex-col items-center w-full">
-                    <div className={cn(
-                      "w-16 h-16 rounded-xl flex items-center justify-center mb-6 transition-all duration-700 shadow-sm border",
-                      !ch.active 
-                        ? "bg-slate-100 text-slate-300 border-slate-200/50" 
-                        : ch.name === 'WhatsApp' ? "bg-emerald-50 text-[#16A34A] border-emerald-100/50" :
-                          ch.name === 'Facebook' ? "bg-blue-50 text-blue-600 border-blue-100/50" :
-                          "bg-pink-50 text-pink-500 border-pink-100/50"
-                    )}>
-                      <ch.icon size={28} strokeWidth={2} />
-                    </div>
-
-                    <div className="mb-6 flex-1 w-full px-2">
-                      <div className="flex flex-col items-center gap-1.5 mb-3">
-                        <h3 className="font-bold text-slate-900 text-lg tracking-tight">{ch.name}</h3>
-                        {!ch.active && (
-                          <span className="px-2 py-0.5 bg-slate-100 text-slate-400 text-[8px] font-bold uppercase tracking-wider rounded border border-slate-200/30">Locked</span>
-                        )}
-                      </div>
-                      <p className="text-xs text-slate-500 font-medium leading-relaxed">{ch.description}</p>
+                    <div>
+                      <h3 className="font-semibold text-slate-900 text-base">WhatsApp</h3>
+                      <p className="text-[11px] text-slate-400">Cloud API</p>
                     </div>
                   </div>
 
-                  <div className="w-full flex justify-center mt-4">
-                    {ch.active ? (
-                      <button 
-                        onClick={() => {
-                          if (ch.name === 'WhatsApp') {
-                            window.location.href = "https://business.facebook.com/messaging/whatsapp/onboard/?app_id=991147863536661&config_id=1048515390903125&extras=%7B%22version%22%3A%22v4%22%2C%22sessionInfoVersion%22%3A%223%22%2C%22featureType%22%3A%22whatsapp_business_app_onboarding%22%7D&redirect_uri=https%3A%2F%2Fuwoconnect.aisa24.com%2Fsettings";
-                          }
-                          else if (ch.name === 'Facebook') setIsFacebookConfigModalOpen(true);
-                          else if (ch.name === 'Instagram') setIsInstagramConfigModalOpen(true);
-                        }}
-                        className={cn("w-full py-3 text-white rounded-xl text-xs font-bold tracking-wide shadow-md transition-all cursor-pointer hover:shadow-lg",
-                          ch.name === 'WhatsApp' ? "bg-[#16A34A] shadow-emerald-100 hover:bg-[#15803D]" :
-                          ch.name === 'Facebook' ? "bg-blue-600 shadow-blue-100 hover:bg-blue-700" :
-                          "bg-pink-500 shadow-pink-100 hover:bg-pink-600"
-                        )}
-                      >
-                        Configure Now
-                      </button>
-                    ) : (
-                      <div className="w-full py-2.5 bg-slate-100/50 text-slate-400 rounded-xl border border-slate-200/30 text-[10px] font-bold uppercase tracking-widest italic">
-                        Coming Soon
-                      </div>
-                    )}
+                  <div className={cn(
+                    "flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium shrink-0",
+                    isWhatsAppConnected ? "bg-emerald-50 text-emerald-700 border border-emerald-200/50" : "bg-slate-100 text-slate-400"
+                  )}>
+                    <span className={cn("w-1.5 h-1.5 rounded-full", isWhatsAppConnected ? "bg-emerald-500" : "bg-slate-300")} />
+                    <span>{isWhatsAppConnected ? 'Connected' : 'Offline'}</span>
                   </div>
                 </div>
-              );
-            })}
+
+                <p className="text-xs text-slate-500 leading-relaxed mb-5">
+                  Official WhatsApp Business Cloud API for automated messaging and customer support.
+                </p>
+
+                {/* Details */}
+                {isWhatsAppConnected ? (
+                  <div className="space-y-3 py-3 border-t border-slate-100 text-xs">
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-400">Business Name</span>
+                      <span className="font-medium text-slate-700 max-w-[140px] truncate">{client?.business_name || 'N/A'}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-400">Phone</span>
+                      <div className="flex items-center gap-1">
+                        <span className="font-medium text-slate-700">{client?.phone_number || 'N/A'}</span>
+                        <CopyButton text={client?.phone_number} />
+                      </div>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-400">WABA ID</span>
+                      <div className="flex items-center gap-1">
+                        <span className="font-medium text-slate-700 max-w-[120px] truncate">{client?.whatsapp_waba_id || 'N/A'}</span>
+                        <CopyButton text={client?.whatsapp_waba_id} />
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-xs text-slate-400 py-6 text-center">No WhatsApp account connected.</p>
+                )}
+              </div>
+
+              {/* Action Button */}
+              <div className="mt-6 pt-4 border-t border-slate-100">
+                {isWhatsAppConnected ? (
+                  <button 
+                    onClick={() => setIsConfigModalOpen(true)}
+                    className="w-full py-2.5 px-4 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer border border-slate-200/60"
+                  >
+                    <Settings size={14} className="text-slate-400" />
+                    <span>Configure</span>
+                  </button>
+                ) : (
+                  <button 
+                    onClick={() => {
+                      window.location.href = "https://business.facebook.com/messaging/whatsapp/onboard/?app_id=991147863536661&config_id=1048515390903125&extras=%7B%22version%22%3A%22v4%22%2C%22sessionInfoVersion%22%3A%223%22%2C%22featureType%22%3A%22whatsapp_business_app_onboarding%22%7D&redirect_uri=https%3A%2F%2Fuwoconnect.aisa24.com%2Fsettings";
+                    }}
+                    className="w-full py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                  >
+                    <Plus size={14} />
+                    <span>Connect</span>
+                  </button>
+                )}
+              </div>
+            </div>
+
+
+            {/* --- FACEBOOK CARD --- */}
+            <div className="bg-white rounded-2xl border border-slate-200/80 p-7 flex flex-col justify-between hover:border-slate-300 transition-all shadow-xs min-h-[360px]">
+              <div>
+                {/* Header */}
+                <div className="flex items-center justify-between mb-5">
+                  <div className="flex items-center gap-3.5">
+                    <div className="w-11 h-11 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100/80 shrink-0">
+                      <FacebookIcon size={22} />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-slate-900 text-base">Facebook</h3>
+                      <p className="text-[11px] text-slate-400">Messenger</p>
+                    </div>
+                  </div>
+
+                  <div className={cn(
+                    "flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium shrink-0",
+                    isFacebookConnected ? "bg-blue-50 text-blue-700 border border-blue-200/50" : "bg-slate-100 text-slate-400"
+                  )}>
+                    <span className={cn("w-1.5 h-1.5 rounded-full", isFacebookConnected ? "bg-blue-500" : "bg-slate-300")} />
+                    <span>{isFacebookConnected ? 'Connected' : 'Offline'}</span>
+                  </div>
+                </div>
+
+                <p className="text-xs text-slate-500 leading-relaxed mb-5">
+                  Connect your Facebook Business Pages to automate Messenger customer interactions.
+                </p>
+
+                {/* Details */}
+                {isFacebookConnected ? (
+                  <div className="space-y-3 py-3 border-t border-slate-100 text-xs">
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-400">Page Name</span>
+                      <span className="font-medium text-slate-700 max-w-[140px] truncate">{client?.facebook_config?.page_name || 'N/A'}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-400">Page ID</span>
+                      <div className="flex items-center gap-1">
+                        <span className="font-medium text-slate-700 max-w-[120px] truncate">{client?.facebook_config?.page_id || 'N/A'}</span>
+                        <CopyButton text={client?.facebook_config?.page_id} />
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-xs text-slate-400 py-6 text-center">No Facebook Page connected.</p>
+                )}
+              </div>
+
+              {/* Action Button */}
+              <div className="mt-6 pt-4 border-t border-slate-100">
+                <button 
+                  onClick={() => setIsFacebookConfigModalOpen(true)}
+                  className={cn(
+                    "w-full py-2.5 px-4 rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer",
+                    isFacebookConnected
+                      ? "bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200/60"
+                      : "bg-blue-600 hover:bg-blue-700 text-white"
+                  )}
+                >
+                  {isFacebookConnected ? <Settings size={14} className="text-slate-400" /> : <Plus size={14} />}
+                  <span>{isFacebookConnected ? 'Configure' : 'Connect'}</span>
+                </button>
+              </div>
+            </div>
+
+
+            {/* --- INSTAGRAM CARD --- */}
+            <div className="bg-white rounded-2xl border border-slate-200/80 p-7 flex flex-col justify-between hover:border-slate-300 transition-all shadow-xs min-h-[360px]">
+              <div>
+                {/* Header */}
+                <div className="flex items-center justify-between mb-5">
+                  <div className="flex items-center gap-3.5">
+                    <div className="w-11 h-11 rounded-2xl bg-pink-50 text-pink-600 flex items-center justify-center border border-pink-100/80 shrink-0">
+                      <InstagramIcon size={22} />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-slate-900 text-base">Instagram</h3>
+                      <p className="text-[11px] text-slate-400">Direct Message</p>
+                    </div>
+                  </div>
+
+                  <div className={cn(
+                    "flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium shrink-0",
+                    isInstagramConnected ? "bg-pink-50 text-pink-700 border border-pink-200/50" : "bg-slate-100 text-slate-400"
+                  )}>
+                    <span className={cn("w-1.5 h-1.5 rounded-full", isInstagramConnected ? "bg-pink-500" : "bg-slate-300")} />
+                    <span>{isInstagramConnected ? 'Connected' : 'Offline'}</span>
+                  </div>
+                </div>
+
+                <p className="text-xs text-slate-500 leading-relaxed mb-5">
+                  Automate replies for Instagram DMs, story mentions, and customer comments.
+                </p>
+
+                {/* Details */}
+                {isInstagramConnected ? (
+                  <div className="space-y-3 py-3 border-t border-slate-100 text-xs">
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-400">Account Name</span>
+                      <span className="font-medium text-slate-700 max-w-[140px] truncate">{client?.instagram_config?.page_name || 'N/A'}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-400">Instagram ID</span>
+                      <div className="flex items-center gap-1">
+                        <span className="font-medium text-slate-700 max-w-[120px] truncate">{client?.instagram_config?.instagram_business_id || 'N/A'}</span>
+                        <CopyButton text={client?.instagram_config?.instagram_business_id} />
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-xs text-slate-400 py-6 text-center">No Instagram account connected.</p>
+                )}
+              </div>
+
+              {/* Action Button */}
+              <div className="mt-6 pt-4 border-t border-slate-100">
+                <button 
+                  onClick={() => setIsInstagramConfigModalOpen(true)}
+                  className={cn(
+                    "w-full py-2.5 px-4 rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer",
+                    isInstagramConnected
+                      ? "bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200/60"
+                      : "bg-pink-600 hover:bg-pink-700 text-white"
+                  )}
+                >
+                  {isInstagramConnected ? <Settings size={14} className="text-slate-400" /> : <Plus size={14} />}
+                  <span>{isInstagramConnected ? 'Configure' : 'Connect'}</span>
+                </button>
+              </div>
+            </div>
+
           </div>
         )}
 
@@ -412,5 +423,3 @@ const ClientChannelsPage = () => {
 };
 
 export default ClientChannelsPage;
-
-
