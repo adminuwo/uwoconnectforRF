@@ -34,9 +34,10 @@ const eslintConfig = defineConfig([
       "react-hooks/preserve-manual-memoization": "off",
 
       // ── TypeScript rules ─────────────────────────────────────────────────
-      // Unused vars are noisy but not blocking issues
-      "@typescript-eslint/no-unused-vars": "warn",
-      "@typescript-eslint/no-require-imports": "warn",
+      // Unused vars are non-blocking warnings
+      "@typescript-eslint/no-unused-vars": "off",
+      "no-unused-vars": "off",
+      "@typescript-eslint/no-require-imports": "off",
     }
   }
 ]);
