@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Hash, Lock, Plus, Send, Paperclip, MessageSquare, Volume2, User, Search, Pin } from 'lucide-react';
+import { Hash, Plus, Send, MessageSquare } from 'lucide-react';
 import axios from 'axios';
 
 export default function TeamChatWindow({ currentUser }) {

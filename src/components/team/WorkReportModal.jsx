@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { X, FileText, CheckCircle, AlertTriangle, Clock, Paperclip } from 'lucide-react';
+import { X, FileText, AlertTriangle, Clock } from 'lucide-react';
 import axios from 'axios';
 
 export default function WorkReportModal({ isOpen, onClose, onSuccess }) {
