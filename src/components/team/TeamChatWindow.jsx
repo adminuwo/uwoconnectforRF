@@ -88,7 +88,7 @@ export default function TeamChatWindow({ currentUser }) {
       fetchMessages();
     } catch (err) {
       console.error('Failed to send chat message:', err);
-    } flex {
+    } finally {
       setIsSending(false);
     }
   };
