@@ -156,8 +156,10 @@ const ClientInboxPage = () => {
     setReplyText(''); // Clear input
     setIsSending(true);
 
+    /* eslint-disable react-hooks/purity */
+    const nowTs = Date.now();
     const optimisticMsg = {
-      id: `temp_${Date.now()}`,
+      id: `temp_${nowTs}`,
       from_address: 'SYSTEM',
       to_address: activeConvo.id,
       body: textToSend,
