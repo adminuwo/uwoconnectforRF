@@ -140,6 +140,55 @@ const ClientChannelsPage = () => {
       setToast({ msg: `Gmail connection failed: ${params.get('gmail_error')}`, type: 'error' });
       window.history.replaceState({}, document.title, window.location.pathname);
     }
+
+    // Check URL for OAuth code
+    const code = params.get('code');
+    const state = params.get('state');
+    if (code) {
+      if (state === 'facebook') {
+        setToast({ msg: 'Connecting Facebook...', type: 'success' });
+        const connectFacebook = async () => {
+          try {
+            const token = localStorage.getItem('token');
+            await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/auth/facebook/embedded-signup`, 
+              { code: code },
+              { headers: { Authorization: `Bearer ${token}` } }
+            );
+            fetchClient();
+            setToast({ msg: 'Facebook connected successfully!', type: 'success' });
+            setTimeout(() => setToast(null), 3000);
+          } catch (err) {
+            console.error("Error connecting Facebook", err);
+            setToast({ msg: err.response?.data?.error || 'Failed to connect Facebook', type: 'error' });
+            setTimeout(() => setToast(null), 4000);
+          } finally {
+            window.history.replaceState({}, document.title, window.location.pathname);
+          }
+        };
+        connectFacebook();
+      } else {
+        setToast({ msg: 'Connecting Instagram...', type: 'success' });
+        const connectInstagram = async () => {
+          try {
+            const token = localStorage.getItem('token');
+            await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/auth/instagram/embedded-signup`, 
+              { code: code },
+              { headers: { Authorization: `Bearer ${token}` } }
+            );
+            fetchClient();
+            setToast({ msg: 'Instagram connected successfully!', type: 'success' });
+            setTimeout(() => setToast(null), 3000);
+          } catch (err) {
+            console.error("Error connecting Instagram", err);
+            setToast({ msg: err.response?.data?.error || 'Failed to connect Instagram', type: 'error' });
+            setTimeout(() => setToast(null), 4000);
+          } finally {
+            window.history.replaceState({}, document.title, window.location.pathname);
+          }
+        };
+        connectInstagram();
+      }
+    }
   }, []);
 
   const handleWhatsAppSaved = (updatedClient) => {
@@ -217,13 +266,13 @@ const ClientChannelsPage = () => {
 
         {/* Loading State */}
         {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 py-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 py-8">
             {[1, 2, 3, 4].map((i) => (
               <div key={i} className="h-64 bg-slate-50/60 rounded-2xl border border-slate-100 animate-pulse" />
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
 
             {/* --- WHATSAPP CARD --- */}
             <div className="bg-white rounded-2xl border border-slate-200/80 p-6 flex flex-col justify-between hover:border-slate-300 transition-all shadow-xs min-h-[380px]">
@@ -359,18 +408,25 @@ const ClientChannelsPage = () => {
 
               {/* Action Button */}
               <div className="mt-6 pt-4 border-t border-slate-100">
-                <button 
-                  onClick={() => setIsFacebookConfigModalOpen(true)}
-                  className={cn(
-                    "w-full py-2.5 px-4 rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer",
-                    isFacebookConnected
-                      ? "bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200/60"
-                      : "bg-blue-600 hover:bg-blue-700 text-white"
-                  )}
-                >
-                  {isFacebookConnected ? <Settings size={14} className="text-slate-400" /> : <Plus size={14} />}
-                  <span>{isFacebookConnected ? 'Configure' : 'Connect'}</span>
-                </button>
+                {isFacebookConnected ? (
+                  <button 
+                    onClick={() => setIsFacebookConfigModalOpen(true)}
+                    className="w-full py-2.5 px-4 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer border border-slate-200/60"
+                  >
+                    <Settings size={14} className="text-slate-400" />
+                    <span>Configure</span>
+                  </button>
+                ) : (
+                  <button 
+                    onClick={() => {
+                      window.location.href = "https://www.facebook.com/v20.0/dialog/oauth?client_id=991147863536661&redirect_uri=https://uwoconnect.aisa24.com/client/channels&response_type=code&scope=pages_messaging%2Cpages_show_list%2Cpages_manage_metadata%2Cpages_read_engagement&state=facebook";
+                    }}
+                    className="w-full py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                  >
+                    <Plus size={14} />
+                    <span>Connect</span>
+                  </button>
+                )}
               </div>
             </div>
 
@@ -427,18 +483,25 @@ const ClientChannelsPage = () => {
 
               {/* Action Button */}
               <div className="mt-6 pt-4 border-t border-slate-100">
-                <button 
-                  onClick={() => setIsInstagramConfigModalOpen(true)}
-                  className={cn(
-                    "w-full py-2.5 px-4 rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer",
-                    isInstagramConnected
-                      ? "bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200/60"
-                      : "bg-pink-600 hover:bg-pink-700 text-white"
-                  )}
-                >
-                  {isInstagramConnected ? <Settings size={14} className="text-slate-400" /> : <Plus size={14} />}
-                  <span>{isInstagramConnected ? 'Configure' : 'Connect'}</span>
-                </button>
+                {isInstagramConnected ? (
+                  <button 
+                    onClick={() => setIsInstagramConfigModalOpen(true)}
+                    className="w-full py-2.5 px-4 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer border border-slate-200/60"
+                  >
+                    <Settings size={14} className="text-slate-400" />
+                    <span>Configure</span>
+                  </button>
+                ) : (
+                  <button 
+                    onClick={() => {
+                      window.location.href = "https://www.instagram.com/oauth/authorize?force_reauth=true&client_id=991147863536661&redirect_uri=https://uwoconnect.aisa24.com/client/channels&response_type=code&scope=instagram_business_basic%2Cinstagram_business_manage_messages%2Cinstagram_business_manage_comments%2Cinstagram_business_content_publish%2Cinstagram_business_manage_insights&state=instagram";
+                    }}
+                    className="w-full py-2.5 px-4 bg-pink-600 hover:bg-pink-700 text-white rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                  >
+                    <Plus size={14} />
+                    <span>Connect</span>
+                  </button>
+                )}
               </div>
             </div>
 
