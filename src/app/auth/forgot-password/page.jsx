@@ -43,9 +43,11 @@ const ForgotPasswordPage = () => {
       <div className="w-full max-w-[400px] z-10 bg-white/80 backdrop-blur-[24px] border border-white/50 rounded-[36px] p-5 sm:py-6 sm:px-8 shadow-[0_20px_50px_rgba(0,0,0,0.05)] flex flex-col items-center">
         {/* Brand Logo */}
         <div className="flex items-center gap-2.5 mb-4 bg-white/20 px-5 py-2 rounded-full border border-white/30 backdrop-blur-sm shadow-sm">
-          <div className="w-7 h-7 rounded-full bg-[#45724c] flex items-center justify-center shadow-md">
-            <Sparkles className="text-white animate-pulse" size={13} strokeWidth={2.5} />
-          </div>
+          <img 
+            src="/download (3).gif" 
+            alt="UwoConnect Logo" 
+            className="w-7 h-7 rounded-full object-contain shadow-md"
+          />
           <span className="text-[#2f593b] font-black text-base tracking-tight uppercase">
             UwoConnect
           </span>

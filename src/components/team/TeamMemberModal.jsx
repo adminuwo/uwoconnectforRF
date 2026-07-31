@@ -26,8 +26,23 @@ export default function TeamMemberModal({ isOpen, onClose, onSuccess, existingMe
   const [reportingManager, setReportingManager] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [assignedPlatforms, setAssignedPlatforms] = useState(['CRM', 'WhatsApp', 'Orders', 'Projects']);
 
   if (!isOpen) return null;
+
+  const PLATFORMS = [
+    'WhatsApp', 'Instagram', 'Facebook', 'CRM', 'Marketing', 
+    'Knowledge Base', 'Orders', 'Catalog', 'Broadcast', 'Analytics', 
+    'AI', 'Finance', 'HR', 'Projects', 'Support'
+  ];
+
+  const togglePlatform = (p) => {
+    if (assignedPlatforms.includes(p)) {
+      setAssignedPlatforms(assignedPlatforms.filter(item => item !== p));
+    } else {
+      setAssignedPlatforms([...assignedPlatforms, p]);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -51,6 +66,7 @@ export default function TeamMemberModal({ isOpen, onClose, onSuccess, existingMe
           department,
           designation,
           reporting_manager: reportingManager || null,
+          assigned_platforms: assignedPlatforms
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -193,6 +209,23 @@ export default function TeamMemberModal({ isOpen, onClose, onSuccess, existingMe
                 <option key={m.id} value={m.id}>{m.username} ({m.designation || m.role})</option>
               ))}
             </select>
+          </div>
+
+          <div>
+            <label className="block text-slate-600 font-medium mb-2">Assigned Platform Access (RBAC)</label>
+            <div className="grid grid-cols-3 gap-2 bg-slate-50 p-3 rounded-2xl border border-slate-100 max-h-36 overflow-y-auto">
+              {PLATFORMS.map((p) => (
+                <label key={p} className="flex items-center gap-2 cursor-pointer text-slate-700 text-xs font-medium">
+                  <input
+                    type="checkbox"
+                    checked={assignedPlatforms.includes(p)}
+                    onChange={() => togglePlatform(p)}
+                    className="rounded text-indigo-600 focus:ring-indigo-500 h-3.5 w-3.5"
+                  />
+                  <span>{p}</span>
+                </label>
+              ))}
+            </div>
           </div>
 
           <div className="pt-4 flex justify-end gap-3 border-t border-slate-100">

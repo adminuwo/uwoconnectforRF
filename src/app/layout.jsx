@@ -10,6 +10,9 @@ const inter = Inter({
 export const metadata = {
   title: "UwoConnect Automation",
   description: "Multi-channel automation platform",
+  icons: {
+    icon: "/download (3).gif",
+  },
 };
 
 export default function RootLayout({ children }) {

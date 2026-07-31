@@ -111,10 +111,11 @@ const Sidebar = ({ role, isOpen, onClose }) => {
       >
       {/* Brand Header */}
       <div className="p-5 pb-2 flex items-center gap-3">
-        <div className="w-8 h-8 bg-gradient-to-tr from-[#16A34A] to-[#059669] rounded-xl flex items-center justify-center shadow-xl shadow-emerald-500/10 relative overflow-hidden group">
-          <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-          <ZapIcon className="text-white relative z-10" size={16} strokeWidth={3} fill="currentColor" />
-        </div>
+        <img 
+          src="/download (3).gif" 
+          alt="UwoConnect Logo" 
+          className="w-8 h-8 rounded-xl object-contain shadow-md"
+        />
         <div>
           <h1 className="text-sm font-black text-slate-900 tracking-tight leading-none">UwoConnect</h1>
           <span className="text-[7px] font-black text-[#059669] uppercase tracking-[0.2em] mt-0.5 block">V1.0 {role}</span>
