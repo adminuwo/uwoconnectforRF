@@ -180,6 +180,10 @@ const ClientChannelsPage = () => {
       console.error("Error connecting Gmail", err);
       setToast({ msg: 'Failed to initiate Gmail connection', type: 'error' });
     }
+  const handleWhatsAppConnect = () => {
+    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://uwoconnect.aisa24.com';
+    const redirectUri = encodeURIComponent(`${origin}/client/settings`);
+    window.location.href = `https://business.facebook.com/messaging/whatsapp/onboard/?app_id=991147863536661&config_id=1048515390903125&extras=%7B%22version%22%3A%22v4%22%2C%22sessionInfoVersion%22%3A%223%22%2C%22featureType%22%3A%22whatsapp_business_app_onboarding%22%7D&redirect_uri=${redirectUri}`;
   };
 
   return (
@@ -294,9 +298,7 @@ const ClientChannelsPage = () => {
                   </button>
                 ) : (
                   <button 
-                    onClick={() => {
-                      window.location.href = "https://business.facebook.com/messaging/whatsapp/onboard/?app_id=991147863536661&config_id=1048515390903125&extras=%7B%22version%22%3A%22v4%22%2C%22sessionInfoVersion%22%3A%223%22%2C%22featureType%22%3A%22whatsapp_business_app_onboarding%22%7D&redirect_uri=https%3A%2F%2Fuwoconnect.aisa24.com%2Fsettings";
-                    }}
+                    onClick={handleWhatsAppConnect}
                     className="w-full py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
                   >
                     <Plus size={14} />
