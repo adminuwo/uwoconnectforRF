@@ -120,7 +120,7 @@ const ClientChannelsPage = () => {
         setTimeout(() => setToast(null), 3000);
       }
     } catch (err) {
-      console.error('Failed to fetch client', err);
+      console.warn('Failed to fetch client', err);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -177,7 +177,7 @@ const ClientChannelsPage = () => {
         window.location.href = res.data.url;
       }
     } catch (err) {
-      console.error("Error connecting Gmail", err);
+      console.warn("Error connecting Gmail", err);
       setToast({ msg: 'Failed to initiate Gmail connection', type: 'error' });
     }
   };
