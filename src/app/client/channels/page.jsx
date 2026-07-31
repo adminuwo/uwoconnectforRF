@@ -102,6 +102,9 @@ const ClientChannelsPage = () => {
   const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
   const [isFacebookConfigModalOpen, setIsFacebookConfigModalOpen] = useState(false);
   const [isInstagramConfigModalOpen, setIsInstagramConfigModalOpen] = useState(false);
+
+  const [fbLoading, setFbLoading] = useState(false);
+  const [igLoading, setIgLoading] = useState(false);
   
   const [toast, setToast] = useState(null);
 
@@ -127,6 +130,24 @@ const ClientChannelsPage = () => {
     }
   };
 
+  // Load the Meta / Facebook JS SDK once on mount
+  useEffect(() => {
+    if (document.getElementById('facebook-jssdk')) return;
+    const script = document.createElement('script');
+    script.id  = 'facebook-jssdk';
+    script.src = 'https://connect.facebook.net/en_US/sdk.js';
+    script.async = true;
+    script.onload = () => {
+      window.FB && window.FB.init({
+        appId:   process.env.NEXT_PUBLIC_META_APP_ID || '991147863536661',
+        version: 'v20.0',
+        cookie:  true,
+        xfbml:   false,
+      });
+    };
+    document.body.appendChild(script);
+  }, []);
+
   useEffect(() => {
     fetchClient();
     
@@ -134,7 +155,6 @@ const ClientChannelsPage = () => {
     const params = new URLSearchParams(window.location.search);
     if (params.get('gmail_connected') === 'true') {
       setToast({ msg: 'Gmail connected successfully!', type: 'success' });
-      // clean up URL
       window.history.replaceState({}, document.title, window.location.pathname);
     } else if (params.get('gmail_error')) {
       setToast({ msg: `Gmail connection failed: ${params.get('gmail_error')}`, type: 'error' });
@@ -186,6 +206,83 @@ const ClientChannelsPage = () => {
     const origin = typeof window !== 'undefined' ? window.location.origin : 'https://uwoconnect.aisa24.com';
     const redirectUri = encodeURIComponent(`${origin}/client/settings`);
     window.location.href = `https://business.facebook.com/messaging/whatsapp/onboard/?app_id=991147863536661&config_id=1048515390903125&extras=%7B%22version%22%3A%22v4%22%2C%22sessionInfoVersion%22%3A%223%22%2C%22featureType%22%3A%22whatsapp_business_app_onboarding%22%7D&redirect_uri=${redirectUri}`;
+  };
+
+  const handleFacebookConnect = () => {
+    if (!window.FB) {
+      setToast({ msg: 'Facebook SDK not loaded yet. Please try again.', type: 'error' });
+      setTimeout(() => setToast(null), 4000);
+      return;
+    }
+    setFbLoading(true);
+    window.FB.login(async (response) => {
+      if (response.status !== 'connected') {
+        setFbLoading(false);
+        setToast({ msg: 'Facebook login was cancelled or failed.', type: 'error' });
+        setTimeout(() => setToast(null), 4000);
+        return;
+      }
+      try {
+        const token = localStorage.getItem('token');
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080';
+        const res = await axios.post(
+          `${apiUrl}/api/auth/facebook/embedded-signup`,
+          { access_token: response.authResponse.accessToken },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        setClient(prev => ({ ...prev, ...res.data.facebook_config ? { facebook_config: res.data.facebook_config, facebook_enabled: true } : {} }));
+        await fetchClient();
+        setToast({ msg: '✅ Facebook Page connected!', type: 'success' });
+        setTimeout(() => setToast(null), 4000);
+      } catch (err) {
+        const msg = err?.response?.data?.error || 'Failed to connect Facebook.';
+        setToast({ msg, type: 'error' });
+        setTimeout(() => setToast(null), 5000);
+      } finally {
+        setFbLoading(false);
+      }
+    }, {
+      scope: 'public_profile,email,pages_show_list,pages_read_engagement,pages_messaging',
+      return_scopes: true,
+    });
+  };
+
+  const handleInstagramConnect = () => {
+    if (!window.FB) {
+      setToast({ msg: 'Facebook SDK not loaded yet. Please try again.', type: 'error' });
+      setTimeout(() => setToast(null), 4000);
+      return;
+    }
+    setIgLoading(true);
+    window.FB.login(async (response) => {
+      if (response.status !== 'connected') {
+        setIgLoading(false);
+        setToast({ msg: 'Instagram login was cancelled or failed.', type: 'error' });
+        setTimeout(() => setToast(null), 4000);
+        return;
+      }
+      try {
+        const token = localStorage.getItem('token');
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080';
+        const res = await axios.post(
+          `${apiUrl}/api/auth/instagram/embedded-signup`,
+          { access_token: response.authResponse.accessToken },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        await fetchClient();
+        setToast({ msg: '✅ Instagram account connected!', type: 'success' });
+        setTimeout(() => setToast(null), 4000);
+      } catch (err) {
+        const msg = err?.response?.data?.error || 'Failed to connect Instagram.';
+        setToast({ msg, type: 'error' });
+        setTimeout(() => setToast(null), 5000);
+      } finally {
+        setIgLoading(false);
+      }
+    }, {
+      scope: 'public_profile,email,pages_show_list,pages_read_engagement,instagram_basic,instagram_manage_messages,pages_messaging',
+      return_scopes: true,
+    });
   };
 
   return (
@@ -363,18 +460,24 @@ const ClientChannelsPage = () => {
 
               {/* Action Button */}
               <div className="mt-6 pt-4 border-t border-slate-100">
-                <button 
-                  onClick={() => setIsFacebookConfigModalOpen(true)}
-                  className={cn(
-                    "w-full py-2.5 px-4 rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer",
-                    isFacebookConnected
-                      ? "bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200/60"
-                      : "bg-blue-600 hover:bg-blue-700 text-white"
-                  )}
-                >
-                  {isFacebookConnected ? <Settings size={14} className="text-slate-400" /> : <Plus size={14} />}
-                  <span>{isFacebookConnected ? 'Configure' : 'Connect'}</span>
-                </button>
+                {isFacebookConnected ? (
+                  <button 
+                    onClick={() => setIsFacebookConfigModalOpen(true)}
+                    className="w-full py-2.5 px-4 rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200/60"
+                  >
+                    <Settings size={14} className="text-slate-400" />
+                    <span>Configure</span>
+                  </button>
+                ) : (
+                  <button 
+                    onClick={handleFacebookConnect}
+                    disabled={fbLoading}
+                    className="w-full py-2.5 px-4 rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-60 disabled:cursor-not-allowed"
+                  >
+                    {fbLoading ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />}
+                    <span>{fbLoading ? 'Connecting...' : 'Connect with Facebook'}</span>
+                  </button>
+                )}
               </div>
             </div>
 
@@ -431,18 +534,24 @@ const ClientChannelsPage = () => {
 
               {/* Action Button */}
               <div className="mt-6 pt-4 border-t border-slate-100">
-                <button 
-                  onClick={() => setIsInstagramConfigModalOpen(true)}
-                  className={cn(
-                    "w-full py-2.5 px-4 rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer",
-                    isInstagramConnected
-                      ? "bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200/60"
-                      : "bg-pink-600 hover:bg-pink-700 text-white"
-                  )}
-                >
-                  {isInstagramConnected ? <Settings size={14} className="text-slate-400" /> : <Plus size={14} />}
-                  <span>{isInstagramConnected ? 'Configure' : 'Connect'}</span>
-                </button>
+                {isInstagramConnected ? (
+                  <button 
+                    onClick={() => setIsInstagramConfigModalOpen(true)}
+                    className="w-full py-2.5 px-4 rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200/60"
+                  >
+                    <Settings size={14} className="text-slate-400" />
+                    <span>Configure</span>
+                  </button>
+                ) : (
+                  <button 
+                    onClick={handleInstagramConnect}
+                    disabled={igLoading}
+                    className="w-full py-2.5 px-4 rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer bg-pink-600 hover:bg-pink-700 text-white disabled:opacity-60 disabled:cursor-not-allowed"
+                  >
+                    {igLoading ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />}
+                    <span>{igLoading ? 'Connecting...' : 'Connect with Instagram'}</span>
+                  </button>
+                )}
               </div>
             </div>
 
