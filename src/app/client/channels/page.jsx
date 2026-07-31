@@ -102,6 +102,9 @@ const ClientChannelsPage = () => {
   const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
   const [isFacebookConfigModalOpen, setIsFacebookConfigModalOpen] = useState(false);
   const [isInstagramConfigModalOpen, setIsInstagramConfigModalOpen] = useState(false);
+
+  const [fbLoading, setFbLoading] = useState(false);
+  const [igLoading, setIgLoading] = useState(false);
   
   const [toast, setToast] = useState(null);
 
@@ -120,21 +123,69 @@ const ClientChannelsPage = () => {
         setTimeout(() => setToast(null), 3000);
       }
     } catch (err) {
-      console.error('Failed to fetch client', err);
+      console.warn('Failed to fetch client', err);
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
   };
 
+  // Load the Meta / Facebook JS SDK once on mount
+  useEffect(() => {
+    if (document.getElementById('facebook-jssdk')) return;
+    const script = document.createElement('script');
+    script.id  = 'facebook-jssdk';
+    script.src = 'https://connect.facebook.net/en_US/sdk.js';
+    script.async = true;
+    script.onload = () => {
+      window.FB && window.FB.init({
+        appId:   process.env.NEXT_PUBLIC_META_APP_ID || '991147863536661',
+        version: 'v20.0',
+        cookie:  true,
+        xfbml:   false,
+      });
+    };
+    document.body.appendChild(script);
+  }, []);
+
   useEffect(() => {
     fetchClient();
     
-    // Check URL for gmail connect success or error
     const params = new URLSearchParams(window.location.search);
-    if (params.get('gmail_connected') === 'true') {
+    const code = params.get('code');
+    const state = params.get('state');
+
+    // Instagram Business OAuth callback
+    if (code && state === 'instagram') {
+      window.history.replaceState({}, document.title, window.location.pathname);
+      (async () => {
+        setIgLoading(true);
+        try {
+          const token = localStorage.getItem('token');
+          const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080';
+          await axios.post(
+            `${apiUrl}/api/auth/instagram/oauth-callback`,
+            { 
+              code,
+              redirect_uri: `${window.location.origin}/client/channels`
+            },
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+          await fetchClient();
+          setToast({ msg: '✅ Instagram account connected!', type: 'success' });
+          setTimeout(() => setToast(null), 4000);
+        } catch (err) {
+          const msg = err?.response?.data?.error || 'Failed to connect Instagram.';
+          setToast({ msg, type: 'error' });
+          setTimeout(() => setToast(null), 5000);
+        } finally {
+          setIgLoading(false);
+        }
+      })();
+    }
+    // Gmail callback
+    else if (params.get('gmail_connected') === 'true') {
       setToast({ msg: 'Gmail connected successfully!', type: 'success' });
-      // clean up URL
       window.history.replaceState({}, document.title, window.location.pathname);
     } else if (params.get('gmail_error')) {
       setToast({ msg: `Gmail connection failed: ${params.get('gmail_error')}`, type: 'error' });
@@ -142,8 +193,6 @@ const ClientChannelsPage = () => {
     }
 
     // Check URL for OAuth code
-    const code = params.get('code');
-    const state = params.get('state');
     if (code) {
       if (state === 'facebook') {
         setToast({ msg: 'Connecting Facebook...', type: 'success' });
@@ -226,9 +275,61 @@ const ClientChannelsPage = () => {
         window.location.href = res.data.url;
       }
     } catch (err) {
-      console.error("Error connecting Gmail", err);
+      console.warn("Error connecting Gmail", err);
       setToast({ msg: 'Failed to initiate Gmail connection', type: 'error' });
     }
+  };
+
+  const handleWhatsAppConnect = () => {
+    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://uwoconnect.aisa24.com';
+    const redirectUri = encodeURIComponent(`${origin}/client/settings`);
+    window.location.href = `https://business.facebook.com/messaging/whatsapp/onboard/?app_id=991147863536661&config_id=1048515390903125&extras=%7B%22version%22%3A%22v4%22%2C%22sessionInfoVersion%22%3A%223%22%2C%22featureType%22%3A%22whatsapp_business_app_onboarding%22%7D&redirect_uri=${redirectUri}`;
+  };
+
+  const handleFacebookConnect = () => {
+    if (!window.FB) {
+      setToast({ msg: 'Facebook SDK not loaded yet. Please try again.', type: 'error' });
+      setTimeout(() => setToast(null), 4000);
+      return;
+    }
+    setFbLoading(true);
+    window.FB.login(async (response) => {
+      if (response.status !== 'connected') {
+        setFbLoading(false);
+        setToast({ msg: 'Facebook login was cancelled or failed.', type: 'error' });
+        setTimeout(() => setToast(null), 4000);
+        return;
+      }
+      try {
+        const token = localStorage.getItem('token');
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080';
+        const res = await axios.post(
+          `${apiUrl}/api/auth/facebook/embedded-signup`,
+          { access_token: response.authResponse.accessToken },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        setClient(prev => ({ ...prev, ...res.data.facebook_config ? { facebook_config: res.data.facebook_config, facebook_enabled: true } : {} }));
+        await fetchClient();
+        setToast({ msg: '✅ Facebook Page connected!', type: 'success' });
+        setTimeout(() => setToast(null), 4000);
+      } catch (err) {
+        const msg = err?.response?.data?.error || 'Failed to connect Facebook.';
+        setToast({ msg, type: 'error' });
+        setTimeout(() => setToast(null), 5000);
+      } finally {
+        setFbLoading(false);
+      }
+    }, {
+      scope: 'public_profile,email,pages_show_list,pages_read_engagement,pages_messaging',
+      return_scopes: true,
+    });
+  };
+
+  const handleInstagramConnect = () => {
+    // Use Instagram Business Login OAuth flow
+    const redirectUri = encodeURIComponent(`${window.location.origin}/client/channels`);
+    const instagramOAuthUrl = `https://www.instagram.com/oauth/authorize?force_reauth=true&client_id=1704328300882543&redirect_uri=${redirectUri}&response_type=code&scope=instagram_business_basic%2Cinstagram_business_manage_messages%2Cinstagram_business_manage_comments%2Cinstagram_business_content_publish%2Cinstagram_business_manage_insights&state=instagram`;
+    window.location.href = instagramOAuthUrl;
   };
 
   return (
@@ -343,9 +444,7 @@ const ClientChannelsPage = () => {
                   </button>
                 ) : (
                   <button 
-                    onClick={() => {
-                      window.location.href = "https://business.facebook.com/messaging/whatsapp/onboard/?app_id=991147863536661&config_id=1048515390903125&extras=%7B%22version%22%3A%22v4%22%2C%22sessionInfoVersion%22%3A%223%22%2C%22featureType%22%3A%22whatsapp_business_app_onboarding%22%7D&redirect_uri=https%3A%2F%2Fuwoconnect.aisa24.com%2Fsettings";
-                    }}
+                    onClick={handleWhatsAppConnect}
                     className="w-full py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
                   >
                     <Plus size={14} />
