@@ -26,6 +26,7 @@ export default function TeamMemberModal({ isOpen, onClose, onSuccess, existingMe
   const [reportingManager, setReportingManager] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [assignedPlatforms, setAssignedPlatforms] = useState(['CRM', 'WhatsApp', 'Orders', 'Projects']);
 
   if (!isOpen) return null;
 
@@ -34,8 +35,6 @@ export default function TeamMemberModal({ isOpen, onClose, onSuccess, existingMe
     'Knowledge Base', 'Orders', 'Catalog', 'Broadcast', 'Analytics', 
     'AI', 'Finance', 'HR', 'Projects', 'Support'
   ];
-
-  const [assignedPlatforms, setAssignedPlatforms] = useState(['CRM', 'WhatsApp', 'Orders', 'Projects']);
 
   const togglePlatform = (p) => {
     if (assignedPlatforms.includes(p)) {
