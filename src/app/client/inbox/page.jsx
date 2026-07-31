@@ -24,32 +24,32 @@ const ClientInboxPage = () => {
   const [isSyncingGmail, setIsSyncingGmail] = useState(false);
   const scrollRef = useRef(null);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        if (!token) return;
-        const [msgRes, contactRes] = await Promise.all([
-          axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/messages/`, {
-            headers: { Authorization: `Bearer ${token}` }
-          }),
-          axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/contacts/`, {
-            headers: { Authorization: `Bearer ${token}` }
-          })
-        ]);
-        setMessages(msgRes.data);
-        setContacts(contactRes.data);
-        if (msgRes.data.length > 0 && !selectedConvoId) {
-          const firstSender = [...new Set(msgRes.data.map(m => m.from_address))][0];
-          setSelectedConvoId(firstSender);
-        }
-      } catch (err) {
-        console.warn('Failed to fetch messages and contacts');
-      } finally {
-        setLoading(false);
+  const fetchData = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+      const [msgRes, contactRes] = await Promise.all([
+        axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/messages/`, {
+          headers: { Authorization: `Bearer ${token}` }
+        }),
+        axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/contacts/`, {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+      ]);
+      setMessages(msgRes.data);
+      setContacts(contactRes.data);
+      if (msgRes.data.length > 0 && !selectedConvoId) {
+        const firstSender = [...new Set(msgRes.data.map(m => m.from_address))][0];
+        setSelectedConvoId(firstSender);
       }
-    };
+    } catch (err) {
+      console.warn('Failed to fetch messages and contacts');
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchData();
 
     // Auto-poll every 3 seconds so new messages load live without page refresh
@@ -190,7 +190,7 @@ const ClientInboxPage = () => {
         message_type: isInternal ? 'INTERNAL' : 'OUTGOING'
       }, { headers: { Authorization: `Bearer ${token}` } });
       
-      fetchMessages();
+      fetchData();
       if (isInternal) {
         setIsInternal(false);
       }
