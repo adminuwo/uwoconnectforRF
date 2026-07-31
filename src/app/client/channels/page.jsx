@@ -180,6 +180,8 @@ const ClientChannelsPage = () => {
       console.error("Error connecting Gmail", err);
       setToast({ msg: 'Failed to initiate Gmail connection', type: 'error' });
     }
+  };
+
   const handleWhatsAppConnect = () => {
     const origin = typeof window !== 'undefined' ? window.location.origin : 'https://uwoconnect.aisa24.com';
     const redirectUri = encodeURIComponent(`${origin}/client/settings`);
