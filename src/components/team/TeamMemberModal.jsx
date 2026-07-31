@@ -24,6 +24,11 @@ export default function TeamMemberModal({ isOpen, onClose, onSuccess, existingMe
   const [enterpriseRole, setEnterpriseRole] = useState('EMPLOYEE');
   const [designation, setDesignation] = useState('Software Engineer');
   const [reportingManager, setReportingManager] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState('');
+
+  if (!isOpen) return null;
+
   const PLATFORMS = [
     'WhatsApp', 'Instagram', 'Facebook', 'CRM', 'Marketing', 
     'Knowledge Base', 'Orders', 'Catalog', 'Broadcast', 'Analytics', 
