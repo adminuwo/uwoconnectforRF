@@ -38,7 +38,7 @@ export default function PlatformModules({ isDark = true }) {
   ];
 
   return (
-    <section className="bg-[#171A20]/40 border-y border-white/5 py-24 md:py-32 relative overflow-hidden">
+    <section className={`py-24 md:py-32 relative overflow-hidden transition-colors duration-500 ${isDark ? 'bg-[#171A20]/40 border-y border-white/5' : 'bg-[#F3FBF7] border-y border-[#10B981]/10'}`}>
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-[#0F6B52]/10 rounded-full blur-[150px] pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-6 relative z-10">
@@ -55,7 +55,11 @@ export default function PlatformModules({ isDark = true }) {
           {modules.map((mod, idx) => (
             <div
               key={idx}
-              className={`glass-card rounded-2xl p-6 border border-white/10 hover:border-[#16A085]/50 flex flex-col items-start cursor-pointer transition-all duration-300 transform hover:-translate-y-1 hover:shadow-[0_12px_24px_-10px_rgba(16,185,129,0.3)]`}
+              className={`rounded-2xl p-6 border flex flex-col items-start cursor-pointer transition-all duration-300 transform hover:-translate-y-1 ${
+                isDark 
+                  ? 'glass-card border-white/10 hover:border-[#16A085]/50 hover:shadow-[0_12px_24px_-10px_rgba(16,185,129,0.3)]' 
+                  : 'bg-white border-[#10B981]/20 hover:border-[#10B981]/50 hover:shadow-[0_12px_24px_-10px_rgba(16,185,129,0.15)]'
+              }`}
             >
               <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-6 bg-[#0F6B52]/20 text-[#20C997]">
                 <mod.icon size={24} strokeWidth={1.5} />
@@ -67,7 +71,11 @@ export default function PlatformModules({ isDark = true }) {
             </div>
           ))}
 
-          <div className={`glass-card rounded-2xl p-5 border border-white/10 hover:border-[#16A085]/50 flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-300 transform hover:-translate-y-1.5 hover:scale-[1.03] hover:shadow-[0_12px_24px_-10px_rgba(16,185,129,0.3)]`}>
+          <div className={`rounded-2xl p-5 border flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-300 transform hover:-translate-y-1.5 hover:scale-[1.03] ${
+            isDark 
+              ? 'glass-card border-white/10 hover:border-[#16A085]/50 hover:shadow-[0_12px_24px_-10px_rgba(16,185,129,0.3)]' 
+              : 'bg-white border-[#10B981]/20 hover:border-[#10B981]/50 hover:shadow-[0_12px_24px_-10px_rgba(16,185,129,0.15)]'
+          }`}>
             <div className="w-10 h-10 rounded-xl bg-[#0F6B52]/20 text-[#20C997] flex items-center justify-center mb-4">
               +
             </div>

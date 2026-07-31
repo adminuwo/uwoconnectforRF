@@ -104,7 +104,7 @@ export default function Home() {
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#10B981] to-[#059669] flex items-center justify-center text-black font-black shadow-[0_0_20px_rgba(16,185,129,0.4)] group-hover:shadow-[0_0_30px_rgba(16,185,129,0.6)] transition-all">
               <Sparkles size={20} />
             </div>
-            <span className="text-xl font-bold tracking-tight text-white">UWO Connect</span>
+            <span className={`text-xl font-bold tracking-tight ${isDark ? 'text-white' : 'text-slate-900'}`}>UWO Connect</span>
           </Link>
 
           {/* Desktop Nav Items */}
@@ -125,9 +125,17 @@ export default function Home() {
 
           {/* Action CTAs */}
           <div className="hidden md:flex items-center gap-4">
+            <button
+              onClick={() => setIsDark(!isDark)}
+              className={`p-2 rounded-xl transition-all ${isDark ? 'text-slate-300 hover:text-white bg-white/5 hover:bg-white/10' : 'text-slate-600 hover:text-black bg-black/5 hover:bg-black/10'}`}
+              title="Toggle Theme"
+            >
+              {isDark ? <Sun size={18} /> : <Moon size={18} />}
+            </button>
+            <div className={`h-6 w-px ${isDark ? 'bg-white/10' : 'bg-black/10'}`}></div>
             <Link
               href="/auth/login"
-              className="text-xs font-bold uppercase tracking-wider text-slate-300 hover:text-white transition-colors"
+              className={`text-xs font-bold uppercase tracking-wider transition-colors ${isDark ? 'text-slate-300 hover:text-white' : 'text-slate-600 hover:text-black'}`}
             >
               Login
             </Link>
@@ -166,10 +174,20 @@ export default function Home() {
                 </a>
               ))}
             </div>
-            <div className="pt-4 border-t border-white/10 flex flex-col gap-3">
+            <div className={`pt-4 border-t flex flex-col gap-3 ${isDark ? 'border-white/10' : 'border-black/10'}`}>
+              <button
+                onClick={() => {
+                  setIsDark(!isDark);
+                  setMobileMenuOpen(false);
+                }}
+                className={`w-full py-3 flex items-center justify-center gap-2 text-xs font-bold rounded-xl border transition-all ${isDark ? 'text-white bg-white/5 border-white/10' : 'text-black bg-black/5 border-black/10'}`}
+              >
+                {isDark ? <Sun size={16} /> : <Moon size={16} />} 
+                {isDark ? 'Light Mode' : 'Dark Mode'}
+              </button>
               <Link
                 href="/auth/login"
-                className="w-full py-3 text-center text-xs font-bold text-white bg-white/5 border border-white/10 rounded-xl"
+                className={`w-full py-3 text-center text-xs font-bold rounded-xl border ${isDark ? 'text-white bg-white/5 border-white/10' : 'text-black bg-black/5 border-black/10'}`}
               >
                 Login
               </Link>
@@ -204,25 +222,25 @@ export default function Home() {
         </div>
         
         <AutomationShowcase isDark={isDark} />
-        <DashboardPreview />
-        <AIAssistant />
+        <DashboardPreview isDark={isDark} />
+        <AIAssistant isDark={isDark} />
         
         <div id="documentation">
-          <FeatureComparison />
+          <FeatureComparison isDark={isDark} />
         </div>
         
-        <WorkflowTimeline />
-        <Testimonials />
+        <WorkflowTimeline isDark={isDark} />
+        <Testimonials isDark={isDark} />
         
         <div id="pricing">
-          <Pricing />
+          <Pricing isDark={isDark} />
         </div>
         
         <div id="contact">
-          <FAQ />
+          <FAQ isDark={isDark} />
         </div>
         
-        <CTABanner />
+        <CTABanner isDark={isDark} />
       </main>
 
       {/* FOOTER */}

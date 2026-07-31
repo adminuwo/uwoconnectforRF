@@ -30,7 +30,9 @@ export default function HeroSection({ isDark = true }) {
           }`}
         >
           One Platform. <br />
-          <span className="bg-gradient-to-r from-white via-[#10B981] to-teal-300 bg-clip-text text-transparent drop-shadow-[0_0_30px_rgba(16,185,129,0.3)]">
+          <span className={`bg-gradient-to-r bg-clip-text text-transparent drop-shadow-[0_0_30px_rgba(16,185,129,0.3)] ${
+            isDark ? 'from-white via-[#10B981] to-teal-300' : 'from-slate-900 via-[#10B981] to-teal-600'
+          }`}>
             Endless Connections.
           </span>
         </h1>
@@ -63,16 +65,18 @@ export default function HeroSection({ isDark = true }) {
           </Link>
           <a
             href="#pricing"
-            className="px-8 py-4 bg-white/5 border border-white/10 text-white font-bold rounded-2xl text-xs uppercase tracking-wider hover:bg-white/10 transition-all duration-300 cursor-pointer"
+            className={`px-8 py-4 border font-bold rounded-2xl text-xs uppercase tracking-wider transition-all duration-300 cursor-pointer ${
+              isDark ? 'bg-white/5 border-white/10 text-white hover:bg-white/10' : 'bg-slate-900/5 border-slate-900/10 text-slate-900 hover:bg-slate-900/10'
+            }`}
           >
             Explore Pricing
           </a>
         </div>
 
         {/* Key Live Metrics Bar */}
-        <div className="pt-6 border-t border-white/10 grid grid-cols-3 gap-4 text-left max-w-lg mx-auto lg:mx-0">
+        <div className={`pt-6 border-t grid grid-cols-3 gap-4 text-left max-w-lg mx-auto lg:mx-0 ${isDark ? 'border-white/10' : 'border-slate-900/10'}`}>
           <div>
-            <div className="text-2xl font-extrabold text-white">+340%</div>
+            <div className={`text-2xl font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>+340%</div>
             <div className="text-[10px] font-semibold text-[#8E99A8] uppercase tracking-wider">Lead Conversion</div>
           </div>
           <div>
@@ -80,7 +84,7 @@ export default function HeroSection({ isDark = true }) {
             <div className="text-[10px] font-semibold text-[#8E99A8] uppercase tracking-wider">AI Response Time</div>
           </div>
           <div>
-            <div className="text-2xl font-extrabold text-white">99.99%</div>
+            <div className={`text-2xl font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>99.99%</div>
             <div className="text-[10px] font-semibold text-[#8E99A8] uppercase tracking-wider">Uptime SLA</div>
           </div>
         </div>

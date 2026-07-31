@@ -21,6 +21,7 @@ const ClientInboxPage = () => {
   const [activeFilter, setActiveFilter] = useState('ALL');
   const [isInternal, setIsInternal] = useState(false);
   const [isDrafting, setIsDrafting] = useState(false);
+  const [isSyncingGmail, setIsSyncingGmail] = useState(false);
   const scrollRef = useRef(null);
 
   useEffect(() => {
@@ -147,7 +148,18 @@ const ClientInboxPage = () => {
     .filter(c => activeFilter === 'ALL' || c.channel === activeFilter)
     .sort((a, b) => new Date(b.time) - new Date(a.time));
 
-  const activeConvo = conversations[selectedConvoId];
+  const handleFilterChange = (newFilter) => {
+    setActiveFilter(newFilter);
+    const newList = Object.values(conversations)
+      .filter(c => c.id.toLowerCase().includes(searchTerm.toLowerCase()))
+      .filter(c => newFilter === 'ALL' || c.channel === newFilter)
+      .sort((a, b) => new Date(b.time) - new Date(a.time));
+    if (selectedConvoId && !newList.some(c => c.id === selectedConvoId)) {
+      setSelectedConvoId(newList.length > 0 ? newList[0].id : null);
+    }
+  };
+
+  const activeConvo = convoList.find(c => c.id === selectedConvoId) || null;
 
   const handleSendMessage = async () => {
     if (!replyText.trim() || !activeConvo || isSending) return;
@@ -211,6 +223,31 @@ const ClientInboxPage = () => {
     }
   };
 
+  const handleSyncGmail = async () => {
+    setIsSyncingGmail(true);
+    try {
+      const token = localStorage.getItem('token');
+      const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/auth/gmail/sync`, {}, { 
+        headers: { Authorization: `Bearer ${token}` } 
+      });
+      if (res.data.synced_count > 0) {
+        const msgRes = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/messages/`, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        setMessages(msgRes.data);
+        alert(`Successfully synced ${res.data.synced_count} new messages!`);
+      } else {
+        alert("No new messages found.");
+      }
+    } catch (err) {
+      console.warn('Failed to sync gmail:', err);
+      alert("Failed to sync Gmail. Make sure it's connected.");
+    } finally {
+      setIsSyncingGmail(false);
+    }
+  };
+
+
   return (
     <DashboardLayout role="CLIENT">
       <div className="h-[calc(100vh-140px)] md:h-[calc(100vh-180px)] flex flex-col">
@@ -248,7 +285,7 @@ const ClientInboxPage = () => {
               </div>
               <div className="flex items-center gap-1.5 mt-4 overflow-x-auto pb-1 custom-scrollbar">
                 <button 
-                  onClick={() => setActiveFilter('ALL')}
+                  onClick={() => handleFilterChange('ALL')}
                   className={cn(
                     "px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all",
                     activeFilter === 'ALL' ? "bg-slate-900 text-white" : "text-slate-400 hover:bg-slate-100"
@@ -257,7 +294,7 @@ const ClientInboxPage = () => {
                   All
                 </button>
                 <button 
-                  onClick={() => setActiveFilter('WHATSAPP')}
+                  onClick={() => handleFilterChange('WHATSAPP')}
                   className={cn(
                     "px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all",
                     activeFilter === 'WHATSAPP' ? "bg-emerald-600 text-white" : "text-slate-400 hover:bg-slate-100"
@@ -266,7 +303,7 @@ const ClientInboxPage = () => {
                   WhatsApp
                 </button>
                 <button 
-                  onClick={() => setActiveFilter('INSTAGRAM')}
+                  onClick={() => handleFilterChange('INSTAGRAM')}
                   className={cn(
                     "px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all",
                     activeFilter === 'INSTAGRAM' ? "bg-pink-500 text-white" : "text-slate-400 hover:bg-slate-100"
@@ -275,7 +312,7 @@ const ClientInboxPage = () => {
                   Instagram
                 </button>
                 <button 
-                  onClick={() => setActiveFilter('FACEBOOK')}
+                  onClick={() => handleFilterChange('FACEBOOK')}
                   className={cn(
                     "px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all",
                     activeFilter === 'FACEBOOK' ? "bg-blue-600 text-white" : "text-slate-400 hover:bg-slate-100"
@@ -283,7 +320,29 @@ const ClientInboxPage = () => {
                 >
                   Facebook
                 </button>
+                <button 
+                  onClick={() => handleFilterChange('GMAIL')}
+                  className={cn(
+                    "px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all flex-shrink-0",
+                    activeFilter === 'GMAIL' ? "bg-red-500 text-white" : "text-slate-400 hover:bg-slate-100"
+                  )}
+                >
+                  Gmail
+                </button>
               </div>
+              
+              {activeFilter === 'GMAIL' && (
+                <div className="mt-3">
+                  <button
+                    onClick={handleSyncGmail}
+                    disabled={isSyncingGmail}
+                    className="w-full py-2 bg-red-50 text-red-600 rounded-xl text-xs font-bold hover:bg-red-100 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+                  >
+                    {isSyncingGmail ? <Loader2 size={14} className="animate-spin" /> : <Loader2 size={14} className="rotate-180" />}
+                    {isSyncingGmail ? 'Syncing...' : 'Sync Incoming Emails'}
+                  </button>
+                </div>
+              )}
             </div>
 
             <div className="flex-1 overflow-y-auto custom-scrollbar">
@@ -405,7 +464,7 @@ const ClientInboxPage = () => {
                         className={cn("flex flex-col", isIncoming ? "items-start" : "items-end")}
                       >
                         <div className={cn(
-                          "max-w-[85%] md:max-w-[70%] p-3 md:p-4 rounded-[20px] md:rounded-[24px] text-sm leading-relaxed shadow-sm transition-all hover:shadow-md",
+                          "max-w-[85%] md:max-w-[70%] p-3 md:p-4 rounded-[20px] md:rounded-[24px] text-sm leading-relaxed shadow-sm transition-all hover:shadow-md break-words whitespace-pre-wrap",
                           msg.message_type === 'INTERNAL' 
                             ? "bg-amber-100 text-amber-900 rounded-br-none border border-amber-200"
                             : isIncoming 
@@ -480,9 +539,9 @@ const ClientInboxPage = () => {
                   </div>
                   <h3 className="text-lg font-bold text-slate-900 mb-1">{activeConvo.name}</h3>
                   <div className="flex items-center justify-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                    <span className={cn("w-2 h-2 rounded-full", activeConvo.channel === 'GMAIL' ? "bg-red-500" : activeConvo.channel === 'FACEBOOK' ? "bg-blue-600" : activeConvo.channel === 'INSTAGRAM' ? "bg-pink-500" : "bg-emerald-500")} />
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                      Active via {activeConvo.channel === 'FACEBOOK' ? 'Facebook' : activeConvo.channel === 'INSTAGRAM' ? 'Instagram' : 'WhatsApp'}
+                      Active via {activeConvo.channel === 'GMAIL' ? 'Gmail' : activeConvo.channel === 'FACEBOOK' ? 'Facebook' : activeConvo.channel === 'INSTAGRAM' ? 'Instagram' : 'WhatsApp'}
                     </p>
                   </div>
                 </div>

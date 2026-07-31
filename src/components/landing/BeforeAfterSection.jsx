@@ -59,8 +59,12 @@ export default function BeforeAfterSection({ isDark = true }) {
           <div
             className={`rounded-3xl p-8 border transition-all duration-500 relative overflow-hidden flex flex-col justify-between ${
               activeTab === 'before'
-                ? 'bg-gradient-to-b from-red-950/30 to-slate-950 border-red-500/40 shadow-[0_0_50px_rgba(239,68,68,0.15)] scale-[1.02] z-20'
-                : 'bg-slate-950/40 border-white/5 opacity-60 hover:opacity-100'
+                ? isDark 
+                  ? 'bg-gradient-to-b from-red-950/30 to-slate-950 border-red-500/40 shadow-[0_0_50px_rgba(239,68,68,0.15)] scale-[1.02] z-20'
+                  : 'bg-white border-red-200 shadow-[0_20px_50px_-12px_rgba(239,68,68,0.15)] scale-[1.02] z-20'
+                : isDark 
+                  ? 'bg-slate-950/40 border-white/5 opacity-60 hover:opacity-100'
+                  : 'bg-slate-50 border-slate-200 opacity-60 hover:opacity-100'
             }`}
           >
             <div>
@@ -70,7 +74,7 @@ export default function BeforeAfterSection({ isDark = true }) {
                     <AlertTriangle size={20} />
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold text-white">Disconnected Reality</h3>
+                    <h3 className={`text-lg font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>Disconnected Reality</h3>
                     <p className="text-xs text-red-400 font-medium">Without UWO Connect</p>
                   </div>
                 </div>
@@ -81,16 +85,16 @@ export default function BeforeAfterSection({ isDark = true }) {
 
               {/* Chaos Visual representation */}
               <div className="space-y-4 mb-8">
-                <div className="p-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-xs text-slate-300 flex items-start gap-3">
-                  <span className="text-red-400 font-bold shrink-0">⚠️ 15+ Tabs Open:</span>
+                <div className={`p-4 rounded-2xl border text-xs flex items-start gap-3 ${isDark ? 'bg-red-500/10 border-red-500/20 text-slate-300' : 'bg-red-50 border-red-100 text-slate-700'}`}>
+                  <span className="text-red-500 font-bold shrink-0">⚠️ 15+ Tabs Open:</span>
                   <span>Constantly switching between WhatsApp Web, Instagram App, Gmail, Webchat & Excel sheets.</span>
                 </div>
-                <div className="p-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-xs text-slate-300 flex items-start gap-3">
-                  <span className="text-red-400 font-bold shrink-0">⏰ Slow Responses:</span>
+                <div className={`p-4 rounded-2xl border text-xs flex items-start gap-3 ${isDark ? 'bg-red-500/10 border-red-500/20 text-slate-300' : 'bg-red-50 border-red-100 text-slate-700'}`}>
+                  <span className="text-red-500 font-bold shrink-0">⏰ Slow Responses:</span>
                   <span>Leads wait 4–12 hours for reply after work hours, resulting in 60%+ lost sales opportunities.</span>
                 </div>
-                <div className="p-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-xs text-slate-300 flex items-start gap-3">
-                  <span className="text-red-400 font-bold shrink-0">🤯 Manual Burnout:</span>
+                <div className={`p-4 rounded-2xl border text-xs flex items-start gap-3 ${isDark ? 'bg-red-500/10 border-red-500/20 text-slate-300' : 'bg-red-50 border-red-100 text-slate-700'}`}>
+                  <span className="text-red-500 font-bold shrink-0">🤯 Manual Burnout:</span>
                   <span>Support agents manually answer the exact same FAQ inquiries 100+ times every single day.</span>
                 </div>
               </div>
@@ -106,8 +110,12 @@ export default function BeforeAfterSection({ isDark = true }) {
           <div
             className={`rounded-3xl p-8 border transition-all duration-500 relative overflow-hidden flex flex-col justify-between ${
               activeTab === 'after'
-                ? 'bg-gradient-to-b from-[#10B981]/15 via-slate-950 to-slate-950 border-[#10B981]/40 shadow-[0_0_50px_rgba(16,185,129,0.2)] scale-[1.02] z-20'
-                : 'bg-slate-950/40 border-white/5 opacity-60 hover:opacity-100'
+                ? isDark
+                  ? 'bg-gradient-to-b from-[#10B981]/15 via-slate-950 to-slate-950 border-[#10B981]/40 shadow-[0_0_50px_rgba(16,185,129,0.2)] scale-[1.02] z-20'
+                  : 'bg-white border-emerald-200 shadow-[0_20px_50px_-12px_rgba(16,185,129,0.15)] scale-[1.02] z-20'
+                : isDark
+                  ? 'bg-slate-950/40 border-white/5 opacity-60 hover:opacity-100'
+                  : 'bg-slate-50 border-slate-200 opacity-60 hover:opacity-100'
             }`}
           >
             <div>
@@ -117,7 +125,7 @@ export default function BeforeAfterSection({ isDark = true }) {
                     <CheckCircle2 size={20} />
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold text-white">Intelligent Connection</h3>
+                    <h3 className={`text-lg font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>Intelligent Connection</h3>
                     <p className="text-xs text-[#10B981] font-medium">Powered by UWO Connect AI</p>
                   </div>
                 </div>
@@ -128,15 +136,15 @@ export default function BeforeAfterSection({ isDark = true }) {
 
               {/* Serene AI Visual representation */}
               <div className="space-y-4 mb-8">
-                <div className="p-4 rounded-2xl bg-[#10B981]/10 border border-[#10B981]/20 text-xs text-slate-300 flex items-start gap-3">
+                <div className={`p-4 rounded-2xl border text-xs flex items-start gap-3 ${isDark ? 'bg-[#10B981]/10 border-[#10B981]/20 text-slate-300' : 'bg-emerald-50 border-emerald-100 text-slate-700'}`}>
                   <span className="text-[#10B981] font-bold shrink-0">⚡ 1 Unified Thread:</span>
                   <span>WhatsApp, Instagram, Email & Webchat merged into a single multi-agent collaborative workspace.</span>
                 </div>
-                <div className="p-4 rounded-2xl bg-[#10B981]/10 border border-[#10B981]/20 text-xs text-slate-300 flex items-start gap-3">
+                <div className={`p-4 rounded-2xl border text-xs flex items-start gap-3 ${isDark ? 'bg-[#10B981]/10 border-[#10B981]/20 text-slate-300' : 'bg-emerald-50 border-emerald-100 text-slate-700'}`}>
                   <span className="text-[#10B981] font-bold shrink-0">🤖 24/7 AI Qualification:</span>
                   <span>Instant responses in under 2 seconds. RAG Vector AI answers complex queries & qualifies leads automatically.</span>
                 </div>
-                <div className="p-4 rounded-2xl bg-[#10B981]/10 border border-[#10B981]/20 text-xs text-slate-300 flex items-start gap-3">
+                <div className={`p-4 rounded-2xl border text-xs flex items-start gap-3 ${isDark ? 'bg-[#10B981]/10 border-[#10B981]/20 text-slate-300' : 'bg-emerald-50 border-emerald-100 text-slate-700'}`}>
                   <span className="text-[#10B981] font-bold shrink-0">📈 Automated Workflows:</span>
                   <span>Reclaim 15+ hours weekly. Auto-assign inquiries to agents, trigger webhooks, and log to CRM.</span>
                 </div>

@@ -54,6 +54,24 @@ const InstagramIcon = ({ size = 22, className }) => (
   </svg>
 );
 
+const GmailIcon = ({ size = 22, className }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+  >
+    <path d="M4 7.00005L10.2 11.65C11.2667 12.45 12.7333 12.45 13.8 11.65L20 7" />
+    <rect x="3" y="5" width="18" height="14" rx="2" />
+  </svg>
+);
+
 const CopyButton = ({ text }) => {
   const [copied, setCopied] = useState(false);
 
@@ -111,6 +129,17 @@ const ClientChannelsPage = () => {
 
   useEffect(() => {
     fetchClient();
+    
+    // Check URL for gmail connect success or error
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('gmail_connected') === 'true') {
+      setToast({ msg: 'Gmail connected successfully!', type: 'success' });
+      // clean up URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+    } else if (params.get('gmail_error')) {
+      setToast({ msg: `Gmail connection failed: ${params.get('gmail_error')}`, type: 'error' });
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
   }, []);
 
   const handleWhatsAppSaved = (updatedClient) => {
@@ -134,8 +163,24 @@ const ClientChannelsPage = () => {
   const isWhatsAppConnected = !!client?.whatsapp_phone_number_id;
   const isFacebookConnected = !!client?.facebook_config?.page_id;
   const isInstagramConnected = !!client?.instagram_config?.instagram_business_id;
+  const isGmailConnected = !!client?.gmail_enabled;
 
-  const connectedCount = [isWhatsAppConnected, isFacebookConnected, isInstagramConnected].filter(Boolean).length;
+  const connectedCount = [isWhatsAppConnected, isFacebookConnected, isInstagramConnected, isGmailConnected].filter(Boolean).length;
+
+  const handleConnectGmail = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/auth/gmail/connect`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.data.url) {
+        window.location.href = res.data.url;
+      }
+    } catch (err) {
+      console.error("Error connecting Gmail", err);
+      setToast({ msg: 'Failed to initiate Gmail connection', type: 'error' });
+    }
+  };
 
   return (
     <DashboardLayout role="CLIENT">
@@ -157,7 +202,7 @@ const ClientChannelsPage = () => {
 
           <div className="flex items-center gap-3">
             <span className="text-xs text-slate-400 font-medium">
-              <strong className="text-slate-700">{connectedCount}</strong> of 3 connected
+              <strong className="text-slate-700">{connectedCount}</strong> of 4 connected
             </span>
             <button
               onClick={() => fetchClient(true)}
@@ -172,20 +217,20 @@ const ClientChannelsPage = () => {
 
         {/* Loading State */}
         {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 py-8">
-            {[1, 2, 3].map((i) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 py-8">
+            {[1, 2, 3, 4].map((i) => (
               <div key={i} className="h-64 bg-slate-50/60 rounded-2xl border border-slate-100 animate-pulse" />
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
 
             {/* --- WHATSAPP CARD --- */}
-            <div className="bg-white rounded-2xl border border-slate-200/80 p-7 flex flex-col justify-between hover:border-slate-300 transition-all shadow-xs min-h-[360px]">
+            <div className="bg-white rounded-2xl border border-slate-200/80 p-6 flex flex-col justify-between hover:border-slate-300 transition-all shadow-xs min-h-[380px]">
               <div>
                 {/* Header */}
-                <div className="flex items-center justify-between mb-5">
-                  <div className="flex items-center gap-3.5">
+                <div className="flex flex-col gap-3.5 mb-5">
+                  <div className="flex items-center gap-3">
                     <div className="w-11 h-11 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100/80 shrink-0">
                       <MessageCircle size={22} strokeWidth={2} />
                     </div>
@@ -195,12 +240,14 @@ const ClientChannelsPage = () => {
                     </div>
                   </div>
 
-                  <div className={cn(
-                    "flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium shrink-0",
-                    isWhatsAppConnected ? "bg-emerald-50 text-emerald-700 border border-emerald-200/50" : "bg-slate-100 text-slate-400"
-                  )}>
-                    <span className={cn("w-1.5 h-1.5 rounded-full", isWhatsAppConnected ? "bg-emerald-500" : "bg-slate-300")} />
-                    <span>{isWhatsAppConnected ? 'Connected' : 'Offline'}</span>
+                  <div>
+                    <div className={cn(
+                      "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium",
+                      isWhatsAppConnected ? "bg-emerald-50 text-emerald-700 border border-emerald-200/50" : "bg-slate-100 text-slate-400"
+                    )}>
+                      <span className={cn("w-1.5 h-1.5 rounded-full", isWhatsAppConnected ? "bg-emerald-500" : "bg-slate-300")} />
+                      <span>{isWhatsAppConnected ? 'Connected' : 'Offline'}</span>
+                    </div>
                   </div>
                 </div>
 
@@ -210,22 +257,22 @@ const ClientChannelsPage = () => {
 
                 {/* Details */}
                 {isWhatsAppConnected ? (
-                  <div className="space-y-3 py-3 border-t border-slate-100 text-xs">
-                    <div className="flex justify-between items-center">
-                      <span className="text-slate-400">Business Name</span>
-                      <span className="font-medium text-slate-700 max-w-[140px] truncate">{client?.business_name || 'N/A'}</span>
+                  <div className="space-y-4 py-4 border-t border-slate-100 text-xs">
+                    <div className="flex flex-col gap-1">
+                      <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Business Name</span>
+                      <span className="font-medium text-slate-700 truncate">{client?.business_name || 'N/A'}</span>
                     </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-slate-400">Phone</span>
-                      <div className="flex items-center gap-1">
-                        <span className="font-medium text-slate-700">{client?.phone_number || 'N/A'}</span>
+                    <div className="flex flex-col gap-1">
+                      <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Phone</span>
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium text-slate-700 truncate">{client?.phone_number || 'N/A'}</span>
                         <CopyButton text={client?.phone_number} />
                       </div>
                     </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-slate-400">WABA ID</span>
-                      <div className="flex items-center gap-1">
-                        <span className="font-medium text-slate-700 max-w-[120px] truncate">{client?.whatsapp_waba_id || 'N/A'}</span>
+                    <div className="flex flex-col gap-1">
+                      <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">WABA ID</span>
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium text-slate-700 truncate">{client?.whatsapp_waba_id || 'N/A'}</span>
                         <CopyButton text={client?.whatsapp_waba_id} />
                       </div>
                     </div>
@@ -261,11 +308,11 @@ const ClientChannelsPage = () => {
 
 
             {/* --- FACEBOOK CARD --- */}
-            <div className="bg-white rounded-2xl border border-slate-200/80 p-7 flex flex-col justify-between hover:border-slate-300 transition-all shadow-xs min-h-[360px]">
+            <div className="bg-white rounded-2xl border border-slate-200/80 p-6 flex flex-col justify-between hover:border-slate-300 transition-all shadow-xs min-h-[380px]">
               <div>
                 {/* Header */}
-                <div className="flex items-center justify-between mb-5">
-                  <div className="flex items-center gap-3.5">
+                <div className="flex flex-col gap-3.5 mb-5">
+                  <div className="flex items-center gap-3">
                     <div className="w-11 h-11 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100/80 shrink-0">
                       <FacebookIcon size={22} />
                     </div>
@@ -275,12 +322,14 @@ const ClientChannelsPage = () => {
                     </div>
                   </div>
 
-                  <div className={cn(
-                    "flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium shrink-0",
-                    isFacebookConnected ? "bg-blue-50 text-blue-700 border border-blue-200/50" : "bg-slate-100 text-slate-400"
-                  )}>
-                    <span className={cn("w-1.5 h-1.5 rounded-full", isFacebookConnected ? "bg-blue-500" : "bg-slate-300")} />
-                    <span>{isFacebookConnected ? 'Connected' : 'Offline'}</span>
+                  <div>
+                    <div className={cn(
+                      "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium",
+                      isFacebookConnected ? "bg-blue-50 text-blue-700 border border-blue-200/50" : "bg-slate-100 text-slate-400"
+                    )}>
+                      <span className={cn("w-1.5 h-1.5 rounded-full", isFacebookConnected ? "bg-blue-500" : "bg-slate-300")} />
+                      <span>{isFacebookConnected ? 'Connected' : 'Offline'}</span>
+                    </div>
                   </div>
                 </div>
 
@@ -290,15 +339,15 @@ const ClientChannelsPage = () => {
 
                 {/* Details */}
                 {isFacebookConnected ? (
-                  <div className="space-y-3 py-3 border-t border-slate-100 text-xs">
-                    <div className="flex justify-between items-center">
-                      <span className="text-slate-400">Page Name</span>
-                      <span className="font-medium text-slate-700 max-w-[140px] truncate">{client?.facebook_config?.page_name || 'N/A'}</span>
+                  <div className="space-y-4 py-4 border-t border-slate-100 text-xs">
+                    <div className="flex flex-col gap-1">
+                      <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Page Name</span>
+                      <span className="font-medium text-slate-700 truncate">{client?.facebook_config?.page_name || 'N/A'}</span>
                     </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-slate-400">Page ID</span>
-                      <div className="flex items-center gap-1">
-                        <span className="font-medium text-slate-700 max-w-[120px] truncate">{client?.facebook_config?.page_id || 'N/A'}</span>
+                    <div className="flex flex-col gap-1">
+                      <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Page ID</span>
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium text-slate-700 truncate">{client?.facebook_config?.page_id || 'N/A'}</span>
                         <CopyButton text={client?.facebook_config?.page_id} />
                       </div>
                     </div>
@@ -327,11 +376,11 @@ const ClientChannelsPage = () => {
 
 
             {/* --- INSTAGRAM CARD --- */}
-            <div className="bg-white rounded-2xl border border-slate-200/80 p-7 flex flex-col justify-between hover:border-slate-300 transition-all shadow-xs min-h-[360px]">
+            <div className="bg-white rounded-2xl border border-slate-200/80 p-6 flex flex-col justify-between hover:border-slate-300 transition-all shadow-xs min-h-[380px]">
               <div>
                 {/* Header */}
-                <div className="flex items-center justify-between mb-5">
-                  <div className="flex items-center gap-3.5">
+                <div className="flex flex-col gap-3.5 mb-5">
+                  <div className="flex items-center gap-3">
                     <div className="w-11 h-11 rounded-2xl bg-pink-50 text-pink-600 flex items-center justify-center border border-pink-100/80 shrink-0">
                       <InstagramIcon size={22} />
                     </div>
@@ -341,12 +390,14 @@ const ClientChannelsPage = () => {
                     </div>
                   </div>
 
-                  <div className={cn(
-                    "flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium shrink-0",
-                    isInstagramConnected ? "bg-pink-50 text-pink-700 border border-pink-200/50" : "bg-slate-100 text-slate-400"
-                  )}>
-                    <span className={cn("w-1.5 h-1.5 rounded-full", isInstagramConnected ? "bg-pink-500" : "bg-slate-300")} />
-                    <span>{isInstagramConnected ? 'Connected' : 'Offline'}</span>
+                  <div>
+                    <div className={cn(
+                      "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium",
+                      isInstagramConnected ? "bg-pink-50 text-pink-700 border border-pink-200/50" : "bg-slate-100 text-slate-400"
+                    )}>
+                      <span className={cn("w-1.5 h-1.5 rounded-full", isInstagramConnected ? "bg-pink-500" : "bg-slate-300")} />
+                      <span>{isInstagramConnected ? 'Connected' : 'Offline'}</span>
+                    </div>
                   </div>
                 </div>
 
@@ -356,15 +407,15 @@ const ClientChannelsPage = () => {
 
                 {/* Details */}
                 {isInstagramConnected ? (
-                  <div className="space-y-3 py-3 border-t border-slate-100 text-xs">
-                    <div className="flex justify-between items-center">
-                      <span className="text-slate-400">Account Name</span>
-                      <span className="font-medium text-slate-700 max-w-[140px] truncate">{client?.instagram_config?.page_name || 'N/A'}</span>
+                  <div className="space-y-4 py-4 border-t border-slate-100 text-xs">
+                    <div className="flex flex-col gap-1">
+                      <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Account Name</span>
+                      <span className="font-medium text-slate-700 truncate">{client?.instagram_config?.page_name || 'N/A'}</span>
                     </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-slate-400">Instagram ID</span>
-                      <div className="flex items-center gap-1">
-                        <span className="font-medium text-slate-700 max-w-[120px] truncate">{client?.instagram_config?.instagram_business_id || 'N/A'}</span>
+                    <div className="flex flex-col gap-1">
+                      <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Instagram ID</span>
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium text-slate-700 truncate">{client?.instagram_config?.instagram_business_id || 'N/A'}</span>
                         <CopyButton text={client?.instagram_config?.instagram_business_id} />
                       </div>
                     </div>
@@ -387,6 +438,69 @@ const ClientChannelsPage = () => {
                 >
                   {isInstagramConnected ? <Settings size={14} className="text-slate-400" /> : <Plus size={14} />}
                   <span>{isInstagramConnected ? 'Configure' : 'Connect'}</span>
+                </button>
+              </div>
+            </div>
+
+            {/* --- GMAIL CARD --- */}
+            <div className="bg-white rounded-2xl border border-slate-200/80 p-6 flex flex-col justify-between hover:border-slate-300 transition-all shadow-xs min-h-[380px]">
+              <div>
+                {/* Header */}
+                <div className="flex flex-col gap-3.5 mb-5">
+                  <div className="flex items-center gap-3">
+                    <div className="w-11 h-11 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center border border-red-100/80 shrink-0">
+                      <GmailIcon size={22} />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-slate-900 text-base">Gmail</h3>
+                      <p className="text-[11px] text-slate-400">Email Sync</p>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className={cn(
+                      "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium",
+                      isGmailConnected ? "bg-red-50 text-red-700 border border-red-200/50" : "bg-slate-100 text-slate-400"
+                    )}>
+                      <span className={cn("w-1.5 h-1.5 rounded-full", isGmailConnected ? "bg-red-500" : "bg-slate-300")} />
+                      <span>{isGmailConnected ? 'Connected' : 'Offline'}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <p className="text-xs text-slate-500 leading-relaxed mb-5">
+                  Connect your Google Workspace or Gmail account to send and receive emails.
+                </p>
+
+                {/* Details */}
+                {isGmailConnected ? (
+                  <div className="space-y-4 py-4 border-t border-slate-100 text-xs">
+                    <div className="flex flex-col gap-1">
+                      <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Email Address</span>
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium text-slate-700 truncate">{client?.gmail_config?.email_address || 'Connected'}</span>
+                        <CopyButton text={client?.gmail_config?.email_address} />
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-xs text-slate-400 py-6 text-center">No Gmail account connected.</p>
+                )}
+              </div>
+
+              {/* Action Button */}
+              <div className="mt-6 pt-4 border-t border-slate-100">
+                <button 
+                  onClick={handleConnectGmail}
+                  className={cn(
+                    "w-full py-2.5 px-4 rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer",
+                    isGmailConnected
+                      ? "bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200/60"
+                      : "bg-red-600 hover:bg-red-700 text-white"
+                  )}
+                >
+                  {isGmailConnected ? <RefreshCw size={14} className="text-slate-400" /> : <Plus size={14} />}
+                  <span>{isGmailConnected ? 'Reconnect' : 'Connect'}</span>
                 </button>
               </div>
             </div>

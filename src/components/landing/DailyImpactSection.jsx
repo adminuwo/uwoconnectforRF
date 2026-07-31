@@ -121,7 +121,7 @@ export default function DailyImpactSection({ isDark = true }) {
         </div>
 
         {/* Active Module Showcase Box */}
-        <div className="bg-[#0B0D11] border border-white/10 rounded-3xl p-8 md:p-12 shadow-2xl relative overflow-hidden">
+        <div className={`border rounded-3xl p-8 md:p-12 shadow-2xl relative overflow-hidden transition-colors ${isDark ? 'bg-[#0B0D11] border-white/10' : 'bg-white border-emerald-100'}`}>
           <div className="absolute top-0 right-0 w-96 h-96 bg-[#10B981]/10 rounded-full blur-[140px] pointer-events-none" />
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center relative z-10">
@@ -131,11 +131,11 @@ export default function DailyImpactSection({ isDark = true }) {
                 <IconComp size={14} /> {currentMod.badge}
               </div>
 
-              <h3 className="text-2xl md:text-4xl font-bold text-white tracking-tight leading-tight">
+              <h3 className={`text-2xl md:text-4xl font-bold tracking-tight leading-tight ${isDark ? 'text-white' : 'text-slate-900'}`}>
                 {currentMod.headline}
               </h3>
 
-              <p className="text-sm text-[#8E99A8] leading-relaxed">
+              <p className={`text-sm leading-relaxed ${isDark ? 'text-[#8E99A8]' : 'text-slate-600'}`}>
                 {currentMod.desc}
               </p>
 
@@ -146,7 +146,7 @@ export default function DailyImpactSection({ isDark = true }) {
 
               <ul className="space-y-3">
                 {currentMod.highlights.map((h, i) => (
-                  <li key={i} className="flex items-center gap-3 text-xs font-semibold text-slate-300">
+                  <li key={i} className={`flex items-center gap-3 text-xs font-semibold ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
                     <CheckCircle2 size={16} className="text-[#10B981] shrink-0" />
                     <span>{h}</span>
                   </li>
@@ -155,7 +155,7 @@ export default function DailyImpactSection({ isDark = true }) {
             </div>
 
             {/* Right Live Interactive Simulator Box */}
-            <div className="bg-slate-950/80 border border-white/10 rounded-2xl p-6 shadow-xl relative">
+            <div className="bg-slate-950 border border-slate-800 rounded-2xl p-6 shadow-xl relative text-white">
               <div className="flex items-center justify-between pb-4 border-b border-white/10 mb-4 text-xs text-slate-400">
                 <div className="flex items-center gap-2">
                   <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping" />
