@@ -203,7 +203,7 @@ export default function TeamPage() {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-200/80">
           <div>
             <h1 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
-              Enterprise Team Platform <span className="text-xs bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-full font-semibold border border-indigo-200">Unified</span>
+              Enterprise Team Platform <span className="text-xs bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-full font-semibold border border-emerald-200">Unified</span>
             </h1>
             <p className="text-xs text-slate-400 mt-1">
               Manage employees, task workflows, team chat, work reports, approvals, and AI analytics in one place.
@@ -221,7 +221,7 @@ export default function TeamPage() {
 
             <button
               onClick={() => setIsProjectModalOpen(true)}
-              className="px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-medium text-xs flex items-center gap-1.5 shadow-md shadow-purple-200 transition-colors cursor-pointer"
+              className="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-xs flex items-center gap-1.5 shadow-md shadow-emerald-200 transition-colors cursor-pointer"
             >
               <FolderPlus size={15} />
               <span>Create Project</span>
@@ -237,7 +237,7 @@ export default function TeamPage() {
 
             <button
               onClick={() => setIsTaskModalOpen(true)}
-              className="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-xs flex items-center gap-1.5 shadow-md shadow-indigo-200 transition-colors cursor-pointer"
+              className="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-xs flex items-center gap-1.5 shadow-md shadow-emerald-200 transition-colors cursor-pointer"
             >
               <Plus size={15} />
               <span>Create Task</span>
@@ -258,7 +258,7 @@ export default function TeamPage() {
           <button
             onClick={() => setActiveTab('DIRECTORY')}
             className={`px-4 py-3 border-b-2 flex items-center gap-2 transition-colors cursor-pointer whitespace-nowrap ${
-              activeTab === 'DIRECTORY' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-slate-500 hover:text-slate-800'
+              activeTab === 'DIRECTORY' ? 'border-emerald-600 text-emerald-600' : 'border-transparent text-slate-500 hover:text-slate-800'
             }`}
           >
             <Users size={16} />
@@ -268,7 +268,7 @@ export default function TeamPage() {
           <button
             onClick={() => setActiveTab('PROJECTS')}
             className={`px-4 py-3 border-b-2 flex items-center gap-2 transition-colors cursor-pointer whitespace-nowrap ${
-              activeTab === 'PROJECTS' ? 'border-purple-600 text-purple-600' : 'border-transparent text-slate-500 hover:text-slate-800'
+              activeTab === 'PROJECTS' ? 'border-emerald-600 text-emerald-600' : 'border-transparent text-slate-500 hover:text-slate-800'
             }`}
           >
             <FolderPlus size={16} />
@@ -278,7 +278,7 @@ export default function TeamPage() {
           <button
             onClick={() => setActiveTab('TASKS')}
             className={`px-4 py-3 border-b-2 flex items-center gap-2 transition-colors cursor-pointer whitespace-nowrap ${
-              activeTab === 'TASKS' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-slate-500 hover:text-slate-800'
+              activeTab === 'TASKS' ? 'border-emerald-600 text-emerald-600' : 'border-transparent text-slate-500 hover:text-slate-800'
             }`}
           >
             <CheckSquare size={16} />
@@ -288,7 +288,7 @@ export default function TeamPage() {
           <button
             onClick={() => setActiveTab('CHAT')}
             className={`px-4 py-3 border-b-2 flex items-center gap-2 transition-colors cursor-pointer whitespace-nowrap ${
-              activeTab === 'CHAT' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-slate-500 hover:text-slate-800'
+              activeTab === 'CHAT' ? 'border-emerald-600 text-emerald-600' : 'border-transparent text-slate-500 hover:text-slate-800'
             }`}
           >
             <MessageSquare size={16} />
@@ -308,7 +308,7 @@ export default function TeamPage() {
           <button
             onClick={() => setActiveTab('REPORTS')}
             className={`px-4 py-3 border-b-2 flex items-center gap-2 transition-colors cursor-pointer whitespace-nowrap ${
-              activeTab === 'REPORTS' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-slate-500 hover:text-slate-800'
+              activeTab === 'REPORTS' ? 'border-emerald-600 text-emerald-600' : 'border-transparent text-slate-500 hover:text-slate-800'
             }`}
           >
             <FileText size={16} />
@@ -318,7 +318,7 @@ export default function TeamPage() {
           <button
             onClick={() => setActiveTab('APPROVALS')}
             className={`px-4 py-3 border-b-2 flex items-center gap-2 transition-colors cursor-pointer whitespace-nowrap ${
-              activeTab === 'APPROVALS' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-slate-500 hover:text-slate-800'
+              activeTab === 'APPROVALS' ? 'border-emerald-600 text-emerald-600' : 'border-transparent text-slate-500 hover:text-slate-800'
             }`}
           >
             <ShieldCheck size={16} />
@@ -328,7 +328,7 @@ export default function TeamPage() {
           <button
             onClick={() => setActiveTab('ANALYTICS')}
             className={`px-4 py-3 border-b-2 flex items-center gap-2 transition-colors cursor-pointer ${
-              activeTab === 'ANALYTICS' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-slate-500 hover:text-slate-800'
+              activeTab === 'ANALYTICS' ? 'border-emerald-600 text-emerald-600' : 'border-transparent text-slate-500 hover:text-slate-800'
             }`}
           >
             <BarChart3 size={16} />
@@ -338,10 +338,10 @@ export default function TeamPage() {
           <button
             onClick={() => setActiveTab('COPILOT')}
             className={`px-4 py-3 border-b-2 flex items-center gap-2 transition-colors cursor-pointer ${
-              activeTab === 'COPILOT' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-slate-500 hover:text-slate-800'
+              activeTab === 'COPILOT' ? 'border-emerald-600 text-emerald-600' : 'border-transparent text-slate-500 hover:text-slate-800'
             }`}
           >
-            <Bot size={16} className="text-purple-600" />
+            <Bot size={16} className="text-emerald-600" />
             <span>AI Copilot</span>
           </button>
         </div>
