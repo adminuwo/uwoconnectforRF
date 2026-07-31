@@ -151,9 +151,40 @@ const ClientChannelsPage = () => {
   useEffect(() => {
     fetchClient();
     
-    // Check URL for gmail connect success or error
     const params = new URLSearchParams(window.location.search);
-    if (params.get('gmail_connected') === 'true') {
+    const code = params.get('code');
+    const state = params.get('state');
+
+    // Instagram Business OAuth callback
+    if (code && state === 'instagram') {
+      window.history.replaceState({}, document.title, window.location.pathname);
+      (async () => {
+        setIgLoading(true);
+        try {
+          const token = localStorage.getItem('token');
+          const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080';
+          await axios.post(
+            `${apiUrl}/api/auth/instagram/oauth-callback`,
+            { 
+              code,
+              redirect_uri: `${window.location.origin}/client/channels`
+            },
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+          await fetchClient();
+          setToast({ msg: '✅ Instagram account connected!', type: 'success' });
+          setTimeout(() => setToast(null), 4000);
+        } catch (err) {
+          const msg = err?.response?.data?.error || 'Failed to connect Instagram.';
+          setToast({ msg, type: 'error' });
+          setTimeout(() => setToast(null), 5000);
+        } finally {
+          setIgLoading(false);
+        }
+      })();
+    }
+    // Gmail callback
+    else if (params.get('gmail_connected') === 'true') {
       setToast({ msg: 'Gmail connected successfully!', type: 'success' });
       window.history.replaceState({}, document.title, window.location.pathname);
     } else if (params.get('gmail_error')) {
@@ -248,41 +279,10 @@ const ClientChannelsPage = () => {
   };
 
   const handleInstagramConnect = () => {
-    if (!window.FB) {
-      setToast({ msg: 'Facebook SDK not loaded yet. Please try again.', type: 'error' });
-      setTimeout(() => setToast(null), 4000);
-      return;
-    }
-    setIgLoading(true);
-    window.FB.login(async (response) => {
-      if (response.status !== 'connected') {
-        setIgLoading(false);
-        setToast({ msg: 'Instagram login was cancelled or failed.', type: 'error' });
-        setTimeout(() => setToast(null), 4000);
-        return;
-      }
-      try {
-        const token = localStorage.getItem('token');
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080';
-        const res = await axios.post(
-          `${apiUrl}/api/auth/instagram/embedded-signup`,
-          { access_token: response.authResponse.accessToken },
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        await fetchClient();
-        setToast({ msg: '✅ Instagram account connected!', type: 'success' });
-        setTimeout(() => setToast(null), 4000);
-      } catch (err) {
-        const msg = err?.response?.data?.error || 'Failed to connect Instagram.';
-        setToast({ msg, type: 'error' });
-        setTimeout(() => setToast(null), 5000);
-      } finally {
-        setIgLoading(false);
-      }
-    }, {
-      scope: 'public_profile,email,pages_show_list,pages_read_engagement,instagram_basic,instagram_manage_messages,pages_messaging',
-      return_scopes: true,
-    });
+    // Use Instagram Business Login OAuth flow
+    const redirectUri = encodeURIComponent(`${window.location.origin}/client/channels`);
+    const instagramOAuthUrl = `https://www.instagram.com/oauth/authorize?force_reauth=true&client_id=1704328300882543&redirect_uri=${redirectUri}&response_type=code&scope=instagram_business_basic%2Cinstagram_business_manage_messages%2Cinstagram_business_manage_comments%2Cinstagram_business_content_publish%2Cinstagram_business_manage_insights&state=instagram`;
+    window.location.href = instagramOAuthUrl;
   };
 
   return (
