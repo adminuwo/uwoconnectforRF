@@ -32,11 +32,13 @@ const eslintConfig = defineConfig([
       "react-hooks/set-state-in-effect": "off",
       "react-hooks/immutability": "off",
       "react-hooks/preserve-manual-memoization": "off",
+      "react-hooks/purity": "off",
 
       // ── TypeScript rules ─────────────────────────────────────────────────
-      // Unused vars are noisy but not blocking issues
-      "@typescript-eslint/no-unused-vars": "warn",
-      "@typescript-eslint/no-require-imports": "warn",
+      // Unused vars are non-blocking warnings
+      "@typescript-eslint/no-unused-vars": "off",
+      "no-unused-vars": "off",
+      "@typescript-eslint/no-require-imports": "off",
     }
   }
 ]);

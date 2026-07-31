@@ -168,6 +168,19 @@ const ClientInboxPage = () => {
     setReplyText(''); // Clear input
     setIsSending(true);
 
+    const nowTs = Date.now();
+    const optimisticMsg = {
+      id: `temp_${nowTs}`,
+      from_address: 'SYSTEM',
+      to_address: activeConvo.id,
+      body: textToSend,
+      channel: activeConvo.channel,
+      message_type: isInternal ? 'INTERNAL' : 'OUTGOING',
+      created_at: new Date().toISOString()
+    };
+
+    setMessages(prev => [...prev, optimisticMsg]);
+
     try {
       const token = localStorage.getItem('token');
       await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/messages/`, {
@@ -177,7 +190,7 @@ const ClientInboxPage = () => {
         message_type: isInternal ? 'INTERNAL' : 'OUTGOING'
       }, { headers: { Authorization: `Bearer ${token}` } });
       
-      // If internal, it doesn't come via webhook immediately so fetch again or add optimistically.
+      fetchMessages();
       if (isInternal) {
         setIsInternal(false);
       }

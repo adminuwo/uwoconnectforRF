@@ -13,9 +13,7 @@ import {
   X,
   Lightbulb,
   Info,
-  HelpCircle,
   CheckCircle2,
-  MapPin,
 } from 'lucide-react';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
