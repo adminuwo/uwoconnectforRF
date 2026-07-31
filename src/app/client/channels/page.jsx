@@ -17,6 +17,11 @@ import { cn } from '@/lib/utils';
 import WhatsAppConfigModal from '@/components/channels/WhatsAppConfigModal';
 import FacebookConfigModal from '@/components/channels/FacebookConfigModal';
 import InstagramConfigModal from '@/components/channels/InstagramConfigModal';
+import OneDriveConfigModal, { OneDriveIcon } from '@/components/channels/OneDriveConfigModal';
+import GoogleCalendarConfigModal, { GoogleCalendarIcon } from '@/components/channels/GoogleCalendarConfigModal';
+import GoogleSheetsConfigModal, { GoogleSheetsIcon } from '@/components/channels/GoogleSheetsConfigModal';
+import GoogleDocsConfigModal, { GoogleDocsIcon } from '@/components/channels/GoogleDocsConfigModal';
+import GoogleSlidesConfigModal, { GoogleSlidesIcon } from '@/components/channels/GoogleSlidesConfigModal';
 
 const FacebookIcon = ({ size = 22, className }) => (
   <svg
@@ -102,6 +107,11 @@ const ClientChannelsPage = () => {
   const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
   const [isFacebookConfigModalOpen, setIsFacebookConfigModalOpen] = useState(false);
   const [isInstagramConfigModalOpen, setIsInstagramConfigModalOpen] = useState(false);
+  const [isOneDriveConfigModalOpen, setIsOneDriveConfigModalOpen] = useState(false);
+  const [isGoogleCalendarConfigModalOpen, setIsGoogleCalendarConfigModalOpen] = useState(false);
+  const [isGoogleSheetsConfigModalOpen, setIsGoogleSheetsConfigModalOpen] = useState(false);
+  const [isGoogleDocsConfigModalOpen, setIsGoogleDocsConfigModalOpen] = useState(false);
+  const [isGoogleSlidesConfigModalOpen, setIsGoogleSlidesConfigModalOpen] = useState(false);
 
   const [fbLoading, setFbLoading] = useState(false);
   const [igLoading, setIgLoading] = useState(false);
@@ -113,8 +123,9 @@ const ClientChannelsPage = () => {
     try {
       const token = localStorage.getItem('token');
       const user = JSON.parse(localStorage.getItem('user') || '{}');
-      if (!user.client) return;
-      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/clients/${user.client}/`, {
+      const clientId = typeof user.client === 'object' ? (user.client?.id || user.client?._id) : user.client;
+      if (!clientId) return;
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/clients/${clientId}/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setClient(res.data);
@@ -190,6 +201,70 @@ const ClientChannelsPage = () => {
     } else if (params.get('gmail_error')) {
       setToast({ msg: `Gmail connection failed: ${params.get('gmail_error')}`, type: 'error' });
       window.history.replaceState({}, document.title, window.location.pathname);
+    }    // OneDrive callback
+    else if (params.get('onedrive_connected') === 'true') {
+      fetchClient();
+      setToast({ msg: '✅ OneDrive connected successfully!', type: 'success' });
+      setTimeout(() => setToast(null), 4000);
+      window.history.replaceState({}, document.title, window.location.pathname);
+    } else if (params.get('onedrive_error')) {
+      setToast({ msg: `OneDrive connection failed: ${params.get('onedrive_error')}`, type: 'error' });
+      setTimeout(() => setToast(null), 5000);
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+    // Google Calendar callback
+    else if (params.get('google_calendar_connected') === 'true') {
+      fetchClient();
+      setToast({ msg: '✅ Google Calendar connected successfully!', type: 'success' });
+      setTimeout(() => setToast(null), 4000);
+      window.history.replaceState({}, document.title, window.location.pathname);
+    } else if (params.get('google_calendar_error')) {
+      setToast({ msg: `Google Calendar connection failed: ${params.get('google_calendar_error')}`, type: 'error' });
+      setTimeout(() => setToast(null), 5000);
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+    // Google Sheets callback
+    else if (params.get('google_sheets_connected') === 'true') {
+      fetchClient();
+      setToast({ msg: '✅ Google Sheets connected successfully!', type: 'success' });
+      setTimeout(() => setToast(null), 4000);
+      window.history.replaceState({}, document.title, window.location.pathname);
+    } else if (params.get('google_sheets_error')) {
+      setToast({ msg: `Google Sheets connection failed: ${params.get('google_sheets_error')}`, type: 'error' });
+      setTimeout(() => setToast(null), 5000);
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+    // Google Docs callback
+    else if (params.get('gdocs_connected') === 'true') {
+      fetchClient();
+      setToast({ msg: '✅ Google Docs connected successfully!', type: 'success' });
+      setTimeout(() => setToast(null), 4000);
+      window.history.replaceState({}, document.title, window.location.pathname);
+    } else if (params.get('gdocs_error')) {
+      const err = params.get('gdocs_error');
+      const msg = err === 'access_denied' ? 'Google Docs permission was cancelled.' : `Google Docs connection failed: ${err}`;
+      setToast({ msg, type: 'error' });
+      setTimeout(() => setToast(null), 5000);
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+    // Google Slides callback
+    else if (params.get('gslides_connected') === 'true') {
+      fetchClient();
+      setToast({ msg: '✅ Google Slides connected successfully!', type: 'success' });
+      setTimeout(() => setToast(null), 4000);
+      window.history.replaceState({}, document.title, window.location.pathname);
+    } else if (params.get('gslides_error')) {
+      const err = params.get('gslides_error');
+      const msg = err === 'access_denied' ? 'Google Slides permission was cancelled.' : `Google Slides connection failed: ${err}`;
+      setToast({ msg, type: 'error' });
+      setTimeout(() => setToast(null), 5000);
+      window.history.replaceState({}, document.title, window.location.pathname);
+    } else if (params.get('gmail_error')) {
+      const err = params.get('gmail_error');
+      const msg = err === 'access_denied' ? 'Google OAuth permission was cancelled.' : `Google connection failed: ${err}`;
+      setToast({ msg, type: 'error' });
+      setTimeout(() => setToast(null), 5000);
+      window.history.replaceState({}, document.title, window.location.pathname);
     }
   }, []);
 
@@ -211,12 +286,47 @@ const ClientChannelsPage = () => {
     setTimeout(() => setToast(null), 3000);
   };
 
-  const isWhatsAppConnected = !!client?.whatsapp_phone_number_id;
-  const isFacebookConnected = !!client?.facebook_config?.page_id;
-  const isInstagramConnected = !!client?.instagram_config?.instagram_business_id;
-  const isGmailConnected = !!client?.gmail_enabled;
+  const handleOneDriveSaved = (updatedClient) => {
+    setClient(updatedClient);
+    setToast({ msg: 'OneDrive configured', type: 'success' });
+    setTimeout(() => setToast(null), 3000);
+  };
 
-  const connectedCount = [isWhatsAppConnected, isFacebookConnected, isInstagramConnected, isGmailConnected].filter(Boolean).length;
+  const handleGoogleCalendarSaved = (updatedClient) => {
+    setClient(updatedClient);
+    setToast({ msg: 'Google Calendar configured', type: 'success' });
+    setTimeout(() => setToast(null), 3000);
+  };
+
+  const handleGoogleSheetsSaved = (updatedClient) => {
+    setClient(updatedClient);
+    setToast({ msg: 'Google Sheets configured', type: 'success' });
+    setTimeout(() => setToast(null), 3000);
+  };
+
+  const handleGoogleDocsSaved = (updatedClient) => {
+    setClient(updatedClient);
+    setToast({ msg: 'Google Docs configured', type: 'success' });
+    setTimeout(() => setToast(null), 3000);
+  };
+
+  const handleGoogleSlidesSaved = (updatedClient) => {
+    setClient(updatedClient);
+    setToast({ msg: 'Google Slides configured', type: 'success' });
+    setTimeout(() => setToast(null), 3000);
+  };
+
+  const isWhatsAppConnected = Boolean(client?.whatsapp_access_token && client?.whatsapp_phone_number_id);
+  const isFacebookConnected = Boolean(client?.facebook_enabled && client?.facebook_config?.page_id);
+  const isInstagramConnected = Boolean(client?.instagram_enabled && client?.instagram_config?.instagram_business_account_id);
+  const isGmailConnected = Boolean(client?.gmail_enabled && client?.gmail_config?.email);
+  const isOneDriveConnected = Boolean(client?.onedrive_enabled);
+  const isGoogleCalendarConnected = Boolean(client?.google_calendar_enabled);
+  const isGoogleSheetsConnected = Boolean(client?.google_sheets_enabled);
+  const isGoogleDocsConnected = Boolean(client?.google_docs_enabled);
+  const isGoogleSlidesConnected = Boolean(client?.google_slides_enabled);
+
+  const connectedCount = [isWhatsAppConnected, isFacebookConnected, isInstagramConnected, isGmailConnected, isOneDriveConnected, isGoogleCalendarConnected, isGoogleSheetsConnected, isGoogleDocsConnected, isGoogleSlidesConnected].filter(Boolean).length;
 
   const handleConnectGmail = async () => {
     try {
@@ -305,7 +415,7 @@ const ClientChannelsPage = () => {
 
           <div className="flex items-center gap-3">
             <span className="text-xs text-slate-400 font-medium">
-              <strong className="text-slate-700">{connectedCount}</strong> of 4 connected
+              <strong className="text-slate-700">{connectedCount}</strong> of 9 connected
             </span>
             <button
               onClick={() => fetchClient(true)}
@@ -618,8 +728,401 @@ const ClientChannelsPage = () => {
               </div>
             </div>
 
-          </div>
-        )}
+            {/* --- ONEDRIVE CARD --- */}
+            <div className="bg-white rounded-2xl border border-slate-200/80 p-6 flex flex-col justify-between hover:border-slate-300 transition-all shadow-xs min-h-[380px]">
+              <div>
+                {/* Header */}
+                <div className="flex flex-col gap-3.5 mb-5">
+                  <div className="flex items-center gap-3">
+                    <div className="w-11 h-11 rounded-2xl bg-[#0078D4]/10 text-[#0078D4] flex items-center justify-center border border-[#0078D4]/20 shrink-0">
+                      <OneDriveIcon size={22} />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-slate-900 text-base">OneDrive</h3>
+                      <p className="text-[11px] text-slate-400">Document Backup</p>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className={cn(
+                      "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium",
+                      isOneDriveConnected ? "bg-[#0078D4]/10 text-[#0078D4] border border-[#0078D4]/20" : "bg-slate-100 text-slate-400"
+                    )}>
+                      <span className={cn("w-1.5 h-1.5 rounded-full", isOneDriveConnected ? "bg-[#0078D4]" : "bg-slate-300")} />
+                      <span>{isOneDriveConnected ? 'Connected' : 'Offline'}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <p className="text-xs text-slate-500 leading-relaxed mb-5">
+                  Automatically back up all documents received across channels to your Microsoft OneDrive.
+                </p>
+
+                {/* Details */}
+                {isOneDriveConnected ? (
+                  <div className="space-y-4 py-4 border-t border-slate-100 text-xs">
+                    <div className="flex flex-col gap-1">
+                      <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Account</span>
+                      <span className="font-medium text-slate-700 truncate">{client?.onedrive_config?.account_name || 'N/A'}</span>
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Drive Name</span>
+                      <span className="font-medium text-slate-700 truncate">{client?.onedrive_config?.drive_name || 'N/A'}</span>
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Last Sync</span>
+                      <span className="font-medium text-slate-700 truncate">
+                        {client?.onedrive_config?.last_sync_time 
+                          ? new Date(client.onedrive_config.last_sync_time).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' }) 
+                          : 'Never'}
+                      </span>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-xs text-slate-400 py-6 text-center">No OneDrive account connected.</p>
+                )}
+              </div>
+
+              {/* Action Button */}
+              <div className="mt-6 pt-4 border-t border-slate-100">
+                {isOneDriveConnected ? (
+                  <button 
+                    onClick={() => setIsOneDriveConfigModalOpen(true)}
+                    className="w-full py-2.5 px-4 rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200/60"
+                  >
+                    <Settings size={14} className="text-slate-400" />
+                    <span>Configure</span>
+                  </button>
+                ) : (
+                  <button 
+                    onClick={() => setIsOneDriveConfigModalOpen(true)}
+                    className="w-full py-2.5 px-4 rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer bg-[#0078D4] hover:bg-[#106EBE] text-white"
+                  >
+                    <Plus size={14} />
+                    <span>Connect OneDrive</span>
+                  </button>
+                )}
+              </div>
+            </div>
+
+              {/* --- GOOGLE CALENDAR CARD --- */}
+              <div className="bg-white rounded-2xl border border-slate-200/80 p-6 flex flex-col justify-between hover:border-slate-300 transition-all shadow-xs min-h-[380px]">
+                <div>
+                  {/* Header */}
+                  <div className="flex flex-col gap-3.5 mb-5">
+                    <div className="flex items-center gap-3">
+                      <div className="w-11 h-11 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100/80 shrink-0">
+                        <GoogleCalendarIcon size={24} />
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-slate-900 text-sm tracking-tight">Google Calendar</h3>
+                        <p className="text-[11px] text-slate-400 font-normal mt-0.5">Appointment & Event Sync</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center">
+                      <div className={cn(
+                        "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium border transition-colors",
+                        isGoogleCalendarConnected
+                          ? "bg-emerald-50 text-emerald-700 border-emerald-200/70" 
+                          : "bg-slate-50 text-slate-500 border-slate-200/60"
+                      )}>
+                        <span className={cn(
+                          "w-1.5 h-1.5 rounded-full shrink-0",
+                          isGoogleCalendarConnected ? "bg-emerald-500 animate-pulse" : "bg-slate-400"
+                        )} />
+                        <span>{isGoogleCalendarConnected ? 'Connected' : 'Not Connected'}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Body Info */}
+                  <p className="text-xs text-slate-500 mb-5 leading-relaxed font-normal">
+                    Sync lead appointments, customer meeting requests from WhatsApp/CRM into Google Calendar.
+                  </p>
+
+                  {isGoogleCalendarConnected ? (
+                    <div className="bg-slate-50/70 rounded-xl p-3.5 border border-slate-100 flex flex-col gap-2.5 text-xs">
+                      <div className="flex flex-col gap-1">
+                        <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Account</span>
+                        <span className="font-medium text-slate-700 truncate">{client?.google_calendar_config?.account_email || 'Connected'}</span>
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Timezone</span>
+                        <span className="font-medium text-slate-700 truncate">{client?.google_calendar_config?.timezone || 'Asia/Kolkata'}</span>
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Last Sync</span>
+                        <span className="font-medium text-slate-700 truncate">
+                          {client?.google_calendar_config?.last_sync_time 
+                            ? new Date(client.google_calendar_config.last_sync_time).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' }) 
+                            : 'Never'}
+                        </span>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-xs text-slate-400 py-6 text-center">No Google Calendar account connected.</p>
+                  )}
+                </div>
+
+                {/* Action Button */}
+                <div className="mt-6 pt-4 border-t border-slate-100">
+                  {isGoogleCalendarConnected ? (
+                    <button 
+                      onClick={() => setIsGoogleCalendarConfigModalOpen(true)}
+                      className="w-full py-2.5 px-4 rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200/60"
+                    >
+                      <Settings size={14} className="text-slate-400" />
+                      <span>Configure</span>
+                    </button>
+                  ) : (
+                    <button 
+                      onClick={() => setIsGoogleCalendarConfigModalOpen(true)}
+                      className="w-full py-2.5 px-4 rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer bg-blue-600 hover:bg-blue-700 text-white shadow-xs"
+                    >
+                      <Plus size={14} />
+                      <span>Connect Google Calendar</span>
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* --- GOOGLE SHEETS CARD --- */}
+              <div className="bg-white rounded-2xl border border-slate-200/80 p-6 flex flex-col justify-between hover:border-slate-300 transition-all shadow-xs min-h-[380px]">
+                <div>
+                  {/* Header */}
+                  <div className="flex flex-col gap-3.5 mb-5">
+                    <div className="flex items-center gap-3">
+                      <div className="w-11 h-11 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100/80 shrink-0">
+                        <GoogleSheetsIcon size={24} />
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-slate-900 text-sm tracking-tight">Google Sheets</h3>
+                        <p className="text-[11px] text-slate-400 font-normal mt-0.5">Real-time Lead Export</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center">
+                      <div className={cn(
+                        "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium border transition-colors",
+                        isGoogleSheetsConnected
+                          ? "bg-emerald-50 text-emerald-700 border-emerald-200/70" 
+                          : "bg-slate-50 text-slate-500 border-slate-200/60"
+                      )}>
+                        <span className={cn(
+                          "w-1.5 h-1.5 rounded-full shrink-0",
+                          isGoogleSheetsConnected ? "bg-emerald-500 animate-pulse" : "bg-slate-400"
+                        )} />
+                        <span>{isGoogleSheetsConnected ? 'Connected' : 'Not Connected'}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Body Info */}
+                  <p className="text-xs text-slate-500 mb-5 leading-relaxed font-normal">
+                    Export incoming leads, WhatsApp messages, orders, and CRM contacts into live Google Spreadsheets.
+                  </p>
+
+                  {isGoogleSheetsConnected ? (
+                    <div className="bg-slate-50/70 rounded-xl p-3.5 border border-slate-100 flex flex-col gap-2.5 text-xs">
+                      <div className="flex flex-col gap-1">
+                        <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Account</span>
+                        <span className="font-medium text-slate-700 truncate">{client?.google_sheets_config?.account_email || 'Connected'}</span>
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Spreadsheet</span>
+                        <span className="font-medium text-emerald-700 truncate">{client?.google_sheets_config?.spreadsheet_name || 'UWOConnect Leads'}</span>
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Rows Exported</span>
+                        <span className="font-medium text-slate-700 truncate">{client?.google_sheets_config?.rows_synced || 0} Rows</span>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-xs text-slate-400 py-6 text-center">No Google Sheets account connected.</p>
+                  )}
+                </div>
+
+                {/* Action Button */}
+                <div className="mt-6 pt-4 border-t border-slate-100">
+                  {isGoogleSheetsConnected ? (
+                    <button 
+                      onClick={() => setIsGoogleSheetsConfigModalOpen(true)}
+                      className="w-full py-2.5 px-4 rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200/60"
+                    >
+                      <Settings size={14} className="text-slate-400" />
+                      <span>Configure</span>
+                    </button>
+                  ) : (
+                    <button 
+                      onClick={() => setIsGoogleSheetsConfigModalOpen(true)}
+                      className="w-full py-2.5 px-4 rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer bg-[#0F9D58] hover:bg-[#0B8043] text-white shadow-xs"
+                    >
+                      <Plus size={14} />
+                      <span>Connect Google Sheets</span>
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* --- GOOGLE DOCS CARD --- */}
+              <div className="bg-white rounded-2xl border border-slate-200/80 p-6 flex flex-col justify-between hover:border-slate-300 transition-all shadow-xs min-h-[380px]">
+                <div>
+                  {/* Header */}
+                  <div className="flex flex-col gap-3.5 mb-5">
+                    <div className="flex items-center gap-3">
+                      <div className="w-11 h-11 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100/80 shrink-0">
+                        <GoogleDocsIcon size={24} />
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-slate-900 text-sm tracking-tight">Google Docs</h3>
+                        <p className="text-[11px] text-slate-400 font-normal mt-0.5">Automated Contracts & Briefs</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center">
+                      <div className={cn(
+                        "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium border transition-colors",
+                        isGoogleDocsConnected
+                          ? "bg-[#4285F4]/10 text-[#4285F4] border-[#4285F4]/20" 
+                          : "bg-slate-50 text-slate-500 border-slate-200/60"
+                      )}>
+                        <span className={cn(
+                          "w-1.5 h-1.5 rounded-full shrink-0",
+                          isGoogleDocsConnected ? "bg-[#4285F4] animate-pulse" : "bg-slate-400"
+                        )} />
+                        <span>{isGoogleDocsConnected ? 'Connected' : 'Not Connected'}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Body Info */}
+                  <p className="text-xs text-slate-500 mb-5 leading-relaxed font-normal">
+                    Auto-generate customer contracts, order receipts, proposals, and lead summary briefs in Google Docs.
+                  </p>
+
+                  {isGoogleDocsConnected ? (
+                    <div className="bg-slate-50/70 rounded-xl p-3.5 border border-slate-100 flex flex-col gap-2.5 text-xs">
+                      <div className="flex flex-col gap-1">
+                        <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Account</span>
+                        <span className="font-medium text-slate-700 truncate">{client?.google_docs_config?.account_email || 'Connected'}</span>
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Default Document</span>
+                        <span className="font-medium text-blue-700 truncate">{client?.google_docs_config?.default_doc_name || 'UWOConnect Documents'}</span>
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Documents Created</span>
+                        <span className="font-medium text-slate-700 truncate">{client?.google_docs_config?.docs_created_count || 0} Documents</span>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-xs text-slate-400 py-6 text-center">No Google Docs account connected.</p>
+                  )}
+                </div>
+
+                {/* Action Button */}
+                <div className="mt-6 pt-4 border-t border-slate-100">
+                  {isGoogleDocsConnected ? (
+                    <button 
+                      onClick={() => setIsGoogleDocsConfigModalOpen(true)}
+                      className="w-full py-2.5 px-4 rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200/60"
+                    >
+                      <Settings size={14} className="text-slate-400" />
+                      <span>Configure</span>
+                    </button>
+                  ) : (
+                    <button 
+                      onClick={() => setIsGoogleDocsConfigModalOpen(true)}
+                      className="w-full py-2.5 px-4 rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer bg-[#4285F4] hover:bg-[#3367D6] text-white shadow-xs"
+                    >
+                      <Plus size={14} />
+                      <span>Connect Google Docs</span>
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* --- GOOGLE SLIDES CARD --- */}
+              <div className="bg-white rounded-2xl border border-slate-200/80 p-6 flex flex-col justify-between hover:border-slate-300 transition-all shadow-xs min-h-[380px]">
+                <div>
+                  {/* Header */}
+                  <div className="flex flex-col gap-3.5 mb-5">
+                    <div className="flex items-center gap-3">
+                      <div className="w-11 h-11 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center border border-amber-100/80 shrink-0">
+                        <GoogleSlidesIcon size={24} />
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-slate-900 text-sm tracking-tight">Google Slides</h3>
+                        <p className="text-[11px] text-slate-400 font-normal mt-0.5">Automated Pitch Decks & Slides</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center">
+                      <div className={cn(
+                        "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium border transition-colors",
+                        isGoogleSlidesConnected
+                          ? "bg-[#F4B400]/10 text-[#F4B400] border-[#F4B400]/20" 
+                          : "bg-slate-50 text-slate-500 border-slate-200/60"
+                      )}>
+                        <span className={cn(
+                          "w-1.5 h-1.5 rounded-full shrink-0",
+                          isGoogleSlidesConnected ? "bg-[#F4B400] animate-pulse" : "bg-slate-400"
+                        )} />
+                        <span>{isGoogleSlidesConnected ? 'Connected' : 'Not Connected'}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Body Info */}
+                  <p className="text-xs text-slate-500 mb-5 leading-relaxed font-normal">
+                    Auto-generate sales pitch decks, product catalog showcases, and client presentation decks in Google Slides.
+                  </p>
+
+                  {isGoogleSlidesConnected ? (
+                    <div className="bg-slate-50/70 rounded-xl p-3.5 border border-slate-100 flex flex-col gap-2.5 text-xs">
+                      <div className="flex flex-col gap-1">
+                        <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Account</span>
+                        <span className="font-medium text-slate-700 truncate">{client?.google_slides_config?.account_email || 'Connected'}</span>
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Default Presentation</span>
+                        <span className="font-medium text-amber-700 truncate">{client?.google_slides_config?.default_presentation_name || 'UWOConnect Presentation'}</span>
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Slide Decks Created</span>
+                        <span className="font-medium text-slate-700 truncate">{client?.google_slides_config?.presentations_created_count || 0} Decks</span>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-xs text-slate-400 py-6 text-center">No Google Slides account connected.</p>
+                  )}
+                </div>
+
+                {/* Action Button */}
+                <div className="mt-6 pt-4 border-t border-slate-100">
+                  {isGoogleSlidesConnected ? (
+                    <button 
+                      onClick={() => setIsGoogleSlidesConfigModalOpen(true)}
+                      className="w-full py-2.5 px-4 rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200/60"
+                    >
+                      <Settings size={14} className="text-slate-400" />
+                      <span>Configure</span>
+                    </button>
+                  ) : (
+                    <button 
+                      onClick={() => setIsGoogleSlidesConfigModalOpen(true)}
+                      className="w-full py-2.5 px-4 rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer bg-[#F4B400] hover:bg-[#E3A300] text-white shadow-xs"
+                    >
+                      <Plus size={14} />
+                      <span>Connect Google Slides</span>
+                    </button>
+                  )}
+                </div>
+              </div>
+
+            </div>
+          )}
 
         {/* WhatsApp Configuration Modal */}
         <WhatsAppConfigModal 
@@ -643,6 +1146,46 @@ const ClientChannelsPage = () => {
           onClose={() => setIsInstagramConfigModalOpen(false)}
           client={client}
           onSaved={handleInstagramSaved}
+        />
+
+        {/* OneDrive Configuration Modal */}
+        <OneDriveConfigModal 
+          isOpen={isOneDriveConfigModalOpen}
+          onClose={() => setIsOneDriveConfigModalOpen(false)}
+          client={client}
+          onSaved={handleOneDriveSaved}
+        />
+
+        {/* Google Calendar Configuration Modal */}
+        <GoogleCalendarConfigModal 
+          isOpen={isGoogleCalendarConfigModalOpen}
+          onClose={() => setIsGoogleCalendarConfigModalOpen(false)}
+          client={client}
+          onSaved={handleGoogleCalendarSaved}
+        />
+
+        {/* Google Sheets Configuration Modal */}
+        <GoogleSheetsConfigModal 
+          isOpen={isGoogleSheetsConfigModalOpen}
+          onClose={() => setIsGoogleSheetsConfigModalOpen(false)}
+          client={client}
+          onSaved={handleGoogleSheetsSaved}
+        />
+
+        {/* Google Docs Configuration Modal */}
+        <GoogleDocsConfigModal 
+          isOpen={isGoogleDocsConfigModalOpen}
+          onClose={() => setIsGoogleDocsConfigModalOpen(false)}
+          client={client}
+          onSaved={handleGoogleDocsSaved}
+        />
+
+        {/* Google Slides Configuration Modal */}
+        <GoogleSlidesConfigModal 
+          isOpen={isGoogleSlidesConfigModalOpen}
+          onClose={() => setIsGoogleSlidesConfigModalOpen(false)}
+          client={client}
+          onSaved={handleGoogleSlidesSaved}
         />
       </div>
     </DashboardLayout>
