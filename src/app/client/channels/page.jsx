@@ -342,7 +342,6 @@ const ClientChannelsPage = () => {
     setTimeout(() => setToast(null), 3000);
   };
 
-<<<<<<< HEAD
   const handleOneDriveSaved = (updatedClient) => {
     setClient(updatedClient);
     setToast({ msg: 'OneDrive configured', type: 'success' });
@@ -384,15 +383,6 @@ const ClientChannelsPage = () => {
   const isGoogleSlidesConnected = Boolean(client?.google_slides_enabled);
 
   const connectedCount = [isWhatsAppConnected, isFacebookConnected, isInstagramConnected, isGmailConnected, isOneDriveConnected, isGoogleCalendarConnected, isGoogleSheetsConnected, isGoogleDocsConnected, isGoogleSlidesConnected].filter(Boolean).length;
-=======
-  const isWhatsAppConnected = !!client?.whatsapp_phone_number_id;
-  const isFacebookConnected = !!client?.facebook_config?.page_id;
-  const isInstagramConnected = !!client?.instagram_config?.instagram_business_id;
-  const isGmailConnected = !!client?.gmail_enabled;
-  const isGoogleCalendarConnected = !!client?.google_calendar_enabled;
-
-  const connectedCount = [isWhatsAppConnected, isFacebookConnected, isInstagramConnected, isGmailConnected, isGoogleCalendarConnected].filter(Boolean).length;
->>>>>>> 9253a32b02a5615499a87cb3bc73bbf6621892a4
 
   const handleConnectGmail = async () => {
     try {
