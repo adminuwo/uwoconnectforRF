@@ -182,6 +182,19 @@ export default function TeamPage() {
     }
   };
 
+  const handleDeleteProject = async (id) => {
+    if (!confirm('Are you sure you want to delete this project?')) return;
+    try {
+      const token = localStorage.getItem('token');
+      await axios.delete(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/team/projects/${id}/`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      fetchProjects();
+    } catch (err) {
+      console.error('Failed to delete project:', err);
+    }
+  };
+
   const filteredMembers = members.filter(m => {
     const matchesSearch = (m.username || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
                           (m.email || '').toLowerCase().includes(searchQuery.toLowerCase());
@@ -572,7 +585,7 @@ export default function TeamPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
               {projects.map((p) => (
                 <div key={p.id} className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-2xs hover:shadow-md transition-all space-y-4">
-                  <div className="flex items-start justify-between">
+                  <div className="flex items-start justify-between gap-3">
                     <div>
                       <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
                         p.status === 'COMPLETED' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
@@ -584,6 +597,14 @@ export default function TeamPage() {
                       <h4 className="font-bold text-slate-900 text-base mt-2">{p.name}</h4>
                       <p className="text-xs text-slate-500 line-clamp-2 mt-1">{p.description || 'No description provided.'}</p>
                     </div>
+
+                    <button
+                      onClick={() => handleDeleteProject(p.id)}
+                      className="p-1.5 text-slate-300 hover:text-rose-500 rounded-lg hover:bg-rose-50 transition-colors shrink-0 cursor-pointer"
+                      title="Delete Project"
+                    >
+                      <Trash2 size={16} />
+                    </button>
                   </div>
 
                   {/* Progress Bar */}
