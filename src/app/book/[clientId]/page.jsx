@@ -3,10 +3,16 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { Calendar, Clock, User, Phone, CheckCircle } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+
+const Card = ({ className = '', children }) => <div className={`bg-white rounded-2xl border border-slate-200 ${className}`}>{children}</div>;
+const CardHeader = ({ className = '', children }) => <div className={`p-6 ${className}`}>{children}</div>;
+const CardTitle = ({ className = '', children }) => <h2 className={`text-2xl font-bold text-slate-900 ${className}`}>{children}</h2>;
+const CardDescription = ({ className = '', children }) => <p className={`text-sm text-slate-500 mt-1 ${className}`}>{children}</p>;
+const CardContent = ({ className = '', children }) => <div className={`p-6 ${className}`}>{children}</div>;
+const CardFooter = ({ className = '', children }) => <div className={`p-6 border-t border-slate-100 ${className}`}>{children}</div>;
+const Button = ({ className = '', children, ...props }) => <button className={`py-3 px-4 rounded-xl font-semibold transition-all cursor-pointer ${className}`} {...props}>{children}</button>;
+const Input = ({ className = '', ...props }) => <input className={`w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm font-medium focus:outline-none focus:border-indigo-500 ${className}`} {...props} />;
+const Label = ({ className = '', children, ...props }) => <label className={`text-sm font-bold text-slate-700 block ${className}`} {...props}>{children}</label>;
 
 export default function PublicBookingPage() {
   const { clientId } = useParams();
@@ -58,6 +64,7 @@ export default function PublicBookingPage() {
     
     setBookingLoading(true);
     setError('');
+
     try {
       const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
       const res = await fetch(`${baseUrl}/api/public/calendar/${clientId}/book`, {
@@ -105,7 +112,7 @@ export default function PublicBookingPage() {
             </p>
           </CardContent>
           <CardFooter>
-            <Button className="w-full" onClick={() => window.location.reload()}>Book Another</Button>
+            <Button className="w-full bg-indigo-600 text-white hover:bg-indigo-700" onClick={() => window.location.reload()}>Book Another</Button>
           </CardFooter>
         </Card>
       </div>
@@ -171,7 +178,7 @@ export default function PublicBookingPage() {
                     Preferred Time (HH:MM)
                   </Label>
                   <div className="relative">
-                    <Clock className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+                    <Clock className="absolute left-3 top-3.5 h-4 w-4 text-slate-400" />
                     <Input 
                       id="time"
                       type="time" 
@@ -188,7 +195,7 @@ export default function PublicBookingPage() {
                     Your Name
                   </Label>
                   <div className="relative">
-                    <User className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+                    <User className="absolute left-3 top-3.5 h-4 w-4 text-slate-400" />
                     <Input 
                       id="name"
                       placeholder="John Doe" 
@@ -203,7 +210,7 @@ export default function PublicBookingPage() {
                 <Button 
                   type="submit" 
                   disabled={bookingLoading || loading}
-                  className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 rounded-lg transition-all mt-4"
+                  className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 rounded-xl transition-all mt-4"
                 >
                   {bookingLoading ? 'Booking...' : 'Confirm Appointment'}
                 </Button>
