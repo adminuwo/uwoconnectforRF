@@ -487,6 +487,36 @@ const ClientInboxPage = () => {
                           {msg.message_type === 'INTERNAL' && <div className="flex items-center gap-1 text-[10px] uppercase font-bold text-amber-700 mb-1"><Lock size={10} /> Internal Note</div>}
                           {msg.body}
                         </div>
+
+                        {/* WhatsApp Media (Image) */}
+                        {msg.metadata?.payload?.type === 'image' && msg.metadata?.payload?.image?.link && (
+                          <div className="mt-2 max-w-[85%] md:max-w-[70%]">
+                            <img src={msg.metadata.payload.image.link} alt="Media" className="rounded-[16px] border border-slate-100 shadow-sm max-h-60 object-cover" />
+                          </div>
+                        )}
+
+                        {/* WhatsApp Buttons */}
+                        {msg.metadata?.payload?.interactive?.action?.buttons && (
+                          <div className={cn("flex flex-col gap-1.5 mt-2 w-full max-w-[85%] md:max-w-[70%]", isIncoming ? "items-start" : "items-end")}>
+                            {msg.metadata.payload.interactive.action.buttons.map((btn, idx) => (
+                              <div key={idx} className="w-full text-center py-2.5 px-4 bg-white border border-emerald-100 hover:bg-emerald-50 rounded-xl text-emerald-600 text-sm font-bold shadow-sm transition-colors cursor-default">
+                                {btn.reply.title}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* Facebook/Instagram Quick Replies */}
+                        {msg.metadata?.message?.quick_replies && (
+                          <div className={cn("flex flex-col gap-1.5 mt-2 w-full max-w-[85%] md:max-w-[70%]", isIncoming ? "items-start" : "items-end")}>
+                            {msg.metadata.message.quick_replies.map((btn, idx) => (
+                              <div key={idx} className="w-full text-center py-2.5 px-4 bg-white border border-blue-100 hover:bg-blue-50 rounded-xl text-blue-600 text-sm font-bold shadow-sm transition-colors cursor-default">
+                                {btn.title}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
                         <div className="mt-2 flex items-center gap-2 px-1">
                           <p className="text-[9px] font-bold text-slate-300 uppercase">
                             {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
@@ -499,8 +529,8 @@ const ClientInboxPage = () => {
                 </div>
 
                 {/* Reply Box */}
-                <div className="p-3 md:p-8 border-t border-slate-50 bg-white">
-                  <div className="bg-slate-50 rounded-2xl md:rounded-[32px] p-1.5 md:p-2 focus-within:ring-2 focus-within:ring-blue-100 transition-all border border-slate-100 shadow-inner">
+                <div className="p-3 md:p-4 border-t border-slate-50 bg-white shrink-0">
+                  <div className="bg-slate-50 rounded-2xl p-1.5 focus-within:ring-2 focus-within:ring-blue-100 transition-all border border-slate-100 shadow-inner flex flex-col">
                     <textarea 
                       rows={1}
                       placeholder="Type a message..."
@@ -512,19 +542,19 @@ const ClientInboxPage = () => {
                           handleSendMessage();
                         }
                       }}
-                      className="w-full bg-transparent p-2 md:p-4 text-sm font-medium outline-none resize-none max-h-32"
+                      className="w-full bg-transparent px-3 py-2 text-sm font-medium outline-none resize-none max-h-32 min-h-[44px]"
                     />
-                    <div className="flex items-center justify-between p-2">
-                      <div className="flex items-center gap-2 px-2">
-                        <button onClick={() => setIsInternal(!isInternal)} className={cn("px-3 py-1.5 flex items-center gap-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all", isInternal ? "bg-amber-100 text-amber-700" : "bg-slate-100 text-slate-400 hover:bg-slate-200")}>
+                    <div className="flex items-center justify-between px-1 pb-1 pt-0">
+                      <div className="flex items-center gap-2">
+                        <button onClick={() => setIsInternal(!isInternal)} className={cn("px-2.5 py-1.5 flex items-center gap-1.5 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all", isInternal ? "bg-amber-100 text-amber-700" : "bg-slate-100 text-slate-400 hover:bg-slate-200")}>
                           <Lock size={12} /> {isInternal ? 'Internal' : 'Public'}
                         </button>
-                        <button onClick={handleSuggestDraft} disabled={isDrafting} className="px-3 py-1.5 flex items-center gap-1.5 rounded-full bg-blue-50 text-blue-600 text-[10px] font-bold uppercase tracking-widest hover:bg-blue-100 transition-all">
+                        <button onClick={handleSuggestDraft} disabled={isDrafting} className="px-2.5 py-1.5 flex items-center gap-1.5 rounded-xl bg-blue-50 text-blue-600 text-[10px] font-bold uppercase tracking-widest hover:bg-blue-100 transition-all">
                           {isDrafting ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />} AI Draft
                         </button>
                       </div>
-                      <button onClick={handleSendMessage} disabled={!replyText.trim() || isSending} className={cn("text-white p-4 rounded-2xl transition-all shadow-xl", replyText.trim() && !isSending ? (isInternal ? "bg-amber-500 hover:bg-amber-600 shadow-amber-200" : "bg-emerald-600 hover:bg-slate-900 shadow-emerald-100") : "bg-slate-300 cursor-not-allowed shadow-none")}>
-                        {isSending ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
+                      <button onClick={handleSendMessage} disabled={!replyText.trim() || isSending} className={cn("text-white p-2.5 rounded-xl transition-all shadow-md", replyText.trim() && !isSending ? (isInternal ? "bg-amber-500 hover:bg-amber-600 shadow-amber-200" : "bg-emerald-600 hover:bg-emerald-700 shadow-emerald-100") : "bg-slate-300 cursor-not-allowed shadow-none")}>
+                        {isSending ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
                       </button>
                     </div>
                   </div>

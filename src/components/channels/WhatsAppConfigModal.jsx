@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { X, Eye, EyeOff, Copy, Check, Loader2, ShieldAlert, AlertCircle } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { X, Eye, EyeOff, Copy, Check, Loader2, ShieldAlert, AlertCircle, Upload, User } from 'lucide-react';
 import axios from 'axios';
 import { cn } from '@/lib/utils';
 
@@ -14,7 +14,49 @@ export default function WhatsAppConfigModal({ isOpen, onClose, client, onSaved }
   const [showAccessToken, setShowAccessToken] = useState(false);
   const [saving, setSaving] = useState(false);
   
+  const [uploadingPic, setUploadingPic] = useState(false);
+  const fileInputRef = useRef(null);
+  
   const [errors, setErrors] = useState({});
+
+  const handleProfilePicUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    if (!file.type.startsWith('image/')) {
+      alert('Please select an image file (JPEG or PNG)');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      alert('File size must be under 5MB');
+      return;
+    }
+
+    setUploadingPic(true);
+    try {
+      const token = localStorage.getItem('token');
+      const formData = new FormData();
+      formData.append('profile_picture', file);
+
+      await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/clients/${client.id}/update_whatsapp_profile_picture/`,
+        formData,
+        { 
+          headers: { 
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'multipart/form-data'
+          } 
+        }
+      );
+      alert('Profile picture updated successfully on WhatsApp!');
+    } catch (err) {
+      console.error('Failed to upload profile picture', err);
+      alert(err.response?.data?.error || 'Failed to update profile picture on WhatsApp.');
+    } finally {
+      setUploadingPic(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
   const [touched, setTouched] = useState({});
 
   // Parse details when modal opens
@@ -432,6 +474,36 @@ export default function WhatsAppConfigModal({ isOpen, onClose, client, onSaved }
                 </div>
               </div>
             </div>
+
+            {isConnected && (
+              <div className="space-y-4 pt-6 mt-6 border-t border-slate-200/60">
+                <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Profile Picture</h4>
+                <div className="bg-white border border-slate-200/60 rounded-xl p-4 flex flex-col items-center gap-3 text-center shadow-sm">
+                  <div className="w-16 h-16 rounded-full bg-emerald-50 text-emerald-500 flex items-center justify-center overflow-hidden border border-emerald-100">
+                    <User size={24} />
+                  </div>
+                  <p className="text-[10px] text-slate-400">Update your live WhatsApp display picture.</p>
+                  
+                  <input 
+                    type="file" 
+                    accept="image/jpeg, image/png" 
+                    ref={fileInputRef} 
+                    className="hidden" 
+                    onChange={handleProfilePicUpload} 
+                  />
+                  
+                  <button 
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploadingPic}
+                    className="w-full py-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 text-xs font-bold rounded-lg transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                  >
+                    {uploadingPic ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />}
+                    {uploadingPic ? 'Uploading to Meta...' : 'Upload New Picture'}
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
         </div>
