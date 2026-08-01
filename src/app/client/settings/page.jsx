@@ -21,6 +21,7 @@ const ClientSettingsPage = () => {
   const [editData, setEditData] = useState({ 
     name: '', 
     phone_number: '',
+    address: '',
     whatsapp_access_token: '',
     whatsapp_phone_number_id: '',
     whatsapp_waba_id: '',
@@ -50,6 +51,7 @@ const ClientSettingsPage = () => {
       setEditData({
         name: res.data.user.name,
         phone_number: res.data.client.phone_number || '',
+        address: res.data.client.address || '',
         whatsapp_access_token: res.data.client.whatsapp_access_token || '',
         whatsapp_phone_number_id: res.data.client.whatsapp_phone_number_id || '',
         whatsapp_waba_id: res.data.client.whatsapp_waba_id || '',
@@ -177,10 +179,10 @@ const ClientSettingsPage = () => {
         </div>
 
         <div className="space-y-10">
-          {/* Personal Information */}
+          {/* Personal & Business Information */}
           <div className="space-y-1">
-            <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-4 ml-1">Personal Details</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-4 ml-1">Personal & Business Details</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="flex items-center gap-4 p-5 bg-white border border-slate-100 rounded-3xl transition-all hover:border-emerald-100 group">
                 <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center transition-colors group-hover:bg-emerald-600 group-hover:text-white shrink-0">
                   <User size={22} strokeWidth={2} />
@@ -215,6 +217,39 @@ const ClientSettingsPage = () => {
                     <input value={editData.phone_number} onChange={e => setEditData({...editData, phone_number: e.target.value})} className="w-full bg-slate-50 border-none p-0 focus:ring-0 font-semibold text-slate-900 text-base" placeholder="e.g. +91 9876543210" />
                   ) : (
                     <p className="text-base font-semibold text-slate-900 tracking-tight truncate">{client?.phone_number || 'Not Linked'}</p>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex items-start gap-4 p-5 bg-white border border-slate-100 rounded-3xl transition-all hover:border-emerald-100 group">
+                <div className="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center transition-colors group-hover:bg-rose-600 group-hover:text-white shrink-0">
+                  <MapPin size={22} strokeWidth={2} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Business Address & Map Location</p>
+                  {isEditing ? (
+                    <textarea 
+                      value={editData.address} 
+                      onChange={e => setEditData({...editData, address: e.target.value})} 
+                      rows={2}
+                      className="w-full bg-slate-50 border border-slate-100 rounded-xl p-2 font-semibold text-slate-900 text-sm focus:outline-none focus:border-emerald-500" 
+                      placeholder="e.g. Shop 12, Main Market, MG Road, Connaught Place, New Delhi" 
+                    />
+                  ) : (
+                    <div>
+                      <p className="text-sm font-semibold text-slate-900 tracking-tight">{client?.address || 'No address configured'}</p>
+                      {client?.address && (
+                        <a 
+                          href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(client.address)}`} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-xs font-bold text-emerald-600 hover:text-emerald-700 mt-1"
+                        >
+                          <span>View Map Path & Directions</span>
+                          <ArrowUpRight size={12} />
+                        </a>
+                      )}
+                    </div>
                   )}
                 </div>
               </div>

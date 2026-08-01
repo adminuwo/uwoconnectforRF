@@ -4,7 +4,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { 
   MessageSquare, Search, Loader2, User, Phone, Mail, 
   MapPin, Send, Plus, MoreHorizontal, Filter, 
-  Smile, Paperclip, Zap, ArrowLeft, Check, CheckCheck, Archive, Sparkles, Lock 
+  Smile, Paperclip, Zap, ArrowLeft, Check, CheckCheck, Archive, Sparkles, Lock,
+  FileText, Download, Image as ImageIcon, Music, Film, ExternalLink
 } from 'lucide-react';
 import axios from 'axios';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
@@ -117,28 +118,38 @@ const ClientInboxPage = () => {
     }
   }, [selectedConvoId, messages]);
 
-  // Group messages by contact (from_address for INCOMING, to_address for OUTGOING) to create "Conversations"
+  // Normalize phone numbers to prevent +91... and 91... splitting into separate conversations
+  const normalizeContactId = (rawId) => {
+    if (!rawId) return 'Unknown';
+    const digits = rawId.replace(/[^0-9]/g, '');
+    return digits || rawId;
+  };
+
+  // Group messages by contact to create "Conversations"
   const conversations = messages.reduce((acc, msg) => {
-    const contact = msg.message_type === 'INCOMING' ? msg.from_address : msg.to_address;
-    if (!acc[contact]) {
-      acc[contact] = {
-        id: contact,
-        name: contact,
-        lastMessage: msg.body,
+    const rawContact = msg.message_type === 'INCOMING' ? msg.from_address : msg.to_address;
+    const contactKey = normalizeContactId(rawContact);
+    
+    if (!acc[contactKey]) {
+      acc[contactKey] = {
+        id: contactKey,
+        name: rawContact.startsWith('+') ? rawContact : `+${rawContact}`,
+        rawAddress: rawContact,
+        lastMessage: msg.body || '📎 [Media Attachment]',
         time: msg.created_at,
         unread: msg.message_type === 'INCOMING' ? 1 : 0,
         channel: msg.channel || 'WHATSAPP',
         messages: []
       };
     }
-    acc[contact].messages.push(msg);
-    // Sort messages within convo
-    acc[contact].messages.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+    acc[contactKey].messages.push(msg);
+    // Sort messages within convo chronologically
+    acc[contactKey].messages.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
     // Update last message
-    if (new Date(msg.created_at) > new Date(acc[contact].time)) {
-      acc[contact].lastMessage = msg.body;
-      acc[contact].time = msg.created_at;
-      acc[contact].channel = msg.channel || 'WHATSAPP';
+    if (new Date(msg.created_at) > new Date(acc[contactKey].time)) {
+      acc[contactKey].lastMessage = msg.body || '📎 [Media Attachment]';
+      acc[contactKey].time = msg.created_at;
+      acc[contactKey].channel = msg.channel || 'WHATSAPP';
     }
     return acc;
   }, {});
@@ -471,6 +482,16 @@ const ClientInboxPage = () => {
 
                   {activeConvo.messages.map((msg, i) => {
                     const isIncoming = msg.message_type === 'INCOMING';
+                    const meta = msg.metadata || {};
+                    const isDoc = meta.document || (msg.body && msg.body.includes('📄'));
+                    const isImg = meta.image || (msg.body && msg.body.includes('📷'));
+                    const isAudio = meta.audio || meta.voice || (msg.body && msg.body.includes('🎵'));
+                    const isVid = meta.video || (msg.body && msg.body.includes('🎥'));
+                    const mediaId = meta.document?.id || meta.image?.id || meta.audio?.id || meta.voice?.id || meta.video?.id;
+                    const filename = meta.document?.filename || (isDoc ? msg.body.replace('📄 ', '').split(' - ')[0] : 'Document');
+                    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080';
+                    const downloadUrl = mediaId ? `${apiUrl}/api/media-proxy/?media_id=${mediaId}&filename=${encodeURIComponent(filename)}` : null;
+
                     return (
                       <div
                         key={msg.id || i} 
@@ -485,7 +506,64 @@ const ClientInboxPage = () => {
                               : "bg-emerald-600 text-white rounded-br-none shadow-emerald-100"
                         )}>
                           {msg.message_type === 'INTERNAL' && <div className="flex items-center gap-1 text-[10px] uppercase font-bold text-amber-700 mb-1"><Lock size={10} /> Internal Note</div>}
-                          {msg.body}
+                          
+                          {/* Rich Document Card */}
+                          {isDoc && (
+                            <div className="mb-2 p-3 bg-slate-50/90 rounded-xl border border-slate-200/80 flex items-center gap-3 text-slate-800">
+                              <div className="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 border border-blue-100">
+                                <FileText size={20} />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-xs font-bold truncate">{filename}</p>
+                                <p className="text-[10px] text-slate-400 font-medium">Document Attachment</p>
+                              </div>
+                              {downloadUrl && (
+                                <a
+                                  href={downloadUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="p-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition-all flex items-center gap-1 text-xs font-bold shrink-0 shadow-xs"
+                                >
+                                  <Download size={13} />
+                                  <span>Download</span>
+                                </a>
+                              )}
+                            </div>
+                          )}
+
+                          {/* Rich Image Preview */}
+                          {isImg && (
+                            <div className="mb-2 rounded-xl overflow-hidden border border-slate-200/60 bg-slate-100 max-w-xs">
+                              {downloadUrl ? (
+                                <a href={downloadUrl} target="_blank" rel="noopener noreferrer" className="block relative group">
+                                  <img src={downloadUrl} alt="Received attachment" className="w-full h-auto max-h-60 object-cover" />
+                                  <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 text-white text-xs font-bold">
+                                    <Download size={16} /> View Image
+                                  </div>
+                                </a>
+                              ) : (
+                                <div className="p-4 text-center text-xs text-slate-500 flex items-center justify-center gap-2">
+                                  <ImageIcon size={18} className="text-slate-400" /> Photo Attachment
+                                </div>
+                              )}
+                            </div>
+                          )}
+
+                          {/* Rich Audio Player */}
+                          {isAudio && downloadUrl && (
+                            <div className="mb-2">
+                              <audio controls className="w-full max-w-xs h-9">
+                                <source src={downloadUrl} />
+                                Your browser does not support the audio element.
+                              </audio>
+                            </div>
+                          )}
+
+                          {/* Message Body text if not redundant */}
+                          {(!isDoc && !isImg) && (msg.body || '📎 [Media Attachment]')}
+                          {(isDoc || isImg) && meta.document?.caption && (
+                            <p className="mt-1 text-xs font-medium">{meta.document.caption}</p>
+                          )}
                         </div>
 
                         {/* WhatsApp Media (Image) */}
