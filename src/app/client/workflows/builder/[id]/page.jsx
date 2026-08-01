@@ -11,7 +11,9 @@ import ReactFlow, {
   Handle,
   Position,
   useReactFlow,
-  ReactFlowProvider
+  ReactFlowProvider,
+  getBezierPath,
+  EdgeLabelRenderer
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import { 
@@ -42,7 +44,7 @@ const NodeContainer = ({ children, title, icon: Icon, color, id, isTrigger }) =>
           <span className="text-[10px] font-black text-white uppercase tracking-widest">{title}</span>
         </div>
         {!isTrigger && (
-          <button onClick={onDelete} className="w-5 h-5 bg-white/20 hover:bg-red-500 text-white rounded-md flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 shadow-sm">
+          <button onClick={onDelete} title="Delete Step" className="w-5 h-5 bg-white/20 hover:bg-red-500 text-white rounded-md flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 shadow-xs cursor-pointer">
             <X size={12} strokeWidth={3} />
           </button>
         )}
@@ -183,6 +185,79 @@ const HandoffNode = ({ id, data = {} }) => (
   </NodeContainer>
 );
 
+const GoogleMeetNode = ({ id, data = {} }) => (
+  <NodeContainer id={id} title="Google Meet & Calendar" icon={Video} color="bg-blue-600">
+    <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-100 mb-2">
+      <p className="text-[9px] font-black text-blue-600 uppercase tracking-widest mb-1">📅 Schedule Meeting</p>
+      <p className="text-xs font-semibold text-slate-700 leading-relaxed truncate">"{data.title || 'Product Demo Call'}"</p>
+      <div className="mt-2 flex items-center justify-between text-[9px] text-slate-500 font-bold">
+        <span>⏱️ {data.duration || 30} mins</span>
+        <span className="text-blue-600">📹 Auto Meet Link</span>
+      </div>
+    </div>
+    <Handle type="target" position={Position.Top} className="w-2.5 h-2.5 bg-slate-400 border-2 border-white -top-1" />
+    <Handle type="source" position={Position.Bottom} className="w-2.5 h-2.5 bg-blue-600 border-2 border-white -bottom-1" />
+  </NodeContainer>
+);
+
+const DeletableEdge = ({
+  id,
+  sourceX,
+  sourceY,
+  targetX,
+  targetY,
+  sourcePosition,
+  targetPosition,
+  style = {},
+  markerEnd,
+}) => {
+  const { setEdges } = useReactFlow();
+  const [edgePath, labelX, labelY] = getBezierPath({
+    sourceX,
+    sourceY,
+    sourcePosition,
+    targetX,
+    targetY,
+    targetPosition,
+  });
+
+  const onEdgeClick = (evt) => {
+    evt.stopPropagation();
+    setEdges((edges) => edges.filter((edge) => edge.id !== id));
+  };
+
+  return (
+    <>
+      <path
+        id={id}
+        style={{ ...style, strokeWidth: 3, stroke: '#94a3b8', cursor: 'pointer' }}
+        className="react-flow__edge-path hover:stroke-red-500 transition-colors"
+        d={edgePath}
+        markerEnd={markerEnd}
+        onClick={onEdgeClick}
+      />
+      <EdgeLabelRenderer>
+        <div
+          style={{
+            position: 'absolute',
+            transform: `translate(-50%, -50%) translate(${labelX}px,${labelY}px)`,
+            pointerEvents: 'all',
+          }}
+          className="nodrag nopan"
+        >
+          <button
+            onClick={onEdgeClick}
+            title="Delete Wire Connection"
+            className="w-5 h-5 bg-white border border-slate-300 text-slate-400 hover:bg-red-500 hover:text-white hover:border-red-500 rounded-full flex items-center justify-center shadow-md transition-all cursor-pointer hover:scale-125"
+          >
+            <X size={10} strokeWidth={3} />
+          </button>
+        </div>
+      </EdgeLabelRenderer>
+    </>
+  );
+};
+
 // --- MAIN BUILDER ---
 
 const WorkflowBuilderInner = () => {
@@ -227,6 +302,12 @@ const WorkflowBuilderInner = () => {
     video: VideoNode,
     condition: BranchNode,
     handoff: HandoffNode,
+    google_meet: GoogleMeetNode,
+    calendar: GoogleMeetNode,
+  }), []);
+
+  const edgeTypes = useMemo(() => ({
+    default: DeletableEdge,
   }), []);
 
   const fetchData = async () => {
@@ -509,6 +590,9 @@ const WorkflowBuilderInner = () => {
                 <SidebarItem icon={ImageIcon} label="Message + Image" onDragStart={(e) => onDragStart(e, 'image')} onClick={() => { handleAddNodeDirectly('image'); setIsSidebarOpen(false); }} />
                 <SidebarItem icon={Video} label="Message + Video" onDragStart={(e) => onDragStart(e, 'video')} onClick={() => { handleAddNodeDirectly('video'); setIsSidebarOpen(false); }} />
              </SidebarCategory>
+             <SidebarCategory title="Integrations & Meetings" icon={Zap} expanded>
+                <SidebarItem icon={Video} label="Google Meet & Calendar" onDragStart={(e) => onDragStart(e, 'google_meet')} onClick={() => { handleAddNodeDirectly('google_meet'); setIsSidebarOpen(false); }} color="blue" />
+             </SidebarCategory>
              <div className="px-4 py-2 mt-4">
                <SidebarItem icon={Zap} label="Set a Condition" onDragStart={(e) => onDragStart(e, 'condition')} onClick={() => { handleAddNodeDirectly('condition'); setIsSidebarOpen(false); }} color="amber" />
              </div>
@@ -527,6 +611,7 @@ const WorkflowBuilderInner = () => {
             onEdgesChange={onEdgesChange} 
             onConnect={onConnect} 
             nodeTypes={nodeTypes} 
+            edgeTypes={edgeTypes}
             onDrop={onDrop} 
             onDragOver={(e) => e.preventDefault()} 
             onNodeDoubleClick={onNodeDoubleClick} 
@@ -547,7 +632,17 @@ const WorkflowBuilderInner = () => {
                 <button onClick={() => setSelectedNode(null)} className="text-slate-400 hover:text-slate-900"><X size={20} /></button>
               </div>
               <div className="p-6 sm:p-8 flex-1 overflow-y-auto">
-                <MessageForm key={selectedNode.id} data={selectedNode.data} type={selectedNode.type} onSave={(d) => updateNodeData(selectedNode.id, d)} />
+                <MessageForm 
+                  key={selectedNode.id} 
+                  data={selectedNode.data} 
+                  type={selectedNode.type} 
+                  onSave={(d) => updateNodeData(selectedNode.id, d)}
+                  onDelete={() => {
+                    setNodes(nds => nds.filter(n => n.id !== selectedNode.id));
+                    setEdges(eds => eds.filter(e => e.source !== selectedNode.id && e.target !== selectedNode.id));
+                    setSelectedNode(null);
+                  }}
+                />
               </div>
             </div>
           </>
@@ -558,8 +653,10 @@ const WorkflowBuilderInner = () => {
 };
 
 // --- FORM COMPONENT ---
-const MessageForm = ({ data, type, onSave }) => {
+const MessageForm = ({ data, type, onSave, onDelete }) => {
   const [msg, setMsg] = useState(data.message || '');
+  const [title, setTitle] = useState(data.title || 'Product Demo Call');
+  const [duration, setDuration] = useState(data.duration || '30');
   const [buttons, setButtons] = useState(data.buttons || ['Option 1']);
   const [mediaUrl, setMediaUrl] = useState(data.mediaUrl || null);
   const [keyword, setKeyword] = useState(data.keyword || '');
@@ -765,17 +862,58 @@ const MessageForm = ({ data, type, onSave }) => {
       </div>
     )}
 
-    <button onClick={() => onSave({ 
-      message: msg, 
-      buttons, 
-      mediaUrl, 
-      keyword: triggerMode === 'ALL' ? '*' : keyword, 
-      triggerMode,
-      condition: type === 'condition' ? buildCondition() : (data.condition || ''),
-      conditionField,
-      conditionOperator,
-      conditionValue
-    })} className="w-full py-4 bg-emerald-600 text-white rounded-xl font-black uppercase text-[10px] hover:bg-emerald-700 hover:shadow-lg hover:shadow-emerald-200 transition-all">Save Changes</button>
+    {type === 'google_meet' || type === 'calendar' ? (
+      <div className="space-y-4">
+        <div>
+          <label className="text-[10px] font-black uppercase text-slate-400 mb-2 block">Meeting Title / Subject</label>
+          <input 
+            value={title} 
+            onChange={e => setTitle(e.target.value)} 
+            className="w-full bg-slate-50 border p-3 rounded-xl text-sm font-bold focus:border-blue-500 outline-none text-slate-800" 
+            placeholder="e.g. Product Demo Call" 
+          />
+        </div>
+        <div>
+          <label className="text-[10px] font-black uppercase text-slate-400 mb-2 block">Meeting Duration (Minutes)</label>
+          <select 
+            value={duration} 
+            onChange={e => setDuration(e.target.value)} 
+            className="w-full bg-slate-50 border p-3 rounded-xl text-sm font-bold focus:border-blue-500 outline-none text-slate-800"
+          >
+            <option value="15">15 Minutes</option>
+            <option value="30">30 Minutes</option>
+            <option value="45">45 Minutes</option>
+            <option value="60">60 Minutes (1 Hour)</option>
+          </select>
+        </div>
+        <div className="p-3 bg-blue-50 border border-blue-100 rounded-xl">
+          <p className="text-[10px] font-bold text-blue-600 uppercase tracking-widest mb-1">📹 Automatic Feature</p>
+          <p className="text-xs text-blue-800 font-medium">When a customer reaches this step, Google Meet will generate a video link and schedule it on Google Calendar with automated reminders!</p>
+        </div>
+      </div>
+    ) : null}
+
+    <div className="flex items-center gap-3 pt-2">
+      <button onClick={() => onSave({ 
+        message: msg, 
+        title,
+        duration,
+        buttons, 
+        mediaUrl, 
+        keyword: triggerMode === 'ALL' ? '*' : keyword, 
+        triggerMode,
+        condition: type === 'condition' ? buildCondition() : (data.condition || ''),
+        conditionField,
+        conditionOperator,
+        conditionValue
+      })} className="flex-1 py-3.5 bg-emerald-600 text-white rounded-xl font-black uppercase text-[10px] hover:bg-emerald-700 hover:shadow-lg transition-all cursor-pointer">Save Changes</button>
+      {type !== 'trigger' && (
+        <button onClick={onDelete} className="py-3.5 px-4 bg-red-50 text-red-600 hover:bg-red-600 hover:text-white rounded-xl font-black uppercase text-[10px] transition-all flex items-center gap-1.5 cursor-pointer border border-red-200 shadow-xs">
+          <Trash2 size={14} />
+          <span>Delete</span>
+        </button>
+      )}
+    </div>
   </div>);
 };
 
