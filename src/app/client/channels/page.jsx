@@ -9,7 +9,8 @@ import {
   Check,
   Settings,
   RefreshCw,
-  Plus
+  Plus,
+  Calendar
 } from 'lucide-react';
 import axios from 'axios';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
@@ -266,6 +267,14 @@ const ClientChannelsPage = () => {
       setTimeout(() => setToast(null), 5000);
       window.history.replaceState({}, document.title, window.location.pathname);
     }
+    // Google Calendar callback
+    else if (params.get('google_calendar_connected') === 'true') {
+      setToast({ msg: 'Google Calendar connected successfully!', type: 'success' });
+      window.history.replaceState({}, document.title, window.location.pathname);
+    } else if (params.get('google_calendar_error')) {
+      setToast({ msg: `Google Calendar connection failed: ${params.get('google_calendar_error')}`, type: 'error' });
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
 
     // Check URL for OAuth code
     if (code) {
@@ -333,6 +342,7 @@ const ClientChannelsPage = () => {
     setTimeout(() => setToast(null), 3000);
   };
 
+<<<<<<< HEAD
   const handleOneDriveSaved = (updatedClient) => {
     setClient(updatedClient);
     setToast({ msg: 'OneDrive configured', type: 'success' });
@@ -374,6 +384,15 @@ const ClientChannelsPage = () => {
   const isGoogleSlidesConnected = Boolean(client?.google_slides_enabled);
 
   const connectedCount = [isWhatsAppConnected, isFacebookConnected, isInstagramConnected, isGmailConnected, isOneDriveConnected, isGoogleCalendarConnected, isGoogleSheetsConnected, isGoogleDocsConnected, isGoogleSlidesConnected].filter(Boolean).length;
+=======
+  const isWhatsAppConnected = !!client?.whatsapp_phone_number_id;
+  const isFacebookConnected = !!client?.facebook_config?.page_id;
+  const isInstagramConnected = !!client?.instagram_config?.instagram_business_id;
+  const isGmailConnected = !!client?.gmail_enabled;
+  const isGoogleCalendarConnected = !!client?.google_calendar_enabled;
+
+  const connectedCount = [isWhatsAppConnected, isFacebookConnected, isInstagramConnected, isGmailConnected, isGoogleCalendarConnected].filter(Boolean).length;
+>>>>>>> 9253a32b02a5615499a87cb3bc73bbf6621892a4
 
   const handleConnectGmail = async () => {
     try {
@@ -386,7 +405,24 @@ const ClientChannelsPage = () => {
       }
     } catch (err) {
       console.warn("Error connecting Gmail", err);
-      setToast({ msg: 'Failed to initiate Gmail connection', type: 'error' });
+      setToast({ msg: 'Failed to initiate Gmail connect', type: 'error' });
+      setTimeout(() => setToast(null), 3000);
+    }
+  };
+
+  const handleConnectGoogleCalendar = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/auth/google-calendar/connect`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.data.url) {
+        window.location.href = res.data.url;
+      }
+    } catch (err) {
+      console.warn("Error connecting Google Calendar", err);
+      setToast({ msg: 'Failed to initiate Google Calendar connect', type: 'error' });
+      setTimeout(() => setToast(null), 3000);
     }
   };
 
@@ -1167,6 +1203,20 @@ const ClientChannelsPage = () => {
                     <span>Connect Google Slides</span>
                   </button>
                 )}
+=======
+                <button 
+                  onClick={handleConnectGoogleCalendar}
+                  className={cn(
+                    "w-full py-2.5 px-4 rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer",
+                    isGoogleCalendarConnected
+                      ? "bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200/60"
+                      : "bg-indigo-600 hover:bg-indigo-700 text-white"
+                  )}
+                >
+                  {isGoogleCalendarConnected ? <RefreshCw size={14} className="text-slate-400" /> : <Plus size={14} />}
+                  <span>{isGoogleCalendarConnected ? 'Reconnect' : 'Connect'}</span>
+                </button>
+>>>>>>> 9253a32b02a5615499a87cb3bc73bbf6621892a4
               </div>
             </div>
 
