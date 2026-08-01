@@ -1193,20 +1193,6 @@ const ClientChannelsPage = () => {
                     <span>Connect Google Slides</span>
                   </button>
                 )}
-=======
-                <button 
-                  onClick={handleConnectGoogleCalendar}
-                  className={cn(
-                    "w-full py-2.5 px-4 rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer",
-                    isGoogleCalendarConnected
-                      ? "bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200/60"
-                      : "bg-indigo-600 hover:bg-indigo-700 text-white"
-                  )}
-                >
-                  {isGoogleCalendarConnected ? <RefreshCw size={14} className="text-slate-400" /> : <Plus size={14} />}
-                  <span>{isGoogleCalendarConnected ? 'Reconnect' : 'Connect'}</span>
-                </button>
->>>>>>> 9253a32b02a5615499a87cb3bc73bbf6621892a4
               </div>
             </div>
 
