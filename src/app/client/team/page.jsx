@@ -186,7 +186,8 @@ export default function TeamPage() {
     if (!confirm('Are you sure you want to delete this project?')) return;
     try {
       const token = localStorage.getItem('token');
-      await axios.delete(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/team/projects/${id}/`, {
+      const cleanId = typeof id === 'object' ? (id.$oid || id.toString()) : id;
+      await axios.delete(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/team/projects/${cleanId}/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       fetchProjects();
@@ -599,7 +600,7 @@ export default function TeamPage() {
                     </div>
 
                     <button
-                      onClick={() => handleDeleteProject(p.id)}
+                      onClick={() => handleDeleteProject(p.id || p._id)}
                       className="p-1.5 text-slate-300 hover:text-rose-500 rounded-lg hover:bg-rose-50 transition-colors shrink-0 cursor-pointer"
                       title="Delete Project"
                     >
