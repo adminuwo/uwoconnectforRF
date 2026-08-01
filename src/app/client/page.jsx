@@ -34,25 +34,31 @@ const ClientOverview = () => {
     }
 
     const fetchDashboardData = async () => {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setLoading(false);
+        return;
+      }
+      const headers = { Authorization: `Bearer ${token}` };
+
       try {
-        const token = localStorage.getItem('token');
-        const headers = { Authorization: `Bearer ${token}` };
-        
-        // Fetch stats
         const res = await axios.get(
           `${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/client/stats`,
           { headers }
         );
-        setStatsData(res.data);
+        if (res.data) setStatsData(res.data);
+      } catch (err) {
+        console.warn("Dashboard stats notice:", err.message);
+      }
 
-        // Fetch contacts
+      try {
         const contactsRes = await axios.get(
           `${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/contacts/`,
           { headers }
         );
         setContacts(contactsRes.data || []);
       } catch (err) {
-        console.error("Error fetching dashboard data:", err);
+        console.warn("Contacts fetch notice:", err.message);
       } finally {
         setLoading(false);
       }
