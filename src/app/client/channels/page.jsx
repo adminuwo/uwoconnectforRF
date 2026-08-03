@@ -607,9 +607,7 @@ const ClientChannelsPage = () => {
                   </button>
                 ) : (
                   <button
-                    onClick={() => {
-                      window.location.href = "https://www.facebook.com/v20.0/dialog/oauth?client_id=991147863536661&redirect_uri=https://uwoconnect.aisa24.com/client/channels&response_type=code&scope=pages_messaging%2Cpages_show_list%2Cpages_manage_metadata%2Cpages_read_engagement&state=facebook";
-                    }}
+                    onClick={handleFacebookConnect}
                     className="w-full py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
                   >
                     <Plus size={14} />
