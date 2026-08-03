@@ -276,51 +276,6 @@ const ClientChannelsPage = () => {
       window.history.replaceState({}, document.title, window.location.pathname);
     }
 
-    // Check URL for OAuth code
-    if (code) {
-      if (state === 'facebook') {
-        setToast({ msg: 'Connecting Facebook...', type: 'success' });
-        const connectFacebook = async () => {
-          try {
-            const token = localStorage.getItem('token');
-            await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/auth/facebook/embedded-signup`,
-              { code: code },
-              { headers: { Authorization: `Bearer ${token}` } }
-            );
-            fetchClient();
-            setToast({ msg: 'Facebook connected successfully!', type: 'success' });
-            setTimeout(() => setToast(null), 3000);
-          } catch (err) {
-            console.error("Error connecting Facebook", err);
-            setToast({ msg: err.response?.data?.error || 'Failed to connect Facebook', type: 'error' });
-            setTimeout(() => setToast(null), 4000);
-          } finally {
-            window.history.replaceState({}, document.title, window.location.pathname);
-          }
-        };
-        connectFacebook();
-      } else {
-        setToast({ msg: 'Connecting Instagram...', type: 'success' });
-        const connectInstagram = async () => {
-          try {
-            const token = localStorage.getItem('token');
-            await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/auth/instagram/embedded-signup`,
-              { code: code },
-              { headers: { Authorization: `Bearer ${token}` } }
-            );
-            fetchClient();
-            setToast({ msg: 'Instagram connected successfully!', type: 'success' });
-            setTimeout(() => setToast(null), 3000);
-          } catch (err) {
-            console.error("Error connecting Instagram", err);
-            setToast({ msg: err.response?.data?.error || 'Failed to connect Instagram', type: 'error' });
-            setTimeout(() => setToast(null), 4000);
-          } finally {
-            window.history.replaceState({}, document.title, window.location.pathname);
-          }
-        };
-        connectInstagram();
-      }
     }
   }, []);
 
