@@ -429,32 +429,34 @@ const ClientChannelsPage = () => {
       return;
     }
     setFbLoading(true);
-    window.FB.login(async (response) => {
-      if (response.status !== 'connected') {
-        setFbLoading(false);
-        setToast({ msg: 'Facebook login was cancelled or failed.', type: 'error' });
-        setTimeout(() => setToast(null), 4000);
-        return;
-      }
-      try {
-        const token = localStorage.getItem('token');
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080';
-        const res = await axios.post(
-          `${apiUrl}/api/auth/facebook/embedded-signup`,
-          { access_token: response.authResponse.accessToken },
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        setClient(prev => ({ ...prev, ...res.data.facebook_config ? { facebook_config: res.data.facebook_config, facebook_enabled: true } : {} }));
-        await fetchClient();
-        setToast({ msg: '✅ Facebook Page connected!', type: 'success' });
-        setTimeout(() => setToast(null), 4000);
-      } catch (err) {
-        const msg = err?.response?.data?.error || 'Failed to connect Facebook.';
-        setToast({ msg, type: 'error' });
-        setTimeout(() => setToast(null), 5000);
-      } finally {
-        setFbLoading(false);
-      }
+    window.FB.login((response) => {
+      (async () => {
+        if (response.status !== 'connected') {
+          setFbLoading(false);
+          setToast({ msg: 'Facebook login was cancelled or failed.', type: 'error' });
+          setTimeout(() => setToast(null), 4000);
+          return;
+        }
+        try {
+          const token = localStorage.getItem('token');
+          const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080';
+          const res = await axios.post(
+            `${apiUrl}/api/auth/facebook/embedded-signup`,
+            { access_token: response.authResponse.accessToken },
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+          setClient(prev => ({ ...prev, ...res.data.facebook_config ? { facebook_config: res.data.facebook_config, facebook_enabled: true } : {} }));
+          await fetchClient();
+          setToast({ msg: '✅ Facebook Page connected!', type: 'success' });
+          setTimeout(() => setToast(null), 4000);
+        } catch (err) {
+          const msg = err?.response?.data?.error || 'Failed to connect Facebook.';
+          setToast({ msg, type: 'error' });
+          setTimeout(() => setToast(null), 5000);
+        } finally {
+          setFbLoading(false);
+        }
+      })();
     }, {
       scope: 'public_profile,email,pages_show_list,pages_read_engagement,pages_messaging',
       return_scopes: true,
@@ -463,36 +465,38 @@ const ClientChannelsPage = () => {
 
   const handleInstagramConnect = () => {
     setIgLoading(true);
-    window.FB.login(async (response) => {
-      if (response.status !== 'connected') {
-        setIgLoading(false);
-        setToast({ msg: 'Instagram login was cancelled or failed.', type: 'error' });
-        setTimeout(() => setToast(null), 4000);
-        return;
-      }
-      try {
-        const token = localStorage.getItem('token');
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080';
-        const res = await axios.post(
-          `${apiUrl}/api/auth/instagram/embedded-signup`,
-          { access_token: response.authResponse.accessToken },
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        setClient(prev => ({ 
-          ...prev, 
-          ...(res.data.instagram_config ? { instagram_config: res.data.instagram_config, instagram_enabled: true } : {}),
-          ...(res.data.facebook_config ? { facebook_config: res.data.facebook_config, facebook_enabled: true } : {})
-        }));
-        await fetchClient();
-        setToast({ msg: '✅ Instagram account connected!', type: 'success' });
-        setTimeout(() => setToast(null), 4000);
-      } catch (err) {
-        const msg = err?.response?.data?.error || 'Failed to connect Instagram.';
-        setToast({ msg, type: 'error' });
-        setTimeout(() => setToast(null), 5000);
-      } finally {
-        setIgLoading(false);
-      }
+    window.FB.login((response) => {
+      (async () => {
+        if (response.status !== 'connected') {
+          setIgLoading(false);
+          setToast({ msg: 'Instagram login was cancelled or failed.', type: 'error' });
+          setTimeout(() => setToast(null), 4000);
+          return;
+        }
+        try {
+          const token = localStorage.getItem('token');
+          const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080';
+          const res = await axios.post(
+            `${apiUrl}/api/auth/instagram/embedded-signup`,
+            { access_token: response.authResponse.accessToken },
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+          setClient(prev => ({ 
+            ...prev, 
+            ...(res.data.instagram_config ? { instagram_config: res.data.instagram_config, instagram_enabled: true } : {}),
+            ...(res.data.facebook_config ? { facebook_config: res.data.facebook_config, facebook_enabled: true } : {})
+          }));
+          await fetchClient();
+          setToast({ msg: '✅ Instagram account connected!', type: 'success' });
+          setTimeout(() => setToast(null), 4000);
+        } catch (err) {
+          const msg = err?.response?.data?.error || 'Failed to connect Instagram.';
+          setToast({ msg, type: 'error' });
+          setTimeout(() => setToast(null), 5000);
+        } finally {
+          setIgLoading(false);
+        }
+      })();
     }, {
       scope: 'instagram_basic,instagram_manage_messages,pages_show_list,pages_read_engagement,pages_manage_metadata,public_profile',
       return_scopes: true,
