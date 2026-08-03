@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { X, Tag, User, Phone, Mail, FileText, Save, Loader2, MessageSquare } from 'lucide-react';
+import { X, Tag, User, Phone, Mail, FileText, Save, Loader2, MessageSquare, ShoppingBag } from 'lucide-react';
 
 export default function ContactDetailsModal({ contact, isOpen, onClose, onUpdated }) {
   const [formData, setFormData] = useState({
@@ -147,6 +147,33 @@ export default function ContactDetailsModal({ contact, isOpen, onClose, onUpdate
                 Add Tag
               </button>
             </form>
+          </div>
+
+          {/* Products Shared Section */}
+          <div className="pt-6 border-t border-slate-100">
+            <label className="text-xs font-bold text-slate-400 uppercase tracking-widest block mb-3 flex items-center gap-2">
+              <ShoppingBag size={14} className="text-emerald-600" /> Products Shared with Lead
+            </label>
+            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-3">
+              <div className="flex items-center justify-between p-3 bg-white rounded-xl border border-slate-100 shadow-2xs">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
+                    📦
+                  </div>
+                  <div>
+                    <h5 className="text-xs font-bold text-slate-900">AI Automation Book</h5>
+                    <p className="text-[10px] text-slate-400">Shared via WhatsApp Workflow • Aug 3, 2026</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <span className="text-xs font-black text-slate-900">$23.00</span>
+                  <div className="flex items-center gap-2 mt-0.5 justify-end">
+                    <span className="text-[9px] font-bold bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded">Link Clicked: Yes</span>
+                    <span className="text-[9px] font-bold bg-blue-50 text-blue-700 px-2 py-0.5 rounded">Status: Paid</span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
           <div className="pt-6 border-t border-slate-100">

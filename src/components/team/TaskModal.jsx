@@ -18,8 +18,8 @@ export default function TaskModal({ isOpen, onClose, onSuccess, members = [] }) 
   const [dueDate, setDueDate] = useState('');
   const [estimatedHours, setEstimatedHours] = useState(4.0);
   const [checklistItems, setChecklistItems] = useState([
-    { id: 1, title: 'Requirements & initial scope review', completed: false },
-    { id: 2, title: 'Core implementation', completed: false }
+    { id: 1, title: 'Milestone 1: Scope & Requirements Review', completed: false },
+    { id: 2, title: 'Milestone 2: Core Development & Implementation', completed: false }
   ]);
   const [newChecklistText, setNewChecklistText] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -221,13 +221,15 @@ export default function TaskModal({ isOpen, onClose, onSuccess, members = [] }) 
             </div>
           </div>
 
-          {/* Subtask Checklist */}
+          {/* Subtask Checklist / Milestones */}
           <div>
-            <label className="block text-slate-600 font-medium mb-2">Checklist & Subtasks</label>
+            <label className="block text-slate-600 font-medium mb-2 flex items-center gap-1.5">
+              <span>Task Milestones & Checkpoints</span>
+            </label>
             <div className="space-y-2 mb-3">
               {checklistItems.map((item) => (
-                <div key={item.id} className="flex items-center justify-between p-2 rounded-xl border border-slate-100 bg-slate-50/50">
-                  <span className="text-xs text-slate-700">{item.title}</span>
+                <div key={item.id} className="flex items-center justify-between p-2.5 rounded-xl border border-slate-100 bg-slate-50/50">
+                  <span className="text-xs font-medium text-slate-700">{item.title}</span>
                   <button
                     type="button"
                     onClick={() => handleRemoveChecklistItem(item.id)}
@@ -243,16 +245,16 @@ export default function TaskModal({ isOpen, onClose, onSuccess, members = [] }) 
                 type="text"
                 value={newChecklistText}
                 onChange={(e) => setNewChecklistText(e.target.value)}
-                placeholder="Add checklist item..."
-                className="flex-1 px-3 py-2 rounded-xl border border-slate-200 focus:outline-none text-xs"
+                placeholder="Add milestone checkpoint (e.g. Milestone 3: QA & Testing)..."
+                className="flex-1 px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none text-xs"
                 onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddChecklistItem(); } }}
               />
               <button
                 type="button"
                 onClick={handleAddChecklistItem}
-                className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium flex items-center gap-1 text-xs"
+                className="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium flex items-center gap-1 text-xs shrink-0"
               >
-                <Plus size={14} /> Add
+                <Plus size={14} /> Add Milestone
               </button>
             </div>
           </div>

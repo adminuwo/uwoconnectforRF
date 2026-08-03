@@ -1,53 +1,101 @@
 'use client';
 
 import React, { useState } from 'react';
-import { X, UserPlus, Shield, Building2, UserCheck, Key, Mail, User } from 'lucide-react';
+import { X, UserPlus, Shield, Building2, UserCheck, Key, Mail, User, Phone, Globe, Clock, CheckCircle2, Sliders, MessageSquare, Instagram, Facebook } from 'lucide-react';
 import axios from 'axios';
 
 const DEPARTMENTS = ['Engineering', 'Product', 'Marketing', 'Sales', 'Support', 'Design', 'HR', 'Finance', 'Executive'];
 const ROLES = [
-  { value: 'SUPER_ADMIN', label: 'Super Admin' },
-  { value: 'ORG_ADMIN', label: 'Organization Admin' },
-  { value: 'HR', label: 'HR Manager' },
+  { value: 'SUPER_ADMIN', label: 'Owner / Super Admin' },
+  { value: 'ORG_ADMIN', label: 'Admin' },
   { value: 'MANAGER', label: 'Manager' },
   { value: 'TEAM_LEAD', label: 'Team Lead' },
   { value: 'EMPLOYEE', label: 'Employee' },
   { value: 'INTERN', label: 'Intern' },
-  { value: 'GUEST', label: 'Guest' },
+  { value: 'GUEST', label: 'Custom / Guest' },
+];
+
+const PERMISSION_FEATURES = [
+  { key: 'instagram', label: 'Instagram Inbox & Messages' },
+  { key: 'facebook', label: 'Facebook Inbox & Pages' },
+  { key: 'whatsapp', label: 'WhatsApp Business Number' },
+  { key: 'messenger', label: 'Messenger Chat' },
+  { key: 'telegram', label: 'Telegram Support' },
+  { key: 'workflows', label: 'Visual Workflows' },
+  { key: 'broadcast', label: 'Broadcast Campaigns' },
+  { key: 'crm', label: 'Leads & CRM' },
+  { key: 'knowledge_base', label: 'AI Knowledge Base' },
+  { key: 'catalog', label: 'Product Catalog' },
+  { key: 'orders', label: 'Orders & Payments' },
+  { key: 'reports', label: 'Daily Work Reports' },
+  { key: 'analytics', label: 'Analytics & Insights' },
+  { key: 'settings', label: 'Workspace Settings' },
+  { key: 'billing', label: 'Billing & Subscriptions' },
+];
+
+const CONNECTED_CHANNELS = [
+  { id: 'wa_default', name: 'WhatsApp Main (+123456789)', type: 'WhatsApp' },
+  { id: 'ig_main', name: 'Instagram Main (@uwoconnect)', type: 'Instagram' },
+  { id: 'fb_page', name: 'Facebook Page (UWOConnect)', type: 'Facebook' },
+  { id: 'tg_support', name: 'Telegram (@uwosupport)', type: 'Telegram' },
+  { id: 'li_company', name: 'LinkedIn Company Page', type: 'LinkedIn' },
 ];
 
 export default function TeamMemberModal({ isOpen, onClose, onSuccess, existingMembers = [] }) {
+  const [activeTab, setActiveTab] = useState('basic'); // 'basic' | 'permissions' | 'channels'
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [phone, setPhone] = useState('');
+  const [password, setPassword] = useState('UWOConnect123!');
   const [department, setDepartment] = useState('Engineering');
   const [enterpriseRole, setEnterpriseRole] = useState('EMPLOYEE');
   const [designation, setDesignation] = useState('Software Engineer');
+  const [employeeId, setEmployeeId] = useState(`EMP-${Math.floor(1000 + Math.random() * 9000)}`);
+  const [joiningDate, setJoiningDate] = useState(new Date().toISOString().split('T')[0]);
   const [reportingManager, setReportingManager] = useState('');
+  const [timezoneStr, setTimezoneStr] = useState('UTC');
+  const [workingHours, setWorkingHours] = useState('9:00 AM - 6:00 PM');
+  const [language, setLanguage] = useState('English');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
-  const [assignedPlatforms, setAssignedPlatforms] = useState(['CRM', 'WhatsApp', 'Orders', 'Projects']);
+
+  // Permissions Matrix State
+  const [permissionMatrix, setPermissionMatrix] = useState(() => {
+    const initial = {};
+    PERMISSION_FEATURES.forEach(f => {
+      initial[f.key] = 'FULL';
+    });
+    return initial;
+  });
+
+  // Assigned Channels State
+  const [assignedSocialChannels, setAssignedSocialChannels] = useState(['wa_default', 'ig_main']);
 
   if (!isOpen) return null;
 
-  const PLATFORMS = [
-    'WhatsApp', 'Instagram', 'Facebook', 'CRM', 'Marketing', 
-    'Knowledge Base', 'Orders', 'Catalog', 'Broadcast', 'Analytics', 
-    'AI', 'Finance', 'HR', 'Projects', 'Support'
-  ];
+  const handlePermissionChange = (featureKey, level) => {
+    setPermissionMatrix(prev => ({ ...prev, [featureKey]: level }));
+  };
 
-  const togglePlatform = (p) => {
-    if (assignedPlatforms.includes(p)) {
-      setAssignedPlatforms(assignedPlatforms.filter(item => item !== p));
-    } else {
-      setAssignedPlatforms([...assignedPlatforms, p]);
+  const toggleSocialChannel = (channelId) => {
+    setAssignedSocialChannels(prev => 
+      prev.includes(channelId) ? prev.filter(c => c !== channelId) : [...prev, channelId]
+    );
+  };
+
+  const handleGeneratePassword = () => {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
+    let pass = '';
+    for (let i = 0; i < 12; i++) {
+      pass += chars.charAt(Math.floor(Math.random() * chars.length));
     }
+    setPassword(pass);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!username || !email || !password) {
-      setError('Username, email, and password are required');
+      setError('Username, email, and password are required.');
       return;
     }
     setIsSubmitting(true);
@@ -60,13 +108,20 @@ export default function TeamMemberModal({ isOpen, onClose, onSuccess, existingMe
         {
           username,
           email,
+          phone_number: phone,
           password,
           role: 'AGENT',
           enterprise_role: enterpriseRole,
           department,
           designation,
+          employee_id: employeeId,
+          joining_date: joiningDate,
           reporting_manager: reportingManager || null,
-          assigned_platforms: assignedPlatforms
+          timezone: timezoneStr,
+          working_hours: workingHours,
+          language,
+          permission_matrix: permissionMatrix,
+          assigned_social_channels: assignedSocialChannels
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -81,19 +136,46 @@ export default function TeamMemberModal({ isOpen, onClose, onSuccess, existingMe
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 overflow-y-auto">
-      <div className="bg-white rounded-3xl max-w-xl w-full p-6 shadow-2xl border border-slate-100 my-8">
-        <div className="flex justify-between items-center pb-4 border-b border-slate-100 mb-6">
+      <div className="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl border border-slate-100 my-8 flex flex-col max-h-[90vh]">
+        
+        {/* Header */}
+        <div className="flex justify-between items-center pb-4 border-b border-slate-100 mb-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-200">
               <UserPlus size={20} />
             </div>
             <div>
-              <h3 className="font-semibold text-slate-900 text-lg">Add Team Member</h3>
-              <p className="text-xs text-slate-400">Create employee account with custom roles and permissions</p>
+              <h3 className="font-bold text-slate-900 text-lg">Add Team Member (Client Admin)</h3>
+              <p className="text-xs text-slate-400">Collect employee details, assign RBAC permissions, & configure channel access</p>
             </div>
           </div>
-          <button onClick={onClose} className="p-2 text-slate-400 hover:text-slate-600 rounded-xl hover:bg-slate-50">
+          <button onClick={onClose} className="p-2 text-slate-400 hover:text-slate-600 rounded-xl hover:bg-slate-50 cursor-pointer">
             <X size={18} />
+          </button>
+        </div>
+
+        {/* Tabs */}
+        <div className="flex items-center gap-3 border-b border-slate-100 pb-3 mb-4 text-xs font-bold">
+          <button 
+            type="button" 
+            onClick={() => setActiveTab('basic')}
+            className={`pb-2 transition-all border-b-2 cursor-pointer ${activeTab === 'basic' ? 'border-emerald-600 text-emerald-600' : 'border-transparent text-slate-400 hover:text-slate-700'}`}
+          >
+            1. Basic Information
+          </button>
+          <button 
+            type="button" 
+            onClick={() => setActiveTab('permissions')}
+            className={`pb-2 transition-all border-b-2 cursor-pointer ${activeTab === 'permissions' ? 'border-emerald-600 text-emerald-600' : 'border-transparent text-slate-400 hover:text-slate-700'}`}
+          >
+            2. Permissions Matrix
+          </button>
+          <button 
+            type="button" 
+            onClick={() => setActiveTab('channels')}
+            className={`pb-2 transition-all border-b-2 cursor-pointer ${activeTab === 'channels' ? 'border-emerald-600 text-emerald-600' : 'border-transparent text-slate-400 hover:text-slate-700'}`}
+          >
+            3. Assigned Channels ({assignedSocialChannels.length})
           </button>
         </div>
 
@@ -103,148 +185,234 @@ export default function TeamMemberModal({ isOpen, onClose, onSuccess, existingMe
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4 text-xs">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-slate-600 font-medium mb-1.5 flex items-center gap-1.5">
-                <User size={13} className="text-slate-400" /> Username
-              </label>
-              <input
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                placeholder="e.g. john_doe"
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-slate-600 font-medium mb-1.5 flex items-center gap-1.5">
-                <Mail size={13} className="text-slate-400" /> Work Email
-              </label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="john@company.com"
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
-                required
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-slate-600 font-medium mb-1.5 flex items-center gap-1.5">
-                <Key size={13} className="text-slate-400" /> Login Password
-              </label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-slate-600 font-medium mb-1.5 flex items-center gap-1.5">
-                <Shield size={13} className="text-slate-400" /> Designation Title
-              </label>
-              <input
-                type="text"
-                value={designation}
-                onChange={(e) => setDesignation(e.target.value)}
-                placeholder="e.g. Senior Frontend Dev"
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-slate-600 font-medium mb-1.5 flex items-center gap-1.5">
-                <Building2 size={13} className="text-slate-400" /> Department
-              </label>
-              <select
-                value={department}
-                onChange={(e) => setDepartment(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
-              >
-                {DEPARTMENTS.map((dept) => (
-                  <option key={dept} value={dept}>{dept}</option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-slate-600 font-medium mb-1.5 flex items-center gap-1.5">
-                <Shield size={13} className="text-slate-400" /> Organization Role
-              </label>
-              <select
-                value={enterpriseRole}
-                onChange={(e) => setEnterpriseRole(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
-              >
-                {ROLES.map((r) => (
-                  <option key={r.value} value={r.value}>{r.label}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-slate-600 font-medium mb-1.5 flex items-center gap-1.5">
-              <UserCheck size={13} className="text-slate-400" /> Reporting Manager
-            </label>
-            <select
-              value={reportingManager}
-              onChange={(e) => setReportingManager(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
-            >
-              <option value="">None (Reports to Admin)</option>
-              {existingMembers.map((m) => (
-                <option key={m.id} value={m.id}>{m.username} ({m.designation || m.role})</option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-slate-600 font-medium mb-2">Assigned Platform Access (RBAC)</label>
-            <div className="grid grid-cols-3 gap-2 bg-slate-50 p-3 rounded-2xl border border-slate-100 max-h-36 overflow-y-auto">
-              {PLATFORMS.map((p) => (
-                <label key={p} className="flex items-center gap-2 cursor-pointer text-slate-700 text-xs font-medium">
+        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto space-y-4 text-xs">
+          
+          {/* TAB 1: BASIC INFO */}
+          {activeTab === 'basic' && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-slate-600 font-bold mb-1.5 flex items-center gap-1.5">
+                    <User size={13} className="text-slate-400" /> Full Name / Username *
+                  </label>
                   <input
-                    type="checkbox"
-                    checked={assignedPlatforms.includes(p)}
-                    onChange={() => togglePlatform(p)}
-                    className="rounded text-indigo-600 focus:ring-indigo-500 h-3.5 w-3.5"
+                    type="text"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    placeholder="e.g. aditi_sharma"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 font-semibold"
+                    required
                   />
-                  <span>{p}</span>
-                </label>
-              ))}
-            </div>
-          </div>
+                </div>
 
-          <div className="pt-4 flex justify-end gap-3 border-t border-slate-100">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 font-medium"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-medium shadow-md shadow-indigo-200 transition-all disabled:opacity-50"
-            >
-              {isSubmitting ? 'Creating...' : 'Create Employee Account'}
-            </button>
+                <div>
+                  <label className="block text-slate-600 font-bold mb-1.5 flex items-center gap-1.5">
+                    <Mail size={13} className="text-slate-400" /> Email Address *
+                  </label>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="aditi@uwo24.com"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 font-semibold"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-slate-600 font-bold mb-1.5 flex items-center gap-1.5">
+                    <Phone size={13} className="text-slate-400" /> Phone Number
+                  </label>
+                  <input
+                    type="text"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder="+91 98765 43210"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 font-semibold"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-slate-600 font-bold mb-1.5 flex items-center gap-1.5 justify-between">
+                    <span className="flex items-center gap-1.5"><Key size={13} className="text-slate-400" /> Password *</span>
+                    <button type="button" onClick={handleGeneratePassword} className="text-[10px] text-emerald-600 font-bold hover:underline cursor-pointer">Generate Temp</button>
+                  </label>
+                  <input
+                    type="text"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 font-mono font-bold"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-slate-600 font-bold mb-1.5">Department</label>
+                  <select
+                    value={department}
+                    onChange={(e) => setDepartment(e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white font-semibold outline-none focus:border-emerald-500"
+                  >
+                    {DEPARTMENTS.map((dept) => (
+                      <option key={dept} value={dept}>{dept}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-slate-600 font-bold mb-1.5">Role</label>
+                  <select
+                    value={enterpriseRole}
+                    onChange={(e) => setEnterpriseRole(e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white font-semibold outline-none focus:border-emerald-500"
+                  >
+                    {ROLES.map((r) => (
+                      <option key={r.value} value={r.value}>{r.label}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-slate-600 font-bold mb-1.5">Employee ID</label>
+                  <input
+                    type="text"
+                    value={employeeId}
+                    onChange={(e) => setEmployeeId(e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 font-mono font-semibold"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-slate-600 font-bold mb-1.5">Designation</label>
+                  <input
+                    type="text"
+                    value={designation}
+                    onChange={(e) => setDesignation(e.target.value)}
+                    placeholder="e.g. Lead Sales Specialist"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 font-semibold"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-slate-600 font-bold mb-1.5">Reporting Manager</label>
+                  <select
+                    value={reportingManager}
+                    onChange={(e) => setReportingManager(e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white font-semibold outline-none"
+                  >
+                    <option value="">None (Reports to Client Admin)</option>
+                    {existingMembers.map((m) => (
+                      <option key={m.id} value={m.id}>{m.username} ({m.designation || m.role})</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 2: PERMISSION MATRIX */}
+          {activeTab === 'permissions' && (
+            <div className="space-y-4">
+              <div className="bg-emerald-50/60 p-3 rounded-2xl border border-emerald-200/80">
+                <p className="text-[11px] font-semibold text-emerald-800">
+                  🛡️ <strong>Granular Permission Control</strong>: Set access levels (No Access, View, Manage, Full Access) for every module.
+                </p>
+              </div>
+
+              <div className="divide-y divide-slate-100 border border-slate-200 rounded-2xl overflow-hidden bg-white">
+                {PERMISSION_FEATURES.map(f => (
+                  <div key={f.key} className="p-3 flex items-center justify-between hover:bg-slate-50/50">
+                    <span className="font-bold text-slate-800">{f.label}</span>
+                    <div className="flex items-center gap-1.5 bg-slate-100 p-1 rounded-xl">
+                      {['NONE', 'VIEW', 'MANAGE', 'FULL'].map(lvl => (
+                        <button
+                          key={lvl}
+                          type="button"
+                          onClick={() => handlePermissionChange(f.key, lvl)}
+                          className={`px-2.5 py-1 rounded-lg text-[9px] font-black tracking-wider transition-all cursor-pointer ${
+                            permissionMatrix[f.key] === lvl 
+                              ? (lvl === 'NONE' ? 'bg-rose-500 text-white' : lvl === 'FULL' ? 'bg-emerald-600 text-white' : 'bg-slate-800 text-white')
+                              : 'text-slate-500 hover:text-slate-900'
+                          }`}
+                        >
+                          {lvl}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* TAB 3: ASSIGNED CHANNELS */}
+          {activeTab === 'channels' && (
+            <div className="space-y-4">
+              <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                <h4 className="font-bold text-slate-900 mb-1">Assign Social Media Channels</h4>
+                <p className="text-[11px] text-slate-500">
+                  Select which social channels this employee can view and manage in their dashboard.
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                {CONNECTED_CHANNELS.map(ch => {
+                  const isAssigned = assignedSocialChannels.includes(ch.id);
+                  return (
+                    <div 
+                      key={ch.id} 
+                      onClick={() => toggleSocialChannel(ch.id)}
+                      className={`p-4 rounded-2xl border flex items-center justify-between cursor-pointer transition-all ${
+                        isAssigned ? 'bg-emerald-50/60 border-emerald-500 ring-2 ring-emerald-500/10' : 'bg-white border-slate-200 hover:border-slate-300'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-xl bg-white border border-slate-200 flex items-center justify-center font-bold text-emerald-600 shadow-2xs">
+                          {ch.type === 'WhatsApp' ? '💬' : ch.type === 'Instagram' ? '📸' : '🌐'}
+                        </div>
+                        <div>
+                          <p className="font-bold text-slate-900">{ch.name}</p>
+                          <p className="text-[10px] text-slate-400">{ch.details}</p>
+                        </div>
+                      </div>
+                      <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase ${isAssigned ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-500'}`}>
+                        {isAssigned ? 'Assigned' : 'Unassigned'}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Footer Submit */}
+          <div className="pt-4 flex justify-between items-center border-t border-slate-100">
+            <span className="text-[10px] font-bold text-slate-400">Client Admin Control Panel</span>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-4 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 font-bold cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold shadow-md transition-all cursor-pointer disabled:opacity-50"
+              >
+                {isSubmitting ? 'Saving...' : 'Create Employee Account'}
+              </button>
+            </div>
           </div>
         </form>
+
       </div>
     </div>
   );
