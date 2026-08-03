@@ -273,9 +273,6 @@ const ClientChannelsPage = () => {
       window.history.replaceState({}, document.title, window.location.pathname);
     } else if (params.get('google_calendar_error')) {
       setToast({ msg: `Google Calendar connection failed: ${params.get('google_calendar_error')}`, type: 'error' });
-      window.history.replaceState({}, document.title, window.location.pathname);
-    }
-
     }
   }, []);
 
