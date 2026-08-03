@@ -728,9 +728,7 @@ const ClientChannelsPage = () => {
                   </button>
                 ) : (
                   <button
-                    onClick={() => {
-                      window.location.href = "https://www.instagram.com/oauth/authorize?force_reauth=true&client_id=991147863536661&redirect_uri=https://uwoconnect.aisa24.com/client/channels&response_type=code&scope=instagram_business_basic%2Cinstagram_business_manage_messages%2Cinstagram_business_manage_comments%2Cinstagram_business_content_publish%2Cinstagram_business_manage_insights&state=instagram";
-                    }}
+                    onClick={handleInstagramConnect}
                     className="w-full py-2.5 px-4 bg-pink-600 hover:bg-pink-700 text-white rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
                   >
                     <Plus size={14} />
