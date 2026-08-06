@@ -23,6 +23,9 @@ import GoogleCalendarConfigModal, { GoogleCalendarIcon } from '@/components/chan
 import GoogleSheetsConfigModal, { GoogleSheetsIcon } from '@/components/channels/GoogleSheetsConfigModal';
 import GoogleDocsConfigModal, { GoogleDocsIcon } from '@/components/channels/GoogleDocsConfigModal';
 import GoogleSlidesConfigModal, { GoogleSlidesIcon } from '@/components/channels/GoogleSlidesConfigModal';
+import GoogleNewsConfigModal, { GoogleNewsIcon } from '@/components/channels/GoogleNewsConfigModal';
+import LearningCenterModal from '@/components/guides/LearningCenterModal';
+import { Sparkles } from 'lucide-react';
 
 const FacebookIcon = ({ size = 22, className }) => (
   <svg
@@ -113,11 +116,15 @@ const ClientChannelsPage = () => {
   const [isGoogleSheetsConfigModalOpen, setIsGoogleSheetsConfigModalOpen] = useState(false);
   const [isGoogleDocsConfigModalOpen, setIsGoogleDocsConfigModalOpen] = useState(false);
   const [isGoogleSlidesConfigModalOpen, setIsGoogleSlidesConfigModalOpen] = useState(false);
+  const [isGoogleNewsConfigModalOpen, setIsGoogleNewsConfigModalOpen] = useState(false);
+  const [isYouTubeConfigModalOpen, setIsYouTubeConfigModalOpen] = useState(false);
+  const [youtubeLoading, setYoutubeLoading] = useState(false);
 
   const [fbLoading, setFbLoading] = useState(false);
   const [igLoading, setIgLoading] = useState(false);
 
   const [toast, setToast] = useState(null);
+  const [isGuideOpen, setIsGuideOpen] = useState(false);
 
   const fetchClient = async (isManualRefresh = false) => {
     if (isManualRefresh) setRefreshing(true);
@@ -275,8 +282,21 @@ const ClientChannelsPage = () => {
       setToast({ msg: `Google Calendar connection failed: ${params.get('google_calendar_error')}`, type: 'error' });
       window.history.replaceState({}, document.title, window.location.pathname);
     }
+    // YouTube callback
+    else if (params.get('youtube_connected') === 'true') {
+      fetchClient();
+      setToast({ msg: '✅ YouTube channel connected successfully!', type: 'success' });
+      setTimeout(() => setToast(null), 4000);
+      window.history.replaceState({}, document.title, window.location.pathname);
+    } else if (params.get('youtube_error')) {
+      const err = params.get('youtube_error');
+      const msg = err === 'access_denied' ? 'YouTube permission was cancelled.' : `YouTube connection failed: ${err}`;
+      setToast({ msg, type: 'error' });
+      setTimeout(() => setToast(null), 5000);
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
 
-    // Check URL for OAuth code
+
     if (code) {
       if (state === 'facebook') {
         setToast({ msg: 'Connecting Facebook...', type: 'success' });
@@ -381,8 +401,9 @@ const ClientChannelsPage = () => {
   const isGoogleSheetsConnected = Boolean(client?.google_sheets_enabled);
   const isGoogleDocsConnected = Boolean(client?.google_docs_enabled);
   const isGoogleSlidesConnected = Boolean(client?.google_slides_enabled);
+  const isYouTubeConnected = Boolean(client?.youtube_enabled);
 
-  const connectedCount = [isWhatsAppConnected, isFacebookConnected, isInstagramConnected, isGmailConnected, isOneDriveConnected, isGoogleCalendarConnected, isGoogleSheetsConnected, isGoogleDocsConnected, isGoogleSlidesConnected].filter(Boolean).length;
+  const connectedCount = [isWhatsAppConnected, isFacebookConnected, isInstagramConnected, isGmailConnected, isOneDriveConnected, isGoogleCalendarConnected, isGoogleSheetsConnected, isGoogleDocsConnected, isGoogleSlidesConnected, isYouTubeConnected].filter(Boolean).length;
 
   const handleConnectGmail = async () => {
     try {
@@ -487,8 +508,16 @@ const ClientChannelsPage = () => {
           </div>
 
           <div className="flex items-center gap-3">
+            <button
+              onClick={() => setIsGuideOpen(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-xl font-bold text-xs hover:bg-black transition-all shadow-sm cursor-pointer"
+              title="Open Connectors & Integrations Master Guide"
+            >
+              <Sparkles size={14} className="text-emerald-400" />
+              View Complete Guide
+            </button>
             <span className="text-xs text-slate-400 font-medium">
-              <strong className="text-slate-700">{connectedCount}</strong> of 9 connected
+              <strong className="text-slate-700">{connectedCount}</strong> of 10 connected
             </span>
             <button
               onClick={() => fetchClient(true)}
@@ -1196,6 +1225,198 @@ const ClientChannelsPage = () => {
               </div>
             </div>
 
+            {/* --- GOOGLE NEWS CARD --- */}
+            <div className="bg-white rounded-2xl border border-slate-200/80 p-6 flex flex-col justify-between hover:border-slate-300 transition-all shadow-xs min-h-[380px]">
+              <div>
+                {/* Header */}
+                <div className="flex flex-col gap-3.5 mb-5">
+                  <div className="flex items-center gap-3">
+                    <div className="w-11 h-11 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100/80 shrink-0">
+                      <GoogleNewsIcon size={24} />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-slate-900 text-base">Google News</h3>
+                      <p className="text-[11px] text-slate-400">Live RSS & AI Summarizer</p>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className={cn(
+                      "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium",
+                      client?.google_news_enabled ? "bg-blue-50 text-blue-700 border border-blue-200/50" : "bg-slate-100 text-slate-400"
+                    )}>
+                      <span className={cn("w-1.5 h-1.5 rounded-full", client?.google_news_enabled ? "bg-blue-600 animate-pulse" : "bg-slate-300")} />
+                      <span>{client?.google_news_enabled ? 'Connected' : 'Not Connected'}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <p className="text-xs text-slate-500 leading-relaxed mb-5">
+                  Monitor live Google News feeds by topic or keyword, generate AI executive summaries, and broadcast news digests to WhatsApp contacts.
+                </p>
+
+                {client?.google_news_enabled ? (
+                  <div className="bg-slate-50/70 rounded-xl p-3.5 border border-slate-100 flex flex-col gap-2.5 text-xs">
+                    <div className="flex flex-col gap-1">
+                      <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Default Topic</span>
+                      <span className="font-medium text-blue-700 uppercase font-bold">{client?.google_news_config?.default_topic || 'TECHNOLOGY'}</span>
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Tracked Keywords</span>
+                      <span className="font-medium text-slate-700 truncate">{Array.isArray(client?.google_news_config?.keywords) ? client?.google_news_config?.keywords.join(', ') : 'AI, Tech, Business'}</span>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-xs text-slate-400 py-6 text-center">Google News feed monitoring disabled.</p>
+                )}
+              </div>
+
+              {/* Action Button */}
+              <div className="mt-6 pt-4 border-t border-slate-100">
+                {client?.google_news_enabled ? (
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => router.push('/client/google-news')}
+                      className="flex-1 py-2.5 px-3 rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer bg-blue-600 hover:bg-blue-700 text-white shadow-xs"
+                    >
+                      <Settings size={14} />
+                      <span>Workspace</span>
+                    </button>
+                    <button
+                      onClick={() => setIsGoogleNewsConfigModalOpen(true)}
+                      className="py-2.5 px-3 rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200/60"
+                      title="Configure Google News settings"
+                    >
+                      <Settings size={14} />
+                      <span>Configure</span>
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => setIsGoogleNewsConfigModalOpen(true)}
+                    className="w-full py-2.5 px-4 rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer bg-[#4285F4] hover:bg-[#3367D6] text-white shadow-xs"
+                  >
+                    <Plus size={14} />
+                    <span>Connect Google News</span>
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* --- YOUTUBE CARD --- */}
+            <div className="bg-white rounded-2xl border border-slate-200/80 p-6 flex flex-col justify-between hover:border-slate-300 transition-all shadow-xs min-h-[380px]">
+              <div>
+                {/* Header */}
+                <div className="flex flex-col gap-3.5 mb-5">
+                  <div className="flex items-center gap-3">
+                    <div className="w-11 h-11 rounded-2xl bg-red-50 text-[#FF0000] flex items-center justify-center border border-red-100/80 shrink-0">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-slate-900 text-base">YouTube</h3>
+                      <p className="text-[11px] text-slate-400">Video & Channel Management</p>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className={cn(
+                      "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium",
+                      isYouTubeConnected ? "bg-red-50 text-red-700 border border-red-200/50" : "bg-slate-100 text-slate-400"
+                    )}>
+                      <span className={cn("w-1.5 h-1.5 rounded-full", isYouTubeConnected ? "bg-red-500" : "bg-slate-300")} />
+                      <span>{isYouTubeConnected ? 'Connected' : 'Not Connected'}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <p className="text-xs text-slate-500 leading-relaxed mb-5">
+                  Connect your YouTube channel to manage videos, schedule uploads, and sync content with your WhatsApp broadcast campaigns.
+                </p>
+
+                {/* Details */}
+                {isYouTubeConnected ? (
+                  <div className="space-y-4 py-4 border-t border-slate-100 text-xs">
+                    <div className="flex flex-col gap-1">
+                      <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Channel</span>
+                      <span className="font-medium text-slate-700 truncate">{client?.youtube_config?.channel_title || 'N/A'}</span>
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Email</span>
+                      <span className="font-medium text-slate-700 truncate">{client?.youtube_config?.email || 'N/A'}</span>
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Channel ID</span>
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium text-slate-700 truncate">{client?.youtube_config?.channel_id || 'N/A'}</span>
+                        <CopyButton text={client?.youtube_config?.channel_id} />
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-xs text-slate-400 py-6 text-center">No YouTube channel connected.</p>
+                )}
+              </div>
+
+              {/* Action Button */}
+              <div className="mt-6 pt-4 border-t border-slate-100">
+                {isYouTubeConnected ? (
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => { window.location.href = '/client/youtube'; }}
+                      className="flex-1 py-2.5 px-3 rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer bg-[#FF0000] hover:bg-[#CC0000] text-white shadow-xs"
+                    >
+                      <Settings size={14} />
+                      <span>Dashboard</span>
+                    </button>
+                    <button
+                      onClick={async () => {
+                        setYoutubeLoading(true);
+                        try {
+                          const token = localStorage.getItem('token');
+                          const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/auth/youtube/connect`, {
+                            headers: { Authorization: `Bearer ${token}` }
+                          });
+                          if (res.data.url) window.location.href = res.data.url;
+                        } catch (err) {
+                          setToast({ msg: 'Failed to reconnect YouTube', type: 'error' });
+                          setTimeout(() => setToast(null), 4000);
+                        } finally { setYoutubeLoading(false); }
+                      }}
+                      disabled={youtubeLoading}
+                      className="py-2.5 px-3 rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200/60 disabled:opacity-50"
+                      title="Reconnect YouTube"
+                    >
+                      <RefreshCw size={14} className={cn("text-slate-400", youtubeLoading && "animate-spin")} />
+                      <span>Reconnect</span>
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={async () => {
+                      setYoutubeLoading(true);
+                      try {
+                        const token = localStorage.getItem('token');
+                        const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/auth/youtube/connect`, {
+                          headers: { Authorization: `Bearer ${token}` }
+                        });
+                        if (res.data.url) window.location.href = res.data.url;
+                      } catch (err) {
+                        setToast({ msg: 'Failed to connect YouTube', type: 'error' });
+                        setTimeout(() => setToast(null), 4000);
+                      } finally { setYoutubeLoading(false); }
+                    }}
+                    disabled={youtubeLoading}
+                    className="w-full py-2.5 px-4 rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer bg-[#FF0000] hover:bg-[#CC0000] text-white disabled:opacity-50"
+                  >
+                    {youtubeLoading ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />}
+                    <span>Connect YouTube</span>
+                  </button>
+                )}
+              </div>
+            </div>
+
           </div>
         )}
 
@@ -1261,6 +1482,21 @@ const ClientChannelsPage = () => {
           onClose={() => setIsGoogleSlidesConfigModalOpen(false)}
           client={client}
           onSaved={handleGoogleSlidesSaved}
+        />
+
+        {/* Google News Configuration Modal */}
+        <GoogleNewsConfigModal
+          isOpen={isGoogleNewsConfigModalOpen}
+          onClose={() => setIsGoogleNewsConfigModalOpen(false)}
+          client={client}
+          onSaved={() => fetchClient(true)}
+        />
+
+        {/* Interactive Connectors Learning Guide Modal */}
+        <LearningCenterModal
+          guideSlug="connectors"
+          isOpen={isGuideOpen}
+          onClose={() => setIsGuideOpen(false)}
         />
       </div>
     </DashboardLayout>

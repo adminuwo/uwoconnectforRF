@@ -14,7 +14,31 @@ import {
   Lightbulb,
   Info,
   CheckCircle2,
+  BookOpen,
 } from 'lucide-react';
+import LearningCenterModal from '@/components/guides/LearningCenterModal';
+
+const STEP_TO_GUIDE_MAP = {
+  'welcome': 'dashboard',
+  'sidebar-nav': 'dashboard',
+  'dashboard-stats': 'dashboard',
+  'dashboard-launch-btn': 'workflows',
+  'sidebar-channels': 'connectors',
+  'sidebar-youtube': 'youtube',
+  'sidebar-google-news': 'google-news',
+  'sidebar-automations': 'automations',
+  'sidebar-workflows': 'workflows',
+  'sidebar-crm': 'crm',
+  'sidebar-inbox': 'inbox',
+  'sidebar-campaigns': 'broadcasts',
+  'sidebar-knowledge': 'knowledge',
+  'sidebar-catalog': 'catalog',
+  'sidebar-orders': 'orders',
+  'sidebar-team': 'team',
+  'sidebar-reports': 'reports',
+  'sidebar-settings': 'settings',
+  'sidebar-support': 'support',
+};
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 const SPOTLIGHT_PAD  = 10; // px padding around the spotlit element
@@ -44,7 +68,6 @@ function computeTooltipPosition(rect, placement, windowW, windowH) {
     case 'right':
       top  = rect.top  + rect.height / 2;
       left = rect.right + pad + TOOLTIP_OFFSET;
-      // clamp horizontally
       if (left + w > windowW - 16) left = rect.left - w - pad - TOOLTIP_OFFSET;
       break;
     case 'left':
@@ -63,12 +86,10 @@ function computeTooltipPosition(rect, placement, windowW, windowH) {
       break;
   }
 
-  // Vertical clamping — use 85% of viewport as safe max height estimate
   const tooltipH = Math.min(420, windowH * 0.85);
   if (top + tooltipH > windowH - 16) top = windowH - tooltipH - 16;
   if (top < 16) top = 16;
 
-  // Horizontal clamping
   if (left + w > windowW - 16) left = windowW - w - 16;
   if (left < 16) left = 16;
 
@@ -97,11 +118,11 @@ const TooltipCard = ({
   onSkip,
   onFinish,
   visible,
+  onOpenGuide
 }) => {
   const isLast  = currentStep === totalSteps - 1;
   const isFirst = currentStep === 0;
 
-  // anchor triangle side
   const triangle = {
     right:  'tour-tooltip-triangle-left',
     left:   'tour-tooltip-triangle-right',
@@ -116,7 +137,7 @@ const TooltipCard = ({
       role="dialog"
       aria-label={`Tour step ${currentStep + 1} of ${totalSteps}: ${step.title}`}
     >
-      {/* ── Header ── */}
+      {/* Header */}
       <div className="tour-tooltip-header">
         <div className="tour-tooltip-icon">{step.icon}</div>
         <div className="tour-tooltip-meta">
@@ -133,7 +154,7 @@ const TooltipCard = ({
         </button>
       </div>
 
-      {/* ── Body ── */}
+      {/* Body */}
       <div className="tour-tooltip-body">
         <p className="tour-description">{step.description}</p>
 
@@ -150,17 +171,25 @@ const TooltipCard = ({
             <p><strong>Tip:</strong> {step.tip}</p>
           </div>
         )}
+
+        {/* View Guide Link */}
+        <div className="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between">
+          <button
+            onClick={() => onOpenGuide && onOpenGuide(step.id)}
+            className="text-[11px] font-bold text-emerald-700 hover:text-emerald-800 flex items-center gap-1 hover:underline cursor-pointer"
+          >
+            <BookOpen size={12} className="text-emerald-600" />
+            <span>View Full Guide</span>
+          </button>
+        </div>
       </div>
 
-      {/* ── Progress Bar ── */}
+      {/* Progress Bar */}
       <ProgressBar current={currentStep} total={totalSteps} />
 
-      {/* ── Footer Buttons ── */}
+      {/* Footer Buttons */}
       <div className="tour-tooltip-footer">
-        <button
-          className="tour-btn-skip"
-          onClick={onSkip}
-        >
+        <button className="tour-btn-skip" onClick={onSkip}>
           {isLast ? 'Finish' : 'Skip Tour'}
         </button>
 
@@ -203,91 +232,47 @@ const ProductTour = () => {
   const [tooltipPos,    setTooltipPos]    = useState({ top: 0, left: 0 });
   const [placement,     setPlacement]     = useState('bottom');
   const [tooltipVisible, setTooltipVisible] = useState(false);
+  const [activeGuideSlug, setActiveGuideSlug] = useState(null);
   const rafRef      = useRef(null);
   const retryRef    = useRef(null);
   const retryCount  = useRef(0);
 
-  // ── Find & position target element ──────────────────────────────────────────
+  const handleOpenGuideFromStep = (stepId) => {
+    const slug = STEP_TO_GUIDE_MAP[stepId] || 'dashboard';
+    setActiveGuideSlug(slug);
+  };
+
   const positionOnElement = useCallback(() => {
     if (!isActive || !step || isNavigating) return;
 
-    if (process.env.NODE_ENV === 'development' && retryCount.current === 0) {
-      console.log(`[Tour Debug] Step loaded: ${step.id}`);
-    }
-
     const el = document.querySelector(step.selector);
     if (!el) {
-      // Element not found — retry a few times (e.g. page still loading)
-      if (retryCount.current < 15) { // 3 seconds max (15 * 200ms)
+      if (retryCount.current < 15) {
         retryCount.current++;
         retryRef.current = setTimeout(positionOnElement, 200);
       } else {
-        if (process.env.NODE_ENV === 'development') {
-          console.warn(`[Tour Debug] Error: Target element missing for selector: ${step.selector}`);
-        }
-        // Auto-skip this step if element isn't found
         nextStep();
       }
       return;
     }
-    
-    if (process.env.NODE_ENV === 'development') {
-      console.log(`[Tour Debug] Target element found for selector: ${step.selector}`);
-    }
-    retryCount.current = -1; // Prevent multiple logs for same step if resize triggers it
 
-    // Smooth-scroll element into view — check if it has a scrollable parent (e.g. sidebar nav)
-    let parent = el.parentElement;
-    let scrolledParent = false;
-    while (parent && parent !== document.body) {
-      const style = window.getComputedStyle(parent);
-      if (style.overflowY === 'auto' || style.overflowY === 'scroll') {
-        el.scrollIntoView({ behavior: 'auto', block: 'nearest' });
-        scrolledParent = true;
-        break;
-      }
-      parent = parent.parentElement;
-    }
-    
-    // If not in a scrollable sub-container, scroll window if it is not a fixed layout component
-    if (!scrolledParent) {
-      let isFixed = false;
-      let currentEl = el;
-      while (currentEl && currentEl !== document.body) {
-        if (window.getComputedStyle(currentEl).position === 'fixed') {
-          isFixed = true;
-          break;
-        }
-        currentEl = currentEl.parentElement;
-      }
-      if (!isFixed) {
-        el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
-      }
-    }
+    const rect = el.getBoundingClientRect();
+    const windowW = window.innerWidth;
+    const windowH = window.innerHeight;
 
-    // Wait for scroll to settle then measure
-    const t = setTimeout(() => {
-      const rect = el.getBoundingClientRect();
-      const winW = window.innerWidth;
-      const winH = window.innerHeight;
+    const resolvedPlacement = getPlacement(rect, windowW, windowH, step.placement || 'auto');
+    const pos = computeTooltipPosition(rect, resolvedPlacement, windowW, windowH);
 
-      const resolvedPlacement = getPlacement(rect, winW, winH, step.placement);
-      const pos = computeTooltipPosition(rect, resolvedPlacement, winW, winH);
+    setSpotlightRect({
+      top:    rect.top    - SPOTLIGHT_PAD,
+      left:   rect.left   - SPOTLIGHT_PAD,
+      width:  rect.width  + SPOTLIGHT_PAD * 2,
+      height: rect.height + SPOTLIGHT_PAD * 2,
+    });
+    setPlacement(resolvedPlacement);
+    setTooltipPos(pos);
 
-      setSpotlightRect({
-        top:    rect.top    - SPOTLIGHT_PAD,
-        left:   rect.left   - SPOTLIGHT_PAD,
-        width:  rect.width  + SPOTLIGHT_PAD * 2,
-        height: rect.height + SPOTLIGHT_PAD * 2,
-      });
-      setPlacement(resolvedPlacement);
-      setTooltipPos(pos);
-
-      // Animate in
-      setTimeout(() => setTooltipVisible(true), 80);
-    }, 450);
-
-    return () => clearTimeout(t);
+    setTimeout(() => setTooltipVisible(true), 80);
   }, [isActive, step, isNavigating, nextStep]);
 
   useEffect(() => {
@@ -304,7 +289,6 @@ const ProductTour = () => {
     return () => clearTimeout(t);
   }, [isActive, isNavigating, currentStep, positionOnElement]);
 
-  // ── Reposition on window resize ──────────────────────────────────────────────
   useEffect(() => {
     if (!isActive) return;
     const handleResize = () => {
@@ -315,7 +299,6 @@ const ProductTour = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, [isActive, positionOnElement]);
 
-  // ── Keyboard navigation ──────────────────────────────────────────────────────
   useEffect(() => {
     if (!isActive) return;
     const handleKey = (e) => {
@@ -327,9 +310,8 @@ const ProductTour = () => {
     return () => window.removeEventListener('keydown', handleKey);
   }, [isActive, nextStep, prevStep, skipTour]);
 
-  if (!isActive) return null;
+  if (!isActive && !activeGuideSlug) return null;
 
-  // ── Spotlight clip-path values ───────────────────────────────────────────────
   const sr = spotlightRect;
   const overlayStyle = sr
     ? {
@@ -342,51 +324,63 @@ const ProductTour = () => {
 
   return (
     <>
-      {/* ── Overlay + Spotlight ── */}
-      <div
-        className={`tour-overlay ${sr ? 'tour-overlay-spotlight' : ''}`}
-        style={overlayStyle}
-        aria-hidden="true"
+      {isActive && (
+        <>
+          {/* Overlay + Spotlight */}
+          <div
+            className={`tour-overlay ${sr ? 'tour-overlay-spotlight' : ''}`}
+            style={overlayStyle}
+            aria-hidden="true"
+          />
+
+          {/* Spotlight border glow */}
+          {sr && (
+            <div
+              className="tour-spotlight-ring"
+              style={{
+                top:    sr.top,
+                left:   sr.left,
+                width:  sr.width,
+                height: sr.height,
+              }}
+            />
+          )}
+
+          {/* Tooltip Card */}
+          {step && !isNavigating && (
+            <TooltipCard
+              step={step}
+              currentStep={currentStep}
+              totalSteps={totalSteps}
+              position={tooltipPos}
+              placement={placement}
+              onNext={nextStep}
+              onPrev={prevStep}
+              onSkip={skipTour}
+              onFinish={finishTour}
+              visible={tooltipVisible}
+              onOpenGuide={handleOpenGuideFromStep}
+            />
+          )}
+
+          {/* Loading indicator while navigating pages */}
+          {isNavigating && (
+            <div className="tour-nav-loading">
+              <div className="tour-nav-loading-dot" />
+              <div className="tour-nav-loading-dot" style={{ animationDelay: '0.15s' }} />
+              <div className="tour-nav-loading-dot" style={{ animationDelay: '0.3s' }} />
+              <span>Loading next step…</span>
+            </div>
+          )}
+        </>
+      )}
+
+      {/* Interactive Learning Center Modal */}
+      <LearningCenterModal
+        guideSlug={activeGuideSlug}
+        isOpen={!!activeGuideSlug}
+        onClose={() => setActiveGuideSlug(null)}
       />
-
-      {/* ── Spotlight border glow ── */}
-      {sr && (
-        <div
-          className="tour-spotlight-ring"
-          style={{
-            top:    sr.top,
-            left:   sr.left,
-            width:  sr.width,
-            height: sr.height,
-          }}
-        />
-      )}
-
-      {/* ── Tooltip ── */}
-      {step && !isNavigating && (
-        <TooltipCard
-          step={step}
-          currentStep={currentStep}
-          totalSteps={totalSteps}
-          position={tooltipPos}
-          placement={placement}
-          onNext={nextStep}
-          onPrev={prevStep}
-          onSkip={skipTour}
-          onFinish={finishTour}
-          visible={tooltipVisible}
-        />
-      )}
-
-      {/* ── Loading indicator while navigating pages ── */}
-      {isNavigating && (
-        <div className="tour-nav-loading">
-          <div className="tour-nav-loading-dot" />
-          <div className="tour-nav-loading-dot" style={{ animationDelay: '0.15s' }} />
-          <div className="tour-nav-loading-dot" style={{ animationDelay: '0.3s' }} />
-          <span>Loading next step…</span>
-        </div>
-      )}
     </>
   );
 };

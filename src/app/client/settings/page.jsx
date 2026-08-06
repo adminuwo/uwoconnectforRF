@@ -8,9 +8,12 @@ import axios from 'axios';
 import { useTour } from '@/context/TourContext';
 import PaymentModal from '@/components/billing/PaymentModal';
 
+import LearningCenterModal from '@/components/guides/LearningCenterModal';
+
 const ClientSettingsPage = () => {
   const searchParams = useSearchParams();
   const { resetTour } = useTour();
+  const [isGuideOpen, setIsGuideOpen] = useState(false);
   const [client, setClient] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
@@ -152,17 +155,26 @@ const ClientSettingsPage = () => {
             <p className="text-slate-500 font-medium italic">Manage your profile, integration and security.</p>
           </div>
           <div className="flex items-center gap-3 flex-wrap w-full sm:w-auto">
+            {/* View Complete Guide Button */}
+            <button
+              onClick={() => setIsGuideOpen(true)}
+              className="flex items-center justify-center gap-2 px-5 py-3 bg-slate-900 text-white rounded-2xl font-bold text-xs hover:bg-black transition-all shadow-md flex-1 sm:flex-initial text-center cursor-pointer"
+              title="Open step-by-step documentation guide for Settings"
+            >
+              <Sparkles size={15} className="text-emerald-400" />
+              View Complete Guide
+            </button>
             {/* Restart Product Tour button */}
             <button
               onClick={resetTour}
-              className="flex items-center justify-center gap-2 px-5 py-3 bg-white border-2 border-emerald-200 text-emerald-700 rounded-2xl font-bold text-xs hover:bg-emerald-50 hover:border-emerald-400 transition-all shadow-sm group flex-1 sm:flex-initial text-center"
+              className="flex items-center justify-center gap-2 px-5 py-3 bg-white border-2 border-emerald-200 text-emerald-700 rounded-2xl font-bold text-xs hover:bg-emerald-50 hover:border-emerald-400 transition-all shadow-sm group flex-1 sm:flex-initial text-center cursor-pointer"
               title="Replay the guided product tour"
             >
               <MapPin size={15} className="group-hover:animate-bounce" />
               Restart Tour
             </button>
             {!isEditing ? (
-              <button onClick={() => setIsEditing(true)} className="px-6 py-3 bg-emerald-600 text-white rounded-2xl font-bold text-xs hover:bg-emerald-700 transition-all shadow-xl shadow-emerald-100 flex-1 sm:flex-initial text-center">
+              <button onClick={() => setIsEditing(true)} className="px-6 py-3 bg-emerald-600 text-white rounded-2xl font-bold text-xs hover:bg-emerald-700 transition-all shadow-xl shadow-emerald-100 flex-1 sm:flex-initial text-center cursor-pointer">
                 Edit Settings
               </button>
             ) : (
@@ -642,6 +654,13 @@ const ClientSettingsPage = () => {
             }}
           />
         )}
+
+        {/* Interactive Settings Learning Guide Modal */}
+        <LearningCenterModal
+          guideSlug="settings"
+          isOpen={isGuideOpen}
+          onClose={() => setIsGuideOpen(false)}
+        />
       </div>
     </DashboardLayout>
   );

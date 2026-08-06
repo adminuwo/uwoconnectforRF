@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Plus, Trash2, Loader2, MessageCircle, Star, Sparkles, Key, CheckCircle2, Edit3, X, Save } from 'lucide-react';
+import { Plus, Trash2, Loader2, MessageCircle, Star, Sparkles, Key, CheckCircle2, Edit3, X, Save, Zap, ArrowRight } from 'lucide-react';
 import axios from 'axios';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { cn } from '@/lib/utils';
@@ -79,10 +79,6 @@ const ClientAutomationsPage = () => {
         headers: { Authorization: `Bearer ${token}` }
       });
       setClient(profileRes.data.client);
-      setGreetingData({
-        enabled: profileRes.data.client.greeting_enabled || false,
-        message: profileRes.data.client.greeting_message || ''
-      });
       setAIData({
         enabled: profileRes.data.client.ai_enabled || false,
         context: profileRes.data.client.ai_context || ''
@@ -98,20 +94,45 @@ const ClientAutomationsPage = () => {
     fetchData();
   }, []);
 
+  useEffect(() => {
+    const welcomeAutomation = automations.find(a => a.trigger_type === 'START_CHAT' && a.channels.includes(selectedChannel));
+    if (welcomeAutomation) {
+      setGreetingData({ enabled: welcomeAutomation.enabled, message: welcomeAutomation.response });
+    } else {
+      setGreetingData({ enabled: false, message: '' });
+    }
+  }, [selectedChannel, automations]);
+
   // Save Welcome Greeting
   const handleSaveGreeting = async (newEnabledState = null) => {
     setSavingKey('greeting');
     try {
       const token = localStorage.getItem('token');
       const enabled = newEnabledState !== null ? newEnabledState : greetingData.enabled;
-      await axios.patch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/profile`, {
-        greeting_enabled: enabled,
-        greeting_message: greetingData.message
-      }, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setGreetingData(prev => ({ ...prev, enabled }));
-      showToast('Welcome message saved!');
+      
+      const welcomeAutomation = automations.find(a => a.trigger_type === 'START_CHAT' && a.channels.includes(selectedChannel));
+
+      if (welcomeAutomation) {
+        await axios.patch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/automations/${welcomeAutomation.id}/`, {
+          enabled: enabled,
+          response: greetingData.message
+        }, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+      } else {
+        await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/automations/`, {
+          name: `Welcome Greeting (${selectedChannel})`,
+          trigger_type: 'START_CHAT',
+          response: greetingData.message,
+          enabled: enabled,
+          channels: [selectedChannel]
+        }, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+      }
+      
+      fetchData();
+      showToast(`Welcome message saved for ${selectedChannel.toLowerCase()}!`);
     } catch (err) {
       showToast('Failed to save welcome message');
     } finally {
@@ -148,173 +169,182 @@ const ClientAutomationsPage = () => {
     try {
       const token = localStorage.getItem('token');
       await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/automations/`, {
-        name: newKeyword.name || newKeyword.keywords,
+        name: newKeyword.keywords.split(',')[0].trim(),
         trigger_type: 'KEYWORD',
-        keywords: newKeyword.keywords.split(',').map(k => k.trim()).filter(Boolean),
+        keywords: newKeyword.keywords.split(',').map(k => k.trim()),
         response: newKeyword.response,
-        channels: [selectedChannel],
-        enabled: true
+        enabled: true,
+        channels: [selectedChannel]
       }, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setIsKeywordModalOpen(false);
       setNewKeyword({ name: '', keywords: '', response: '' });
-      showToast('New keyword reply added!');
+      setIsKeywordModalOpen(false);
       fetchData();
+      showToast('Keyword reply created!');
     } catch (err) {
-      showToast('Failed to add keyword reply');
+      showToast('Failed to create keyword reply');
     } finally {
       setSavingKey(null);
     }
   };
 
   // Toggle Keyword Reply
-  const handleToggleKeyword = async (id, currentEnabled) => {
+  const handleToggleKeyword = async (id, currentStatus) => {
     try {
       const token = localStorage.getItem('token');
       await axios.patch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/automations/${id}/`, {
-        enabled: !currentEnabled
+        enabled: !currentStatus
       }, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      fetchData();
-      showToast(currentEnabled ? 'Rule paused' : 'Rule enabled');
+      setAutomations(automations.map(a => a.id === id ? { ...a, enabled: !currentStatus } : a));
+      showToast(!currentStatus ? 'Keyword reply enabled' : 'Keyword reply paused');
     } catch (err) {
-      console.error('Failed to toggle keyword rule');
+      showToast('Failed to update keyword reply');
     }
   };
 
   // Delete Keyword Reply
   const handleDeleteKeyword = async (id) => {
-    if (!confirm('Are you sure you want to delete this reply rule?')) return;
     try {
       const token = localStorage.getItem('token');
       await axios.delete(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/automations/${id}/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      fetchData();
-      showToast('Rule deleted');
+      setAutomations(automations.filter(a => a.id !== id));
+      showToast('Keyword reply deleted');
     } catch (err) {
-      console.error('Failed to delete rule');
+      showToast('Failed to delete keyword reply');
     }
   };
 
   const channelKeywords = automations.filter(auto => {
     const chs = auto.channels || [];
-    return chs.length === 0 || chs.includes(selectedChannel);
+    return auto.trigger_type === 'KEYWORD' && (chs.length === 0 || chs.includes(selectedChannel));
   });
 
   return (
     <DashboardLayout role="CLIENT">
-      <div className="max-w-4xl mx-auto pb-16 px-4 sm:px-6">
+      <div style={{ fontFamily: '"Times New Roman", Times, serif' }} className="max-w-5xl mx-auto pb-20 px-4 sm:px-6">
         
         {/* Notification Toast */}
         {toast && (
-          <div className="fixed top-6 right-6 z-[120] flex items-center gap-2 px-4 py-2.5 rounded-xl shadow-lg font-medium text-xs bg-slate-900 text-white animate-in fade-in duration-200">
-            <CheckCircle2 size={15} className="text-emerald-400" />
+          <div className="fixed top-6 right-6 z-[120] flex items-center gap-2 px-5 py-3 rounded-2xl shadow-xl font-medium text-xs bg-slate-900 text-white animate-in fade-in duration-200 border border-slate-800">
+            <CheckCircle2 size={16} className="text-[#00AB56]" />
             <span>{toast}</span>
           </div>
         )}
 
-        {/* Clean Header */}
-        <div className="py-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 border-b border-slate-100">
+        {/* Header Section */}
+        <div className="py-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 border-b border-slate-200/80">
           <div>
-            <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Auto Replies</h1>
-            <p className="text-slate-500 text-xs mt-0.5">Simple automatic responses for your customer messages.</p>
+            <h1 className="text-3xl font-black text-slate-900 tracking-tight flex items-center gap-2.5">
+              <Zap className="w-7 h-7 text-[#00AB56]" />
+              Auto Replies & AI Automations
+            </h1>
+            <p className="text-slate-500 text-sm mt-1 font-medium">Configure instant responses, keyword triggers, and AI assistants for your channels.</p>
           </div>
 
           {/* Channel Selector Tabs */}
-          <div className="flex gap-1.5 bg-slate-100/70 p-1 rounded-xl shrink-0">
+          <div className="flex gap-2 bg-slate-100 p-1.5 rounded-2xl border border-slate-200/80 shrink-0">
             <button
               onClick={() => setSelectedChannel('WHATSAPP')}
               className={cn(
-                "py-1.5 px-3 rounded-lg text-xs font-medium transition-all cursor-pointer flex items-center gap-1.5",
-                selectedChannel === 'WHATSAPP' ? "bg-white text-emerald-700 shadow-xs font-semibold" : "text-slate-500 hover:text-slate-800"
+                "py-2 px-4 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2",
+                selectedChannel === 'WHATSAPP' ? "bg-white text-[#00AB56] shadow-sm border border-emerald-100" : "text-slate-500 hover:text-slate-900"
               )}
             >
-              <MessageCircle size={14} className={selectedChannel === 'WHATSAPP' ? 'text-emerald-600' : ''} />
+              <MessageCircle size={15} className={selectedChannel === 'WHATSAPP' ? 'text-[#00AB56]' : ''} />
               <span>WhatsApp</span>
             </button>
             <button
               onClick={() => setSelectedChannel('FACEBOOK')}
               className={cn(
-                "py-1.5 px-3 rounded-lg text-xs font-medium transition-all cursor-pointer flex items-center gap-1.5",
-                selectedChannel === 'FACEBOOK' ? "bg-white text-blue-700 shadow-xs font-semibold" : "text-slate-500 hover:text-slate-800"
+                "py-2 px-4 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2",
+                selectedChannel === 'FACEBOOK' ? "bg-white text-[#2563EB] shadow-sm border border-blue-100" : "text-slate-500 hover:text-slate-900"
               )}
             >
-              <FacebookIcon size={14} className={selectedChannel === 'FACEBOOK' ? 'text-blue-600' : ''} />
+              <FacebookIcon size={15} className={selectedChannel === 'FACEBOOK' ? 'text-[#2563EB]' : ''} />
               <span>Facebook</span>
             </button>
             <button
               onClick={() => setSelectedChannel('INSTAGRAM')}
               className={cn(
-                "py-1.5 px-3 rounded-lg text-xs font-medium transition-all cursor-pointer flex items-center gap-1.5",
-                selectedChannel === 'INSTAGRAM' ? "bg-white text-pink-700 shadow-xs font-semibold" : "text-slate-500 hover:text-slate-800"
+                "py-2 px-4 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2",
+                selectedChannel === 'INSTAGRAM' ? "bg-white text-pink-600 shadow-sm border border-pink-100" : "text-slate-500 hover:text-slate-900"
               )}
             >
-              <InstagramIcon size={14} className={selectedChannel === 'INSTAGRAM' ? 'text-pink-600' : ''} />
+              <InstagramIcon size={15} className={selectedChannel === 'INSTAGRAM' ? 'text-pink-600' : ''} />
               <span>Instagram</span>
             </button>
           </div>
         </div>
 
         {loading ? (
-          <div className="py-16 text-center">
-            <Loader2 className="animate-spin text-emerald-600 mx-auto" size={28} />
+          <div className="py-20 text-center">
+            <Loader2 className="animate-spin text-[#00AB56] mx-auto" size={32} />
           </div>
         ) : (
-          <div className="space-y-6">
+          <div className="space-y-8">
 
             {/* --- CARD 1: WELCOME MESSAGE (GREETING) --- */}
-            <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-xs">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center border border-amber-100">
-                    <Star size={18} fill="currentColor" className="opacity-80" />
+            <div className="bg-white rounded-3xl border border-slate-200/80 p-6 sm:p-8 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-48 h-48 bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
+              
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                <div className="flex items-start sm:items-center gap-4">
+                  <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center border border-amber-200/60 shadow-xs shrink-0">
+                    <Star size={22} fill="currentColor" className="opacity-90" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-slate-900 text-sm">Welcome Greeting</h3>
-                    <p className="text-[11px] text-slate-400">Automatic reply when a customer first messages you.</p>
+                    <h3 className="font-bold text-slate-900 text-lg">Welcome Greeting</h3>
+                    <p className="text-xs text-slate-500 mt-0.5">Send an automated instant greeting whenever a customer messages you for the first time.</p>
                   </div>
                 </div>
 
                 {/* ON / OFF Switch */}
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-slate-400 font-medium">
-                    {greetingData.enabled ? 'Enabled' : 'Disabled'}
+                <div className="flex items-center gap-3 bg-slate-50 px-4 py-2 rounded-2xl border border-slate-200/80 self-start sm:self-auto">
+                  <span className={cn("text-xs font-bold", greetingData.enabled ? "text-[#00AB56]" : "text-slate-400")}>
+                    {greetingData.enabled ? 'Active' : 'Disabled'}
                   </span>
                   <button 
                     onClick={() => handleSaveGreeting(!greetingData.enabled)}
                     className={cn(
-                      "w-11 h-6 rounded-full p-0.5 transition-colors cursor-pointer",
-                      greetingData.enabled ? "bg-emerald-500" : "bg-slate-200"
+                      "w-12 h-6.5 rounded-full p-1 transition-colors cursor-pointer relative",
+                      greetingData.enabled ? "bg-[#00AB56]" : "bg-slate-300"
                     )}
                   >
                     <div className={cn(
-                      "w-5 h-5 bg-white rounded-full transition-transform shadow-xs",
-                      greetingData.enabled ? "translate-x-5" : "translate-x-0"
+                      "w-4.5 h-4.5 bg-white rounded-full transition-transform shadow-sm",
+                      greetingData.enabled ? "translate-x-5.5" : "translate-x-0"
                     )} />
                   </button>
                 </div>
               </div>
 
               {/* Message Box */}
-              <div className="space-y-3">
-                <textarea
-                  value={greetingData.message}
-                  onChange={(e) => setGreetingData({ ...greetingData, message: e.target.value })}
-                  placeholder="e.g. Hi! Welcome to our store. How can we help you today?"
-                  rows={3}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3.5 text-xs text-slate-800 outline-none focus:border-emerald-500 transition-colors resize-none"
-                />
+              <div className="space-y-4">
+                <div className="relative">
+                  <textarea
+                    value={greetingData.message}
+                    onChange={(e) => setGreetingData({ ...greetingData, message: e.target.value })}
+                    placeholder="e.g. Hi there! Welcome to UWO Connect. How can our team assist you today?"
+                    rows={4}
+                    className="w-full bg-slate-50/80 border border-slate-200 rounded-2xl p-4 text-xs text-slate-800 outline-none focus:border-[#00AB56] focus:ring-2 focus:ring-[#00AB56]/15 transition-all resize-none font-medium leading-relaxed"
+                  />
+                  <span className="absolute bottom-3 right-3 text-[10px] text-slate-400 font-bold">
+                    {greetingData.message.length} chars
+                  </span>
+                </div>
                 
                 <div className="flex justify-end">
                   <button
                     onClick={() => handleSaveGreeting(null)}
                     disabled={savingKey === 'greeting'}
-                    className="py-2 px-4 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-medium transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                    className="py-3 px-6 bg-[#00AB56] hover:bg-[#008947] text-white rounded-2xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shadow-md shadow-[#00AB56]/20 disabled:opacity-50"
                   >
-                    {savingKey === 'greeting' ? <Loader2 size={13} className="animate-spin" /> : <Save size={13} />}
+                    {savingKey === 'greeting' ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
                     <span>Save Welcome Reply</span>
                   </button>
                 </div>
@@ -323,70 +353,73 @@ const ClientAutomationsPage = () => {
 
 
             {/* --- CARD 2: KEYWORD REPLIES --- */}
-            <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-xs">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100">
-                    <Key size={18} />
+            <div className="bg-white rounded-3xl border border-slate-200/80 p-6 sm:p-8 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                <div className="flex items-start sm:items-center gap-4">
+                  <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-[#00AB56] flex items-center justify-center border border-emerald-200/60 shadow-xs shrink-0">
+                    <Key size={22} />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-slate-900 text-sm">Keyword Auto Replies</h3>
-                    <p className="text-[11px] text-slate-400">Reply automatically when specific words (e.g. "Price", "Hours") are sent.</p>
+                    <h3 className="font-bold text-slate-900 text-lg">Keyword Auto Replies</h3>
+                    <p className="text-xs text-slate-500 mt-0.5">Trigger customized responses when customers send specific keywords (e.g. "Price", "Support", "Offer").</p>
                   </div>
                 </div>
 
                 <button
                   onClick={() => setIsKeywordModalOpen(true)}
-                  className="py-1.5 px-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-medium transition-colors flex items-center gap-1 cursor-pointer"
+                  className="py-2.5 px-5 bg-[#00AB56] hover:bg-[#008947] text-white rounded-2xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shadow-md shadow-[#00AB56]/20 shrink-0 self-start sm:self-auto"
                 >
-                  <Plus size={14} />
+                  <Plus size={16} />
                   <span>Add Keyword Reply</span>
                 </button>
               </div>
 
               {/* Keyword List */}
               {channelKeywords.length === 0 ? (
-                <div className="p-8 text-center bg-slate-50/60 rounded-xl border border-dashed border-slate-200 text-slate-400 text-xs">
-                  No keyword replies set yet. Click <strong>+ Add Keyword Reply</strong> above to create one.
+                <div className="p-10 text-center bg-slate-50/60 rounded-2xl border border-dashed border-slate-200 text-slate-400 text-xs">
+                  No keyword auto-replies configured for this channel yet. Click <strong className="text-[#00AB56]">+ Add Keyword Reply</strong> to get started.
                 </div>
               ) : (
-                <div className="space-y-3">
+                <div className="space-y-4">
                   {channelKeywords.map((auto) => (
                     <div 
                       key={auto.id}
-                      className="p-4 bg-slate-50/80 rounded-xl border border-slate-200/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                      className="p-5 bg-slate-50/70 hover:bg-white rounded-2xl border border-slate-200/70 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all shadow-2xs hover:shadow-sm"
                     >
-                      <div className="space-y-1 max-w-xl">
+                      <div className="space-y-2 max-w-2xl">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <span className="text-xs font-semibold text-slate-900">Keywords:</span>
+                          <span className="text-xs font-bold text-slate-900">Triggers:</span>
                           {auto.keywords.map((kw, idx) => (
-                            <span key={idx} className="px-2 py-0.5 bg-white text-emerald-700 border border-emerald-200/60 rounded text-[11px] font-medium">
+                            <span key={idx} className="px-2.5 py-1 bg-[#00AB56]/10 text-[#00AB56] border border-[#00AB56]/20 rounded-lg text-xs font-bold">
                               {kw}
                             </span>
                           ))}
                         </div>
-                        <p className="text-xs text-slate-600 italic">"{auto.response}"</p>
+                        <p className="text-xs text-slate-700 font-medium bg-white p-3 rounded-xl border border-slate-200/60 italic">
+                          "{auto.response}"
+                        </p>
                       </div>
 
-                      <div className="flex items-center gap-3 shrink-0">
-                        {/* Toggle */}
+                      <div className="flex items-center gap-3 shrink-0 self-end sm:self-center">
+                        {/* Toggle Status */}
                         <button
                           onClick={() => handleToggleKeyword(auto.id, auto.enabled)}
                           className={cn(
-                            "px-2.5 py-0.5 rounded-full text-[11px] font-medium transition-colors cursor-pointer",
-                            auto.enabled ? "bg-emerald-100 text-emerald-700" : "bg-slate-200 text-slate-500"
+                            "px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer border flex items-center gap-1.5",
+                            auto.enabled ? "bg-emerald-50 text-[#00AB56] border-emerald-200" : "bg-slate-100 text-slate-500 border-slate-200"
                           )}
                         >
+                          <span className={cn("w-1.5 h-1.5 rounded-full", auto.enabled ? "bg-[#00AB56] animate-pulse" : "bg-slate-400")} />
                           {auto.enabled ? 'Active' : 'Paused'}
                         </button>
 
-                        {/* Delete */}
+                        {/* Delete Button */}
                         <button
                           onClick={() => handleDeleteKeyword(auto.id)}
-                          className="p-1.5 text-slate-400 hover:text-red-600 transition-colors cursor-pointer"
+                          className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all cursor-pointer"
                           title="Delete"
                         >
-                          <Trash2 size={15} />
+                          <Trash2 size={16} />
                         </button>
                       </div>
                     </div>
@@ -397,55 +430,62 @@ const ClientAutomationsPage = () => {
 
 
             {/* --- CARD 3: AI SMART ASSISTANT --- */}
-            <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-xs">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center border border-purple-100">
-                    <Sparkles size={18} />
+            <div className="bg-white rounded-3xl border border-slate-200/80 p-6 sm:p-8 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-48 h-48 bg-blue-500/5 rounded-full blur-3xl pointer-events-none" />
+
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                <div className="flex items-start sm:items-center gap-4">
+                  <div className="w-12 h-12 rounded-2xl bg-blue-50 text-[#2563EB] flex items-center justify-center border border-blue-200/60 shadow-xs shrink-0">
+                    <Sparkles size={22} />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-slate-900 text-sm">AI Smart Assistant</h3>
-                    <p className="text-[11px] text-slate-400">Let AI answer customer questions based on your business info.</p>
+                    <h3 className="font-bold text-slate-900 text-lg">AI Smart Assistant</h3>
+                    <p className="text-xs text-slate-500 mt-0.5">Empower AI to answer complex customer queries automatically using your business knowledge.</p>
                   </div>
                 </div>
 
                 {/* ON / OFF Switch */}
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-slate-400 font-medium">
-                    {aiData.enabled ? 'Enabled' : 'Disabled'}
+                <div className="flex items-center gap-3 bg-slate-50 px-4 py-2 rounded-2xl border border-slate-200/80 self-start sm:self-auto">
+                  <span className={cn("text-xs font-bold", aiData.enabled ? "text-[#2563EB]" : "text-slate-400")}>
+                    {aiData.enabled ? 'Active' : 'Disabled'}
                   </span>
                   <button 
                     onClick={() => handleSaveAI(!aiData.enabled)}
                     className={cn(
-                      "w-11 h-6 rounded-full p-0.5 transition-colors cursor-pointer",
-                      aiData.enabled ? "bg-purple-600" : "bg-slate-200"
+                      "w-12 h-6.5 rounded-full p-1 transition-colors cursor-pointer relative",
+                      aiData.enabled ? "bg-[#2563EB]" : "bg-slate-300"
                     )}
                   >
                     <div className={cn(
-                      "w-5 h-5 bg-white rounded-full transition-transform shadow-xs",
-                      aiData.enabled ? "translate-x-5" : "translate-x-0"
+                      "w-4.5 h-4.5 bg-white rounded-full transition-transform shadow-sm",
+                      aiData.enabled ? "translate-x-5.5" : "translate-x-0"
                     )} />
                   </button>
                 </div>
               </div>
 
               {/* Context Box */}
-              <div className="space-y-3">
-                <textarea
-                  value={aiData.context}
-                  onChange={(e) => setAIData({ ...aiData, context: e.target.value })}
-                  placeholder="Describe your business, products, services, timings, or prices so AI can answer customer queries accurately..."
-                  rows={3}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3.5 text-xs text-slate-800 outline-none focus:border-purple-500 transition-colors resize-none"
-                />
+              <div className="space-y-4">
+                <div className="relative">
+                  <textarea
+                    value={aiData.context}
+                    onChange={(e) => setAIData({ ...aiData, context: e.target.value })}
+                    placeholder="Describe your business services, opening hours, pricing, refund policies, or product FAQs so AI answers customer queries with high precision..."
+                    rows={4}
+                    className="w-full bg-slate-50/80 border border-slate-200 rounded-2xl p-4 text-xs text-slate-800 outline-none focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/15 transition-all resize-none font-medium leading-relaxed"
+                  />
+                  <span className="absolute bottom-3 right-3 text-[10px] text-slate-400 font-bold">
+                    {aiData.context.length} chars
+                  </span>
+                </div>
 
                 <div className="flex justify-end">
                   <button
                     onClick={() => handleSaveAI(null)}
                     disabled={savingKey === 'ai'}
-                    className="py-2 px-4 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-medium transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                    className="py-3 px-6 bg-[#2563EB] hover:bg-[#1D4ED8] text-white rounded-2xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shadow-md shadow-[#2563EB]/20 disabled:opacity-50"
                   >
-                    {savingKey === 'ai' ? <Loader2 size={13} className="animate-spin" /> : <Save size={13} />}
+                    {savingKey === 'ai' ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
                     <span>Save AI Assistant</span>
                   </button>
                 </div>
@@ -458,51 +498,56 @@ const ClientAutomationsPage = () => {
         {/* Modal: Add New Keyword Reply */}
         {isKeywordModalOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
-            <div onClick={() => setIsKeywordModalOpen(false)} className="absolute inset-0 bg-slate-900/30 backdrop-blur-xs" />
-            <div className="relative bg-white w-full max-w-md rounded-2xl shadow-xl p-6 border border-slate-200">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-base font-bold text-slate-900">Add Keyword Reply</h2>
-                <button onClick={() => setIsKeywordModalOpen(false)} className="text-slate-400 hover:text-slate-700 cursor-pointer"><X size={18} /></button>
+            <div onClick={() => setIsKeywordModalOpen(false)} className="absolute inset-0 bg-slate-900/40 backdrop-blur-xs" />
+            <div className="relative bg-white w-full max-w-md rounded-3xl shadow-2xl p-6 sm:p-8 border border-slate-200/90 z-10 space-y-6">
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                  <Key size={18} className="text-[#00AB56]" />
+                  Add Keyword Reply
+                </h2>
+                <button onClick={() => setIsKeywordModalOpen(false)} className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition-all cursor-pointer">
+                  <X size={18} />
+                </button>
               </div>
 
               <form onSubmit={handleCreateKeyword} className="space-y-4">
                 <div>
-                  <label className="text-xs font-medium text-slate-600 mb-1 block">When customer sends (Keywords, comma separated):</label>
+                  <label className="text-xs font-bold text-slate-700 mb-1.5 block">When Customer Sends Keywords (comma separated):</label>
                   <input
                     required
                     value={newKeyword.keywords}
                     onChange={(e) => setNewKeyword({ ...newKeyword, keywords: e.target.value })}
-                    placeholder="e.g. price, cost, rate"
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs outline-none focus:border-emerald-500 text-slate-800"
+                    placeholder="e.g. price, cost, rate, plans"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-xs outline-none focus:border-[#00AB56] focus:ring-2 focus:ring-[#00AB56]/15 text-slate-900 font-medium"
                   />
                 </div>
 
                 <div>
-                  <label className="text-xs font-medium text-slate-600 mb-1 block">Automatic Reply Message:</label>
+                  <label className="text-xs font-bold text-slate-700 mb-1.5 block">Automatic Reply Message:</label>
                   <textarea
                     required
                     value={newKeyword.response}
                     onChange={(e) => setNewKeyword({ ...newKeyword, response: e.target.value })}
                     placeholder="e.g. Our basic plan starts at $50/mo. Visit our website for details."
-                    rows={3}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs outline-none focus:border-emerald-500 text-slate-800 resize-none"
+                    rows={4}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-xs outline-none focus:border-[#00AB56] focus:ring-2 focus:ring-[#00AB56]/15 text-slate-900 font-medium resize-none"
                   />
                 </div>
 
-                <div className="flex justify-end gap-2 pt-2">
+                <div className="flex items-center justify-end gap-3 pt-2">
                   <button
                     type="button"
                     onClick={() => setIsKeywordModalOpen(false)}
-                    className="px-4 py-2 text-slate-500 text-xs font-medium cursor-pointer"
+                    className="px-5 py-2.5 text-slate-500 hover:text-slate-800 text-xs font-bold cursor-pointer rounded-xl"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={savingKey === 'create_kw'}
-                    className="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-medium transition-colors cursor-pointer flex items-center gap-1.5"
+                    className="px-6 py-2.5 bg-[#00AB56] hover:bg-[#008947] text-white rounded-2xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 shadow-md shadow-[#00AB56]/20"
                   >
-                    {savingKey === 'create_kw' && <Loader2 size={13} className="animate-spin" />}
+                    {savingKey === 'create_kw' && <Loader2 size={14} className="animate-spin" />}
                     <span>Save Reply</span>
                   </button>
                 </div>
