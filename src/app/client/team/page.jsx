@@ -25,62 +25,65 @@ import MemberDetailDrawer from '@/components/team/MemberDetailDrawer';
 import ProjectDetailDrawer from '@/components/team/ProjectDetailDrawer';
 
 export default function TeamPage() {
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  const [activeTab, setActiveTab] = useState('DIRECTORY'); // DIRECTORY, PROJECTS, TASKS, CHAT, ATTENDANCE, REPORTS
+  const [members, setMembers] = useState([]);
+  const [projects, setProjects] = useState([]);
+  const [tasks, setTasks] = useState([]);
+  const [reports, setReports] = useState([]);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   // Filters & Search
+  const [searchQuery, setSearchQuery] = useState('');
+  const [departmentFilter, setDepartmentFilter] = useState('ALL');
+  const [taskViewMode, setTaskViewMode] = useState('KANBAN'); // KANBAN, LIST
 
-
-
-
+  // Modals & Drawers
   const [isMemberModalOpen, setIsMemberModalOpen] = useState(false);
   const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  const [isAttendanceModalOpen, setIsAttendanceModalOpen] = useState(false);
 
+  const [selectedTask, setSelectedTask] = useState(null);
+  const [selectedMember, setSelectedMember] = useState(null);
+  const [selectedProject, setSelectedProject] = useState(null);
 
-
-
-
-
-
-
-
+  const fetchProfile = async () => {
     try {
       const token = localStorage.getItem('token');
       const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/profile`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-
+      setCurrentUser(res.data);
     } catch (err) {
+      console.warn('Failed to fetch profile:', err);
+    }
+  };
 
-
-
-
+  const fetchMembers = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/team/members/`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setMembers(res.data || []);
     } catch (err) {
+      console.warn('Failed to fetch members:', err);
+    }
+  };
 
-
-
+  const fetchProjects = async () => {
     try {
       const token = localStorage.getItem('token');
       const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/team/projects/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-
-
+      setProjects(res.data || []);
+    } catch (err) {
+      console.warn('Failed to fetch projects:', err);
+    }
+  };
 
   const fetchTasks = async () => {
     try {
@@ -90,57 +93,139 @@ export default function TeamPage() {
       });
       setTasks(res.data || []);
     } catch (err) {
+      console.warn('Failed to fetch tasks:', err);
+    }
+  };
 
-
-
-
-
-    } catch (err) {
-
-
-
-
-
-
-
-
+  const fetchReports = async () => {
     try {
       const token = localStorage.getItem('token');
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/team/reports/`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setReports(res.data || []);
+    } catch (err) {
+      console.warn('Failed to fetch reports:', err);
+    }
+  };
 
+  const handleDeleteProject = async (id) => {
+    if (!confirm('Are you sure you want to delete this project?')) return;
+    try {
+      const token = localStorage.getItem('token');
+      await axios.delete(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/team/projects/${id}/`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      fetchProjects();
+    } catch (err) {
+      console.error('Failed to delete project:', err);
+    }
+  };
 
+  const handleDeleteMember = async (id) => {
+    if (!confirm('Are you sure you want to remove this team member?')) return;
+    try {
+      const token = localStorage.getItem('token');
+      await axios.delete(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/team/members/${id}/`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      fetchMembers();
+    } catch (err) {
+      console.error('Failed to delete member:', err);
+    }
+  };
 
+  useEffect(() => {
+    const init = async () => {
+      setLoading(true);
+      await Promise.all([
+        fetchProfile(),
+        fetchMembers(),
+        fetchProjects(),
+        fetchTasks(),
+        fetchReports()
+      ]);
+      setLoading(false);
+    };
+    init();
+  }, []);
 
+  const filteredMembers = members.filter(m => {
+    const matchesSearch = (m.username || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          (m.email || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          (m.department || '').toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesDept = departmentFilter === 'ALL' || (m.department || '').toUpperCase() === departmentFilter.toUpperCase();
+    return matchesSearch && matchesDept;
+  });
 
+  const filteredProjects = projects.filter(p => 
+    (p.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (p.description || '').toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
+  return (
+    <DashboardLayout>
+      <div className="p-6 max-w-7xl mx-auto space-y-6">
+        {/* Header */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-slate-200 shadow-2xs">
+          <div>
+            <h1 className="text-2xl font-black text-slate-900 flex items-center gap-2">
+              <Users className="text-emerald-600" size={28} /> Team & Workspace Hub
+            </h1>
+            <p className="text-xs font-medium text-slate-500 mt-1">
+              Manage your organization, assign tasks, track attendance, and monitor team performance
+            </p>
+          </div>
 
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              onClick={() => setIsMemberModalOpen(true)}
+              className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl text-xs font-bold transition-all shadow-sm flex items-center gap-2 cursor-pointer"
+            >
+              <UserPlus size={15} /> Invite Member
+            </button>
+            <button
+              onClick={() => setIsProjectModalOpen(true)}
+              className="px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl text-xs font-bold transition-all shadow-sm flex items-center gap-2 cursor-pointer"
+            >
+              <FolderPlus size={15} /> New Project
+            </button>
+            <button
+              onClick={() => setIsTaskModalOpen(true)}
+              className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-2xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer"
+            >
+              <Plus size={15} /> Create Task
+            </button>
+          </div>
+        </div>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        {/* Tab Navigation */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+          {[
+            { id: 'DIRECTORY', label: 'Directory', icon: Users },
+            { id: 'PROJECTS', label: 'Projects', icon: Layers },
+            { id: 'TASKS', label: 'Tasks & Board', icon: CheckSquare },
+            { id: 'CHAT', label: 'Internal Chat', icon: MessageSquare },
+            { id: 'ATTENDANCE', label: 'Attendance & Leave', icon: CalendarIcon },
+            { id: 'REPORTS', label: 'Work Reports', icon: FileText },
+          ].map((tab) => {
+            const Icon = tab.icon;
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`px-4 py-2.5 rounded-2xl text-xs font-bold transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${
+                  isActive
+                    ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20'
+                    : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
+                }`}
+              >
+                <Icon size={15} /> {tab.label}
+              </button>
+            );
+          })}
+        </div>
 
 
 

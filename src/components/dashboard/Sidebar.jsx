@@ -23,13 +23,18 @@ import {
   ShoppingBag,
   Receipt,
   MessagesSquare,
-  FileCheck
+  FileCheck,
+  Newspaper,
+  BookOpen
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 // Tour ID → sidebar link name mapping
 const TOUR_IDS = {
+  'Dashboard':      'sidebar-dashboard',
   'Channels':       'sidebar-channels',
+  'YouTube':        'sidebar-youtube',
+  'Google News':    'sidebar-google-news',
   'Auto Replies':   'sidebar-automations',
   'Workflows':      'sidebar-workflows',
   'Leads (CRM)':    'sidebar-crm',
@@ -39,10 +44,23 @@ const TOUR_IDS = {
   'Catalog':        'sidebar-catalog',
   'Orders':         'sidebar-orders',
   'Team':           'sidebar-team',
+  'Work Reports':   'sidebar-reports',
   'Settings':       'sidebar-settings',
-  'Dashboard':      'sidebar-dashboard',
   'Support':        'sidebar-support',
 };
+
+const YoutubeIcon = ({ size = 16, className }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="currentColor"
+    className={className}
+  >
+    <path d="M23.498 6.163a3.003 3.003 0 0 0-2.11-2.107C19.528 3.545 12 3.545 12 3.545s-7.528 0-9.388.511a3.003 3.003 0 0 0-2.11 2.107A30.213 30.213 0 0 0 0 12c0 1.944.15 3.89.49 5.837a3.003 3.003 0 0 0 2.11 2.107c1.86.51 9.388.51 9.388.51s7.528 0 9.388-.51a3.003 3.003 0 0 0 2.11-2.107A30.213 30.213 0 0 0 24 12a30.213 30.213 0 0 0-.502-5.837zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+  </svg>
+);
 
 const Sidebar = ({ role, isOpen, onClose }) => {
   const pathname = usePathname();
@@ -51,6 +69,7 @@ const Sidebar = ({ role, isOpen, onClose }) => {
     { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
     { name: 'Client List', href: '/admin/clients', icon: Link2 },
     { name: 'Approvals', href: '/admin/approvals', icon: ShieldCheck },
+    { name: 'Guide Admin', href: '/admin/guides', icon: BookOpen },
     { name: 'Automations', href: '/admin/automations', icon: Zap },
     { name: 'Messages', href: '/admin/inbox', icon: MessageSquare },
     { name: 'Audit Logs', href: '/admin/audit-logs', icon: Activity },
@@ -62,7 +81,10 @@ const Sidebar = ({ role, isOpen, onClose }) => {
 
   const clientLinks = [
     { name: 'Dashboard', href: '/client', icon: LayoutDashboard },
+    { name: 'Learning Center', href: '/client/guides', icon: BookOpen },
     { name: 'Channels', href: '/client/channels', icon: Link2 },
+    { name: 'YouTube', href: '/client/youtube', icon: YoutubeIcon },
+    { name: 'Google News', href: '/client/google-news', icon: Newspaper },
     { name: 'Auto Replies', href: '/client/automations', icon: Zap },
     { name: 'Workflows', href: '/client/workflows', icon: GitBranch },
     { name: 'Leads (CRM)', href: '/client/crm', icon: Users },

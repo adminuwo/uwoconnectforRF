@@ -10,42 +10,34 @@
   --color-glow-green: var(--green-glow);
   --color-text-secondary: var(--secondary-text);
   --color-border-base: var(--border);
+  --color-logo-blue: var(--logo-blue);
+  --color-logo-green: var(--logo-green);
 
-
-
-  --font-sans: "Times New Roman", Times, Georgia, serif;
-  --font-serif: "Times New Roman", Times, Georgia, serif;
+  --font-sans: var(--font-inter), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
 :root {
-  --background: #fcfdfe;
-  --foreground: #0f172a;
+  --background: #F0FDF4;
+  --foreground: #0F172A;
   --surface: #0B0D11;
-  --card: rgba(16, 185, 129, 0.03);
-  --primary: #10B981;
-  --secondary: #20C997;
-  --ai-accent: #25D366;
-  --green-glow: rgba(16, 185, 129, 0.15);
-  --secondary-text: #8E99A8;
-  --border: rgba(255, 255, 255, 0.08);
+  --card: rgba(0, 171, 86, 0.04);
+  --primary: #00AB56;
+  --secondary: #00AE8B;
+  --ai-accent: #2563EB;
+  --green-glow: rgba(0, 171, 86, 0.15);
+  --blue-glow: rgba(37, 99, 235, 0.15);
+  --secondary-text: #64748B;
+  --border: rgba(0, 171, 86, 0.15);
+  --logo-blue: #2563EB;
+  --logo-green: #00AB56;
 }
 
 @layer base {
-  *,
-  html,
-  body,
-  button,
-  input,
-  select,
-  textarea {
-    font-family: "Times New Roman", Times, Georgia, serif !important;
-  }
-
   html,
   body {
-    background-color: #fcfdfe;
+    background-color: #F0FDF4;
     color: var(--foreground);
-    @apply antialiased transition-colors duration-300;
+    font-family: var(--font-inter), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     overflow-x: hidden !important;
     max-width: 100% !important;
   }
@@ -910,3 +902,43 @@
     justify-content: center !important;
   }
 }
+
+/* Kinso Design System Utilities */
+.kinso-green-glow {
+  box-shadow: 0 0 35px -5px rgba(22, 163, 74, 0.25);
+}
+
+.kinso-card-shadow {
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.02), 0 10px 30px -10px rgba(0, 0, 0, 0.05);
+}
+
+.kinso-card-hover {
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.kinso-card-hover:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.08);
+}
+
+.kinso-gradient-text {
+  background: linear-gradient(135deg, #111827 0%, #00AB56 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+@keyframes shimmerGradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.text-gradient-animated {
+  background: linear-gradient(90deg, #0F172A 0%, #00AB56 35%, #2563EB 70%, #0F172A 100%);
+  background-size: 200% auto;
+  color: transparent;
+  -webkit-background-clip: text;
+  background-clip: text;
+  animation: shimmerGradient 6s ease infinite;
+}
+
