@@ -1426,9 +1426,10 @@ return (
                 </button>
               )}
             </div>
+          </div>
 
-            {/* --- YOUTUBE CARD --- */}
-            <div className="bg-white rounded-2xl border border-slate-200/80 p-6 flex flex-col justify-between hover:border-slate-300 transition-all shadow-xs min-h-[380px]">
+          {/* --- YOUTUBE CARD --- */}
+          <div className="bg-white rounded-2xl border border-slate-200/80 p-6 flex flex-col justify-between hover:border-slate-300 transition-all shadow-xs min-h-[380px]">
               <div>
                 {/* Header */}
                 <div className="flex flex-col gap-3.5 mb-5">
@@ -1542,8 +1543,6 @@ return (
             </div>
 
           </div>
-
-        </div>
       )}
 
       {/* WhatsApp Configuration Modal */}
