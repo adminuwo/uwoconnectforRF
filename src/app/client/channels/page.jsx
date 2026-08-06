@@ -222,48 +222,15 @@ const ClientChannelsPage = () => {
       window.history.replaceState({}, document.title, window.location.pathname);
     } else if (params.get('gmail_error')) {
       setToast({ msg: `Gmail connection failed: ${params.get('gmail_error')}`, type: 'error' });
-      window.history.replaceState({}, document.title, window.location.pathname);\n    }\n    // YouTube callback
-    else if (params.get('youtube_connected') === 'true') {
-      fetchClient();
-      setToast({ msg: '✅ YouTube channel connected successfully!', type: 'success' });
-      setTimeout(() => setToast(null), 4000);
-      window.history.replaceState({}, document.title, window.location.pathname);
-    } else if (params.get('youtube_error')) {
-      const err = params.get('youtube_error');
-      const msg = err === 'access_denied' ? 'YouTube permission was cancelled.' : `YouTube connection failed: ${err}`;
-      setToast({ msg, type: 'error' });
-      setTimeout(() => setToast(null), 5000);
       window.history.replaceState({}, document.title, window.location.pathname);
     }    // OneDrive callback
     else if (params.get('onedrive_connected') === 'true') {
       fetchClient();
       setToast({ msg: 'Γ£à OneDrive connected successfully!', type: 'success' });
       setTimeout(() => setToast(null), 4000);
-      window.history.replaceState({}, document.title, window.location.pathname);\n    }\n    // YouTube callback
-    else if (params.get('youtube_connected') === 'true') {
-      fetchClient();
-      setToast({ msg: '✅ YouTube channel connected successfully!', type: 'success' });
-      setTimeout(() => setToast(null), 4000);
-      window.history.replaceState({}, document.title, window.location.pathname);
-    } else if (params.get('youtube_error')) {
-      const err = params.get('youtube_error');
-      const msg = err === 'access_denied' ? 'YouTube permission was cancelled.' : `YouTube connection failed: ${err}`;
-      setToast({ msg, type: 'error' });
-      setTimeout(() => setToast(null), 5000);
       window.history.replaceState({}, document.title, window.location.pathname);
     } else if (params.get('onedrive_error')) {
       setToast({ msg: `OneDrive connection failed: ${params.get('onedrive_error')}`, type: 'error' });
-      setTimeout(() => setToast(null), 5000);
-      window.history.replaceState({}, document.title, window.location.pathname);\n    }\n    // YouTube callback
-    else if (params.get('youtube_connected') === 'true') {
-      fetchClient();
-      setToast({ msg: '✅ YouTube channel connected successfully!', type: 'success' });
-      setTimeout(() => setToast(null), 4000);
-      window.history.replaceState({}, document.title, window.location.pathname);
-    } else if (params.get('youtube_error')) {
-      const err = params.get('youtube_error');
-      const msg = err === 'access_denied' ? 'YouTube permission was cancelled.' : `YouTube connection failed: ${err}`;
-      setToast({ msg, type: 'error' });
       setTimeout(() => setToast(null), 5000);
       window.history.replaceState({}, document.title, window.location.pathname);
     }
@@ -272,31 +239,9 @@ const ClientChannelsPage = () => {
       fetchClient();
       setToast({ msg: 'Γ£à Google Calendar connected successfully!', type: 'success' });
       setTimeout(() => setToast(null), 4000);
-      window.history.replaceState({}, document.title, window.location.pathname);\n    }\n    // YouTube callback
-    else if (params.get('youtube_connected') === 'true') {
-      fetchClient();
-      setToast({ msg: '✅ YouTube channel connected successfully!', type: 'success' });
-      setTimeout(() => setToast(null), 4000);
-      window.history.replaceState({}, document.title, window.location.pathname);
-    } else if (params.get('youtube_error')) {
-      const err = params.get('youtube_error');
-      const msg = err === 'access_denied' ? 'YouTube permission was cancelled.' : `YouTube connection failed: ${err}`;
-      setToast({ msg, type: 'error' });
-      setTimeout(() => setToast(null), 5000);
       window.history.replaceState({}, document.title, window.location.pathname);
     } else if (params.get('google_calendar_error')) {
       setToast({ msg: `Google Calendar connection failed: ${params.get('google_calendar_error')}`, type: 'error' });
-      setTimeout(() => setToast(null), 5000);
-      window.history.replaceState({}, document.title, window.location.pathname);\n    }\n    // YouTube callback
-    else if (params.get('youtube_connected') === 'true') {
-      fetchClient();
-      setToast({ msg: '✅ YouTube channel connected successfully!', type: 'success' });
-      setTimeout(() => setToast(null), 4000);
-      window.history.replaceState({}, document.title, window.location.pathname);
-    } else if (params.get('youtube_error')) {
-      const err = params.get('youtube_error');
-      const msg = err === 'access_denied' ? 'YouTube permission was cancelled.' : `YouTube connection failed: ${err}`;
-      setToast({ msg, type: 'error' });
       setTimeout(() => setToast(null), 5000);
       window.history.replaceState({}, document.title, window.location.pathname);
     }
@@ -305,31 +250,9 @@ const ClientChannelsPage = () => {
       fetchClient();
       setToast({ msg: 'Γ£à Google Sheets connected successfully!', type: 'success' });
       setTimeout(() => setToast(null), 4000);
-      window.history.replaceState({}, document.title, window.location.pathname);\n    }\n    // YouTube callback
-    else if (params.get('youtube_connected') === 'true') {
-      fetchClient();
-      setToast({ msg: '✅ YouTube channel connected successfully!', type: 'success' });
-      setTimeout(() => setToast(null), 4000);
-      window.history.replaceState({}, document.title, window.location.pathname);
-    } else if (params.get('youtube_error')) {
-      const err = params.get('youtube_error');
-      const msg = err === 'access_denied' ? 'YouTube permission was cancelled.' : `YouTube connection failed: ${err}`;
-      setToast({ msg, type: 'error' });
-      setTimeout(() => setToast(null), 5000);
       window.history.replaceState({}, document.title, window.location.pathname);
     } else if (params.get('google_sheets_error')) {
       setToast({ msg: `Google Sheets connection failed: ${params.get('google_sheets_error')}`, type: 'error' });
-      setTimeout(() => setToast(null), 5000);
-      window.history.replaceState({}, document.title, window.location.pathname);\n    }\n    // YouTube callback
-    else if (params.get('youtube_connected') === 'true') {
-      fetchClient();
-      setToast({ msg: '✅ YouTube channel connected successfully!', type: 'success' });
-      setTimeout(() => setToast(null), 4000);
-      window.history.replaceState({}, document.title, window.location.pathname);
-    } else if (params.get('youtube_error')) {
-      const err = params.get('youtube_error');
-      const msg = err === 'access_denied' ? 'YouTube permission was cancelled.' : `YouTube connection failed: ${err}`;
-      setToast({ msg, type: 'error' });
       setTimeout(() => setToast(null), 5000);
       window.history.replaceState({}, document.title, window.location.pathname);
     }
@@ -338,32 +261,10 @@ const ClientChannelsPage = () => {
       fetchClient();
       setToast({ msg: 'Γ£à Google Docs connected successfully!', type: 'success' });
       setTimeout(() => setToast(null), 4000);
-      window.history.replaceState({}, document.title, window.location.pathname);\n    }\n    // YouTube callback
-    else if (params.get('youtube_connected') === 'true') {
-      fetchClient();
-      setToast({ msg: '✅ YouTube channel connected successfully!', type: 'success' });
-      setTimeout(() => setToast(null), 4000);
-      window.history.replaceState({}, document.title, window.location.pathname);
-    } else if (params.get('youtube_error')) {
-      const err = params.get('youtube_error');
-      const msg = err === 'access_denied' ? 'YouTube permission was cancelled.' : `YouTube connection failed: ${err}`;
-      setToast({ msg, type: 'error' });
-      setTimeout(() => setToast(null), 5000);
       window.history.replaceState({}, document.title, window.location.pathname);
     } else if (params.get('gdocs_error')) {
       const err = params.get('gdocs_error');
       const msg = err === 'access_denied' ? 'Google Docs permission was cancelled.' : `Google Docs connection failed: ${err}`;
-      setToast({ msg, type: 'error' });
-      setTimeout(() => setToast(null), 5000);
-      window.history.replaceState({}, document.title, window.location.pathname);\n    }\n    // YouTube callback
-    else if (params.get('youtube_connected') === 'true') {
-      fetchClient();
-      setToast({ msg: '✅ YouTube channel connected successfully!', type: 'success' });
-      setTimeout(() => setToast(null), 4000);
-      window.history.replaceState({}, document.title, window.location.pathname);
-    } else if (params.get('youtube_error')) {
-      const err = params.get('youtube_error');
-      const msg = err === 'access_denied' ? 'YouTube permission was cancelled.' : `YouTube connection failed: ${err}`;
       setToast({ msg, type: 'error' });
       setTimeout(() => setToast(null), 5000);
       window.history.replaceState({}, document.title, window.location.pathname);
@@ -373,32 +274,10 @@ const ClientChannelsPage = () => {
       fetchClient();
       setToast({ msg: 'Γ£à Google Slides connected successfully!', type: 'success' });
       setTimeout(() => setToast(null), 4000);
-      window.history.replaceState({}, document.title, window.location.pathname);\n    }\n    // YouTube callback
-    else if (params.get('youtube_connected') === 'true') {
-      fetchClient();
-      setToast({ msg: '✅ YouTube channel connected successfully!', type: 'success' });
-      setTimeout(() => setToast(null), 4000);
-      window.history.replaceState({}, document.title, window.location.pathname);
-    } else if (params.get('youtube_error')) {
-      const err = params.get('youtube_error');
-      const msg = err === 'access_denied' ? 'YouTube permission was cancelled.' : `YouTube connection failed: ${err}`;
-      setToast({ msg, type: 'error' });
-      setTimeout(() => setToast(null), 5000);
       window.history.replaceState({}, document.title, window.location.pathname);
     } else if (params.get('gslides_error')) {
       const err = params.get('gslides_error');
       const msg = err === 'access_denied' ? 'Google Slides permission was cancelled.' : `Google Slides connection failed: ${err}`;
-      setToast({ msg, type: 'error' });
-      setTimeout(() => setToast(null), 5000);
-      window.history.replaceState({}, document.title, window.location.pathname);\n    }\n    // YouTube callback
-    else if (params.get('youtube_connected') === 'true') {
-      fetchClient();
-      setToast({ msg: '✅ YouTube channel connected successfully!', type: 'success' });
-      setTimeout(() => setToast(null), 4000);
-      window.history.replaceState({}, document.title, window.location.pathname);
-    } else if (params.get('youtube_error')) {
-      const err = params.get('youtube_error');
-      const msg = err === 'access_denied' ? 'YouTube permission was cancelled.' : `YouTube connection failed: ${err}`;
       setToast({ msg, type: 'error' });
       setTimeout(() => setToast(null), 5000);
       window.history.replaceState({}, document.title, window.location.pathname);
@@ -407,33 +286,11 @@ const ClientChannelsPage = () => {
       const msg = err === 'access_denied' ? 'Google OAuth permission was cancelled.' : `Google connection failed: ${err}`;
       setToast({ msg, type: 'error' });
       setTimeout(() => setToast(null), 5000);
-      window.history.replaceState({}, document.title, window.location.pathname);\n    }\n    // YouTube callback
-    else if (params.get('youtube_connected') === 'true') {
-      fetchClient();
-      setToast({ msg: '✅ YouTube channel connected successfully!', type: 'success' });
-      setTimeout(() => setToast(null), 4000);
-      window.history.replaceState({}, document.title, window.location.pathname);
-    } else if (params.get('youtube_error')) {
-      const err = params.get('youtube_error');
-      const msg = err === 'access_denied' ? 'YouTube permission was cancelled.' : `YouTube connection failed: ${err}`;
-      setToast({ msg, type: 'error' });
-      setTimeout(() => setToast(null), 5000);
       window.history.replaceState({}, document.title, window.location.pathname);
     }
     // Google Calendar callback
     else if (params.get('google_calendar_connected') === 'true') {
       setToast({ msg: 'Google Calendar connected successfully!', type: 'success' });
-      window.history.replaceState({}, document.title, window.location.pathname);\n    }\n    // YouTube callback
-    else if (params.get('youtube_connected') === 'true') {
-      fetchClient();
-      setToast({ msg: '✅ YouTube channel connected successfully!', type: 'success' });
-      setTimeout(() => setToast(null), 4000);
-      window.history.replaceState({}, document.title, window.location.pathname);
-    } else if (params.get('youtube_error')) {
-      const err = params.get('youtube_error');
-      const msg = err === 'access_denied' ? 'YouTube permission was cancelled.' : `YouTube connection failed: ${err}`;
-      setToast({ msg, type: 'error' });
-      setTimeout(() => setToast(null), 5000);
       window.history.replaceState({}, document.title, window.location.pathname);
     } else if (params.get('google_calendar_error')) {
       setToast({ msg: `Google Calendar connection failed: ${params.get('google_calendar_error')}`, type: 'error' });
