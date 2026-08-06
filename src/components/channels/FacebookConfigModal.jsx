@@ -95,6 +95,33 @@ export default function FacebookConfigModal({ isOpen, onClose, client, onSaved }
     } catch (err) {
       console.error('Failed to configure Facebook API', err);
       setErrors(prev => ({ ...prev, form: 'Failed to update configuration.' }));
+      setSaving(false);
+    }
+  };
+
+  const handleDisconnect = async () => {
+    if (!window.confirm("Are you sure you want to disconnect this Facebook Page?")) return;
+    
+    setSaving(true);
+    try {
+      const token = localStorage.getItem('token');
+      
+      const payload = {
+        facebook_enabled: false,
+        facebook_config: {}
+      };
+
+      const res = await axios.patch(
+        `${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/profile`, 
+        payload, 
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      
+      onSaved(res.data);
+      onClose();
+    } catch (err) {
+      console.error('Failed to disconnect Facebook API', err);
+      setErrors(prev => ({ ...prev, form: 'Failed to disconnect.' }));
     } finally {
       setSaving(false);
     }
@@ -234,27 +261,41 @@ export default function FacebookConfigModal({ isOpen, onClose, client, onSaved }
               </div>
             </div>
             {/* Footer buttons */}
-            <div className="pt-5 border-t border-slate-100 flex justify-end gap-3 shrink-0">
-              <button 
-                type="button" 
-                onClick={onClose} 
-                className="px-5 py-3 font-bold text-slate-500 hover:bg-slate-50 hover:text-slate-800 border border-transparent hover:border-slate-200 rounded-xl transition-all text-xs cursor-pointer"
-              >
-                Cancel
-              </button>
-              <button 
-                type="submit" 
-                disabled={isSubmitDisabled}
-                className={cn(
-                  "px-6 py-3 rounded-xl font-bold text-xs shadow-lg transition-all duration-200 flex items-center gap-2 text-white border border-transparent cursor-pointer",
-                  isSubmitDisabled 
-                    ? "bg-slate-200 text-slate-400 shadow-none cursor-not-allowed" 
-                    : "bg-[#16A34A] hover:bg-[#15803D] shadow-emerald-100"
+            <div className="pt-5 border-t border-slate-100 flex justify-between items-center shrink-0 w-full">
+              <div>
+                {isEditMode && (
+                  <button 
+                    type="button" 
+                    onClick={handleDisconnect}
+                    disabled={saving}
+                    className="px-4 py-3 font-bold text-red-600 hover:bg-red-50 rounded-xl transition-all text-xs cursor-pointer flex items-center gap-2"
+                  >
+                    Disconnect
+                  </button>
                 )}
-              >
-                {saving && <Loader2 size={14} className="animate-spin" />}
-                {isEditMode ? 'Update Page Config' : 'Save Page Config'}
-              </button>
+              </div>
+              <div className="flex gap-3">
+                <button 
+                  type="button" 
+                  onClick={onClose} 
+                  className="px-5 py-3 font-bold text-slate-500 hover:bg-slate-50 hover:text-slate-800 border border-transparent hover:border-slate-200 rounded-xl transition-all text-xs cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="submit" 
+                  disabled={isSubmitDisabled}
+                  className={cn(
+                    "px-6 py-3 rounded-xl font-bold text-xs shadow-lg transition-all duration-200 flex items-center gap-2 text-white border border-transparent cursor-pointer",
+                    isSubmitDisabled 
+                      ? "bg-slate-200 text-slate-400 shadow-none cursor-not-allowed" 
+                      : "bg-[#16A34A] hover:bg-[#15803D] shadow-emerald-100"
+                  )}
+                >
+                  {saving && <Loader2 size={14} className="animate-spin" />}
+                  {isEditMode ? 'Update Page Config' : 'Save Page Config'}
+                </button>
+              </div>
             </div>
           </form>
         </div>

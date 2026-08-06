@@ -13,9 +13,9 @@ import tourSteps from '@/lib/tourConfig';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 const TOUR_COMPLETED_KEY = 'aisa_tour_completed';
-const TOUR_PENDING_KEY   = 'aisa_tour_pending';
-const TOUR_STEP_KEY      = 'aisa_tour_step';
-const TOUR_ACTIVE_KEY    = 'aisa_tour_active';
+const TOUR_PENDING_KEY = 'aisa_tour_pending';
+const TOUR_STEP_KEY = 'aisa_tour_step';
+const TOUR_ACTIVE_KEY = 'aisa_tour_active';
 
 // ─── Context ──────────────────────────────────────────────────────────────────
 const TourContext = createContext(null);
@@ -28,13 +28,13 @@ export const useTour = () => {
 
 // ─── Provider ─────────────────────────────────────────────────────────────────
 export const TourProvider = ({ children }) => {
-  const [isActive,     setIsActive]     = useState(false);
-  const [currentStep,  setCurrentStep]  = useState(0);
+  const [isActive, setIsActive] = useState(false);
+  const [currentStep, setCurrentStep] = useState(0);
   const [isNavigating, setIsNavigating] = useState(false); // true while waiting for page load
   const pathname = usePathname();
-  const router   = useRouter();
+  const router = useRouter();
   const prevPathRef = useRef(pathname);
-  const mountedRef  = useRef(false);
+  const mountedRef = useRef(false);
 
   const totalSteps = tourSteps.length;
 
@@ -50,7 +50,7 @@ export const TourProvider = ({ children }) => {
     mountedRef.current = true;
     debugLog('Tour initialized');
 
-    const pending   = localStorage.getItem(TOUR_PENDING_KEY);
+    const pending = localStorage.getItem(TOUR_PENDING_KEY);
     const completed = localStorage.getItem(TOUR_COMPLETED_KEY);
     const savedStep = localStorage.getItem(TOUR_STEP_KEY);
     const wasActive = localStorage.getItem(TOUR_ACTIVE_KEY);
@@ -75,7 +75,7 @@ export const TourProvider = ({ children }) => {
         router.push(step.page);
       }
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // ── Detect page change while tour is active ────────────────────────────────
@@ -105,7 +105,7 @@ export const TourProvider = ({ children }) => {
   const goToStep = useCallback(
     (stepIndex) => {
       if (stepIndex < 0 || stepIndex >= totalSteps) return;
-      const step     = tourSteps[stepIndex];
+      const step = tourSteps[stepIndex];
       const needsNav = step.page && step.page !== pathname;
 
       if (typeof window !== 'undefined') {
@@ -131,7 +131,7 @@ export const TourProvider = ({ children }) => {
     } else {
       finishTour();
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentStep, totalSteps, goToStep]);
 
   // ── prevStep ───────────────────────────────────────────────────────────────

@@ -23,6 +23,7 @@ import GoogleCalendarConfigModal, { GoogleCalendarIcon } from '@/components/chan
 import GoogleSheetsConfigModal, { GoogleSheetsIcon } from '@/components/channels/GoogleSheetsConfigModal';
 import GoogleDocsConfigModal, { GoogleDocsIcon } from '@/components/channels/GoogleDocsConfigModal';
 import GoogleSlidesConfigModal, { GoogleSlidesIcon } from '@/components/channels/GoogleSlidesConfigModal';
+import ZohoConfigModal, { ZohoIcon } from '@/components/channels/ZohoConfigModal';
 
 const FacebookIcon = ({ size = 22, className }) => (
   <svg
@@ -113,6 +114,7 @@ const ClientChannelsPage = () => {
   const [isGoogleSheetsConfigModalOpen, setIsGoogleSheetsConfigModalOpen] = useState(false);
   const [isGoogleDocsConfigModalOpen, setIsGoogleDocsConfigModalOpen] = useState(false);
   const [isGoogleSlidesConfigModalOpen, setIsGoogleSlidesConfigModalOpen] = useState(false);
+  const [isZohoConfigModalOpen, setIsZohoConfigModalOpen] = useState(false);
 
   const [fbLoading, setFbLoading] = useState(false);
   const [igLoading, setIgLoading] = useState(false);
@@ -324,6 +326,12 @@ const ClientChannelsPage = () => {
     setTimeout(() => setToast(null), 3000);
   };
 
+  const handleZohoSaved = (updatedClient) => {
+    setClient(updatedClient);
+    setToast({ msg: 'Zoho configured', type: 'success' });
+    setTimeout(() => setToast(null), 3000);
+  };
+
   const isWhatsAppConnected = Boolean(client?.whatsapp_access_token && client?.whatsapp_phone_number_id);
   const isFacebookConnected = Boolean(client?.facebook_enabled && client?.facebook_config?.page_id);
   const isInstagramConnected = Boolean(client?.instagram_enabled && (client?.instagram_config?.instagram_business_id || client?.instagram_config?.instagram_business_account_id || client?.instagram_config?.access_token));
@@ -333,8 +341,9 @@ const ClientChannelsPage = () => {
   const isGoogleSheetsConnected = Boolean(client?.google_sheets_enabled);
   const isGoogleDocsConnected = Boolean(client?.google_docs_enabled);
   const isGoogleSlidesConnected = Boolean(client?.google_slides_enabled);
+  const isZohoConnected = Boolean(client?.zoho_enabled);
 
-  const connectedCount = [isWhatsAppConnected, isFacebookConnected, isInstagramConnected, isGmailConnected, isOneDriveConnected, isGoogleCalendarConnected, isGoogleSheetsConnected, isGoogleDocsConnected, isGoogleSlidesConnected].filter(Boolean).length;
+  const connectedCount = [isWhatsAppConnected, isFacebookConnected, isInstagramConnected, isGmailConnected, isOneDriveConnected, isGoogleCalendarConnected, isGoogleSheetsConnected, isGoogleDocsConnected, isGoogleSlidesConnected, isZohoConnected].filter(Boolean).length;
 
   const handleConnectGmail = async () => {
     try {
@@ -1146,6 +1155,76 @@ const ClientChannelsPage = () => {
               </div>
             </div>
 
+            {/* --- ZOHO CARD --- */}
+            <div className="bg-white rounded-2xl border border-slate-200/80 p-6 flex flex-col justify-between hover:border-slate-300 transition-all shadow-xs min-h-[380px]">
+              <div>
+                {/* Header */}
+                <div className="flex flex-col gap-3.5 mb-5">
+                  <div className="flex items-center gap-3">
+                    <div className="w-11 h-11 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center border border-red-100/80 shrink-0">
+                      <ZohoIcon size={24} />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-slate-900 text-sm tracking-tight">Zoho CRM</h3>
+                      <p className="text-[11px] text-slate-400 font-normal mt-0.5">Sync CRM Leads & Data</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center">
+                    <div className={cn(
+                      "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium border transition-colors",
+                      isZohoConnected
+                        ? "bg-[#E62C2D]/10 text-[#E62C2D] border-[#E62C2D]/20"
+                        : "bg-slate-50 text-slate-500 border-slate-200/60"
+                    )}>
+                      <span className={cn(
+                        "w-1.5 h-1.5 rounded-full shrink-0",
+                        isZohoConnected ? "bg-[#E62C2D] animate-pulse" : "bg-slate-400"
+                      )} />
+                      <span>{isZohoConnected ? 'Connected' : 'Not Connected'}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Body Info */}
+                <p className="text-xs text-slate-500 mb-5 leading-relaxed font-normal">
+                  Auto-sync leads, manage customer relationships, and streamline ticket operations with Zoho CRM and Desk.
+                </p>
+
+                {isZohoConnected ? (
+                  <div className="bg-slate-50/70 rounded-xl p-3.5 border border-slate-100 flex flex-col gap-2.5 text-xs">
+                    <div className="flex flex-col gap-1">
+                      <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Status</span>
+                      <span className="font-medium text-emerald-600 truncate">Authenticated</span>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-xs text-slate-400 py-6 text-center">No Zoho account connected.</p>
+                )}
+              </div>
+
+              {/* Action Button */}
+              <div className="mt-6 pt-4 border-t border-slate-100">
+                {isZohoConnected ? (
+                  <button
+                    onClick={() => setIsZohoConfigModalOpen(true)}
+                    className="w-full py-2.5 px-4 rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200/60"
+                  >
+                    <Settings size={14} className="text-slate-400" />
+                    <span>Configure</span>
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => setIsZohoConfigModalOpen(true)}
+                    className="w-full py-2.5 px-4 rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer bg-[#E62C2D] hover:bg-[#c92424] text-white shadow-xs"
+                  >
+                    <Plus size={14} />
+                    <span>Connect Zoho</span>
+                  </button>
+                )}
+              </div>
+            </div>
+
           </div>
         )}
 
@@ -1212,8 +1291,17 @@ const ClientChannelsPage = () => {
           client={client}
           onSaved={handleGoogleSlidesSaved}
         />
+
+        {/* Zoho Configuration Modal */}
+        <ZohoConfigModal
+          isOpen={isZohoConfigModalOpen}
+          onClose={() => setIsZohoConfigModalOpen(false)}
+          client={client}
+          onSaved={handleZohoSaved}
+        />
       </div>
     </DashboardLayout>
+
   );
 };
 
