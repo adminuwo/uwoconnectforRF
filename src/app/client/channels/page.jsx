@@ -1426,6 +1426,121 @@ return (
                 </button>
               )}
             </div>
+
+            {/* --- YOUTUBE CARD --- */}
+            <div className="bg-white rounded-2xl border border-slate-200/80 p-6 flex flex-col justify-between hover:border-slate-300 transition-all shadow-xs min-h-[380px]">
+              <div>
+                {/* Header */}
+                <div className="flex flex-col gap-3.5 mb-5">
+                  <div className="flex items-center gap-3">
+                    <div className="w-11 h-11 rounded-2xl bg-red-50 text-[#FF0000] flex items-center justify-center border border-red-100/80 shrink-0">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-slate-900 text-base">YouTube</h3>
+                      <p className="text-[11px] text-slate-400">Video & Channel Management</p>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className={cn(
+                      "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium",
+                      isYouTubeConnected ? "bg-red-50 text-red-700 border border-red-200/50" : "bg-slate-100 text-slate-400"
+                    )}>
+                      <span className={cn("w-1.5 h-1.5 rounded-full", isYouTubeConnected ? "bg-red-500" : "bg-slate-300")} />
+                      <span>{isYouTubeConnected ? 'Connected' : 'Not Connected'}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <p className="text-xs text-slate-500 leading-relaxed mb-5">
+                  Connect your YouTube channel to manage videos, schedule uploads, and sync content with your WhatsApp broadcast campaigns.
+                </p>
+
+                {/* Details */}
+                {isYouTubeConnected ? (
+                  <div className="space-y-4 py-4 border-t border-slate-100 text-xs">
+                    <div className="flex flex-col gap-1">
+                      <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Channel</span>
+                      <span className="font-medium text-slate-700 truncate">{client?.youtube_config?.channel_title || 'N/A'}</span>
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Email</span>
+                      <span className="font-medium text-slate-700 truncate">{client?.youtube_config?.email || 'N/A'}</span>
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Channel ID</span>
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium text-slate-700 truncate">{client?.youtube_config?.channel_id || 'N/A'}</span>
+                        <CopyButton text={client?.youtube_config?.channel_id} />
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-xs text-slate-400 py-6 text-center">No YouTube channel connected.</p>
+                )}
+              </div>
+
+              {/* Action Button */}
+              <div className="mt-6 pt-4 border-t border-slate-100">
+                {isYouTubeConnected ? (
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => { window.location.href = '/client/youtube'; }}
+                      className="flex-1 py-2.5 px-3 rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer bg-[#FF0000] hover:bg-[#CC0000] text-white shadow-xs"
+                    >
+                      <Settings size={14} />
+                      <span>Dashboard</span>
+                    </button>
+                    <button
+                      onClick={async () => {
+                        setYoutubeLoading(true);
+                        try {
+                          const token = localStorage.getItem('token');
+                          const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/auth/youtube/connect`, {
+                            headers: { Authorization: `Bearer ${token}` }
+                          });
+                          if (res.data.url) window.location.href = res.data.url;
+                        } catch (err) {
+                          setToast({ msg: 'Failed to reconnect YouTube', type: 'error' });
+                          setTimeout(() => setToast(null), 4000);
+                        } finally { setYoutubeLoading(false); }
+                      }}
+                      disabled={youtubeLoading}
+                      className="py-2.5 px-3 rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200/60 disabled:opacity-50"
+                      title="Reconnect YouTube"
+                    >
+                      <RefreshCw size={14} className={cn("text-slate-400", youtubeLoading && "animate-spin")} />
+                      <span>Reconnect</span>
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={async () => {
+                      setYoutubeLoading(true);
+                      try {
+                        const token = localStorage.getItem('token');
+                        const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/auth/youtube/connect`, {
+                          headers: { Authorization: `Bearer ${token}` }
+                        });
+                        if (res.data.url) window.location.href = res.data.url;
+                      } catch (err) {
+                        setToast({ msg: 'Failed to connect YouTube', type: 'error' });
+                        setTimeout(() => setToast(null), 4000);
+                      } finally { setYoutubeLoading(false); }
+                    }}
+                    disabled={youtubeLoading}
+                    className="w-full py-2.5 px-4 rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer bg-[#FF0000] hover:bg-[#CC0000] text-white disabled:opacity-50"
+                  >
+                    {youtubeLoading ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />}
+                    <span>Connect YouTube</span>
+                  </button>
+                )}
+              </div>
+            </div>
+
           </div>
 
         </div>
