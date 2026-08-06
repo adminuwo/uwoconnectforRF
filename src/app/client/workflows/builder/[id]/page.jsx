@@ -19,7 +19,7 @@ import 'reactflow/dist/style.css';
 import { 
   Save, MessageSquare, Clock, Zap, Loader2, 
   ChevronDown, Image as ImageIcon, Video, List, FileText, Webhook, Tag, BarChart3,
-  MousePointer2, ArrowLeft, CheckCircle2, XCircle, Play, X, Plus, Trash2, Edit3, User
+  MousePointer2, ArrowLeft, CheckCircle2, XCircle, Play, X, Plus, Trash2, Edit3, User, ShoppingBag, ExternalLink
 } from 'lucide-react';
 import axios from 'axios';
 import { useParams, useRouter } from 'next/navigation';
@@ -200,6 +200,24 @@ const GoogleMeetNode = ({ id, data = {} }) => (
   </NodeContainer>
 );
 
+const CatalogProductNode = ({ id, data = {} }) => (
+  <NodeContainer id={id} title="Send Catalog Product" icon={ShoppingBag} color="bg-emerald-600">
+    <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-100 mb-2">
+      <div className="flex items-center justify-between mb-1">
+        <span className="text-[9px] font-black text-emerald-600 uppercase tracking-widest">🛍️ Catalog Item</span>
+        <span className="text-xs font-black text-slate-900">${data.productPrice || '29.99'}</span>
+      </div>
+      <p className="text-xs font-bold text-slate-800 truncate mb-1">"{data.productName || 'Select Product...'}"</p>
+      <div className="bg-emerald-50 text-emerald-800 p-1.5 rounded text-[10px] font-semibold flex items-center justify-between">
+        <span>🔗 [{data.ctaText || 'View Product'}]</span>
+        <ExternalLink size={10} />
+      </div>
+    </div>
+    <Handle type="target" position={Position.Top} className="w-2.5 h-2.5 bg-slate-400 border-2 border-white -top-1" />
+    <Handle type="source" position={Position.Bottom} className="w-2.5 h-2.5 bg-emerald-600 border-2 border-white -bottom-1" />
+  </NodeContainer>
+);
+
 const DeletableEdge = ({
   id,
   sourceX,
@@ -304,6 +322,7 @@ const WorkflowBuilderInner = () => {
     handoff: HandoffNode,
     google_meet: GoogleMeetNode,
     calendar: GoogleMeetNode,
+    catalog_product: CatalogProductNode,
   }), []);
 
   const edgeTypes = useMemo(() => ({
@@ -590,6 +609,9 @@ const WorkflowBuilderInner = () => {
                 <SidebarItem icon={ImageIcon} label="Message + Image" onDragStart={(e) => onDragStart(e, 'image')} onClick={() => { handleAddNodeDirectly('image'); setIsSidebarOpen(false); }} />
                 <SidebarItem icon={Video} label="Message + Video" onDragStart={(e) => onDragStart(e, 'video')} onClick={() => { handleAddNodeDirectly('video'); setIsSidebarOpen(false); }} />
              </SidebarCategory>
+             <SidebarCategory title="Commerce & Catalog" icon={ShoppingBag} expanded>
+                <SidebarItem icon={ShoppingBag} label="Send Catalog Product" onDragStart={(e) => onDragStart(e, 'catalog_product')} onClick={() => { handleAddNodeDirectly('catalog_product'); setIsSidebarOpen(false); }} color="emerald" />
+              </SidebarCategory>
              <SidebarCategory title="Integrations & Meetings" icon={Zap} expanded>
                 <SidebarItem icon={Video} label="Google Meet & Calendar" onDragStart={(e) => onDragStart(e, 'google_meet')} onClick={() => { handleAddNodeDirectly('google_meet'); setIsSidebarOpen(false); }} color="blue" />
              </SidebarCategory>
@@ -891,6 +913,58 @@ const MessageForm = ({ data, type, onSave, onDelete }) => {
           <p className="text-xs text-blue-800 font-medium">When a customer reaches this step, Google Meet will generate a video link and schedule it on Google Calendar with automated reminders!</p>
         </div>
       </div>
+    ) : type === 'catalog_product' ? (
+      <div className="space-y-4">
+        <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl">
+          <p className="text-[10px] font-bold text-emerald-700 uppercase tracking-widest mb-1">🛍️ Send Catalog Product</p>
+          <p className="text-xs text-emerald-900 font-medium">Select product from your UWOConnect Catalog to send directly to customer on WhatsApp.</p>
+        </div>
+
+        <div>
+          <label className="text-[10px] font-black uppercase text-slate-400 mb-2 block">Product Name *</label>
+          <input 
+            value={msg || data.productName || ''} 
+            onChange={e => setMsg(e.target.value)} 
+            className="w-full bg-slate-50 border p-3 rounded-xl text-sm font-bold focus:border-emerald-500 outline-none text-slate-800" 
+            placeholder="e.g. AI Automation Book" 
+          />
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="text-[10px] font-black uppercase text-slate-400 mb-2 block">Price ($)</label>
+            <input 
+              value={title || data.productPrice || '29.99'} 
+              onChange={e => setTitle(e.target.value)} 
+              className="w-full bg-slate-50 border p-3 rounded-xl text-sm font-bold focus:border-emerald-500 outline-none text-slate-800" 
+              placeholder="29.99" 
+            />
+          </div>
+
+          <div>
+            <label className="text-[10px] font-black uppercase text-slate-400 mb-2 block">CTA Button Text</label>
+            <input 
+              value={keyword || data.ctaText || 'View Product'} 
+              onChange={e => setKeyword(e.target.value)} 
+              className="w-full bg-slate-50 border p-3 rounded-xl text-sm font-bold focus:border-emerald-500 outline-none text-slate-800" 
+              placeholder="View Product" 
+            />
+          </div>
+        </div>
+
+        <div className="space-y-2 pt-2 border-t border-slate-100">
+          <p className="text-[10px] font-black uppercase text-slate-400 mb-1">Send Included Elements:</p>
+          <label className="flex items-center gap-2 text-xs font-bold text-slate-700 cursor-pointer">
+            <input type="checkbox" defaultChecked className="accent-emerald-600 rounded" /> ☑ Image
+          </label>
+          <label className="flex items-center gap-2 text-xs font-bold text-slate-700 cursor-pointer">
+            <input type="checkbox" defaultChecked className="accent-emerald-600 rounded" /> ☑ Product Link
+          </label>
+          <label className="flex items-center gap-2 text-xs font-bold text-slate-700 cursor-pointer">
+            <input type="checkbox" defaultChecked className="accent-emerald-600 rounded" /> ☑ CTA Button [ View Product ]
+          </label>
+        </div>
+      </div>
     ) : null}
 
     <div className="flex items-center gap-3 pt-2">
@@ -900,6 +974,9 @@ const MessageForm = ({ data, type, onSave, onDelete }) => {
         duration,
         buttons, 
         mediaUrl, 
+        productName: msg,
+        productPrice: title,
+        ctaText: keyword,
         keyword: triggerMode === 'ALL' ? '*' : keyword, 
         triggerMode,
         condition: type === 'condition' ? buildCondition() : (data.condition || ''),

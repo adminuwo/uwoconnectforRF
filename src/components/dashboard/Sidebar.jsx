@@ -21,7 +21,9 @@ import {
   LifeBuoy,
   Activity,
   ShoppingBag,
-  Receipt
+  Receipt,
+  MessagesSquare,
+  FileCheck
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -70,6 +72,7 @@ const Sidebar = ({ role, isOpen, onClose }) => {
     { name: 'Catalog', href: '/client/catalog', icon: ShoppingBag },
     { name: 'Orders', href: '/client/orders', icon: Receipt },
     { name: 'Team', href: '/client/team', icon: ShieldCheck },
+    { name: 'Work Reports', href: '/client/reports', icon: FileCheck },
     { name: 'Settings', href: '/client/settings', icon: Settings },
     { name: 'Support', href: '/client/support', icon: LifeBuoy },
   ];
@@ -78,9 +81,11 @@ const Sidebar = ({ role, isOpen, onClose }) => {
     { name: 'Dashboard', href: '/client', icon: LayoutDashboard },
     { name: 'Leads (CRM)', href: '/client/crm', icon: Users },
     { name: 'Messages', href: '/client/inbox', icon: MessageSquare },
+    { name: 'Team Chat', href: '/client/team-chat', icon: MessagesSquare },
     { name: 'Knowledge Base', href: '/client/knowledge', icon: Brain },
     { name: 'Catalog', href: '/client/catalog', icon: ShoppingBag },
     { name: 'Orders', href: '/client/orders', icon: Receipt },
+    { name: 'Work Reports', href: '/client/reports', icon: FileCheck },
     { name: 'Support', href: '/client/support', icon: LifeBuoy },
   ];
 

@@ -18,8 +18,8 @@
 }
 
 :root {
-  --background: #030712;
-  --foreground: #FFFFFF;
+  --background: #fcfdfe;
+  --foreground: #0f172a;
   --surface: #0B0D11;
   --card: rgba(16, 185, 129, 0.03);
   --primary: #10B981;
@@ -43,7 +43,7 @@
 
   html,
   body {
-    background-color: var(--background);
+    background-color: #fcfdfe;
     color: var(--foreground);
     @apply antialiased transition-colors duration-300;
     overflow-x: hidden !important;

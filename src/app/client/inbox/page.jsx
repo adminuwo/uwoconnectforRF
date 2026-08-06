@@ -274,27 +274,27 @@ const ClientInboxPage = () => {
 
   return (
     <DashboardLayout role="CLIENT">
-      <div className="h-[calc(100vh-140px)] md:h-[calc(100vh-180px)] flex flex-col">
-        {/* Page Header (Optional, simplified) */}
-        <div className="mb-3 md:mb-6 flex items-center justify-between px-2">
+      <div className="h-full flex flex-col min-h-0">
+        {/* Page Header */}
+        <div className="mb-2 flex items-center justify-between px-1 shrink-0">
           <div>
-            <h1 className="text-lg md:text-2xl font-bold text-slate-900 tracking-tight">Inbox</h1>
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1 hidden sm:block">Real-time Customer Support</p>
+            <h1 className="text-base md:text-xl font-black text-slate-900 tracking-tight">Inbox</h1>
+            <p className="text-[9px] font-extrabold text-slate-400 uppercase tracking-widest hidden sm:block">Real-time Customer Support</p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <div className="flex -space-x-2 hidden sm:flex">
               {[1,2,3].map(i => (
-                <div key={i} className="w-8 h-8 rounded-full border-2 border-white bg-slate-100 flex items-center justify-center overflow-hidden">
-                  <User size={14} className="text-slate-400" />
+                <div key={i} className="w-6 h-6 rounded-full border-2 border-white bg-slate-100 flex items-center justify-center overflow-hidden">
+                  <User size={12} className="text-slate-400" />
                 </div>
               ))}
             </div>
-            <span className="text-xs font-bold text-slate-400 hidden sm:inline">+12 agents online</span>
+            <span className="text-[11px] font-bold text-slate-400 hidden sm:inline">+12 agents online</span>
           </div>
         </div>
 
         {/* Intercom Style Main Container */}
-        <div className="flex-1 flex bg-white rounded-2xl md:rounded-[40px] border border-slate-100 shadow-[0_24px_48px_-12px_rgba(0,0,0,0.05)] overflow-hidden">
+        <div className="flex-1 flex bg-white rounded-2xl md:rounded-[32px] border border-slate-100 shadow-[0_24px_48px_-12px_rgba(0,0,0,0.05)] overflow-hidden min-h-0">
           
           {/* Column 1: Conversation List */}
           <aside className={cn("w-full md:w-80 lg:w-96 border-r border-slate-50 flex flex-col bg-white md:shrink-0", mobileShowChat ? "hidden md:flex" : "flex")}>
@@ -386,16 +386,16 @@ const ClientInboxPage = () => {
                   key={convo.id} 
                   onClick={() => { setSelectedConvoId(convo.id); setMobileShowChat(true); }}
                   className={cn(
-                    "w-full p-6 text-left border-b border-slate-50 transition-all flex gap-4 hover:bg-slate-50/50",
-                    selectedConvoId === convo.id ? "bg-emerald-50/50 border-r-4 border-r-emerald-500" : ""
+                    "w-[94%] mx-[3%] my-1 p-3 text-left rounded-xl transition-all flex gap-3 cursor-pointer hover:bg-slate-50",
+                    selectedConvoId === convo.id ? "bg-emerald-50 text-slate-900 border border-emerald-100" : "bg-transparent text-slate-700"
                   )}
                 >
                   <div className="relative shrink-0">
-                    <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-400 font-bold text-lg">
+                    <div className="w-10 h-10 rounded-xl bg-slate-100/80 flex items-center justify-center text-slate-600 font-bold text-sm">
                       {convo.name[0].toUpperCase()}
                     </div>
                     <div className={cn(
-                        "absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-white flex items-center justify-center text-[10px] text-white font-black",
+                        "absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white flex items-center justify-center text-[7px] text-white font-black",
                         convo.channel === 'FACEBOOK' ? "bg-blue-600" :
                         convo.channel === 'INSTAGRAM' ? "bg-pink-500" : "bg-emerald-500"
                       )}>
@@ -403,13 +403,13 @@ const ClientInboxPage = () => {
                       </div>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between mb-1">
-                      <p className="text-sm font-bold text-slate-900 truncate">{convo.name}</p>
-                      <p className="text-[10px] font-bold text-slate-300">
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs font-semibold text-slate-800 truncate">{convo.name}</p>
+                      <p className="text-[9px] font-semibold text-slate-400">
                         {new Date(convo.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </p>
                     </div>
-                    <p className="text-xs text-slate-500 truncate leading-relaxed">
+                    <p className="text-[11px] text-slate-400 truncate leading-relaxed mt-0.5">
                       {convo.lastMessage}
                     </p>
                   </div>
@@ -423,12 +423,12 @@ const ClientInboxPage = () => {
             {activeConvo ? (
               <>
                 {/* Chat Header */}
-                <header className="h-16 md:h-20 border-b border-slate-50 flex items-center justify-between px-3 md:px-8 bg-white/80 backdrop-blur-md sticky top-0 z-10">
-                  <div className="flex items-center gap-2 md:gap-4">
-                    <button onClick={() => setMobileShowChat(false)} className="md:hidden p-1.5 text-slate-400 hover:text-slate-900 rounded-lg hover:bg-slate-50 transition-colors">
-                      <ArrowLeft size={20} />
+                <header className="h-14 border-b border-slate-100 flex items-center justify-between px-4 md:px-6 bg-white/80 backdrop-blur-md sticky top-0 z-10">
+                  <div className="flex items-center gap-2 md:gap-3">
+                    <button onClick={() => setMobileShowChat(false)} className="md:hidden p-1 text-slate-400 hover:text-slate-900 rounded-lg hover:bg-slate-50 transition-colors">
+                      <ArrowLeft size={18} />
                     </button>
-                    <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-400 font-bold">
+                    <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-500 font-bold text-xs">
                       {activeConvo.name[0].toUpperCase()}
                     </div>
                     <div>
@@ -472,10 +472,10 @@ const ClientInboxPage = () => {
                 {/* Messages Feed */}
                 <div 
                   ref={scrollRef}
-                  className="flex-1 overflow-y-auto p-4 md:p-10 space-y-6 md:space-y-8 bg-slate-50/20 custom-scrollbar"
+                  className="flex-1 overflow-y-auto p-3 md:p-4 space-y-3 bg-slate-50/20 custom-scrollbar"
                 >
-                  <div className="flex flex-col items-center mb-10">
-                    <span className="px-4 py-1.5 bg-white border border-slate-100 rounded-full text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] shadow-sm">
+                  <div className="flex flex-col items-center mb-3">
+                    <span className="px-3 py-0.5 bg-white border border-slate-200 rounded-full text-[9px] font-extrabold text-slate-400 uppercase tracking-widest shadow-2xs">
                       Today
                     </span>
                   </div>
@@ -498,7 +498,7 @@ const ClientInboxPage = () => {
                         className={cn("flex flex-col", isIncoming ? "items-start" : "items-end")}
                       >
                         <div className={cn(
-                          "max-w-[85%] md:max-w-[70%] p-3 md:p-4 rounded-[20px] md:rounded-[24px] text-sm leading-relaxed shadow-sm transition-all hover:shadow-md break-words whitespace-pre-wrap",
+                          "max-w-[85%] md:max-w-[65%] p-2.5 px-4 rounded-2xl text-xs md:text-sm leading-snug shadow-2xs break-words whitespace-pre-wrap",
                           msg.message_type === 'INTERNAL' 
                             ? "bg-amber-100 text-amber-900 rounded-br-none border border-amber-200"
                             : isIncoming 
@@ -650,53 +650,53 @@ const ClientInboxPage = () => {
           </main>
 
           {/* Column 3: Customer Details (Intercom Sidebar) */}
-          <aside className="w-80 border-l border-slate-50 bg-white p-8 overflow-y-auto shrink-0 hidden xl:block">
+          <aside className="w-64 md:w-72 border-l border-slate-100 bg-white p-4 md:p-5 overflow-y-auto shrink-0 hidden xl:block">
             {activeConvo ? (
-              <div className="space-y-10">
+              <div className="space-y-5">
                 {/* Profile Card */}
                 <div className="text-center">
-                  <div className="w-20 h-20 bg-emerald-600 text-white rounded-[28px] flex items-center justify-center text-2xl font-bold mx-auto mb-4 shadow-2xl shadow-slate-200">
+                  <div className="w-12 h-12 bg-emerald-600 text-white rounded-2xl flex items-center justify-center text-base font-bold mx-auto mb-2 shadow-md">
                     {activeConvo.name[0].toUpperCase()}
                   </div>
-                  <h3 className="text-lg font-bold text-slate-900 mb-1">{activeConvo.name}</h3>
-                  <div className="flex items-center justify-center gap-2">
-                    <span className={cn("w-2 h-2 rounded-full", activeConvo.channel === 'GMAIL' ? "bg-red-500" : activeConvo.channel === 'FACEBOOK' ? "bg-blue-600" : activeConvo.channel === 'INSTAGRAM' ? "bg-pink-500" : "bg-emerald-500")} />
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                  <h3 className="text-sm font-bold text-slate-900 mb-0.5">{activeConvo.name}</h3>
+                  <div className="flex items-center justify-center gap-1.5">
+                    <span className={cn("w-1.5 h-1.5 rounded-full", activeConvo.channel === 'GMAIL' ? "bg-red-500" : activeConvo.channel === 'FACEBOOK' ? "bg-blue-600" : activeConvo.channel === 'INSTAGRAM' ? "bg-pink-500" : "bg-emerald-500")} />
+                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">
                       Active via {activeConvo.channel === 'GMAIL' ? 'Gmail' : activeConvo.channel === 'FACEBOOK' ? 'Facebook' : activeConvo.channel === 'INSTAGRAM' ? 'Instagram' : 'WhatsApp'}
                     </p>
                   </div>
                 </div>
 
                 {/* Contact Info */}
-                <div className="space-y-4">
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-4">Contact Detail</p>
-                  <div className="flex items-center gap-3 p-3 bg-slate-50/50 rounded-2xl border border-slate-100">
-                    <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center text-slate-400 shadow-sm"><Phone size={14} /></div>
-                    <span className="text-xs font-bold text-slate-600">{activeConvo.id}</span>
+                <div className="space-y-2">
+                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-wider mb-2">Contact Detail</p>
+                  <div className="flex items-center gap-2.5 p-2 px-3 bg-slate-50 rounded-xl border border-slate-100">
+                    <div className="w-6 h-6 rounded-md bg-white flex items-center justify-center text-slate-400 shadow-xs"><Phone size={12} /></div>
+                    <span className="text-xs font-semibold text-slate-700 truncate">{activeConvo.id}</span>
                   </div>
-                  <div className="flex items-center gap-3 p-3 bg-slate-50/50 rounded-2xl border border-slate-100">
-                    <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center text-slate-400 shadow-sm"><MapPin size={14} /></div>
-                    <span className="text-xs font-bold text-slate-600">Mumbai, India</span>
+                  <div className="flex items-center gap-2.5 p-2 px-3 bg-slate-50 rounded-xl border border-slate-100">
+                    <div className="w-6 h-6 rounded-md bg-white flex items-center justify-center text-slate-400 shadow-xs"><MapPin size={12} /></div>
+                    <span className="text-xs font-semibold text-slate-700">Mumbai, India</span>
                   </div>
                 </div>
 
                 {/* Quick Actions */}
-                <div className="space-y-4 pt-6 border-t border-slate-50">
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-4">Actions</p>
-                  <button className="w-full py-3 px-4 bg-white border border-slate-100 rounded-xl text-xs font-bold text-slate-700 flex items-center gap-3 hover:bg-slate-50 transition-all">
-                    <User size={14} className="text-slate-400" /> View Profile
+                <div className="space-y-2 pt-4 border-t border-slate-100">
+                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-wider mb-2">Actions</p>
+                  <button className="w-full py-2 px-3 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-700 flex items-center gap-2.5 hover:bg-slate-50 transition-all cursor-pointer">
+                    <User size={13} className="text-slate-400" /> View Profile
                   </button>
                   {activeContact && (
                     <button 
                       onClick={() => handleToggleBot(activeContact)}
                       className={cn(
-                        "w-full py-3 px-4 border rounded-xl text-xs font-bold flex items-center gap-3 hover:bg-slate-50 transition-all",
+                        "w-full py-2 px-3 border rounded-xl text-xs font-bold flex items-center gap-2.5 transition-all cursor-pointer",
                         activeContact.bot_paused 
-                          ? "bg-rose-50 border-rose-100 text-rose-600 hover:bg-rose-100/50" 
-                          : "bg-white border-slate-100 text-slate-700 hover:border-slate-200"
+                          ? "bg-rose-50 border-rose-200 text-rose-600 hover:bg-rose-100/50" 
+                          : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50"
                       )}
                     >
-                      <Zap size={14} className={activeContact.bot_paused ? "text-rose-600 animate-pulse" : "text-slate-400"} />
+                      <Zap size={13} className={activeContact.bot_paused ? "text-rose-600 animate-pulse" : "text-slate-400"} />
                       {activeContact.bot_paused ? "Resume Auto-Bot" : "Pause Auto-Bot"}
                     </button>
                   )}
@@ -704,22 +704,22 @@ const ClientInboxPage = () => {
                     <button 
                       onClick={handleArchive}
                       className={cn(
-                        "w-full py-3 px-4 bg-white border border-slate-100 rounded-xl text-xs font-bold flex items-center gap-3 hover:bg-slate-50 transition-all",
+                        "w-full py-2 px-3 bg-white border border-slate-200 rounded-xl text-xs font-bold flex items-center gap-2.5 transition-all cursor-pointer",
                         activeContact.is_archived ? "text-amber-600" : "text-slate-700"
                       )}
                     >
-                      <Archive size={14} className={activeContact.is_archived ? "text-amber-600" : "text-slate-400"} /> 
-                      {activeContact.is_archived ? "Unarchive Conversation" : "Archive Conversation"}
+                      <Archive size={13} className={activeContact.is_archived ? "text-amber-600" : "text-slate-400"} /> 
+                      {activeContact.is_archived ? "Unarchive Convo" : "Archive Convo"}
                     </button>
                   )}
                 </div>
 
                 {/* Tags */}
-                <div className="space-y-4 pt-6 border-t border-slate-50">
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-4">Tags</p>
-                  <div className="flex flex-wrap gap-2">
+                <div className="space-y-2 pt-4 border-t border-slate-100">
+                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-wider mb-2">Tags</p>
+                  <div className="flex flex-wrap gap-1.5">
                     {['Priority', 'WhatsApp', 'Support'].map(tag => (
-                      <span key={tag} className="px-3 py-1 bg-emerald-50 text-emerald-600 rounded-lg text-[10px] font-bold uppercase tracking-widest border border-emerald-100">
+                      <span key={tag} className="px-2.5 py-0.5 bg-emerald-50 text-emerald-700 rounded-md text-[9px] font-extrabold uppercase tracking-wider border border-emerald-200">
                         {tag}
                       </span>
                     ))}
@@ -728,7 +728,7 @@ const ClientInboxPage = () => {
               </div>
             ) : (
               <div className="h-full flex items-center justify-center text-center opacity-20 grayscale">
-                <User size={48} />
+                <User size={36} />
               </div>
             )}
           </aside>
@@ -737,17 +737,18 @@ const ClientInboxPage = () => {
       
       <style jsx global>{`
         .custom-scrollbar::-webkit-scrollbar {
-          width: 6px;
+          width: 5px;
+          height: 5px;
         }
         .custom-scrollbar::-webkit-scrollbar-track {
           background: transparent;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: #e2e8f0;
+          background: #10B981;
           border-radius: 10px;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: #cbd5e1;
+          background: #059669;
         }
       `}</style>
     </DashboardLayout>
