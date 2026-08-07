@@ -118,7 +118,14 @@ export default function CampaignsPage() {
                       {campaign.name[0].toUpperCase()}
                     </div>
                     <div>
-                      <h3 className="text-base font-bold text-slate-900">{campaign.name}</h3>
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-base font-bold text-slate-900">{campaign.name}</h3>
+                        {campaign.has_followup && (
+                          <span title="Auto Follow-up Enabled" className="flex items-center justify-center bg-amber-100 text-amber-600 rounded-full w-5 h-5 text-xs">
+                            ⚡
+                          </span>
+                        )}
+                      </div>
                       <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-xs font-bold text-slate-400">
                         <span className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
                           {campaign.channel || 'WHATSAPP'}

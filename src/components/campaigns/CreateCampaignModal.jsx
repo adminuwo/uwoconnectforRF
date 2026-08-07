@@ -25,6 +25,11 @@ export default function CreateCampaignModal({ isOpen, onClose, onCreated }) {
   const [scheduleDate, setScheduleDate] = useState('');
   const [scheduleTime, setScheduleTime] = useState('');
 
+  // Follow-up States
+  const [isFollowUpEnabled, setIsFollowUpEnabled] = useState(false);
+  const [followupDelayHours, setFollowupDelayHours] = useState('24');
+  const [followupTemplateId, setFollowupTemplateId] = useState('');
+
   useEffect(() => {
     if (isOpen) {
       fetchTemplates();
@@ -37,6 +42,9 @@ export default function CreateCampaignModal({ isOpen, onClose, onCreated }) {
       setIsScheduled(false);
       setScheduleDate('');
       setScheduleTime('');
+      setIsFollowUpEnabled(false);
+      setFollowupDelayHours('24');
+      setFollowupTemplateId('');
     }
   }, [isOpen]);
 
@@ -79,7 +87,9 @@ export default function CreateCampaignModal({ isOpen, onClose, onCreated }) {
         body: channel !== 'WHATSAPP' ? body : '',
         template: channel === 'WHATSAPP' ? templateId : null,
         audience_filter: audienceFilter,
-        scheduled_at
+        scheduled_at,
+        followup_delay_hours: isFollowUpEnabled ? followupDelayHours : null,
+        followup_template_id: isFollowUpEnabled ? followupTemplateId : null
       }, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -233,6 +243,54 @@ export default function CreateCampaignModal({ isOpen, onClose, onCreated }) {
               </div>
             )}
           </div>
+
+          {channel === 'WHATSAPP' && (
+            <div className="pt-2 border-t border-slate-100">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <label className="block text-sm font-bold text-slate-700">Auto Follow-up (If no reply)</label>
+                  <p className="text-[11px] text-slate-500 font-medium mt-0.5">Send another message if ignored</p>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" className="sr-only peer" checked={isFollowUpEnabled} onChange={() => setIsFollowUpEnabled(!isFollowUpEnabled)} />
+                  <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+                </label>
+              </div>
+
+              {isFollowUpEnabled && (
+                <div className="grid grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-2 duration-200 bg-slate-50 p-4 rounded-xl border border-slate-200">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-600 mb-1">Wait Time</label>
+                    <select
+                      required={isFollowUpEnabled}
+                      value={followupDelayHours}
+                      onChange={(e) => setFollowupDelayHours(e.target.value)}
+                      className="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none text-sm font-medium text-slate-800"
+                    >
+                      <option value="1">1 Hour</option>
+                      <option value="2">2 Hours</option>
+                      <option value="24">24 Hours</option>
+                      <option value="48">48 Hours</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-600 mb-1">Follow-up Message</label>
+                    <select
+                      required={isFollowUpEnabled}
+                      value={followupTemplateId}
+                      onChange={(e) => setFollowupTemplateId(e.target.value)}
+                      className="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none text-sm font-medium text-slate-800"
+                    >
+                      <option value="" disabled>Select Template</option>
+                      {templates.map(tmpl => (
+                        <option key={tmpl.id} value={tmpl.id}>{tmpl.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
 
           <div className="pt-4 border-t border-slate-100 flex justify-end gap-3">
             <button type="button" onClick={onClose} className="px-6 py-3 font-bold text-slate-500 hover:bg-slate-100 rounded-xl transition-all text-sm">
