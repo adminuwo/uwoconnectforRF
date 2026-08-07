@@ -2,15 +2,41 @@
 
 import React, { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
+import { usePathname } from 'next/navigation';
 import Sidebar from './Sidebar';
-import { Menu, MessageCircle } from 'lucide-react';
+import { MessageCircle } from 'lucide-react';
 
 const PlatformAssistant = dynamic(() => import('./PlatformAssistant'), { ssr: false });
 const ProductTour       = dynamic(() => import('@/components/tour/ProductTour'), { ssr: false });
 const TeamChatDrawer    = dynamic(() => import('@/components/team/TeamChatDrawer'), { ssr: false });
+const GlobalIncomingCallListener = dynamic(() => import('./GlobalIncomingCallListener'), { ssr: false });
+
+const PAGE_TITLES = {
+  '/client': 'Dashboard',
+  '/admin': 'Control Center',
+  '/client/guides': 'Learning Center',
+  '/client/channels': 'Channels',
+  '/client/email': 'Email / Gmail',
+  '/client/calls': 'Voice & Video Calls',
+  '/client/youtube': 'YouTube',
+  '/client/google-news': 'Google News',
+  '/client/automations': 'Auto Replies',
+  '/client/workflows': 'Workflows',
+  '/client/crm': 'Leads (CRM)',
+  '/client/inbox': 'Messages',
+  '/client/campaigns': 'Broadcasts',
+  '/client/knowledge': 'Knowledge Base',
+  '/client/catalog': 'Catalog',
+  '/client/orders': 'Orders',
+  '/client/team': 'Team',
+  '/client/reports': 'Work Reports',
+  '/client/settings': 'Settings',
+  '/client/support': 'Support',
+};
 
 const DashboardLayout = ({ children, role: initialRole }) => {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const pathname = usePathname();
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [chatOpen, setChatOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [user, setUser] = useState(null);
@@ -42,25 +68,20 @@ const DashboardLayout = ({ children, role: initialRole }) => {
 
   const displayName = user?.name || 'User';
   const displayRole = user?.role || initialRole || '';
+  const currentTitle = PAGE_TITLES[pathname] || (displayRole === 'ADMIN' ? 'Control Center' : 'Dashboard');
 
   return (
     <div className="flex flex-col h-screen w-screen bg-[#fcfdfe] overflow-hidden">
       <div className="flex bg-[#fcfdfe] h-screen w-full font-sans selection:bg-emerald-100 selection:text-emerald-900 text-slate-900 flex-1 overflow-hidden">
-        <Sidebar role={displayRole} isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+        <Sidebar role={displayRole} isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} onToggle={() => setSidebarOpen(v => !v)} />
 
         <main className="flex-1 dashboard-main h-screen flex flex-col min-w-0 overflow-hidden">
           {/* Header */}
           <header className="h-14 sm:h-16 bg-white/80 backdrop-blur-xl border-b border-slate-100 px-3 sm:px-6 flex items-center justify-between sticky top-0 z-20 shrink-0 shadow-xs">
             <div className="flex items-center gap-3">
-              <button
-                onClick={() => setSidebarOpen(true)}
-                className="p-1.5 -ml-1 text-slate-500 hover:text-slate-800 md:hidden block cursor-pointer rounded-lg hover:bg-slate-100"
-              >
-                <Menu size={22} />
-              </button>
               <div className="w-1.5 h-6 bg-gradient-to-b from-[#16A34A] to-[#059669] rounded-full shadow-[0_0_10px_rgba(5,150,105,0.2)]" />
               <h1 className="text-xs sm:text-sm md:text-base font-black text-slate-800 tracking-tight uppercase">
-                {displayRole === 'ADMIN' ? 'Control Center' : 'Dashboard'}
+                {currentTitle}
               </h1>
             </div>
 
@@ -90,7 +111,7 @@ const DashboardLayout = ({ children, role: initialRole }) => {
           </header>
 
           {/* Content */}
-          <div className="p-2.5 sm:p-4 md:p-6 flex-1 min-h-0 relative bg-gradient-to-br from-slate-50/50 to-white overflow-y-auto flex flex-col custom-scrollbar">
+          <div className="flex-1 min-h-0 relative bg-gradient-to-br from-slate-50/50 to-white overflow-y-auto flex flex-col custom-scrollbar">
             <div className="absolute inset-0 bg-[radial-gradient(#94a3b8_1px,transparent_1px)] [background-size:40px_40px] opacity-[0.08] pointer-events-none" />
             <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-[#059669]/5 rounded-full blur-[120px] pointer-events-none" />
             <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-[#16A34A]/5 rounded-full blur-[120px] pointer-events-none" />
@@ -105,6 +126,7 @@ const DashboardLayout = ({ children, role: initialRole }) => {
       <PlatformAssistant />
       <ProductTour />
       <TeamChatDrawer isOpen={chatOpen} onClose={() => setChatOpen(false)} />
+      <GlobalIncomingCallListener />
     </div>
   );
 };

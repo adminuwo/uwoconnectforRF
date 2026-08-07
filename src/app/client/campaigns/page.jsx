@@ -3,17 +3,25 @@
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import CreateCampaignModal from '@/components/campaigns/CreateCampaignModal';
-import { Megaphone, RefreshCw, Loader2, Play, Users, CheckCircle2, XCircle, AlertCircle, Eye, CheckCheck } from 'lucide-react';
+import CampaignDetailModal from '@/components/campaigns/CampaignDetailModal';
+import { 
+  Megaphone, RefreshCw, Loader2, Play, Users, CheckCircle2, XCircle, 
+  CheckCheck, Eye, ChevronRight
+} from 'lucide-react';
 import axios from 'axios';
 
 export default function CampaignsPage() {
   const [campaigns, setCampaigns] = useState([]);
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [selectedCampaign, setSelectedCampaign] = useState(null);
+  const [platformFilter, setPlatformFilter] = useState('ALL');
 
   useEffect(() => {
     fetchCampaigns();
+    const interval = setInterval(fetchCampaigns, 5000);
+    return () => clearInterval(interval);
   }, []);
 
   const fetchCampaigns = async () => {
@@ -22,7 +30,7 @@ export default function CampaignsPage() {
       const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/campaigns/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setCampaigns(res.data);
+      setCampaigns(res.data || []);
     } catch (err) {
       console.error("Failed to fetch campaigns", err);
     } finally {
@@ -40,128 +48,161 @@ export default function CampaignsPage() {
       alert(res.data.message || "Templates synced successfully!");
     } catch (err) {
       console.error("Failed to sync templates", err);
-      alert(err.response?.data?.message || "Failed to sync templates. Make sure Meta credentials are set.");
+      alert(err.response?.data?.message || "Failed to sync templates.");
     } finally {
       setSyncing(false);
     }
   };
 
-  const getStatusColor = (status) => {
+  const getStatusBadge = (status) => {
     switch (status) {
-      case 'COMPLETED': return 'bg-emerald-100 text-emerald-700 border-emerald-200';
-      case 'SENDING': return 'bg-blue-100 text-blue-700 border-blue-200';
-      case 'FAILED': return 'bg-rose-100 text-rose-700 border-rose-200';
-      default: return 'bg-slate-100 text-slate-700 border-slate-200';
+      case 'COMPLETED': return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+      case 'SENDING': return 'bg-blue-50 text-blue-700 border-blue-200 animate-pulse';
+      case 'FAILED': return 'bg-rose-50 text-rose-700 border-rose-200';
+      default: return 'bg-slate-50 text-slate-600 border-slate-200';
     }
   };
 
+  const totalSent = campaigns.reduce((sum, c) => sum + (c.total_sent || 0), 0);
+  const totalFailed = campaigns.reduce((sum, c) => sum + (c.total_failed || 0), 0);
+
   return (
     <DashboardLayout role="CLIENT">
-      <div className="bg-white font-sans flex flex-col min-h-[calc(100vh-140px)] md:h-[calc(100vh-140px)] rounded-[24px] sm:rounded-[32px] overflow-hidden border border-slate-200 shadow-[0_24px_48px_-12px_rgba(0,0,0,0.05)]">
-        {/* Header */}
-        <header className="bg-white border-b border-slate-100 px-4 sm:px-8 py-6 sm:py-8 shrink-0 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      <div className="max-w-6xl mx-auto pb-16 space-y-6">
+        
+        {/* Simple Clean Header */}
+        <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center shadow-sm">
+            <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2.5">
+              <span className="w-9 h-9 rounded-xl bg-emerald-50 text-[#00AB56] flex items-center justify-center">
                 <Megaphone size={20} />
-              </div>
-              <h1 className="text-2xl font-black text-slate-900 tracking-tight">Broadcast Campaigns</h1>
-            </div>
-            <p className="text-sm text-slate-500 font-medium">Send bulk messages to your contacts using approved Meta templates.</p>
+              </span>
+              Broadcast Campaigns
+            </h1>
+            <p className="text-xs text-slate-500 font-medium mt-1">Send bulk message campaigns across WhatsApp, Email & SMS.</p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
+          <div className="flex items-center gap-2.5 w-full sm:w-auto">
             <button 
               onClick={syncTemplates}
               disabled={syncing}
-              className="px-5 py-2.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all disabled:opacity-50 flex-1 md:flex-none"
+              className="px-4 py-2.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 rounded-xl font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-50"
             >
-              <RefreshCw size={16} className={syncing ? "animate-spin" : ""} />
+              <RefreshCw size={14} className={syncing ? "animate-spin text-[#00AB56]" : "text-slate-500"} />
               {syncing ? 'Syncing...' : 'Sync Templates'}
             </button>
+
             <button 
-              onClick={() => setIsModalOpen(true)}
-              className="px-6 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold text-sm shadow-xl shadow-slate-200 flex items-center justify-center gap-2 transition-all flex-1 md:flex-none"
+              onClick={() => setIsCreateModalOpen(true)}
+              className="px-5 py-2.5 bg-[#00AB56] hover:bg-[#009249] text-white rounded-xl font-bold text-xs shadow-xs flex items-center gap-1.5 transition-all cursor-pointer"
             >
-              <Play size={16} />
+              <Play size={14} />
               New Broadcast
             </button>
           </div>
-        </header>
+        </div>
 
-        {/* Content */}
-        <div className="flex-1 overflow-auto p-4 sm:p-8 bg-slate-50/50">
+        {/* Clean Stat Pills */}
+        <div className="grid grid-cols-3 gap-3">
+          <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs text-center">
+            <span className="text-[10px] text-slate-400 font-bold uppercase block mb-0.5">Total Campaigns</span>
+            <span className="text-lg font-black text-slate-900">{campaigns.length}</span>
+          </div>
+          <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs text-center">
+            <span className="text-[10px] text-slate-400 font-bold uppercase block mb-0.5">Messages Sent</span>
+            <span className="text-lg font-black text-emerald-600">{totalSent.toLocaleString()}</span>
+          </div>
+          <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs text-center">
+            <span className="text-[10px] text-slate-400 font-bold uppercase block mb-0.5">Failed Deliveries</span>
+            <span className="text-lg font-black text-rose-600">{totalFailed.toLocaleString()}</span>
+          </div>
+        </div>
+
+        {/* Campaign List */}
+        <div className="space-y-3">
           {loading ? (
-            <div className="flex justify-center items-center h-64">
-              <Loader2 className="animate-spin text-emerald-500" size={32} />
+            <div className="h-48 flex items-center justify-center text-slate-400 text-xs font-semibold gap-2 bg-white rounded-2xl border border-slate-200">
+              <Loader2 className="animate-spin text-[#00AB56]" size={20} />
+              Loading campaigns...
             </div>
           ) : campaigns.length === 0 ? (
-            <div className="flex flex-col items-center justify-center min-h-[300px] text-center max-w-sm mx-auto">
-              <div className="w-20 h-20 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center mb-6">
-                <Megaphone size={32} />
-              </div>
-              <h3 className="text-xl font-bold text-slate-900 mb-2">No campaigns yet</h3>
-              <p className="text-slate-500 text-sm mb-8 leading-relaxed">
-                Start reaching your customers by syncing your Meta templates and creating your first broadcast campaign.
-              </p>
-              <button onClick={() => setIsModalOpen(true)} className="px-6 py-3 bg-emerald-600 text-white rounded-xl font-bold text-sm shadow-lg shadow-emerald-200 hover:bg-emerald-700 transition-all w-full">
-                Create First Broadcast
+            <div className="text-center py-12 bg-white rounded-2xl border border-slate-200/80 shadow-xs max-w-md mx-auto">
+              <Megaphone size={28} className="text-[#00AB56] mx-auto mb-2" />
+              <h3 className="text-sm font-bold text-slate-900 mb-1">No campaigns yet</h3>
+              <p className="text-xs text-slate-400 mb-4">Create your first broadcast to reach your contacts.</p>
+              <button
+                onClick={() => setIsCreateModalOpen(true)}
+                className="px-5 py-2 bg-[#00AB56] text-white rounded-xl font-bold text-xs"
+              >
+                Create Broadcast
               </button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 gap-4">
-              {campaigns.map((campaign) => (
-                <div key={campaign.id} className="bg-white p-4 sm:p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between hover:shadow-md transition-all gap-4">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-slate-50 text-slate-500 rounded-xl flex items-center justify-center font-black text-xl border border-slate-100 shrink-0">
-                      {campaign.name[0].toUpperCase()}
+            campaigns.map((camp) => (
+              <div
+                key={camp.id}
+                onClick={() => setSelectedCampaign(camp)}
+                className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-xs hover:border-[#00AB56]/50 transition-all cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-4 group"
+              >
+                <div className="flex items-center gap-3.5">
+                  <div className="w-10 h-10 rounded-xl bg-emerald-50 text-[#00AB56] border border-emerald-100 flex items-center justify-center font-bold text-sm shrink-0">
+                    {camp.name[0].toUpperCase()}
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-sm font-bold text-slate-900 group-hover:text-[#00AB56] transition-colors">
+                        {camp.name}
+                      </h3>
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border uppercase ${getStatusBadge(camp.status)}`}>
+                        {camp.status}
+                      </span>
                     </div>
-                    <div>
-                      <h3 className="text-base font-bold text-slate-900">{campaign.name}</h3>
-                      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-xs font-bold text-slate-400">
-                        <span className="flex items-center gap-1.5"><Users size={12} /> Target: {campaign.audience_filter}</span>
-                        <span className="hidden sm:inline">•</span>
-                        <span>{new Date(campaign.created_at).toLocaleString()}</span>
-                      </div>
+
+                    <div className="flex items-center gap-3 mt-0.5 text-[11px] text-slate-400 font-medium">
+                      <span>Target: {camp.audience_filter || 'ALL'}</span>
+                      <span>•</span>
+                      <span>{new Date(camp.created_at).toLocaleDateString()}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between sm:justify-end gap-5 text-xs">
+                  <div className="flex gap-4">
+                    <div className="text-center">
+                      <span className="text-[9px] text-slate-400 font-bold uppercase block">Sent</span>
+                      <span className="font-bold text-slate-900">{camp.total_sent || 0}</span>
+                    </div>
+                    <div className="text-center">
+                      <span className="text-[9px] text-slate-400 font-bold uppercase block">Delivered</span>
+                      <span className="font-bold text-emerald-600">{camp.total_delivered || 0}</span>
+                    </div>
+                    <div className="text-center">
+                      <span className="text-[9px] text-slate-400 font-bold uppercase block">Failed</span>
+                      <span className="font-bold text-rose-600">{camp.total_failed || 0}</span>
                     </div>
                   </div>
 
-                    <div className="flex items-center justify-between sm:justify-end gap-6 w-full sm:w-auto border-t sm:border-t-0 pt-3 sm:pt-0">
-                      <div className="flex gap-4 sm:gap-6 text-sm">
-                        <div className="text-center">
-                          <p className="text-slate-400 font-bold text-[10px] uppercase tracking-widest mb-1">Sent</p>
-                          <p className="font-black text-slate-900 flex items-center justify-center gap-1"><CheckCircle2 size={14} className="text-slate-400"/> {campaign.total_sent}</p>
-                        </div>
-                        <div className="text-center">
-                          <p className="text-slate-400 font-bold text-[10px] uppercase tracking-widest mb-1">Delivered</p>
-                          <p className="font-black text-slate-900 flex items-center justify-center gap-1"><CheckCheck size={14} className="text-emerald-400"/> {campaign.total_delivered}</p>
-                        </div>
-                        <div className="text-center">
-                          <p className="text-slate-400 font-bold text-[10px] uppercase tracking-widest mb-1">Read</p>
-                          <p className="font-black text-slate-900 flex items-center justify-center gap-1"><Eye size={14} className="text-blue-400"/> {campaign.total_read}</p>
-                        </div>
-                        <div className="text-center">
-                          <p className="text-slate-400 font-bold text-[10px] uppercase tracking-widest mb-1">Failed</p>
-                          <p className="font-black text-slate-900 flex items-center justify-center gap-1"><XCircle size={14} className="text-rose-400"/> {campaign.total_failed}</p>
-                        </div>
-                      </div>
-                      <div className={`px-4 py-1.5 rounded-lg border text-xs font-bold tracking-widest uppercase shrink-0 ${getStatusColor(campaign.status)}`}>
-                        {campaign.status}
-                      </div>
-                    </div>
+                  <ChevronRight size={16} className="text-slate-400 group-hover:text-[#00AB56] transition-colors" />
                 </div>
-              ))}
-            </div>
+              </div>
+            ))
           )}
         </div>
+
       </div>
 
-      <CreateCampaignModal 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
-        onCreated={fetchCampaigns} 
+      <CreateCampaignModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        onCreated={fetchCampaigns}
+      />
+
+      <CampaignDetailModal
+        isOpen={!!selectedCampaign}
+        campaign={selectedCampaign}
+        onClose={() => setSelectedCampaign(null)}
+        onRefresh={fetchCampaigns}
       />
     </DashboardLayout>
   );
 }
-

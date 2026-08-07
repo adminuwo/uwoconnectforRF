@@ -10,8 +10,10 @@ import {
   Settings,
   RefreshCw,
   Plus,
-  Calendar
+  Calendar,
+  Sparkles
 } from 'lucide-react';
+import { useSearchParams } from 'next/navigation';
 import axios from 'axios';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { cn } from '@/lib/utils';
@@ -24,8 +26,8 @@ import GoogleSheetsConfigModal, { GoogleSheetsIcon } from '@/components/channels
 import GoogleDocsConfigModal, { GoogleDocsIcon } from '@/components/channels/GoogleDocsConfigModal';
 import GoogleSlidesConfigModal, { GoogleSlidesIcon } from '@/components/channels/GoogleSlidesConfigModal';
 import GoogleNewsConfigModal, { GoogleNewsIcon } from '@/components/channels/GoogleNewsConfigModal';
+import OutlookConfigModal, { OutlookIcon } from '@/components/channels/OutlookConfigModal';
 import LearningCenterModal from '@/components/guides/LearningCenterModal';
-import { Sparkles } from 'lucide-react';
 
 const FacebookIcon = ({ size = 22, className }) => (
   <svg
@@ -125,6 +127,25 @@ const ClientChannelsPage = () => {
 
   const [toast, setToast] = useState(null);
   const [isGuideOpen, setIsGuideOpen] = useState(false);
+  const [isOutlookConfigOpen, setIsOutlookConfigOpen] = useState(false);
+
+  useEffect(() => {
+    const handleOpenModal = () => {
+      setIsOutlookConfigOpen(true);
+    };
+    window.addEventListener('open-email-modal', handleOpenModal);
+
+    if (typeof window !== 'undefined') {
+      const search = window.location.search;
+      if (search.includes('channel=outlook') || search.includes('channel=gmail') || search.includes('channel=email')) {
+        setIsOutlookConfigOpen(true);
+      }
+    }
+
+    return () => {
+      window.removeEventListener('open-email-modal', handleOpenModal);
+    };
+  }, []);
 
   const fetchClient = async (isManualRefresh = false) => {
     if (isManualRefresh) setRefreshing(true);
@@ -294,6 +315,23 @@ const ClientChannelsPage = () => {
       setToast({ msg, type: 'error' });
       setTimeout(() => setToast(null), 5000);
       window.history.replaceState({}, document.title, window.location.pathname);
+    }
+    // Microsoft Outlook OAuth callback (backend redirects here after token exchange)
+    else if (params.get('outlook_connected') === 'true') {
+      window.history.replaceState({}, document.title, window.location.pathname);
+      fetchClient();
+      setToast({ msg: '✅ Microsoft Outlook connected successfully!', type: 'success' });
+      setTimeout(() => setToast(null), 4000);
+    } else if (params.get('outlook_error')) {
+      window.history.replaceState({}, document.title, window.location.pathname);
+      const err = params.get('outlook_error');
+      const msg = err === 'access_denied' ? 'Outlook permission was cancelled.' : `Outlook connection failed: ${err}`;
+      setToast({ msg, type: 'error' });
+      setTimeout(() => setToast(null), 5000);
+    }
+
+    if (params.get('channel') === 'outlook' || params.get('channel') === 'gmail' || params.get('channel') === 'email') {
+      setIsOutlookConfigOpen(true);
     }
 
 
@@ -816,18 +854,13 @@ const ClientChannelsPage = () => {
               </div>
 
               {/* Action Button */}
-              <div className="mt-6 pt-4 border-t border-slate-100">
+              <div className="mt-6 pt-4 border-t border-slate-100 flex gap-2">
                 <button
-                  onClick={handleConnectGmail}
-                  className={cn(
-                    "w-full py-2.5 px-4 rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer",
-                    isGmailConnected
-                      ? "bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200/60"
-                      : "bg-red-600 hover:bg-red-700 text-white"
-                  )}
+                  onClick={() => setIsOutlookConfigOpen(true)}
+                  className="flex-1 py-2.5 px-4 rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200/60"
                 >
-                  {isGmailConnected ? <RefreshCw size={14} className="text-slate-400" /> : <Plus size={14} />}
-                  <span>{isGmailConnected ? 'Reconnect' : 'Connect'}</span>
+                  <Settings size={14} className="text-slate-400" />
+                  <span>Configure Email</span>
                 </button>
               </div>
             </div>
@@ -1417,6 +1450,38 @@ const ClientChannelsPage = () => {
               </div>
             </div>
 
+            {/* ── Microsoft Outlook Connector Card ── */}
+            <div
+              className="relative group p-5 bg-white border border-slate-200/80 rounded-2xl hover:border-blue-300 hover:shadow-md transition-all cursor-pointer"
+              onClick={() => setIsOutlookConfigOpen(true)}
+            >
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-xl bg-blue-600/10 border border-blue-200/60 flex items-center justify-center text-blue-600 shrink-0">
+                  <OutlookIcon size={20} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <h3 className="text-sm font-black text-slate-900">Microsoft Outlook</h3>
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md border uppercase tracking-wider ${
+                      client?.outlook_enabled
+                        ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                        : 'bg-slate-100 text-slate-500 border-slate-200'
+                    }`}>
+                      {client?.outlook_enabled ? '● Connected' : '○ Not Connected'}
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-500 leading-relaxed">
+                    Automate emails, AI summaries, CRM lead capture & file attachments via Microsoft Graph API.
+                  </p>
+                  <div className="mt-3 flex items-center gap-1.5 flex-wrap">
+                    {['Mail.Read', 'Mail.Send', 'User.Read', 'Graph API'].map(tag => (
+                      <span key={tag} className="text-[10px] px-2 py-0.5 bg-blue-50 text-blue-700 border border-blue-100 rounded-md font-bold">{tag}</span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
           </div>
         )}
 
@@ -1488,6 +1553,19 @@ const ClientChannelsPage = () => {
         <GoogleNewsConfigModal
           isOpen={isGoogleNewsConfigModalOpen}
           onClose={() => setIsGoogleNewsConfigModalOpen(false)}
+          client={client}
+          onSaved={() => fetchClient(true)}
+        />
+
+        {/* Microsoft Outlook Configuration Modal */}
+        <OutlookConfigModal
+          isOpen={isOutlookConfigOpen}
+          onClose={() => {
+            setIsOutlookConfigOpen(false);
+            if (typeof window !== 'undefined' && window.location.search.includes('channel=')) {
+              window.history.replaceState({}, '', window.location.pathname);
+            }
+          }}
           client={client}
           onSaved={() => fetchClient(true)}
         />

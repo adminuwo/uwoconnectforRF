@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
 import { 
@@ -427,7 +427,7 @@ export default function CatalogPage() {
 
   return (
     <DashboardLayout role="CLIENT">
-      <div className="max-w-7xl mx-auto pb-24 px-4 md:px-0 font-sans text-slate-800">
+      <div className="max-w-7xl mx-auto w-full p-4 sm:p-6 pb-24 font-sans text-slate-800">
 
         {/* --- TOP HEADER --- */}
         <div className="mb-8 flex items-center justify-between flex-wrap gap-4 bg-white/70 backdrop-blur-md p-6 rounded-3xl border border-slate-200/80 shadow-sm">

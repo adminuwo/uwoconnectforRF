@@ -1,4 +1,4 @@
-export default function Loading() {
+﻿export default function Loading() {
   return (
     <div className="flex bg-[#fcfdfe] min-h-screen">
       <div className="fixed left-0 top-0 h-screen w-64 bg-white border-r border-slate-100 hidden md:block" />
@@ -7,7 +7,7 @@ export default function Loading() {
           <div className="w-40 h-5 bg-slate-100 rounded-full" />
         </header>
         <div className="p-4 md:p-10 flex-1">
-          <div className="max-w-7xl mx-auto space-y-8">
+          <div className="w-full p-4 space-y-8">
             <div className="w-64 h-8 bg-slate-100 rounded-2xl" />
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               {[...Array(4)].map((_, i) => (

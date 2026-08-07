@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
@@ -148,7 +148,7 @@ const ClientSettingsPage = () => {
 
   return (
     <DashboardLayout role="CLIENT">
-      <div className="max-w-7xl mx-auto pb-20 px-2 sm:px-4 md:px-0">
+      <div className="max-w-7xl mx-auto w-full p-4 sm:p-6 pb-20">
         <div className="mb-8 flex items-center justify-between flex-wrap gap-4">
           <div>
             <h1 className="text-3xl font-bold text-slate-900 tracking-tight mb-2">Account Settings</h1>

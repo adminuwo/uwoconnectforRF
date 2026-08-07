@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState, useEffect } from 'react';
 import { 
@@ -284,7 +284,7 @@ const ClientOverview = () => {
 
   return (
     <DashboardLayout role="CLIENT">
-      <div style={{ fontFamily: '"Times New Roman", Times, serif' }} className="max-w-7xl mx-auto pb-20 px-2 sm:px-4 md:px-0">
+      <div style={{ fontFamily: '"Times New Roman", Times, serif' }} className="max-w-7xl mx-auto w-full p-4 sm:p-6 pb-20">
         
         {/* Welcome Section */}
         <div data-tour="dashboard-welcome" className="flex flex-col sm:flex-row sm:items-center justify-between mb-8">

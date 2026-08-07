@@ -179,7 +179,7 @@ export default function BuilderPage() {
 
   return (
     <DashboardLayout>
-      <div className="flex flex-col h-[calc(100vh-64px)] -m-6 relative">
+      <div className="flex flex-col h-[calc(100vh-64px)] w-full relative">
         {/* Header */}
         <div className="h-14 bg-white border-b border-slate-200 flex items-center justify-between px-6 shrink-0 z-10 shadow-sm relative">
           <div className="flex items-center gap-4">

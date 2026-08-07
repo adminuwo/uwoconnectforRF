@@ -51,26 +51,26 @@ const LearningCenterPage = () => {
 
   return (
     <DashboardLayout role="CLIENT">
-      <div className="max-w-7xl mx-auto pb-20 px-2 sm:px-4 md:px-0">
+      <div className="max-w-7xl mx-auto w-full p-4 sm:p-6 pb-20 space-y-6">
         
-        {/* Banner */}
-        <div className="mb-8 p-8 rounded-3xl bg-slate-950 text-white relative overflow-hidden border border-slate-800 shadow-xl">
-          <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+        {/* Banner - Light Theme */}
+        <div className="mb-6 p-5 sm:p-6 rounded-3xl bg-gradient-to-br from-emerald-500/10 via-[#F0FDF4] to-white relative overflow-hidden border border-emerald-500/20 shadow-sm">
+          <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-400/20 rounded-full blur-3xl pointer-events-none" />
           <div className="relative z-10 max-w-2xl space-y-3">
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-500/20 text-emerald-400 rounded-xl border border-emerald-500/30 text-xs font-black uppercase tracking-widest">
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-600/10 text-emerald-700 rounded-xl border border-emerald-600/20 text-xs font-black uppercase tracking-widest">
               <Sparkles size={13} /> UWOConnect Learning Academy
             </div>
-            <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-white">
+            <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-slate-900">
               Interactive Learning Center & Step-by-Step Guides
             </h1>
-            <p className="text-slate-400 text-xs sm:text-sm leading-relaxed font-medium">
+            <p className="text-slate-600 text-xs sm:text-sm leading-relaxed font-medium">
               Explore interactive tutorials, architecture blueprints, code snippets, and step-by-step setup walkthroughs for every UWOConnect feature.
             </p>
           </div>
         </div>
 
         {/* Filters & Search Bar */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6">
           {/* Search Input */}
           <div className="relative flex-1 max-w-md">
             <Search size={16} className="absolute left-3.5 top-3 text-slate-400" />
@@ -84,7 +84,7 @@ const LearningCenterPage = () => {
           </div>
 
           {/* Category Chips */}
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-2 sm:pb-0 custom-scroll">
+          <div className="flex items-center gap-1.5 flex-wrap">
             {categories.map(cat => (
               <button
                 key={cat}
