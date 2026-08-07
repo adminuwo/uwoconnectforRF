@@ -588,7 +588,13 @@ const YouTubeManager = () => {
                   >
                     <div>
                       {/* Video Thumbnail with Play Overlay */}
-                      <div className="relative rounded-2xl overflow-hidden aspect-video border border-slate-100/50 mb-3">
+                      <a 
+                        href={vid.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={(e) => e.stopPropagation()}
+                        className="relative rounded-2xl overflow-hidden aspect-video border border-slate-100/50 mb-3 block"
+                      >
                         <img 
                           src={vid.thumbnail} 
                           alt={vid.title} 
@@ -599,6 +605,7 @@ const YouTubeManager = () => {
                         </div>
                         <button
                           onClick={(e) => {
+                            e.preventDefault();
                             e.stopPropagation();
                             handleDeleteVideo(vid.id, vid.title);
                           }}
@@ -612,7 +619,7 @@ const YouTubeManager = () => {
                             <Trash2 size={14} />
                           )}
                         </button>
-                      </div>
+                      </a>
 
                       <h3 className="text-xs font-bold text-slate-900 line-clamp-2 leading-tight group-hover:text-red-700 transition-colors mb-2">
                         {vid.title}
@@ -1024,9 +1031,10 @@ const YouTubeManager = () => {
                           </div>
 
                           {/* Comment text */}
-                          <p className="text-xs text-slate-600 leading-relaxed font-medium pl-1 bg-white p-2 rounded-xl border border-slate-50/50 shadow-inner">
-                            {comment.text}
-                          </p>
+                          <div 
+                            className="text-xs text-slate-600 leading-relaxed font-medium pl-1 bg-white p-2 rounded-xl border border-slate-50/50 shadow-inner"
+                            dangerouslySetInnerHTML={{ __html: comment.text }}
+                          />
 
                           {/* Existing Replies */}
                           {comment.replies && comment.replies.length > 0 && (
@@ -1050,9 +1058,10 @@ const YouTubeManager = () => {
                                       <span className="text-[8px] font-bold text-slate-400">{new Date(reply.published_at).toLocaleDateString()}</span>
                                     </div>
                                   </div>
-                                  <p className="text-[10px] text-slate-600 leading-relaxed font-medium pl-1">
-                                    {reply.text}
-                                  </p>
+                                  <div 
+                                    className="text-[10px] text-slate-600 leading-relaxed font-medium pl-1"
+                                    dangerouslySetInnerHTML={{ __html: reply.text }}
+                                  />
                                 </div>
                               ))}
                             </div>

@@ -546,7 +546,9 @@ const isGoogleSlidesConnected = Boolean(client?.google_slides_enabled);
 const isZohoConnected = Boolean(client?.zoho_enabled);
 const isYouTubeConnected = Boolean(client?.youtube_enabled);
 
-const connectedCount = [isWhatsAppConnected, isFacebookConnected, isInstagramConnected, isGmailConnected, isOneDriveConnected, isGoogleCalendarConnected, isGoogleSheetsConnected, isGoogleDocsConnected, isGoogleSlidesConnected, isZohoConnected, isYouTubeConnected].filter(Boolean).length;
+const allChannels = [isWhatsAppConnected, isFacebookConnected, isInstagramConnected, isGmailConnected, isOneDriveConnected, isGoogleCalendarConnected, isGoogleSheetsConnected, isGoogleDocsConnected, isGoogleSlidesConnected, isZohoConnected, isYouTubeConnected];
+const connectedCount = allChannels.filter(Boolean).length;
+const totalChannelsCount = allChannels.length;
 
 const handleConnectGmail = async () => {
   try {
@@ -654,7 +656,7 @@ return (
 
         <div className="flex items-center gap-3">
           <span className="text-xs text-slate-400 font-medium">
-            <strong className="text-slate-700">{connectedCount}</strong> of 9 connected
+            <strong className="text-slate-700">{connectedCount}</strong> of {totalChannelsCount} connected
           </span>
           <button
             onClick={() => fetchClient(true)}
