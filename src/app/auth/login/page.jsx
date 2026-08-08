@@ -14,6 +14,7 @@ import {
   signInWithPopup,
 } from '@/lib/firebase';
 import { storeUserSession } from '@/features/auth/authHelpers';
+import { API_BASE_URL } from '@/config/apiConfig';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
@@ -24,7 +25,7 @@ const LoginPage = () => {
   const [error, setError] = useState('');
   const router = useRouter();
 
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080';
+  const API_URL = API_BASE_URL;
 
   /**
    * After Firebase sign-in, send the ID token to the backend
