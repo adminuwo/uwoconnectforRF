@@ -93,7 +93,10 @@ export default function GlobalIncomingCallListener() {
     // 4. Backend Active Call Poller (Cross-Device & Cross-Browser)
     const pollInterval = setInterval(async () => {
       try {
-        const res = await fetch(`${API_BASE_URL}/api/webrtc/call/active-check`);
+        const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+        const res = await fetch(`${API_BASE_URL}/api/webrtc/call/active-check`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {}
+        });
         if (res.ok) {
           const data = await res.json();
           if (data.active_call) {

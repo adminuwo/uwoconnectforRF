@@ -317,15 +317,27 @@ export default function EnterpriseCallsPage() {
     // 3. Register Call Session with Backend API
     try {
       const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-      await fetch(`${API_BASE}/api/webrtc/initiate/`, {
+      const currentUserStr = typeof window !== 'undefined' ? localStorage.getItem('user') : null;
+      let callerName = 'Abha (Client)';
+      if (currentUserStr) {
+        try {
+          const u = JSON.parse(currentUserStr);
+          callerName = u.name || u.username || u.email || callerName;
+        } catch(e) {}
+      }
+
+      await fetch(`${API_BASE}/api/webrtc/call/initiate/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           ...(token ? { Authorization: `Bearer ${token}` } : {})
         },
         body: JSON.stringify({
-          recipient: callTarget.name,
-          call_type: isVideo ? 'video' : 'voice'
+          caller: callerName,
+          recipient: callTarget.email || callTarget.name,
+          recipient_name: callTarget.name,
+          call_type: isVideo ? 'video' : 'voice',
+          is_video: isVideo
         })
       });
     } catch (e) {}
