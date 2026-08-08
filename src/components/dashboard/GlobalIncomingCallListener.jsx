@@ -108,10 +108,14 @@ export default function GlobalIncomingCallListener() {
               isVideo: data.is_video,
               sessionId: data.session_id
             });
+          } else {
+            // Stop ringtone immediately when active_call is cleared / ended
+            stopRingtone();
+            setIncomingCall(null);
           }
         }
       } catch (e) {}
-    }, 2500);
+    }, 1800);
 
     return () => {
       clearInterval(pollInterval);

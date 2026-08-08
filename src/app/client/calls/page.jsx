@@ -292,6 +292,20 @@ export default function EnterpriseCallsPage() {
       pcRef.current.close();
       pcRef.current = null;
     }
+    if (remoteAudioRef.current) {
+      remoteAudioRef.current.srcObject = null;
+    }
+    if (remoteVideoRef.current) {
+      remoteVideoRef.current.srcObject = null;
+    }
+    if (localVideoRef.current) {
+      localVideoRef.current.srcObject = null;
+    }
+
+    try {
+      const channel = new BroadcastChannel('uwo_calls_live_channel');
+      channel.postMessage({ type: 'CALL_ENDED' });
+    } catch(e) {}
 
     if (activeCall?.sessionId) {
       try {
