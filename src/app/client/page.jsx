@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React, { useState, useEffect } from 'react';
 import { 
@@ -15,9 +15,19 @@ import LearningCenterModal from '@/components/guides/LearningCenterModal';
 import { cn } from '@/lib/utils';
 
 const ClientOverview = () => {
+  const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [userName, setUserName] = useState('User');
   const [contacts, setContacts] = useState([]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        router.push('/auth/login');
+      }
+    }
+  }, [router]);
 
   // Time Range Filter State
   const [selectedPeriod, setSelectedPeriod] = useState('30d'); // '7d' | '30d' | '90d' | '1y' | 'custom'
