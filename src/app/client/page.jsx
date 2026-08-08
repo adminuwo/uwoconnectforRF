@@ -93,7 +93,6 @@ const ClientOverview = () => {
   const [toast, setToast] = useState(null);
   const [activeFeatureDrawer, setActiveFeatureDrawer] = useState(null);
   const [activeGuideSlug, setActiveGuideSlug] = useState(null);
-  const router = useRouter();
 
   // Map route paths to feature IDs for the drawer
   const pathToFeatureId = {
