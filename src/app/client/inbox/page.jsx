@@ -368,37 +368,37 @@ export default function ClientInboxPage() {
             {/* Live Indicator Badges */}
             <div className="flex items-center gap-6 overflow-x-auto py-1">
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-emerald-100 dark:bg-emerald-950/80 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-black shadow-xs">
+                <div className="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center font-black shadow-xs">
                   <Activity className="w-5 h-5 animate-pulse" />
                 </div>
                 <div>
-                  <h1 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                  <h1 className="text-sm font-bold text-slate-900 flex items-center gap-2">
                     Live Shared Inbox
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-700 border border-emerald-200">
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
                       WS LIVE
                     </span>
                   </h1>
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Real-Time Team Monitoring System</p>
+                  <p className="text-[11px] text-slate-500 font-medium">Real-Time Team Monitoring System</p>
                 </div>
               </div>
 
               {/* Quick Metrics */}
-              <div className="hidden lg:flex items-center gap-4 border-l border-slate-200 dark:border-slate-800 pl-6">
+              <div className="hidden lg:flex items-center gap-4 border-l border-slate-200 pl-6">
                 <div className="text-left">
                   <div className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Active Chats</div>
-                  <div className="text-sm font-black text-slate-900 dark:text-white">{statsData?.active_conversations || convoList.length}</div>
+                  <div className="text-sm font-black text-slate-900">{statsData?.active_conversations || convoList.length}</div>
                 </div>
                 <div className="text-left">
                   <div className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Online Team</div>
-                  <div className="text-sm font-black text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                  <div className="text-sm font-black text-emerald-600 flex items-center gap-1">
                     <span className="w-2 h-2 rounded-full bg-emerald-500" />
                     {teamMembers.filter(m => m.is_online).length || 3} Members
                   </div>
                 </div>
                 <div className="text-left">
                   <div className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Avg Response</div>
-                  <div className="text-sm font-black text-teal-600 dark:text-teal-400">{statsData?.avg_response_time || '1m 45s'}</div>
+                  <div className="text-sm font-black text-teal-600">{statsData?.avg_response_time || '1m 45s'}</div>
                 </div>
               </div>
             </div>
@@ -407,7 +407,7 @@ export default function ClientInboxPage() {
             <div className="flex items-center gap-3">
               <button
                 onClick={openAnalyticsModal}
-                className="px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 flex items-center gap-2 border border-slate-200 dark:border-slate-700 transition-all"
+                className="px-3.5 py-2 rounded-xl text-xs font-bold bg-emerald-50 hover:bg-emerald-100 text-emerald-800 flex items-center gap-2 border border-emerald-200 transition-all shadow-xs"
               >
                 <BarChart3 className="w-4 h-4 text-emerald-600" />
                 Team Analytics
@@ -419,26 +419,26 @@ export default function ClientInboxPage() {
         {/* ========================================================================= */}
         {/* LIVE TEAM MEMBER PRESENCE STRIP                                           */}
         {/* ========================================================================= */}
-        <div className="bg-slate-100/90 dark:bg-slate-900/60 border-b border-slate-200 dark:border-slate-800 px-6 py-2 flex items-center gap-4 overflow-x-auto text-xs">
-          <span className="font-bold text-slate-500 dark:text-slate-400 text-[11px] uppercase tracking-wider whitespace-nowrap flex items-center gap-1.5">
+        <div className="bg-slate-100/90 border-b border-slate-200 px-6 py-2 flex items-center gap-4 overflow-x-auto text-xs">
+          <span className="font-bold text-slate-500 text-[11px] uppercase tracking-wider whitespace-nowrap flex items-center gap-1.5">
             <Users className="w-3.5 h-3.5 text-emerald-500" />
             Live Replying Team:
           </span>
           <div className="flex items-center gap-3">
             {teamMembers.length > 0 ? (
               teamMembers.map(member => (
-                <div key={member.id} className="flex items-center gap-1.5 bg-white dark:bg-slate-800 px-2.5 py-1 rounded-full border border-slate-200 dark:border-slate-700 shadow-2xs">
+                <div key={member.id} className="flex items-center gap-1.5 bg-white px-2.5 py-1 rounded-full border border-slate-200 shadow-2xs">
                   <span className={`w-2 h-2 rounded-full ${member.is_online ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'}`} />
-                  <span className="font-semibold text-slate-800 dark:text-slate-200">{member.username}</span>
+                  <span className="font-semibold text-slate-800">{member.username}</span>
                   <span className="text-[10px] text-slate-400 font-medium">({member.department || 'Support'})</span>
                 </div>
               ))
             ) : (
               <div className="flex items-center gap-2">
-                <span className="flex items-center gap-1 bg-white dark:bg-slate-800 px-2.5 py-1 rounded-full border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-semibold">
+                <span className="flex items-center gap-1 bg-white px-2.5 py-1 rounded-full border border-slate-200 text-slate-700 font-semibold">
                   <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" /> Abha (Support Lead)
                 </span>
-                <span className="flex items-center gap-1 bg-white dark:bg-slate-800 px-2.5 py-1 rounded-full border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-semibold">
+                <span className="flex items-center gap-1 bg-white px-2.5 py-1 rounded-full border border-slate-200 text-slate-700 font-semibold">
                   <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" /> Rahul (Sales)
                 </span>
               </div>
