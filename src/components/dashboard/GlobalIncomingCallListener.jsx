@@ -1,8 +1,4 @@
-'use client';
-
-import React, { useState, useEffect, useRef } from 'react';
-import { Phone, PhoneCall, PhoneOff } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { API_BASE_URL } from '@/config/apiConfig';
 
 export default function GlobalIncomingCallListener() {
   const router = useRouter();
@@ -56,7 +52,8 @@ export default function GlobalIncomingCallListener() {
           callerName: data.callerName || 'Client / Team Member',
           role: data.role || 'Member',
           dept: data.dept || 'UWOConnect',
-          isVideo: data.isVideo
+          isVideo: data.isVideo,
+          sessionId: data.sessionId
         });
         startRingtone();
       } else if (data.type === 'CALL_ACCEPTED' || data.type === 'CALL_REJECTED' || data.type === 'CALL_ENDED') {
@@ -88,7 +85,28 @@ export default function GlobalIncomingCallListener() {
     };
     window.addEventListener('uwo_call_signal', handleCustomCallEvent);
 
+    // 4. Backend Active Call Poller (Cross-Device & Cross-Browser)
+    const pollInterval = setInterval(async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/webrtc/call/active-check`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.active_call) {
+            handleCallSignal({
+              type: 'CALL_INITIATED',
+              callerName: data.caller || 'Abha (Client)',
+              role: 'Client',
+              dept: 'UWOConnect',
+              isVideo: data.is_video,
+              sessionId: data.session_id
+            });
+          }
+        }
+      } catch (e) {}
+    }, 2500);
+
     return () => {
+      clearInterval(pollInterval);
       if (channel) channel.close();
       window.removeEventListener('storage', handleStorageChange);
       window.removeEventListener('uwo_call_signal', handleCustomCallEvent);
@@ -96,22 +114,40 @@ export default function GlobalIncomingCallListener() {
     };
   }, []);
 
-  const handleAccept = () => {
+  const handleAccept = async () => {
     stopRingtone();
     try {
       const channel = new BroadcastChannel('uwo_calls_live_channel');
       channel.postMessage({ type: 'CALL_ACCEPTED', responderName: 'Team Member' });
     } catch(e) {}
+    if (incomingCall?.sessionId) {
+      try {
+        await fetch(`${API_BASE_URL}/api/webrtc/call/action`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ session_id: incomingCall.sessionId, action: 'accept' })
+        });
+      } catch(e) {}
+    }
     setIncomingCall(null);
     router.push('/client/calls');
   };
 
-  const handleDecline = () => {
+  const handleDecline = async () => {
     stopRingtone();
     try {
       const channel = new BroadcastChannel('uwo_calls_live_channel');
       channel.postMessage({ type: 'CALL_REJECTED' });
     } catch(e) {}
+    if (incomingCall?.sessionId) {
+      try {
+        await fetch(`${API_BASE_URL}/api/webrtc/call/action`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ session_id: incomingCall.sessionId, action: 'decline' })
+        });
+      } catch(e) {}
+    }
     setIncomingCall(null);
   };
 
