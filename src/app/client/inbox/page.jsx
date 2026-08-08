@@ -275,6 +275,7 @@ export default function ClientInboxPage() {
       }, {
         headers: { Authorization: `Bearer ${token}` }
       });
+      fetchData();
     } catch (err) {
       console.warn('Failed to send message:', err);
     } finally {
