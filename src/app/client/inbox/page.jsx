@@ -117,8 +117,17 @@ export default function ClientInboxPage() {
         messages: []
       };
     }
-    acc[contactKey].messages.push(msg);
-    acc[contactKey].messages.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+    // Deduplicate by message ID, temp ID, or exact body + timestamp proximity
+    const isDuplicate = acc[contactKey].messages.some(m => 
+      m.id === msg.id || 
+      (m.id?.startsWith('temp_') && m.body === msg.body) ||
+      (m.body === msg.body && Math.abs(new Date(m.created_at) - new Date(msg.created_at)) < 3000)
+    );
+
+    if (!isDuplicate) {
+      acc[contactKey].messages.push(msg);
+      acc[contactKey].messages.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+    }
     
     if (new Date(msg.created_at) > new Date(acc[contactKey].time)) {
       acc[contactKey].lastMessage = msg.body || '📎 [Attachment]';
