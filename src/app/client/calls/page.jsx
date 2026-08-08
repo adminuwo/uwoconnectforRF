@@ -52,18 +52,32 @@ export default function EnterpriseCallsPage() {
       if (res.ok) {
         const data = await res.json();
         const memberList = Array.isArray(data) ? data : data.results || [];
+        const currentUserStr = typeof window !== 'undefined' ? localStorage.getItem('user') : null;
+        let currentUserEmail = '';
+        if (currentUserStr) {
+          try {
+            const u = JSON.parse(currentUserStr);
+            currentUserEmail = (u.email || u.username || '').toLowerCase();
+          } catch(e) {}
+        }
 
-        const mapped = memberList.map((c, i) => ({
-          id: c.id || i + 1,
-          name: c.name || c.full_name || c.username || c.email || 'Team Member',
-          email: c.email || c.username || '',
-          role: c.role || c.designation || c.enterprise_role || 'Team Member',
-          dept: c.department || 'General',
-          status: c.status === 'SUSPENDED' ? 'offline' : (c.is_online ? 'available' : 'offline'),
-          is_in_call: c.is_in_call || false,
-          color: ['blue', 'emerald', 'purple', 'teal', 'orange', 'indigo'][i % 6],
-          avatar: (c.name || c.username || c.email || 'TM').split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()
-        }));
+        const mapped = memberList.map((c, i) => {
+          const cEmail = (c.email || c.username || '').toLowerCase();
+          const isCurrentUser = currentUserEmail && (cEmail === currentUserEmail || currentUserEmail.includes(cEmail));
+          const isOnline = c.is_online || isCurrentUser;
+
+          return {
+            id: c.id || i + 1,
+            name: c.name || c.full_name || c.username || c.email || 'Team Member',
+            email: c.email || c.username || '',
+            role: c.role || c.designation || c.enterprise_role || 'Team Member',
+            dept: c.department || 'General',
+            status: c.status === 'SUSPENDED' ? 'offline' : (isOnline ? 'available' : 'offline'),
+            is_in_call: c.is_in_call || false,
+            color: ['blue', 'emerald', 'purple', 'teal', 'orange', 'indigo'][i % 6],
+            avatar: (c.name || c.username || c.email || 'TM').split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()
+          };
+        });
 
         setContacts(mapped);
       }
