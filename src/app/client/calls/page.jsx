@@ -290,18 +290,43 @@ export default function EnterpriseCallsPage() {
   // Start Call Handler (Voice / Video)
   const initiateCall = async (target, isVideo = false) => {
     const callTarget = target.name ? target : { name: String(target), role: 'Team Member', dept: 'UWOConnect', color: 'blue' };
-    
-    // Broadcast call event to other tabs / devices
+    const signalPayload = {
+      type: 'CALL_INITIATED',
+      callerName: 'Abha Jatav (Client)',
+      recipientName: callTarget.name,
+      role: callTarget.role,
+      dept: callTarget.dept,
+      isVideo: isVideo,
+      sessionId: `sess_${Date.now()}`
+    };
+
+    // 1. BroadcastChannel for cross-tab communication
     try {
       const channel = new BroadcastChannel('uwo_calls_live_channel');
-      channel.postMessage({
-        type: 'CALL_INITIATED',
-        callerName: 'Abha Jatav (Client)',
-        recipientName: callTarget.name,
-        role: callTarget.role,
-        dept: callTarget.dept,
-        isVideo: isVideo,
-        sessionId: `sess_${Date.now()}`
+      channel.postMessage(signalPayload);
+    } catch (e) {}
+
+    // 2. LocalStorage & Custom Event for cross-window notifications
+    try {
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('uwo_call_signal', { detail: signalPayload }));
+        localStorage.setItem('uwo_calls_signal_event', JSON.stringify({ ...signalPayload, _ts: Date.now() }));
+      }
+    } catch (e) {}
+
+    // 3. Register Call Session with Backend API
+    try {
+      const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+      await fetch(`${API_BASE}/api/webrtc/initiate/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {})
+        },
+        body: JSON.stringify({
+          recipient: callTarget.name,
+          call_type: isVideo ? 'video' : 'voice'
+        })
       });
     } catch (e) {}
 

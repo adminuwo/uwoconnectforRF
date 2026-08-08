@@ -48,27 +48,50 @@ export default function GlobalIncomingCallListener() {
   useEffect(() => {
     if (typeof window === 'undefined') return;
     let channel;
+
+    const handleCallSignal = (data) => {
+      if (!data) return;
+      if (data.type === 'CALL_INITIATED') {
+        setIncomingCall({
+          callerName: data.callerName || 'Client / Team Member',
+          role: data.role || 'Member',
+          dept: data.dept || 'UWOConnect',
+          isVideo: data.isVideo
+        });
+        startRingtone();
+      } else if (data.type === 'CALL_ACCEPTED' || data.type === 'CALL_REJECTED' || data.type === 'CALL_ENDED') {
+        stopRingtone();
+        setIncomingCall(null);
+      }
+    };
+
+    // 1. BroadcastChannel Listener
     try {
       channel = new BroadcastChannel('uwo_calls_live_channel');
-      channel.onmessage = (event) => {
-        const data = event.data;
-        if (data?.type === 'CALL_INITIATED') {
-          setIncomingCall({
-            callerName: data.callerName || 'Client / Team Member',
-            role: data.role || 'Member',
-            dept: data.dept || 'UWOConnect',
-            isVideo: data.isVideo
-          });
-          startRingtone();
-        } else if (data?.type === 'CALL_ACCEPTED' || data?.type === 'CALL_REJECTED' || data?.type === 'CALL_ENDED') {
-          stopRingtone();
-          setIncomingCall(null);
-        }
-      };
+      channel.onmessage = (event) => handleCallSignal(event.data);
     } catch (e) {}
+
+    // 2. LocalStorage Cross-Tab Listener
+    const handleStorageChange = (e) => {
+      if (e.key === 'uwo_calls_signal_event' && e.newValue) {
+        try {
+          const parsed = JSON.parse(e.newValue);
+          handleCallSignal(parsed);
+        } catch (err) {}
+      }
+    };
+    window.addEventListener('storage', handleStorageChange);
+
+    // 3. Custom DOM Event Listener
+    const handleCustomCallEvent = (e) => {
+      handleCallSignal(e.detail);
+    };
+    window.addEventListener('uwo_call_signal', handleCustomCallEvent);
 
     return () => {
       if (channel) channel.close();
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('uwo_call_signal', handleCustomCallEvent);
       stopRingtone();
     };
   }, []);
