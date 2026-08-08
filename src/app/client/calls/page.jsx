@@ -108,6 +108,39 @@ export default function EnterpriseCallsPage() {
     fetchRealContacts();
     fetchRealCallHistory();
 
+    const checkActiveConnectedCall = async () => {
+      try {
+        const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+        const res = await fetch(`${API_BASE_URL}/api/webrtc/call/active-check`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {}
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.active_call) {
+            try {
+              const constraints = data.is_video ? { audio: true, video: true } : { audio: true, video: false };
+              const stream = await navigator.mediaDevices.getUserMedia(constraints);
+              streamRef.current = stream;
+              if (data.is_video && localVideoRef.current) {
+                localVideoRef.current.srcObject = stream;
+              }
+            } catch(err) {}
+
+            setActiveCall({
+              name: data.caller || 'Caller',
+              role: 'Team Member',
+              dept: 'UWOConnect',
+              isVideo: data.is_video,
+              callState: 'CONNECTED',
+              sessionId: data.session_id
+            });
+          }
+        }
+      } catch(e) {}
+    };
+
+    checkActiveConnectedCall();
+
     const interval = setInterval(() => {
       fetchRealContacts();
     }, 10000);
