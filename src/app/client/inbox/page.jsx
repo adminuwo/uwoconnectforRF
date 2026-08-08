@@ -770,23 +770,6 @@ export default function ClientInboxPage() {
                 </div>
               </div>
             </div>
-                    className="flex-1 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-emerald-500 outline-none resize-none"
-                  />
-                  
-                  <button
-                    onClick={handleSendMessage}
-                    disabled={isSending || !replyText.trim()}
-                    className={`p-3.5 rounded-xl font-bold text-white shadow-lg transition-all ${
-                      isInternalNote 
-                        ? 'bg-amber-500 hover:bg-amber-600 shadow-amber-500/20' 
-                        : 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/20'
-                    }`}
-                  >
-                    <Send className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-            </div>
           ) : null}
         </div>
       </div>
