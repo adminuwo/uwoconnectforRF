@@ -4,8 +4,8 @@ const getApiBaseUrl = () => {
     return envUrl;
   }
   if (typeof window !== 'undefined') {
-    if (window.location.hostname.includes('uwoconnectforf') || window.location.hostname.includes('run.app')) {
-      return 'https://uwoconnectforb-743978421487.asia-south1.run.app';
+    if (window.location.hostname.includes('uwoconnectforrf') || window.location.hostname.includes('uwoconnectforf') || window.location.hostname.includes('run.app')) {
+      return 'https://uwoconnectforrb-743928421487.asia-south1.run.app';
     }
   }
   return envUrl || 'http://127.0.0.1:8080';
