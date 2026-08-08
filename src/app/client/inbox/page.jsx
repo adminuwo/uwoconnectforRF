@@ -248,10 +248,11 @@ export default function ClientInboxPage() {
     setIsSending(true);
 
     const nowTs = Date.now();
+    const targetAddress = activeConvo.rawAddress || activeConvo.id;
     const optimisticMsg = {
       id: `temp_${nowTs}`,
       from_address: currentUser?.username || 'SYSTEM',
-      to_address: activeConvo.id,
+      to_address: targetAddress,
       body: textToSend,
       channel: activeConvo.channel,
       message_type: isInternalNote ? 'INTERNAL' : 'OUTGOING',
@@ -267,14 +268,18 @@ export default function ClientInboxPage() {
       const token = localStorage.getItem('token');
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080';
 
-      await axios.post(`${apiUrl}/api/messages/`, {
-        to_number: activeConvo.id,
+      const res = await axios.post(`${apiUrl}/api/messages/`, {
+        to_number: targetAddress,
         body: textToSend,
         channel: activeConvo.channel,
         message_type: isInternalNote ? 'INTERNAL' : 'OUTGOING'
       }, {
         headers: { Authorization: `Bearer ${token}` }
       });
+
+      if (res.data) {
+        setMessages(prev => prev.map(m => m.id === optimisticMsg.id ? res.data : m));
+      }
       fetchData();
     } catch (err) {
       console.warn('Failed to send message:', err);
