@@ -19,10 +19,10 @@ export default function RootLayout({ children }) {
   return (
     <html
       lang="en"
-      className={`${inter.variable} h-full antialiased`}
+      className="h-full antialiased"
       suppressHydrationWarning
     >
-      <body className="min-h-full flex flex-col font-sans overflow-x-hidden" suppressHydrationWarning>
+      <body className="min-h-full flex flex-col overflow-x-hidden" style={{ fontFamily: '"Times New Roman", Times, serif' }} suppressHydrationWarning>
         <TourProvider>
           {children}
         </TourProvider>

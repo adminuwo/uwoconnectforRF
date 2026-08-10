@@ -15,9 +15,19 @@ import LearningCenterModal from '@/components/guides/LearningCenterModal';
 import { cn } from '@/lib/utils';
 
 const ClientOverview = () => {
+  const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [userName, setUserName] = useState('User');
   const [contacts, setContacts] = useState([]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        router.push('/auth/login');
+      }
+    }
+  }, [router]);
 
   // Time Range Filter State
   const [selectedPeriod, setSelectedPeriod] = useState('30d'); // '7d' | '30d' | '90d' | '1y' | 'custom'
@@ -65,11 +75,11 @@ const ClientOverview = () => {
   const currentChartConfig = timeFilterPresets[selectedPeriod] || timeFilterPresets['30d'];
 
   const [resourceCounts, setResourceCounts] = useState({
-    connectors: 5,
-    projects: 8,
-    teamMembers: 4,
-    pdfs: 12,
-    products: 24
+    connectors: 0,
+    projects: 0,
+    teamMembers: 0,
+    pdfs: 0,
+    products: 0
   });
   const [statsData, setStatsData] = useState({
     totalConversations: 0,
@@ -83,7 +93,6 @@ const ClientOverview = () => {
   const [toast, setToast] = useState(null);
   const [activeFeatureDrawer, setActiveFeatureDrawer] = useState(null);
   const [activeGuideSlug, setActiveGuideSlug] = useState(null);
-  const router = useRouter();
 
   // Map route paths to feature IDs for the drawer
   const pathToFeatureId = {
@@ -284,7 +293,7 @@ const ClientOverview = () => {
 
   return (
     <DashboardLayout role="CLIENT">
-      <div style={{ fontFamily: '"Times New Roman", Times, serif' }} className="max-w-7xl mx-auto pb-20 px-2 sm:px-4 md:px-0">
+      <div style={{ fontFamily: '"Times New Roman", Times, serif' }} className="max-w-7xl mx-auto w-full p-4 sm:p-6 pb-20">
         
         {/* Welcome Section */}
         <div data-tour="dashboard-welcome" className="flex flex-col sm:flex-row sm:items-center justify-between mb-8">

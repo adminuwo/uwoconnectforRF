@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState, useEffect } from 'react';
 import { 
@@ -75,36 +75,28 @@ const YouTubeManager = () => {
       const headers = { Authorization: `Bearer ${token}` };
 
       try {
-        // Fetch analytics/channel info
-        const statsRes = await axios.get(
-          `${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/youtube/analytics`,
-          { headers }
-        );
+        setLoadingVideos(true);
+        const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080';
+
+        const [statsRes, videosRes, settingsRes] = await Promise.all([
+          axios.get(`${API_BASE}/api/youtube/analytics`, { headers }).catch(e => e.response || {}),
+          axios.get(`${API_BASE}/api/youtube/videos`, { headers }).catch(e => e.response || {}),
+          axios.get(`${API_BASE}/api/youtube/settings`, { headers }).catch(e => e.response || {})
+        ]);
+
         if (statsRes.data && !statsRes.data.error) {
           setYtData(statsRes.data);
           setChannelDescription(statsRes.data.channel_description || '');
-        } else {
-          // If not enabled/connected
+        } else if (statsRes.status === 400 || statsRes.data?.error) {
           showToast('Please connect YouTube channel first.', 'error');
           router.push('/client/channels');
           return;
         }
 
-        // Fetch videos list
-        setLoadingVideos(true);
-        const videosRes = await axios.get(
-          `${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/youtube/videos`,
-          { headers }
-        );
         if (videosRes.data && videosRes.data.videos) {
           setVideos(videosRes.data.videos);
         }
 
-        // Fetch broadcast & bot settings
-        const settingsRes = await axios.get(
-          `${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/youtube/settings`,
-          { headers }
-        );
         if (settingsRes.data) {
           setBroadcastEnabled(settingsRes.data.broadcast_enabled);
           setBroadcastTemplate(settingsRes.data.broadcast_template);
@@ -114,7 +106,6 @@ const YouTubeManager = () => {
         }
       } catch (err) {
         console.error('Error fetching YouTube data:', err);
-        showToast('Failed to load YouTube content. Check if YouTube is connected.', 'error');
       } finally {
         setLoading(false);
         setLoadingVideos(false);
@@ -240,8 +231,7 @@ const YouTubeManager = () => {
     setUploadingVideo(true);
     const token = localStorage.getItem('token');
     const headers = { 
-      Authorization: `Bearer ${token}`,
-      'Content-Type': 'multipart/form-data'
+      Authorization: `Bearer ${token}`
     };
 
     const formData = new FormData();
@@ -435,7 +425,7 @@ const YouTubeManager = () => {
 
   return (
     <DashboardLayout role="CLIENT">
-      <div style={{ fontFamily: '"Times New Roman", Times, serif' }} className="max-w-7xl mx-auto pb-20 px-2 sm:px-4 md:px-0">
+      <div style={{ fontFamily: '"Times New Roman", Times, serif' }} className="max-w-7xl mx-auto w-full p-4 sm:p-6 pb-20">
         
         {/* Toast Notification */}
         {toast && (
@@ -536,7 +526,7 @@ const YouTubeManager = () => {
                 </div>
                 <div className="text-center px-2">
                   <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block mb-1">Videos</span>
-                  <span className="text-xl font-black text-slate-800">{ytData.video_count?.toLocaleString() || 0}</span>
+                  <span className="text-xl font-black text-slate-800">{!loadingVideos ? videos.length : (ytData.video_count || 0)}</span>
                 </div>
               </div>
 

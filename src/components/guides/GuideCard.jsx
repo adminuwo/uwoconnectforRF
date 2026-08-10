@@ -26,7 +26,7 @@ const GuideCard = ({ guide, onOpenGuide, progress = 0 }) => {
       <div>
         {/* Header Badges */}
         <div className="flex items-center justify-between gap-2 mb-4">
-          <div className="w-12 h-12 rounded-2xl bg-slate-900 text-emerald-400 border border-slate-800 flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform">
+          <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform">
             <IconComponent size={22} />
           </div>
 

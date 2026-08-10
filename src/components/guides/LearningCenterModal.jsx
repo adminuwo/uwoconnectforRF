@@ -111,9 +111,9 @@ const StepContentRenderer = ({ step }) => {
 
     case 'diagram':
       return (
-        <div className="my-3 p-5 bg-gradient-to-br from-slate-900 to-slate-950 text-white rounded-2xl border border-slate-800 font-mono text-xs text-center leading-relaxed tracking-wide">
-          <div className="text-[10px] uppercase font-bold text-emerald-400 tracking-widest mb-2">Interactive Workflow Diagram</div>
-          <p className="text-slate-200">{step.content}</p>
+        <div className="my-3 p-5 bg-gradient-to-br from-[#F0FDF4] to-emerald-50 text-slate-800 rounded-2xl border border-emerald-200/80 font-mono text-xs text-center leading-relaxed tracking-wide shadow-xs">
+          <div className="text-[10px] uppercase font-bold text-emerald-700 tracking-widest mb-2">Interactive Workflow Diagram</div>
+          <p className="text-slate-700">{step.content}</p>
         </div>
       );
 

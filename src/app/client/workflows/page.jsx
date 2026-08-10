@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState, useEffect } from 'react';
 import { 
@@ -242,7 +242,7 @@ const ClientWorkflowsPage = () => {
 
   return (
     <DashboardLayout role="CLIENT">
-      <div className="max-w-7xl mx-auto pb-24 px-2 sm:px-4 md:px-0">
+      <div className="max-w-7xl mx-auto w-full p-4 sm:p-6 pb-24">
         
         {/* HEADER SECTION */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-10 pb-6 border-b border-slate-100 gap-4">

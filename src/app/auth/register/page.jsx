@@ -15,6 +15,7 @@ import {
   signInWithPopup,
 } from '@/lib/firebase';
 import { storeUserSession } from '@/features/auth/authHelpers';
+import { API_BASE_URL } from '@/config/apiConfig';
 
 const RegisterPage = () => {
   const searchParams = useSearchParams();
@@ -35,7 +36,7 @@ const RegisterPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
 
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080';
+  const API_URL = API_BASE_URL;
 
   /**
    * After Firebase auth, send token to backend to register/login the Django user.

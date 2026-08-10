@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState, useEffect } from 'react';
 import { Receipt, Loader2, DollarSign, User, Calendar, Tag, ShieldAlert } from 'lucide-react';
@@ -42,7 +42,7 @@ export default function OrdersPage() {
 
   return (
     <DashboardLayout role="CLIENT">
-      <div className="max-w-7xl mx-auto pb-20 px-4 md:px-0 font-sans text-slate-800">
+      <div className="max-w-7xl mx-auto w-full p-4 sm:p-6 pb-20 font-sans text-slate-800">
         
         {/* Header */}
         <div className="mb-8">

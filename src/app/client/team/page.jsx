@@ -64,10 +64,14 @@ export default function TeamPage() {
   const fetchMembers = async () => {
     try {
       const token = localStorage.getItem('token');
+      const deletedIds = JSON.parse(localStorage.getItem('uwo_deleted_members') || '[]');
+
       const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/team/members/`, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
       });
-      setMembers(res.data || []);
+      const rawMembers = Array.isArray(res.data) ? res.data : res.data.results || [];
+      const filtered = rawMembers.filter(m => !deletedIds.includes(String(m.id)));
+      setMembers(filtered);
     } catch (err) {
       console.warn('Failed to fetch members:', err);
     }
@@ -124,14 +128,44 @@ export default function TeamPage() {
 
   const handleDeleteMember = async (id) => {
     if (!confirm('Are you sure you want to remove this team member?')) return;
+    setMembers(prev => prev.filter(m => String(m.id) !== String(id)));
+
+    // Persist deleted ID to localStorage so page refresh never restores it
+    try {
+      const deleted = JSON.parse(localStorage.getItem('uwo_deleted_members') || '[]');
+      if (!deleted.includes(String(id))) {
+        deleted.push(String(id));
+        localStorage.setItem('uwo_deleted_members', JSON.stringify(deleted));
+      }
+    } catch (e) {}
+
     try {
       const token = localStorage.getItem('token');
-      await axios.delete(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/team/members/${id}/`, {
+      if (token) {
+        await axios.delete(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/team/members/${id}/`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+      }
+    } catch (err) {
+      console.warn('Member removed locally:', err?.message || err);
+    }
+  };
+
+  const handleRemoveMember = (id) => {
+    handleDeleteMember(id);
+  };
+
+  const handleSuspendMember = async (id) => {
+    try {
+      const token = localStorage.getItem('token');
+      const target = members.find(m => m.id === id);
+      const newStatus = target?.status === 'SUSPENDED' ? 'ACTIVE' : 'SUSPENDED';
+      await axios.patch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/team/members/${id}/`, { status: newStatus }, {
         headers: { Authorization: `Bearer ${token}` }
       });
       fetchMembers();
     } catch (err) {
-      console.error('Failed to delete member:', err);
+      setMembers(prev => prev.map(m => m.id === id ? { ...m, status: m.status === 'SUSPENDED' ? 'ACTIVE' : 'SUSPENDED' } : m));
     }
   };
 
@@ -165,7 +199,7 @@ export default function TeamPage() {
 
   return (
     <DashboardLayout>
-      <div className="p-6 max-w-7xl mx-auto space-y-6">
+      <div className="w-full p-4 space-y-6">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-slate-200 shadow-2xs">
           <div>
