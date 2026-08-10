@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { API_BASE_URL } from '@/config/apiConfig';
 import {
   Mail,
   Inbox,
@@ -62,6 +63,7 @@ const CopyButton = ({ text }) => {
 const ClientEmailPage = () => {
   const [client, setClient] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState(null);
 
   // Active View Mode ('inbox' or 'settings' or 'analytics')
   const [activeView, setActiveView] = useState('inbox');
@@ -123,7 +125,7 @@ const ClientEmailPage = () => {
       const clientId = typeof user.client === 'object' ? (user.client?.id || user.client?._id) : user.client;
       if (!clientId) return;
 
-      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/clients/${clientId}/`, {
+      const res = await axios.get(`${API_BASE_URL}/api/clients/${clientId}/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setClient(res.data);
@@ -134,9 +136,10 @@ const ClientEmailPage = () => {
 
   const fetchEmails = async () => {
     try {
+      setFetchError(null);
       const token = localStorage.getItem('token');
       if (!token) return;
-      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/email/messages/`, {
+      const res = await axios.get(`${API_BASE_URL}/api/email/messages/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
@@ -168,6 +171,7 @@ const ClientEmailPage = () => {
       }
     } catch (err) {
       console.warn('Email fetch notice:', err.message);
+      setFetchError(err.response?.data?.error || err.response?.data?.detail || err.message);
     } finally {
       setLoading(false);
     }
@@ -231,7 +235,7 @@ const ClientEmailPage = () => {
     try {
       const token = localStorage.getItem('token');
       await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/email/compose/`,
+        `${API_BASE_URL}/api/email/compose/`,
         {
           action: actionType, // 'send', 'draft', 'schedule'
           provider: selectedProvider,
@@ -283,7 +287,7 @@ const ClientEmailPage = () => {
     try {
       const token = localStorage.getItem('token');
       const res = await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/campaigns/ai_generate/`,
+        `${API_BASE_URL}/api/campaigns/ai_generate/`,
         { prompt: messageBody || subject || "Business email", action_type: 'improve', tone: 'professional' },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -301,7 +305,7 @@ const ClientEmailPage = () => {
     try {
       const token = localStorage.getItem('token');
       await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/email/auto-replies/`,
+        `${API_BASE_URL}/api/email/auto-replies/`,
         {
           name: 'Instant Personalised Auto Reply',
           reply_type: 'thank_you',
@@ -499,8 +503,19 @@ const ClientEmailPage = () => {
                 <span className="text-[11px] text-slate-400">{filteredMessages.length}</span>
               </div>
 
+              {fetchError && (
+                <div className="p-3 bg-red-50 text-red-600 text-[10px] font-medium border-b border-red-100 break-all leading-normal">
+                  ⚠️ Error fetching: {String(fetchError)}
+                </div>
+              )}
+
               <div className="flex-1 overflow-y-auto custom-scrollbar">
-                {filteredMessages.length === 0 ? (
+                {loading ? (
+                  <div className="p-10 text-center flex flex-col items-center justify-center h-full space-y-3">
+                    <div className="w-6 h-6 border-2 border-[#00AB56] border-t-transparent rounded-full animate-spin" />
+                    <span className="text-xs text-slate-400 font-medium">Syncing with Outlook...</span>
+                  </div>
+                ) : filteredMessages.length === 0 ? (
                   <div className="p-10 text-center flex flex-col items-center justify-center h-full">
                     <Mail size={28} className="text-slate-200 mb-3" />
                     <span className="text-xs text-slate-400">No emails in {activeFolder}</span>

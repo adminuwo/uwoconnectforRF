@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { API_BASE_URL } from '@/config/apiConfig';
 import {
   Mail,
   Inbox,
@@ -62,6 +63,7 @@ const CopyButton = ({ text }) => {
 const ClientEmailPage = () => {
   const [client, setClient] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState(null);
 
   // Active View Mode ('inbox' or 'settings' or 'analytics')
   const [activeView, setActiveView] = useState('inbox');
@@ -123,7 +125,7 @@ const ClientEmailPage = () => {
       const clientId = typeof user.client === 'object' ? (user.client?.id || user.client?._id) : user.client;
       if (!clientId) return;
 
-      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/clients/${clientId}/`, {
+      const res = await axios.get(`${API_BASE_URL}/api/clients/${clientId}/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setClient(res.data);
@@ -134,32 +136,41 @@ const ClientEmailPage = () => {
 
   const fetchEmails = async () => {
     try {
+      setFetchError(null);
       const token = localStorage.getItem('token');
       if (!token) return;
-      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/email/messages/`, {
+      const res = await axios.get(`${API_BASE_URL}/api/email/messages/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
+      
+      console.log("API Response:", res.data);
 
       // Map backend EmailMessage to frontend message format
-      const apiMessages = (res.data?.messages || res.data || []).map(msg => ({
-        id: String(msg.id),
-        folder: msg.folder || 'inbox',
-        provider: msg.account_provider || (msg.sender_email?.includes('gmail') ? 'gmail' : 'outlook'),
-        sender_name: msg.sender_name || msg.sender_email?.split('@')[0] || 'Unknown',
-        sender_email: msg.sender_email || '',
-        to: (msg.to_recipients && msg.to_recipients.length > 0) ? msg.to_recipients[0] : '',
-        subject: msg.subject || '(No Subject)',
-        preview: (msg.body_text || '').substring(0, 120),
-        body: msg.body_text || msg.body_html || '',
-        time: msg.created_at ? new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '',
-        date: msg.created_at ? new Date(msg.created_at).toLocaleDateString() : '',
-        is_read: msg.is_read ?? false,
-        has_attachment: (msg.attachments && msg.attachments.length > 0) || false,
-        attachment_name: msg.attachments?.[0]?.name || null,
-        has_meeting: !!(msg.meeting_invite_data && msg.meeting_invite_data.title),
-        meeting_info: msg.meeting_invite_data || null
-      }));
+      const apiMessages = (res.data?.messages || res.data || []).map(msg => {
+        let provider = msg.account_provider || 'gmail';
+        return {
+          id: String(msg.id),
+          folder: msg.folder || 'inbox',
+          provider: provider,
+          sender_name: msg.sender_name || msg.sender_email?.split('@')[0] || 'Unknown',
+          sender_email: msg.sender_email || '',
+          to: (msg.to_recipients && msg.to_recipients.length > 0) ? msg.to_recipients[0] : '',
+          subject: msg.subject || '(No Subject)',
+          preview: (msg.body_text || '').substring(0, 120),
+          body: msg.body_text || msg.body_html || '',
+          time: msg.created_at ? new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '',
+          date: msg.created_at ? new Date(msg.created_at).toLocaleDateString() : '',
+          is_read: msg.is_read ?? false,
+          has_attachment: (msg.attachments && msg.attachments.length > 0) || false,
+          attachment_name: msg.attachments?.[0]?.name || null,
+          has_meeting: !!(msg.meeting_invite_data && msg.meeting_invite_data.title),
+          meeting_info: msg.meeting_invite_data || null,
+          scheduled_info: msg.metadata?.scheduled_date ? `${msg.metadata.scheduled_date} at ${msg.metadata.scheduled_time}` : null,
+          created_full: msg.created_at ? new Date(msg.created_at).toLocaleString() : ''
+        };
+      });
 
+      console.log("Mapped Messages:", apiMessages);
       setMessages(apiMessages);
 
       // Set folder counts from API response
@@ -168,6 +179,7 @@ const ClientEmailPage = () => {
       }
     } catch (err) {
       console.warn('Email fetch notice:', err.message);
+      setFetchError(err.response?.data?.error || err.response?.data?.detail || err.message);
     } finally {
       setLoading(false);
     }
@@ -231,18 +243,30 @@ const ClientEmailPage = () => {
     setSendingMail(true);
     try {
       const token = localStorage.getItem('token');
+      const payload = {
+        action: isScheduleMode ? 'schedule' : 'send',
+        provider: 'gmail',
+        to: toEmail,
+        subject,
+        body: messageBody,
+      };
+      if (isScheduleMode) {
+        payload.scheduled_date = scheduleDate;
+        payload.scheduled_time = scheduleTime;
+      }
       await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/outlook/send-mail/`,
-        { to: toEmail, subject, body: messageBody },
+        `${API_BASE_URL}/api/email/compose/`,
+        payload,
         { headers: { Authorization: `Bearer ${token}` } }
       );
+      setToast({ msg: isScheduleMode ? `✅ Email scheduled for ${scheduleDate} ${scheduleTime}` : `✅ Email sent to ${toEmail}` });
     } catch (err) {
-      console.log('Dispatched successfully');
+      console.error('Send email error:', err);
+      setToast({ msg: `❌ Failed to send: ${err.response?.data?.error || err.message}` });
     } finally {
       setSendingMail(false);
       setIsComposerOpen(false);
-      const isSched = isScheduleMode;
-      setToast({ msg: isSched ? `✅ Email scheduled for ${scheduleDate} ${scheduleTime}` : `✅ Email sent to ${toEmail}` });
+      fetchEmails();
       setTimeout(() => setToast(null), 3500);
       setToEmail('');
       setSubject('');
@@ -256,7 +280,7 @@ const ClientEmailPage = () => {
     try {
       const token = localStorage.getItem('token');
       const res = await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/campaigns/ai_generate/`,
+        `${API_BASE_URL}/api/campaigns/ai_generate/`,
         { prompt: messageBody || subject || "Business email", action_type: 'improve', tone: 'professional' },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -268,13 +292,35 @@ const ClientEmailPage = () => {
     }
   };
 
+  const handleDeleteEmail = async (emailId) => {
+    if (!emailId) return;
+    try {
+      const token = localStorage.getItem('token');
+      await axios.post(
+        `${API_BASE_URL}/api/email/messages/${emailId}/delete_message/`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setToast({ msg: '🗑️ Moved to Trash' });
+      fetchEmails();
+    } catch (err) {
+      console.error('Delete error:', err);
+      // Fallback local change if API error occurs
+      setMessages(messages.filter(m => m.id !== emailId));
+      setToast({ msg: '🗑️ Moved to Trash (Local)' });
+    } finally {
+      setSelectedMessage(null);
+      setTimeout(() => setToast(null), 3500);
+    }
+  };
+
   const handleSaveAutoReplyRule = async (e) => {
     e.preventDefault();
     setSavingAutoReply(true);
     try {
       const token = localStorage.getItem('token');
       await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/email/auto-replies/`,
+        `${API_BASE_URL}/api/email/auto-replies/`,
         {
           name: 'Instant Personalised Auto Reply',
           reply_type: 'thank_you',
@@ -472,8 +518,19 @@ const ClientEmailPage = () => {
                 <span className="text-[11px] text-slate-400">{filteredMessages.length}</span>
               </div>
 
+              {fetchError && (
+                <div className="p-3 bg-red-50 text-red-600 text-[10px] font-medium border-b border-red-100 break-all leading-normal">
+                  ⚠️ Error fetching: {String(fetchError)}
+                </div>
+              )}
+
               <div className="flex-1 overflow-y-auto custom-scrollbar">
-                {filteredMessages.length === 0 ? (
+                {loading ? (
+                  <div className="p-10 text-center flex flex-col items-center justify-center h-full space-y-3">
+                    <div className="w-6 h-6 border-2 border-[#00AB56] border-t-transparent rounded-full animate-spin" />
+                    <span className="text-xs text-slate-400 font-medium">Syncing with Gmail...</span>
+                  </div>
+                ) : filteredMessages.length === 0 ? (
                   <div className="p-10 text-center flex flex-col items-center justify-center h-full">
                     <Mail size={28} className="text-slate-200 mb-3" />
                     <span className="text-xs text-slate-400">No emails in {activeFolder}</span>
@@ -512,6 +569,12 @@ const ClientEmailPage = () => {
                             <h4 className={cn("text-[11px] truncate mb-0.5", !msg.is_read ? "font-semibold text-slate-800" : "text-slate-600")}>
                               {msg.subject}
                             </h4>
+                            {msg.folder === 'scheduled' && msg.scheduled_info && (
+                              <div className="text-[10px] text-amber-600 font-semibold mb-1 flex items-center gap-1">
+                                <Clock size={10} />
+                                <span>Send at: {msg.scheduled_info}</span>
+                              </div>
+                            )}
                             <p className="text-[11px] text-slate-400 truncate">{msg.preview}</p>
                             {msg.has_attachment && (
                               <div className="mt-1.5 flex items-center gap-1 text-[10px] text-slate-400">
@@ -539,12 +602,7 @@ const ClientEmailPage = () => {
                       <div className="flex items-center gap-1.5 shrink-0">
                         <span className="text-[11px] text-slate-400">{selectedMessage.time}</span>
                         <button
-                          onClick={() => {
-                            setMessages(messages.filter(m => m.id !== selectedMessage.id));
-                            setSelectedMessage(null);
-                            setToast({ msg: '🗑️ Moved to Trash' });
-                            setTimeout(() => setToast(null), 3000);
-                          }}
+                          onClick={() => handleDeleteEmail(selectedMessage.id)}
                           title="Delete"
                           className="p-1 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-md transition-colors cursor-pointer"
                         >
@@ -562,6 +620,13 @@ const ClientEmailPage = () => {
                           <span className="text-xs font-semibold text-slate-900">{selectedMessage.sender_name}</span>
                           <span className="text-[11px] text-slate-400 ml-1">&lt;{selectedMessage.sender_email}&gt;</span>
                           <p className="text-[10px] text-slate-400">to {selectedMessage.to}</p>
+                          <p className="text-[10px] text-slate-400 mt-0.5">Created on: {selectedMessage.created_full}</p>
+                          {selectedMessage.folder === 'scheduled' && selectedMessage.scheduled_info && (
+                            <p className="text-[10px] text-amber-600 font-bold mt-0.5 flex items-center gap-1">
+                              <Clock size={11} />
+                              <span>Scheduled to send on: {selectedMessage.scheduled_info}</span>
+                            </p>
+                          )}
                         </div>
                       </div>
 
@@ -637,12 +702,7 @@ const ClientEmailPage = () => {
                       Auto-Reply
                     </button>
                     <button
-                      onClick={() => {
-                        setMessages(messages.filter(m => m.id !== selectedMessage.id));
-                        setSelectedMessage(null);
-                        setToast({ msg: '🗑️ Moved to Trash' });
-                        setTimeout(() => setToast(null), 3000);
-                      }}
+                      onClick={() => handleDeleteEmail(selectedMessage.id)}
                       className="px-3.5 py-1.5 border border-red-200 text-red-500 bg-red-50/50 hover:bg-red-50 text-[11px] font-medium rounded-lg transition-colors cursor-pointer flex items-center gap-1.5"
                     >
                       <Trash2 size={13} />
@@ -658,7 +718,7 @@ const ClientEmailPage = () => {
                       </button>
                       {showMoreActions && (
                         <div className="absolute right-0 bottom-9 w-40 bg-white border border-slate-200 shadow-lg rounded-lg p-1 z-20 space-y-0.5 text-[11px] font-medium text-slate-600">
-                          <button onClick={() => { setMessages(messages.filter(m => m.id !== selectedMessage.id)); setShowMoreActions(false); }} className="w-full text-left px-2.5 py-1.5 hover:bg-red-50 hover:text-red-600 rounded-md">Move to Trash</button>
+                          <button onClick={() => { handleDeleteEmail(selectedMessage.id); setShowMoreActions(false); }} className="w-full text-left px-2.5 py-1.5 hover:bg-red-50 hover:text-red-600 rounded-md">Move to Trash</button>
                           <button onClick={() => { alert("Marked unread"); setShowMoreActions(false); }} className="w-full text-left px-2.5 py-1.5 hover:bg-slate-50 rounded-md">Mark as Unread</button>
                         </div>
                       )}

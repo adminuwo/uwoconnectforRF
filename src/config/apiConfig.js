@@ -8,6 +8,10 @@ const getApiBaseUrl = () => {
     if (host.includes('uwoconnectforrf') || host.includes('uwoconnectforf') || host.includes('run.app')) {
       return 'https://uwoconnectforrb-743928421487.asia-south1.run.app';
     }
+    if (host.includes('ngrok')) {
+      // Use relative URLs — Next.js rewrites in next.config.js proxy /api/* to local backend
+      return '';
+    }
     if (host !== 'localhost' && host !== '127.0.0.1') {
       return `http://${host}:8080`;
     }
