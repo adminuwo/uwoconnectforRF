@@ -75,11 +75,11 @@ const ClientOverview = () => {
   const currentChartConfig = timeFilterPresets[selectedPeriod] || timeFilterPresets['30d'];
 
   const [resourceCounts, setResourceCounts] = useState({
-    connectors: 5,
-    projects: 8,
-    teamMembers: 4,
-    pdfs: 12,
-    products: 24
+    connectors: 0,
+    projects: 0,
+    teamMembers: 0,
+    pdfs: 0,
+    products: 0
   });
   const [statsData, setStatsData] = useState({
     totalConversations: 0,

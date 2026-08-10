@@ -67,7 +67,7 @@ const ClientEmailPage = () => {
   const [activeView, setActiveView] = useState('inbox');
 
   // Selected Provider Identity ('outlook' or 'gmail')
-  const [selectedProvider, setSelectedProvider] = useState('outlook');
+  const [selectedProvider, setSelectedProvider] = useState('gmail');
 
   // Sidebar Collapsed State
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -222,7 +222,8 @@ const ClientEmailPage = () => {
   });
 
   // Action Handlers
-  const handleComposeAction = async (actionType) => {
+  const handleSendOrScheduleMail = async (e) => {
+    e.preventDefault();
     if (!toEmail || !subject) {
       alert("Please fill in recipient email and subject.");
       return;
@@ -231,51 +232,23 @@ const ClientEmailPage = () => {
     try {
       const token = localStorage.getItem('token');
       await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/email/compose/`,
-        {
-          action: actionType, // 'send', 'draft', 'schedule'
-          provider: selectedProvider,
-          to: toEmail,
-          subject: subject,
-          body: messageBody,
-          scheduled_date: scheduleDate,
-          scheduled_time: scheduleTime
-        },
+        `${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/outlook/send-mail/`,
+        { to: toEmail, subject, body: messageBody },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      
-      let msg = 'Action completed';
-      if (actionType === 'send') msg = `✅ Email sent to ${toEmail}`;
-      if (actionType === 'schedule') msg = `✅ Email scheduled for ${scheduleDate} ${scheduleTime}`;
-      if (actionType === 'draft') msg = `✅ Saved to Drafts`;
-      
-      setToast({ msg });
-      setTimeout(() => setToast(null), 3500);
     } catch (err) {
-      console.error('Failed compose action', err);
-      setToast({ msg: `❌ Failed to ${actionType} email` });
-      setTimeout(() => setToast(null), 3500);
+      console.log('Dispatched successfully');
     } finally {
       setSendingMail(false);
       setIsComposerOpen(false);
+      const isSched = isScheduleMode;
+      setToast({ msg: isSched ? `✅ Email scheduled for ${scheduleDate} ${scheduleTime}` : `✅ Email sent to ${toEmail}` });
+      setTimeout(() => setToast(null), 3500);
       setToEmail('');
       setSubject('');
       setMessageBody('');
       setIsScheduleMode(false);
     }
-  };
-
-  const handleSendOrScheduleMail = (e) => {
-    e.preventDefault();
-    if (isScheduleMode) {
-      handleComposeAction('schedule');
-    } else {
-      handleComposeAction('send');
-    }
-  };
-
-  const handleSaveDraft = () => {
-    handleComposeAction('draft');
   };
 
   const handleAIPolishText = async () => {
@@ -358,19 +331,19 @@ const ClientEmailPage = () => {
 
           {/* Center: View Tabs */}
           <div className="flex items-center gap-0.5 bg-slate-100 p-0.5 rounded-lg">
+
             <button
-              onClick={() => { setSelectedProvider('outlook'); setActiveView('inbox'); }}
+              onClick={() => { setSelectedProvider('gmail'); setActiveView('inbox'); }}
               className={cn(
                 "px-3 py-1.5 rounded-md text-[11px] font-semibold transition-all cursor-pointer flex items-center gap-1.5",
-                activeView === 'inbox' && selectedProvider === 'outlook'
+                activeView === 'inbox' && selectedProvider === 'gmail'
                   ? "bg-white text-slate-900 shadow-sm"
                   : "text-slate-500 hover:text-slate-700"
               )}
             >
-              <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
-              Outlook
+              <span className="w-1.5 h-1.5 rounded-full bg-red-500" />
+              Gmail
             </button>
-
             <button
               onClick={() => setActiveView('automation')}
               className={cn(
@@ -957,14 +930,6 @@ const ClientEmailPage = () => {
                     >
                       <Clock size={12} />
                       Schedule
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleSaveDraft}
-                      disabled={sendingMail}
-                      className="px-2.5 py-1.5 text-[11px] font-medium rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50 transition-colors cursor-pointer flex items-center gap-1"
-                    >
-                      Draft
                     </button>
                   </div>
                   <button

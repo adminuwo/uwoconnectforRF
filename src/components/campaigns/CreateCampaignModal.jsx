@@ -13,7 +13,8 @@ const STAGES = [
   { id: 'FOLLOWUP', label: 'Follow Up' },
   { id: 'NEGOTIATION', label: 'Negotiation' },
   { id: 'WON', label: 'Closed Won' },
-  { id: 'LOST', label: 'Closed Lost' }
+  { id: 'LOST', label: 'Closed Lost' },
+  { id: 'SPECIFIC', label: 'Select Specific Contacts' }
 ];
 
 const PLATFORMS = [
@@ -39,13 +40,28 @@ export default function CreateCampaignModal({ isOpen, onClose, onCreated }) {
   const [messageBody, setMessageBody] = useState('Hello {{first_name}},\n\nWe have an exclusive offer for you on UWOConnect today!');
   const [templates, setTemplates] = useState([]);
   const [selectedPlatforms, setSelectedPlatforms] = useState(['WHATSAPP']);
+  const [contacts, setContacts] = useState([]);
+  const [selectedContacts, setSelectedContacts] = useState([]);
 
   useEffect(() => {
     if (isOpen) {
       fetchTemplates();
+      fetchContacts();
       setStep(1);
     }
   }, [isOpen]);
+
+  const fetchContacts = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/contacts/`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setContacts(res.data || []);
+    } catch (err) {
+      console.error("Failed to fetch contacts", err);
+    }
+  };
 
   const fetchTemplates = async () => {
     try {
@@ -111,6 +127,7 @@ export default function CreateCampaignModal({ isOpen, onClose, onCreated }) {
         template: composeMode === 'TEMPLATE' ? templateId : null,
         platforms: selectedPlatforms,
         audience_filter: audienceFilter,
+        tags: audienceFilter === 'SPECIFIC' ? selectedContacts : [],
       };
 
       await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/campaigns/`, payload, {
@@ -181,6 +198,36 @@ export default function CreateCampaignModal({ isOpen, onClose, onCreated }) {
                   ))}
                 </select>
               </div>
+
+              {audienceFilter === 'SPECIFIC' && (
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1.5">Select Contacts</label>
+                  <div className="max-h-40 overflow-y-auto border border-slate-200 rounded-xl bg-slate-50 p-2 space-y-1">
+                    {contacts.length === 0 ? (
+                       <p className="text-xs text-slate-400 p-2 text-center">No contacts available</p>
+                    ) : (
+                       contacts.map(c => {
+                         const cId = typeof c.id === 'object' && c.id !== null ? (c.id.$oid || c.id._id || c.id.id) : c.id;
+                         const isSelected = selectedContacts.includes(cId);
+                         return (
+                           <label key={cId} className="flex items-center gap-2 p-2 hover:bg-white rounded-lg cursor-pointer">
+                             <input 
+                               type="checkbox" 
+                               checked={isSelected}
+                               onChange={(e) => {
+                                 if (e.target.checked) setSelectedContacts([...selectedContacts, cId]);
+                                 else setSelectedContacts(selectedContacts.filter(id => id !== cId));
+                               }}
+                               className="rounded border-slate-300 text-[#00AB56] focus:ring-[#00AB56]"
+                             />
+                             <span className="text-xs font-medium text-slate-700">{c.name || c.phone_number || c.email}</span>
+                           </label>
+                         );
+                       })
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           )}
 

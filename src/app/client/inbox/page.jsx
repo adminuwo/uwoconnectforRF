@@ -373,92 +373,7 @@ export default function ClientInboxPage() {
     <DashboardLayout>
       <div className="flex flex-col h-[calc(100vh-4rem)] bg-slate-50 text-slate-900 overflow-hidden">
         
-        {/* ========================================================================= */}
-        {/* TOP ADMIN LIVE MONITORING BAR (METRICS & ACTIONS)                        */}
-        {/* ========================================================================= */}
-        <div className="bg-white border-b border-slate-200 px-6 py-3 shadow-xs">
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            
-            {/* Live Indicator Badges */}
-            <div className="flex items-center gap-6 overflow-x-auto py-1">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center font-black shadow-xs">
-                  <Activity className="w-5 h-5 animate-pulse" />
-                </div>
-                <div>
-                  <h1 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                    Live Shared Inbox
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-700 border border-emerald-200">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
-                      WS LIVE
-                    </span>
-                  </h1>
-                  <p className="text-[11px] text-slate-500 font-medium">Real-Time Team Monitoring System</p>
-                </div>
-              </div>
 
-              {/* Quick Metrics */}
-              <div className="hidden lg:flex items-center gap-4 border-l border-slate-200 pl-6">
-                <div className="text-left">
-                  <div className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Active Chats</div>
-                  <div className="text-sm font-black text-slate-900">{statsData?.active_conversations || convoList.length}</div>
-                </div>
-                <div className="text-left">
-                  <div className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Online Team</div>
-                  <div className="text-sm font-black text-emerald-600 flex items-center gap-1">
-                    <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                    {teamMembers.filter(m => m.is_online).length || 3} Members
-                  </div>
-                </div>
-                <div className="text-left">
-                  <div className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Avg Response</div>
-                  <div className="text-sm font-black text-teal-600">{statsData?.avg_response_time || '1m 45s'}</div>
-                </div>
-              </div>
-            </div>
-
-            {/* Admin Controls & Modals Triggers */}
-            <div className="flex items-center gap-3">
-              <button
-                onClick={openAnalyticsModal}
-                className="px-3.5 py-2 rounded-xl text-xs font-bold bg-emerald-50 hover:bg-emerald-100 text-emerald-800 flex items-center gap-2 border border-emerald-200 transition-all shadow-xs"
-              >
-                <BarChart3 className="w-4 h-4 text-emerald-600" />
-                Team Analytics
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* ========================================================================= */}
-        {/* LIVE TEAM MEMBER PRESENCE STRIP                                           */}
-        {/* ========================================================================= */}
-        <div className="bg-slate-100/90 border-b border-slate-200 px-6 py-2 flex items-center gap-4 overflow-x-auto text-xs">
-          <span className="font-bold text-slate-500 text-[11px] uppercase tracking-wider whitespace-nowrap flex items-center gap-1.5">
-            <Users className="w-3.5 h-3.5 text-emerald-500" />
-            Live Replying Team:
-          </span>
-          <div className="flex items-center gap-3">
-            {teamMembers.length > 0 ? (
-              teamMembers.map(member => (
-                <div key={member.id} className="flex items-center gap-1.5 bg-white px-2.5 py-1 rounded-full border border-slate-200 shadow-2xs">
-                  <span className={`w-2 h-2 rounded-full ${member.is_online ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'}`} />
-                  <span className="font-semibold text-slate-800">{member.username}</span>
-                  <span className="text-[10px] text-slate-400 font-medium">({member.department || 'Support'})</span>
-                </div>
-              ))
-            ) : (
-              <div className="flex items-center gap-2">
-                <span className="flex items-center gap-1 bg-white px-2.5 py-1 rounded-full border border-slate-200 text-slate-700 font-semibold">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" /> Abha (Support Lead)
-                </span>
-                <span className="flex items-center gap-1 bg-white px-2.5 py-1 rounded-full border border-slate-200 text-slate-700 font-semibold">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" /> Rahul (Sales)
-                </span>
-              </div>
-            )}
-          </div>
-        </div>
 
         {/* ========================================================================= */}
         {/* MAIN WORKSPACE split: SIDEBAR & LIVE CHAT MONITOR WINDOW                   */}
@@ -631,41 +546,40 @@ export default function ClientInboxPage() {
                   </div>
                 </div>
 
-                {/* Admin Actions: Takeover, Transfer, Audit Trail */}
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={handleTakeover}
-                    className="px-3 py-1.5 rounded-lg text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white shadow-xs flex items-center gap-1.5 transition-all"
-                  >
-                    <ShieldAlert className="w-3.5 h-3.5" />
-                    Take Over Chat
-                  </button>
+                {/* Active Handler & Admin Actions */}
+                <div className="flex flex-col items-end gap-2">
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1.5 text-[11px] font-semibold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-200 shadow-sm">
+                      <Lock className="w-3 h-3" />
+                      <span>Handling: <strong>Abha Patel</strong></span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={handleTakeover}
+                      className="px-2.5 py-1 rounded-md text-[11px] font-bold bg-rose-50 text-rose-600 hover:bg-rose-100 border border-rose-200 transition-all flex items-center gap-1"
+                    >
+                      <ShieldAlert className="w-3 h-3" />
+                      Take Over
+                    </button>
 
-                  <button
-                    onClick={() => setIsTransferModalOpen(true)}
-                    className="px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs flex items-center gap-1.5 transition-all"
-                  >
-                    <ArrowRightLeft className="w-3.5 h-3.5" />
-                    Transfer
-                  </button>
+                    <button
+                      onClick={() => setIsTransferModalOpen(true)}
+                      className="px-2.5 py-1 rounded-md text-[11px] font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200 transition-all flex items-center gap-1"
+                    >
+                      <ArrowRightLeft className="w-3 h-3" />
+                      Transfer
+                    </button>
 
-                  <button
-                    onClick={fetchAuditLogs}
-                    className="p-2 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors"
-                    title="Inspect Audit Log"
-                  >
-                    <History className="w-4 h-4" />
-                  </button>
+                    <button
+                      onClick={fetchAuditLogs}
+                      className="p-1.5 rounded-md bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200 transition-colors"
+                      title="Inspect Audit Log"
+                    >
+                      <History className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
                 </div>
-              </div>
-
-              {/* Ownership Lock Banner */}
-              <div className="bg-amber-50 border-b border-amber-200 px-4 py-2 text-xs font-semibold text-amber-900 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Lock className="w-4 h-4 text-amber-600" />
-                  <span>🔒 Active Handler: <strong>Abha Patel (Support Team)</strong>. Other members have view & note access.</span>
-                </div>
-                <span className="text-[10px] font-bold text-amber-700 uppercase tracking-wider">Shared Inbox</span>
               </div>
 
               {/* Timeline Messages View */}

@@ -6,7 +6,7 @@ import CreateCampaignModal from '@/components/campaigns/CreateCampaignModal';
 import CampaignDetailModal from '@/components/campaigns/CampaignDetailModal';
 import { 
   Megaphone, RefreshCw, Loader2, Play, Users, CheckCircle2, XCircle, 
-  CheckCheck, Eye, ChevronRight
+  CheckCheck, Eye, ChevronRight, Trash2
 } from 'lucide-react';
 import axios from 'axios';
 
@@ -60,6 +60,28 @@ export default function CampaignsPage() {
       case 'SENDING': return 'bg-blue-50 text-blue-700 border-blue-200 animate-pulse';
       case 'FAILED': return 'bg-rose-50 text-rose-700 border-rose-200';
       default: return 'bg-slate-50 text-slate-600 border-slate-200';
+    }
+  };
+
+  const handleDeleteCampaign = async (e, id) => {
+    e.stopPropagation();
+    if (!window.confirm("Are you sure you want to delete this campaign?")) return;
+    
+    // Handle MongoDB ObjectId if it comes as an object
+    const campaignId = typeof id === 'object' && id !== null ? (id.$oid || id._id || id.id) : id;
+    
+    try {
+      const token = localStorage.getItem('token');
+      await axios.delete(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/campaigns/${campaignId}/`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setCampaigns(prev => prev.filter(c => {
+         const cId = typeof c.id === 'object' && c.id !== null ? (c.id.$oid || c.id._id || c.id.id) : c.id;
+         return cId !== campaignId;
+      }));
+    } catch (err) {
+      console.error("Failed to delete campaign", err);
+      alert("Failed to delete campaign.");
     }
   };
 
@@ -182,7 +204,16 @@ export default function CampaignsPage() {
                     </div>
                   </div>
 
-                  <ChevronRight size={16} className="text-slate-400 group-hover:text-[#00AB56] transition-colors" />
+                  <div className="flex items-center gap-2">
+                    <button 
+                      onClick={(e) => handleDeleteCampaign(e, camp.id || camp._id)}
+                      className="p-1.5 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
+                      title="Delete Campaign"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                    <ChevronRight size={16} className="text-slate-400 group-hover:text-[#00AB56] transition-colors" />
+                  </div>
                 </div>
               </div>
             ))
