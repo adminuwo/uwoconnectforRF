@@ -11,7 +11,8 @@ import {
   RefreshCw,
   Plus,
   Calendar,
-  Sparkles
+  Sparkles,
+  Trash2
 } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 import axios from 'axios';
@@ -331,25 +332,47 @@ const isZohoConnected = Boolean(client?.zoho_enabled);
 const isYouTubeConnected = Boolean(client?.youtube_enabled);
 const isOutlookConnected = Boolean(client?.outlook_enabled);
 
-const allChannels = [isWhatsAppConnected, isFacebookConnected, isInstagramConnected, isGmailConnected, isOneDriveConnected, isGoogleCalendarConnected, isGoogleSheetsConnected, isGoogleDocsConnected, isGoogleSlidesConnected, isZohoConnected, isYouTubeConnected, isOutlookConnected];
-const connectedCount = allChannels.filter(Boolean).length;
-const totalChannelsCount = allChannels.length;
+  const allChannels = [isWhatsAppConnected, isFacebookConnected, isInstagramConnected, isGmailConnected, isOneDriveConnected, isGoogleCalendarConnected, isGoogleSheetsConnected, isGoogleDocsConnected, isGoogleSlidesConnected, isZohoConnected, isYouTubeConnected, isOutlookConnected];
+  const connectedCount = allChannels.filter(Boolean).length;
+  const totalChannelsCount = allChannels.length;
 
-const handleConnectGmail = async () => {
-  try {
-    const token = localStorage.getItem('token');
-    const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/auth/gmail/connect`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    if (res.data.url) {
-      window.location.href = res.data.url;
+  const [gmailDisconnecting, setGmailDisconnecting] = useState(false);
+
+  const handleDisconnectGmail = async () => {
+    if (!confirm('Are you sure you want to disconnect Gmail?')) return;
+    setGmailDisconnecting(true);
+    try {
+      const token = localStorage.getItem('token');
+      await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/auth/gmail/disconnect`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      fetchClient(true);
+      setToast({ msg: 'Gmail disconnected successfully', type: 'success' });
+      setTimeout(() => setToast(null), 3000);
+    } catch (err) {
+      console.warn("Error disconnecting Gmail", err);
+      setToast({ msg: 'Failed to disconnect Gmail', type: 'error' });
+      setTimeout(() => setToast(null), 3000);
+    } finally {
+      setGmailDisconnecting(false);
     }
-  } catch (err) {
-    console.warn("Error connecting Gmail", err);
-    setToast({ msg: 'Failed to initiate Gmail connect', type: 'error' });
-    setTimeout(() => setToast(null), 3000);
-  }
-};
+  };
+
+  const handleConnectGmail = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/auth/gmail/connect`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.data.url) {
+        window.location.href = res.data.url;
+      }
+    } catch (err) {
+      console.warn("Error connecting Gmail", err);
+      setToast({ msg: 'Failed to initiate Gmail connect', type: 'error' });
+      setTimeout(() => setToast(null), 3000);
+    }
+  };
 
 const handleConnectGoogleCalendar = async () => {
   try {
@@ -521,6 +544,7 @@ return (
               )}
             </div>
 
+<<<<<<< HEAD
             {/* Action Button */}
             <div className="mt-6 pt-4 border-t border-slate-100">
               {isWhatsAppConnected ? (
@@ -540,6 +564,225 @@ return (
                   <span>Connect</span>
                 </button>
               )}
+=======
+
+            {/* --- FACEBOOK CARD --- */}
+            <div className="bg-white rounded-2xl border border-slate-200/80 p-6 flex flex-col justify-between hover:border-slate-300 transition-all shadow-xs min-h-[380px]">
+              <div>
+                {/* Header */}
+                <div className="flex flex-col gap-3.5 mb-5">
+                  <div className="flex items-center gap-3">
+                    <div className="w-11 h-11 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100/80 shrink-0">
+                      <FacebookIcon size={22} />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-slate-900 text-base">Facebook</h3>
+                      <p className="text-[11px] text-slate-400">Messenger</p>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className={cn(
+                      "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium",
+                      isFacebookConnected ? "bg-blue-50 text-blue-700 border border-blue-200/50" : "bg-slate-100 text-slate-400"
+                    )}>
+                      <span className={cn("w-1.5 h-1.5 rounded-full", isFacebookConnected ? "bg-blue-500" : "bg-slate-300")} />
+                      <span>{isFacebookConnected ? 'Connected' : 'Offline'}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <p className="text-xs text-slate-500 leading-relaxed mb-5">
+                  Connect your Facebook Business Pages to automate Messenger customer interactions.
+                </p>
+
+                {/* Details */}
+                {isFacebookConnected ? (
+                  <div className="space-y-4 py-4 border-t border-slate-100 text-xs">
+                    <div className="flex flex-col gap-1">
+                      <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Page Name</span>
+                      <span className="font-medium text-slate-700 truncate">{client?.facebook_config?.page_name || 'N/A'}</span>
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Page ID</span>
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium text-slate-700 truncate">{client?.facebook_config?.page_id || 'N/A'}</span>
+                        <CopyButton text={client?.facebook_config?.page_id} />
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-xs text-slate-400 py-6 text-center">No Facebook Page connected.</p>
+                )}
+              </div>
+
+              {/* Action Button */}
+              <div className="mt-6 pt-4 border-t border-slate-100">
+                {isFacebookConnected ? (
+                  <button
+                    onClick={() => setIsFacebookConfigModalOpen(true)}
+                    className="w-full py-2.5 px-4 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer border border-slate-200/60"
+                  >
+                    <Settings size={14} className="text-slate-400" />
+                    <span>Configure</span>
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => {
+                      window.location.href = "https://www.facebook.com/v20.0/dialog/oauth?client_id=991147863536661&redirect_uri=https://uwoconnect.aisa24.com/client/channels&response_type=code&scope=pages_messaging%2Cpages_show_list%2Cpages_manage_metadata%2Cpages_read_engagement&state=facebook";
+                    }}
+                    className="w-full py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                  >
+                    <Plus size={14} />
+                    <span>Connect</span>
+                  </button>
+                )}
+              </div>
+            </div>
+
+
+            {/* --- INSTAGRAM CARD --- */}
+            <div className="bg-white rounded-2xl border border-slate-200/80 p-6 flex flex-col justify-between hover:border-slate-300 transition-all shadow-xs min-h-[380px]">
+              <div>
+                {/* Header */}
+                <div className="flex flex-col gap-3.5 mb-5">
+                  <div className="flex items-center gap-3">
+                    <div className="w-11 h-11 rounded-2xl bg-pink-50 text-pink-600 flex items-center justify-center border border-pink-100/80 shrink-0">
+                      <InstagramIcon size={22} />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-slate-900 text-base">Instagram</h3>
+                      <p className="text-[11px] text-slate-400">Direct Message</p>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className={cn(
+                      "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium",
+                      isInstagramConnected ? "bg-pink-50 text-pink-700 border border-pink-200/50" : "bg-slate-100 text-slate-400"
+                    )}>
+                      <span className={cn("w-1.5 h-1.5 rounded-full", isInstagramConnected ? "bg-pink-500" : "bg-slate-300")} />
+                      <span>{isInstagramConnected ? 'Connected' : 'Offline'}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <p className="text-xs text-slate-500 leading-relaxed mb-5">
+                  Automate replies for Instagram DMs, story mentions, and customer comments.
+                </p>
+
+                {/* Details */}
+                {isInstagramConnected ? (
+                  <div className="space-y-4 py-4 border-t border-slate-100 text-xs">
+                    <div className="flex flex-col gap-1">
+                      <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Account Name</span>
+                      <span className="font-medium text-slate-700 truncate">{client?.instagram_config?.page_name || 'N/A'}</span>
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Instagram ID</span>
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium text-slate-700 truncate">{client?.instagram_config?.instagram_business_id || client?.instagram_config?.instagram_business_account_id || 'N/A'}</span>
+                        <CopyButton text={client?.instagram_config?.instagram_business_id || client?.instagram_config?.instagram_business_account_id} />
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-xs text-slate-400 py-6 text-center">No Instagram account connected.</p>
+                )}
+              </div>
+
+              {/* Action Button */}
+              <div className="mt-6 pt-4 border-t border-slate-100">
+                {isInstagramConnected ? (
+                  <button
+                    onClick={() => setIsInstagramConfigModalOpen(true)}
+                    className="w-full py-2.5 px-4 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer border border-slate-200/60"
+                  >
+                    <Settings size={14} className="text-slate-400" />
+                    <span>Configure</span>
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => {
+                      window.location.href = "https://www.instagram.com/oauth/authorize?force_reauth=true&client_id=991147863536661&redirect_uri=https://uwoconnect.aisa24.com/client/channels&response_type=code&scope=instagram_business_basic%2Cinstagram_business_manage_messages%2Cinstagram_business_manage_comments%2Cinstagram_business_content_publish%2Cinstagram_business_manage_insights&state=instagram";
+                    }}
+                    className="w-full py-2.5 px-4 bg-pink-600 hover:bg-pink-700 text-white rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                  >
+                    <Plus size={14} />
+                    <span>Connect</span>
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* --- GMAIL CARD --- */}
+            <div className="bg-white rounded-2xl border border-slate-200/80 p-6 flex flex-col justify-between hover:border-slate-300 transition-all shadow-xs min-h-[380px]">
+              <div>
+                {/* Header */}
+                <div className="flex flex-col gap-3.5 mb-5">
+                  <div className="flex items-center gap-3">
+                    <div className="w-11 h-11 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center border border-red-100/80 shrink-0">
+                      <GmailIcon size={22} />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-slate-900 text-base">Gmail</h3>
+                      <p className="text-[11px] text-slate-400">Email Sync</p>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className={cn(
+                      "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium",
+                      isGmailConnected ? "bg-red-50 text-red-700 border border-red-200/50" : "bg-slate-100 text-slate-400"
+                    )}>
+                      <span className={cn("w-1.5 h-1.5 rounded-full", isGmailConnected ? "bg-red-500" : "bg-slate-300")} />
+                      <span>{isGmailConnected ? 'Connected' : 'Offline'}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <p className="text-xs text-slate-500 leading-relaxed mb-5">
+                  Connect your Google Workspace or Gmail account to send and receive emails.
+                </p>
+
+                {/* Details */}
+                {isGmailConnected ? (
+                  <div className="space-y-4 py-4 border-t border-slate-100 text-xs">
+                    <div className="flex flex-col gap-1">
+                      <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Email Address</span>
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium text-slate-700 truncate">{client?.gmail_config?.email_address || client?.gmail_config?.email || 'Connected'}</span>
+                        <CopyButton text={client?.gmail_config?.email_address || client?.gmail_config?.email} />
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-xs text-slate-400 py-6 text-center">No Gmail account connected.</p>
+                )}
+              </div>
+
+              {/* Action Button */}
+              <div className="mt-6 pt-4 border-t border-slate-100 flex gap-2">
+                {isGmailConnected ? (
+                  <button
+                    onClick={handleDisconnectGmail}
+                    disabled={gmailDisconnecting}
+                    className="flex-1 py-2.5 px-4 rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer bg-red-50 hover:bg-red-100 text-red-700 border border-red-200/60 disabled:opacity-50"
+                  >
+                    {gmailDisconnecting ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
+                    <span>Disconnect Gmail</span>
+                  </button>
+                ) : (
+                  <button
+                    onClick={handleConnectGmail}
+                    className="flex-1 py-2.5 px-4 rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer bg-red-600 hover:bg-red-700 text-white shadow-xs"
+                  >
+                    <Plus size={14} />
+                    <span>Connect Gmail</span>
+                  </button>
+                )}
+              </div>
+>>>>>>> 6ece2f774d2195fb8ff6bdbc2f2cb426b4798636
             </div>
           </div>
 
