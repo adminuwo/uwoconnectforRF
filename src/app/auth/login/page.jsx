@@ -66,7 +66,7 @@ const LoginPage = () => {
       const result = await signInWithPopup(auth, googleProvider);
       await handleBackendAuth(result.user);
     } catch (err) {
-      console.error('Google login error:', err);
+      console.log('Google login error:', err);
       if (err.code === 'auth/popup-closed-by-user') {
         setError('Google Login was cancelled.');
       } else if (err.response?.data?.message) {
@@ -86,7 +86,7 @@ const LoginPage = () => {
       const result = await signInWithPopup(auth, githubProvider);
       await handleBackendAuth(result.user);
     } catch (err) {
-      console.error('Github login error:', err);
+      console.log('Github login error:', err);
       if (err.code === 'auth/popup-closed-by-user') {
         setError('Github Login was cancelled.');
       } else if (err.response?.data?.message) {
@@ -106,7 +106,7 @@ const LoginPage = () => {
       const result = await signInWithPopup(auth, facebookProvider);
       await handleBackendAuth(result.user);
     } catch (err) {
-      console.error('Facebook login error:', err);
+      console.log('Facebook login error:', err);
       if (err.code === 'auth/popup-closed-by-user') {
         setError('Facebook Login was cancelled.');
       } else if (err.response?.data?.message) {
@@ -143,7 +143,7 @@ const LoginPage = () => {
         router.push('/client');
       }
     } catch (err) {
-      console.error('Login error:', err);
+      console.log('Login error:', err);
       if (err.response?.data?.message) {
         setError(err.response.data.message);
       } else {

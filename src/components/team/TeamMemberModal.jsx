@@ -41,7 +41,9 @@ const CONNECTED_CHANNELS = [
   { id: 'li_company', name: 'LinkedIn Company Page', type: 'LinkedIn' },
 ];
 
-export default function TeamMemberModal({ isOpen, onClose, onSuccess, existingMembers = [] }) {
+import { useEffect } from 'react';
+
+export default function TeamMemberModal({ isOpen, onClose, onSuccess, existingMembers = [], editMember = null }) {
   const [activeTab, setActiveTab] = useState('basic'); // 'basic' | 'permissions' | 'channels'
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
@@ -69,7 +71,47 @@ export default function TeamMemberModal({ isOpen, onClose, onSuccess, existingMe
   });
 
   // Assigned Channels State
+  // Assigned Channels State
   const [assignedSocialChannels, setAssignedSocialChannels] = useState(['wa_default', 'ig_main']);
+
+  useEffect(() => {
+    if (isOpen) {
+      if (editMember) {
+        setUsername(editMember.username || '');
+        setEmail(editMember.email || '');
+        setPhone(editMember.phone_number || '');
+        setPassword('');
+        setDepartment(editMember.department || 'General');
+        setEnterpriseRole(editMember.enterprise_role || editMember.role || 'EMPLOYEE');
+        setDesignation(editMember.designation || '');
+        setEmployeeId(editMember.employee_id || '');
+        setJoiningDate(editMember.joining_date || new Date().toISOString().split('T')[0]);
+        setReportingManager(editMember.reporting_manager || '');
+        setTimezoneStr(editMember.timezone || 'UTC');
+        setWorkingHours(editMember.working_hours || '9:00 AM - 6:00 PM');
+        setLanguage(editMember.language || 'English');
+        if (editMember.permission_matrix) setPermissionMatrix(editMember.permission_matrix);
+        if (editMember.assigned_social_channels) setAssignedSocialChannels(editMember.assigned_social_channels);
+      } else {
+        setUsername('');
+        setEmail('');
+        setPhone('');
+        setPassword('UWOConnect123!');
+        setDepartment('Engineering');
+        setEnterpriseRole('EMPLOYEE');
+        setDesignation('Software Engineer');
+        setEmployeeId(`EMP-${Math.floor(1000 + Math.random() * 9000)}`);
+        setJoiningDate(new Date().toISOString().split('T')[0]);
+        setReportingManager('');
+        setTimezoneStr('UTC');
+        setWorkingHours('9:00 AM - 6:00 PM');
+        setLanguage('English');
+        setAssignedSocialChannels(['wa_default', 'ig_main']);
+      }
+      setActiveTab('basic');
+      setError('');
+    }
+  }, [isOpen, editMember]);
 
   if (!isOpen) return null;
 
@@ -94,7 +136,7 @@ export default function TeamMemberModal({ isOpen, onClose, onSuccess, existingMe
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!username || !email || !password) {
+    if (!username || !email || (!password && !editMember)) {
       setError('Username, email, and password are required.');
       return;
     }
@@ -103,13 +145,10 @@ export default function TeamMemberModal({ isOpen, onClose, onSuccess, existingMe
 
     try {
       const token = localStorage.getItem('token');
-      await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/team/members/`,
-        {
+      const payload = {
           username,
           email,
           phone_number: phone,
-          password,
           role: 'AGENT',
           enterprise_role: enterpriseRole,
           department,
@@ -122,9 +161,22 @@ export default function TeamMemberModal({ isOpen, onClose, onSuccess, existingMe
           language,
           permission_matrix: permissionMatrix,
           assigned_social_channels: assignedSocialChannels
-        },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      };
+      if (password) payload.password = password;
+
+      if (editMember) {
+        await axios.patch(
+          `${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/team/members/${editMember.id}/`,
+          payload,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+      } else {
+        await axios.post(
+          `${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/team/members/`,
+          payload,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+      }
       onSuccess();
       onClose();
     } catch (err) {
@@ -141,14 +193,14 @@ export default function TeamMemberModal({ isOpen, onClose, onSuccess, existingMe
         {/* Header */}
         <div className="flex justify-between items-center pb-4 border-b border-slate-100 mb-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-200">
-              <UserPlus size={20} />
-            </div>
-            <div>
-              <h3 className="font-bold text-slate-900 text-lg">Add Team Member (Client Admin)</h3>
-              <p className="text-xs text-slate-400">Collect employee details, assign RBAC permissions, & configure channel access</p>
-            </div>
+          <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
+            {editMember ? <UserCheck size={20} /> : <UserPlus size={20} />}
           </div>
+          <div>
+            <h2 className="text-base font-black text-slate-900 tracking-tight">{editMember ? 'Edit Team Member' : 'Add Team Member'}</h2>
+            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{editMember ? 'Update details and permissions' : 'Create a new employee profile'}</p>
+          </div>
+        </div>
           <button onClick={onClose} className="p-2 text-slate-400 hover:text-slate-600 rounded-xl hover:bg-slate-50 cursor-pointer">
             <X size={18} />
           </button>
@@ -405,9 +457,9 @@ export default function TeamMemberModal({ isOpen, onClose, onSuccess, existingMe
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold shadow-md transition-all cursor-pointer disabled:opacity-50"
+                className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl py-3 px-6 text-xs font-black tracking-widest uppercase transition-all shadow-md disabled:opacity-50 flex items-center justify-center gap-2"
               >
-                {isSubmitting ? 'Saving...' : 'Create Employee Account'}
+                {isSubmitting ? 'Saving...' : (editMember ? 'Update Member' : 'Create Member')}
               </button>
             </div>
           </div>

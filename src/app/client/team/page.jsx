@@ -40,6 +40,7 @@ export default function TeamPage() {
 
   // Modals & Drawers
   const [isMemberModalOpen, setIsMemberModalOpen] = useState(false);
+  const [memberToEdit, setMemberToEdit] = useState(null);
   const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
@@ -213,7 +214,10 @@ export default function TeamPage() {
 
           <div className="flex flex-wrap items-center gap-2">
             <button
-              onClick={() => setIsMemberModalOpen(true)}
+              onClick={() => {
+                setMemberToEdit(null);
+                setIsMemberModalOpen(true);
+              }}
               className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl text-xs font-bold transition-all shadow-sm flex items-center gap-2 cursor-pointer"
             >
               <UserPlus size={15} /> Invite Member
@@ -334,6 +338,17 @@ export default function TeamPage() {
                           title={m.status === 'SUSPENDED' ? 'Activate Member' : 'Suspend Member'}
                         >
                           {m.status === 'SUSPENDED' ? <UserCheck size={16} /> : <UserX size={16} />}
+                        </button>
+                        <button
+                          onClick={(e) => { 
+                            e.stopPropagation(); 
+                            setMemberToEdit(m); 
+                            setIsMemberModalOpen(true); 
+                          }}
+                          className="p-1.5 text-slate-400 hover:text-blue-500 rounded-xl hover:bg-blue-50 transition-colors cursor-pointer"
+                          title="Edit Member"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
                         </button>
                         <button
                           onClick={(e) => { e.stopPropagation(); handleRemoveMember(m.id); }}
@@ -642,7 +657,11 @@ export default function TeamPage() {
         {/* --- MODALS --- */}
         <TeamMemberModal
           isOpen={isMemberModalOpen}
-          onClose={() => setIsMemberModalOpen(false)}
+          editMember={memberToEdit}
+          onClose={() => {
+            setIsMemberModalOpen(false);
+            setMemberToEdit(null);
+          }}
           onSuccess={fetchMembers}
           existingMembers={members}
         />
