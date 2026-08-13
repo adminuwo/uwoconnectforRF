@@ -9,6 +9,7 @@ import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import GoogleNewsConfigModal, { GoogleNewsIcon } from '@/components/channels/GoogleNewsConfigModal';
+import { API_BASE_URL } from '@/config/apiConfig';
 
 const CATEGORIES = [
   { id: '', name: '🔥 Top Stories' },
@@ -40,7 +41,7 @@ export default function GoogleNewsPage() {
   const [clientConfig, setClientConfig] = useState(null);
   const [toast, setToast] = useState(null);
 
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080';
+  const apiUrl = API_BASE_URL;
 
   const showToast = (msg, type = 'success') => {
     setToast({ msg, type });

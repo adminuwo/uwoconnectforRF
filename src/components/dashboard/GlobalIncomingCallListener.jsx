@@ -2,11 +2,12 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Phone, PhoneCall, PhoneOff } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { API_BASE_URL } from '@/config/apiConfig';
 
 export default function GlobalIncomingCallListener() {
   const router = useRouter();
+  const pathname = usePathname();
   const [incomingCall, setIncomingCall] = useState(null);
   const ringtoneRef = useRef(null);
 
@@ -60,7 +61,9 @@ export default function GlobalIncomingCallListener() {
           isVideo: data.isVideo,
           sessionId: data.sessionId
         });
-        startRingtone();
+        if (!ringtoneRef.current) {
+          startRingtone();
+        }
       } else if (data.type === 'CALL_ACCEPTED' || data.type === 'CALL_REJECTED' || data.type === 'CALL_ENDED') {
         stopRingtone();
         setIncomingCall(null);
@@ -99,7 +102,26 @@ export default function GlobalIncomingCallListener() {
         });
         if (res.ok) {
           const data = await res.json();
-          if (data.active_call) {
+          const wasActed = data.session_id && (
+            sessionStorage.getItem(`call_acted_${data.session_id}`) === 'true'
+          );
+
+          const currentUserStr = typeof window !== 'undefined' ? localStorage.getItem('user') : null;
+          let currentUserName = '';
+          let currentUserEmail = '';
+          if (currentUserStr) {
+            try {
+              const u = JSON.parse(currentUserStr);
+              currentUserName = (u.username || '').toLowerCase();
+              currentUserEmail = (u.email || '').toLowerCase();
+            } catch(e) {}
+          }
+
+          const isUserCaller = data.is_caller || 
+            (currentUserName && data.caller?.toLowerCase() === currentUserName) || 
+            (currentUserEmail && data.caller?.toLowerCase() === currentUserEmail);
+
+          if (data.active_call && data.status === 'RINGING' && !isUserCaller && !wasActed) {
             handleCallSignal({
               type: 'CALL_INITIATED',
               callerName: data.caller || 'Abha (Client)',
@@ -108,11 +130,12 @@ export default function GlobalIncomingCallListener() {
               isVideo: data.is_video,
               sessionId: data.session_id
             });
-          } else {
-            // Stop ringtone immediately when active_call is cleared / ended
+          } else if (!data.active_call) {
+            // Only stop ringtone and clear popup when call session is completely gone
             stopRingtone();
             setIncomingCall(null);
           }
+          // If status is CONNECTED or other - do nothing, let the calls page handle it
         }
       } catch (e) {}
     }, 1800);
@@ -126,17 +149,33 @@ export default function GlobalIncomingCallListener() {
     };
   }, []);
 
+
   const handleAccept = async () => {
     stopRingtone();
+    if (incomingCall?.sessionId) {
+      sessionStorage.setItem(`call_acted_${incomingCall.sessionId}`, 'true');
+      // Save incoming call data so calls/page.jsx can restore active call state
+      localStorage.setItem('pending_incoming_call', JSON.stringify({
+        sessionId: incomingCall.sessionId,
+        callerName: incomingCall.callerName,
+        isVideo: incomingCall.isVideo,
+        role: incomingCall.role,
+        dept: incomingCall.dept
+      }));
+    }
     try {
       const channel = new BroadcastChannel('uwo_calls_live_channel');
       channel.postMessage({ type: 'CALL_ACCEPTED', responderName: 'Team Member' });
     } catch(e) {}
     if (incomingCall?.sessionId) {
       try {
-        await fetch(`${API_BASE_URL}/api/webrtc/call/action`, {
+        const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+        await fetch(`${API_BASE_URL}/api/webrtc/call/action/`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Content-Type': 'application/json',
+            ...(token ? { Authorization: `Bearer ${token}` } : {})
+          },
           body: JSON.stringify({ session_id: incomingCall.sessionId, action: 'accept' })
         });
       } catch(e) {}
@@ -147,15 +186,22 @@ export default function GlobalIncomingCallListener() {
 
   const handleDecline = async () => {
     stopRingtone();
+    if (incomingCall?.sessionId) {
+      sessionStorage.setItem(`call_acted_${incomingCall.sessionId}`, 'true');
+    }
     try {
       const channel = new BroadcastChannel('uwo_calls_live_channel');
       channel.postMessage({ type: 'CALL_REJECTED' });
     } catch(e) {}
     if (incomingCall?.sessionId) {
       try {
-        await fetch(`${API_BASE_URL}/api/webrtc/call/action`, {
+        const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+        await fetch(`${API_BASE_URL}/api/webrtc/call/action/`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Content-Type': 'application/json',
+            ...(token ? { Authorization: `Bearer ${token}` } : {})
+          },
           body: JSON.stringify({ session_id: incomingCall.sessionId, action: 'decline' })
         });
       } catch(e) {}

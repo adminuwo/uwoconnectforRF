@@ -27,7 +27,9 @@ import {
   Newspaper,
   BookOpen,
   Mail,
-  PhoneCall
+  PhoneCall,
+  CreditCard,
+  FileText
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -44,7 +46,11 @@ const TOUR_IDS = {
   'Broadcasts':     'sidebar-campaigns',
   'Knowledge Base': 'sidebar-knowledge',
   'Catalog':        'sidebar-catalog',
+  'Payments':       'sidebar-payments',
   'Orders':         'sidebar-orders',
+  'Quotations':     'sidebar-quotations',
+  'Proposals':      'sidebar-proposals',
+  'Invoices':       'sidebar-invoices',
   'Team':           'sidebar-team',
   'Work Reports':   'sidebar-reports',
   'Settings':       'sidebar-settings',
@@ -99,10 +105,14 @@ const Sidebar = ({ role, isOpen, onClose, onToggle }) => {
     { name: 'Auto Replies', href: '/client/automations', icon: Zap },
     { name: 'Workflows', href: '/client/workflows', icon: GitBranch },
     { name: 'Leads (CRM)', href: '/client/crm', icon: Users },
+    { name: 'Quotations', href: '/client/quotations', icon: FileCheck },
+    { name: 'Proposals', href: '/client/proposals', icon: FileText },
+    { name: 'Invoices', href: '/client/invoices', icon: Receipt },
     { name: 'Messages', href: '/client/inbox', icon: MessageSquare },
     { name: 'Broadcasts', href: '/client/campaigns', icon: Megaphone },
     { name: 'Knowledge Base', href: '/client/knowledge', icon: Brain },
     { name: 'Catalog', href: '/client/catalog', icon: ShoppingBag },
+    { name: 'Payments', href: '/client/payments', icon: CreditCard },
     { name: 'Orders', href: '/client/orders', icon: Receipt },
     { name: 'Team', href: '/client/team', icon: ShieldCheck },
     { name: 'Work Reports', href: '/client/reports', icon: FileCheck },
@@ -114,6 +124,9 @@ const Sidebar = ({ role, isOpen, onClose, onToggle }) => {
     { name: 'Dashboard', href: '/client', icon: LayoutDashboard },
     { name: 'Voice & Video Calls', href: '/client/calls', icon: PhoneCall },
     { name: 'Leads (CRM)', href: '/client/crm', icon: Users },
+    { name: 'Quotations', href: '/client/quotations', icon: FileCheck },
+    { name: 'Proposals', href: '/client/proposals', icon: FileText },
+    { name: 'Invoices', href: '/client/invoices', icon: Receipt },
     { name: 'Messages', href: '/client/inbox', icon: MessageSquare },
     { name: 'Team Chat', href: '/client/team-chat', icon: MessagesSquare },
     { name: 'Knowledge Base', href: '/client/knowledge', icon: Brain },

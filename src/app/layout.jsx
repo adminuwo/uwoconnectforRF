@@ -1,6 +1,7 @@
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { TourProvider } from "@/context/TourContext";
+import AxiosNetworkFixer from "@/components/AxiosNetworkFixer";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -23,6 +24,7 @@ export default function RootLayout({ children }) {
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col overflow-x-hidden" style={{ fontFamily: '"Times New Roman", Times, serif' }} suppressHydrationWarning>
+        <AxiosNetworkFixer />
         <TourProvider>
           {children}
         </TourProvider>

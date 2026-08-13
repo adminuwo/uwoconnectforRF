@@ -22,18 +22,18 @@ const CodeBlock = ({ code, language }) => {
   };
 
   return (
-    <div className="relative my-3 rounded-2xl bg-slate-950 border border-slate-800 overflow-hidden text-xs">
-      <div className="flex items-center justify-between px-4 py-2 bg-slate-900/80 border-b border-slate-800 text-slate-400">
-        <span className="font-mono text-[10px] uppercase font-bold text-emerald-400">{language || 'code'}</span>
+    <div className="relative my-4 rounded-2xl bg-slate-950 border border-slate-800/80 overflow-hidden text-xs shadow-md">
+      <div className="flex items-center justify-between px-4 py-2.5 bg-slate-900/80 border-b border-slate-800/60 text-slate-400">
+        <span className="font-mono text-[10px] uppercase font-bold text-emerald-400 tracking-wider">{language || 'code'}</span>
         <button
           onClick={handleCopy}
-          className="flex items-center gap-1 text-[11px] font-semibold text-slate-300 hover:text-white transition-colors cursor-pointer"
+          className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-300 hover:text-white transition-colors cursor-pointer bg-slate-800/40 hover:bg-slate-800/80 px-2.5 py-1 rounded-lg border border-slate-700/60"
         >
-          {copied ? <Check size={13} className="text-emerald-400" /> : <Copy size={13} />}
-          <span>{copied ? 'Copied!' : 'Copy Code'}</span>
+          {copied ? <Check size={12} className="text-emerald-400" /> : <Copy size={12} />}
+          <span>{copied ? 'Copied!' : 'Copy'}</span>
         </button>
       </div>
-      <pre className="p-4 text-slate-100 font-mono overflow-x-auto leading-relaxed text-[11px]">
+      <pre className="p-4 text-slate-100 font-mono overflow-x-auto leading-relaxed text-[11px] bg-slate-950">
         <code>{code}</code>
       </pre>
     </div>
@@ -51,22 +51,24 @@ const InteractiveChecklist = ({ items }) => {
   };
 
   return (
-    <div className="my-3 space-y-2 bg-slate-50 border border-slate-200/80 rounded-2xl p-4">
+    <div className="my-4 space-y-2.5 bg-slate-50/50 border border-slate-100 rounded-2xl p-5">
       {checkedState.map((item, idx) => (
-        <div
+        <motion.div
+          whileHover={{ scale: 1.005, x: 2 }}
+          whileTap={{ scale: 0.995 }}
           key={idx}
           onClick={() => toggleCheck(idx)}
-          className="flex items-start gap-3 p-2.5 bg-white border border-slate-200/60 rounded-xl cursor-pointer hover:border-emerald-300 transition-all"
+          className={`flex items-start gap-3.5 p-3.5 bg-white border rounded-xl cursor-pointer shadow-xs transition-all ${item.checked ? 'border-emerald-100 bg-emerald-50/10' : 'border-slate-200/60 hover:border-emerald-300 hover:shadow-xs'
+            }`}
         >
-          <div className={`mt-0.5 w-4 h-4 rounded-md border flex items-center justify-center transition-all ${
-            item.checked ? 'bg-emerald-600 border-emerald-600 text-white' : 'border-slate-300 bg-white'
-          }`}>
-            {item.checked && <Check size={11} />}
+          <div className={`mt-0.5 w-4.5 h-4.5 rounded-lg border flex items-center justify-center transition-all ${item.checked ? 'bg-emerald-600 border-emerald-600 text-white' : 'border-slate-300 bg-white'
+            }`}>
+            {item.checked && <Check size={12} strokeWidth={3} />}
           </div>
-          <span className={`text-xs font-medium ${item.checked ? 'line-through text-slate-400' : 'text-slate-700'}`}>
+          <span className={`text-xs font-semibold tracking-wide ${item.checked ? 'line-through text-slate-400' : 'text-slate-700'}`}>
             {item.text || item}
           </span>
-        </div>
+        </motion.div>
       ))}
     </div>
   );
@@ -80,7 +82,7 @@ const StepContentRenderer = ({ step }) => {
     case 'code':
       return (
         <div className="space-y-2">
-          {step.content && <p className="text-xs text-slate-600 leading-relaxed font-medium">{step.content}</p>}
+          {step.content && <p className="text-xs text-slate-600 leading-relaxed font-semibold">{step.content}</p>}
           <CodeBlock code={step.code_snippet || step.content} language={step.code_language} />
         </div>
       );
@@ -88,38 +90,56 @@ const StepContentRenderer = ({ step }) => {
     case 'checklist':
       return (
         <div className="space-y-2">
-          {step.content && <p className="text-xs text-slate-600 leading-relaxed font-medium">{step.content}</p>}
+          {step.content && <p className="text-xs text-slate-600 leading-relaxed font-semibold">{step.content}</p>}
           <InteractiveChecklist items={step.checklist_items} />
         </div>
       );
 
     case 'tip':
       return (
-        <div className="my-3 p-4 bg-emerald-50/70 border border-emerald-200/70 rounded-2xl flex items-start gap-3 text-emerald-900">
-          <Lightbulb size={18} className="text-emerald-600 shrink-0 mt-0.5" />
-          <div className="text-xs leading-relaxed font-medium whitespace-pre-line">{step.content}</div>
+        <div className="my-4 p-4.5 bg-gradient-to-r from-emerald-50/60 to-teal-50/40 border border-emerald-200/50 rounded-2xl flex items-start gap-3.5 text-emerald-950 shadow-xs">
+          <div className="w-8 h-8 rounded-xl bg-emerald-100/80 text-emerald-700 flex items-center justify-center shrink-0">
+            <Lightbulb size={16} />
+          </div>
+          <div className="text-xs leading-relaxed font-semibold whitespace-pre-line pt-0.5">{step.content}</div>
         </div>
       );
 
     case 'warning':
       return (
-        <div className="my-3 p-4 bg-amber-50/70 border border-amber-200/70 rounded-2xl flex items-start gap-3 text-amber-900">
-          <AlertTriangle size={18} className="text-amber-600 shrink-0 mt-0.5" />
-          <div className="text-xs leading-relaxed font-medium whitespace-pre-line">{step.content}</div>
+        <div className="my-4 p-4.5 bg-gradient-to-r from-amber-50/60 to-orange-50/40 border border-amber-200/50 rounded-2xl flex items-start gap-3.5 text-amber-950 shadow-xs">
+          <div className="w-8 h-8 rounded-xl bg-amber-100/80 text-amber-700 flex items-center justify-center shrink-0">
+            <AlertTriangle size={16} />
+          </div>
+          <div className="text-xs leading-relaxed font-semibold whitespace-pre-line pt-0.5">{step.content}</div>
         </div>
       );
 
     case 'diagram':
+      const parts = step.content.split('➔').map(p => p.trim());
       return (
-        <div className="my-3 p-5 bg-gradient-to-br from-[#F0FDF4] to-emerald-50 text-slate-800 rounded-2xl border border-emerald-200/80 font-mono text-xs text-center leading-relaxed tracking-wide shadow-xs">
-          <div className="text-[10px] uppercase font-bold text-emerald-700 tracking-widest mb-2">Interactive Workflow Diagram</div>
-          <p className="text-slate-700">{step.content}</p>
+        <div className="my-4 p-5 bg-slate-50 border border-slate-200/60 rounded-2xl shadow-xs">
+          <div className="text-[9px] uppercase font-black text-slate-400 tracking-wider mb-4 text-center">Interactive Workflow Flowchart</div>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-2 flex-wrap">
+            {parts.map((part, index) => (
+              <React.Fragment key={index}>
+                <div className="px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl shadow-xs text-xs font-bold text-slate-800 text-center min-w-[120px] max-w-[200px] hover:border-emerald-400 transition-colors">
+                  {part}
+                </div>
+                {index < parts.length - 1 && (
+                  <div className="text-slate-400 flex items-center justify-center py-1 sm:py-0">
+                    <ArrowRight size={14} className="rotate-90 sm:rotate-0" />
+                  </div>
+                )}
+              </React.Fragment>
+            ))}
+          </div>
         </div>
       );
 
     case 'image':
       return (
-        <div className="my-3 space-y-2">
+        <div className="my-4 space-y-2">
           {step.media_url ? (
             <img src={step.media_url} alt={step.title} className="w-full rounded-2xl border border-slate-200 shadow-sm object-cover" />
           ) : (
@@ -133,7 +153,7 @@ const StepContentRenderer = ({ step }) => {
 
     default: // 'text'
       return (
-        <p className="text-xs text-slate-700 leading-relaxed font-medium whitespace-pre-line">
+        <p className="text-xs text-slate-700 leading-relaxed font-semibold whitespace-pre-line">
           {step.content}
         </p>
       );
@@ -198,6 +218,13 @@ const LearningCenterModal = ({ guideSlug, isOpen, onClose }) => {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onClose]);
+
+  // Scroll to top of content when chapter changes
+  useEffect(() => {
+    if (contentRef.current) {
+      contentRef.current.scrollTop = 0;
+    }
+  }, [activeSectionId]);
 
   // Toggle step completion
   const handleToggleStepComplete = async (stepId) => {
@@ -266,47 +293,47 @@ const LearningCenterModal = ({ guideSlug, isOpen, onClose }) => {
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-[100] flex items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-md overflow-hidden">
+      <div className="fixed inset-0 z-[100] flex items-center justify-center p-0 sm:p-4 bg-slate-950/80 backdrop-blur-md overflow-hidden">
         <motion.div
-          initial={{ opacity: 0, scale: 0.96 }}
+          initial={{ opacity: 0, scale: 0.97 }}
           animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.96 }}
-          transition={{ duration: 0.25 }}
-          className="w-full h-full sm:h-[94vh] sm:max-w-6xl bg-white sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden border border-slate-200"
+          exit={{ opacity: 0, scale: 0.97 }}
+          transition={{ duration: 0.2, ease: 'easeOut' }}
+          className="w-full h-full sm:h-[92vh] sm:max-w-6xl bg-white sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden border border-slate-200/80"
         >
           {/* ── HEADER BAR ───────────────────────────────────────────────── */}
-          <div className="px-6 py-4 bg-white text-slate-900 flex items-center justify-between border-b border-slate-100 shrink-0">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-emerald-50 border border-emerald-200/60 flex items-center justify-center text-emerald-700">
-                <BookOpen size={18} />
+          <div className="px-6 py-4.5 bg-white text-slate-900 flex items-center justify-between border-b border-slate-100 shrink-0">
+            <div className="flex items-center gap-3.5">
+              <div className="w-10 h-10 rounded-2xl bg-emerald-50 border border-emerald-100/80 flex items-center justify-center text-emerald-700 shadow-xs">
+                <BookOpen size={20} className="stroke-[2.5]" />
               </div>
               <div>
                 <h2 className="text-base font-bold tracking-tight text-slate-900">
                   {guide?.title || 'Learning Guide'}
                 </h2>
-                <div className="flex items-center gap-2 text-xs text-slate-500 font-medium mt-0.5">
-                  <span className="flex items-center gap-1"><Clock size={12} className="text-slate-400" /> {guide?.estimated_time || '10 mins'}</span>
+                <div className="flex items-center gap-2 text-xs text-slate-500 font-semibold mt-0.5">
+                  <span className="flex items-center gap-1"><Clock size={13} className="text-slate-400" /> {guide?.estimated_time || '10 mins'}</span>
                   <span>•</span>
-                  <span>{progressPercent}% Completed</span>
+                  <span className="text-emerald-600 font-extrabold">{progressPercent}% Completed</span>
                 </div>
               </div>
             </div>
 
             {/* Header Search & Close */}
             <div className="flex items-center gap-3">
-              <div className="relative hidden md:block w-56">
-                <Search size={14} className="absolute left-3 top-2.5 text-slate-400" />
+              <div className="relative hidden md:block w-64">
+                <Search size={14} className="absolute left-3.5 top-2.5 text-slate-400" />
                 <input
                   type="text"
-                  placeholder="Search..."
+                  placeholder="Search in chapters..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-9 pr-3 py-1.5 bg-slate-50 text-slate-900 placeholder-slate-400 text-xs rounded-xl border border-slate-200 focus:outline-none focus:border-emerald-500"
+                  className="w-full pl-10 pr-3.5 py-2 bg-slate-50 text-slate-900 placeholder-slate-400 text-xs rounded-xl border border-slate-200/80 focus:outline-none focus:border-emerald-500 focus:bg-white transition-all"
                 />
               </div>
               <button
                 onClick={onClose}
-                className="p-2 hover:bg-slate-100 rounded-xl text-slate-400 hover:text-slate-700 transition-colors cursor-pointer"
+                className="p-2.5 hover:bg-slate-100 rounded-xl text-slate-400 hover:text-slate-700 transition-colors cursor-pointer"
               >
                 <X size={20} />
               </button>
@@ -315,46 +342,46 @@ const LearningCenterModal = ({ guideSlug, isOpen, onClose }) => {
 
           {/* ── MAIN TWO-COLUMN BODY ──────────────────────────────────────── */}
           {loading ? (
-            <div className="flex-1 flex items-center justify-center p-12 text-slate-400 gap-3">
-              <div className="w-8 h-8 border-3 border-emerald-600 border-t-transparent rounded-full animate-spin" />
-              <span className="text-xs font-semibold">Loading Learning Guide...</span>
+            <div className="flex-1 flex flex-col items-center justify-center p-12 text-slate-400 gap-4">
+              <div className="w-10 h-10 border-3 border-emerald-600 border-t-transparent rounded-full animate-spin" />
+              <span className="text-xs font-bold text-slate-600 tracking-wide">Loading Learning Guide...</span>
             </div>
           ) : (
             <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
               {/* ── LEFT SIDEBAR (280px) ─────────────────────────────────── */}
-              <div className="w-full md:w-72 bg-slate-50 border-r border-slate-200/80 flex flex-col shrink-0 overflow-y-auto">
-                
+              <div className="w-full md:w-72 bg-slate-50 border-r border-slate-200 flex flex-col shrink-0 overflow-y-auto text-slate-700">
+
                 {/* Progress Bar Header */}
-                <div className="p-4 border-b border-slate-200/80 bg-white">
-                  <div className="flex items-center justify-between text-[11px] font-bold text-slate-700 mb-1.5">
+                <div className="p-5 border-b border-slate-200 bg-white shrink-0">
+                  <div className="flex items-center justify-between text-[11px] font-bold text-slate-500 mb-2">
                     <span>Course Progress</span>
-                    <span className="text-emerald-700 font-extrabold">{progressPercent}%</span>
+                    <span className="text-emerald-600 font-extrabold">{progressPercent}%</span>
                   </div>
-                  <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden border border-slate-200/60">
+                  <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden border border-slate-200/60">
                     <div
-                      className="h-full bg-emerald-600 transition-all duration-500"
+                      className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 transition-all duration-500"
                       style={{ width: `${progressPercent}%` }}
                     />
                   </div>
                 </div>
 
                 {/* Mobile Search */}
-                <div className="p-3 md:hidden border-b border-slate-200/80 bg-white">
+                <div className="p-4 md:hidden border-b border-slate-200 bg-white">
                   <div className="relative w-full">
-                    <Search size={14} className="absolute left-3 top-2.5 text-slate-400" />
+                    <Search size={14} className="absolute left-3.5 top-2.5 text-slate-400" />
                     <input
                       type="text"
                       placeholder="Search in guide..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="w-full pl-9 pr-3 py-1.5 bg-slate-100 text-slate-800 placeholder-slate-400 text-xs rounded-xl border border-slate-200"
+                      className="w-full pl-10 pr-3.5 py-1.5 bg-slate-50 text-slate-800 placeholder-slate-400 text-xs rounded-xl border border-slate-200"
                     />
                   </div>
                 </div>
 
                 {/* Chapter Sections List */}
-                <div className="p-3 space-y-1">
-                  <span className="px-3 py-1.5 text-[10px] font-black text-slate-400 uppercase tracking-widest block">
+                <div className="p-4 space-y-1.5">
+                  <span className="px-3 py-1.5 text-[9px] font-black text-slate-400 uppercase tracking-widest block">
                     Learning Chapters ({filteredSections.length})
                   </span>
 
@@ -365,19 +392,19 @@ const LearningCenterModal = ({ guideSlug, isOpen, onClose }) => {
                     const isSecFullyCompleted = sec.steps?.length > 0 && secCompletedCount === sec.steps.length;
 
                     return (
-                      <button
+                      <motion.button
+                        whileHover={{ scale: 1.015, x: 2 }}
+                        whileTap={{ scale: 0.985 }}
                         key={sec.id}
                         onClick={() => setActiveSectionId(sec.id)}
-                        className={`w-full text-left p-3 rounded-2xl text-xs font-bold transition-all flex items-start justify-between group cursor-pointer ${
-                          isActive
-                            ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20'
-                            : 'hover:bg-slate-200/60 text-slate-700'
-                        }`}
+                        className={`w-full text-left p-3.5 rounded-xl text-xs font-bold transition-all flex items-start justify-between group cursor-pointer ${isActive
+                            ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-600/20 border border-emerald-500/10'
+                            : 'hover:bg-slate-200/60 text-slate-600 hover:text-slate-900'
+                          }`}
                       >
-                        <div className="flex items-start gap-2.5">
-                          <span className={`w-5 h-5 rounded-lg flex items-center justify-center text-[10px] font-black shrink-0 ${
-                            isActive ? 'bg-emerald-700 text-white' : 'bg-slate-200 text-slate-600'
-                          }`}>
+                        <div className="flex items-start gap-3">
+                          <span className={`w-5.5 h-5.5 rounded-lg flex items-center justify-center text-[10px] font-black shrink-0 ${isActive ? 'bg-emerald-700/50 text-white' : 'bg-slate-200 text-slate-500 group-hover:bg-slate-300/80 transition-colors'
+                            }`}>
                             {idx + 1}
                           </span>
                           <div>
@@ -396,21 +423,27 @@ const LearningCenterModal = ({ guideSlug, isOpen, onClose }) => {
                             <Bookmark size={13} className={isActive ? 'text-emerald-200 fill-emerald-200' : 'text-amber-500 fill-amber-500'} />
                           )}
                         </div>
-                      </button>
+                      </motion.button>
                     );
                   })}
                 </div>
               </div>
 
               {/* ── RIGHT CONTENT AREA ────────────────────────────────────── */}
-              <div ref={contentRef} className="flex-1 overflow-y-auto p-6 sm:p-8 space-y-6 bg-white">
+              <div ref={contentRef} className="flex-1 overflow-y-auto p-6 sm:p-8 space-y-6 bg-slate-50/30">
                 {currentSection ? (
-                  <>
+                  <motion.div
+                    key={currentSection.id}
+                    initial={{ opacity: 0, y: 15 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -15 }}
+                    transition={{ duration: 0.25 }}
+                  >
                     {/* Chapter Header */}
-                    <div className="pb-5 border-b border-slate-100 flex items-start justify-between gap-4">
+                    <div className="pb-5 border-b border-slate-200/60 flex items-start justify-between gap-4 mb-6">
                       <div>
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="px-2.5 py-0.5 bg-slate-100 text-slate-600 rounded-md text-[10px] font-bold uppercase tracking-widest">
+                        <div className="flex items-center gap-2 mb-1.5">
+                          <span className="px-2.5 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-100/50 rounded-md text-[10px] font-bold uppercase tracking-widest">
                             Chapter {currentSectionIndex + 1} of {guide?.sections?.length || 1}
                           </span>
                         </div>
@@ -421,11 +454,10 @@ const LearningCenterModal = ({ guideSlug, isOpen, onClose }) => {
 
                       <button
                         onClick={() => handleToggleBookmark(currentSection.id)}
-                        className={`p-2.5 rounded-xl border transition-all cursor-pointer ${
-                          bookmarkedSections.includes(currentSection.id)
+                        className={`p-2.5 rounded-xl border transition-all cursor-pointer ${bookmarkedSections.includes(currentSection.id)
                             ? 'bg-amber-50 border-amber-200 text-amber-600'
                             : 'bg-slate-50 border-slate-200 text-slate-400 hover:text-slate-700'
-                        }`}
+                          }`}
                         title="Bookmark Chapter"
                       >
                         <Bookmark size={16} className={bookmarkedSections.includes(currentSection.id) ? 'fill-amber-500' : ''} />
@@ -438,37 +470,38 @@ const LearningCenterModal = ({ guideSlug, isOpen, onClose }) => {
                         const isCompleted = completedStepIds.includes(step.id);
 
                         return (
-                          <div
+                          <motion.div
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: sIdx * 0.05 }}
                             key={step.id || sIdx}
-                            className={`p-5 rounded-3xl border transition-all ${
-                              isCompleted
-                                ? 'bg-slate-50/60 border-slate-200/60'
-                                : 'bg-white border-slate-200 shadow-xs hover:border-slate-300'
-                            }`}
+                            className={`p-5.5 rounded-3xl border transition-all ${isCompleted
+                                ? 'bg-slate-100/60 border-slate-200/50'
+                                : 'bg-white border-slate-200 shadow-xs hover:border-slate-300/80 hover:shadow-xs'
+                              }`}
                           >
-                            <div className="flex items-start justify-between gap-3 mb-3">
-                              <div className="flex items-center gap-2.5">
+                            <div className="flex items-start justify-between gap-3 mb-3.5">
+                              <div className="flex items-center gap-3">
                                 <button
                                   onClick={() => handleToggleStepComplete(step.id)}
-                                  className={`w-6 h-6 rounded-lg border flex items-center justify-center transition-all cursor-pointer ${
-                                    isCompleted
+                                  className={`w-6 h-6 rounded-lg border flex items-center justify-center transition-all cursor-pointer ${isCompleted
                                       ? 'bg-emerald-600 border-emerald-600 text-white'
                                       : 'border-slate-300 hover:border-emerald-500 bg-white text-transparent'
-                                  }`}
+                                    }`}
                                   title={isCompleted ? 'Mark Incomplete' : 'Mark Complete'}
                                 >
-                                  <Check size={14} />
+                                  <Check size={14} strokeWidth={3} />
                                 </button>
 
                                 {step.title && (
-                                  <h3 className={`text-sm font-bold ${isCompleted ? 'text-slate-500 line-through' : 'text-slate-900'}`}>
+                                  <h3 className={`text-sm font-bold tracking-tight ${isCompleted ? 'text-slate-400 line-through' : 'text-slate-900'}`}>
                                     {step.title}
                                   </h3>
                                 )}
                               </div>
 
                               {step.step_type !== 'text' && (
-                                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 px-2 py-0.5 bg-slate-100 rounded-md">
+                                <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400 px-2 py-0.5 bg-slate-50 border border-slate-200/40 rounded-md">
                                   {step.step_type}
                                 </span>
                               )}
@@ -476,17 +509,17 @@ const LearningCenterModal = ({ guideSlug, isOpen, onClose }) => {
 
                             {/* Render step content */}
                             <StepContentRenderer step={step} />
-                          </div>
+                          </motion.div>
                         );
                       })}
                     </div>
 
                     {/* Prev / Next Section Navigation */}
-                    <div className="pt-6 border-t border-slate-100 flex items-center justify-between gap-4">
+                    <div className="mt-8 pt-6 border-t border-slate-200/60 flex items-center justify-between gap-4">
                       {currentSectionIndex > 0 ? (
                         <button
                           onClick={() => setActiveSectionId(guide.sections[currentSectionIndex - 1].id)}
-                          className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-2xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer"
+                          className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-2xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer border border-slate-200/60"
                         >
                           <ArrowLeft size={14} /> Previous Chapter
                         </button>
@@ -502,13 +535,13 @@ const LearningCenterModal = ({ guideSlug, isOpen, onClose }) => {
                       ) : (
                         <button
                           onClick={onClose}
-                          className="px-5 py-2.5 bg-slate-900 hover:bg-black text-white rounded-2xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer"
+                          className="px-5 py-2.5 bg-slate-900 hover:bg-black text-white rounded-2xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shadow-md shadow-slate-950/20"
                         >
                           Complete & Exit Academy <Check size={14} />
                         </button>
                       )}
                     </div>
-                  </>
+                  </motion.div>
                 ) : (
                   <div className="text-center py-16 text-slate-400 text-xs">
                     Select a learning chapter from the left sidebar.

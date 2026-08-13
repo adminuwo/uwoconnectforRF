@@ -5,7 +5,7 @@ import {
   MessageSquare, Search, Loader2, User, Phone, Mail, 
   MapPin, Send, Plus, MoreHorizontal, Filter, 
   Smile, Paperclip, Zap, ArrowLeft, Check, CheckCheck, Archive, Sparkles, Lock, Unlock,
-  FileText, Download, Image as ImageIcon, Music, Film, ExternalLink,
+  FileText, Download, Image as ImageIcon, Music, Film, Video, ExternalLink,
   Shield, ShieldAlert, ArrowRightLeft, History, BarChart3, Activity, Users, Eye, StickyNote,
   Clock, Tag, RefreshCw, AlertCircle, Bot
 } from 'lucide-react';
@@ -15,6 +15,7 @@ import TransferModal from '@/components/inbox/TransferModal';
 import AuditLogDrawer from '@/components/inbox/AuditLogDrawer';
 import MonitoringAnalyticsModal from '@/components/inbox/MonitoringAnalyticsModal';
 import { cn } from '@/lib/utils';
+import { API_BASE_URL } from '@/config/apiConfig';
 
 export default function ClientInboxPage() {
   const [messages, setMessages] = useState([]);
@@ -46,6 +47,11 @@ export default function ClientInboxPage() {
   const scrollRef = useRef(null);
   const wsRef = useRef(null);
   const typingTimeoutRef = useRef(null);
+  const selectedConvoIdRef = useRef(selectedConvoId);
+
+  useEffect(() => {
+    selectedConvoIdRef.current = selectedConvoId;
+  }, [selectedConvoId]);
 
   // 1. Initial Data Fetching
   const fetchData = async () => {
@@ -54,7 +60,7 @@ export default function ClientInboxPage() {
       if (!token) return;
       
       const headers = { Authorization: `Bearer ${token}` };
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080';
+      const apiUrl = API_BASE_URL;
 
       const [msgRes, contactRes, profileRes, teamRes, statsRes] = await Promise.all([
         axios.get(`${apiUrl}/api/messages/`, { headers }),
@@ -70,7 +76,7 @@ export default function ClientInboxPage() {
       setTeamMembers(teamRes.data || []);
       if (statsRes.data) setStatsData(statsRes.data);
 
-      if (msgRes.data?.length > 0 && !selectedConvoId) {
+      if (msgRes.data?.length > 0 && !selectedConvoIdRef.current) {
         const firstSender = normalizeContactId(msgRes.data[0].from_address || msgRes.data[0].to_address);
         setSelectedConvoId(firstSender);
       }
@@ -97,14 +103,28 @@ export default function ClientInboxPage() {
   // Group messages into structured conversation threads
   const groupedConversations = messages.reduce((acc, msg) => {
     const rawContact = msg.message_type === 'INCOMING' ? msg.from_address : msg.to_address;
-    const contactKey = normalizeContactId(rawContact);
+    const normRaw = normalizeContactId(rawContact);
+
+    // Match contact object across phone, platform_id, or name
+    const contactObj = contacts.find(c => {
+      const cPhone = normalizeContactId(c.phone_number);
+      const cPlatform = normalizeContactId(c.platform_id);
+      const cName = c.name?.toLowerCase().trim();
+      const rawLower = rawContact?.toLowerCase().trim();
+      return (cPhone && cPhone === normRaw) ||
+             (cPlatform && cPlatform === normRaw) ||
+             (cName && rawLower && (cName === rawLower || rawLower.includes(cName) || cName.includes(rawLower)));
+    });
+
+    const contactKey = contactObj
+      ? (normalizeContactId(contactObj.phone_number || contactObj.platform_id) || contactObj.name || normRaw)
+      : normRaw;
     
     if (!acc[contactKey]) {
-      const contactObj = contacts.find(c => normalizeContactId(c.platform_id || c.phone_number) === contactKey);
       acc[contactKey] = {
         id: contactKey,
-        name: contactObj?.name || (rawContact.startsWith('+') ? rawContact : `+${rawContact}`),
-        rawAddress: rawContact,
+        name: contactObj?.name || (rawContact?.startsWith('+') ? rawContact : `+${rawContact}`),
+        rawAddress: contactObj?.phone_number || contactObj?.platform_id || rawContact,
         lastMessage: msg.body || '📎 [Attachment]',
         time: msg.created_at,
         unread: msg.message_type === 'INCOMING' ? 1 : 0,
@@ -149,7 +169,7 @@ export default function ClientInboxPage() {
     const token = localStorage.getItem('token');
     if (!token) return;
 
-    let wsUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080';
+    let wsUrl = API_BASE_URL || 'http://127.0.0.1:8080';
     wsUrl = wsUrl.replace(/^http/, 'ws') + `/ws/inbox/?token=${token}`;
     
     const ws = new WebSocket(wsUrl);
@@ -257,7 +277,7 @@ export default function ClientInboxPage() {
     setIsSending(true);
 
     const nowTs = Date.now();
-    const targetAddress = activeConvo.rawAddress || activeConvo.id;
+    const targetAddress = activeConvo.contactObj?.phone_number || activeConvo.contactObj?.platform_id || activeConvo.rawAddress || activeConvo.id;
     const optimisticMsg = {
       id: `temp_${nowTs}`,
       from_address: currentUser?.username || 'SYSTEM',
@@ -275,7 +295,7 @@ export default function ClientInboxPage() {
 
     try {
       const token = localStorage.getItem('token');
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080';
+      const apiUrl = API_BASE_URL;
 
       const res = await axios.post(`${apiUrl}/api/messages/`, {
         to_number: targetAddress,
@@ -292,6 +312,7 @@ export default function ClientInboxPage() {
       fetchData();
     } catch (err) {
       console.warn('Failed to send message:', err);
+      alert('Failed to send message: ' + (err.response?.data?.detail || err.message));
     } finally {
       setIsSending(false);
     }
@@ -302,7 +323,7 @@ export default function ClientInboxPage() {
     if (!activeConvo) return;
     try {
       const token = localStorage.getItem('token');
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080';
+      const apiUrl = API_BASE_URL;
       await axios.post(`${apiUrl}/api/conversations/${activeConvo.id}/takeover/`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -315,7 +336,7 @@ export default function ClientInboxPage() {
   const handleTransferSubmit = async (convoId, payload) => {
     try {
       const token = localStorage.getItem('token');
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080';
+      const apiUrl = API_BASE_URL;
       await axios.post(`${apiUrl}/api/conversations/${convoId}/transfer/`, payload, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -329,7 +350,7 @@ export default function ClientInboxPage() {
     if (!activeConvo) return;
     try {
       const token = localStorage.getItem('token');
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080';
+      const apiUrl = API_BASE_URL;
       const res = await axios.get(`${apiUrl}/api/conversations/${activeConvo.id}/audit_logs/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -346,7 +367,7 @@ export default function ClientInboxPage() {
   const openAnalyticsModal = async () => {
     try {
       const token = localStorage.getItem('token');
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080';
+      const apiUrl = API_BASE_URL;
       const res = await axios.get(`${apiUrl}/api/monitoring/analytics/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -589,6 +610,65 @@ export default function ClientInboxPage() {
                     const isIncoming = msg.message_type === 'INCOMING';
                     const isInternal = msg.message_type === 'INTERNAL';
 
+                    // Extract URLs and interactive buttons
+                    const extractUrls = (text) => {
+                      if (!text) return [];
+                      const urlRegex = /(https?:\/\/[^\s\)\>\]]+)/g;
+                      const matches = text.match(urlRegex) || [];
+                      const cleanMatches = matches.filter(url => {
+                        const lower = url.toLowerCase();
+                        if (lower.includes('hubspotemail.net') || 
+                            lower.includes('hubspotlinks.com') || 
+                            lower.includes('_hsenc=') || 
+                            lower.includes('_hsmi=') || 
+                            lower.includes('unsubscribe') || 
+                            lower.includes('preferences-center') ||
+                            lower.includes('doubleclick') ||
+                            lower.includes('click.mail')) {
+                          return false;
+                        }
+                        return true;
+                      });
+                      return Array.from(new Set(cleanMatches)).slice(0, 3);
+                    };
+
+                    const extractMessageButtons = (m) => {
+                      if (!m) return [];
+                      let btnList = [];
+                      if (Array.isArray(m.buttons) && m.buttons.length > 0) {
+                        btnList = m.buttons;
+                      } else if (m.metadata) {
+                        if (Array.isArray(m.metadata.buttons) && m.metadata.buttons.length > 0) {
+                          btnList = m.metadata.buttons;
+                        } else {
+                          const interactiveBtns = m.metadata.payload?.interactive?.action?.buttons;
+                          if (Array.isArray(interactiveBtns) && interactiveBtns.length > 0) {
+                            btnList = interactiveBtns;
+                          }
+                        }
+                      }
+                      return btnList.map(b => {
+                        if (typeof b === 'string') return b;
+                        return b.reply?.title || b.title || b.text || b.label || JSON.stringify(b);
+                      }).filter(Boolean);
+                    };
+
+                    const msgButtons = extractMessageButtons(msg);
+                    const msgUrls = extractUrls(msg.body);
+
+                    // Email specific parsing
+                    const isEmail = msg.channel === 'GMAIL' || (msg.body && msg.body.startsWith('Subject:'));
+                    let emailSubject = '';
+                    let emailBodyText = msg.body || '';
+
+                    if (isEmail && msg.body && msg.body.startsWith('Subject:')) {
+                      const subjectLineEnd = msg.body.indexOf('\n');
+                      if (subjectLineEnd !== -1) {
+                        emailSubject = msg.body.substring(8, subjectLineEnd).trim();
+                        emailBodyText = msg.body.substring(subjectLineEnd).trim();
+                      }
+                    }
+
                     if (isInternal) {
                       return (
                         <div key={msg.id || index} className="my-3 flex justify-center">
@@ -622,14 +702,99 @@ export default function ClientInboxPage() {
                           </div>
                         )}
 
-                        <div className={`max-w-lg rounded-2xl p-3.5 text-xs shadow-xs ${
+                        <div className={`max-w-xl rounded-2xl p-4 text-xs shadow-sm ${
                           isIncoming 
-                            ? 'bg-white text-slate-900 rounded-tl-none border border-slate-200'
+                            ? isEmail ? 'bg-slate-50 text-slate-900 rounded-tl-none border border-slate-300' : 'bg-white text-slate-900 rounded-tl-none border border-slate-200'
                             : 'bg-emerald-600 text-white rounded-tr-none shadow-emerald-600/10'
                         }`}>
-                          <p className="whitespace-pre-wrap font-normal leading-relaxed">{msg.body}</p>
+                          {/* Gmail Header Badge */}
+                          {isEmail && (
+                            <div className="flex items-center justify-between gap-2 pb-2.5 mb-2.5 border-b border-slate-200">
+                              <div className="flex items-center gap-1.5 text-[11px] font-extrabold text-rose-600">
+                                <Mail className="w-3.5 h-3.5" />
+                                <span>GMAIL INBOX MESSAGE</span>
+                              </div>
+                              <span className="text-[9px] font-bold bg-rose-100 text-rose-700 px-2 py-0.5 rounded-full">
+                                Email
+                              </span>
+                            </div>
+                          )}
+
+                          {/* Email Subject Title */}
+                          {emailSubject && (
+                            <div className="mb-2 pb-2 border-b border-slate-200/60">
+                              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Subject</span>
+                              <h4 className="font-extrabold text-sm text-slate-900 leading-snug">
+                                {emailSubject}
+                              </h4>
+                            </div>
+                          )}
+
+                          <div className={`whitespace-pre-wrap font-normal leading-relaxed ${isEmail ? 'max-h-72 overflow-y-auto pr-1 text-slate-800' : ''}`}>
+                            {emailBodyText}
+                          </div>
                           
-                          <div className={`mt-1.5 flex items-center justify-end gap-1.5 text-[9px] ${
+                          {/* Render Interactive CTA Quick Reply Buttons */}
+                          {msgButtons.length > 0 && (
+                            <div className="mt-2.5 space-y-1.5 pt-2 border-t border-slate-200/40">
+                              {msgButtons.map((btnText, bIdx) => (
+                                <button
+                                  key={bIdx}
+                                  onClick={() => {
+                                    setReplyText(btnText);
+                                  }}
+                                  className={`w-full py-1.5 px-3 rounded-lg text-xs font-extrabold transition-all flex items-center justify-center gap-1.5 border shadow-2xs cursor-pointer ${
+                                    isIncoming 
+                                      ? 'bg-slate-50 hover:bg-emerald-50 text-emerald-700 border-slate-200 hover:border-emerald-300' 
+                                      : 'bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-xs'
+                                  }`}
+                                >
+                                  <span>💬 {btnText}</span>
+                                </button>
+                              ))}
+                            </div>
+                          )}
+
+                          {/* Render Interactive CTA Link Buttons */}
+                          {msgUrls.length > 0 && (
+                            <div className="mt-2.5 space-y-1.5 pt-2 border-t border-slate-200/40">
+                              {msgUrls.map((url, uIdx) => {
+                                let label = '🌐 Open Link';
+                                let icon = <ExternalLink className="w-3.5 h-3.5" />;
+                                if (url.includes('meet.google.com') || url.includes('teams.microsoft.com') || url.includes('zoom.us')) {
+                                  label = '📹 Join Video Call';
+                                  icon = <Video className="w-3.5 h-3.5 text-emerald-500" />;
+                                } else if (url.includes('/public/quote/')) {
+                                  label = '📄 View Proposal / Quotation';
+                                  icon = <FileText className="w-3.5 h-3.5 text-amber-500" />;
+                                } else {
+                                  try {
+                                    const parsedDomain = new URL(url).hostname.replace('www.', '');
+                                    label = `🌐 Visit ${parsedDomain}`;
+                                  } catch(e) {}
+                                }
+
+                                return (
+                                  <a
+                                    key={uIdx}
+                                    href={url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className={`w-full py-2 px-3 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2 border shadow-sm cursor-pointer no-underline ${
+                                      isIncoming
+                                        ? 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border-emerald-200'
+                                        : 'bg-white text-emerald-800 hover:bg-slate-50 border-white/80 shadow-md'
+                                    }`}
+                                  >
+                                    {icon}
+                                    <span className="truncate">{label}</span>
+                                  </a>
+                                );
+                              })}
+                            </div>
+                          )}
+
+                          <div className={`mt-2 flex items-center justify-end gap-1.5 text-[9px] ${
                             isIncoming ? 'text-slate-400' : 'text-emerald-100'
                           }`}>
                             <span>{new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>

@@ -28,12 +28,15 @@ export default function EnterpriseCallsPage() {
   const [isVideoOff, setIsVideoOff] = useState(false);
   const [isSharingScreen, setIsSharingScreen] = useState(false);
   const [toast, setToast] = useState(null);
+  const [localStream, setLocalStream] = useState(null);
+  const [remoteStream, setRemoteStream] = useState(null);
 
   // Media refs for WebRTC
   const localVideoRef = useRef(null);
   const remoteVideoRef = useRef(null);
   const remoteAudioRef = useRef(null);
   const streamRef = useRef(null);
+  const remoteStreamRef = useRef(null);
   const pcRef = useRef(null);
   const timerIntervalRef = useRef(null);
 
@@ -61,23 +64,28 @@ export default function EnterpriseCallsPage() {
           } catch(e) {}
         }
 
-        const mapped = memberList.map((c, i) => {
-          const cEmail = (c.email || c.username || '').toLowerCase();
-          const isCurrentUser = currentUserEmail && (cEmail === currentUserEmail || currentUserEmail.includes(cEmail));
-          const isOnline = c.is_online || isCurrentUser;
+        const mapped = memberList
+          .filter(c => {
+            const cEmail = (c.email || c.username || '').toLowerCase();
+            return !(currentUserEmail && (cEmail === currentUserEmail || currentUserEmail.includes(cEmail)));
+          })
+          .map((c, i) => {
+            const cEmail = (c.email || c.username || '').toLowerCase();
+            const isCurrentUser = currentUserEmail && (cEmail === currentUserEmail || currentUserEmail.includes(cEmail));
+            const isOnline = c.is_online || isCurrentUser;
 
-          return {
-            id: c.id || i + 1,
-            name: c.name || c.full_name || c.username || c.email || 'Team Member',
-            email: c.email || c.username || '',
-            role: c.role || c.designation || c.enterprise_role || 'Team Member',
-            dept: c.department || 'General',
-            status: c.status === 'SUSPENDED' ? 'offline' : (isOnline ? 'available' : 'offline'),
-            is_in_call: c.is_in_call || false,
-            color: ['blue', 'emerald', 'purple', 'teal', 'orange', 'indigo'][i % 6],
-            avatar: (c.name || c.username || c.email || 'TM').split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()
-          };
-        });
+            return {
+              id: c.id || i + 1,
+              name: c.name || c.full_name || c.username || c.email || 'Team Member',
+              email: c.email || c.username || '',
+              role: c.role || c.designation || c.enterprise_role || 'Team Member',
+              dept: c.department || 'General',
+              status: c.status === 'SUSPENDED' ? 'offline' : (isOnline ? 'available' : 'offline'),
+              is_in_call: c.is_in_call || false,
+              color: ['blue', 'emerald', 'purple', 'teal', 'orange', 'indigo'][i % 6],
+              avatar: (c.name || c.username || c.email || 'TM').split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()
+            };
+          });
 
         setContacts(mapped);
       }
@@ -108,8 +116,121 @@ export default function EnterpriseCallsPage() {
     fetchRealContacts();
     fetchRealCallHistory();
 
+    const answerIncomingCall = async (callData) => {
+      let localStream = null;
+      try {
+        const constraints = callData.is_video ? { audio: true, video: true } : { audio: true, video: false };
+        localStream = await navigator.mediaDevices.getUserMedia(constraints);
+        streamRef.current = localStream;
+        setLocalStream(localStream);
+      } catch (err) {
+        console.warn("Media access failed: ", err);
+        return;
+      }
+
+      try {
+        const pc = new RTCPeerConnection({
+          iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
+        });
+        pcRef.current = pc;
+
+        pc.oniceconnectionstatechange = () => {
+          console.log("--- WebRTC ICE Connection State (Receiver):", pc.iceConnectionState);
+        };
+        pc.onconnectionstatechange = () => {
+          console.log("--- WebRTC Connection State (Receiver):", pc.connectionState);
+        };
+        pc.onsignalingstatechange = () => {
+          console.log("--- WebRTC Signaling State (Receiver):", pc.signalingState);
+        };
+
+        localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
+
+        pc.ontrack = (event) => {
+          if (event.streams && event.streams[0]) {
+            remoteStreamRef.current = event.streams[0];
+            setRemoteStream(event.streams[0]);
+            if (callData.is_video && remoteVideoRef.current) {
+              remoteVideoRef.current.srcObject = event.streams[0];
+            } else if (remoteAudioRef.current) {
+              remoteAudioRef.current.srcObject = event.streams[0];
+            }
+          }
+        };
+
+        if (callData.sdp_offer) {
+          await pc.setRemoteDescription(new RTCSessionDescription(JSON.parse(callData.sdp_offer)));
+          const answer = await pc.createAnswer();
+          await pc.setLocalDescription(answer);
+
+          // Wait for ICE gathering to complete
+          await new Promise((resolve) => {
+            if (pc.iceGatheringState === 'complete') {
+              resolve();
+            } else {
+              const checkState = () => {
+                if (pc.iceGatheringState === 'complete') {
+                  pc.removeEventListener('icegatheringstatechange', checkState);
+                  resolve();
+                }
+              };
+              pc.addEventListener('icegatheringstatechange', checkState);
+              setTimeout(resolve, 2000);
+            }
+          });
+
+          const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+          await fetch(`${API_BASE_URL}/api/webrtc/call/signal/`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              ...(token ? { Authorization: `Bearer ${token}` } : {})
+            },
+            body: JSON.stringify({
+              session_id: callData.session_id,
+              type: 'answer',
+              payload: JSON.stringify(pc.localDescription)
+            })
+          });
+        }
+      } catch (e) {
+        console.warn("WebRTC answer negotiation error: ", e);
+      }
+    };
+
     const checkActiveConnectedCall = async () => {
       try {
+        // First: check if we just accepted an incoming call (team member side)
+        const pendingStr = typeof window !== 'undefined' ? localStorage.getItem('pending_incoming_call') : null;
+        if (pendingStr) {
+          localStorage.removeItem('pending_incoming_call');
+          try {
+            const pending = JSON.parse(pendingStr);
+            // Fetch the full session data from backend
+            const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+            const res2 = await fetch(`${API_BASE_URL}/api/webrtc/call/active-check`, {
+              headers: token ? { Authorization: `Bearer ${token}` } : {}
+            });
+            if (res2.ok) {
+              const data2 = await res2.json();
+              if (data2.active_call && data2.session_id === pending.sessionId) {
+                setActiveCall({
+                  name: pending.callerName || data2.caller || 'Caller',
+                  role: pending.role || 'Client',
+                  dept: pending.dept || 'UWOConnect',
+                  isVideo: pending.isVideo || data2.is_video,
+                  callState: 'CONNECTED',
+                  sessionId: pending.sessionId
+                });
+                if (data2.sdp_offer && !pcRef.current) {
+                  await answerIncomingCall(data2);
+                }
+                return; // Done — no need to run the standard check below
+              }
+            }
+          } catch(e) {}
+        }
+
         const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
         const res = await fetch(`${API_BASE_URL}/api/webrtc/call/active-check`, {
           headers: token ? { Authorization: `Bearer ${token}` } : {}
@@ -117,23 +238,18 @@ export default function EnterpriseCallsPage() {
         if (res.ok) {
           const data = await res.json();
           if (data.active_call) {
-            try {
-              const constraints = data.is_video ? { audio: true, video: true } : { audio: true, video: false };
-              const stream = await navigator.mediaDevices.getUserMedia(constraints);
-              streamRef.current = stream;
-              if (data.is_video && localVideoRef.current) {
-                localVideoRef.current.srcObject = stream;
-              }
-            } catch(err) {}
-
             setActiveCall({
-              name: data.caller || 'Caller',
-              role: 'Team Member',
+              name: data.is_caller ? (data.recipient || 'Team Member') : (data.caller || 'Caller'),
+              role: data.is_caller ? 'Team Member' : 'Caller',
               dept: 'UWOConnect',
               isVideo: data.is_video,
-              callState: 'CONNECTED',
+              callState: data.status || 'CONNECTED',
               sessionId: data.session_id
             });
+
+            if (!data.is_caller && data.sdp_offer && !pcRef.current) {
+              await answerIncomingCall(data);
+            }
           }
         }
       } catch(e) {}
@@ -147,6 +263,47 @@ export default function EnterpriseCallsPage() {
 
     return () => clearInterval(interval);
   }, []);
+
+  // Poll for active call status updates (ringing -> connected, or ended)
+  useEffect(() => {
+    if (!activeCall) return;
+
+    const pollCallStatus = async () => {
+      try {
+        const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+        const res = await fetch(`${API_BASE_URL}/api/webrtc/call/active-check`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {}
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.active_call && data.session_id === activeCall.sessionId) {
+            if (data.status && data.status !== activeCall.callState) {
+              setActiveCall(prev => prev ? { ...prev, callState: data.status } : null);
+            }
+
+            // Apply remote SDP answer on the caller end when connection is established
+            if (data.is_caller && data.status === 'CONNECTED' && pcRef.current && !pcRef.current.remoteDescription) {
+              if (data.sdp_answer) {
+                try {
+                  await pcRef.current.setRemoteDescription(new RTCSessionDescription(JSON.parse(data.sdp_answer)));
+                } catch(e) {
+                  console.warn("Failed to set remote answer: ", e);
+                }
+              }
+            }
+          } else {
+            // Call ended or not active anymore
+            setActiveCall(null);
+            showNotification('Call ended.');
+            fetchRealCallHistory();
+          }
+        }
+      } catch (e) {}
+    };
+
+    const statusInterval = setInterval(pollCallStatus, 2000);
+    return () => clearInterval(statusInterval);
+  }, [activeCall?.sessionId, activeCall?.callState]);
 
   // Timer for active call
   useEffect(() => {
@@ -184,10 +341,7 @@ export default function EnterpriseCallsPage() {
       const constraints = isVideo ? { audio: true, video: true } : { audio: true, video: false };
       localStream = await navigator.mediaDevices.getUserMedia(constraints);
       streamRef.current = localStream;
-
-      if (isVideo && localVideoRef.current) {
-        localVideoRef.current.srcObject = localStream;
-      }
+      setLocalStream(localStream);
     } catch (err) {
       const msg = isVideo
         ? "Camera & Microphone access is required to start a video call."
@@ -203,10 +357,22 @@ export default function EnterpriseCallsPage() {
         iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
       });
 
+      pc.oniceconnectionstatechange = () => {
+        console.log("--- WebRTC ICE Connection State (Caller):", pc.iceConnectionState);
+      };
+      pc.onconnectionstatechange = () => {
+        console.log("--- WebRTC Connection State (Caller):", pc.connectionState);
+      };
+      pc.onsignalingstatechange = () => {
+        console.log("--- WebRTC Signaling State (Caller):", pc.signalingState);
+      };
+
       localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
 
       pc.ontrack = (event) => {
         if (event.streams && event.streams[0]) {
+          remoteStreamRef.current = event.streams[0];
+          setRemoteStream(event.streams[0]);
           if (isVideo && remoteVideoRef.current) {
             remoteVideoRef.current.srcObject = event.streams[0];
           } else if (remoteAudioRef.current) {
@@ -217,7 +383,24 @@ export default function EnterpriseCallsPage() {
 
       const offer = await pc.createOffer();
       await pc.setLocalDescription(offer);
-      offerSdp = JSON.stringify(offer);
+
+      // Wait for ICE gathering to complete
+      await new Promise((resolve) => {
+        if (pc.iceGatheringState === 'complete') {
+          resolve();
+        } else {
+          const checkState = () => {
+            if (pc.iceGatheringState === 'complete') {
+              pc.removeEventListener('icegatheringstatechange', checkState);
+              resolve();
+            }
+          };
+          pc.addEventListener('icegatheringstatechange', checkState);
+          setTimeout(resolve, 2000);
+        }
+      });
+
+      offerSdp = JSON.stringify(pc.localDescription);
       pcRef.current = pc;
     } catch (e) {
       console.warn('WebRTC creation error:', e);
@@ -288,6 +471,9 @@ export default function EnterpriseCallsPage() {
       streamRef.current.getTracks().forEach(track => track.stop());
       streamRef.current = null;
     }
+    remoteStreamRef.current = null;
+    setLocalStream(null);
+    setRemoteStream(null);
     if (pcRef.current) {
       pcRef.current.close();
       pcRef.current = null;
@@ -398,7 +584,16 @@ export default function EnterpriseCallsPage() {
         )}
 
         {/* Audio Element for Remote Voice Calls */}
-        <audio ref={remoteAudioRef} autoPlay />
+        <audio
+          ref={el => {
+            remoteAudioRef.current = el;
+            if (el && remoteStream) {
+              el.srcObject = remoteStream;
+              el.play().catch(err => console.log("Audio play error:", err));
+            }
+          }}
+          autoPlay
+        />
 
         {/* TOP HEADER */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs">
@@ -735,7 +930,13 @@ export default function EnterpriseCallsPage() {
                   <div className="relative w-full h-full min-h-[360px] flex items-center justify-center bg-slate-900 rounded-2xl overflow-hidden border border-slate-800">
                     {/* Remote Video */}
                     <video
-                      ref={remoteVideoRef}
+                      ref={el => {
+                        remoteVideoRef.current = el;
+                        if (el && remoteStream) {
+                          el.srcObject = remoteStream;
+                          el.play().catch(err => console.log("Remote video play error:", err));
+                        }
+                      }}
                       autoPlay
                       playsInline
                       className="w-full h-full object-cover"
@@ -744,7 +945,13 @@ export default function EnterpriseCallsPage() {
                     {/* Local Video Preview */}
                     <div className="absolute bottom-4 right-4 w-36 h-24 rounded-xl bg-slate-950 border-2 border-emerald-500 overflow-hidden shadow-2xl">
                       <video
-                        ref={localVideoRef}
+                        ref={el => {
+                          localVideoRef.current = el;
+                          if (el && localStream) {
+                            el.srcObject = localStream;
+                            el.play().catch(err => console.log("Local video play error:", err));
+                          }
+                        }}
                         autoPlay
                         playsInline
                         muted
