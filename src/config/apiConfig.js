@@ -10,9 +10,15 @@
 const PRIVATE_IP_REGEX = /^(127\.|10\.|192\.168\.|172\.(1[6-9]|2[0-9]|3[01])\.)/;
 
 const getApiBaseUrl = () => {
+  const envUrl = process.env.NEXT_PUBLIC_API_URL;
   if (typeof window === 'undefined') {
     // Server-side render: use env var
-    return process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080';
+    return envUrl || 'http://127.0.0.1:8080';
+  }
+
+  // If an environment variable is explicitly set, use it everywhere
+  if (envUrl) {
+    return envUrl;
   }
 
   const host = window.location.hostname;
