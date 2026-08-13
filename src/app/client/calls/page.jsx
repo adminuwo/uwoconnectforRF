@@ -320,7 +320,11 @@ export default function EnterpriseCallsPage() {
         });
         if (res.ok) {
           const data = await res.json();
-          if (data.active_call && data.session_id === activeCall.sessionId) {
+          // If activeCall doesn't have a sessionId yet (just initiated), accept the server's session_id
+          if (data.active_call && (!activeCall.sessionId || data.session_id === activeCall.sessionId)) {
+            if (!activeCall.sessionId) {
+              setActiveCall(prev => prev ? { ...prev, sessionId: data.session_id } : null);
+            }
             if (data.status && data.status !== activeCall.callState) {
               setActiveCall(prev => prev ? { ...prev, callState: data.status } : null);
             }
@@ -336,10 +340,13 @@ export default function EnterpriseCallsPage() {
               }
             }
           } else {
-            // Call ended or not active anymore
-            setActiveCall(null);
-            showNotification('Call ended.');
-            fetchRealCallHistory();
+            // If we already had a sessionId, or it's been ringing for a while, it means the call ended.
+            // If we don't have a sessionId yet, it might just be taking a few seconds to register on the backend.
+            if (activeCall.sessionId || activeCall.callState !== 'RINGING') {
+              setActiveCall(null);
+              showNotification('Call ended.');
+              fetchRealCallHistory();
+            }
           }
         }
       } catch (e) {}
