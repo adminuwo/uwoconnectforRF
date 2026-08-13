@@ -10,35 +10,7 @@
 const PRIVATE_IP_REGEX = /^(127\.|10\.|192\.168\.|172\.(1[6-9]|2[0-9]|3[01])\.)/;
 
 const getApiBaseUrl = () => {
-  const envUrl = process.env.NEXT_PUBLIC_API_URL;
-  if (typeof window === 'undefined') {
-    // Server-side render: use env var
-    return envUrl || 'http://127.0.0.1:8080';
-  }
-
-  // If an environment variable is explicitly set, use it everywhere
-  if (envUrl) {
-    return envUrl;
-  }
-
-  const host = window.location.hostname;
-
-  // External / cloud domains → relative URL (Next.js proxies via rewrites)
-  if (!PRIVATE_IP_REGEX.test(host) && host !== 'localhost') {
-    if (host.includes('run.app') || host.includes('uwoconnectforrf') || host.includes('uwoconnectforf')) {
-      return 'https://uwoconnectforrb-743928421487.asia-south1.run.app';
-    }
-    // ngrok, vercel, or any external → empty string (relative URLs)
-    return '';
-  }
-
-  // Local / LAN
-  if (host === 'localhost' || host === '127.0.0.1') {
-    return 'http://127.0.0.1:8080';
-  }
-
-  // LAN IP (192.168.x.x accessed directly on phone via WiFi)
-  return `http://${host}:8080`;
+  return process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080';
 };
 
 export const API_BASE_URL = getApiBaseUrl();

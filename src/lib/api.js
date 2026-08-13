@@ -12,35 +12,7 @@
 const PRIVATE_IP_REGEX = /^(127\.|10\.|192\.168\.|172\.(1[6-9]|2[0-9]|3[01])\.)/;
 
 export function getApiBase() {
-  const envUrl = process.env.NEXT_PUBLIC_API_URL;
-  if (typeof window === 'undefined') {
-    // Server-side: use env var directly
-    return envUrl || 'http://127.0.0.1:8080';
-  }
-
-  // If an environment variable is explicitly set, use it everywhere
-  if (envUrl) {
-    return envUrl;
-  }
-
-  const host = window.location.hostname;
-
-  // External access (ngrok, vercel, run.app, etc.) - use relative URLs
-  if (!PRIVATE_IP_REGEX.test(host) && host !== 'localhost') {
-    if (host.includes('run.app') || host.includes('uwoconnect')) {
-      return 'https://uwoconnectforrb-743928421487.asia-south1.run.app';
-    }
-    // ngrok, vercel, or any other external domain - relative URL (Next.js proxies)
-    return '';
-  }
-
-  // LAN or localhost access - use backend on same host, port 8080
-  if (host === 'localhost' || host === '127.0.0.1') {
-    return 'http://127.0.0.1:8080';
-  }
-
-  // LAN IP (192.168.x.x, etc.)
-  return `http://${host}:8080`;
+  return process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080';
 }
 
 // Singleton — computed once per page load
