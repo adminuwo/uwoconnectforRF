@@ -14,7 +14,7 @@ import {
   Sparkles,
   Trash2
 } from 'lucide-react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import axios from 'axios';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { cn } from '@/lib/utils';
@@ -85,6 +85,13 @@ const GmailIcon = ({ size = 22, className }) => (
   </svg>
 );
 
+const RazorpayLogo = () => (
+  <svg width="22" height="22" viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M16 56L28.5 16H44L36.5 40H50L22 56H16Z" fill="#3395FF"/>
+    <path d="M36.5 40L44 16H58L50 40H36.5Z" fill="#072654"/>
+  </svg>
+);
+
 const CopyButton = ({ text }) => {
   const [copied, setCopied] = useState(false);
 
@@ -108,7 +115,9 @@ const CopyButton = ({ text }) => {
 };
 
 const ClientChannelsPage = () => {
+  const router = useRouter();
   const [client, setClient] = useState(null);
+  const [razorpayConn, setRazorpayConn] = useState(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -157,10 +166,23 @@ const ClientChannelsPage = () => {
       const user = JSON.parse(localStorage.getItem('user') || '{}');
       const clientId = typeof user.client === 'object' ? (user.client?.id || user.client?._id) : user.client;
       if (!clientId) return;
+
+      // 1. Fetch client channels info
       const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/clients/${clientId}/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setClient(res.data);
+
+      // 2. Fetch Razorpay connection status
+      try {
+        const rzpRes = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/razorpay/status`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setRazorpayConn(rzpRes.data);
+      } catch (rzpErr) {
+        console.warn('Failed to fetch Razorpay connection status', rzpErr);
+      }
+
       if (isManualRefresh) {
         setToast({ msg: 'Channels updated', type: 'success' });
         setTimeout(() => setToast(null), 3000);
@@ -181,12 +203,14 @@ const ClientChannelsPage = () => {
     script.src = 'https://connect.facebook.net/en_US/sdk.js';
     script.async = true;
     script.onload = () => {
-      window.FB && window.FB.init({
-        appId: process.env.NEXT_PUBLIC_META_APP_ID || '991147863536661',
-        version: 'v20.0',
-        cookie: true,
-        xfbml: false,
-      });
+      if (window.FB) {
+        window.FB.init({
+          appId: process.env.NEXT_PUBLIC_META_APP_ID || '991147863536661',
+          version: 'v20.0',
+          cookie: true,
+          xfbml: false,
+        });
+      }
     };
     document.body.appendChild(script);
   }, []);
@@ -336,6 +360,7 @@ const isOutlookConnected = Boolean(client?.outlook_enabled);
   const connectedCount = allChannels.filter(Boolean).length;
   const totalChannelsCount = allChannels.length;
 
+
   const [gmailDisconnecting, setGmailDisconnecting] = useState(false);
 
   const handleDisconnectGmail = async () => {
@@ -460,6 +485,7 @@ return (
         <div>
           <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Channels</h1>
           <p className="text-slate-400 text-xs mt-0.5 font-normal">Connect your social messaging accounts to automate replies.</p>
+
         </div>
 
         <div className="flex items-center gap-3">
@@ -579,7 +605,9 @@ return (
                     <h3 className="font-semibold text-slate-900 text-base">Facebook</h3>
                     <p className="text-[11px] text-slate-400">Messenger</p>
                   </div>
+
                 </div>
+              </div>
 
                 <div>
                   <div className={cn(
@@ -1268,123 +1296,658 @@ return (
                       <span>{isYouTubeConnected ? 'Connected' : 'Not Connected'}</span>
                     </div>
                   </div>
+
                 </div>
+              </div>
 
-                <p className="text-xs text-slate-500 leading-relaxed mb-5">
-                  Connect your YouTube channel to manage videos, schedule uploads, and sync content with your WhatsApp broadcast campaigns.
-                </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+                {/* --- ONEDRIVE CARD --- */}
+                <div className="bg-white rounded-2xl border border-slate-200/80 p-6 flex flex-col justify-between hover:border-slate-300 transition-all shadow-xs min-h-[380px]">
+                  <div>
+                    {/* Header */}
+                    <div className="flex flex-col gap-3.5 mb-5">
+                      <div className="flex items-center gap-3">
+                        <div className="w-11 h-11 rounded-2xl bg-[#0078D4]/10 text-[#0078D4] flex items-center justify-center border border-[#0078D4]/20 shrink-0">
+                          <OneDriveIcon size={22} />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-slate-900 text-base">OneDrive</h3>
+                          <p className="text-[11px] text-slate-400">Document Backup</p>
+                        </div>
+                      </div>
 
-                {/* Details */}
-                {isYouTubeConnected ? (
-                  <div className="space-y-4 py-4 border-t border-slate-100 text-xs">
-                    <div className="flex flex-col gap-1">
-                      <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Channel</span>
-                      <span className="font-medium text-slate-700 truncate">{client?.youtube_config?.channel_title || 'N/A'}</span>
-                    </div>
-                    <div className="flex flex-col gap-1">
-                      <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Email</span>
-                      <span className="font-medium text-slate-700 truncate">{client?.youtube_config?.email || 'N/A'}</span>
-                    </div>
-                    <div className="flex flex-col gap-1">
-                      <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Channel ID</span>
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium text-slate-700 truncate">{client?.youtube_config?.channel_id || 'N/A'}</span>
-                        <CopyButton text={client?.youtube_config?.channel_id} />
+                      <div>
+                        <div className={cn(
+                          "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium",
+                          isOneDriveConnected ? "bg-[#0078D4]/10 text-[#0078D4] border border-[#0078D4]/20" : "bg-slate-100 text-slate-400"
+                        )}>
+                          <span className={cn("w-1.5 h-1.5 rounded-full", isOneDriveConnected ? "bg-[#0078D4]" : "bg-slate-300")} />
+                          <span>{isOneDriveConnected ? 'Connected' : 'Offline'}</span>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ) : (
-                  <p className="text-xs text-slate-400 py-6 text-center">No YouTube channel connected.</p>
-                )}
-              </div>
 
-              {/* Action Button */}
-              <div className="mt-6 pt-4 border-t border-slate-100">
-                {isYouTubeConnected ? (
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => { window.location.href = '/client/youtube'; }}
-                      className="flex-1 py-2.5 px-3 rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer bg-[#FF0000] hover:bg-[#CC0000] text-white shadow-xs"
-                    >
-                      <Settings size={14} />
-                      <span>Dashboard</span>
-                    </button>
-                    <button
-                      onClick={async () => {
-                        setYoutubeLoading(true);
-                        try {
-                          const token = localStorage.getItem('token');
-                          const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/auth/youtube/connect`, {
-                            headers: { Authorization: `Bearer ${token}` }
-                          });
-                          if (res.data.url) window.location.href = res.data.url;
-                        } catch (err) {
-                          setToast({ msg: 'Failed to reconnect YouTube', type: 'error' });
-                          setTimeout(() => setToast(null), 4000);
-                        } finally { setYoutubeLoading(false); }
-                      }}
-                      disabled={youtubeLoading}
-                      className="py-2.5 px-3 rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200/60 disabled:opacity-50"
-                      title="Reconnect YouTube"
-                    >
-                      <RefreshCw size={14} className={cn("text-slate-400", youtubeLoading && "animate-spin")} />
-                      <span>Reconnect</span>
-                    </button>
-                  </div>
-                ) : (
-                  <button
-                    onClick={async () => {
-                      setYoutubeLoading(true);
-                      try {
-                        const token = localStorage.getItem('token');
-                        const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/auth/youtube/connect`, {
-                          headers: { Authorization: `Bearer ${token}` }
-                        });
-                        if (res.data.url) window.location.href = res.data.url;
-                      } catch (err) {
-                        setToast({ msg: 'Failed to connect YouTube', type: 'error' });
-                        setTimeout(() => setToast(null), 4000);
-                      } finally { setYoutubeLoading(false); }
-                    }}
-                    disabled={youtubeLoading}
-                    className="w-full py-2.5 px-4 rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer bg-[#FF0000] hover:bg-[#CC0000] text-white disabled:opacity-50"
-                  >
-                    {youtubeLoading ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />}
-                    <span>Connect YouTube</span>
-                  </button>
-                )}
-              </div>
-            </div>
+                    <p className="text-xs text-slate-500 leading-relaxed mb-5">
+                      Automatically back up all documents received across channels to your Microsoft OneDrive.
+                    </p>
 
-            {/* ── Microsoft Outlook Connector Card ── */}
-            <div
-              className="relative group p-5 bg-white border border-slate-200/80 rounded-2xl hover:border-blue-300 hover:shadow-md transition-all cursor-pointer"
-              onClick={() => setIsOutlookConfigOpen(true)}
-            >
-              <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-xl bg-blue-600/10 border border-blue-200/60 flex items-center justify-center text-blue-600 shrink-0">
-                  <OutlookIcon size={20} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <h3 className="text-sm font-black text-slate-900">Microsoft Outlook</h3>
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md border uppercase tracking-wider ${
-                      client?.outlook_enabled
-                        ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                        : 'bg-slate-100 text-slate-500 border-slate-200'
-                    }`}>
-                      {client?.outlook_enabled ? '● Connected' : '○ Not Connected'}
-                    </span>
+                    {/* Details */}
+                    {isOneDriveConnected ? (
+                      <div className="space-y-4 py-4 border-t border-slate-100 text-xs">
+                        <div className="flex flex-col gap-1">
+                          <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Account</span>
+                          <span className="font-medium text-slate-700 truncate">{client?.onedrive_config?.account_name || 'N/A'}</span>
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Drive Name</span>
+                          <span className="font-medium text-slate-700 truncate">{client?.onedrive_config?.drive_name || 'N/A'}</span>
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Last Sync</span>
+                          <span className="font-medium text-slate-700 truncate">
+                            {client?.onedrive_config?.last_sync_time
+                              ? new Date(client.onedrive_config.last_sync_time).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' })
+                              : 'Never'}
+                          </span>
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="text-xs text-slate-400 py-6 text-center">No OneDrive account connected.</p>
+                    )}
                   </div>
-                  <p className="text-xs text-slate-500 leading-relaxed">
-                    Automate emails, AI summaries, CRM lead capture & file attachments via Microsoft Graph API.
-                  </p>
-                  <div className="mt-3 flex items-center gap-1.5 flex-wrap">
-                    {['Mail.Read', 'Mail.Send', 'User.Read', 'Graph API'].map(tag => (
-                      <span key={tag} className="text-[10px] px-2 py-0.5 bg-blue-50 text-blue-700 border border-blue-100 rounded-md font-bold">{tag}</span>
-                    ))}
+
+                  {/* Action Button */}
+                  <div className="mt-6 pt-4 border-t border-slate-100">
+                    {isOneDriveConnected ? (
+                      <button
+                        onClick={() => setIsOneDriveConfigModalOpen(true)}
+                        className="w-full py-2.5 px-4 rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200/60"
+                      >
+                        <Settings size={14} className="text-slate-400" />
+                        <span>Configure</span>
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => setIsOneDriveConfigModalOpen(true)}
+                        className="w-full py-2.5 px-4 rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer bg-[#0078D4] hover:bg-[#106EBE] text-white"
+                      >
+                        <Plus size={14} />
+                        <span>Connect OneDrive</span>
+                      </button>
+                    )}
                   </div>
                 </div>
+
+                {/* --- GOOGLE CALENDAR CARD --- */}
+                <div className="bg-white rounded-2xl border border-slate-200/80 p-6 flex flex-col justify-between hover:border-slate-300 transition-all shadow-xs min-h-[380px]">
+                  <div>
+                    {/* Header */}
+                    <div className="flex flex-col gap-3.5 mb-5">
+                      <div className="flex items-center gap-3">
+                        <div className="w-11 h-11 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100/80 shrink-0">
+                          <GoogleCalendarIcon size={24} />
+                        </div>
+                        <div>
+                          <h3 className="font-bold text-slate-900 text-sm tracking-tight">Google Calendar</h3>
+                          <p className="text-[11px] text-slate-400 font-normal mt-0.5">Appointment & Event Sync</p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center">
+                        <div className={cn(
+                          "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium border transition-colors",
+                          isGoogleCalendarConnected
+                            ? "bg-emerald-50 text-emerald-700 border-emerald-200/70"
+                            : "bg-slate-50 text-slate-500 border-slate-200/60"
+                        )}>
+                          <span className={cn(
+                            "w-1.5 h-1.5 rounded-full shrink-0",
+                            isGoogleCalendarConnected ? "bg-emerald-500 animate-pulse" : "bg-slate-400"
+                          )} />
+                          <span>{isGoogleCalendarConnected ? 'Connected' : 'Not Connected'}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Body Info */}
+                    <p className="text-xs text-slate-500 mb-5 leading-relaxed font-normal">
+                      Sync lead appointments, customer meeting requests from WhatsApp/CRM into Google Calendar.
+                    </p>
+
+                    {isGoogleCalendarConnected ? (
+                      <div className="bg-slate-50/70 rounded-xl p-3.5 border border-slate-100 flex flex-col gap-2.5 text-xs">
+                        <div className="flex flex-col gap-1">
+                          <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Account</span>
+                          <span className="font-medium text-slate-700 truncate">{client?.google_calendar_config?.account_email || 'Connected'}</span>
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Timezone</span>
+                          <span className="font-medium text-slate-700 truncate">{client?.google_calendar_config?.timezone || 'Asia/Kolkata'}</span>
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Last Sync</span>
+                          <span className="font-medium text-slate-700 truncate">
+                            {client?.google_calendar_config?.last_sync_time
+                              ? new Date(client.google_calendar_config.last_sync_time).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' })
+                              : 'Never'}
+                          </span>
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="text-xs text-slate-400 py-6 text-center">No Google Calendar account connected.</p>
+                    )}
+                  </div>
+
+                  {/* Action Button */}
+                  <div className="mt-6 pt-4 border-t border-slate-100">
+                    {isGoogleCalendarConnected ? (
+                      <button
+                        onClick={() => setIsGoogleCalendarConfigModalOpen(true)}
+                        className="w-full py-2.5 px-4 rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200/60"
+                      >
+                        <Settings size={14} className="text-slate-400" />
+                        <span>Configure</span>
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => setIsGoogleCalendarConfigModalOpen(true)}
+                        className="w-full py-2.5 px-4 rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer bg-blue-600 hover:bg-blue-700 text-white shadow-xs"
+                      >
+                        <Plus size={14} />
+                        <span>Connect Google Calendar</span>
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* --- GOOGLE SHEETS CARD --- */}
+                <div className="bg-white rounded-2xl border border-slate-200/80 p-6 flex flex-col justify-between hover:border-slate-300 transition-all shadow-xs min-h-[380px]">
+                  <div>
+                    {/* Header */}
+                    <div className="flex flex-col gap-3.5 mb-5">
+                      <div className="flex items-center gap-3">
+                        <div className="w-11 h-11 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100/80 shrink-0">
+                          <GoogleSheetsIcon size={24} />
+                        </div>
+                        <div>
+                          <h3 className="font-bold text-slate-900 text-sm tracking-tight">Google Sheets</h3>
+                          <p className="text-[11px] text-slate-400 font-normal mt-0.5">Real-time Lead Export</p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center">
+                        <div className={cn(
+                          "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium border transition-colors",
+                          isGoogleSheetsConnected
+                            ? "bg-emerald-50 text-emerald-700 border-emerald-200/70"
+                            : "bg-slate-50 text-slate-500 border-slate-200/60"
+                        )}>
+                          <span className={cn(
+                            "w-1.5 h-1.5 rounded-full shrink-0",
+                            isGoogleSheetsConnected ? "bg-emerald-500 animate-pulse" : "bg-slate-400"
+                          )} />
+                          <span>{isGoogleSheetsConnected ? 'Connected' : 'Not Connected'}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Body Info */}
+                    <p className="text-xs text-slate-500 mb-5 leading-relaxed font-normal">
+                      Export incoming leads, WhatsApp messages, orders, and CRM contacts into live Google Spreadsheets.
+                    </p>
+
+                    {isGoogleSheetsConnected ? (
+                      <div className="bg-slate-50/70 rounded-xl p-3.5 border border-slate-100 flex flex-col gap-2.5 text-xs">
+                        <div className="flex flex-col gap-1">
+                          <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Account</span>
+                          <span className="font-medium text-slate-700 truncate">{client?.google_sheets_config?.account_email || 'Connected'}</span>
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Spreadsheet</span>
+                          <span className="font-medium text-emerald-700 truncate">{client?.google_sheets_config?.spreadsheet_name || 'UWOConnect Leads'}</span>
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Rows Exported</span>
+                          <span className="font-medium text-slate-700 truncate">{client?.google_sheets_config?.rows_synced || 0} Rows</span>
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="text-xs text-slate-400 py-6 text-center">No Google Sheets account connected.</p>
+                    )}
+                  </div>
+
+                  {/* Action Button */}
+                  <div className="mt-6 pt-4 border-t border-slate-100">
+                    {isGoogleSheetsConnected ? (
+                      <button
+                        onClick={() => setIsGoogleSheetsConfigModalOpen(true)}
+                        className="w-full py-2.5 px-4 rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200/60"
+                      >
+                        <Settings size={14} className="text-slate-400" />
+                        <span>Configure</span>
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => setIsGoogleSheetsConfigModalOpen(true)}
+                        className="w-full py-2.5 px-4 rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer bg-[#0F9D58] hover:bg-[#0B8043] text-white shadow-xs"
+                      >
+                        <Plus size={14} />
+                        <span>Connect Google Sheets</span>
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* --- GOOGLE DOCS CARD --- */}
+                <div className="bg-white rounded-2xl border border-slate-200/80 p-6 flex flex-col justify-between hover:border-slate-300 transition-all shadow-xs min-h-[380px]">
+                  <div>
+                    {/* Header */}
+                    <div className="flex flex-col gap-3.5 mb-5">
+                      <div className="flex items-center gap-3">
+                        <div className="w-11 h-11 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100/80 shrink-0">
+                          <GoogleDocsIcon size={24} />
+                        </div>
+                        <div>
+                          <h3 className="font-bold text-slate-900 text-sm tracking-tight">Google Docs</h3>
+                          <p className="text-[11px] text-slate-400 font-normal mt-0.5">Automated Contracts & Briefs</p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center">
+                        <div className={cn(
+                          "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium border transition-colors",
+                          isGoogleDocsConnected
+                            ? "bg-[#4285F4]/10 text-[#4285F4] border-[#4285F4]/20"
+                            : "bg-slate-50 text-slate-500 border-slate-200/60"
+                        )}>
+                          <span className={cn(
+                            "w-1.5 h-1.5 rounded-full shrink-0",
+                            isGoogleDocsConnected ? "bg-[#4285F4] animate-pulse" : "bg-slate-400"
+                          )} />
+                          <span>{isGoogleDocsConnected ? 'Connected' : 'Not Connected'}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Body Info */}
+                    <p className="text-xs text-slate-500 mb-5 leading-relaxed font-normal">
+                      Auto-generate customer contracts, order receipts, proposals, and lead summary briefs in Google Docs.
+                    </p>
+
+                    {isGoogleDocsConnected ? (
+                      <div className="bg-slate-50/70 rounded-xl p-3.5 border border-slate-100 flex flex-col gap-2.5 text-xs">
+                        <div className="flex flex-col gap-1">
+                          <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Account</span>
+                          <span className="font-medium text-slate-700 truncate">{client?.google_docs_config?.account_email || 'Connected'}</span>
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Default Document</span>
+                          <span className="font-medium text-blue-700 truncate">{client?.google_docs_config?.default_doc_name || 'UWOConnect Documents'}</span>
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Documents Created</span>
+                          <span className="font-medium text-slate-700 truncate">{client?.google_docs_config?.docs_created_count || 0} Documents</span>
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="text-xs text-slate-400 py-6 text-center">No Google Docs account connected.</p>
+                    )}
+                  </div>
+
+                  {/* Action Button */}
+                  <div className="mt-6 pt-4 border-t border-slate-100">
+                    {isGoogleDocsConnected ? (
+                      <button
+                        onClick={() => setIsGoogleDocsConfigModalOpen(true)}
+                        className="w-full py-2.5 px-4 rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200/60"
+                      >
+                        <Settings size={14} className="text-slate-400" />
+                        <span>Configure</span>
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => setIsGoogleDocsConfigModalOpen(true)}
+                        className="w-full py-2.5 px-4 rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer bg-[#4285F4] hover:bg-[#3367D6] text-white shadow-xs"
+                      >
+                        <Plus size={14} />
+                        <span>Connect Google Docs</span>
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* --- GOOGLE SLIDES CARD --- */}
+                <div className="bg-white rounded-2xl border border-slate-200/80 p-6 flex flex-col justify-between hover:border-slate-300 transition-all shadow-xs min-h-[380px]">
+                  <div>
+                    {/* Header */}
+                    <div className="flex flex-col gap-3.5 mb-5">
+                      <div className="flex items-center gap-3">
+                        <div className="w-11 h-11 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center border border-amber-100/80 shrink-0">
+                          <GoogleSlidesIcon size={24} />
+                        </div>
+                        <div>
+                          <h3 className="font-bold text-slate-900 text-sm tracking-tight">Google Slides</h3>
+                          <p className="text-[11px] text-slate-400 font-normal mt-0.5">Automated Pitch Decks & Slides</p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center">
+                        <div className={cn(
+                          "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium border transition-colors",
+                          isGoogleSlidesConnected
+                            ? "bg-[#F4B400]/10 text-[#F4B400] border-[#F4B400]/20"
+                            : "bg-slate-50 text-slate-500 border-slate-200/60"
+                        )}>
+                          <span className={cn(
+                            "w-1.5 h-1.5 rounded-full shrink-0",
+                            isGoogleSlidesConnected ? "bg-[#F4B400] animate-pulse" : "bg-slate-400"
+                          )} />
+                          <span>{isGoogleSlidesConnected ? 'Connected' : 'Not Connected'}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Body Info */}
+                    <p className="text-xs text-slate-500 mb-5 leading-relaxed font-normal">
+                      Auto-generate sales pitch decks, product catalog showcases, and client presentation decks in Google Slides.
+                    </p>
+
+                    {isGoogleSlidesConnected ? (
+                      <div className="bg-slate-50/70 rounded-xl p-3.5 border border-slate-100 flex flex-col gap-2.5 text-xs">
+                        <div className="flex flex-col gap-1">
+                          <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Account</span>
+                          <span className="font-medium text-slate-700 truncate">{client?.google_slides_config?.account_email || 'Connected'}</span>
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Default Presentation</span>
+                          <span className="font-medium text-amber-700 truncate">{client?.google_slides_config?.default_presentation_name || 'UWOConnect Presentation'}</span>
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Slide Decks Created</span>
+                          <span className="font-medium text-slate-700 truncate">{client?.google_slides_config?.presentations_created_count || 0} Decks</span>
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="text-xs text-slate-400 py-6 text-center">No Google Slides account connected.</p>
+                    )}
+                  </div>
+
+                  {/* Action Button */}
+                  <div className="mt-6 pt-4 border-t border-slate-100">
+                    {isGoogleSlidesConnected ? (
+                      <button
+                        onClick={() => setIsGoogleSlidesConfigModalOpen(true)}
+                        className="w-full py-2.5 px-4 rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200/60"
+                      >
+                        <Settings size={14} className="text-slate-400" />
+                        <span>Configure</span>
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => setIsGoogleSlidesConfigModalOpen(true)}
+                        className="w-full py-2.5 px-4 rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer bg-[#F4B400] hover:bg-[#E3A300] text-white shadow-xs"
+                      >
+                        <Plus size={14} />
+                        <span>Connect Google Slides</span>
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* --- GOOGLE NEWS CARD --- */}
+                <div className="bg-white rounded-2xl border border-slate-200/80 p-6 flex flex-col justify-between hover:border-slate-300 transition-all shadow-xs min-h-[380px]">
+                  <div>
+                    {/* Header */}
+                    <div className="flex flex-col gap-3.5 mb-5">
+                      <div className="flex items-center gap-3">
+                        <div className="w-11 h-11 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100/80 shrink-0">
+                          <GoogleNewsIcon size={24} />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-slate-900 text-base">Google News</h3>
+                          <p className="text-[11px] text-slate-400">Live RSS & AI Summarizer</p>
+                        </div>
+                      </div>
+
+                      <div>
+                        <div className={cn(
+                          "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium",
+                          client?.google_news_enabled ? "bg-blue-50 text-blue-700 border border-blue-200/50" : "bg-slate-100 text-slate-400"
+                        )}>
+                          <span className={cn("w-1.5 h-1.5 rounded-full", client?.google_news_enabled ? "bg-blue-600 animate-pulse" : "bg-slate-300")} />
+                          <span>{client?.google_news_enabled ? 'Connected' : 'Not Connected'}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <p className="text-xs text-slate-500 leading-relaxed mb-5">
+                      Monitor live Google News feeds by topic or keyword, generate AI executive summaries, and broadcast news digests to WhatsApp contacts.
+                    </p>
+
+                    {client?.google_news_enabled ? (
+                      <div className="bg-slate-50/70 rounded-xl p-3.5 border border-slate-100 flex flex-col gap-2.5 text-xs">
+                        <div className="flex flex-col gap-1">
+                          <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Default Topic</span>
+                          <span className="font-medium text-blue-700 uppercase font-bold">{client?.google_news_config?.default_topic || 'TECHNOLOGY'}</span>
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Tracked Keywords</span>
+                          <span className="font-medium text-slate-700 truncate">{Array.isArray(client?.google_news_config?.keywords) ? client?.google_news_config?.keywords.join(', ') : 'AI, Tech, Business'}</span>
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="text-xs text-slate-400 py-6 text-center">Google News feed monitoring disabled.</p>
+                    )}
+                  </div>
+
+                  {/* Action Button */}
+                  <div className="mt-6 pt-4 border-t border-slate-100">
+                    {client?.google_news_enabled ? (
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => router.push('/client/google-news')}
+                          className="flex-1 py-2.5 px-3 rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer bg-blue-600 hover:bg-blue-700 text-white shadow-xs"
+                        >
+                          <Settings size={14} />
+                          <span>Workspace</span>
+                        </button>
+                        <button
+                          onClick={() => setIsGoogleNewsConfigModalOpen(true)}
+                          className="py-2.5 px-3 rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200/60"
+                          title="Configure Google News settings"
+                        >
+                          <Settings size={14} />
+                          <span>Configure</span>
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => setIsGoogleNewsConfigModalOpen(true)}
+                        className="w-full py-2.5 px-4 rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer bg-[#4285F4] hover:bg-[#3367D6] text-white shadow-xs"
+                      >
+                        <Plus size={14} />
+                        <span>Connect Google News</span>
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* --- YOUTUBE CARD --- */}
+                <div className="bg-white rounded-2xl border border-slate-200/80 p-6 flex flex-col justify-between hover:border-slate-300 transition-all shadow-xs min-h-[380px]">
+                  <div>
+                    {/* Header */}
+                    <div className="flex flex-col gap-3.5 mb-5">
+                      <div className="flex items-center gap-3">
+                        <div className="w-11 h-11 rounded-2xl bg-red-50 text-[#FF0000] flex items-center justify-center border border-red-100/80 shrink-0">
+                          <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                          </svg>
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-slate-900 text-base">YouTube</h3>
+                          <p className="text-[11px] text-slate-400">Video & Channel Management</p>
+                        </div>
+                      </div>
+
+                      <div>
+                        <div className={cn(
+                          "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium",
+                          isYouTubeConnected ? "bg-red-50 text-red-700 border border-red-200/50" : "bg-slate-100 text-slate-400"
+                        )}>
+                          <span className={cn("w-1.5 h-1.5 rounded-full", isYouTubeConnected ? "bg-red-500" : "bg-slate-300")} />
+                          <span>{isYouTubeConnected ? 'Connected' : 'Not Connected'}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <p className="text-xs text-slate-500 leading-relaxed mb-5">
+                      Connect your YouTube channel to manage videos, schedule uploads, and sync content with your WhatsApp broadcast campaigns.
+                    </p>
+
+                    {/* Details */}
+                    {isYouTubeConnected ? (
+                      <div className="space-y-4 py-4 border-t border-slate-100 text-xs">
+                        <div className="flex flex-col gap-1">
+                          <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Channel</span>
+                          <span className="font-medium text-slate-700 truncate">{client?.youtube_config?.channel_title || 'N/A'}</span>
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Email</span>
+                          <span className="font-medium text-slate-700 truncate">{client?.youtube_config?.email || 'N/A'}</span>
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Channel ID</span>
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium text-slate-700 truncate">{client?.youtube_config?.channel_id || 'N/A'}</span>
+                            <CopyButton text={client?.youtube_config?.channel_id} />
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="text-xs text-slate-400 py-6 text-center">No YouTube channel connected.</p>
+                    )}
+                  </div>
+
+                  {/* Action Button */}
+                  <div className="mt-6 pt-4 border-t border-slate-100">
+                    {isYouTubeConnected ? (
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => { window.location.href = '/client/youtube'; }}
+                          className="flex-1 py-2.5 px-3 rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer bg-[#FF0000] hover:bg-[#CC0000] text-white shadow-xs"
+                        >
+                          <Settings size={14} />
+                          <span>Dashboard</span>
+                        </button>
+                        <button
+                          onClick={async () => {
+                            setYoutubeLoading(true);
+                            try {
+                              const token = localStorage.getItem('token');
+                              const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/auth/youtube/connect`, {
+                                headers: { Authorization: `Bearer ${token}` }
+                              });
+                              if (res.data.url) window.location.href = res.data.url;
+                            } catch (err) {
+                              setToast({ msg: 'Failed to reconnect YouTube', type: 'error' });
+                              setTimeout(() => setToast(null), 4000);
+                            } finally { setYoutubeLoading(false); }
+                          }}
+                          disabled={youtubeLoading}
+                          className="py-2.5 px-3 rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200/60 disabled:opacity-50"
+                          title="Reconnect YouTube"
+                        >
+                          <RefreshCw size={14} className={cn("text-slate-400", youtubeLoading && "animate-spin")} />
+                          <span>Reconnect</span>
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={async () => {
+                          setYoutubeLoading(true);
+                          try {
+                            const token = localStorage.getItem('token');
+                            const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/auth/youtube/connect`, {
+                              headers: { Authorization: `Bearer ${token}` }
+                            });
+                            if (res.data.url) window.location.href = res.data.url;
+                          } catch (err) {
+                            setToast({ msg: 'Failed to connect YouTube', type: 'error' });
+                            setTimeout(() => setToast(null), 4000);
+                          } finally { setYoutubeLoading(false); }
+                        }}
+                        disabled={youtubeLoading}
+                        className="w-full py-2.5 px-4 rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer bg-[#FF0000] hover:bg-[#CC0000] text-white disabled:opacity-50"
+                      >
+                        {youtubeLoading ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />}
+                        <span>Connect YouTube</span>
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* --- RAZORPAY CARD --- */}
+                <div className="bg-white rounded-2xl border border-slate-200/80 p-6 flex flex-col justify-between hover:border-slate-300 transition-all shadow-xs min-h-[380px]">
+                  <div>
+                    {/* Header */}
+                    <div className="flex flex-col gap-3.5 mb-5">
+                      <div className="flex items-center gap-3">
+                        <div className="w-11 h-11 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100/80 shrink-0">
+                          <RazorpayLogo />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-slate-900 text-base">Razorpay</h3>
+                          <p className="text-[11px] text-slate-400">Payment Gateway</p>
+                        </div>
+                      </div>
+
+                      <div>
+                        <div className={cn(
+                          "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium",
+                          isRazorpayConnected ? "bg-emerald-50 text-emerald-700 border border-emerald-200/50" : "bg-slate-100 text-slate-400"
+                        )}>
+                          <span className={cn("w-1.5 h-1.5 rounded-full", isRazorpayConnected ? "bg-emerald-500" : "bg-slate-300")} />
+                          <span>{isRazorpayConnected ? 'Connected' : 'Offline'}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <p className="text-xs text-slate-500 leading-relaxed mb-5">
+                      Connect your Razorpay account to accept online payments for your catalog products.
+                    </p>
+
+                    {/* Details */}
+                    {isRazorpayConnected ? (
+                      <div className="space-y-4 py-4 border-t border-slate-100 text-xs">
+                        <div className="flex flex-col gap-1">
+                          <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Account ID</span>
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium text-slate-700 truncate">{razorpayConn?.razorpay_account_id || razorpayConn?.linked_key_id || 'Connected'}</span>
+                            <CopyButton text={razorpayConn?.razorpay_account_id || razorpayConn?.linked_key_id} />
+                          </div>
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Gateway Mode</span>
+                          <span className="font-bold text-slate-700 uppercase">{razorpayConn?.mode || 'TEST'} MODE</span>
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="text-xs text-slate-400 py-6 text-center">No Razorpay account connected.</p>
+                    )}
+                  </div>
+
+                  {/* Action Button */}
+                  <div className="mt-6 pt-4 border-t border-slate-100">
+                    <button
+                      onClick={() => router.push('/client/payments')}
+                      className="w-full py-2.5 px-4 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer border border-slate-200/60"
+                    >
+                      <Settings size={14} className="text-slate-400" />
+                      <span>Configure Payments</span>
+                    </button>
+                  </div>
+                </div>
+
               </div>
             </div>
 
@@ -1398,6 +1961,7 @@ return (
         client={client}
         onSaved={handleWhatsAppSaved}
       />
+
 
       {/* Facebook Configuration Modal */}
       <FacebookConfigModal

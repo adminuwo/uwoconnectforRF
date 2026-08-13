@@ -13,6 +13,7 @@ import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import FeatureDetailDrawer from '@/components/dashboard/FeatureDetailDrawer';
 import LearningCenterModal from '@/components/guides/LearningCenterModal';
 import { cn } from '@/lib/utils';
+import { API_BASE_URL } from '@/config/apiConfig';
 
 const ClientOverview = () => {
   const router = useRouter();
@@ -134,7 +135,7 @@ const ClientOverview = () => {
 
     try {
       const res = await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/google-news/send-alert`,
+        `${API_BASE_URL}/api/google-news/send-alert`,
         {
           title: article.title,
           snippet: article.snippet,

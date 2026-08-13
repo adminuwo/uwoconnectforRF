@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
 import { 
@@ -80,6 +80,34 @@ export default function CatalogPage() {
   const [newSpecKey, setNewSpecKey] = useState('');
   const [newSpecVal, setNewSpecVal] = useState('');
   const [copiedId, setCopiedId] = useState(null);
+  const [copiedCheckoutId, setCopiedCheckoutId] = useState(null);
+
+  // Razorpay connection status (for showing checkout link buttons)
+  const [razorpayConnected, setRazorpayConnected] = useState(false);
+
+  const fetchRazorpayStatus = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/razorpay/status`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setRazorpayConnected(res.data?.connected === true);
+    } catch (e) {
+      setRazorpayConnected(false);
+    }
+  };
+
+  const getCheckoutUrl = (productId) => {
+    const frontendBase = typeof window !== 'undefined' ? window.location.origin : '';
+    return `${frontendBase}/checkout/${productId}`;
+  };
+
+  const handleCopyCheckoutLink = (product) => {
+    const url = getCheckoutUrl(product.id);
+    navigator.clipboard.writeText(url);
+    setCopiedCheckoutId(product.id);
+    setTimeout(() => setCopiedCheckoutId(null), 2500);
+  };
 
   const fetchProducts = async () => {
     try {
@@ -111,6 +139,7 @@ export default function CatalogPage() {
   useEffect(() => {
     fetchProducts();
     fetchAnalytics();
+    fetchRazorpayStatus();
   }, []);
 
   const openAddModal = () => {
@@ -743,6 +772,36 @@ export default function CatalogPage() {
                               title="Share to WhatsApp"
                             >
                               <Share2 size={14} />
+                            </button>
+                            {/* Checkout Link Button */}
+                            <button
+                              onClick={() => {
+                                if (razorpayConnected) {
+                                  handleCopyCheckoutLink(product);
+                                } else {
+                                  if (typeof window !== 'undefined') {
+                                    window.location.href = '/client/payments';
+                                  }
+                                }
+                              }}
+                              className={`p-2 rounded-xl text-xs transition-colors cursor-pointer ${
+                                razorpayConnected
+                                  ? copiedCheckoutId === product.id
+                                    ? 'bg-blue-600 text-white'
+                                    : 'bg-blue-50 text-blue-600 hover:bg-blue-100'
+                                  : 'bg-slate-50 text-slate-400 hover:bg-amber-50 hover:text-amber-600'
+                              }`}
+                              title={
+                                razorpayConnected
+                                  ? copiedCheckoutId === product.id
+                                    ? 'Checkout link copied!'
+                                    : 'Copy Razorpay Checkout Link'
+                                  : 'Connect Razorpay to get checkout link'
+                              }
+                            >
+                              {copiedCheckoutId === product.id
+                                ? <Check size={14} />
+                                : <CreditCard size={14} />}
                             </button>
                           </div>
 

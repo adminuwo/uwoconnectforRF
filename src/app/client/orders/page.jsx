@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React, { useState, useEffect } from 'react';
 import { Receipt, Loader2, DollarSign, User, Calendar, Tag, ShieldAlert } from 'lucide-react';
@@ -73,6 +73,7 @@ export default function OrdersPage() {
                     <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Total Amount</th>
                     <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</th>
                     <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Date & Time</th>
+                    <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Invoice</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -106,6 +107,15 @@ export default function OrdersPage() {
                       </td>
                       <td className="px-6 py-5 text-xs text-slate-400">
                         {new Date(order.created_at).toLocaleDateString()} at {new Date(order.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                      </td>
+                      <td className="px-6 py-5 text-right">
+                        <a
+                          href={`/client/invoices?search=${order.id}`}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 text-xs font-bold transition-all shadow-2xs no-underline"
+                        >
+                          <Receipt className="w-3.5 h-3.5" />
+                          <span>Invoice PDF</span>
+                        </a>
                       </td>
                     </tr>
                   ))}

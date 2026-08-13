@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
@@ -7,7 +7,7 @@ import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import axios from 'axios';
 import { useTour } from '@/context/TourContext';
 import PaymentModal from '@/components/billing/PaymentModal';
-
+import { API_BASE_URL } from '@/config/apiConfig';
 import LearningCenterModal from '@/components/guides/LearningCenterModal';
 
 const ClientSettingsPage = () => {
@@ -53,8 +53,13 @@ const ClientSettingsPage = () => {
       
       setEditData({
         name: res.data.user.name,
+        business_name: res.data.client.business_name || '',
         phone_number: res.data.client.phone_number || '',
         address: res.data.client.address || '',
+        company_logo_url: res.data.client.company_logo_url || '',
+        tax_id_gstin: res.data.client.tax_id_gstin || '',
+        invoice_prefix: res.data.client.invoice_prefix || 'INV',
+        website: res.data.client.website || '',
         whatsapp_access_token: res.data.client.whatsapp_access_token || '',
         whatsapp_phone_number_id: res.data.client.whatsapp_phone_number_id || '',
         whatsapp_waba_id: res.data.client.whatsapp_waba_id || '',
@@ -71,6 +76,38 @@ const ClientSettingsPage = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleLogoUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
+    if (!allowedTypes.includes(file.type.toLowerCase())) {
+      alert("Invalid image file type. Please upload PNG, JPG, or WEBP.");
+      return;
+    }
+
+    if (file.size > 3 * 1024 * 1024) {
+      alert("File size exceeds 3MB. Please select a smaller logo file.");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (uploadEvent) => {
+      setEditData((prev) => ({
+        ...prev,
+        company_logo_url: uploadEvent.target.result
+      }));
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemoveLogo = () => {
+    setEditData((prev) => ({
+      ...prev,
+      company_logo_url: ''
+    }));
   };
 
   const fetchPaymentHistory = async () => {
@@ -132,7 +169,7 @@ const ClientSettingsPage = () => {
         settings: updatedSettings
       };
 
-      await axios.patch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/profile`, payload, {
+      await axios.patch(`${API_BASE_URL}/api/profile`, payload, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setIsEditing(false);
@@ -191,9 +228,105 @@ const ClientSettingsPage = () => {
         </div>
 
         <div className="space-y-10">
+          {/* Company Branding & Logo System */}
+          <div className="space-y-1">
+            <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-4 ml-1">Company Branding & Document Settings</h3>
+            <div className="bg-white border border-slate-100 rounded-3xl p-6 space-y-6">
+              
+              {/* Logo Upload & Preview */}
+              <div className="flex flex-col sm:flex-row items-center gap-6 border-b border-slate-100 pb-6">
+                <div className="w-24 h-24 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-center overflow-hidden p-2 shrink-0">
+                  {editData.company_logo_url ? (
+                    <img src={editData.company_logo_url} alt="Company Logo" className="w-full h-full object-contain" />
+                  ) : (
+                    <div className="text-center text-slate-400">
+                      <Paintbrush size={24} className="mx-auto mb-1 text-slate-300" />
+                      <span className="text-[9px] font-bold uppercase tracking-wider block">No Logo</span>
+                    </div>
+                  )}
+                </div>
+
+                <div className="space-y-2 flex-1 text-center sm:text-left">
+                  <h4 className="text-sm font-bold text-slate-900">Company Logo</h4>
+                  <p className="text-xs text-slate-500 font-medium leading-relaxed">
+                    Appears top-left on all Proposals, Quotations, and Invoices (web & PDF). Supported: PNG, JPG, WEBP (Max 3MB).
+                  </p>
+                  
+                  {isEditing && (
+                    <div className="flex items-center justify-center sm:justify-start gap-3 pt-1">
+                      <label className="px-4 py-2 bg-slate-900 hover:bg-black text-white rounded-xl text-xs font-bold cursor-pointer transition">
+                        Upload Logo
+                        <input type="file" accept="image/png, image/jpeg, image/jpg, image/webp" onChange={handleLogoUpload} className="hidden" />
+                      </label>
+                      {editData.company_logo_url && (
+                        <button
+                          type="button"
+                          onClick={handleRemoveLogo}
+                          className="px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl text-xs font-bold transition cursor-pointer"
+                        >
+                          Remove Logo
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Company Meta Fields */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Business Name</label>
+                  {isEditing ? (
+                    <input 
+                      value={editData.business_name} 
+                      onChange={e => setEditData({...editData, business_name: e.target.value})} 
+                      className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-4 py-3 outline-none focus:border-emerald-500 font-semibold text-xs" 
+                    />
+                  ) : (
+                    <div className="bg-slate-50 rounded-2xl px-4 py-3 font-semibold text-slate-900 text-xs">
+                      {client?.business_name || 'Not Configured'}
+                    </div>
+                  )}
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">GSTIN / Tax ID</label>
+                  {isEditing ? (
+                    <input 
+                      value={editData.tax_id_gstin} 
+                      onChange={e => setEditData({...editData, tax_id_gstin: e.target.value})} 
+                      className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-4 py-3 outline-none focus:border-emerald-500 font-semibold text-xs" 
+                      placeholder="e.g. 07AAAAA0000A1Z5"
+                    />
+                  ) : (
+                    <div className="bg-slate-50 rounded-2xl px-4 py-3 font-semibold text-slate-900 text-xs">
+                      {client?.tax_id_gstin || 'Not Configured'}
+                    </div>
+                  )}
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Document Prefix</label>
+                  {isEditing ? (
+                    <input 
+                      value={editData.invoice_prefix} 
+                      onChange={e => setEditData({...editData, invoice_prefix: e.target.value})} 
+                      className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-4 py-3 outline-none focus:border-emerald-500 font-semibold text-xs" 
+                      placeholder="e.g. INV"
+                    />
+                  ) : (
+                    <div className="bg-slate-50 rounded-2xl px-4 py-3 font-semibold text-slate-900 text-xs">
+                      {client?.invoice_prefix || 'INV'}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* Personal & Business Information */}
           <div className="space-y-1">
-            <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-4 ml-1">Personal & Business Details</h3>
+            <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-4 ml-1">Personal & Contact Details</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="flex items-center gap-4 p-5 bg-white border border-slate-100 rounded-3xl transition-all hover:border-emerald-100 group">
                 <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center transition-colors group-hover:bg-emerald-600 group-hover:text-white shrink-0">

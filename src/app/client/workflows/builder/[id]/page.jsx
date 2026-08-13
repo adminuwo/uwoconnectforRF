@@ -24,6 +24,7 @@ import {
 import axios from 'axios';
 import { useParams, useRouter } from 'next/navigation';
 import { templateData } from '../../templateData';
+import { API_BASE_URL } from '@/config/apiConfig';
 
 
 const cn = (...classes) => classes.filter(Boolean).join(' ');
@@ -358,7 +359,7 @@ const WorkflowBuilderInner = () => {
         }
       } else {
         const token = localStorage.getItem('token');
-        const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/workflows/${id}/`, { headers: { Authorization: `Bearer ${token}` } });
+        const res = await axios.get(`${API_BASE_URL}/api/workflows/${id}/`, { headers: { Authorization: `Bearer ${token}` } });
         setWorkflow(res.data);
         setDeploymentChannels(res.data.channels || ['WHATSAPP']);
         let steps = res.data.steps;
@@ -403,7 +404,7 @@ const WorkflowBuilderInner = () => {
 
         if (isShared) {
           const res = await axios.post(
-            `${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/workflows/`, 
+            `${API_BASE_URL}/api/workflows/`, 
             { 
               name: workflow.name,
               category: category,
@@ -417,12 +418,13 @@ const WorkflowBuilderInner = () => {
             }, 
             { headers: { Authorization: `Bearer ${token}` } }
           );
+          alert('Workflow created successfully!');
           router.push(`/client/workflows/builder/${res.data.id}`);
         } else {
           let firstSavedId = null;
           for (const channel of deploymentChannels) {
             const res = await axios.post(
-              `${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/workflows/`, 
+              `${API_BASE_URL}/api/workflows/`, 
               { 
                 name: deploymentChannels.length > 1 ? `${workflow.name} (${channel})` : workflow.name,
                 category: category,
@@ -438,6 +440,7 @@ const WorkflowBuilderInner = () => {
             );
             if (!firstSavedId) firstSavedId = res.data.id;
           }
+          alert('Workflow created successfully!');
           if (firstSavedId) {
             router.push(`/client/workflows/builder/${firstSavedId}`);
           } else {
@@ -446,8 +449,9 @@ const WorkflowBuilderInner = () => {
         }
       } else {
         await axios.patch(
-          `${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/workflows/${id}/`, 
+          `${API_BASE_URL}/api/workflows/${id}/`, 
           { 
+            name: workflow?.name,
             steps: { nodes, edges },
             trigger_value: trigger_value,
             channels: deploymentChannels,
@@ -455,8 +459,14 @@ const WorkflowBuilderInner = () => {
           }, 
           { headers: { Authorization: `Bearer ${token}` } }
         );
+        alert('Workflow saved successfully!');
       }
-    } catch (err) { alert('Save failed'); } finally { setIsSaving(false); }
+    } catch (err) {
+      console.error('Workflow save error:', err);
+      alert('Save failed: ' + (err.response?.data?.detail || JSON.stringify(err.response?.data) || err.message));
+    } finally { 
+      setIsSaving(false); 
+    }
   };
 
   const onDragStart = (event, nodeType) => {

@@ -15,6 +15,7 @@ import { useParams, useRouter } from 'next/navigation';
 import axios from 'axios';
 import { Save, ArrowLeft, Loader2 } from 'lucide-react';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
+import { API_BASE_URL } from '@/config/apiConfig';
 
 import Sidebar from '@/components/builder/Sidebar';
 import PropertiesPanel from '@/components/builder/PropertiesPanel';
@@ -158,18 +159,20 @@ export default function BuilderPage() {
       };
 
       if (isNew) {
-        const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/workflows/`, payload, {
+        const res = await axios.post(`${API_BASE_URL}/api/workflows/`, payload, {
           headers: { Authorization: `Bearer ${token}` }
         });
+        alert('Workflow saved successfully!');
         router.replace(`/client/automations/builder/${res.data.id}`);
       } else {
-        await axios.put(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/workflows/${workflowId}/`, payload, {
+        await axios.put(`${API_BASE_URL}/api/workflows/${workflowId}/`, payload, {
           headers: { Authorization: `Bearer ${token}` }
         });
+        alert('Workflow saved successfully!');
       }
     } catch (error) {
       console.error('Error saving workflow', error);
-      alert('Failed to save workflow');
+      alert('Failed to save workflow: ' + (error.response?.data?.detail || JSON.stringify(error.response?.data) || error.message));
     } finally {
       setSaving(false);
     }

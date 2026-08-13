@@ -2,10 +2,12 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Phone, PhoneCall, PhoneOff } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
+import { API_BASE_URL } from '@/config/apiConfig';
 
 export default function GlobalIncomingCallListener() {
   const router = useRouter();
+  const pathname = usePathname();
   const [incomingCall, setIncomingCall] = useState(null);
   const ringtoneRef = useRef(null);
   const wsRef = useRef(null);
@@ -59,6 +61,25 @@ export default function GlobalIncomingCallListener() {
     const backendHost = new URL(backendUrlStr).host;
     const wsUrl = `${protocol}//${backendHost}/ws/webrtc/?token=${token}`;
 
+    const handleCallSignal = (data) => {
+      if (!data) return;
+      if (data.type === 'CALL_INITIATED') {
+        setIncomingCall({
+          callerName: data.callerName || 'Client / Team Member',
+          role: data.role || 'Member',
+          dept: data.dept || 'UWOConnect',
+          isVideo: data.isVideo,
+          sessionId: data.sessionId
+        });
+        if (!ringtoneRef.current) {
+          startRingtone();
+        }
+      } else if (data.type === 'CALL_ACCEPTED' || data.type === 'CALL_REJECTED' || data.type === 'CALL_ENDED') {
+        stopRingtone();
+        setIncomingCall(null);
+      }
+    };
+
     wsRef.current = new WebSocket(wsUrl);
 
     wsRef.current.onmessage = (event) => {
@@ -83,16 +104,93 @@ export default function GlobalIncomingCallListener() {
       } catch (e) {}
     };
 
+    // 4. Backend Active Call Poller (Cross-Device & Cross-Browser)
+    const pollInterval = setInterval(async () => {
+      try {
+        const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+        const res = await fetch(`${API_BASE_URL}/api/webrtc/call/active-check`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {}
+        });
+        if (res.ok) {
+          const data = await res.json();
+          const wasActed = data.session_id && (
+            sessionStorage.getItem(`call_acted_${data.session_id}`) === 'true'
+          );
+
+          const currentUserStr = typeof window !== 'undefined' ? localStorage.getItem('user') : null;
+          let currentUserName = '';
+          let currentUserEmail = '';
+          if (currentUserStr) {
+            try {
+              const u = JSON.parse(currentUserStr);
+              currentUserName = (u.username || '').toLowerCase();
+              currentUserEmail = (u.email || '').toLowerCase();
+            } catch(e) {}
+          }
+
+          const isUserCaller = data.is_caller || 
+            (currentUserName && data.caller?.toLowerCase() === currentUserName) || 
+            (currentUserEmail && data.caller?.toLowerCase() === currentUserEmail);
+
+          if (data.active_call && data.status === 'RINGING' && !isUserCaller && !wasActed) {
+            handleCallSignal({
+              type: 'CALL_INITIATED',
+              callerName: data.caller || 'Abha (Client)',
+              role: 'Client',
+              dept: 'UWOConnect',
+              isVideo: data.is_video,
+              sessionId: data.session_id
+            });
+          } else if (!data.active_call) {
+            // Only stop ringtone and clear popup when call session is completely gone
+            stopRingtone();
+            setIncomingCall(null);
+          }
+          // If status is CONNECTED or other - do nothing, let the calls page handle it
+        }
+      } catch (e) {}
+    }, 1800);
+
     return () => {
+      clearInterval(pollInterval);
       if (wsRef.current) wsRef.current.close();
       stopRingtone();
     };
   }, []);
 
-  const handleAccept = () => {
+
+  const handleAccept = async () => {
     stopRingtone();
-    if (pendingOfferRef.current) {
+      if (pendingOfferRef.current) {
       localStorage.setItem('webrtc_pending_offer', JSON.stringify(pendingOfferRef.current));
+
+    if (incomingCall?.sessionId) {
+      sessionStorage.setItem(`call_acted_${incomingCall.sessionId}`, 'true');
+      // Save incoming call data so calls/page.jsx can restore active call state
+      localStorage.setItem('pending_incoming_call', JSON.stringify({
+        sessionId: incomingCall.sessionId,
+        callerName: incomingCall.callerName,
+        isVideo: incomingCall.isVideo,
+        role: incomingCall.role,
+        dept: incomingCall.dept
+      }));
+    }
+    try {
+      const channel = new BroadcastChannel('uwo_calls_live_channel');
+      channel.postMessage({ type: 'CALL_ACCEPTED', responderName: 'Team Member' });
+    } catch(e) {}
+    if (incomingCall?.sessionId) {
+      try {
+        const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+        await fetch(`${API_BASE_URL}/api/webrtc/call/action/`, {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            ...(token ? { Authorization: `Bearer ${token}` } : {})
+          },
+          body: JSON.stringify({ session_id: incomingCall.sessionId, action: 'accept' })
+        });
+      } catch(e) {}
     }
     setIncomingCall(null);
     router.push('/client/calls');
@@ -105,6 +203,26 @@ export default function GlobalIncomingCallListener() {
         type: 'call_ended',
         recipient: pendingOfferRef.current.callerEmail
       }));
+
+    if (incomingCall?.sessionId) {
+      sessionStorage.setItem(`call_acted_${incomingCall.sessionId}`, 'true');
+    }
+    try {
+      const channel = new BroadcastChannel('uwo_calls_live_channel');
+      channel.postMessage({ type: 'CALL_REJECTED' });
+    } catch(e) {}
+    if (incomingCall?.sessionId) {
+      try {
+        const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+        await fetch(`${API_BASE_URL}/api/webrtc/call/action/`, {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            ...(token ? { Authorization: `Bearer ${token}` } : {})
+          },
+          body: JSON.stringify({ session_id: incomingCall.sessionId, action: 'decline' })
+        });
+      } catch(e) {}
     }
     setIncomingCall(null);
     pendingOfferRef.current = null;
