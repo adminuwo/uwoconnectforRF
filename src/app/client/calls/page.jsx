@@ -454,6 +454,7 @@ export default function EnterpriseCallsPage() {
     }
 
     let offer = null;
+    let offerSdp = null;
     try {
       const pc = new RTCPeerConnection({
         iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
@@ -516,7 +517,8 @@ export default function EnterpriseCallsPage() {
       offerSdp = JSON.stringify(pc.localDescription);
       pcRef.current = pc;
     } catch (e) {
-      showNotification('WebRTC creation error');
+      console.error('WebRTC Error:', e);
+      showNotification('WebRTC creation error: ' + (e.message || String(e)));
       return;
     }
 
