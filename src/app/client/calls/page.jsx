@@ -485,12 +485,21 @@ export default function EnterpriseCallsPage() {
       };
 
       pc.onicecandidate = (event) => {
-        if (event.candidate && wsRef.current) {
-          wsRef.current.send(JSON.stringify({
-            type: 'ice_candidate',
-            candidate: event.candidate,
-            recipient: callTarget.email
-          }));
+        if (!event.candidate || !wsRef.current) return;
+        const payload = JSON.stringify({
+          type: 'ice_candidate',
+          candidate: event.candidate,
+          recipient: callTarget.email
+        });
+
+        if (wsRef.current.readyState === WebSocket.OPEN) {
+          wsRef.current.send(payload);
+        } else if (wsRef.current.readyState === WebSocket.CONNECTING) {
+          wsRef.current.addEventListener('open', () => {
+            wsRef.current.send(payload);
+          }, { once: true });
+        } else {
+          console.warn("WebSocket is closed. Cannot send ICE candidate.");
         }
       };
 
@@ -533,7 +542,7 @@ export default function EnterpriseCallsPage() {
       } catch(e) {}
     }
 
-    if (wsRef.current) {
+    const sendOfferPayload = () => {
       wsRef.current.send(JSON.stringify({
         type: 'offer',
         sdp_offer: offer,
@@ -542,6 +551,18 @@ export default function EnterpriseCallsPage() {
         callerEmail: callerEmail,
         isVideo: isVideo
       }));
+    };
+
+    if (wsRef.current) {
+      if (wsRef.current.readyState === WebSocket.OPEN) {
+        sendOfferPayload();
+      } else if (wsRef.current.readyState === WebSocket.CONNECTING) {
+        wsRef.current.addEventListener('open', () => {
+          sendOfferPayload();
+        }, { once: true });
+      } else {
+        console.warn("WebSocket is closed. Cannot send offer.");
+      }
     }
 
     setActiveCall({
