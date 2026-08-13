@@ -36,6 +36,7 @@ export default function EnterpriseCallsPage() {
   const streamRef = useRef(null);
   const pcRef = useRef(null);
   const timerIntervalRef = useRef(null);
+  const wsRef = useRef(null);
 
   const showNotification = (msg) => {
     setToast(msg);
@@ -108,44 +109,53 @@ export default function EnterpriseCallsPage() {
     fetchRealContacts();
     fetchRealCallHistory();
 
-    const checkActiveConnectedCall = async () => {
-      try {
-        const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-        const res = await fetch(`${API_BASE_URL}/api/webrtc/call/active-check`, {
-          headers: token ? { Authorization: `Bearer ${token}` } : {}
-        });
-        if (res.ok) {
-          const data = await res.json();
-          if (data.active_call) {
-            try {
-              const constraints = data.is_video ? { audio: true, video: true } : { audio: true, video: false };
-              const stream = await navigator.mediaDevices.getUserMedia(constraints);
-              streamRef.current = stream;
-              if (data.is_video && localVideoRef.current) {
-                localVideoRef.current.srcObject = stream;
-              }
-            } catch(err) {}
-
-            setActiveCall({
-              name: data.caller || 'Caller',
-              role: 'Team Member',
-              dept: 'UWOConnect',
-              isVideo: data.is_video,
-              callState: 'CONNECTED',
-              sessionId: data.session_id
-            });
-          }
-        }
-      } catch(e) {}
-    };
-
-    checkActiveConnectedCall();
-
     const interval = setInterval(() => {
       fetchRealContacts();
     }, 10000);
+    
+    // Connect WebSocket
+    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+    if (token) {
+      const backendUrlStr = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+      const isSecureBackend = backendUrlStr.startsWith('https');
+      const protocol = isSecureBackend ? 'wss:' : (window.location.protocol === 'https:' ? 'wss:' : 'ws:');
+      const backendHost = new URL(backendUrlStr).host;
+      const wsUrl = `${protocol}//${backendHost}/ws/webrtc/?token=${token}`;
+      wsRef.current = new WebSocket(wsUrl);
+      
+      wsRef.current.onmessage = async (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          if (data.type === 'answer') {
+            if (pcRef.current) {
+              await pcRef.current.setRemoteDescription(new RTCSessionDescription(data.sdp_answer));
+              setActiveCall(prev => prev ? { ...prev, callState: 'CONNECTED' } : prev);
+            }
+          } else if (data.type === 'ice_candidate') {
+            if (pcRef.current) {
+              await pcRef.current.addIceCandidate(new RTCIceCandidate(data.candidate));
+            }
+          } else if (data.type === 'call_ended') {
+            handleRemoteEndCall();
+          }
+        } catch (e) {}
+      };
+    }
 
-    return () => clearInterval(interval);
+    // Check if we arrived here by accepting a call globally
+    const pendingOfferStr = typeof window !== 'undefined' ? localStorage.getItem('webrtc_pending_offer') : null;
+    if (pendingOfferStr) {
+      try {
+        const pendingOffer = JSON.parse(pendingOfferStr);
+        localStorage.removeItem('webrtc_pending_offer');
+        answerCall(pendingOffer);
+      } catch(e) {}
+    }
+
+    return () => {
+      clearInterval(interval);
+      if (wsRef.current) wsRef.current.close();
+    };
   }, []);
 
   // Timer for active call
@@ -170,6 +180,67 @@ export default function EnterpriseCallsPage() {
   };
 
   // WebRTC Initiate Call Handler (Voice / Video)
+  const answerCall = async (offerData) => {
+    try {
+      const constraints = offerData.isVideo ? { audio: true, video: true } : { audio: true, video: false };
+      const localStream = await navigator.mediaDevices.getUserMedia(constraints);
+      streamRef.current = localStream;
+      if (offerData.isVideo && localVideoRef.current) {
+        localVideoRef.current.srcObject = localStream;
+      }
+
+      const pc = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] });
+      localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
+      
+      pc.ontrack = (event) => {
+        if (event.streams && event.streams[0]) {
+          if (offerData.isVideo && remoteVideoRef.current) {
+            remoteVideoRef.current.srcObject = event.streams[0];
+          } else if (remoteAudioRef.current) {
+            remoteAudioRef.current.srcObject = event.streams[0];
+          }
+        }
+      };
+
+      pc.onicecandidate = (event) => {
+        if (event.candidate && wsRef.current) {
+          wsRef.current.send(JSON.stringify({
+            type: 'ice_candidate',
+            candidate: event.candidate,
+            recipient: offerData.callerEmail
+          }));
+        }
+      };
+
+      await pc.setRemoteDescription(new RTCSessionDescription(offerData.sdp_offer));
+      const answer = await pc.createAnswer();
+      await pc.setLocalDescription(answer);
+      pcRef.current = pc;
+
+      if (wsRef.current) {
+        wsRef.current.send(JSON.stringify({
+          type: 'answer',
+          sdp_answer: answer,
+          recipient: offerData.callerEmail
+        }));
+      }
+
+      setActiveCall({
+        name: offerData.caller || 'Caller',
+        role: 'Team Member',
+        dept: 'Workspace',
+        isVideo: offerData.isVideo,
+        callState: 'CONNECTED',
+        email: offerData.callerEmail
+      });
+      setIsMuted(false);
+      setIsVideoOff(false);
+      setIsSharingScreen(false);
+    } catch(err) {
+      showNotification("⚠️ Failed to answer call.");
+    }
+  };
+
   const initiateCall = async (target, isVideo = false) => {
     const callTarget = target.name ? target : { name: String(target), role: 'Team Member', dept: 'UWOConnect' };
 
@@ -178,31 +249,20 @@ export default function EnterpriseCallsPage() {
       return;
     }
 
-    // Permission check for Microphone / Camera
     let localStream = null;
     try {
       const constraints = isVideo ? { audio: true, video: true } : { audio: true, video: false };
       localStream = await navigator.mediaDevices.getUserMedia(constraints);
       streamRef.current = localStream;
-
-      if (isVideo && localVideoRef.current) {
-        localVideoRef.current.srcObject = localStream;
-      }
+      if (isVideo && localVideoRef.current) localVideoRef.current.srcObject = localStream;
     } catch (err) {
-      const msg = isVideo
-        ? "Camera & Microphone access is required to start a video call."
-        : "Microphone access is required to make a voice call.";
-      showNotification(`⚠️ ${msg}`);
+      showNotification(`⚠️ Camera & Microphone access is required.`);
       return;
     }
 
-    // Initialize WebRTC PeerConnection
-    let offerSdp = null;
+    let offer = null;
     try {
-      const pc = new RTCPeerConnection({
-        iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
-      });
-
+      const pc = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] });
       localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
 
       pc.ontrack = (event) => {
@@ -215,66 +275,50 @@ export default function EnterpriseCallsPage() {
         }
       };
 
-      const offer = await pc.createOffer();
+      pc.onicecandidate = (event) => {
+        if (event.candidate && wsRef.current) {
+          wsRef.current.send(JSON.stringify({
+            type: 'ice_candidate',
+            candidate: event.candidate,
+            recipient: callTarget.email
+          }));
+        }
+      };
+
+      offer = await pc.createOffer();
       await pc.setLocalDescription(offer);
-      offerSdp = JSON.stringify(offer);
       pcRef.current = pc;
     } catch (e) {
-      console.warn('WebRTC creation error:', e);
+      showNotification('WebRTC creation error');
+      return;
     }
 
-    // Send Call Initiation Request to Backend API
-    let sessionId = `call_sess_${Date.now()}`;
-    try {
-      const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-      const currentUserStr = typeof window !== 'undefined' ? localStorage.getItem('user') : null;
-      let callerName = 'Abha (Client)';
-      if (currentUserStr) {
-        try {
-          const u = JSON.parse(currentUserStr);
-          callerName = u.name || u.username || u.email || callerName;
-        } catch(e) {}
-      }
+    let callerName = 'Abha (Client)';
+    let callerEmail = '';
+    const currentUserStr = typeof window !== 'undefined' ? localStorage.getItem('user') : null;
+    if (currentUserStr) {
+      try {
+        const u = JSON.parse(currentUserStr);
+        callerName = u.name || u.username || u.email || callerName;
+        callerEmail = u.email || u.username;
+      } catch(e) {}
+    }
 
-      const res = await fetch(`${API_BASE_URL}/api/webrtc/call/initiate/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token ? { Authorization: `Bearer ${token}` } : {})
-        },
-        body: JSON.stringify({
-          caller: callerName,
-          recipient: callTarget.email || callTarget.name,
-          recipient_name: callTarget.name,
-          call_type: isVideo ? 'video' : 'voice',
-          is_video: isVideo,
-          sdp_offer: offerSdp
-        })
-      });
-
-      if (res.status === 403) {
-        showNotification("⛔ Calling forbidden: Both users must belong to the same UWOConnect workspace.");
-        streamRef.current?.getTracks().forEach(t => t.stop());
-        return;
-      }
-      if (res.status === 400) {
-        const errData = await res.json();
-        showNotification(`⚠️ ${errData.error || 'Recipient user is unavailable.'}`);
-        streamRef.current?.getTracks().forEach(t => t.stop());
-        return;
-      }
-
-      if (res.ok) {
-        const data = await res.json();
-        if (data.session_id) sessionId = data.session_id;
-      }
-    } catch (e) {}
+    if (wsRef.current) {
+      wsRef.current.send(JSON.stringify({
+        type: 'offer',
+        sdp_offer: offer,
+        recipient: callTarget.email,
+        caller: callerName,
+        callerEmail: callerEmail,
+        isVideo: isVideo
+      }));
+    }
 
     setActiveCall({
       ...callTarget,
       isVideo,
-      callState: 'RINGING',
-      sessionId
+      callState: 'RINGING'
     });
     setIsMuted(false);
     setIsVideoOff(false);
@@ -283,7 +327,7 @@ export default function EnterpriseCallsPage() {
   };
 
   // End Call Handler
-  const endCall = async () => {
+  const handleRemoteEndCall = () => {
     if (streamRef.current) {
       streamRef.current.getTracks().forEach(track => track.stop());
       streamRef.current = null;
@@ -292,42 +336,22 @@ export default function EnterpriseCallsPage() {
       pcRef.current.close();
       pcRef.current = null;
     }
-    if (remoteAudioRef.current) {
-      remoteAudioRef.current.srcObject = null;
-    }
-    if (remoteVideoRef.current) {
-      remoteVideoRef.current.srcObject = null;
-    }
-    if (localVideoRef.current) {
-      localVideoRef.current.srcObject = null;
-    }
-
-    try {
-      const channel = new BroadcastChannel('uwo_calls_live_channel');
-      channel.postMessage({ type: 'CALL_ENDED' });
-    } catch(e) {}
-
-    if (activeCall?.sessionId) {
-      try {
-        const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-        await fetch(`${API_BASE_URL}/api/webrtc/call/action/`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            ...(token ? { Authorization: `Bearer ${token}` } : {})
-          },
-          body: JSON.stringify({
-            session_id: activeCall.sessionId,
-            action: 'end',
-            duration: formatTimer(callTimer)
-          })
-        });
-      } catch (e) {}
-    }
-
+    if (remoteAudioRef.current) remoteAudioRef.current.srcObject = null;
+    if (remoteVideoRef.current) remoteVideoRef.current.srcObject = null;
+    if (localVideoRef.current) localVideoRef.current.srcObject = null;
     setActiveCall(null);
     showNotification('Call ended.');
     fetchRealCallHistory();
+  };
+
+  const endCall = () => {
+    if (wsRef.current && activeCall) {
+      wsRef.current.send(JSON.stringify({
+        type: 'call_ended',
+        recipient: activeCall.email
+      }));
+    }
+    handleRemoteEndCall();
   };
 
   // Toggle Mute
