@@ -161,8 +161,9 @@ export default function GlobalIncomingCallListener() {
 
   const handleAccept = async () => {
     stopRingtone();
-      if (pendingOfferRef.current) {
+    if (pendingOfferRef.current) {
       localStorage.setItem('webrtc_pending_offer', JSON.stringify(pendingOfferRef.current));
+    }
 
     if (incomingCall?.sessionId) {
       sessionStorage.setItem(`call_acted_${incomingCall.sessionId}`, 'true');
@@ -196,13 +197,14 @@ export default function GlobalIncomingCallListener() {
     router.push('/client/calls');
   };
 
-  const handleDecline = () => {
+  const handleDecline = async () => {
     stopRingtone();
     if (wsRef.current && pendingOfferRef.current) {
       wsRef.current.send(JSON.stringify({
         type: 'call_ended',
         recipient: pendingOfferRef.current.callerEmail
       }));
+    }
 
     if (incomingCall?.sessionId) {
       sessionStorage.setItem(`call_acted_${incomingCall.sessionId}`, 'true');
