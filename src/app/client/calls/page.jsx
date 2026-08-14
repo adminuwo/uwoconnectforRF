@@ -294,12 +294,29 @@ export default function EnterpriseCallsPage() {
 
     // Check if we arrived here by accepting a call globally
     const pendingOfferStr = typeof window !== 'undefined' ? localStorage.getItem('webrtc_pending_offer') : null;
+    const pendingIncomingStr = typeof window !== 'undefined' ? localStorage.getItem('pending_incoming_call') : null;
+    
     if (pendingOfferStr) {
       try {
         const pendingOffer = JSON.parse(pendingOfferStr);
         localStorage.removeItem('webrtc_pending_offer');
+        localStorage.removeItem('pending_incoming_call');
         answerCall(pendingOffer);
       } catch(e) {}
+    } else if (pendingIncomingStr) {
+      // WebSocket missed it, but HTTP poller caught it! Set activeCall to trigger HTTP polling for SDP offer
+      try {
+        const pendingCall = JSON.parse(pendingIncomingStr);
+        localStorage.removeItem('pending_incoming_call');
+        setActiveCall({
+          name: pendingCall.callerName || 'Caller',
+          role: pendingCall.role || 'Team Member',
+          dept: pendingCall.dept || 'Workspace',
+          isVideo: pendingCall.isVideo,
+          callState: 'CONNECTED',
+          sessionId: pendingCall.sessionId
+        });
+      } catch (e) {}
     }
 
     return () => {
@@ -310,8 +327,6 @@ export default function EnterpriseCallsPage() {
 
   // Poll for active call status updates (ringing -> connected, or ended)
   useEffect(() => {
-    if (!activeCall) return;
-
     const pollCallStatus = async () => {
       try {
         const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
@@ -320,12 +335,23 @@ export default function EnterpriseCallsPage() {
         });
         if (res.ok) {
           const data = await res.json();
-          // If activeCall doesn't have a sessionId yet (just initiated), accept the server's session_id
-          if (data.active_call && (!activeCall.sessionId || data.session_id === activeCall.sessionId)) {
-            if (!activeCall.sessionId) {
+          if (data.active_call) {
+            // If we are the recipient, the call is CONNECTED (accepted), and we missed the WebSocket offer:
+            if (!data.is_caller && data.sdp_offer && data.status === 'CONNECTED' && !pcRef.current) {
+              const offerData = {
+                caller: data.caller,
+                callerEmail: data.caller,
+                isVideo: data.is_video,
+                sdp_offer: JSON.parse(data.sdp_offer),
+                sessionId: data.session_id
+              };
+              answerCall(offerData);
+            }
+
+            if (!activeCall?.sessionId) {
               setActiveCall(prev => prev ? { ...prev, sessionId: data.session_id } : null);
             }
-            if (data.status && data.status !== activeCall.callState) {
+            if (data.status && data.status !== activeCall?.callState) {
               setActiveCall(prev => prev ? { ...prev, callState: data.status } : null);
             }
 
@@ -340,9 +366,8 @@ export default function EnterpriseCallsPage() {
               }
             }
           } else {
-            // If we already had a sessionId, or it's been ringing for a while, it means the call ended.
-            // If we don't have a sessionId yet, it might just be taking a few seconds to register on the backend.
-            if (activeCall.sessionId || activeCall.callState !== 'RINGING') {
+            // Call ended
+            if (activeCall && (activeCall.sessionId || activeCall.callState !== 'RINGING')) {
               setActiveCall(null);
               showNotification('Call ended.');
               fetchRealCallHistory();
@@ -371,6 +396,26 @@ export default function EnterpriseCallsPage() {
     };
   }, [activeCall?.callState]);
 
+  // Handle Video Element streams reliably
+  useEffect(() => {
+    if (localVideoRef.current && localStream) {
+      localVideoRef.current.srcObject = localStream;
+      localVideoRef.current.play().catch(e => console.warn('Local video play error:', e));
+    }
+  }, [localStream, activeCall?.callState]);
+
+  useEffect(() => {
+    if (remoteVideoRef.current && remoteStream) {
+      remoteVideoRef.current.srcObject = remoteStream;
+      remoteVideoRef.current.play().catch(e => console.warn('Remote video play error:', e));
+    }
+    if (remoteAudioRef.current && remoteStream) {
+      remoteAudioRef.current.srcObject = remoteStream;
+      remoteAudioRef.current.play().catch(e => console.warn('Remote audio play error:', e));
+    }
+  }, [remoteStream, activeCall?.callState]);
+
+
   const formatTimer = (seconds) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -383,30 +428,30 @@ export default function EnterpriseCallsPage() {
       const constraints = offerData.isVideo ? { audio: true, video: true } : { audio: true, video: false };
       const localStream = await navigator.mediaDevices.getUserMedia(constraints);
       streamRef.current = localStream;
-      if (offerData.isVideo && localVideoRef.current) {
-        localVideoRef.current.srcObject = localStream;
-      }
+      setLocalStream(localStream);
 
       const pc = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] });
       localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
       
       pc.ontrack = (event) => {
         if (event.streams && event.streams[0]) {
-          if (offerData.isVideo && remoteVideoRef.current) {
-            remoteVideoRef.current.srcObject = event.streams[0];
-          } else if (remoteAudioRef.current) {
-            remoteAudioRef.current.srcObject = event.streams[0];
-          }
+          remoteStreamRef.current = event.streams[0];
+          setRemoteStream(event.streams[0]);
         }
       };
 
       pc.onicecandidate = (event) => {
         if (event.candidate && wsRef.current) {
-          wsRef.current.send(JSON.stringify({
+          const payload = JSON.stringify({
             type: 'ice_candidate',
             candidate: event.candidate,
             recipient: offerData.callerEmail
-          }));
+          });
+          if (wsRef.current.readyState === WebSocket.OPEN) {
+            wsRef.current.send(payload);
+          } else if (wsRef.current.readyState === WebSocket.CONNECTING) {
+            wsRef.current.addEventListener('open', () => wsRef.current.send(payload), { once: true });
+          }
         }
       };
 
@@ -415,12 +460,61 @@ export default function EnterpriseCallsPage() {
       await pc.setLocalDescription(answer);
       pcRef.current = pc;
 
+      // Wait for ICE gathering to complete before sending via API as fallback
+      await new Promise((resolve) => {
+        if (pc.iceGatheringState === 'complete') {
+          resolve();
+        } else {
+          const checkState = () => {
+            if (pc.iceGatheringState === 'complete') {
+              pc.removeEventListener('icegatheringstatechange', checkState);
+              resolve();
+            }
+          };
+          pc.addEventListener('icegatheringstatechange', checkState);
+          setTimeout(resolve, 2000); // 2s timeout
+        }
+      });
+
+      const answerSdp = JSON.stringify(pc.localDescription);
+
+      const sendAnswerPayload = () => {
+        if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+          wsRef.current.send(JSON.stringify({
+            type: 'answer',
+            sdp_answer: pc.localDescription,
+            recipient: offerData.callerEmail
+          }));
+        }
+
+        // Always send answer via API as fallback (for HTTP Poller)
+        const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+        if (offerData.sessionId) {
+          fetch(`${API_BASE_URL}/api/webrtc/call/signal/`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              ...(token ? { Authorization: `Bearer ${token}` } : {})
+            },
+            body: JSON.stringify({
+              session_id: offerData.sessionId,
+              type: 'answer',
+              payload: answerSdp
+            })
+          }).catch(e => console.error(e));
+        }
+      };
+
       if (wsRef.current) {
-        wsRef.current.send(JSON.stringify({
-          type: 'answer',
-          sdp_answer: answer,
-          recipient: offerData.callerEmail
-        }));
+        if (wsRef.current.readyState === WebSocket.OPEN) {
+          sendAnswerPayload();
+        } else if (wsRef.current.readyState === WebSocket.CONNECTING) {
+          wsRef.current.addEventListener('open', () => sendAnswerPayload(), { once: true });
+        } else {
+          sendAnswerPayload(); // Call it anyway so API fallback triggers
+        }
+      } else {
+        sendAnswerPayload(); // Call it anyway so API fallback triggers
       }
 
       setActiveCall({
@@ -435,6 +529,12 @@ export default function EnterpriseCallsPage() {
       setIsVideoOff(false);
       setIsSharingScreen(false);
     } catch(err) {
+      console.error("Answer call failed:", err);
+      if (!navigator.mediaDevices) {
+        alert("Camera error: Please ensure you open this link with HTTPS:// (Secure Context). HTTP will block the camera.");
+      } else {
+        alert("WebRTC Error: " + err.message);
+      }
       showNotification("⚠️ Failed to answer call.");
     }
   };
@@ -549,15 +649,49 @@ export default function EnterpriseCallsPage() {
       } catch(e) {}
     }
 
-    const sendOfferPayload = () => {
-      wsRef.current.send(JSON.stringify({
-        type: 'offer',
-        sdp_offer: offer,
-        recipient: callTarget.email,
-        caller: callerName,
-        callerEmail: callerEmail,
-        isVideo: isVideo
-      }));
+    const sendOfferPayload = async () => {
+      if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+        wsRef.current.send(JSON.stringify({
+          type: 'offer',
+          sdp_offer: offer,
+          recipient: callTarget.email,
+          caller: callerName,
+          callerEmail: callerEmail,
+          isVideo: isVideo
+        }));
+      }
+
+      // Persist the call session in MongoDB so the receiver's HTTP Poller doesn't auto-reject it (AND as a fallback!)
+      try {
+        const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+        const res = await fetch(`${API_BASE_URL}/api/webrtc/call/initiate/`, {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            ...(token ? { Authorization: `Bearer ${token}` } : {})
+          },
+          body: JSON.stringify({
+            caller: callerName,
+            recipient: callTarget.email,
+            recipient_name: callTarget.name,
+            call_type: isVideo ? 'video' : 'voice',
+            is_video: isVideo,
+            sdp_offer: offerSdp
+          })
+        });
+        
+        if (res.ok) {
+           const data = await res.json();
+           // Attach the server-generated session ID to the local active call state
+           setActiveCall(prev => prev ? { ...prev, sessionId: data.session_id } : prev);
+        } else {
+           console.error("Failed to initiate call in DB. 400 Bad Request usually means you are calling yourself or a stuck call exists.");
+           alert("Call Failed! Make sure you are not calling yourself and that no other calls are stuck.");
+           endCall();
+        }
+      } catch (err) {
+        console.warn('Failed to persist call in DB:', err);
+      }
     };
 
     if (wsRef.current) {
@@ -568,8 +702,12 @@ export default function EnterpriseCallsPage() {
           sendOfferPayload();
         }, { once: true });
       } else {
-        console.warn("WebSocket is closed. Cannot send offer.");
+        // WebSocket is closed, but STILL call sendOfferPayload so the API fallback creates the call!
+        console.warn("WebSocket is closed. Relying purely on API fallback.");
+        sendOfferPayload();
       }
+    } else {
+      sendOfferPayload();
     }
 
     setActiveCall({
@@ -605,11 +743,28 @@ export default function EnterpriseCallsPage() {
   };
 
   const endCall = () => {
-    if (wsRef.current && activeCall) {
+    if (wsRef.current && activeCall && wsRef.current.readyState === WebSocket.OPEN) {
       wsRef.current.send(JSON.stringify({
         type: 'call_ended',
         recipient: activeCall.email
       }));
+    }
+
+    // ALWAYS delete the session from MongoDB instantly so it doesn't block future calls
+    if (activeCall && activeCall.sessionId) {
+      const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+      fetch(`${API_BASE_URL}/api/webrtc/call/action/`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {})
+        },
+        body: JSON.stringify({
+          session_id: activeCall.sessionId,
+          action: 'end',
+          duration: formatTimer(callTimer)
+        })
+      }).catch(e => console.error("Failed to end call in DB:", e));
     }
     handleRemoteEndCall();
   };
@@ -1028,13 +1183,7 @@ export default function EnterpriseCallsPage() {
                   <div className="relative w-full h-full min-h-[360px] flex items-center justify-center bg-slate-900 rounded-2xl overflow-hidden border border-slate-800">
                     {/* Remote Video */}
                     <video
-                      ref={el => {
-                        remoteVideoRef.current = el;
-                        if (el && remoteStream) {
-                          el.srcObject = remoteStream;
-                          el.play().catch(err => console.log("Remote video play error:", err));
-                        }
-                      }}
+                      ref={remoteVideoRef}
                       autoPlay
                       playsInline
                       className="w-full h-full object-cover"
@@ -1043,13 +1192,7 @@ export default function EnterpriseCallsPage() {
                     {/* Local Video Preview */}
                     <div className="absolute bottom-4 right-4 w-36 h-24 rounded-xl bg-slate-950 border-2 border-emerald-500 overflow-hidden shadow-2xl">
                       <video
-                        ref={el => {
-                          localVideoRef.current = el;
-                          if (el && localStream) {
-                            el.srcObject = localStream;
-                            el.play().catch(err => console.log("Local video play error:", err));
-                          }
-                        }}
+                        ref={localVideoRef}
                         autoPlay
                         playsInline
                         muted
