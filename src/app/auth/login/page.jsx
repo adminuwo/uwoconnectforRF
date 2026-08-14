@@ -3,8 +3,9 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Loader2, Sparkles, Eye, EyeOff } from 'lucide-react';
+import { Loader2, Sparkles, Eye, EyeOff, ShieldCheck } from 'lucide-react';
 import axios from 'axios';
+import UWOLoginModal from '@/components/UWOLoginModal';
 import {
   auth,
   googleProvider,
@@ -22,8 +23,10 @@ const LoginPage = () => {
   const [loading, setLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [showUWOModal, setShowUWOModal] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
+
 
   const API_URL = API_BASE_URL;
 
@@ -258,19 +261,30 @@ const LoginPage = () => {
           <div className="h-[1px] bg-[#2f593b]/20 flex-1" />
         </div>
 
-        {/* Social logins */}
-        <div className="flex items-center justify-center gap-4">
-          <button onClick={handleGoogleLogin} className="w-11 h-11 bg-white rounded-full flex items-center justify-center shadow-lg shadow-emerald-950/5 hover:scale-105 transition-all cursor-pointer">
+        {/* Social logins with UWO SSO */}
+        <div className="flex items-center justify-center gap-3">
+          {/* UWO SSO Button */}
+          <button
+            type="button"
+            onClick={() => setShowUWOModal(true)}
+            title="Sign in with Unified Web Options (UWO)"
+            className="h-11 px-4 bg-gradient-to-r from-[#21432a] to-[#3a6843] hover:from-[#1a3822] hover:to-[#2e5536] text-white rounded-full flex items-center justify-center gap-2 shadow-lg shadow-emerald-950/15 hover:scale-105 transition-all cursor-pointer border border-emerald-400/30"
+          >
+            <ShieldCheck className="w-4 h-4 text-emerald-300" />
+            <span className="text-xs font-bold uppercase tracking-wider">UWO SSO</span>
+          </button>
+
+          <button onClick={handleGoogleLogin} title="Continue with Google" className="w-11 h-11 bg-white rounded-full flex items-center justify-center shadow-lg shadow-emerald-950/5 hover:scale-105 transition-all cursor-pointer">
             <svg className="w-5 h-5 text-slate-800" viewBox="0 0 24 24" fill="currentColor">
               <path d="M12.24 10.285V14.4h6.887c-.648 2.41-2.519 4.114-6.887 4.114-4.78 0-8.67-3.89-8.67-8.67s3.89-8.67 8.67-8.67c2.14 0 4.09.78 5.61 2.07l3.22-3.22C18.3 1.34 15.42 0 12.24 0 5.48 0 0 5.48 0 12.24s5.48 12.24 12.24 12.24c6.9 0 11.5-4.86 11.5-11.7 0-.79-.07-1.56-.2-2.3H12.24z"/>
             </svg>
           </button>
-          <button onClick={handleFacebookLogin} className="w-11 h-11 bg-[#1877F2] rounded-full flex items-center justify-center shadow-lg shadow-emerald-950/5 hover:scale-105 transition-all cursor-pointer">
+          <button onClick={handleFacebookLogin} title="Continue with Facebook" className="w-11 h-11 bg-[#1877F2] rounded-full flex items-center justify-center shadow-lg shadow-emerald-950/5 hover:scale-105 transition-all cursor-pointer">
             <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
               <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.469h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.469h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
             </svg>
           </button>
-          <button onClick={handleGithubLogin} className="w-11 h-11 bg-slate-900 rounded-full flex items-center justify-center shadow-lg shadow-emerald-950/5 hover:scale-105 transition-all cursor-pointer">
+          <button onClick={handleGithubLogin} title="Continue with GitHub" className="w-11 h-11 bg-slate-900 rounded-full flex items-center justify-center shadow-lg shadow-emerald-950/5 hover:scale-105 transition-all cursor-pointer">
             <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
               <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.463-1.11-1.463-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831.092-.646.35-1.086.636-1.336-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0112 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.161 22 16.418 22 12c0-5.523-4.477-10-10-10z"/>
             </svg>
@@ -284,8 +298,29 @@ const LoginPage = () => {
           </p>
         </div>
       </div>
+
+      {/* UWO Single Sign-On Modal */}
+      <UWOLoginModal
+        isOpen={showUWOModal}
+        onClose={() => setShowUWOModal(false)}
+        onSuccess={(uwoData) => {
+          if (uwoData?.user) {
+            if (uwoData.user.role === 'CLIENT' && !localStorage.getItem('aisa_tour_completed')) {
+              localStorage.setItem('aisa_tour_pending', 'true');
+              localStorage.removeItem('aisa_tour_step');
+            }
+
+            if (uwoData.user.role === 'ADMIN') {
+              router.push('/admin');
+            } else {
+              router.push('/client');
+            }
+          }
+        }}
+      />
     </div>
   );
 };
+
 
 export default LoginPage;

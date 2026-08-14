@@ -13,8 +13,24 @@ const getApiBaseUrl = () => {
   return process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app';
 };
 
+export const getUnifiedApiBaseUrl = () => {
+  if (typeof window !== 'undefined' && window.location) {
+    const currentHost = window.location.hostname;
+    if (currentHost && currentHost !== 'localhost' && currentHost !== '127.0.0.1') {
+      return (
+        process.env.NEXT_PUBLIC_UNIFIED_BACKEND_API ||
+        'https://unified-dashboard-977864306871.asia-south1.run.app/api'
+      );
+    }
+  }
+  return process.env.NEXT_PUBLIC_UNIFIED_BACKEND_API || 'http://localhost:8000/api';
+};
+
+export const UNIFIED_API_BASE_URL = getUnifiedApiBaseUrl();
+
 export const API_BASE_URL = getApiBaseUrl();
 export const API_URL = `${API_BASE_URL}/api`;
+
 
 export const PUBLIC_APP_URL = (function () {
   if (process.env.NEXT_PUBLIC_APP_URL) {
