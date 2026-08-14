@@ -168,14 +168,14 @@ const ClientChannelsPage = () => {
       if (!clientId) return;
 
       // 1. Fetch client channels info
-      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/clients/${clientId}/`, {
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/clients/${clientId}/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setClient(res.data);
 
       // 2. Fetch Razorpay connection status
       try {
-        const rzpRes = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/razorpay/status`, {
+        const rzpRes = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/razorpay/status`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         setRazorpayConn(rzpRes.data);
@@ -229,7 +229,7 @@ const ClientChannelsPage = () => {
         setIgLoading(true);
         try {
           const token = localStorage.getItem('token');
-          const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080';
+          const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app';
           await axios.post(
             `${apiUrl}/api/auth/instagram/oauth-callback`,
             {
@@ -368,7 +368,7 @@ const ClientChannelsPage = () => {
         const connectFacebook = async () => {
           try {
             const token = localStorage.getItem('token');
-            await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/auth/facebook/embedded-signup`,
+            await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/auth/facebook/embedded-signup`,
               { code: code },
               { headers: { Authorization: `Bearer ${token}` } }
             );
@@ -389,7 +389,7 @@ const ClientChannelsPage = () => {
         const connectInstagram = async () => {
           try {
             const token = localStorage.getItem('token');
-            await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/auth/instagram/embedded-signup`,
+            await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/auth/instagram/embedded-signup`,
               { code: code },
               { headers: { Authorization: `Bearer ${token}` } }
             );
@@ -489,7 +489,7 @@ const ClientChannelsPage = () => {
     setGmailDisconnecting(true);
     try {
       const token = localStorage.getItem('token');
-      await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/auth/gmail/disconnect`, {}, {
+      await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/auth/gmail/disconnect`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
       fetchClient(true);
@@ -507,7 +507,7 @@ const ClientChannelsPage = () => {
   const handleConnectGmail = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/auth/gmail/connect`, {
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/auth/gmail/connect`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.data.url) {
@@ -523,7 +523,7 @@ const ClientChannelsPage = () => {
   const handleConnectGoogleCalendar = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/auth/google-calendar/connect`, {
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/auth/google-calendar/connect`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.data.url) {
@@ -558,7 +558,7 @@ const ClientChannelsPage = () => {
       }
       try {
         const token = localStorage.getItem('token');
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080';
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app';
         const res = await axios.post(
           `${apiUrl}/api/auth/facebook/embedded-signup`,
           { access_token: response.authResponse.accessToken },
@@ -1562,7 +1562,7 @@ const ClientChannelsPage = () => {
                             setYoutubeLoading(true);
                             try {
                               const token = localStorage.getItem('token');
-                              const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/auth/youtube/connect`, {
+                              const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/auth/youtube/connect`, {
                                 headers: { Authorization: `Bearer ${token}` }
                               });
                               if (res.data.url) window.location.href = res.data.url;
@@ -1585,7 +1585,7 @@ const ClientChannelsPage = () => {
                           setYoutubeLoading(true);
                           try {
                             const token = localStorage.getItem('token');
-                            const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/auth/youtube/connect`, {
+                            const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/auth/youtube/connect`, {
                               headers: { Authorization: `Bearer ${token}` }
                             });
                             if (res.data.url) window.location.href = res.data.url;

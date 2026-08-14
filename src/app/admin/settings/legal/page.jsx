@@ -23,10 +23,10 @@ const LegalSettings = () => {
       try {
         const token = localStorage.getItem('token');
         const [privacyRes, termsRes] = await Promise.all([
-          axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/admin/settings/global?key=privacy_policy`, {
+          axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/admin/settings/global?key=privacy_policy`, {
             headers: { Authorization: `Bearer ${token}` }
           }),
-          axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/admin/settings/global?key=terms_of_service`, {
+          axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/admin/settings/global?key=terms_of_service`, {
             headers: { Authorization: `Bearer ${token}` }
           })
         ]);
@@ -58,7 +58,7 @@ const LegalSettings = () => {
         formData.append('delete_file', 'true');
       }
 
-      const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/admin/settings/global`, 
+      const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/admin/settings/global`, 
         formData,
         { headers: { 
             Authorization: `Bearer ${token}`,
@@ -198,7 +198,7 @@ const LegalSettings = () => {
                         <div className="flex flex-col">
                           <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest mb-1 italic">File Attached:</p>
                           <a 
-                            href={privacyFile ? URL.createObjectURL(privacyFile) : `${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}${currentPrivacyFile}`} 
+                            href={privacyFile ? URL.createObjectURL(privacyFile) : `${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}${currentPrivacyFile}`} 
                             target="_blank" 
                             className="text-[10px] font-bold text-[#059669] hover:underline flex items-center gap-1"
                           >
@@ -278,7 +278,7 @@ const LegalSettings = () => {
                         <div className="flex flex-col">
                           <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest mb-1 italic">File Attached:</p>
                           <a 
-                            href={termsFile ? URL.createObjectURL(termsFile) : `${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}${currentTermsFile}`} 
+                            href={termsFile ? URL.createObjectURL(termsFile) : `${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}${currentTermsFile}`} 
                             target="_blank" 
                             className="text-[10px] font-bold text-[#059669] hover:underline flex items-center gap-1"
                           >

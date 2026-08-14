@@ -88,7 +88,7 @@ export default function CatalogPage() {
   const fetchRazorpayStatus = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/razorpay/status`, {
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/razorpay/status`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setRazorpayConnected(res.data?.connected === true);
@@ -113,7 +113,7 @@ export default function CatalogPage() {
     try {
       setLoading(true);
       const token = localStorage.getItem('token');
-      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/products/`, {
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/products/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setProducts(res.data || []);
@@ -127,7 +127,7 @@ export default function CatalogPage() {
   const fetchAnalytics = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/products/analytics/`, {
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/products/analytics/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setAnalyticsData(res.data);
@@ -198,11 +198,11 @@ export default function CatalogPage() {
       };
 
       if (editingId) {
-        await axios.patch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/products/${editingId}/`, payload, {
+        await axios.patch(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/products/${editingId}/`, payload, {
           headers: { Authorization: `Bearer ${token}` }
         });
       } else {
-        await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/products/`, payload, {
+        await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/products/`, payload, {
           headers: { Authorization: `Bearer ${token}` }
         });
       }
@@ -221,7 +221,7 @@ export default function CatalogPage() {
     if (!confirm('Are you sure you want to delete this product?')) return;
     try {
       const token = localStorage.getItem('token');
-      await axios.delete(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/products/${id}/`, {
+      await axios.delete(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/products/${id}/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       fetchProducts();
@@ -237,7 +237,7 @@ export default function CatalogPage() {
     try {
       const token = localStorage.getItem('token');
       const allIds = products.map(p => p.id);
-      await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/products/bulk_action/`, {
+      await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/products/bulk_action/`, {
         ids: allIds,
         action: 'delete'
       }, {
@@ -261,7 +261,7 @@ export default function CatalogPage() {
         sku: product.sku ? `${product.sku}-COPY` : '',
         id: undefined
       };
-      await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/products/`, duplicateData, {
+      await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/products/`, duplicateData, {
         headers: { Authorization: `Bearer ${token}` }
       });
       fetchProducts();
@@ -273,7 +273,7 @@ export default function CatalogPage() {
   const trackProductClick = async (product, clickType = 'button') => {
     try {
       const token = localStorage.getItem('token');
-      await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/products/${product.id}/track_click/`, { type: clickType }, {
+      await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/products/${product.id}/track_click/`, { type: clickType }, {
         headers: { Authorization: `Bearer ${token}` }
       });
       fetchAnalytics();
@@ -281,7 +281,7 @@ export default function CatalogPage() {
   };
 
   const handleCopyLink = (product) => {
-    const trackingUrl = product.product_url ? `${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/products/${product.id}/redirect_link/` : window.location.href;
+    const trackingUrl = product.product_url ? `${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/products/${product.id}/redirect_link/` : window.location.href;
     navigator.clipboard.writeText(trackingUrl);
     setCopiedId(product.id);
     trackProductClick(product, 'link');
@@ -289,7 +289,7 @@ export default function CatalogPage() {
   };
 
   const handleShareWhatsApp = (product) => {
-    const trackingUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/products/${product.id}/redirect_link/`;
+    const trackingUrl = `${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/products/${product.id}/redirect_link/`;
     const text = `Check out *${product.name}* ($${product.price})\n${product.description || ''}\n🔗 ${product.cta_text || 'View Product'}: ${trackingUrl}`;
     window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
   };
@@ -305,7 +305,7 @@ export default function CatalogPage() {
       setImporting(true);
       const token = localStorage.getItem('token');
       const res = await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/products/import_csv/`, 
+        `${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/products/import_csv/`, 
         body, 
         {
           headers: { 
@@ -358,7 +358,7 @@ export default function CatalogPage() {
     if (selectedProductIds.length === 0) return;
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/products/bulk_action/`, {
+      const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/products/bulk_action/`, {
         ids: selectedProductIds,
         action: bulkActionType,
         payload: bulkPayload
@@ -1362,7 +1362,7 @@ export default function CatalogPage() {
               
               <div className="w-48 h-48 mx-auto bg-slate-100 rounded-2xl border border-slate-200 flex items-center justify-center mb-4">
                 <img 
-                  src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/products/${activeQrProduct.id}/redirect_link/`)}`} 
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/products/${activeQrProduct.id}/redirect_link/`)}`} 
                   alt="QR Code"
                   className="w-44 h-44 object-contain"
                 />

@@ -16,7 +16,7 @@ export default function TeamChatWindow({ currentUser }) {
   const fetchChannels = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/team/channels/`, {
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/team/channels/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setChannels(res.data);
@@ -32,7 +32,7 @@ export default function TeamChatWindow({ currentUser }) {
     if (!activeChannelId) return;
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/team/channel-messages/?channel_id=${activeChannelId}`, {
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/team/channel-messages/?channel_id=${activeChannelId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setMessages(res.data);
@@ -58,7 +58,7 @@ export default function TeamChatWindow({ currentUser }) {
     if (!newChannelName.trim()) return;
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/team/channels/`, {
+      const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/team/channels/`, {
         name: newChannelName.trim()
       }, { headers: { Authorization: `Bearer ${token}` } });
 
@@ -80,7 +80,7 @@ export default function TeamChatWindow({ currentUser }) {
 
     try {
       const token = localStorage.getItem('token');
-      await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/team/channel-messages/`, {
+      await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/team/channel-messages/`, {
         channel_id: activeChannelId,
         text: textToSend
       }, { headers: { Authorization: `Bearer ${token}` } });

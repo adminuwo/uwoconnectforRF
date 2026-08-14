@@ -39,7 +39,7 @@ export default function WhatsAppConfigModal({ isOpen, onClose, client, onSaved }
       formData.append('profile_picture', file);
 
       await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/clients/${client.id}/update_whatsapp_profile_picture/`,
+        `${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/clients/${client.id}/update_whatsapp_profile_picture/`,
         formData,
         { 
           headers: { 
@@ -166,7 +166,7 @@ export default function WhatsAppConfigModal({ isOpen, onClose, client, onSaved }
       };
 
       const res = await axios.patch(
-        `${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/profile`, 
+        `${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/profile`, 
         payload, 
         { headers: { Authorization: `Bearer ${token}` } }
       );

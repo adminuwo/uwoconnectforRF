@@ -55,7 +55,7 @@ export default function GlobalIncomingCallListener() {
     const token = localStorage.getItem('token');
     if (!token) return;
 
-    const backendUrlStr = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+    const backendUrlStr = process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app';
     const isSecureBackend = backendUrlStr.startsWith('https');
     const protocol = isSecureBackend ? 'wss:' : (window.location.protocol === 'https:' ? 'wss:' : 'ws:');
     const backendHost = new URL(backendUrlStr).host;

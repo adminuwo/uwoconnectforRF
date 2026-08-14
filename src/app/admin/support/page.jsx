@@ -22,7 +22,7 @@ const AdminSupportPage = () => {
   const fetchClients = async (silent = false) => {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/support/messages/clients/`, {
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/support/messages/clients/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setClients(res.data);
@@ -41,7 +41,7 @@ const AdminSupportPage = () => {
     if (!selectedClientId) return;
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/support/messages/?client_id=${selectedClientId}`, {
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/support/messages/?client_id=${selectedClientId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setMessages(res.data);
@@ -99,7 +99,7 @@ const AdminSupportPage = () => {
 
     try {
       const token = localStorage.getItem('token');
-      await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/support/messages/`, {
+      await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/support/messages/`, {
         body: textToSend,
         client_id: selectedClientId
       }, {

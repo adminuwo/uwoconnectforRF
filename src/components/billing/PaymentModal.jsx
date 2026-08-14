@@ -52,7 +52,7 @@ export default function PaymentModal({ isOpen, onClose, selectedPlan = 'GROWTH',
         return;
       }
 
-      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080';
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app';
       const res = await axios.post(
         `${API_URL}/api/payments/create-order`,
         { plan: selectedPlan.toUpperCase(), billing_cycle: billingCycle.toUpperCase() },
@@ -113,7 +113,7 @@ export default function PaymentModal({ isOpen, onClose, selectedPlan = 'GROWTH',
       setVerifying(true);
       setError('');
       const token = localStorage.getItem('token');
-      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080';
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app';
 
       const res = await axios.post(
         `${API_URL}/api/payments/verify-order`,

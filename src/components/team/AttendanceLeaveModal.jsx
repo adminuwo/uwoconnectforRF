@@ -23,7 +23,7 @@ export default function AttendanceLeaveModal({ isOpen, onClose, onActionComplete
     try {
       const token = localStorage.getItem('token');
       await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/team/attendance/clock_in/`,
+        `${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/team/attendance/clock_in/`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -44,7 +44,7 @@ export default function AttendanceLeaveModal({ isOpen, onClose, onActionComplete
     try {
       const token = localStorage.getItem('token');
       await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/team/attendance/clock_out/`,
+        `${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/team/attendance/clock_out/`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -70,7 +70,7 @@ export default function AttendanceLeaveModal({ isOpen, onClose, onActionComplete
     try {
       const token = localStorage.getItem('token');
       await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/team/leaves/`,
+        `${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/team/leaves/`,
         {
           leave_type: leaveType,
           start_date: startDate,

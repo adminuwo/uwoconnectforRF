@@ -45,7 +45,7 @@ export default function ContactDetailsModal({ contact, isOpen, onClose, onUpdate
     setSaving(true);
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.patch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/contacts/${contact.id}/`, formData, {
+      const res = await axios.patch(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/contacts/${contact.id}/`, formData, {
         headers: { Authorization: `Bearer ${token}` }
       });
       onUpdated(res.data);

@@ -35,7 +35,7 @@ const ProposalTemplatesPage = () => {
   const fetchTemplates = async () => {
     setLoading(true);
     const token = localStorage.getItem('token');
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080';
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app';
     try {
       const res = await axios.get(`${API_URL}/api/sales-document-templates/`, {
         headers: { Authorization: `Bearer ${token}` }
@@ -92,7 +92,7 @@ const ProposalTemplatesPage = () => {
 
     setSaving(true);
     const token = localStorage.getItem('token');
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080';
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app';
 
     const payload = {
       name,
@@ -124,7 +124,7 @@ const ProposalTemplatesPage = () => {
   const handleDeleteTemplate = async (tplId) => {
     if (!confirm("Are you sure you want to delete this template?")) return;
     const token = localStorage.getItem('token');
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080';
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app';
     try {
       await axios.delete(`${API_URL}/api/sales-document-templates/${tplId}/`, {
         headers: { Authorization: `Bearer ${token}` }

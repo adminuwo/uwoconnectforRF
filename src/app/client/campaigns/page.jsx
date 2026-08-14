@@ -27,7 +27,7 @@ export default function CampaignsPage() {
   const fetchCampaigns = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/campaigns/`, {
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/campaigns/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setCampaigns(res.data || []);
@@ -42,7 +42,7 @@ export default function CampaignsPage() {
     setSyncing(true);
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/templates/sync_from_meta/`, {}, {
+      const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/templates/sync_from_meta/`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
       alert(res.data.message || "Templates synced successfully!");
@@ -73,7 +73,7 @@ export default function CampaignsPage() {
     
     try {
       const token = localStorage.getItem('token');
-      await axios.delete(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/campaigns/${campaignId}/`, {
+      await axios.delete(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/campaigns/${campaignId}/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setCampaigns(prev => prev.filter(c => {

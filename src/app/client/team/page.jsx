@@ -53,7 +53,7 @@ export default function TeamPage() {
   const fetchProfile = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/profile`, {
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/profile`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setCurrentUser(res.data);
@@ -67,7 +67,7 @@ export default function TeamPage() {
       const token = localStorage.getItem('token');
       const deletedIds = JSON.parse(localStorage.getItem('uwo_deleted_members') || '[]');
 
-      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/team/members/`, {
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/team/members/`, {
         headers: token ? { Authorization: `Bearer ${token}` } : {}
       });
       const rawMembers = Array.isArray(res.data) ? res.data : res.data.results || [];
@@ -81,7 +81,7 @@ export default function TeamPage() {
   const fetchProjects = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/team/projects/`, {
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/team/projects/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setProjects(res.data || []);
@@ -93,7 +93,7 @@ export default function TeamPage() {
   const fetchTasks = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/team/tasks/`, {
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/team/tasks/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setTasks(res.data || []);
@@ -105,7 +105,7 @@ export default function TeamPage() {
   const fetchReports = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/team/reports/`, {
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/team/reports/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setReports(res.data || []);
@@ -118,7 +118,7 @@ export default function TeamPage() {
     if (!confirm('Are you sure you want to delete this project?')) return;
     try {
       const token = localStorage.getItem('token');
-      await axios.delete(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/team/projects/${id}/`, {
+      await axios.delete(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/team/projects/${id}/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       fetchProjects();
@@ -143,7 +143,7 @@ export default function TeamPage() {
     try {
       const token = localStorage.getItem('token');
       if (token) {
-        await axios.delete(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/team/members/${id}/`, {
+        await axios.delete(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/team/members/${id}/`, {
           headers: { Authorization: `Bearer ${token}` }
         });
       }
@@ -161,7 +161,7 @@ export default function TeamPage() {
       const token = localStorage.getItem('token');
       const target = members.find(m => m.id === id);
       const newStatus = target?.status === 'SUSPENDED' ? 'ACTIVE' : 'SUSPENDED';
-      await axios.patch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/team/members/${id}/`, { status: newStatus }, {
+      await axios.patch(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/team/members/${id}/`, { status: newStatus }, {
         headers: { Authorization: `Bearer ${token}` }
       });
       fetchMembers();

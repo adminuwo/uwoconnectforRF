@@ -45,7 +45,7 @@ const AdminClients = () => {
     try {
       setLoading(true);
       const token = localStorage.getItem('token');
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/clients/`, {
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/clients/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setClients(response.data);
@@ -64,7 +64,7 @@ const AdminClients = () => {
     if (!window.confirm('Terminate partner node access?')) return;
     try {
       const token = localStorage.getItem('token');
-      await axios.delete(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/clients/${id}/`, {
+      await axios.delete(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/clients/${id}/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       fetchClients();
@@ -78,7 +78,7 @@ const AdminClients = () => {
     try {
       const token = localStorage.getItem('token');
       const newStatus = currentStatus === 'ACTIVE' ? 'SUSPENDED' : 'ACTIVE';
-      await axios.patch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/clients/${id}/`, { status: newStatus }, {
+      await axios.patch(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/clients/${id}/`, { status: newStatus }, {
         headers: { Authorization: `Bearer ${token}` }
       });
       fetchClients();
@@ -98,7 +98,7 @@ const AdminClients = () => {
     try {
       setIsSubmitting(true);
       const token = localStorage.getItem('token');
-      await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/clients/`, formData, {
+      await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/clients/`, formData, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setIsAddModalOpen(false);

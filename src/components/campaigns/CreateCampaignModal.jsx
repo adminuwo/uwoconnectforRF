@@ -77,7 +77,7 @@ export default function CreateCampaignModal({ isOpen, onClose, onCreated }) {
   const fetchContacts = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/contacts/`, {
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/contacts/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setContacts(res.data || []);
@@ -89,7 +89,7 @@ export default function CreateCampaignModal({ isOpen, onClose, onCreated }) {
   const fetchTemplates = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/templates/`, {
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/templates/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setTemplates(res.data || []);
@@ -105,7 +105,7 @@ export default function CreateCampaignModal({ isOpen, onClose, onCreated }) {
     setAiLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/campaigns/ai_generate/`, {
+      const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/campaigns/ai_generate/`, {
         prompt: messageBody || name || "Create a high converting promotion message",
         action_type: 'improve',
         tone: "professional"
@@ -163,7 +163,7 @@ export default function CreateCampaignModal({ isOpen, onClose, onCreated }) {
         followup_template_id: isFollowUpEnabled ? followupTemplateId : null,
       };
 
-      await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/campaigns/`, payload, {
+      await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/campaigns/`, payload, {
         headers: { Authorization: `Bearer ${token}` }
       });
 

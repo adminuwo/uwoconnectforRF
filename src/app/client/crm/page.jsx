@@ -25,7 +25,7 @@ export default function CRMPage() {
   const fetchContacts = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/contacts/`, {
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/contacts/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setContacts(res.data);
@@ -49,7 +49,7 @@ export default function CRMPage() {
 
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/contacts/import_csv/`, formData, {
+      const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/contacts/import_csv/`, formData, {
         headers: { 
           Authorization: `Bearer ${token}`,
           'Content-Type': 'multipart/form-data'
@@ -71,7 +71,7 @@ export default function CRMPage() {
       setContacts(prev => prev.map(c => c.id === contactId ? { ...c, stage: newStage } : c));
       
       const token = localStorage.getItem('token');
-      await axios.patch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/contacts/${contactId}/`, { stage: newStage }, {
+      await axios.patch(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/contacts/${contactId}/`, { stage: newStage }, {
         headers: { Authorization: `Bearer ${token}` }
       });
     } catch (error) {

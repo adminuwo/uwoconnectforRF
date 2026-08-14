@@ -43,7 +43,7 @@ const ClientSettingsPage = () => {
     try {
       setLoading(true);
       const token = localStorage.getItem('token');
-      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/profile`, {
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/profile`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setClient(res.data.client);
@@ -113,7 +113,7 @@ const ClientSettingsPage = () => {
   const fetchPaymentHistory = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/payments/history`, {
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/payments/history`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setPaymentOrders(res.data.orders || []);
@@ -133,7 +133,7 @@ const ClientSettingsPage = () => {
       const processWhatsAppCode = async () => {
         try {
           const token = localStorage.getItem('token');
-          await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/auth/whatsapp/embedded-signup`, { code }, {
+          await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/auth/whatsapp/embedded-signup`, { code }, {
             headers: { Authorization: `Bearer ${token}` }
           });
           alert("WhatsApp Embedded Signup successful!");

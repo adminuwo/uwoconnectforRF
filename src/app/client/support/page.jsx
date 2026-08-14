@@ -16,7 +16,7 @@ const ClientSupportPage = () => {
   const fetchMessages = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/support/messages/`, {
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/support/messages/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setMessages(res.data);
@@ -56,7 +56,7 @@ const ClientSupportPage = () => {
 
     try {
       const token = localStorage.getItem('token');
-      await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/support/messages/`, {
+      await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/support/messages/`, {
         body: textToSend
       }, {
         headers: { Authorization: `Bearer ${token}` }

@@ -69,7 +69,7 @@ export default function ProjectModal({ isOpen, onClose, onSuccess, members = [] 
       const tagsArray = tagsInput.split(',').map(t => t.trim()).filter(Boolean);
 
       await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/team/projects/`,
+        `${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/team/projects/`,
         {
           name: name.trim(),
           description: description.trim(),

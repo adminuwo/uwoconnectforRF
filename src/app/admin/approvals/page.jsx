@@ -15,7 +15,7 @@ const AdminApprovalsPage = () => {
   const fetchUsers = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/admin/users`, {
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/admin/users`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setUsers(response.data);
@@ -34,7 +34,7 @@ const AdminApprovalsPage = () => {
     setProcessingId(userId);
     try {
       const token = localStorage.getItem('token');
-      await axios.patch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/admin/users/${userId}`, { status }, {
+      await axios.patch(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/admin/users/${userId}`, { status }, {
         headers: { Authorization: `Bearer ${token}` }
       });
       fetchUsers();

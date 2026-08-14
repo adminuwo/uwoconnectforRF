@@ -31,7 +31,7 @@ const AdminAuditLogs = () => {
       if (searchTerm) params.search = searchTerm;
       if (moduleFilter !== 'ALL') params.module = moduleFilter;
 
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/audit-logs/`, {
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/audit-logs/`, {
         headers: { Authorization: `Bearer ${token}` },
         params
       });

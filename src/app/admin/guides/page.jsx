@@ -45,7 +45,7 @@ const AdminGuidesManagementPage = () => {
     setLoading(true);
     const token = localStorage.getItem('token');
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080';
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app';
 
     try {
       const res = await axios.get(`${API_URL}/api/guides/`, { headers });
@@ -60,7 +60,7 @@ const AdminGuidesManagementPage = () => {
   const handleSelectGuide = async (slug) => {
     const token = localStorage.getItem('token');
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080';
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app';
 
     try {
       const res = await axios.get(`${API_URL}/api/guides/${slug}/`, { headers });
@@ -95,7 +95,7 @@ const AdminGuidesManagementPage = () => {
     setSaving(true);
     const token = localStorage.getItem('token');
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080';
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app';
 
     const payload = {
       slug: formSlug,
@@ -127,7 +127,7 @@ const AdminGuidesManagementPage = () => {
     if (!window.confirm('Are you sure you want to delete this guide?')) return;
     const token = localStorage.getItem('token');
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080';
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app';
 
     try {
       await axios.delete(`${API_URL}/api/guides/${slug}/`, { headers });
@@ -144,7 +144,7 @@ const AdminGuidesManagementPage = () => {
     setAddingSection(true);
     const token = localStorage.getItem('token');
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080';
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app';
 
     try {
       await axios.post(`${API_URL}/api/guides/${selectedGuide.slug}/add_section/`, {
@@ -164,7 +164,7 @@ const AdminGuidesManagementPage = () => {
     setAddingStep(true);
     const token = localStorage.getItem('token');
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080';
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app';
 
     try {
       await axios.post(`${API_URL}/api/guides/${selectedGuide.slug}/add_step/`, {

@@ -169,7 +169,7 @@ export default function ClientInboxPage() {
     const token = localStorage.getItem('token');
     if (!token) return;
 
-    let wsUrl = API_BASE_URL || 'http://127.0.0.1:8080';
+    let wsUrl = API_BASE_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app';
     wsUrl = wsUrl.replace(/^http/, 'ws') + `/ws/inbox/?token=${token}`;
     
     const ws = new WebSocket(wsUrl);

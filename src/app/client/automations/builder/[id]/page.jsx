@@ -66,7 +66,7 @@ export default function BuilderPage() {
   const fetchWorkflow = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/workflows/${workflowId}/`, {
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/workflows/${workflowId}/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setWorkflowName(res.data.name);

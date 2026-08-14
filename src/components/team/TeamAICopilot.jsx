@@ -18,7 +18,7 @@ export default function TeamAICopilot() {
     try {
       const token = localStorage.getItem('token');
       const res = await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/team/ai-copilot/`,
+        `${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/team/ai-copilot/`,
         { action, prompt: prompt.trim() },
         { headers: { Authorization: `Bearer ${token}` } }
       );

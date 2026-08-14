@@ -38,7 +38,7 @@ export default function PublicBookingPage() {
     setLoading(true);
     setError('');
     try {
-      const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app';
       const res = await fetch(`${baseUrl}/api/public/calendar/${clientId}/slots?date=${date}`);
       const data = await res.json();
       
@@ -66,7 +66,7 @@ export default function PublicBookingPage() {
     setError('');
 
     try {
-      const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app';
       const res = await fetch(`${baseUrl}/api/public/calendar/${clientId}/book`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

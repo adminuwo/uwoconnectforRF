@@ -53,7 +53,7 @@ export default function OneDriveConfigModal({ isOpen, onClose, client, onSaved }
   const [activeTab, setActiveTab] = useState('overview'); // overview | queue | settings
 
   const isConnected = !!client?.onedrive_config?.drive_id;
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080';
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app';
 
   const fetchDriveInfo = useCallback(async () => {
     if (!isConnected) return;

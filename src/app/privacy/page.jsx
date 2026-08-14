@@ -13,7 +13,7 @@ export default function PrivacyPage() {
   useEffect(() => {
     const fetch = async () => {
       try {
-        const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/admin/settings/global?key=privacy_policy`);
+        const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/admin/settings/global?key=privacy_policy`);
         setContent(res.data.value || '');
         setFileUrl(res.data.file || '');
       } catch (err) {

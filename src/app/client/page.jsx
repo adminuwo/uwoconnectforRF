@@ -184,7 +184,7 @@ const ClientOverview = () => {
 
       try {
         const res = await axios.get(
-          `${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/client/stats`,
+          `${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/client/stats`,
           { headers }
         );
         if (res.data) {
@@ -199,7 +199,7 @@ const ClientOverview = () => {
 
       try {
         const ytRes = await axios.get(
-          `${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/youtube/analytics`,
+          `${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/youtube/analytics`,
           { headers }
         );
         if (ytRes.data && !ytRes.data.error) {
@@ -211,7 +211,7 @@ const ClientOverview = () => {
 
       try {
         const contactsRes = await axios.get(
-          `${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/contacts/`,
+          `${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/contacts/`,
           { headers }
         );
         setContacts(contactsRes.data || []);
@@ -221,7 +221,7 @@ const ClientOverview = () => {
 
       try {
         const newsRes = await axios.get(
-          `${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/google-news/feed?query=technology`,
+          `${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/google-news/feed?query=technology`,
           { headers }
         );
         if (newsRes.data && newsRes.data.articles) {

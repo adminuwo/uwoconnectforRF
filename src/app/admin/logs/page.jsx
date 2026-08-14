@@ -15,7 +15,7 @@ const AdminLogsPage = () => {
     const fetchLogs = async () => {
       try {
         const token = localStorage.getItem('token');
-        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/admin/logs`, {
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/admin/logs`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         setLogs(response.data);

@@ -227,7 +227,7 @@ const QuotationsPage = () => {
     if (!confirm("Are you sure you want to delete this quotation?")) return;
     setActionLoading(prev => ({ ...prev, [docId]: 'delete' }));
     const token = localStorage.getItem('token');
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080';
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app';
     try {
       await axios.delete(`${API_URL}/api/sales-documents/${docId}/`, {
         headers: { Authorization: `Bearer ${token}` }

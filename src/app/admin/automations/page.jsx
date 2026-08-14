@@ -19,7 +19,7 @@ const AdminAutomationsPage = () => {
     try {
       setLoading(true);
       const token = localStorage.getItem('token');
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/admin/automations`, {
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/admin/automations`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setAutomations(response.data);
@@ -35,7 +35,7 @@ const AdminAutomationsPage = () => {
       setDetailsLoading(true);
       setIsDetailsModalOpen(true);
       const token = localStorage.getItem('token');
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/clients/${id}/`, {
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/clients/${id}/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setSelectedClientDetails(response.data);

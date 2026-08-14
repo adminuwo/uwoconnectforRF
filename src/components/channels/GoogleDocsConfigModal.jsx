@@ -38,7 +38,7 @@ export default function GoogleDocsConfigModal({ client, isOpen, onClose, onSaved
 
   const isConnected = Boolean(client?.google_docs_enabled);
   const config = client?.google_docs_config || {};
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080';
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app';
 
   useEffect(() => {
     if (isOpen && isConnected) {
