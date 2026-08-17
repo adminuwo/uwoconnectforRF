@@ -25,20 +25,32 @@ const ClientInboxPage = () => {
   const [isSyncingGmail, setIsSyncingGmail] = useState(false);
   const scrollRef = useRef(null);
 
-  const fetchData = async () => {
+  const fetchData = async (isInitialLoad = false) => {
     try {
       const token = localStorage.getItem('token');
       if (!token) return;
-      const [msgRes, contactRes] = await Promise.all([
+      
+      const promises = [
         axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/messages/`, {
           headers: { Authorization: `Bearer ${token}` }
-        }),
-        axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/contacts/`, {
-          headers: { Authorization: `Bearer ${token}` }
         })
-      ]);
+      ];
+      
+      // Only fetch the massive contacts database on initial load to prevent UI freezing
+      if (isInitialLoad || contacts.length === 0) {
+        promises.push(axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/contacts/`, {
+          headers: { Authorization: `Bearer ${token}` }
+        }));
+      }
+
+      const results = await Promise.all(promises);
+      const msgRes = results[0];
       setMessages(msgRes.data);
-      setContacts(contactRes.data);
+      
+      if (results.length > 1) {
+        setContacts(results[1].data);
+      }
+      
       if (msgRes.data.length > 0 && !selectedConvoId) {
         const firstSender = [...new Set(msgRes.data.map(m => m.from_address))][0];
         setSelectedConvoId(firstSender);
@@ -51,10 +63,10 @@ const ClientInboxPage = () => {
   };
 
   useEffect(() => {
-    fetchData();
+    fetchData(true); // pass true for initial load
 
     // Auto-poll every 3 seconds so new messages load live without page refresh
-    const interval = setInterval(fetchData, 3000);
+    const interval = setInterval(() => fetchData(false), 3000);
     return () => clearInterval(interval);
   }, [selectedConvoId]);
 
