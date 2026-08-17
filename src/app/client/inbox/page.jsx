@@ -24,18 +24,30 @@ const ClientInboxPage = () => {
   const [isDrafting, setIsDrafting] = useState(false);
   const [isSyncingGmail, setIsSyncingGmail] = useState(false);
   const [nextMessageUrl, setNextMessageUrl] = useState(null);
+  const [timeframe, setTimeframe] = useState('48h');
   const scrollRef = useRef(null);
 
   const loadMoreMessages = async () => {
-    if (!nextMessageUrl) return;
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get(nextMessageUrl, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      if (res.data.results) {
-        setMessages(prev => [...prev, ...res.data.results]);
-        setNextMessageUrl(res.data.next);
+      if (nextMessageUrl) {
+        const res = await axios.get(nextMessageUrl, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (res.data.results) {
+          setMessages(prev => [...prev, ...res.data.results]);
+          setNextMessageUrl(res.data.next);
+        }
+      } else if (timeframe === '48h') {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080';
+        const res = await axios.get(`${apiUrl}/api/messages/?timeframe=older`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (res.data.results) {
+          setMessages(prev => [...prev, ...res.data.results]);
+          setNextMessageUrl(res.data.next);
+          setTimeframe('older');
+        }
       }
     } catch (err) {
       console.error("Error loading older messages", err);
@@ -47,10 +59,11 @@ const ClientInboxPage = () => {
       const token = localStorage.getItem('token');
       if (!token) return;
       
+      const headers = { Authorization: `Bearer ${token}` };
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080';
+      
       const promises = [
-        axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/messages/`, {
-          headers: { Authorization: `Bearer ${token}` }
-        })
+        axios.get(`${apiUrl}/api/messages/?timeframe=48h`, { headers })
       ];
       
       // Only fetch the massive contacts database on initial load to prevent UI freezing
@@ -450,7 +463,7 @@ const ClientInboxPage = () => {
                 </button>
               ))}
               
-              {nextMessageUrl && (
+              {(nextMessageUrl || timeframe === '48h') && (
                 <div className="p-4 text-center border-t border-slate-50">
                   <button 
                     onClick={loadMoreMessages}
