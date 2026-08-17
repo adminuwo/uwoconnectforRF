@@ -44,13 +44,6 @@ const ClientOverview = () => {
           { headers }
         );
         setStatsData(res.data);
-
-        // Fetch contacts
-        const contactsRes = await axios.get(
-          `${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/contacts/`,
-          { headers }
-        );
-        setContacts(contactsRes.data || []);
       } catch (err) {
         console.error("Error fetching dashboard data:", err);
       } finally {

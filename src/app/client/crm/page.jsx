@@ -22,17 +22,42 @@ export default function CRMPage() {
   const [viewMode, setViewMode] = useState('kanban'); // 'kanban' or 'sheet'
   const [selectedContact, setSelectedContact] = useState(null);
 
+  const [nextPageUrl, setNextPageUrl] = useState(null);
+
   const fetchContacts = async () => {
     try {
+      setLoading(true);
       const token = localStorage.getItem('token');
       const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/contacts/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setContacts(res.data);
+      // Handle both paginated and non-paginated responses gracefully
+      if (res.data.results) {
+        setContacts(res.data.results);
+        setNextPageUrl(res.data.next);
+      } else {
+        setContacts(res.data);
+      }
     } catch (error) {
       console.error("Error fetching contacts:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadMoreContacts = async () => {
+    if (!nextPageUrl) return;
+    try {
+      const token = localStorage.getItem('token');
+      const res = await axios.get(nextPageUrl, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.data.results) {
+        setContacts(prev => [...prev, ...res.data.results]);
+        setNextPageUrl(res.data.next);
+      }
+    } catch (error) {
+      console.error("Error loading more contacts:", error);
     }
   };
 
@@ -339,6 +364,17 @@ export default function CRMPage() {
                 </div>
               );
             })}
+          </div>
+        )}
+
+        {nextPageUrl && (
+          <div className="mt-8 flex justify-center w-full sticky left-0">
+            <button 
+              onClick={loadMoreContacts}
+              className="px-6 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-xs uppercase tracking-wider rounded-xl transition-all shadow-sm hover:shadow-md cursor-pointer"
+            >
+              Load Older Contacts
+            </button>
           </div>
         )}
       </main>

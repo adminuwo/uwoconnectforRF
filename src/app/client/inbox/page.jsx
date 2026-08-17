@@ -23,7 +23,24 @@ const ClientInboxPage = () => {
   const [isInternal, setIsInternal] = useState(false);
   const [isDrafting, setIsDrafting] = useState(false);
   const [isSyncingGmail, setIsSyncingGmail] = useState(false);
+  const [nextMessageUrl, setNextMessageUrl] = useState(null);
   const scrollRef = useRef(null);
+
+  const loadMoreMessages = async () => {
+    if (!nextMessageUrl) return;
+    try {
+      const token = localStorage.getItem('token');
+      const res = await axios.get(nextMessageUrl, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.data.results) {
+        setMessages(prev => [...prev, ...res.data.results]);
+        setNextMessageUrl(res.data.next);
+      }
+    } catch (err) {
+      console.error("Error loading older messages", err);
+    }
+  };
 
   const fetchData = async (isInitialLoad = false) => {
     try {
@@ -45,10 +62,15 @@ const ClientInboxPage = () => {
 
       const results = await Promise.all(promises);
       const msgRes = results[0];
-      setMessages(msgRes.data);
+      const msgData = msgRes.data.results || msgRes.data;
+      setMessages(msgData);
+      
+      if (msgRes.data.next) {
+        setNextMessageUrl(msgRes.data.next);
+      }
       
       if (results.length > 1) {
-        setContacts(results[1].data);
+        setContacts(results[1].data.results || results[1].data);
       }
       
       if (msgRes.data.length > 0 && !selectedConvoId) {
@@ -427,6 +449,17 @@ const ClientInboxPage = () => {
                   </div>
                 </button>
               ))}
+              
+              {nextMessageUrl && (
+                <div className="p-4 text-center border-t border-slate-50">
+                  <button 
+                    onClick={loadMoreMessages}
+                    className="w-full px-4 py-3 bg-slate-50 hover:bg-slate-100 text-slate-500 font-bold text-[10px] uppercase tracking-wider rounded-xl transition-colors border border-slate-100"
+                  >
+                    Load Older Conversations
+                  </button>
+                </div>
+              )}
             </div>
           </aside>
 
