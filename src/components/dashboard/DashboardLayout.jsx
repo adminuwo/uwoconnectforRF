@@ -39,6 +39,8 @@ const DashboardLayout = ({ children, role: initialRole }) => {
     const token = localStorage.getItem('token');
     
     if (!token || !storedUser) {
+      localStorage.removeItem('aisa_tour_active');
+      localStorage.removeItem('aisa_tour_pending');
       window.location.href = '/auth/login';
       return;
     }
@@ -48,6 +50,8 @@ const DashboardLayout = ({ children, role: initialRole }) => {
         setUser(JSON.parse(storedUser));
       } catch (e) {
         console.warn('Failed to parse user data');
+        localStorage.removeItem('aisa_tour_active');
+        localStorage.removeItem('aisa_tour_pending');
         window.location.href = '/auth/login';
       }
     }

@@ -50,6 +50,16 @@ export const TourProvider = ({ children }) => {
     mountedRef.current = true;
     debugLog('Tour initialized');
 
+    const token = localStorage.getItem('token');
+    const storedUser = localStorage.getItem('user');
+    const isAuthOrPublic = !pathname || pathname === '/' || pathname.startsWith('/auth') || pathname.startsWith('/terms') || pathname.startsWith('/privacy');
+
+    // Do not run or resume tour on unauthenticated or public/auth routes
+    if (!token || !storedUser || isAuthOrPublic) {
+      setIsActive(false);
+      return;
+    }
+
     const pending   = localStorage.getItem(TOUR_PENDING_KEY);
     const completed = localStorage.getItem(TOUR_COMPLETED_KEY);
     const savedStep = localStorage.getItem(TOUR_STEP_KEY);
@@ -76,7 +86,7 @@ export const TourProvider = ({ children }) => {
       }
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [pathname]);
 
   // ── Detect page change while tour is active ────────────────────────────────
   useEffect(() => {

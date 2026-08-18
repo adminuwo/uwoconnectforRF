@@ -28,8 +28,11 @@ export default function TeamChatWindow({ currentUser }) {
     }
   };
 
+  const isFetchingRef = useRef(false);
+
   const fetchMessages = async () => {
-    if (!activeChannelId) return;
+    if (!activeChannelId || isFetchingRef.current) return;
+    isFetchingRef.current = true;
     try {
       const token = localStorage.getItem('token');
       const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/team/channel-messages/?channel_id=${activeChannelId}`, {
@@ -38,6 +41,8 @@ export default function TeamChatWindow({ currentUser }) {
       setMessages(res.data);
     } catch (err) {
       console.error('Failed to fetch chat messages:', err);
+    } finally {
+      isFetchingRef.current = false;
     }
   };
 
@@ -48,7 +53,7 @@ export default function TeamChatWindow({ currentUser }) {
   useEffect(() => {
     if (activeChannelId) {
       fetchMessages();
-      const interval = setInterval(fetchMessages, 3000);
+      const interval = setInterval(fetchMessages, 6000);
       return () => clearInterval(interval);
     }
   }, [activeChannelId]);

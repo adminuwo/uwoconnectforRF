@@ -13,7 +13,11 @@ const ClientSupportPage = () => {
   const [loading, setLoading] = useState(true);
   const scrollRef = useRef(null);
 
+  const isFetchingRef = useRef(false);
+
   const fetchMessages = async () => {
+    if (isFetchingRef.current) return;
+    isFetchingRef.current = true;
     try {
       const token = localStorage.getItem('token');
       const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/support/messages/`, {
@@ -24,12 +28,13 @@ const ClientSupportPage = () => {
       console.warn('Failed to fetch support messages');
     } finally {
       setLoading(false);
+      isFetchingRef.current = false;
     }
   };
 
   useEffect(() => {
     fetchMessages();
-    const interval = setInterval(fetchMessages, 4000);
+    const interval = setInterval(fetchMessages, 6000);
     return () => clearInterval(interval);
   }, []);
 

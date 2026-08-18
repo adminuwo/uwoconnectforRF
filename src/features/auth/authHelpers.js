@@ -31,4 +31,5 @@ export function clearUserSession() {
   localStorage.removeItem('user');
   localStorage.removeItem('aisa_tour_pending');
   localStorage.removeItem('aisa_tour_step');
+  localStorage.removeItem('aisa_tour_active');
 }
