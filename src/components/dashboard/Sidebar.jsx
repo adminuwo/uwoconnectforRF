@@ -29,7 +29,9 @@ import {
   Mail,
   PhoneCall,
   CreditCard,
-  FileText
+  FileText,
+  Search,
+  Bot
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -72,7 +74,7 @@ const TeamsIcon = ({ size = 16, className }) => (
 
 /**
  * Sidebar
- * isOpen = true  → full expanded sidebar (icons + labels, 256 px)
+ * isOpen = true  → full expanded sidebar (icons + labels, 220 px)
  * isOpen = false → collapsed icon-rail (icons only, 56 px)
  */
 const Sidebar = ({ role, isOpen, onClose, onToggle }) => {
@@ -81,17 +83,26 @@ const Sidebar = ({ role, isOpen, onClose, onToggle }) => {
 
   const adminLinks = [
     { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
-    { name: 'Client List', href: '/admin/clients', icon: Link2 },
+    { name: 'Clients', href: '/admin/clients', icon: Users },
+    { name: 'Global Search', href: '/admin/search', icon: Search },
+    { name: 'Team', href: '/admin/team', icon: ShieldCheck },
+    { name: 'Channels', href: '/admin/channels', icon: Link2 },
+    { name: 'Live Messages', href: '/admin/inbox', icon: MessageSquare },
+    { name: 'AI & Bots', href: '/admin/ai', icon: Bot },
+    { name: 'Knowledge Base', href: '/admin/knowledge', icon: Brain },
+    { name: 'Emails', href: '/admin/emails', icon: Mail },
+    { name: 'Products', href: '/admin/products', icon: ShoppingBag },
+    { name: 'Sales & Orders', href: '/admin/sales', icon: CreditCard },
+    { name: 'Quotations', href: '/admin/quotations', icon: FileCheck },
+    { name: 'Proposals', href: '/admin/proposals', icon: FileText },
+    { name: 'Invoices', href: '/admin/invoices', icon: Receipt },
+    { name: 'Work Reports', href: '/admin/reports', icon: FileCheck },
     { name: 'Approvals', href: '/admin/approvals', icon: ShieldCheck },
-    { name: 'Guide Admin', href: '/admin/guides', icon: BookOpen },
-    { name: 'Automations', href: '/admin/automations', icon: Zap },
-    { name: 'Messages', href: '/admin/inbox', icon: MessageSquare },
     { name: 'Audit Logs', href: '/admin/audit-logs', icon: Activity },
-    { name: 'Policy', href: '/admin/settings/legal', icon: Scale },
-    { name: 'Analytics', href: '/admin/stats', icon: GitBranch },
     { name: 'Settings', href: '/admin/settings', icon: Settings },
     { name: 'Support', href: '/admin/support', icon: LifeBuoy },
   ];
+
 
   const clientLinks = [
     { name: 'Dashboard', href: '/client', icon: LayoutDashboard },

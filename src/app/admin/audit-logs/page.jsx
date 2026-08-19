@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import axios from 'axios';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
+import { API_BASE_URL } from '@/config/apiConfig';
 
 const AdminAuditLogs = () => {
   const [logs, setLogs] = useState([]);
@@ -31,7 +32,7 @@ const AdminAuditLogs = () => {
       if (searchTerm) params.search = searchTerm;
       if (moduleFilter !== 'ALL') params.module = moduleFilter;
 
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/audit-logs/`, {
+      const response = await axios.get(`${API_BASE_URL}/api/audit-logs/`, {
         headers: { Authorization: `Bearer ${token}` },
         params
       });

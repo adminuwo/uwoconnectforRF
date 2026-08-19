@@ -1,56 +1,69 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { 
-  Users, 
-  Search, 
-  Plus, 
-  Trash2, 
-  Mail, 
-  ShieldCheck, 
-  Loader2,
-  Target,
-  Zap,
-  ChevronRight,
-  ShieldAlert,
-  Activity,
-  Power,
-  X,
-  Globe,
-  Key,
-  Smartphone,
-  Lock,
-  MoreVertical,
-  MessageSquare
+  Users, Search, Plus, Trash2, Mail, ShieldCheck, Loader2,
+  ChevronRight, Activity, Power, X, Globe, Smartphone,
+  MoreVertical, MessageSquare, Eye, ExternalLink, CheckCircle2,
+  XCircle, Clock, RefreshCw, ChevronLeft, ChevronRight as ChevronRightIcon,
+  Layers, Bot, Receipt, FileText, Share2, Key, EyeOff
 } from 'lucide-react';
 import axios from 'axios';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { cn } from '@/lib/utils';
-const AdminClients = () => {
+import { API_BASE_URL } from '@/config/apiConfig';
+
+export default function AdminClients() {
+  const router = useRouter();
   const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('ALL');
+  const [approvalFilter, setApprovalFilter] = useState('ALL');
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+
   const [activeMenuId, setActiveMenuId] = useState(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [selectedClientForDetails, setSelectedClientForDetails] = useState(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [actionLoading, setActionLoading] = useState({});
+  // New state for delete confirmation modal
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [clientToDelete, setClientToDelete] = useState(null);
+  // New state for password change modal
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+  const [clientForPassword, setClientForPassword] = useState(null);
+  const [newPassword, setNewPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+
   const [formData, setFormData] = useState({
     business_name: '',
     email: '',
-    whatsapp_access_token: '',
-    whatsapp_phone_number_id: '',
+    phone_number: '',
+    plan: 'GROWTH'
   });
 
   const fetchClients = async () => {
     try {
       setLoading(true);
       const token = localStorage.getItem('token');
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/clients/`, {
-        headers: { Authorization: `Bearer ${token}` }
+      const res = await axios.get(`${API_BASE_URL}/api/admin/clients-directory/`, {
+        headers: { Authorization: `Bearer ${token}` },
+        params: {
+          search: searchTerm,
+          status: statusFilter,
+          approval: approvalFilter,
+          page: page,
+          page_size: 10
+        }
       });
-      setClients(response.data);
+      setClients(res.data.results || []);
+      setTotalPages(res.data.total_pages || 1);
+      setTotalCount(res.data.total_count || 0);
     } catch (err) {
-      console.error('Failed to fetch clients');
+      console.error('Failed to fetch clients', err);
     } finally {
       setLoading(false);
     }
@@ -58,471 +71,581 @@ const AdminClients = () => {
 
   useEffect(() => {
     fetchClients();
-  }, []);
+  }, [searchTerm, statusFilter, approvalFilter, page]);
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('Terminate partner node access?')) return;
+  const handleClientAction = async (clientId, action, extraPayload = {}) => {
     try {
+      setActionLoading(prev => ({ ...prev, [clientId]: true }));
       const token = localStorage.getItem('token');
-      await axios.delete(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/clients/${id}/`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await axios.post(
+        `${API_BASE_URL}/api/admin/clients/${clientId}/action/`,
+        { action, ...extraPayload },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
       fetchClients();
     } catch (err) {
-      alert('Termination failed.');
+      alert(err.response?.data?.error || 'Action failed');
+    } finally {
+      setActionLoading(prev => ({ ...prev, [clientId]: false }));
+      setActiveMenuId(null);
     }
-    setActiveMenuId(null);
   };
 
-  const handleStatusToggle = async (id, currentStatus) => {
+  const handleOpenClientWorkspace = async (client) => {
     try {
       const token = localStorage.getItem('token');
-      const newStatus = currentStatus === 'ACTIVE' ? 'SUSPENDED' : 'ACTIVE';
-      await axios.patch(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/clients/${id}/`, { status: newStatus }, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      fetchClients();
+      const currentUser = localStorage.getItem('user');
+
+      localStorage.setItem('admin_backup_token', token);
+      localStorage.setItem('admin_backup_user', currentUser);
+
+      const res = await axios.post(
+        `${API_BASE_URL}/api/admin/impersonate/`,
+        { client_id: client.id },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      if (res.data.access) {
+        localStorage.setItem('token', res.data.access);
+        localStorage.setItem('user', JSON.stringify(res.data.user));
+        localStorage.setItem('impersonation_session', JSON.stringify({
+          client_id: client.id,
+          client_name: client.company_name || client.client_name,
+          admin_name: res.data.impersonating?.impersonator_name || 'Admin'
+        }));
+
+        window.location.href = '/client';
+      }
     } catch (err) {
-      alert('Failed to update status.');
+      alert(err.response?.data?.error || 'Failed to open client workspace.');
     }
-    setActiveMenuId(null);
   };
 
-  const handleMessageClient = (email) => {
-    window.location.href = `mailto:${email}?subject=UwoConnect%20Support`;
-    setActiveMenuId(null);
-  };
-
-  const handleAddClient = async (e) => {
+  const handleCreateClient = async (e) => {
     e.preventDefault();
     try {
-      setIsSubmitting(true);
       const token = localStorage.getItem('token');
-      await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/clients/`, formData, {
+      await axios.post(`${API_BASE_URL}/api/clients/`, formData, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setIsAddModalOpen(false);
-      setFormData({ business_name: '', email: '', whatsapp_access_token: '', whatsapp_phone_number_id: '' });
+      setFormData({ business_name: '', email: '', phone_number: '', plan: 'GROWTH' });
       fetchClients();
     } catch (err) {
-      alert('Failed to provision partner node.');
-    } finally {
-      setIsSubmitting(false);
+      alert(err.response?.data?.error || 'Failed to register client.');
     }
   };
 
-  const filteredClients = clients.filter(c => 
-    (c.name || '').toLowerCase().includes(searchTerm.toLowerCase()) || 
-    (c.email || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (c.business_name || '').toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const handleOpenDeleteModal = (client) => {
+    setClientToDelete(client);
+    setIsDeleteModalOpen(true);
+    setActiveMenuId(null);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!clientToDelete) return;
+    try {
+      await handleClientAction(clientToDelete.id, 'DELETE_CLIENT');
+      setIsDeleteModalOpen(false);
+      setClientToDelete(null);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleOpenPasswordModal = (client) => {
+    setClientForPassword(client);
+    setNewPassword('');
+    setShowPassword(false);
+    setIsPasswordModalOpen(true);
+    setActiveMenuId(null);
+  };
+
+  const handleConfirmPasswordChange = async () => {
+    if (!clientForPassword || !newPassword) return;
+    try {
+      await handleClientAction(clientForPassword.id, 'CHANGE_PASSWORD', { new_password: newPassword });
+      setIsPasswordModalOpen(false);
+      setClientForPassword(null);
+      setNewPassword('');
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   return (
     <DashboardLayout role="ADMIN">
-      <div className="max-w-7xl mx-auto pb-20 px-4 font-sans" onClick={() => setActiveMenuId(null)}>
+      <div className="max-w-full pb-20 px-4 sm:px-10 lg:px-12 font-sans" onClick={() => setActiveMenuId(null)}>
         
-        {/* Header */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-10">
+        {/* ── Clean Minimal Header ── */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 my-8">
           <div>
-            <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight mb-2">Client List</h1>
-            <p className="text-slate-500 font-medium italic">Manage your clients and their message settings here.</p>
-          </div>
-          
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full lg:w-auto">
-            <div className="relative group flex-1 sm:flex-initial">
-               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#059669] transition-colors" size={18} />
-               <input 
-                  type="text" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
-                  placeholder="Search clients..."
-                  className="bg-white border border-slate-200 focus:border-[#059669] px-12 py-3.5 rounded-2xl outline-none w-full sm:w-[280px] font-bold text-xs transition-all shadow-sm italic placeholder:text-slate-300"
-               />
+            <div className="flex items-center gap-2">
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+                Clients
+              </h1>
+              <span className="px-2.5 py-0.5 bg-emerald-50 text-[#059669] text-xs font-bold rounded-full border border-emerald-100">
+                {totalCount} total
+              </span>
             </div>
-             <button 
-                onClick={() => setIsAddModalOpen(true)}
-                className="p-3.5 bg-[#059669] text-white rounded-2xl hover:bg-[#047857] transition-all shadow-lg shadow-emerald-100 group flex items-center justify-center"
-             >
-                <Plus size={24} strokeWidth={3} className="group-hover:rotate-90 transition-transform" />
-             </button>
+            <p className="text-slate-500 text-xs sm:text-sm mt-1">
+              Manage client workspaces, channels, messages, and team permissions.
+            </p>
           </div>
-        </div>
 
-        {/* Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {loading ? (
-            <div className="col-span-full py-24 flex flex-col items-center gap-4">
-               <div className="w-10 h-10 border-4 border-emerald-100 border-t-[#059669] rounded-full animate-spin" />
-               <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Loading clients...</p>
-            </div>
-          ) : filteredClients.length === 0 ? (
-            <div className="col-span-full py-24 bg-white rounded-[32px] border border-slate-200 flex flex-col items-center text-center px-10 shadow-sm">
-               <div className="w-16 h-16 bg-emerald-50 text-emerald-200 rounded-2xl flex items-center justify-center mb-6">
-                  <Target size={32} />
-               </div>
-               <h3 className="text-xl font-bold text-slate-900 mb-2">No clients found</h3>
-               <p className="text-slate-500 max-w-sm font-medium italic">Add your first client to get started.</p>
-            </div>
-          ) : filteredClients.map((client, index) => (
-            <div
-              key={client._id || client.id}
-              className="bg-white p-8 rounded-[32px] border border-slate-200 hover:border-[#059669]/30 transition-all group relative shadow-sm hover:shadow-xl"
-            >
-              <div className="flex items-start justify-between mb-8">
-                 <div className="w-16 h-16 bg-[#059669] text-white rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-100 group-hover:rotate-12 transition-transform border border-[#047857]">
-                    <span className="text-2xl font-black italic uppercase leading-none">{(client.business_name || client.name || 'P')[0]}</span>
-                 </div>
-                 <div className="flex items-center gap-2 relative">
-                    <div className={cn(
-                       "px-3 py-1 rounded-lg text-[9px] font-bold uppercase tracking-widest border italic",
-                       client.status === 'ACTIVE' ? "bg-green-50 text-green-600 border-green-100" : "bg-red-50 text-red-600 border-red-100"
-                    )}>
-                       {client.status || 'ACTIVE'}
-                    </div>
-                    
-                    {/* More Menu Toggle */}
-                    <div className="relative">
-                      <button 
-                        onClick={(e) => { e.stopPropagation(); setActiveMenuId(activeMenuId === (client._id || client.id) ? null : (client._id || client.id)); }} 
-                        className="p-2 bg-slate-50 hover:bg-emerald-50 hover:text-[#059669] rounded-xl text-slate-400 transition-colors border border-slate-100"
-                      >
-                          <MoreVertical size={20} />
-                      </button>
- 
-                      {/* Dropdown Menu */}
-                      
-                        {activeMenuId === (client._id || client.id) && (
-                          <div
-                            className="absolute right-0 top-full mt-2 w-48 bg-white border border-slate-200 rounded-2xl shadow-xl z-20 py-2"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <button onClick={() => handleMessageClient(client.email)} className="w-full px-4 py-2.5 flex items-center gap-3 text-sm font-semibold text-slate-600 hover:bg-emerald-50 hover:text-[#059669] transition-colors text-left">
-                               <MessageSquare size={16} /> Send Message
-                            </button>
-                            <button onClick={() => handleStatusToggle(client._id || client.id, client.status || 'ACTIVE')} className="w-full px-4 py-2.5 flex items-center gap-3 text-sm font-semibold text-slate-600 hover:bg-amber-50 hover:text-amber-600 transition-colors text-left">
-                               <Power size={16} /> {client.status === 'ACTIVE' ? 'Suspend' : 'Activate'}
-                            </button>
-                            <div className="h-[1px] bg-slate-100 my-1 mx-4" />
-                            <button onClick={() => handleDelete(client._id || client.id)} className="w-full px-4 py-2.5 flex items-center gap-3 text-sm font-semibold text-red-500 hover:bg-red-50 transition-colors text-left">
-                               <Trash2 size={16} /> Delete
-                            </button>
-                          </div>
-                        )}
-                      
-                    </div>
-                 </div>
-              </div>
- 
-              <div className="space-y-2 mb-8">
-                 <h3 className="text-xl font-black text-slate-900 tracking-tight group-hover:text-[#059669] transition-colors uppercase leading-none">{client.business_name || client.name}</h3>
-                 <div className="flex items-center gap-2 text-slate-400">
-                    <Mail size={16} strokeWidth={2.5} />
-                    <span className="text-sm font-medium italic truncate">{client.email || 'No email provided'}</span>
-                 </div>
-              </div>
- 
-              <div className="flex items-center justify-between pt-6 border-t border-slate-100">
-                 <div className="flex items-center gap-2">
-                    <div className={cn(
-                       "w-2 h-2 rounded-full shadow-[0_0_8px_rgba(34,197,94,0.5)]",
-                       client.status === 'ACTIVE' ? "bg-green-500" : "bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]"
-                    )} />
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest italic">{client.status === 'ACTIVE' ? 'Online' : 'Inactive'}</span>
-                 </div>
-                  <button 
-                    onClick={(e) => { e.stopPropagation(); setSelectedClientForDetails(client); }}
-                    className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest hover:text-[#059669] transition-colors italic group/access cursor-pointer"
-                  >
-                     View Details <ChevronRight size={18} strokeWidth={4} className="group-hover/access:translate-x-1 transition-transform" />
-                  </button>
-              </div>
-            </div>
-          ))}
-        </div>
- 
-        {/* Footer Hub */}
-        <div className="mt-16 p-6 sm:p-10 bg-slate-50 rounded-[40px] border border-slate-200 flex flex-col lg:flex-row lg:items-center justify-between gap-8 group">
-           <div className="flex items-center gap-6">
-              <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center border border-slate-200 shadow-sm group-hover:rotate-12 transition-transform shrink-0">
-                 <ShieldAlert size={32} className="text-slate-300 group-hover:text-[#059669] transition-colors" />
-              </div>
-              <div>
-                 <h3 className="text-xl font-bold text-slate-900 tracking-tight uppercase mb-1 leading-none">System Status</h3>
-                 <p className="text-slate-500 text-sm font-medium italic leading-relaxed">Your system is secure. All messages are encrypted and protected.</p>
-              </div>
-           </div>
-            <button 
+          <div className="flex items-center gap-3">
+            <button
               onClick={() => setIsAddModalOpen(true)}
-              className="px-10 py-4 bg-emerald-600 text-white rounded-2xl font-bold uppercase tracking-widest text-[11px] hover:bg-black transition-all shadow-xl italic group"
+              className="flex items-center gap-2 px-4 py-2.5 bg-[#059669] hover:bg-emerald-700 text-white rounded-xl font-bold text-xs shadow-sm transition-all cursor-pointer"
             >
-               Add New Client
+              <Plus size={15} /> Add Client
             </button>
-         </div>
- 
-        {/* Add Client Modal */}
-        
-          {isAddModalOpen && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
-              <div
-                onClick={() => setIsAddModalOpen(false)}
-                className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
-              />
-              <div
-                className="relative bg-white w-full max-w-xl rounded-[32px] sm:rounded-[40px] shadow-2xl overflow-hidden border border-slate-200 max-h-[90vh] flex flex-col"
-              >
-                <div className="p-6 sm:p-10 overflow-y-auto flex-1">
-                  <div className="flex items-center justify-between mb-8">
-                    <div>
-                      <h2 className="text-2xl font-black text-slate-900 tracking-tight uppercase leading-none mb-2">Add Client</h2>
-                      <p className="text-slate-400 text-xs font-bold uppercase tracking-widest italic">Set up a new client account</p>
-                    </div>
-                    <button onClick={() => setIsAddModalOpen(false)} className="p-3 hover:bg-slate-50 rounded-2xl text-slate-400 transition-colors">
-                      <X size={24} />
-                    </button>
-                  </div>
- 
-                  {/* Channel Selector (Currently WhatsApp Only) */}
-                  <div className="flex gap-4 mb-8">
-                    <div className="flex-1 p-4 rounded-2xl bg-emerald-50 border border-emerald-100 flex flex-col items-center gap-2">
-                       <Smartphone className="text-[#059669]" size={24} />
-                       <span className="text-[10px] font-black text-[#059669] uppercase tracking-widest italic">WhatsApp</span>
-                    </div>
-                    <div className="flex-1 p-4 rounded-2xl bg-slate-50 border border-slate-100 flex flex-col items-center gap-2 opacity-40 cursor-not-allowed group relative">
-                       <Globe className="text-slate-400" size={24} />
-                       <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">Facebook</span>
-                       <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                          <div className="bg-emerald-600 text-white text-[8px] px-2 py-1 rounded-full font-bold uppercase tracking-tighter">Locked</div>
-                       </div>
-                    </div>
-                    <div className="flex-1 p-4 rounded-2xl bg-slate-50 border border-slate-100 flex flex-col items-center gap-2 opacity-40 cursor-not-allowed group relative">
-                       <Smartphone className="text-slate-400" size={24} />
-                       <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">Instagram</span>
-                       <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                          <div className="bg-emerald-600 text-white text-[8px] px-2 py-1 rounded-full font-bold uppercase tracking-tighter">Locked</div>
-                       </div>
-                    </div>
-                  </div>
- 
-                  <form onSubmit={handleAddClient} className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Business Name</label>
-                        <div className="relative">
-                          <Globe className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={18} />
-                          <input 
-                            required type="text" value={formData.business_name}
-                            onChange={(e) => setFormData({...formData, business_name: e.target.value})}
-                            className="w-full bg-slate-50 border border-slate-100 focus:border-[#059669] px-12 py-4 rounded-2xl outline-none font-bold text-sm transition-all"
-                            placeholder="e.g. AI Mall Global"
-                          />
-                        </div>
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Email Address</label>
-                        <div className="relative">
-                          <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={18} />
-                          <input 
-                            required type="email" value={formData.email}
-                            onChange={(e) => setFormData({...formData, email: e.target.value})}
-                            className="w-full bg-slate-50 border border-slate-100 focus:border-[#059669] px-12 py-4 rounded-2xl outline-none font-bold text-sm transition-all"
-                            placeholder="client@domain.com"
-                          />
-                        </div>
-                      </div>
-                    </div>
- 
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">WhatsApp Access Token</label>
-                      <div className="relative">
-                        <Key className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={18} />
-                        <textarea 
-                          required value={formData.whatsapp_access_token}
-                          onChange={(e) => setFormData({...formData, whatsapp_access_token: e.target.value})}
-                          className="w-full bg-slate-50 border border-slate-100 focus:border-[#059669] px-12 py-4 rounded-2xl outline-none font-bold text-sm transition-all h-24 resize-none"
-                          placeholder="EAAhZ..."
-                        />
-                      </div>
-                    </div>
- 
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Phone Number ID</label>
-                      <div className="relative">
-                        <Smartphone className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={18} />
-                        <input 
-                          required type="text" value={formData.whatsapp_phone_number_id}
-                          onChange={(e) => setFormData({...formData, whatsapp_phone_number_id: e.target.value})}
-                          className="w-full bg-slate-50 border border-slate-100 focus:border-[#059669] px-12 py-4 rounded-2xl outline-none font-bold text-sm transition-all"
-                          placeholder="1029384756..."
-                        />
-                      </div>
-                    </div>
- 
-                    <button 
-                      type="submit" disabled={isSubmitting}
-                      className="w-full py-5 bg-[#059669] text-white rounded-[24px] font-black uppercase tracking-[0.2em] text-xs hover:bg-[#047857] transition-all shadow-xl shadow-emerald-100 active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-3"
-                    >
-                      {isSubmitting ? <Loader2 className="animate-spin" /> : <Zap size={18} />}
-                      {isSubmitting ? 'Adding...' : 'Add Client'}
-                    </button>
-                  </form>
-                </div>
-              </div>
-            </div>
-          )}
-        
-        {/* Client Details Modal */}
-        {selectedClientForDetails && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
-            <div
-              onClick={() => setSelectedClientForDetails(null)}
-              className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
-            />
-            <div
-              className="relative bg-white w-full max-w-2xl rounded-[32px] sm:rounded-[40px] shadow-2xl overflow-hidden border border-slate-200 text-slate-800 animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] flex flex-col"
-              onClick={e => e.stopPropagation()}
+            <button
+              onClick={fetchClients}
+              className="p-2.5 bg-white hover:bg-slate-50 text-slate-600 rounded-xl border border-slate-200 transition-all cursor-pointer shadow-2xs"
+              title="Refresh"
             >
-              <div className="p-6 sm:p-10 overflow-y-auto flex-1 space-y-8">
-                <div className="flex items-center justify-between border-b border-slate-100 pb-6">
-                  <div>
-                    <h2 className="text-2xl font-black text-slate-900 tracking-tight uppercase leading-none mb-2">Client Profile</h2>
-                    <p className="text-slate-400 text-xs font-bold uppercase tracking-widest italic">{selectedClientForDetails.business_name || selectedClientForDetails.name}</p>
-                  </div>
-                  <button onClick={() => setSelectedClientForDetails(null)} className="p-3 hover:bg-slate-50 rounded-2xl text-slate-400 transition-colors">
-                    <X size={24} />
-                  </button>
-                </div>
+              <RefreshCw size={15} />
+            </button>
+          </div>
+        </div>
 
-                {/* Grid for General details */}
-                <div className="grid grid-cols-2 gap-6 bg-slate-50 p-6 rounded-3xl border border-slate-100">
-                  <div>
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Status</span>
-                    <span className={cn(
-                      "px-2.5 py-1 rounded-lg text-[9px] font-bold uppercase tracking-wider border italic inline-block",
-                      selectedClientForDetails.status === 'ACTIVE' ? "bg-green-50 text-green-600 border-green-100" : "bg-red-50 text-red-600 border-red-100"
-                    )}>
-                      {selectedClientForDetails.status || 'ACTIVE'}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Email</span>
-                    <span className="text-sm font-bold text-slate-800 break-all">{selectedClientForDetails.email || 'N/A'}</span>
-                  </div>
-                  <div>
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Phone Number</span>
-                    <span className="text-sm font-bold text-slate-800">{selectedClientForDetails.phone_number || 'N/A'}</span>
-                  </div>
-                  <div>
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Created At</span>
-                    <span className="text-sm font-bold text-slate-800">
-                      {selectedClientForDetails.created_at ? new Date(selectedClientForDetails.created_at).toLocaleString() : 'N/A'}
-                    </span>
-                  </div>
-                </div>
+        {/* ── Clean Search & Status Pills Filter Bar ── */}
+        <div className="bg-white rounded-2xl border border-slate-200/80 p-3 sm:p-4 shadow-2xs mb-6 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+          {/* Search */}
+          <div className="relative flex-1">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+            <input
+              type="text"
+              name="search_client_directory_input"
+              autoComplete="off"
+              placeholder="Search by company, name, email or phone..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800 placeholder-slate-400 focus:bg-white focus:border-[#059669] transition-all outline-none"
+            />
+          </div>
 
-                {/* Configurations */}
-                <div className="space-y-6">
-                  <h3 className="text-xs font-black text-slate-900 uppercase tracking-widest border-b border-slate-100 pb-2">Connected Integration Channels</h3>
+          {/* Quick Filter Pills */}
+          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+            {[
+              { id: 'ALL', label: 'All' },
+              { id: 'ACTIVE', label: 'Active' },
+              { id: 'SUSPENDED', label: 'Suspended' }
+            ].map((f) => (
+              <button
+                key={f.id}
+                onClick={() => setStatusFilter(f.id)}
+                className={cn(
+                  "px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer",
+                  statusFilter === f.id
+                    ? "bg-slate-900 text-white shadow-2xs"
+                    : "bg-slate-50 text-slate-600 hover:bg-slate-100"
+                )}
+              >
+                {f.label}
+              </button>
+            ))}
 
-                  {/* WhatsApp Details */}
-                  <div className="border border-slate-100 rounded-3xl p-5 space-y-4">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm font-black text-slate-800 flex items-center gap-2">
-                        <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" /> WhatsApp Cloud API
-                      </span>
-                      <span className={cn(
-                        "text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider border",
-                        selectedClientForDetails.whatsapp_phone_number_id ? "bg-emerald-50 text-emerald-600 border-emerald-100" : "bg-slate-50 text-slate-400 border-slate-100"
-                      )}>
-                        {selectedClientForDetails.whatsapp_phone_number_id ? 'Configured' : 'Not Configured'}
-                      </span>
-                    </div>
-                    {selectedClientForDetails.whatsapp_phone_number_id && (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs bg-slate-50/50 p-4 rounded-2xl border border-slate-100/50">
-                        <div>
-                          <span className="text-slate-400 font-semibold block mb-0.5">WABA ID</span>
-                          <span className="font-bold text-slate-700 select-all">{selectedClientForDetails.whatsapp_waba_id || 'N/A'}</span>
-                        </div>
-                        <div>
-                          <span className="text-slate-400 font-semibold block mb-0.5">Phone Number ID</span>
-                          <span className="font-bold text-slate-700 select-all">{selectedClientForDetails.whatsapp_phone_number_id || 'N/A'}</span>
-                        </div>
-                      </div>
-                    )}
-                  </div>
+            <div className="h-4 w-px bg-slate-200 mx-1" />
 
-                  {/* Facebook Details */}
-                  <div className="border border-slate-100 rounded-3xl p-5 space-y-4">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm font-black text-slate-800 flex items-center gap-2">
-                        <span className="w-2.5 h-2.5 rounded-full bg-blue-500" /> Facebook Messenger
-                      </span>
-                      <span className={cn(
-                        "text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider border",
-                        selectedClientForDetails.facebook_config?.page_id ? "bg-blue-50 text-blue-600 border-blue-100" : "bg-slate-50 text-slate-400 border-slate-100"
-                      )}>
-                        {selectedClientForDetails.facebook_config?.page_id ? 'Configured' : 'Not Configured'}
-                      </span>
-                    </div>
-                    {selectedClientForDetails.facebook_config?.page_id && (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs bg-slate-50/50 p-4 rounded-2xl border border-slate-100/50">
-                        <div>
-                          <span className="text-slate-400 font-semibold block mb-0.5">Page Name</span>
-                          <span className="font-bold text-slate-700">{selectedClientForDetails.facebook_config?.page_name || 'N/A'}</span>
-                        </div>
-                        <div>
-                          <span className="text-slate-400 font-semibold block mb-0.5">Page ID</span>
-                          <span className="font-bold text-slate-700 select-all">{selectedClientForDetails.facebook_config?.page_id || 'N/A'}</span>
-                        </div>
-                      </div>
-                    )}
-                  </div>
+            {[
+              { id: 'ALL', label: 'All Status' },
+              { id: 'PENDING', label: 'Pending Approval' }
+            ].map((f) => (
+              <button
+                key={f.id}
+                onClick={() => setApprovalFilter(f.id)}
+                className={cn(
+                  "px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer",
+                  approvalFilter === f.id
+                    ? "bg-emerald-600 text-white shadow-2xs"
+                    : "bg-slate-50 text-slate-600 hover:bg-slate-100"
+                )}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
+        </div>
 
-                  {/* Instagram Details */}
-                  <div className="border border-slate-100 rounded-3xl p-5 space-y-4">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm font-black text-slate-800 flex items-center gap-2">
-                        <span className="w-2.5 h-2.5 rounded-full bg-pink-500" /> Instagram DM
-                      </span>
-                      <span className={cn(
-                        "text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider border",
-                        selectedClientForDetails.instagram_config?.instagram_business_id ? "bg-pink-50 text-pink-600 border-pink-100" : "bg-slate-50 text-slate-400 border-slate-100"
-                      )}>
-                        {selectedClientForDetails.instagram_config?.instagram_business_id ? 'Configured' : 'Not Configured'}
-                      </span>
-                    </div>
-                    {selectedClientForDetails.instagram_config?.instagram_business_id && (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs bg-slate-50/50 p-4 rounded-2xl border border-slate-100/50">
-                        <div>
-                          <span className="text-slate-400 font-semibold block mb-0.5">Account Name</span>
-                          <span className="font-bold text-slate-700">{selectedClientForDetails.instagram_config?.page_name || 'N/A'}</span>
+        {/* ── Spacious, Simple Clients Table ── */}
+        <div className="bg-white rounded-2xl border border-slate-200/80 shadow-2xs overflow-hidden">
+          <div className="overflow-x-auto custom-scrollbar">
+            <table className="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr className="border-b border-slate-100 text-slate-400 font-bold uppercase text-[10px] tracking-wider bg-slate-50/50">
+                  <th className="py-3.5 px-5">Client</th>
+                  <th className="py-3.5 px-4">Plan & Status</th>
+                  <th className="py-3.5 px-4 text-center">Channels</th>
+                  <th className="py-3.5 px-4 text-center">Messages</th>
+                  <th className="py-3.5 px-4 text-center">Projects</th>
+                  <th className="py-3.5 px-4 text-center">Invoices</th>
+                  <th className="py-3.5 px-5 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 text-slate-700 font-medium">
+                {loading ? (
+                  <tr>
+                    <td colSpan={7} className="py-20 text-center text-slate-400">
+                      <Loader2 className="animate-spin text-[#059669] mx-auto mb-2" size={28} />
+                      <p className="text-xs font-semibold">Loading clients...</p>
+                    </td>
+                  </tr>
+                ) : clients.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="py-16 text-center text-slate-400 text-xs">
+                      No clients found matching the search criteria.
+                    </td>
+                  </tr>
+                ) : (
+                  clients.map((client) => (
+                    <tr
+                      key={client.id}
+                      className="hover:bg-slate-50/80 transition-colors group cursor-pointer"
+                      onClick={() => router.push(`/admin/clients/${client.id}`)}
+                    >
+                      {/* Client info */}
+                      <td className="py-4 px-5">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-xl bg-emerald-50 text-[#059669] font-black flex items-center justify-center text-sm uppercase shrink-0 border border-emerald-100">
+                            {client.company_name?.[0] || 'C'}
+                          </div>
+                          <div>
+                            <p className="font-bold text-slate-900 group-hover:text-[#059669] transition-colors text-sm">
+                              {client.company_name}
+                            </p>
+                            <p className="text-[11px] text-slate-400">
+                              {client.client_name} • {client.email}
+                            </p>
+                          </div>
                         </div>
-                        <div>
-                          <span className="text-slate-400 font-semibold block mb-0.5">Instagram Business ID</span>
-                          <span className="font-bold text-slate-700 select-all">{selectedClientForDetails.instagram_config?.instagram_business_id || 'N/A'}</span>
+                      </td>
+
+                      {/* Plan & Status */}
+                      <td className="py-4 px-4 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex items-center gap-1.5">
+                          <span className={cn(
+                            "px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wide",
+                            client.status === 'ACTIVE' ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-red-600"
+                          )}>
+                            {client.status}
+                          </span>
+                          <span className="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase bg-slate-100 text-slate-600">
+                            {client.plan}
+                          </span>
+                          {client.approval_status === 'PENDING' && (
+                            <span className="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase bg-amber-50 text-amber-700">
+                              Pending
+                            </span>
+                          )}
                         </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
+                      </td>
+
+                      {/* Connected Channels Icons */}
+                      <td className="py-4 px-4 text-center whitespace-nowrap">
+                        <div className="flex items-center justify-center gap-1.5">
+                          <span className={cn(
+                            "w-6 h-6 rounded-lg flex items-center justify-center text-[10px]",
+                            client.channels?.whatsapp ? "bg-emerald-50 text-[#059669]" : "bg-slate-100 text-slate-300"
+                          )} title="WhatsApp">
+                            <Smartphone size={13} />
+                          </span>
+                          <span className={cn(
+                            "w-6 h-6 rounded-lg flex items-center justify-center text-[10px]",
+                            client.channels?.facebook ? "bg-blue-50 text-blue-600" : "bg-slate-100 text-slate-300"
+                          )} title="Facebook">
+                            <Share2 size={13} />
+                          </span>
+                          <span className={cn(
+                            "w-6 h-6 rounded-lg flex items-center justify-center text-[10px]",
+                            client.channels?.gmail ? "bg-sky-50 text-sky-600" : "bg-slate-100 text-slate-300"
+                          )} title="Gmail">
+                            <Mail size={13} />
+                          </span>
+                          <span className="text-[11px] font-bold text-slate-500 ml-1">
+                            {client.active_channels || 0} active
+                          </span>
+                        </div>
+                      </td>
+
+                      {/* Messages */}
+                      <td className="py-4 px-4 text-center whitespace-nowrap">
+                        <p className="font-bold text-slate-900">{client.total_messages ?? 0}</p>
+                        <p className="text-[10px] text-slate-400">
+                          {client.bot_messages ?? 0} bot • {client.human_replies ?? 0} agent
+                        </p>
+                      </td>
+
+                      {/* Projects */}
+                      <td className="py-4 px-4 text-center whitespace-nowrap">
+                        <span className="font-bold text-slate-800">
+                          {client.active_projects ?? 0} active
+                        </span>
+                        <p className="text-[10px] text-slate-400">
+                          {client.team_members ?? 1} team
+                        </p>
+                      </td>
+
+                      {/* Invoices */}
+                      <td className="py-4 px-4 text-center whitespace-nowrap">
+                        <span className="font-bold text-slate-800">
+                          {client.invoice_count ?? 0} invoices
+                        </span>
+                        <p className="text-[10px] text-emerald-600 font-semibold">
+                          {client.proposal_count ?? 0} proposals
+                        </p>
+                      </td>
+
+                      {/* Quick Actions */}
+                      <td className="py-4 px-5 text-right whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex items-center justify-end gap-2">
+                          <Link
+                            href={`/admin/clients/${client.id}`}
+                            className="px-3 py-1.5 bg-slate-100 hover:bg-[#059669] hover:text-white text-slate-700 rounded-lg text-xs font-bold transition-all"
+                          >
+                            Open Workspace
+                          </Link>
+
+                          <div className="relative inline-block text-left">
+                            <button
+                              onClick={() => setActiveMenuId(activeMenuId === client.id ? null : client.id)}
+                              className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-slate-700 transition-colors cursor-pointer"
+                            >
+                              <MoreVertical size={16} />
+                            </button>
+
+                            {activeMenuId === client.id && (
+                              <div className="absolute right-0 mt-1 w-44 bg-white rounded-xl shadow-lg border border-slate-100 py-1.5 z-50 animate-in fade-in duration-100 font-sans">
+                                <button
+                                  onClick={() => handleOpenClientWorkspace(client)}
+                                  className="w-full flex items-center gap-2 px-3.5 py-1.5 text-xs font-semibold text-amber-700 hover:bg-amber-50 cursor-pointer"
+                                >
+                                  <ExternalLink size={13} /> Open Workspace
+                                </button>
+                                
+                                <button
+                                  onClick={() => handleOpenPasswordModal(client)}
+                                  className="w-full flex items-center gap-2 px-3.5 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 cursor-pointer"
+                                >
+                                  <Key size={13} /> Change Password
+                                </button>
+
+                                <div className="my-1 border-t border-slate-100" />
+
+                                {client.approval_status === 'PENDING' && (
+                                  <button
+                                    onClick={() => handleClientAction(client.id, 'APPROVE')}
+                                    className="w-full flex items-center gap-2 px-3.5 py-1.5 text-xs font-semibold text-[#059669] hover:bg-emerald-50 cursor-pointer"
+                                  >
+                                    <CheckCircle2 size={13} /> Approve Client
+                                  </button>
+                                )}
+
+                                {client.status === 'ACTIVE' ? (
+                                  <button
+                                    onClick={() => handleClientAction(client.id, 'SUSPEND')}
+                                    className="w-full flex items-center gap-2 px-3.5 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 cursor-pointer"
+                                  >
+                                    <Power size={13} /> Suspend Client
+                                  </button>
+                                ) : (
+                                  <button
+                                    onClick={() => handleClientAction(client.id, 'ACTIVATE')}
+                                    className="w-full flex items-center gap-2 px-3.5 py-1.5 text-xs font-semibold text-[#059669] hover:bg-emerald-50 cursor-pointer"
+                                  >
+                                    <CheckCircle2 size={13} /> Activate Client
+                                  </button>
+                                )}
+                                
+                                <button
+                                  onClick={() => handleOpenDeleteModal(client)}
+                                  className="w-full flex items-center gap-2 px-3.5 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 cursor-pointer"
+                                >
+                                  <Trash2 size={13} /> Delete Client
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Simple Pagination */}
+          <div className="py-3 px-5 border-t border-slate-100 bg-slate-50/50 flex items-center justify-between text-xs text-slate-500">
+            <span>Page {page} of {totalPages} ({totalCount} clients)</span>
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+                disabled={page <= 1}
+                className="p-1.5 rounded-lg bg-white border border-slate-200 text-slate-600 disabled:opacity-40 cursor-pointer hover:bg-slate-50"
+              >
+                <ChevronLeft size={14} />
+              </button>
+              <button
+                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                disabled={page >= totalPages}
+                className="p-1.5 rounded-lg bg-white border border-slate-200 text-slate-600 disabled:opacity-40 cursor-pointer hover:bg-slate-50"
+              >
+                <ChevronRightIcon size={14} />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* ── Add Client Modal ── */}
+        {/* Delete Confirmation Modal */}
+        {isDeleteModalOpen && clientToDelete && (
+          <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
+            <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-slate-100 animate-in zoom-in-95 duration-150">
+              <div className="flex items-center justify-between mb-5">
+                <h3 className="text-base font-bold text-slate-900">Delete Client</h3>
+                <button onClick={() => setIsDeleteModalOpen(false)} className="p-1.5 text-slate-400 hover:text-slate-700 cursor-pointer">
+                  <X size={18} />
+                </button>
               </div>
-
-              <div className="p-10 border-t border-slate-100 flex justify-end shrink-0 bg-slate-50">
-                <button
-                  onClick={() => setSelectedClientForDetails(null)}
-                  className="px-8 py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl text-xs font-bold uppercase tracking-wider transition-all shadow-md cursor-pointer"
-                >
-                  Close
+              <p className="text-sm text-slate-600 mb-4">
+                Are you sure you want to delete <strong>{clientToDelete.company_name || clientToDelete.business_name}</strong>? This action cannot be undone.
+              </p>
+              <div className="flex items-center justify-end gap-2.5 pt-4 border-t border-slate-100">
+                <button type="button" onClick={() => setIsDeleteModalOpen(false)} className="px-4 py-2 text-slate-600 font-semibold hover:bg-slate-100 rounded-xl cursor-pointer">
+                  Cancel
+                </button>
+                <button type="button" onClick={handleConfirmDelete} className="px-5 py-2 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded-xl shadow-xs cursor-pointer">
+                  Delete
                 </button>
               </div>
             </div>
           </div>
         )}
-        
- 
+        {/* Password Change Modal */}
+        {isPasswordModalOpen && clientForPassword && (
+          <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
+            <form onSubmit={(e) => { e.preventDefault(); handleConfirmPasswordChange(); }} autoComplete="off" className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-slate-100 animate-in zoom-in-95 duration-150">
+              <div className="flex items-center justify-between mb-5">
+                <h3 className="text-base font-bold text-slate-900">Change Password for {clientForPassword.company_name || clientForPassword.business_name}</h3>
+                <button type="button" onClick={() => setIsPasswordModalOpen(false)} className="p-1.5 text-slate-400 hover:text-slate-700 cursor-pointer">
+                  <X size={18} />
+                </button>
+              </div>
+              <div className="mb-4">
+                <label className="block text-slate-600 mb-1 font-bold">New Password</label>
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    required
+                    name="new_password_client_field"
+                    autoComplete="new-password"
+                    placeholder="Enter new password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    className="w-full pl-3.5 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800 outline-none focus:bg-white focus:border-[#059669]"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
+                  >
+                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
+              </div>
+              <div className="flex items-center justify-end gap-2.5 pt-4 border-t border-slate-100">
+                <button type="button" onClick={() => setIsPasswordModalOpen(false)} className="px-4 py-2 text-slate-600 font-semibold hover:bg-slate-100 rounded-xl cursor-pointer">
+                  Cancel
+                </button>
+                <button type="submit" className="px-5 py-2 bg-[#059669] hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-xs cursor-pointer">
+                  Update Password
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+        {isAddModalOpen && (
+          <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
+            <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-slate-100 animate-in zoom-in-95 duration-150 overflow-y-auto max-h-[90vh]">
+              <div className="flex items-center justify-between mb-5">
+                <h3 className="text-base font-bold text-slate-900">Add Client</h3>
+                <button onClick={() => setIsAddModalOpen(false)} className="p-1.5 text-slate-400 hover:text-slate-700 cursor-pointer">
+                  <X size={18} />
+                </button>
+              </div>
+              <form onSubmit={handleCreateClient} className="space-y-4">
+                <div>
+                  <label className="block text-slate-600 mb-1 font-bold">Business Name</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Acme Corporation"
+                    value={formData.business_name}
+                    onChange={(e) => setFormData({ ...formData, business_name: e.target.value })}
+                    className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800 outline-none focus:bg-white focus:border-[#059669]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-slate-600 mb-1 font-bold">Primary Contact Email</label>
+                  <input
+                    type="email"
+                    required
+                    placeholder="admin@acme.com"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800 outline-none focus:bg-white focus:border-[#059669]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-slate-600 mb-1 font-bold">Phone Number</label>
+                  <input
+                    type="text"
+                    placeholder="+1 555-0199"
+                    value={formData.phone_number}
+                    onChange={(e) => setFormData({ ...formData, phone_number: e.target.value })}
+                    className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800 outline-none focus:bg-white focus:border-[#059669]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-slate-600 mb-1 font-bold">Plan</label>
+                  <select
+                    value={formData.plan}
+                    onChange={(e) => setFormData({ ...formData, plan: e.target.value })}
+                    className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800 outline-none focus:border-[#059669]"
+                  >
+                    <option value="FREE">Free Tier</option>
+                    <option value="STARTER">Starter Tier</option>
+                    <option value="GROWTH">Growth Tier</option>
+                    <option value="ENTERPRISE">Enterprise Tier</option>
+                  </select>
+                </div>
+
+                <div className="flex items-center justify-end gap-2.5 pt-4 border-t border-slate-100">
+                  <button
+                    type="button"
+                    onClick={() => setIsAddModalOpen(false)}
+                    className="px-4 py-2 text-slate-600 font-semibold hover:bg-slate-100 rounded-xl cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-5 py-2 bg-[#059669] hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-xs cursor-pointer"
+                  >
+                    Create Client
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
       </div>
     </DashboardLayout>
   );
-};
-
-export default AdminClients;
-
-
-
+}
