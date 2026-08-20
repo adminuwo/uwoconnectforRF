@@ -294,7 +294,7 @@ const ClientOverview = () => {
 
   return (
     <DashboardLayout role="CLIENT">
-      <div style={{ fontFamily: '"Times New Roman", Times, serif' }} className="max-w-7xl mx-auto w-full p-4 sm:p-6 pb-20">
+      <div className="max-w-7xl mx-auto w-full p-4 sm:p-6 pb-20">
         
         {/* Welcome Section */}
         <div data-tour="dashboard-welcome" className="flex flex-col sm:flex-row sm:items-center justify-between mb-8">

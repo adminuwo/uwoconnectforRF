@@ -1,182 +1,293 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { 
-  Users, 
-  Zap, 
-  TrendingUp, 
-  ArrowUpRight, 
-  ArrowDownRight,
-  ShieldCheck,
-  Star,
-  Activity,
-  ShieldAlert,
-  Target,
-  Zap as ZapIcon,
-  ChevronRight,
-  Loader2,
-  GitBranch
+  Users, Zap, TrendingUp, ArrowUpRight, ArrowDownRight,
+  ShieldCheck, ShieldAlert, Activity, Target, ChevronRight,
+  Loader2, GitBranch, MessageSquare, Brain, ShoppingBag,
+  Receipt, FileCheck, FileText, Mail, PhoneCall, RefreshCw,
+  Search, CheckCircle2, Clock, DollarSign, Bot, Globe,
+  User, ExternalLink, Layers, Sparkles, Filter, ArrowUpDown, Smartphone, Share2
 } from 'lucide-react';
 import axios from 'axios';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { cn } from '@/lib/utils';
-const AdminOverview = () => {
-  const [stats, setStats] = useState(null);
-  const [automations, setAutomations] = useState([]);
+import { API_BASE_URL } from '@/config/apiConfig';
+
+export default function SuperAdminOverview() {
+  const router = useRouter();
+  const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  
+  const [compSearch, setCompSearch] = useState('');
+  const [compSortKey, setCompSortKey] = useState('messages');
+  const [compSortOrder, setCompSortOrder] = useState('desc');
+
+  const fetchData = async (isManualRefresh = false) => {
+    try {
+      if (isManualRefresh) setRefreshing(true);
+      else setLoading(true);
+
+      const token = localStorage.getItem('token');
+      const res = await axios.get(`${API_BASE_URL}/api/admin/overview/`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setData(res.data);
+    } catch (err) {
+      console.error('Failed to fetch super admin overview', err);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        const [statsRes, autoRes] = await Promise.all([
-          axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/admin/stats`, { headers: { Authorization: `Bearer ${token}` } }),
-          axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/admin/automations`, { headers: { Authorization: `Bearer ${token}` } })
-        ]);
-        setStats(statsRes.data);
-        setAutomations(autoRes.data.slice(0, 4)); // Show recent 4
-      } catch (err) {
-        console.error('Failed to fetch data');
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchData();
   }, []);
 
-  const statCards = [
-    { 
-      name: 'Total Clients', 
-      value: stats?.totalClients || '0', 
-      icon: Users, 
-      trend: '+15%', 
-      trendUp: true
-    },
-    { 
-      name: 'Automations', 
-      value: stats?.activeAutomations || '0', 
-      icon: ZapIcon, 
-      trend: '+12%', 
-      trendUp: true
-    },
-    { 
-      name: 'Workflows', 
-      value: stats?.totalWorkflows || '0', 
-      icon: TrendingUp, 
-      trend: 'Optimal', 
-      trendUp: true
-    },
-    { 
-      name: 'System Status', 
-      value: 'CORE', 
-      icon: ShieldCheck, 
-      trend: 'Verified', 
-      trendUp: true
-    },
+  const kpis = data?.kpis || {};
+  const clientComparison = data?.clientComparison || [];
+  const recentActivity = data?.recentActivity || [];
+  const recentLogins = data?.recentLogins || [];
+
+  const mainKpis = [
+    { name: 'Total Clients', value: kpis.totalClients ?? 0, sub: `${kpis.activeClients ?? 0} active`, icon: Users, href: '/admin/clients' },
+    { name: 'Channels Active', value: kpis.activeChannels ?? 0, sub: `${kpis.totalChannels ?? 0} configured`, icon: Globe, href: '/admin/channels' },
+    { name: 'Total Messages', value: (kpis.totalMessages ?? 0).toLocaleString(), sub: `${kpis.botMessages ?? 0} bot handled`, icon: MessageSquare, href: '/admin/inbox' },
+    { name: 'Active AI Bots', value: kpis.activeBots ?? 0, sub: `${kpis.humanTakeoverCount ?? 0} handoffs`, icon: Bot, href: '/admin/ai' },
+    { name: 'Total Invoices', value: kpis.totalInvoices ?? 0, sub: `₹${(kpis.totalInvoiceValue || 0).toLocaleString()}`, icon: Receipt, href: '/admin/invoices' },
+    { name: 'Active Projects', value: kpis.activeProjects ?? 0, sub: `${kpis.totalProjects ?? 0} total`, icon: Layers, href: '/admin/clients' },
   ];
+
+  const handleSort = (key) => {
+    if (compSortKey === key) {
+      setCompSortOrder(compSortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setCompSortKey(key);
+      setCompSortOrder('desc');
+    }
+  };
+
+  const sortedClients = [...clientComparison]
+    .filter(c => {
+      return !compSearch || c.company_name?.toLowerCase().includes(compSearch.toLowerCase()) ||
+             c.client_name?.toLowerCase().includes(compSearch.toLowerCase());
+    })
+    .sort((a, b) => {
+      let valA = a[compSortKey];
+      let valB = b[compSortKey];
+      if (typeof valA === 'string') {
+        return compSortOrder === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
+      }
+      return compSortOrder === 'asc' ? (valA || 0) - (valB || 0) : (valB || 0) - (valA || 0);
+    });
+
+  if (loading) {
+    return (
+      <DashboardLayout role="ADMIN">
+        <div className="max-w-full py-32 flex flex-col items-center justify-center gap-3">
+          <Loader2 className="animate-spin text-[#059669]" size={36} />
+          <p className="text-xs font-semibold text-slate-400">Loading Control Center...</p>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout role="ADMIN">
-      <div className="max-w-7xl mx-auto pb-20 px-2 sm:px-4 md:px-0 font-sans">
+      <div className="max-w-full pb-20 px-4 sm:px-10 lg:px-12 font-sans">
         
-        {/* Welcome Header */}
-        <div className="mb-10">
-          <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight mb-2">Admin Dashboard</h1>
-          <p className="text-slate-500 font-medium italic">Monitor your system and manage your clients.</p>
-        </div>
+        {/* ── Clean Header ── */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 my-8">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+              Control Center
+            </h1>
+            <p className="text-slate-500 text-xs sm:text-sm mt-1">
+              Multi-client monitoring, messaging volume, active channels, and business telemetry.
+            </p>
+          </div>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-          {statCards.map((card, index) => (
-            <div
-              key={card.name}
-              className="bg-white p-6 sm:p-8 rounded-[24px] sm:rounded-[32px] border border-slate-100 premium-shadow hover-lift group"
+          <div className="flex items-center gap-3">
+            <Link
+              href="/admin/clients"
+              className="flex items-center gap-1.5 px-4 py-2.5 bg-[#059669] hover:bg-emerald-700 text-white rounded-xl font-bold text-xs shadow-2xs transition-all"
             >
-              <div className="flex items-center justify-between mb-6">
-                <div className="w-12 h-12 bg-emerald-50/50 text-[#059669] rounded-2xl flex items-center justify-center group-hover:bg-[#059669] group-hover:text-white transition-all duration-500">
-                  <card.icon size={24} strokeWidth={2.5} />
-                </div>
-                <div className={cn(
-                  "flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-tight",
-                  card.trendUp ? "bg-green-50 text-[#059669]" : "bg-red-50 text-red-600"
-                )}>
-                  {card.trendUp ? <ArrowUpRight size={14} strokeWidth={3} /> : <ArrowDownRight size={14} strokeWidth={3} />}
-                  {card.trend}
-                </div>
-              </div>
-              <div className="space-y-1">
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">{card.name}</p>
-                <h3 className="text-3xl font-black text-slate-900 tracking-tight leading-none">{card.value}</h3>
-              </div>
-            </div>
-          ))}
+              <Users size={15} /> Clients Directory
+            </Link>
+            <button
+              onClick={() => fetchData(true)}
+              disabled={refreshing}
+              className="p-2.5 bg-white hover:bg-slate-50 text-slate-600 rounded-xl border border-slate-200 transition-all cursor-pointer shadow-2xs"
+              title="Refresh"
+            >
+              <RefreshCw size={15} className={cn(refreshing && "animate-spin text-[#059669]")} />
+            </button>
+          </div>
         </div>
 
-        {/* System Flux Hub */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-           <div className="lg:col-span-2 bg-white rounded-[32px] sm:rounded-[40px] border border-slate-100 premium-shadow p-4 sm:p-10">
-              <div className="flex items-center justify-between mb-10">
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 bg-slate-950 text-white rounded-xl flex items-center justify-center shadow-lg shadow-slate-200">
-                    <Activity size={20} strokeWidth={3} />
-                  </div>
-                  <h3 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight uppercase">Recent Activity</h3>
+        {/* ── Main Clean KPI Grid ── */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-8">
+          {mainKpis.map((kpi, idx) => {
+            const Icon = kpi.icon;
+            return (
+              <Link
+                key={idx}
+                href={kpi.href}
+                className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-2xs hover:border-slate-300 transition-all flex flex-col justify-between"
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[11px] font-semibold text-slate-400">{kpi.name}</span>
+                  <Icon size={15} className="text-slate-400" />
                 </div>
-                <button className="text-[10px] font-black text-[#059669] hover:underline uppercase tracking-widest">View All &rarr;</button>
-              </div>
-              
-              <div className="space-y-3">
-                 {loading ? (
-                    <div className="py-10 flex justify-center"><Loader2 className="animate-spin text-[#059669]" /></div>
-                 ) : automations.length === 0 ? (
-                    <div className="py-12 text-center bg-slate-50 rounded-[24px] sm:rounded-[32px] border border-slate-100 border-dashed">
-                      <p className="text-sm font-medium text-slate-400 italic">No activity detected yet.</p>
-                    </div>
-                 ) : automations.map((auto) => (
-                    <div key={auto._id || auto.id} className="p-4 sm:p-5 bg-slate-50/50 border border-slate-100 rounded-[20px] sm:rounded-[24px] flex items-center justify-between group hover:bg-white hover:border-[#059669]/20 hover:premium-shadow transition-all cursor-pointer">
-                      <div className="flex items-center gap-4">
-                         <div className={cn("w-11 h-11 rounded-xl flex items-center justify-center border transition-all shadow-sm shrink-0", auto.enabled ? "bg-white text-[#059669] border-[#059669]/10" : "bg-slate-100 text-slate-300 border-transparent")}>
-                            <ZapIcon size={18} strokeWidth={2.5} />
-                         </div>
-                         <div>
-                            <h4 className="text-slate-900 font-bold text-sm mb-0.5 tracking-tight">{auto.name || 'Rule'}</h4>
-                            <div className="flex items-center gap-2">
-                               <span className={cn("w-1.5 h-1.5 rounded-full", auto.enabled ? "bg-[#059669]" : "bg-slate-300")} />
-                               <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest truncate max-w-[120px] sm:max-w-none">{auto.clientName}</span>
-                            </div>
-                         </div>
-                      </div>
-                      <div className="text-right shrink-0">
-                         <p className="text-slate-900 font-black text-[10px] uppercase tracking-widest">{auto.triggerType}</p>
-                         <p className="text-[8px] font-black text-slate-300 uppercase tracking-widest">Type</p>
-                      </div>
-                    </div>
-                  ))}
-              </div>
-           </div>
+                <div>
+                  <h4 className="text-lg font-extrabold text-slate-900">{kpi.value}</h4>
+                  <p className="text-[10px] text-emerald-600 font-semibold mt-0.5">{kpi.sub}</p>
+                </div>
+              </Link>
+            );
+          })}
+        </div>
 
-            <div className="bg-gradient-to-br from-[#f0fdf4] to-white rounded-[32px] sm:rounded-[40px] p-6 sm:p-10 text-slate-800 border border-emerald-100 premium-shadow flex flex-col group overflow-hidden relative">
-               <div className="absolute top-0 right-0 w-48 h-48 bg-[#059669]/10 blur-[60px] -mr-24 -mt-24 rounded-full" />
-               <div className="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center mb-10 group-hover:bg-[#059669] group-hover:text-white transition-all duration-500 shadow-sm border border-emerald-100/50">
-                 <Target size={28} strokeWidth={2.5} />
-               </div>
-               <h3 className="text-2xl font-black text-slate-900 tracking-tight leading-tight mb-4 uppercase">Add <br/>Clients</h3>
-               <p className="text-slate-500 font-medium mb-10 leading-relaxed italic">Onboard new business clients and expand your network.</p>
-               
-               <button 
-                 onClick={() => window.location.href = '/admin/clients'}
-                 className="mt-auto w-full py-4 bg-emerald-600 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-lg shadow-emerald-100 transition-all hover:bg-emerald-700"
-               >
-                   Manage Clients
-                </button>
-             </div>
+        {/* ── Clean Client Comparison Table ── */}
+        <div className="bg-white rounded-2xl border border-slate-200/80 shadow-2xs overflow-hidden mb-8">
+          <div className="p-4 sm:p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <h3 className="text-sm font-bold text-slate-900">Client Comparison</h3>
+              <p className="text-xs text-slate-400">Benchmark clients across channels, messages, bot usage, and projects.</p>
+            </div>
+
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
+              <input
+                type="text"
+                placeholder="Search..."
+                value={compSearch}
+                onChange={(e) => setCompSearch(e.target.value)}
+                className="pl-8 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 outline-none focus:bg-white focus:border-[#059669]"
+              />
+            </div>
+          </div>
+
+          <div className="overflow-x-auto custom-scrollbar">
+            <table className="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr className="bg-slate-50/50 border-b border-slate-100 text-slate-400 font-bold uppercase text-[10px] tracking-wider whitespace-nowrap">
+                  <th className="py-3 px-4 cursor-pointer" onClick={() => handleSort('company_name')}>Client</th>
+                  <th className="py-3 px-3 text-center cursor-pointer" onClick={() => handleSort('channels')}>Channels</th>
+                  <th className="py-3 px-3 text-center cursor-pointer" onClick={() => handleSort('messages')}>Messages</th>
+                  <th className="py-3 px-3 text-center cursor-pointer" onClick={() => handleSort('bot_usage_pct')}>Bot %</th>
+                  <th className="py-3 px-3 text-center cursor-pointer" onClick={() => handleSort('emails')}>Emails</th>
+                  <th className="py-3 px-3 text-center cursor-pointer" onClick={() => handleSort('invoices')}>Invoices</th>
+                  <th className="py-3 px-3 text-center cursor-pointer" onClick={() => handleSort('projects')}>Projects</th>
+                  <th className="py-3 px-3 text-center cursor-pointer" onClick={() => handleSort('progress')}>Progress</th>
+                  <th className="py-3 px-4 text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 text-slate-700 font-medium">
+                {sortedClients.map((client) => (
+                  <tr
+                    key={client.id}
+                    className="hover:bg-slate-50/80 transition-colors cursor-pointer"
+                    onClick={() => router.push(`/admin/clients/${client.id}`)}
+                  >
+                    <td className="py-3.5 px-4 whitespace-nowrap">
+                      <p className="font-bold text-slate-900">{client.company_name}</p>
+                      <span className="text-[10px] text-slate-400">{client.plan}</span>
+                    </td>
+                    <td className="py-3.5 px-3 text-center font-semibold text-slate-800">{client.channels}</td>
+                    <td className="py-3.5 px-3 text-center font-semibold text-slate-800">{client.messages.toLocaleString()}</td>
+                    <td className="py-3.5 px-3 text-center">
+                      <span className="px-2 py-0.5 bg-purple-50 text-purple-700 rounded text-[10px] font-bold">
+                        {client.bot_usage_pct}%
+                      </span>
+                    </td>
+                    <td className="py-3.5 px-3 text-center text-slate-700">{client.emails}</td>
+                    <td className="py-3.5 px-3 text-center text-slate-700">₹{client.total_invoiced.toLocaleString()}</td>
+                    <td className="py-3.5 px-3 text-center text-slate-700">{client.projects}</td>
+                    <td className="py-3.5 px-3 text-center">
+                      <span className="text-[10px] font-bold text-slate-700">{client.progress}%</span>
+                    </td>
+                    <td className="py-3.5 px-4 text-right whitespace-nowrap">
+                      <span className="text-xs font-bold text-[#059669] hover:underline">View Details &rarr;</span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* ── Two Column Bottom Feeds ── */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Live Platform Feed */}
+          <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-2xs">
+            <h3 className="text-sm font-bold text-slate-900 mb-1">Live Platform Feed</h3>
+            <p className="text-xs text-slate-400 mb-4">Real-time messaging, invoices, and audit actions.</p>
+            <div className="space-y-2">
+              {recentActivity.slice(0, 5).map((act) => (
+                <div key={act.id} className="p-3 bg-slate-50 rounded-xl flex items-center justify-between text-xs hover:bg-slate-100/50 transition-colors">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-slate-900">{act.client_name}</span>
+                      <span className="px-1.5 py-0.2 bg-slate-200 text-slate-600 rounded text-[9px] font-semibold">{act.type}</span>
+                    </div>
+                    <p className="text-slate-500 text-[11px] mt-0.5">{act.title}</p>
+                  </div>
+                  <span className="text-[10px] text-slate-400">
+                    {new Date(act.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </span>
+                </div>
+              ))}
+              {recentActivity.length === 0 && (
+                <p className="text-xs text-slate-400 italic py-6 text-center">No platform activity yet.</p>
+              )}
+            </div>
+          </div>
+
+          {/* Recent Logins Feed */}
+          <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-2xs">
+            <h3 className="text-sm font-bold text-slate-900 mb-1">Recent User Logins</h3>
+            <p className="text-xs text-slate-400 mb-4">Track who logged in and when across client workspaces.</p>
+            <div className="space-y-2">
+              {recentLogins.slice(0, 5).map((log) => (
+                <div key={log.id} className="p-3 bg-slate-50 rounded-xl flex items-center justify-between text-xs hover:bg-slate-100/50 transition-colors">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-emerald-50 text-[#059669] flex items-center justify-center border border-emerald-100/30 shrink-0">
+                      <User size={14} />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-slate-900 truncate max-w-[150px] sm:max-w-none">{log.username}</span>
+                        <span className={cn(
+                          "px-1.5 py-0.2 rounded text-[8px] font-black uppercase tracking-wider border",
+                          log.action === 'LOGIN' ? "bg-emerald-50 text-emerald-600 border-emerald-100" : "bg-blue-50 text-blue-600 border-blue-100"
+                        )}>
+                          {log.action}
+                        </span>
+                      </div>
+                      <p className="text-slate-400 text-[10px] font-medium mt-0.5 italic flex items-center gap-1">
+                        Workspace: <span className="text-slate-600 font-bold not-italic">{log.client_name}</span> • IP: <span className="font-mono">{log.ip_address}</span>
+                      </p>
+                    </div>
+                  </div>
+                  <span className="text-[10px] text-slate-400 whitespace-nowrap flex items-center gap-1">
+                    <Clock size={11} />
+                    {new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </span>
+                </div>
+              ))}
+              {recentLogins.length === 0 && (
+                <p className="text-xs text-slate-400 italic py-6 text-center">No user login records found.</p>
+              )}
+            </div>
+          </div>
         </div>
 
       </div>
     </DashboardLayout>
   );
-};
-
-export default AdminOverview;
-
-
+}

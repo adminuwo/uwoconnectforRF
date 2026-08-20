@@ -6,6 +6,7 @@ import AxiosNetworkFixer from "@/components/AxiosNetworkFixer";
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
+  display: "swap",
 });
 
 export const metadata = {
@@ -20,10 +21,10 @@ export default function RootLayout({ children }) {
   return (
     <html
       lang="en"
-      className="h-full antialiased"
+      className={`h-full antialiased ${inter.variable}`}
       suppressHydrationWarning
     >
-      <body className="min-h-full flex flex-col overflow-x-hidden" style={{ fontFamily: '"Times New Roman", Times, serif' }} suppressHydrationWarning>
+      <body className="min-h-full flex flex-col overflow-x-hidden font-sans" suppressHydrationWarning>
         <AxiosNetworkFixer />
         <TourProvider>
           {children}

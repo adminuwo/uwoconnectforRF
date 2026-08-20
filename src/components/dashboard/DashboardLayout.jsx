@@ -1,10 +1,12 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import { usePathname } from 'next/navigation';
 import Sidebar from './Sidebar';
-import { MessageCircle } from 'lucide-react';
+import { MessageCircle, Building2, ChevronDown, Search } from 'lucide-react';
+import axios from 'axios';
+import { API_BASE_URL } from '@/config/apiConfig';
 
 const PlatformAssistant = dynamic(() => import('./PlatformAssistant'), { ssr: false });
 const ProductTour       = dynamic(() => import('@/components/tour/ProductTour'), { ssr: false });
@@ -13,7 +15,25 @@ const GlobalIncomingCallListener = dynamic(() => import('./GlobalIncomingCallLis
 
 const PAGE_TITLES = {
   '/client': 'Dashboard',
-  '/admin': 'Control Center',
+  '/admin': 'Super Admin Control Center',
+  '/admin/clients': 'Client Management Directory',
+  '/admin/search': 'Global Platform Search',
+  '/admin/team': 'Platform Team Overview',
+  '/admin/channels': 'Channel & Integration Center',
+  '/admin/inbox': 'Live Message & Chat Explorer',
+  '/admin/ai': 'AI & Bot Control Center',
+  '/admin/knowledge': 'Platform Knowledge Base',
+  '/admin/emails': 'Email & Gmail Monitoring',
+  '/admin/products': 'Platform Product Catalog',
+  '/admin/sales': 'Sales & Transaction Control',
+  '/admin/quotations': 'Platform Quotations',
+  '/admin/proposals': 'Platform Proposals',
+  '/admin/invoices': 'Financial & Invoices Control',
+  '/admin/reports': 'Work Reports & Operational Stream',
+  '/admin/approvals': 'Client & Member Approvals',
+  '/admin/audit-logs': 'Platform Security Audit Trail',
+  '/admin/settings': 'Global Platform Settings',
+  '/admin/support': 'Super Admin Support Desk',
   '/client/guides': 'Learning Center',
   '/client/channels': 'Channels',
   '/client/email': 'Email / Gmail',
@@ -45,6 +65,12 @@ const DashboardLayout = ({ children, role: initialRole }) => {
   const [chatOpen, setChatOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [user, setUser] = useState(null);
+  const [impersonationData, setImpersonationData] = useState(null);
+  const [clients, setClients] = useState([]);
+  const [switcherOpen, setSwitcherOpen] = useState(false);
+  const [clientSearch, setClientSearch] = useState('');
+  const [clientsLoaded, setClientsLoaded] = useState(false);
+  const switcherRef = useRef(null);
 
   useEffect(() => {
     if (typeof window !== 'undefined' && 'scrollRestoration' in window.history) {
@@ -69,18 +95,117 @@ const DashboardLayout = ({ children, role: initialRole }) => {
         window.location.href = '/auth/login';
       }
     }
+
+    const impRaw = localStorage.getItem('impersonation_session');
+    if (impRaw) {
+      try {
+        setImpersonationData(JSON.parse(impRaw));
+      } catch (e) {
+        console.warn('Failed to parse impersonation session');
+      }
+    }
+
+    const handleClickOutside = (event) => {
+      if (switcherRef.current && !switcherRef.current.contains(event.target)) {
+        setSwitcherOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const displayName = user?.name || 'User';
+  const handleExitImpersonation = () => {
+    const backupToken = localStorage.getItem('admin_backup_token');
+    const backupUser = localStorage.getItem('admin_backup_user');
+
+    if (backupToken && backupUser) {
+      localStorage.setItem('token', backupToken);
+      localStorage.setItem('user', backupUser);
+      localStorage.removeItem('admin_backup_token');
+      localStorage.removeItem('admin_backup_user');
+      localStorage.removeItem('impersonation_session');
+      window.location.href = '/admin/clients';
+    } else {
+      localStorage.removeItem('impersonation_session');
+      window.location.href = '/admin/clients';
+    }
+  };
+
+  const handleToggleSwitcher = async () => {
+    setSwitcherOpen(!switcherOpen);
+    if (!switcherOpen && !clientsLoaded) {
+      try {
+        const token = localStorage.getItem('token');
+        const res = await axios.get(`${API_BASE_URL}/api/admin/clients-directory/`, {
+          headers: { Authorization: `Bearer ${token}` },
+          params: { page_size: 100 }
+        });
+        setClients(res.data.results || []);
+        setClientsLoaded(true);
+      } catch (err) {
+        console.error('Failed to fetch clients for switcher', err);
+      }
+    }
+  };
+
+  const handleOpenClientWorkspace = async (client) => {
+    try {
+      const token = localStorage.getItem('token');
+      const currentUser = localStorage.getItem('user');
+
+      localStorage.setItem('admin_backup_token', token);
+      localStorage.setItem('admin_backup_user', currentUser);
+
+      const res = await axios.post(
+        `${API_BASE_URL}/api/admin/impersonate/`,
+        { client_id: client.id },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      if (res.data.access) {
+        localStorage.setItem('token', res.data.access);
+        localStorage.setItem('user', JSON.stringify(res.data.user));
+        localStorage.setItem('impersonation_session', JSON.stringify({
+          client_id: client.id,
+          client_name: client.company_name || client.client_name,
+          admin_name: res.data.impersonating?.impersonator_name || 'Admin'
+        }));
+
+        window.location.href = '/client';
+      }
+    } catch (err) {
+      alert(err.response?.data?.error || 'Failed to open client workspace.');
+    }
+  };
+
+  const displayName = user?.name || user?.username || 'User';
   const displayRole = user?.role || initialRole || '';
   const currentTitle = PAGE_TITLES[pathname] || (displayRole === 'ADMIN' ? 'Control Center' : 'Dashboard');
 
   return (
     <div className="flex flex-col h-screen w-screen bg-[#fcfdfe] overflow-hidden">
-      <div className="flex bg-[#fcfdfe] h-screen w-full font-sans selection:bg-emerald-100 selection:text-emerald-900 text-slate-900 flex-1 overflow-hidden">
+      {/* ── Super Admin Impersonation Top Banner ── */}
+      {impersonationData && (
+        <div className="bg-gradient-to-r from-amber-600 via-amber-500 to-orange-600 text-white px-4 py-2 text-xs font-bold flex items-center justify-between shadow-md z-50 shrink-0">
+          <div className="flex items-center gap-2">
+            <span className="bg-black/20 px-2 py-0.5 rounded text-[10px] uppercase tracking-widest font-black">Admin Mode</span>
+            <span>
+              Currently viewing client workspace: <strong>{impersonationData.client_name}</strong> (Client ID: #{impersonationData.client_id})
+            </span>
+          </div>
+          <button
+            onClick={handleExitImpersonation}
+            className="bg-white text-amber-900 hover:bg-amber-50 px-3 py-1 rounded-lg text-xs font-black uppercase tracking-wider transition-all shadow-sm cursor-pointer"
+          >
+            Exit Workspace & Return to Admin &rarr;
+          </button>
+        </div>
+      )}
+
+      <div className="flex bg-[#fcfdfe] h-full w-full font-sans selection:bg-emerald-100 selection:text-emerald-900 text-slate-900 flex-1 overflow-hidden">
         <Sidebar role={displayRole} isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} onToggle={() => setSidebarOpen(v => !v)} />
 
-        <main className="flex-1 dashboard-main h-screen flex flex-col min-w-0 overflow-hidden">
+        <main className="flex-1 dashboard-main h-full flex flex-col min-w-0 overflow-hidden">
           {/* Header */}
           <header className="h-14 sm:h-16 bg-white/80 backdrop-blur-xl border-b border-slate-100 px-3 sm:px-6 flex items-center justify-between sticky top-0 z-20 shrink-0 shadow-xs">
             <div className="flex items-center gap-3">
@@ -93,6 +218,58 @@ const DashboardLayout = ({ children, role: initialRole }) => {
             <div className="flex items-center gap-4">
               {mounted && (
                 <>
+                  {displayRole === 'ADMIN' && !impersonationData && (
+                    <div className="relative" ref={switcherRef}>
+                      <button
+                        onClick={handleToggleSwitcher}
+                        className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 hover:bg-emerald-50 text-slate-600 hover:text-[#059669] rounded-xl border border-slate-200 hover:border-emerald-200 transition-all text-xs font-bold shadow-xs cursor-pointer"
+                      >
+                        <Building2 size={15} />
+                        <span className="hidden sm:inline">Switch Workspace</span>
+                        <ChevronDown size={14} className={`transition-transform duration-200 ${switcherOpen ? 'rotate-180' : ''}`} />
+                      </button>
+                      
+                      {switcherOpen && (
+                        <div className="absolute top-full right-0 mt-2 w-72 bg-white rounded-2xl shadow-xl border border-slate-100 z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+                          <div className="p-3 border-b border-slate-100 bg-slate-50/50">
+                            <div className="relative">
+                              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
+                              <input
+                                type="text"
+                                placeholder="Find client..."
+                                value={clientSearch}
+                                onChange={(e) => setClientSearch(e.target.value)}
+                                className="w-full pl-8 pr-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-medium outline-none focus:border-[#059669] focus:ring-1 focus:ring-[#059669]/20 transition-all"
+                              />
+                            </div>
+                          </div>
+                          <div className="max-h-64 overflow-y-auto custom-scrollbar p-1.5">
+                            {clients.filter(c => c.company_name.toLowerCase().includes(clientSearch.toLowerCase())).length === 0 ? (
+                              <div className="py-4 text-center text-xs text-slate-400 font-medium">No clients found</div>
+                            ) : (
+                              clients.filter(c => c.company_name.toLowerCase().includes(clientSearch.toLowerCase())).map(client => (
+                                <button
+                                  key={client.id}
+                                  onClick={() => {
+                                    setSwitcherOpen(false);
+                                    handleOpenClientWorkspace(client);
+                                  }}
+                                  className="w-full text-left px-3 py-2 hover:bg-slate-50 rounded-xl flex items-center justify-between group transition-colors cursor-pointer mb-0.5"
+                                >
+                                  <div>
+                                    <p className="text-xs font-bold text-slate-800 group-hover:text-[#059669] transition-colors">{client.company_name}</p>
+                                    <p className="text-[10px] text-slate-400">{client.email}</p>
+                                  </div>
+                                  <ChevronDown size={14} className="text-slate-300 -rotate-90 group-hover:text-[#059669] transition-colors" />
+                                </button>
+                              ))
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
                   <button
                     data-tour="header-team-chat"
                     onClick={() => setChatOpen(true)}
@@ -137,3 +314,4 @@ const DashboardLayout = ({ children, role: initialRole }) => {
 };
 
 export default DashboardLayout;
+

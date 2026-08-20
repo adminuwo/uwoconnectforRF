@@ -227,7 +227,7 @@ const ClientAutomationsPage = () => {
 
   return (
     <DashboardLayout role="CLIENT">
-      <div style={{ fontFamily: '"Times New Roman", Times, serif' }} className="max-w-5xl mx-auto pb-20 px-4 sm:px-6">
+      <div className="max-w-5xl mx-auto pb-20 px-4 sm:px-6">
         
         {/* Notification Toast */}
         {toast && (
