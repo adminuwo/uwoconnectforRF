@@ -95,6 +95,15 @@ export default function AdminTeamPage() {
     setTimeout(() => setCopiedId(null), 2000);
   };
 
+  // Debounced search to prevent flood of requests
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(searchQuery.trim());
+    }, 300);
+    return () => clearTimeout(handler);
+  }, [searchQuery]);
+
   // Fetch All Projects
   const fetchProjects = useCallback(async () => {
     try {
@@ -105,7 +114,7 @@ export default function AdminTeamPage() {
           client_id: clientFilter !== 'ALL' ? clientFilter : undefined,
           status: statusFilter !== 'ALL' ? statusFilter : undefined,
           priority: priorityFilter !== 'ALL' ? priorityFilter : undefined,
-          search: searchQuery || undefined
+          search: debouncedSearch || undefined
         }
       });
       setProjects(res.data || []);
@@ -114,7 +123,7 @@ export default function AdminTeamPage() {
     } finally {
       setLoadingProjects(false);
     }
-  }, [clientFilter, statusFilter, priorityFilter, searchQuery, getAuthHeader]);
+  }, [clientFilter, statusFilter, priorityFilter, debouncedSearch, getAuthHeader]);
 
   // Fetch All Workforce Members
   const fetchMembers = useCallback(async () => {
@@ -126,7 +135,7 @@ export default function AdminTeamPage() {
           client_id: clientFilter !== 'ALL' ? clientFilter : undefined,
           role: roleFilter !== 'ALL' ? roleFilter : undefined,
           status: statusFilter !== 'ALL' ? statusFilter : undefined,
-          search: searchQuery || undefined
+          search: debouncedSearch || undefined
         }
       });
       setMembers(res.data || []);
@@ -135,7 +144,7 @@ export default function AdminTeamPage() {
     } finally {
       setLoadingMembers(false);
     }
-  }, [clientFilter, roleFilter, statusFilter, searchQuery, getAuthHeader]);
+  }, [clientFilter, roleFilter, statusFilter, debouncedSearch, getAuthHeader]);
 
   // Fetch Clients List
   const fetchClients = useCallback(async () => {
@@ -185,7 +194,7 @@ export default function AdminTeamPage() {
     setRefreshing(false);
   };
 
-  // Initial Load
+  // Initial Load (Fetch clients and analytics once)
   useEffect(() => {
     fetchClients();
     fetchAnalytics();
@@ -194,8 +203,8 @@ export default function AdminTeamPage() {
   // Reactive Fetching on filters & tab
   useEffect(() => {
     if (activeTab === 'projects') fetchProjects();
-    if (activeTab === 'members') fetchMembers();
-    if (activeTab === 'overview' || activeTab === 'workspaces') fetchAnalytics();
+    else if (activeTab === 'members') fetchMembers();
+    else if (activeTab === 'workspaces' || activeTab === 'overview') fetchAnalytics();
   }, [activeTab, fetchProjects, fetchMembers, fetchAnalytics]);
 
   // High-level KPI values (Real data from backend / analytics)
@@ -518,16 +527,11 @@ export default function AdminTeamPage() {
         {/* ── Page Header ── */}
         <div className="my-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <div className="flex items-center gap-2 mb-1.5">
-              <span className="px-3 py-1 bg-emerald-100/80 text-[#059669] text-[10px] font-black uppercase tracking-widest rounded-full flex items-center gap-1.5">
-                <Shield size={12} /> Platform Admin Command Center
-              </span>
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-              Team Management &amp; Workforce Analytics
+            <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+              Team &amp; Projects
             </h1>
-            <p className="text-slate-500 font-medium text-xs sm:text-sm mt-0.5">
-              Central management layer over all client workspaces, projects, workforce assignments, and real-time operations.
+            <p className="text-slate-500 text-xs sm:text-sm mt-0.5">
+              Manage team members, project assignments, and client workspaces.
             </p>
           </div>
 
@@ -536,186 +540,206 @@ export default function AdminTeamPage() {
             <button
               onClick={handleRefreshAll}
               disabled={refreshing}
-              className="inline-flex items-center gap-1.5 px-3 py-2.5 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 rounded-xl text-xs font-bold shadow-2xs transition-all cursor-pointer"
-              title="Refresh all real-time data"
+              className="inline-flex items-center gap-1.5 px-3 py-2 bg-white hover:bg-slate-50 text-slate-600 border border-slate-200 rounded-xl text-xs font-semibold shadow-2xs transition cursor-pointer"
+              title="Refresh all data"
             >
-              <RefreshCw size={14} className={cn(refreshing && "animate-spin text-[#059669]")} />
+              <RefreshCw size={13} className={cn(refreshing && "animate-spin text-[#059669]")} />
               <span className="hidden sm:inline">Refresh</span>
             </button>
 
             {activeTab === 'projects' && (
               <button
                 onClick={() => handleOpenCreateProject()}
-                className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-[#059669] hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-sm transition-all cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-[#059669] hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-2xs transition cursor-pointer"
               >
-                <Plus size={16} /> Create Project
+                <Plus size={15} /> Create Project
               </button>
             )}
 
             {activeTab === 'members' && (
               <button
                 onClick={() => handleOpenCreateMember()}
-                className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-[#059669] hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-sm transition-all cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-[#059669] hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-2xs transition cursor-pointer"
               >
-                <UserPlus size={16} /> Add Team Member
+                <UserPlus size={15} /> Add Member
               </button>
             )}
 
             {activeTab === 'workspaces' && (
               <button
                 onClick={() => handleOpenCreateProject()}
-                className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-[#059669] hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-sm transition-all cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-[#059669] hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-2xs transition cursor-pointer"
               >
-                <Plus size={16} /> Create Project
+                <Plus size={15} /> Create Project
               </button>
             )}
           </div>
         </div>
 
-        {/* ── 4 Top KPI Summary Cards (Prominent & Real-time) ── */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          
-          {/* Card 1: TOTAL PROJECTS */}
-          <div className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-2xs hover:shadow-md transition-all flex items-center gap-3.5">
-            <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 border border-blue-100/60">
-              <FolderKanban size={24} />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Projects</p>
-              <div className="flex items-baseline gap-2 mt-0.5">
-                <span className="text-2xl font-extrabold text-slate-900">{totalProjectsCount}</span>
-                <span className="text-[11px] font-semibold text-emerald-600">({activeProjectsCount} active)</span>
+        {/* ── Summary KPI Cards ── */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 mb-6">
+          {/* Card 1: Projects */}
+          <div className="bg-white border border-slate-200/80 rounded-xl p-3.5 shadow-2xs flex items-center justify-between">
+            <div>
+              <p className="text-xs font-medium text-slate-500">Projects</p>
+              <div className="flex items-center gap-2 mt-1">
+                <span className="text-xl font-bold text-slate-900">{totalProjectsCount}</span>
+                {activeProjectsCount > 0 && (
+                  <span className="text-[10px] font-semibold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded">
+                    {activeProjectsCount} active
+                  </span>
+                )}
               </div>
-              <p className="text-[10px] text-slate-400 font-medium truncate mt-0.5">Across all client workspaces</p>
+            </div>
+            <div className="w-9 h-9 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+              <FolderKanban size={18} />
             </div>
           </div>
 
-          {/* Card 2: TOTAL TEAM MEMBERS */}
-          <div className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-2xs hover:shadow-md transition-all flex items-center gap-3.5">
-            <div className="w-12 h-12 rounded-xl bg-emerald-50 text-[#059669] flex items-center justify-center shrink-0 border border-emerald-100/60">
-              <Users size={24} />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Team Members</p>
-              <div className="flex items-baseline gap-2 mt-0.5">
-                <span className="text-2xl font-extrabold text-slate-900">{totalMembersCount}</span>
-                <span className="text-[11px] font-semibold text-emerald-600">({onlineMembersCount} online)</span>
+          {/* Card 2: Team Members */}
+          <div className="bg-white border border-slate-200/80 rounded-xl p-3.5 shadow-2xs flex items-center justify-between">
+            <div>
+              <p className="text-xs font-medium text-slate-500">Team Members</p>
+              <div className="flex items-center gap-2 mt-1">
+                <span className="text-xl font-bold text-slate-900">{totalMembersCount}</span>
+                {onlineMembersCount > 0 && (
+                  <span className="text-[10px] font-semibold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded">
+                    {onlineMembersCount} online
+                  </span>
+                )}
               </div>
-              <p className="text-[10px] text-slate-400 font-medium truncate mt-0.5">Across all client workspaces</p>
+            </div>
+            <div className="w-9 h-9 rounded-lg bg-emerald-50 text-[#059669] flex items-center justify-center shrink-0">
+              <Users size={18} />
             </div>
           </div>
 
-          {/* Card 3: ACTIVE CLIENT WORKSPACES */}
-          <div className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-2xs hover:shadow-md transition-all flex items-center gap-3.5">
-            <div className="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0 border border-amber-100/60">
-              <Building2 size={24} />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Active Workspaces</p>
-              <div className="flex items-baseline gap-2 mt-0.5">
-                <span className="text-2xl font-extrabold text-slate-900">{activeWorkspacesCount}</span>
-                <span className="text-[11px] font-semibold text-slate-500">managed</span>
+          {/* Card 3: Workspaces */}
+          <div className="bg-white border border-slate-200/80 rounded-xl p-3.5 shadow-2xs flex items-center justify-between">
+            <div>
+              <p className="text-xs font-medium text-slate-500">Workspaces</p>
+              <div className="flex items-center gap-2 mt-1">
+                <span className="text-xl font-bold text-slate-900">{activeWorkspacesCount}</span>
               </div>
-              <p className="text-[10px] text-slate-400 font-medium truncate mt-0.5">Client accounts connected</p>
+            </div>
+            <div className="w-9 h-9 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+              <Building2 size={18} />
             </div>
           </div>
 
-          {/* Card 4: WORKFORCE ACTIVITY */}
-          <div className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-2xs hover:shadow-md transition-all flex items-center gap-3.5">
-            <div className="w-12 h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0 border border-purple-100/60">
-              <Activity size={24} />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Workforce Activity</p>
-              <div className="flex items-baseline gap-2 mt-0.5">
-                <span className="text-2xl font-extrabold text-slate-900">{totalEngagementCount}</span>
-                <span className="text-[11px] font-semibold text-purple-600">actions</span>
+          {/* Card 4: Activity */}
+          <div className="bg-white border border-slate-200/80 rounded-xl p-3.5 shadow-2xs flex items-center justify-between">
+            <div>
+              <p className="text-xs font-medium text-slate-500">Activity</p>
+              <div className="flex items-center gap-2 mt-1">
+                <span className="text-xl font-bold text-slate-900">{totalEngagementCount}</span>
+                <span className="text-[10px] text-slate-400">actions</span>
               </div>
-              <p className="text-[10px] text-slate-400 font-medium truncate mt-0.5">Total messages &amp; reports</p>
+            </div>
+            <div className="w-9 h-9 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
+              <Activity size={18} />
             </div>
           </div>
         </div>
 
         {/* ── Navigation Tabs ── */}
-        <div className="flex items-center justify-between border-b border-slate-200 mb-6 overflow-x-auto custom-scrollbar">
-          <div className="flex gap-1 sm:gap-2">
-            
-            <button
-              onClick={() => setActiveTab('overview')}
-              className={cn(
-                "flex items-center gap-2 px-4 sm:px-5 py-3 text-xs font-bold uppercase tracking-wider border-b-2 transition-all whitespace-nowrap cursor-pointer",
-                activeTab === 'overview'
-                  ? "border-[#059669] text-[#059669]"
-                  : "border-transparent text-slate-400 hover:text-slate-600"
-              )}
-            >
-              <BarChart3 size={15} />
-              Overview &amp; Analytics
-            </button>
+        <div className="flex items-center border-b border-slate-200 mb-5 overflow-x-auto custom-scrollbar gap-2 sm:gap-4">
+          <button
+            onClick={() => setActiveTab('projects')}
+            className={cn(
+              "flex items-center gap-2 pb-3 px-1 text-xs font-semibold border-b-2 transition-all whitespace-nowrap cursor-pointer",
+              activeTab === 'projects'
+                ? "border-[#059669] text-[#059669] font-bold"
+                : "border-transparent text-slate-500 hover:text-slate-800"
+            )}
+          >
+            <FolderKanban size={15} />
+            Projects
+            <span className={cn(
+              "px-1.5 py-0.5 rounded-full text-[10px]",
+              activeTab === 'projects' ? "bg-emerald-100 text-[#059669] font-bold" : "bg-slate-100 text-slate-500"
+            )}>
+              {totalProjectsCount}
+            </span>
+          </button>
 
-            <button
-              onClick={() => setActiveTab('projects')}
-              className={cn(
-                "flex items-center gap-2 px-4 sm:px-5 py-3 text-xs font-bold uppercase tracking-wider border-b-2 transition-all whitespace-nowrap cursor-pointer",
-                activeTab === 'projects'
-                  ? "border-[#059669] text-[#059669]"
-                  : "border-transparent text-slate-400 hover:text-slate-600"
-              )}
-            >
-              <FolderKanban size={15} />
-              Projects ({totalProjectsCount})
-            </button>
+          <button
+            onClick={() => setActiveTab('members')}
+            className={cn(
+              "flex items-center gap-2 pb-3 px-1 text-xs font-semibold border-b-2 transition-all whitespace-nowrap cursor-pointer",
+              activeTab === 'members'
+                ? "border-[#059669] text-[#059669] font-bold"
+                : "border-transparent text-slate-500 hover:text-slate-800"
+            )}
+          >
+            <Users size={15} />
+            Team Members
+            <span className={cn(
+              "px-1.5 py-0.5 rounded-full text-[10px]",
+              activeTab === 'members' ? "bg-emerald-100 text-[#059669] font-bold" : "bg-slate-100 text-slate-500"
+            )}>
+              {totalMembersCount}
+            </span>
+          </button>
 
-            <button
-              onClick={() => setActiveTab('members')}
-              className={cn(
-                "flex items-center gap-2 px-4 sm:px-5 py-3 text-xs font-bold uppercase tracking-wider border-b-2 transition-all whitespace-nowrap cursor-pointer",
-                activeTab === 'members'
-                  ? "border-[#059669] text-[#059669]"
-                  : "border-transparent text-slate-400 hover:text-slate-600"
-              )}
-            >
-              <Users size={15} />
-              Team Members ({totalMembersCount})
-            </button>
+          <button
+            onClick={() => setActiveTab('workspaces')}
+            className={cn(
+              "flex items-center gap-2 pb-3 px-1 text-xs font-semibold border-b-2 transition-all whitespace-nowrap cursor-pointer",
+              activeTab === 'workspaces'
+                ? "border-[#059669] text-[#059669] font-bold"
+                : "border-transparent text-slate-500 hover:text-slate-800"
+            )}
+          >
+            <Building2 size={15} />
+            Workspaces
+            <span className={cn(
+              "px-1.5 py-0.5 rounded-full text-[10px]",
+              activeTab === 'workspaces' ? "bg-emerald-100 text-[#059669] font-bold" : "bg-slate-100 text-slate-500"
+            )}>
+              {clients.length}
+            </span>
+          </button>
 
-            <button
-              onClick={() => setActiveTab('workspaces')}
-              className={cn(
-                "flex items-center gap-2 px-4 sm:px-5 py-3 text-xs font-bold uppercase tracking-wider border-b-2 transition-all whitespace-nowrap cursor-pointer",
-                activeTab === 'workspaces'
-                  ? "border-[#059669] text-[#059669]"
-                  : "border-transparent text-slate-400 hover:text-slate-600"
-              )}
-            >
-              <Building2 size={15} />
-              Client Workspaces ({clients.length})
-            </button>
-          </div>
+          <button
+            onClick={() => setActiveTab('overview')}
+            className={cn(
+              "flex items-center gap-2 pb-3 px-1 text-xs font-semibold border-b-2 transition-all whitespace-nowrap cursor-pointer",
+              activeTab === 'overview'
+                ? "border-[#059669] text-[#059669] font-bold"
+                : "border-transparent text-slate-500 hover:text-slate-800"
+            )}
+          >
+            <BarChart3 size={15} />
+            Analytics
+          </button>
         </div>
 
-        {/* ── Filter Bar (Dynamic per tab) ── */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 mb-6">
+        {/* ── Filter Bar ── */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 mb-5">
           <div className="relative flex-1">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={15} />
             <input
               type="text"
-              placeholder={`Search ${activeTab === 'projects' ? 'projects by name, client, or ID' : activeTab === 'members' ? 'team members by name, email, or client' : 'workspaces and analytics'}...`}
+              placeholder={
+                activeTab === 'projects' ? 'Search projects...' :
+                activeTab === 'members' ? 'Search team members...' :
+                'Search workspaces...'
+              }
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-3 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-800 placeholder-slate-400 focus:border-[#059669] outline-none transition-all shadow-2xs"
+              className="w-full pl-8.5 pr-3 py-2 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:border-[#059669] outline-none transition shadow-2xs"
             />
           </div>
 
-          <div className="flex items-center gap-2.5 flex-wrap">
+          <div className="flex items-center gap-2 flex-wrap">
             {/* Client Workspace filter */}
-            <div className="flex items-center gap-1.5 bg-white border border-slate-200 px-3 py-1.5 rounded-xl shadow-2xs">
-              <Building2 size={14} className="text-slate-400" />
-              <span className="text-[10px] font-bold text-slate-400 uppercase">Client:</span>
+            <div className="flex items-center gap-1.5 bg-white border border-slate-200 px-2.5 py-1.5 rounded-xl shadow-2xs">
+              <Building2 size={13} className="text-slate-400" />
               <select
                 value={clientFilter}
                 onChange={(e) => setClientFilter(e.target.value)}
-                className="bg-transparent text-xs font-bold outline-none text-slate-700 cursor-pointer"
+                className="bg-transparent text-xs font-medium outline-none text-slate-700 cursor-pointer"
               >
                 <option value="ALL">All Workspaces</option>
                 {clients.map(c => (
@@ -727,12 +751,11 @@ export default function AdminTeamPage() {
             {/* Status filter for Projects */}
             {activeTab === 'projects' && (
               <>
-                <div className="flex items-center gap-1.5 bg-white border border-slate-200 px-3 py-1.5 rounded-xl shadow-2xs">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase">Status:</span>
+                <div className="flex items-center gap-1.5 bg-white border border-slate-200 px-2.5 py-1.5 rounded-xl shadow-2xs">
                   <select
                     value={statusFilter}
                     onChange={(e) => setStatusFilter(e.target.value)}
-                    className="bg-transparent text-xs font-bold outline-none text-slate-700 cursor-pointer"
+                    className="bg-transparent text-xs font-medium outline-none text-slate-700 cursor-pointer"
                   >
                     <option value="ALL">All Statuses</option>
                     <option value="PLANNING">Planning</option>
@@ -744,12 +767,11 @@ export default function AdminTeamPage() {
                   </select>
                 </div>
 
-                <div className="flex items-center gap-1.5 bg-white border border-slate-200 px-3 py-1.5 rounded-xl shadow-2xs">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase">Priority:</span>
+                <div className="flex items-center gap-1.5 bg-white border border-slate-200 px-2.5 py-1.5 rounded-xl shadow-2xs">
                   <select
                     value={priorityFilter}
                     onChange={(e) => setPriorityFilter(e.target.value)}
-                    className="bg-transparent text-xs font-bold outline-none text-slate-700 cursor-pointer"
+                    className="bg-transparent text-xs font-medium outline-none text-slate-700 cursor-pointer"
                   >
                     <option value="ALL">All Priorities</option>
                     <option value="LOW">Low</option>
@@ -764,12 +786,11 @@ export default function AdminTeamPage() {
             {/* Role filter for Team Members */}
             {activeTab === 'members' && (
               <>
-                <div className="flex items-center gap-1.5 bg-white border border-slate-200 px-3 py-1.5 rounded-xl shadow-2xs">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase">Role:</span>
+                <div className="flex items-center gap-1.5 bg-white border border-slate-200 px-2.5 py-1.5 rounded-xl shadow-2xs">
                   <select
                     value={roleFilter}
                     onChange={(e) => setRoleFilter(e.target.value)}
-                    className="bg-transparent text-xs font-bold outline-none text-slate-700 cursor-pointer"
+                    className="bg-transparent text-xs font-medium outline-none text-slate-700 cursor-pointer"
                   >
                     <option value="ALL">All Roles</option>
                     <option value="SUPER_ADMIN">Super Admin</option>
@@ -781,15 +802,14 @@ export default function AdminTeamPage() {
                   </select>
                 </div>
 
-                <div className="flex items-center gap-1.5 bg-white border border-slate-200 px-3 py-1.5 rounded-xl shadow-2xs">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase">Status:</span>
+                <div className="flex items-center gap-1.5 bg-white border border-slate-200 px-2.5 py-1.5 rounded-xl shadow-2xs">
                   <select
                     value={statusFilter}
                     onChange={(e) => setStatusFilter(e.target.value)}
-                    className="bg-transparent text-xs font-bold outline-none text-slate-700 cursor-pointer"
+                    className="bg-transparent text-xs font-medium outline-none text-slate-700 cursor-pointer"
                   >
                     <option value="ALL">All Statuses</option>
-                    <option value="APPROVED">Active / Approved</option>
+                    <option value="APPROVED">Approved</option>
                     <option value="PENDING">Pending</option>
                     <option value="SUSPENDED">Suspended</option>
                     <option value="REJECTED">Rejected</option>
@@ -804,51 +824,51 @@ export default function AdminTeamPage() {
         {/* TAB 1: OVERVIEW & WORKFORCE ANALYTICS */}
         {/* ═══════════════════════════════════════════════════════════════════════ */}
         {activeTab === 'overview' && (
-          <div className="space-y-6">
+          <div className="space-y-5">
             {loadingAnalytics ? (
-              <div className="py-20 flex flex-col items-center justify-center gap-2 bg-white rounded-2xl border border-slate-200">
-                <Loader2 className="animate-spin text-[#059669]" size={28} />
-                <p className="text-xs font-medium text-slate-500">Compiling workforce &amp; workspace analytics...</p>
+              <div className="py-16 flex flex-col items-center justify-center gap-2 bg-white rounded-2xl border border-slate-200">
+                <Loader2 className="animate-spin text-[#059669]" size={24} />
+                <p className="text-xs text-slate-500">Loading analytics...</p>
               </div>
             ) : (
               <>
                 {/* Analytics Metrics Grid */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                  <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-2xs">
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Active Members</p>
-                    <p className="text-xl font-extrabold text-emerald-600 mt-1">{analytics?.active_members || 0}</p>
-                    <p className="text-[10px] text-slate-400 mt-0.5">{analytics?.online_members || 0} currently online</p>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
+                  <div className="bg-white border border-slate-200/80 rounded-xl p-3.5 shadow-2xs">
+                    <p className="text-xs font-medium text-slate-500">Active Members</p>
+                    <p className="text-xl font-bold text-emerald-600 mt-1">{analytics?.active_members || 0}</p>
+                    <p className="text-[11px] text-slate-400 mt-0.5">{analytics?.online_members || 0} online now</p>
                   </div>
 
-                  <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-2xs">
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Inactive / Pending</p>
-                    <p className="text-xl font-extrabold text-amber-600 mt-1">{analytics?.inactive_members || 0}</p>
-                    <p className="text-[10px] text-slate-400 mt-0.5">Suspended or pending review</p>
+                  <div className="bg-white border border-slate-200/80 rounded-xl p-3.5 shadow-2xs">
+                    <p className="text-xs font-medium text-slate-500">Pending / Inactive</p>
+                    <p className="text-xl font-bold text-amber-600 mt-1">{analytics?.inactive_members || 0}</p>
+                    <p className="text-[11px] text-slate-400 mt-0.5">Awaiting review</p>
                   </div>
 
-                  <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-2xs">
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Messages</p>
-                    <p className="text-xl font-extrabold text-indigo-600 mt-1">{analytics?.total_messages || 0}</p>
-                    <p className="text-[10px] text-slate-400 mt-0.5">Dispatched across channels</p>
+                  <div className="bg-white border border-slate-200/80 rounded-xl p-3.5 shadow-2xs">
+                    <p className="text-xs font-medium text-slate-500">Messages Sent</p>
+                    <p className="text-xl font-bold text-indigo-600 mt-1">{analytics?.total_messages || 0}</p>
+                    <p className="text-[11px] text-slate-400 mt-0.5">Across all channels</p>
                   </div>
 
-                  <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-2xs">
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Zero Activity Users</p>
-                    <p className="text-xl font-extrabold text-rose-600 mt-1">{analytics?.zero_activity_members || 0}</p>
-                    <p className="text-[10px] text-slate-400 mt-0.5">No messages or reports filed</p>
+                  <div className="bg-white border border-slate-200/80 rounded-xl p-3.5 shadow-2xs">
+                    <p className="text-xs font-medium text-slate-500">Zero Activity</p>
+                    <p className="text-xl font-bold text-rose-600 mt-1">{analytics?.zero_activity_members || 0}</p>
+                    <p className="text-[11px] text-slate-400 mt-0.5">No recent actions</p>
                   </div>
                 </div>
 
                 {/* Client Workspace Analytics Breakdown Table */}
-                <div className="bg-white border border-slate-200/90 rounded-2xl overflow-hidden shadow-2xs">
-                  <div className="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between flex-wrap gap-2">
+                <div className="bg-white border border-slate-200/80 rounded-2xl overflow-hidden shadow-2xs">
+                  <div className="p-4 border-b border-slate-100 flex items-center justify-between flex-wrap gap-2">
                     <div>
-                      <h3 className="text-sm font-extrabold text-slate-900">Client Workspace Workforce Breakdown</h3>
-                      <p className="text-xs text-slate-500 font-medium mt-0.5">
-                        Performance metrics, project counts, and team sizes across each client organization.
+                      <h3 className="text-sm font-bold text-slate-900">Workspace Breakdown</h3>
+                      <p className="text-xs text-slate-500 mt-0.5">
+                        Projects, team size, and activity per workspace.
                       </p>
                     </div>
-                    <span className="text-xs font-bold text-[#059669] bg-emerald-50 px-2.5 py-1 rounded-full">
+                    <span className="text-xs font-semibold text-[#059669] bg-emerald-50 px-2.5 py-0.5 rounded-full">
                       {analytics?.clients_analytics?.length || 0} Workspaces
                     </span>
                   </div>
@@ -856,36 +876,36 @@ export default function AdminTeamPage() {
                   <div className="overflow-x-auto custom-scrollbar">
                     <table className="w-full text-left border-collapse text-xs">
                       <thead>
-                        <tr className="bg-slate-50/80 border-b border-slate-200/80 text-slate-400 text-[10px] uppercase font-bold tracking-wider">
-                          <th className="py-3 px-4 pl-5">Client Workspace</th>
-                          <th className="py-3 px-4">Plan &amp; Status</th>
-                          <th className="py-3 px-4">Total Projects</th>
-                          <th className="py-3 px-4">Total Team</th>
-                          <th className="py-3 px-4">Active / Online</th>
-                          <th className="py-3 px-4">Messages &amp; Reports</th>
-                          <th className="py-3 px-4">Last Activity</th>
-                          <th className="py-3 px-4 pr-5 text-right">Actions</th>
+                        <tr className="bg-slate-50/80 border-b border-slate-200/80 text-slate-500 text-[11px] font-semibold">
+                          <th className="py-2.5 px-4 pl-5">Workspace</th>
+                          <th className="py-2.5 px-4">Plan &amp; Status</th>
+                          <th className="py-2.5 px-4">Projects</th>
+                          <th className="py-2.5 px-4">Team</th>
+                          <th className="py-2.5 px-4">Active / Online</th>
+                          <th className="py-2.5 px-4">Activity</th>
+                          <th className="py-2.5 px-4">Last Active</th>
+                          <th className="py-2.5 px-4 pr-5 text-right">Action</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-slate-100 font-semibold text-slate-700">
+                      <tbody className="divide-y divide-slate-100 text-slate-700">
                         {analytics?.clients_analytics?.map((c) => (
                           <tr key={c.client_id} className="hover:bg-slate-50/60 transition-colors">
-                            <td className="py-4 px-4 pl-5">
+                            <td className="py-3 px-4 pl-5">
                               <div>
-                                <p className="font-extrabold text-slate-900 text-sm">{c.client_name}</p>
+                                <p className="font-bold text-slate-900">{c.client_name}</p>
                                 {c.client_email && (
-                                  <p className="text-[11px] text-slate-400 font-mono mt-0.5">{c.client_email}</p>
+                                  <p className="text-[11px] text-slate-400 font-mono">{c.client_email}</p>
                                 )}
                               </div>
                             </td>
 
-                            <td className="py-4 px-4">
+                            <td className="py-3 px-4">
                               <div className="flex items-center gap-1.5">
-                                <span className="px-2 py-0.5 bg-slate-100 text-slate-700 rounded text-[10px] font-bold">
+                                <span className="px-2 py-0.5 bg-slate-100 text-slate-700 rounded text-[10px] font-semibold">
                                   {c.plan}
                                 </span>
                                 <span className={cn(
-                                  "px-2 py-0.5 rounded text-[10px] font-extrabold uppercase",
+                                  "px-2 py-0.5 rounded text-[10px] font-bold uppercase",
                                   c.client_status === 'ACTIVE' ? "bg-emerald-50 text-[#059669]" : "bg-amber-50 text-amber-700"
                                 )}>
                                   {c.client_status}
@@ -893,42 +913,42 @@ export default function AdminTeamPage() {
                               </div>
                             </td>
 
-                            <td className="py-4 px-4">
-                              <div className="flex items-baseline gap-1.5">
-                                <span className="font-extrabold text-slate-900 text-sm">{c.total_projects}</span>
-                                <span className="text-[10px] text-slate-400">({c.active_projects} active)</span>
+                            <td className="py-3 px-4">
+                              <div className="flex items-baseline gap-1">
+                                <span className="font-bold text-slate-900">{c.total_projects}</span>
+                                <span className="text-[11px] text-slate-400">({c.active_projects} active)</span>
                               </div>
                             </td>
 
-                            <td className="py-4 px-4">
-                              <span className="font-extrabold text-slate-900 text-sm">{c.total_members}</span>
+                            <td className="py-3 px-4">
+                              <span className="font-bold text-slate-900">{c.total_members}</span>
                             </td>
 
-                            <td className="py-4 px-4">
-                              <div className="flex items-center gap-2">
-                                <span className="text-emerald-600 font-bold">{c.active_members} active</span>
+                            <td className="py-3 px-4">
+                              <div className="flex items-center gap-1.5 text-xs">
+                                <span className="text-emerald-600 font-medium">{c.active_members} active</span>
                                 <span className="text-slate-300">•</span>
                                 <span className="text-slate-500">{c.online_members} online</span>
                               </div>
                             </td>
 
-                            <td className="py-4 px-4 text-slate-600">
-                              <span className="font-bold text-slate-900">{c.total_messages}</span> msgs • <span className="font-bold text-slate-900">{c.total_reports}</span> reports
+                            <td className="py-3 px-4 text-slate-600">
+                              <span className="font-semibold text-slate-900">{c.total_messages}</span> msgs • <span className="font-semibold text-slate-900">{c.total_reports}</span> reports
                             </td>
 
-                            <td className="py-4 px-4 text-slate-500 text-xs">
+                            <td className="py-3 px-4 text-slate-500 text-xs">
                               {c.last_activity ? new Date(c.last_activity).toLocaleDateString() : '—'}
                             </td>
 
-                            <td className="py-4 px-4 pr-5 text-right">
+                            <td className="py-3 px-4 pr-5 text-right">
                               <button
                                 onClick={() => {
                                   setActiveTab('workspaces');
                                   setExpandedClient(c.client_id);
                                 }}
-                                className="inline-flex items-center gap-1 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-[#059669] rounded-lg text-xs font-bold transition-all cursor-pointer"
+                                className="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 text-[#059669] rounded-lg text-xs font-semibold transition cursor-pointer"
                               >
-                                View Details <ChevronRight size={14} />
+                                View <ChevronRight size={13} />
                               </button>
                             </td>
                           </tr>
@@ -946,59 +966,58 @@ export default function AdminTeamPage() {
         {/* TAB 2: GLOBAL PROJECTS TABLE */}
         {/* ═══════════════════════════════════════════════════════════════════════ */}
         {activeTab === 'projects' && (
-          <div className="bg-white border border-slate-200/90 rounded-2xl overflow-hidden shadow-2xs">
+          <div className="bg-white border border-slate-200/80 rounded-2xl overflow-hidden shadow-2xs">
             {loadingProjects ? (
               <div className="py-16 flex flex-col items-center justify-center gap-2">
                 <Loader2 className="animate-spin text-[#059669]" size={24} />
-                <p className="text-xs font-medium text-slate-500">Loading global projects...</p>
+                <p className="text-xs text-slate-500">Loading projects...</p>
               </div>
             ) : projects.length === 0 ? (
-              <div className="py-20 text-center text-slate-400 text-xs font-medium italic">
-                No projects found. Click &quot;Create Project&quot; to get started.
+              <div className="py-16 flex flex-col items-center justify-center text-center px-4">
+                <div className="w-12 h-12 rounded-xl bg-slate-50 text-slate-400 flex items-center justify-center mb-2.5">
+                  <FolderKanban size={22} />
+                </div>
+                <p className="text-xs font-semibold text-slate-700">No projects found</p>
+                <p className="text-[11px] text-slate-400 mt-0.5 mb-3">Create your first project to organize your team.</p>
+                <button
+                  onClick={() => handleOpenCreateProject()}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-[#059669] hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition cursor-pointer"
+                >
+                  <Plus size={14} /> Create Project
+                </button>
               </div>
             ) : (
               <div className="overflow-x-auto custom-scrollbar">
                 <table className="w-full text-left border-collapse text-xs">
                   <thead>
-                    <tr className="bg-slate-50/80 border-b border-slate-200/80 text-slate-400 text-[10px] uppercase font-bold tracking-wider">
-                      <th className="py-3 px-4 pl-5">Project Details</th>
-                      <th className="py-3 px-4">Client / Workspace</th>
-                      <th className="py-3 px-4">Priority &amp; Status</th>
-                      <th className="py-3 px-4">Assigned Team</th>
-                      <th className="py-3 px-4">Progress</th>
-                      <th className="py-3 px-4 pr-5 text-right">Actions</th>
+                    <tr className="bg-slate-50/80 border-b border-slate-200/80 text-slate-500 text-[11px] font-semibold">
+                      <th className="py-2.5 px-4 pl-5">Project</th>
+                      <th className="py-2.5 px-4">Workspace</th>
+                      <th className="py-2.5 px-4">Status &amp; Priority</th>
+                      <th className="py-2.5 px-4">Team</th>
+                      <th className="py-2.5 px-4">Progress</th>
+                      <th className="py-2.5 px-4 pr-5 text-right">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100 font-semibold text-slate-700">
+                  <tbody className="divide-y divide-slate-100 text-slate-700">
                     {projects.map((proj) => (
                       <tr key={proj.id} className="hover:bg-slate-50/60 transition-colors">
                         {/* Project Details */}
-                        <td className="py-4 px-4 pl-5">
+                        <td className="py-3 px-4 pl-5">
                           <div className="max-w-xs">
-                            <div className="flex items-center gap-2">
-                              <button
-                                onClick={() => handleOpenProjectDrawer(proj.id)}
-                                className="font-extrabold text-slate-900 text-sm hover:text-[#059669] transition text-left cursor-pointer"
-                              >
-                                {proj.name}
-                              </button>
-                            </div>
+                            <button
+                              onClick={() => handleOpenProjectDrawer(proj.id)}
+                              className="font-bold text-slate-900 text-xs hover:text-[#059669] transition text-left cursor-pointer"
+                            >
+                              {proj.name}
+                            </button>
                             {proj.description && (
                               <p className="text-[11px] text-slate-400 truncate mt-0.5">{proj.description}</p>
                             )}
-                            <div className="flex items-center gap-2 mt-1 text-[10px] text-slate-400 font-mono">
-                              <span className="flex items-center gap-1">
-                                ID: {proj.id.slice(-6)}
-                                <button
-                                  onClick={() => handleCopyId(proj.id)}
-                                  className="text-slate-400 hover:text-slate-600 cursor-pointer"
-                                  title="Copy Project ID"
-                                >
-                                  {copiedId === proj.id ? <CheckCheck size={10} className="text-emerald-600" /> : <Copy size={10} />}
-                                </button>
-                              </span>
+                            <div className="flex items-center gap-2 mt-1 text-[10px] text-slate-400">
+                              <span className="font-mono">ID: {proj.id.slice(-6)}</span>
                               <span>•</span>
-                              <span>Dept: {proj.department || 'General'}</span>
+                              <span>{proj.department || 'General'}</span>
                               {proj.deadline && (
                                 <>
                                   <span>•</span>
@@ -1012,26 +1031,20 @@ export default function AdminTeamPage() {
                         </td>
 
                         {/* Client Workspace Info */}
-                        <td className="py-4 px-4">
+                        <td className="py-3 px-4">
                           <div>
-                            <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-slate-100 text-slate-800 rounded-md text-[11px] font-bold">
-                              <Building2 size={11} className="text-slate-500" />
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-slate-100 text-slate-700 rounded-md text-[11px] font-medium">
+                              <Building2 size={11} className="text-slate-400" />
                               {proj.client_name}
                             </span>
-                            <div className="text-[10px] text-slate-400 mt-1">
-                              Client projects: <span className="font-bold text-slate-600">{proj.client_total_projects}</span>
-                            </div>
-                            <div className="text-[10px] text-slate-400">
-                              Created: {proj.created_at ? new Date(proj.created_at).toLocaleDateString() : '—'}
-                            </div>
                           </div>
                         </td>
 
                         {/* Priority & Status */}
-                        <td className="py-4 px-4">
+                        <td className="py-3 px-4">
                           <div className="flex flex-col gap-1 items-start">
                             <span className={cn(
-                              "px-2 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-wider",
+                              "px-2 py-0.5 rounded text-[10px] font-bold uppercase",
                               proj.status === 'COMPLETED' ? "bg-emerald-100 text-emerald-800" :
                               proj.status === 'IN_PROGRESS' ? "bg-blue-100 text-blue-800" :
                               proj.status === 'ON_HOLD' ? "bg-amber-100 text-amber-800" :
@@ -1041,31 +1054,31 @@ export default function AdminTeamPage() {
                               {proj.status.replace('_', ' ')}
                             </span>
                             <span className={cn(
-                              "text-[10px] font-bold uppercase",
+                              "text-[10px] font-semibold uppercase",
                               proj.priority === 'URGENT' ? "text-rose-600" :
                               proj.priority === 'HIGH' ? "text-amber-600" :
                               "text-slate-400"
                             )}>
-                              {proj.priority} Priority
+                              {proj.priority}
                             </span>
                           </div>
                         </td>
 
                         {/* Assigned Team Members */}
-                        <td className="py-4 px-4">
+                        <td className="py-3 px-4">
                           <div className="flex items-center gap-2">
-                            <div className="flex -space-x-2 overflow-hidden">
+                            <div className="flex -space-x-1.5 overflow-hidden">
                               {proj.members?.slice(0, 3).map((m) => (
                                 <div
                                   key={m.id}
                                   title={`${m.name} (${m.role})`}
-                                  className="inline-block h-7 w-7 rounded-full ring-2 ring-white bg-slate-200 text-slate-700 text-[10px] font-black flex items-center justify-center uppercase shrink-0"
+                                  className="inline-block h-6 w-6 rounded-full ring-2 ring-white bg-slate-200 text-slate-700 text-[10px] font-bold flex items-center justify-center uppercase shrink-0"
                                 >
                                   {m.name?.[0] || 'U'}
                                 </div>
                               ))}
                               {proj.members?.length > 3 && (
-                                <div className="inline-block h-7 w-7 rounded-full ring-2 ring-white bg-emerald-50 text-[#059669] text-[10px] font-black flex items-center justify-center shrink-0">
+                                <div className="inline-block h-6 w-6 rounded-full ring-2 ring-white bg-emerald-50 text-[#059669] text-[10px] font-bold flex items-center justify-center shrink-0">
                                   +{proj.members.length - 3}
                                 </div>
                               )}
@@ -1073,7 +1086,7 @@ export default function AdminTeamPage() {
 
                             <button
                               onClick={() => handleOpenAssignProject(proj)}
-                              className="px-2 py-1 bg-slate-100 hover:bg-emerald-50 hover:text-[#059669] text-slate-600 text-[10px] font-bold rounded-md transition-all cursor-pointer"
+                              className="px-2 py-0.5 bg-slate-100 hover:bg-emerald-50 hover:text-[#059669] text-slate-600 text-[10px] font-medium rounded-md transition cursor-pointer"
                             >
                               Manage ({proj.members_count || 0})
                             </button>
@@ -1081,9 +1094,9 @@ export default function AdminTeamPage() {
                         </td>
 
                         {/* Progress */}
-                        <td className="py-4 px-4">
-                          <div className="w-24">
-                            <div className="flex justify-between text-[10px] font-bold text-slate-600 mb-1">
+                        <td className="py-3 px-4">
+                          <div className="w-20">
+                            <div className="flex justify-between text-[10px] font-semibold text-slate-600 mb-0.5">
                               <span>{proj.progress_percentage || 0}%</span>
                             </div>
                             <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
@@ -1096,18 +1109,18 @@ export default function AdminTeamPage() {
                         </td>
 
                         {/* Actions */}
-                        <td className="py-4 px-4 pr-5 text-right">
-                          <div className="flex items-center justify-end gap-1.5">
+                        <td className="py-3 px-4 pr-5 text-right">
+                          <div className="flex items-center justify-end gap-1">
                             <button
                               onClick={() => handleOpenProjectDrawer(proj.id)}
-                              className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all cursor-pointer"
-                              title="View Project Details & Team"
+                              className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition cursor-pointer"
+                              title="View Project"
                             >
                               <Eye size={14} />
                             </button>
                             <button
                               onClick={() => handleOpenEditProject(proj)}
-                              className="p-1.5 text-slate-400 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition-all cursor-pointer"
+                              className="p-1.5 text-slate-400 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition cursor-pointer"
                               title="Edit Project"
                             >
                               <Edit2 size={14} />
@@ -1115,7 +1128,7 @@ export default function AdminTeamPage() {
                             {proj.status !== 'ARCHIVED' && (
                               <button
                                 onClick={() => setArchiveModal({ open: true, project: proj })}
-                                className="p-1.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-all cursor-pointer"
+                                className="p-1.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition cursor-pointer"
                                 title="Archive Project"
                               >
                                 <Archive size={14} />
@@ -1123,8 +1136,8 @@ export default function AdminTeamPage() {
                             )}
                             <button
                               onClick={() => setDeleteModal({ open: true, type: 'project', id: proj.id, title: `Project: ${proj.name}` })}
-                              className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all cursor-pointer"
-                              title="Delete Project permanently"
+                              className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition cursor-pointer"
+                              title="Delete Project"
                             >
                               <Trash2 size={14} />
                             </button>
@@ -1143,83 +1156,93 @@ export default function AdminTeamPage() {
         {/* TAB 3: GLOBAL TEAM MEMBERS DIRECTORY */}
         {/* ═══════════════════════════════════════════════════════════════════════ */}
         {activeTab === 'members' && (
-          <div className="bg-white border border-slate-200/90 rounded-2xl overflow-hidden shadow-2xs">
+          <div className="bg-white border border-slate-200/80 rounded-2xl overflow-hidden shadow-2xs">
             {loadingMembers ? (
               <div className="py-16 flex flex-col items-center justify-center gap-2">
                 <Loader2 className="animate-spin text-[#059669]" size={24} />
-                <p className="text-xs font-medium text-slate-500">Loading workforce members...</p>
+                <p className="text-xs text-slate-500">Loading team members...</p>
               </div>
             ) : members.length === 0 ? (
-              <div className="py-20 text-center text-slate-400 text-xs font-medium italic">
-                No workforce members found. Click &quot;Add Team Member&quot; to register one.
+              <div className="py-16 flex flex-col items-center justify-center text-center px-4">
+                <div className="w-12 h-12 rounded-xl bg-slate-50 text-slate-400 flex items-center justify-center mb-2.5">
+                  <Users size={22} />
+                </div>
+                <p className="text-xs font-semibold text-slate-700">No team members found</p>
+                <p className="text-[11px] text-slate-400 mt-0.5 mb-3">Add team members to assign them to projects.</p>
+                <button
+                  onClick={() => handleOpenCreateMember()}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-[#059669] hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition cursor-pointer"
+                >
+                  <UserPlus size={14} /> Add Team Member
+                </button>
               </div>
             ) : (
               <div className="overflow-x-auto custom-scrollbar">
                 <table className="w-full text-left border-collapse text-xs">
                   <thead>
-                    <tr className="bg-slate-50/80 border-b border-slate-200/80 text-slate-400 text-[10px] uppercase font-bold tracking-wider">
-                      <th className="py-3 px-4 pl-5">Member Info</th>
-                      <th className="py-3 px-4">Client Workspace</th>
-                      <th className="py-3 px-4">Role &amp; Designation</th>
-                      <th className="py-3 px-4">Assigned Projects</th>
-                      <th className="py-3 px-4">Engagement</th>
-                      <th className="py-3 px-4">Account Status</th>
-                      <th className="py-3 px-4 pr-5 text-right">Actions</th>
+                    <tr className="bg-slate-50/80 border-b border-slate-200/80 text-slate-500 text-[11px] font-semibold">
+                      <th className="py-2.5 px-4 pl-5">Member</th>
+                      <th className="py-2.5 px-4">Workspace</th>
+                      <th className="py-2.5 px-4">Role</th>
+                      <th className="py-2.5 px-4">Assigned Projects</th>
+                      <th className="py-2.5 px-4">Activity</th>
+                      <th className="py-2.5 px-4">Status</th>
+                      <th className="py-2.5 px-4 pr-5 text-right">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100 font-semibold text-slate-700">
+                  <tbody className="divide-y divide-slate-100 text-slate-700">
                     {members.map((u) => (
                       <tr key={u.id} className="hover:bg-slate-50/60 transition-colors">
                         {/* Member Info */}
-                        <td className="py-3.5 px-4 pl-5">
-                          <div className="flex items-center gap-3">
+                        <td className="py-3 px-4 pl-5">
+                          <div className="flex items-center gap-2.5">
                             <div className="relative">
-                              <div className="w-8 h-8 rounded-lg bg-emerald-50 text-[#059669] font-black flex items-center justify-center text-xs uppercase border border-emerald-100/50 shrink-0">
+                              <div className="w-8 h-8 rounded-lg bg-emerald-50 text-[#059669] font-bold flex items-center justify-center text-xs uppercase border border-emerald-100/50 shrink-0">
                                 {u.name?.[0] || u.username?.[0] || 'U'}
                               </div>
                               <span className={cn(
-                                "absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full ring-2 ring-white",
+                                "absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full ring-2 ring-white",
                                 u.is_online ? "bg-emerald-500 animate-pulse" : "bg-slate-300"
                               )} />
                             </div>
                             <div>
                               <button
                                 onClick={() => handleOpenMemberDrawer(u.id)}
-                                className="font-extrabold text-slate-900 text-sm hover:text-[#059669] transition text-left cursor-pointer"
+                                className="font-bold text-slate-900 text-xs hover:text-[#059669] transition text-left cursor-pointer"
                               >
                                 {u.name}
                               </button>
-                              <p className="text-[11px] text-slate-400 font-mono font-medium">{u.email}</p>
+                              <p className="text-[11px] text-slate-400 font-mono">{u.email}</p>
                             </div>
                           </div>
                         </td>
 
                         {/* Client Workspace */}
-                        <td className="py-3.5 px-4">
-                          <span className="inline-flex items-center px-2.5 py-1 bg-slate-100 rounded-md text-[11px] font-semibold text-slate-600">
+                        <td className="py-3 px-4">
+                          <span className="inline-flex items-center px-2 py-0.5 bg-slate-100 rounded-md text-[11px] font-medium text-slate-600">
                             {u.client_name}
                           </span>
                         </td>
 
                         {/* Role & Designation */}
-                        <td className="py-3.5 px-4">
-                          <p className="text-slate-800 font-bold text-xs">{u.designation || 'Team Member'}</p>
-                          <p className="text-[11px] text-slate-400 font-medium">
-                            {u.department || 'General'} • <span className="uppercase text-[10px] font-black text-slate-500">{u.enterprise_role || u.role}</span>
+                        <td className="py-3 px-4">
+                          <p className="text-slate-800 font-semibold text-xs">{u.designation || 'Team Member'}</p>
+                          <p className="text-[10px] text-slate-400">
+                            {u.department || 'General'} • <span className="uppercase font-bold text-slate-500">{u.enterprise_role || u.role}</span>
                           </p>
                         </td>
 
                         {/* Assigned Projects */}
-                        <td className="py-3.5 px-4">
+                        <td className="py-3 px-4">
                           {u.assigned_projects && u.assigned_projects.length > 0 ? (
                             <div className="flex flex-wrap gap-1 max-w-xs">
                               {u.assigned_projects.slice(0, 2).map((p) => (
-                                <span key={p.id} className="px-2 py-0.5 bg-blue-50 text-blue-700 rounded text-[10px] font-bold">
+                                <span key={p.id} className="px-2 py-0.5 bg-blue-50 text-blue-700 rounded text-[10px] font-semibold">
                                   {p.name}
                                 </span>
                               ))}
                               {u.assigned_projects.length > 2 && (
-                                <span className="px-1.5 py-0.5 bg-slate-100 text-slate-600 rounded text-[10px] font-bold">
+                                <span className="px-1.5 py-0.5 bg-slate-100 text-slate-600 rounded text-[10px] font-semibold">
                                   +{u.assigned_projects.length - 2}
                                 </span>
                               )}
@@ -1230,16 +1253,16 @@ export default function AdminTeamPage() {
                         </td>
 
                         {/* Engagement */}
-                        <td className="py-3.5 px-4 text-slate-500 text-xs">
-                          <span className="font-bold text-slate-800">{u.messages_count || 0}</span> msgs
-                          <span className="mx-1.5 text-slate-300">•</span>
-                          <span className="font-bold text-slate-800">{u.reports_count || 0}</span> reports
+                        <td className="py-3 px-4 text-slate-500 text-xs">
+                          <span className="font-semibold text-slate-800">{u.messages_count || 0}</span> msgs
+                          <span className="mx-1 text-slate-300">•</span>
+                          <span className="font-semibold text-slate-800">{u.reports_count || 0}</span> reports
                         </td>
 
                         {/* Status */}
-                        <td className="py-3.5 px-4">
+                        <td className="py-3 px-4">
                           <span className={cn(
-                            "px-2 py-0.5 rounded text-[10px] font-extrabold uppercase",
+                            "px-2 py-0.5 rounded text-[10px] font-bold uppercase",
                             u.status === 'APPROVED' ? "bg-emerald-100 text-emerald-800" :
                             u.status === 'SUSPENDED' ? "bg-rose-100 text-rose-800" :
                             "bg-amber-100 text-amber-800"
@@ -1249,18 +1272,18 @@ export default function AdminTeamPage() {
                         </td>
 
                         {/* Actions */}
-                        <td className="py-3.5 px-4 pr-5 text-right">
-                          <div className="flex items-center justify-end gap-1.5">
+                        <td className="py-3 px-4 pr-5 text-right">
+                          <div className="flex items-center justify-end gap-1">
                             <button
                               onClick={() => handleOpenMemberDrawer(u.id)}
-                              className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all cursor-pointer"
-                              title="View Full Profile & Projects"
+                              className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition cursor-pointer"
+                              title="View Profile"
                             >
                               <Eye size={14} />
                             </button>
                             <button
                               onClick={() => handleOpenEditMember(u)}
-                              className="p-1.5 text-slate-400 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition-all cursor-pointer"
+                              className="p-1.5 text-slate-400 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition cursor-pointer"
                               title="Edit Member"
                             >
                               <Edit2 size={14} />
@@ -1268,7 +1291,7 @@ export default function AdminTeamPage() {
                             <button
                               onClick={() => handleToggleMemberStatus(u)}
                               className={cn(
-                                "p-1.5 rounded-lg transition-all cursor-pointer",
+                                "p-1.5 rounded-lg transition cursor-pointer",
                                 u.status === 'APPROVED'
                                   ? "text-slate-400 hover:text-rose-600 hover:bg-rose-50"
                                   : "text-slate-400 hover:text-emerald-600 hover:bg-emerald-50"
@@ -1279,7 +1302,7 @@ export default function AdminTeamPage() {
                             </button>
                             <button
                               onClick={() => setDeleteModal({ open: true, type: 'member', id: u.id, title: `Member: ${u.name}` })}
-                              className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all cursor-pointer"
+                              className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition cursor-pointer"
                               title="Delete Member"
                             >
                               <Trash2 size={14} />
@@ -1299,127 +1322,121 @@ export default function AdminTeamPage() {
         {/* TAB 4: CLIENT WORKSPACES HIERARCHY */}
         {/* ═══════════════════════════════════════════════════════════════════════ */}
         {activeTab === 'workspaces' && (
-          <div className="space-y-4">
+          <div className="space-y-3.5">
             {loadingAnalytics || loadingClients ? (
-              <div className="py-20 flex flex-col items-center justify-center gap-2 bg-white rounded-2xl border border-slate-200">
-                <Loader2 className="animate-spin text-[#059669]" size={28} />
-                <p className="text-xs font-medium text-slate-500">Loading client workspaces hierarchy...</p>
+              <div className="py-16 flex flex-col items-center justify-center gap-2 bg-white rounded-2xl border border-slate-200">
+                <Loader2 className="animate-spin text-[#059669]" size={24} />
+                <p className="text-xs text-slate-500">Loading workspaces...</p>
               </div>
             ) : analytics?.clients_analytics?.length === 0 ? (
-              <div className="py-20 text-center text-slate-400 text-xs font-medium italic bg-white rounded-2xl border border-slate-200">
-                No client workspaces found.
+              <div className="py-16 flex flex-col items-center justify-center text-center px-4 bg-white rounded-2xl border border-slate-200">
+                <div className="w-12 h-12 rounded-xl bg-slate-50 text-slate-400 flex items-center justify-center mb-2.5">
+                  <Building2 size={22} />
+                </div>
+                <p className="text-xs font-semibold text-slate-700">No client workspaces found</p>
               </div>
             ) : (
               analytics?.clients_analytics?.map((c) => {
                 const isExpanded = expandedClient === c.client_id;
                 return (
-                  <div key={c.client_id} className="bg-white border border-slate-200/90 rounded-2xl shadow-2xs overflow-hidden transition-all">
+                  <div key={c.client_id} className="bg-white border border-slate-200/80 rounded-2xl shadow-2xs overflow-hidden transition">
                     
                     {/* Client Header Bar */}
                     <div 
                       onClick={() => setExpandedClient(isExpanded ? null : c.client_id)}
-                      className="p-5 flex items-center justify-between gap-4 cursor-pointer hover:bg-slate-50/70 transition"
+                      className="p-4 flex items-center justify-between gap-4 cursor-pointer hover:bg-slate-50/70 transition"
                     >
-                      <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center shrink-0 border border-slate-200">
-                          <Building2 size={20} />
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center shrink-0 border border-slate-200/70">
+                          <Building2 size={18} />
                         </div>
                         <div>
                           <div className="flex items-center gap-2">
-                            <h3 className="text-base font-extrabold text-slate-900">{c.client_name}</h3>
-                            <span className="px-2 py-0.5 bg-slate-100 text-slate-700 rounded text-[10px] font-bold">
+                            <h3 className="text-sm font-bold text-slate-900">{c.client_name}</h3>
+                            <span className="px-2 py-0.5 bg-slate-100 text-slate-700 rounded text-[10px] font-medium">
                               {c.plan}
                             </span>
                             <span className={cn(
-                              "px-2 py-0.5 rounded text-[10px] font-extrabold uppercase",
+                              "px-2 py-0.5 rounded text-[10px] font-bold uppercase",
                               c.client_status === 'ACTIVE' ? "bg-emerald-50 text-[#059669]" : "bg-amber-50 text-amber-700"
                             )}>
                               {c.client_status}
                             </span>
                           </div>
-                          <p className="text-xs text-slate-400 font-mono mt-0.5">{c.client_email || 'No email registered'}</p>
+                          <p className="text-[11px] text-slate-400 font-mono mt-0.5">{c.client_email || 'No email registered'}</p>
                         </div>
                       </div>
 
                       {/* Quick Summary Counts */}
-                      <div className="flex items-center gap-6">
-                        <div className="hidden md:flex items-center gap-4 text-xs font-semibold text-slate-600">
-                          <div>
-                            <span className="text-slate-400 block text-[10px] uppercase font-bold">Projects</span>
-                            <span className="font-extrabold text-slate-900">{c.total_projects}</span>
-                          </div>
-                          <div>
-                            <span className="text-slate-400 block text-[10px] uppercase font-bold">Team</span>
-                            <span className="font-extrabold text-slate-900">{c.total_members}</span> ({c.active_members} active)
-                          </div>
-                          <div>
-                            <span className="text-slate-400 block text-[10px] uppercase font-bold">Activity</span>
-                            <span className="font-extrabold text-slate-900">{c.total_messages + c.total_reports}</span> actions
-                          </div>
+                      <div className="flex items-center gap-4">
+                        <div className="hidden sm:flex items-center gap-3 text-xs text-slate-500">
+                          <span><strong className="text-slate-800">{c.total_projects}</strong> projects</span>
+                          <span>•</span>
+                          <span><strong className="text-slate-800">{c.total_members}</strong> members</span>
                         </div>
 
-                        <div className="w-8 h-8 rounded-lg bg-slate-100 text-slate-500 flex items-center justify-center">
-                          {isExpanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                        <div className="w-7 h-7 rounded-lg bg-slate-100 text-slate-500 flex items-center justify-center">
+                          {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                         </div>
                       </div>
                     </div>
 
-                    {/* Expanded Content: Sub-sections for Projects & Team */}
+                    {/* Expanded Content */}
                     {isExpanded && (
-                      <div className="p-5 border-t border-slate-100 bg-slate-50/50 space-y-6">
+                      <div className="p-4 border-t border-slate-100 bg-slate-50/50 space-y-5">
                         
-                        {/* Section 1: ALL PROJECTS CREATED BY THIS CLIENT */}
+                        {/* Section 1: Projects */}
                         <div>
-                          <div className="flex items-center justify-between mb-3">
-                            <div className="flex items-center gap-2">
-                              <FolderKanban size={16} className="text-[#059669]" />
-                              <h4 className="text-xs font-black text-slate-800 uppercase tracking-wider">
-                                Projects Created by {c.client_name} ({c.projects?.length || 0})
+                          <div className="flex items-center justify-between mb-2.5">
+                            <div className="flex items-center gap-1.5">
+                              <FolderKanban size={15} className="text-[#059669]" />
+                              <h4 className="text-xs font-bold text-slate-800">
+                                Projects ({c.projects?.length || 0})
                               </h4>
                             </div>
                             <button
                               onClick={() => handleOpenCreateProject(c.client_id)}
-                              className="inline-flex items-center gap-1 px-2.5 py-1 bg-white hover:bg-emerald-50 hover:text-[#059669] text-slate-700 border border-slate-200 rounded-lg text-xs font-bold transition cursor-pointer"
+                              className="inline-flex items-center gap-1 px-2.5 py-1 bg-white hover:bg-emerald-50 hover:text-[#059669] text-slate-700 border border-slate-200 rounded-lg text-xs font-semibold transition cursor-pointer"
                             >
                               <Plus size={12} /> New Project
                             </button>
                           </div>
 
                           {c.projects?.length === 0 ? (
-                            <div className="bg-white rounded-xl p-4 border border-slate-200 text-center text-xs text-slate-400 italic">
-                              This client has not created any projects yet.
+                            <div className="bg-white rounded-xl p-3.5 border border-slate-200/80 text-center text-xs text-slate-400">
+                              No projects created yet.
                             </div>
                           ) : (
-                            <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+                            <div className="bg-white rounded-xl border border-slate-200/80 overflow-hidden">
                               <table className="w-full text-left text-xs">
                                 <thead>
-                                  <tr className="bg-slate-50 border-b border-slate-100 text-slate-400 text-[10px] uppercase font-bold">
-                                    <th className="py-2.5 px-4">Project Name</th>
-                                    <th className="py-2.5 px-4">Created Date</th>
-                                    <th className="py-2.5 px-4">Members</th>
-                                    <th className="py-2.5 px-4">Status</th>
-                                    <th className="py-2.5 px-4 pr-4 text-right">Actions</th>
+                                  <tr className="bg-slate-50 border-b border-slate-100 text-slate-500 text-[10px] font-semibold uppercase">
+                                    <th className="py-2 px-3.5">Project Name</th>
+                                    <th className="py-2 px-3.5">Date</th>
+                                    <th className="py-2 px-3.5">Members</th>
+                                    <th className="py-2 px-3.5">Status</th>
+                                    <th className="py-2 px-3.5 pr-3.5 text-right">Actions</th>
                                   </tr>
                                 </thead>
-                                <tbody className="divide-y divide-slate-100 font-semibold">
+                                <tbody className="divide-y divide-slate-100">
                                   {c.projects.map((pr) => (
                                     <tr key={pr.id} className="hover:bg-slate-50/80">
-                                      <td className="py-2.5 px-4 font-bold text-slate-900">{pr.name}</td>
-                                      <td className="py-2.5 px-4 text-slate-500 text-xs">
+                                      <td className="py-2.5 px-3.5 font-bold text-slate-900">{pr.name}</td>
+                                      <td className="py-2.5 px-3.5 text-slate-500 text-xs">
                                         {pr.created_at ? new Date(pr.created_at).toLocaleDateString() : '—'}
                                       </td>
-                                      <td className="py-2.5 px-4 text-slate-700">
+                                      <td className="py-2.5 px-3.5 text-slate-700">
                                         {pr.members_count} ({pr.active_members_count} active)
                                       </td>
-                                      <td className="py-2.5 px-4">
+                                      <td className="py-2.5 px-3.5">
                                         <span className="px-2 py-0.5 bg-slate-100 text-slate-700 rounded text-[10px] font-bold uppercase">
                                           {pr.status}
                                         </span>
                                       </td>
-                                      <td className="py-2.5 px-4 text-right">
+                                      <td className="py-2.5 px-3.5 text-right">
                                         <button
                                           onClick={() => handleOpenProjectDrawer(pr.id)}
-                                          className="text-[#059669] hover:underline font-bold text-xs cursor-pointer"
+                                          className="text-[#059669] hover:underline font-semibold text-xs cursor-pointer"
                                         >
                                           View Details
                                         </button>
@@ -1432,43 +1449,43 @@ export default function AdminTeamPage() {
                           )}
                         </div>
 
-                        {/* Section 2: ALL TEAM MEMBERS BELONGING TO THIS CLIENT */}
+                        {/* Section 2: Team Members */}
                         <div>
-                          <div className="flex items-center justify-between mb-3">
-                            <div className="flex items-center gap-2">
-                              <Users size={16} className="text-[#059669]" />
-                              <h4 className="text-xs font-black text-slate-800 uppercase tracking-wider">
-                                Team Members in {c.client_name} ({c.members?.length || 0})
+                          <div className="flex items-center justify-between mb-2.5">
+                            <div className="flex items-center gap-1.5">
+                              <Users size={15} className="text-[#059669]" />
+                              <h4 className="text-xs font-bold text-slate-800">
+                                Team Members ({c.members?.length || 0})
                               </h4>
                             </div>
                             <button
                               onClick={() => handleOpenCreateMember(c.client_id)}
-                              className="inline-flex items-center gap-1 px-2.5 py-1 bg-white hover:bg-emerald-50 hover:text-[#059669] text-slate-700 border border-slate-200 rounded-lg text-xs font-bold transition cursor-pointer"
+                              className="inline-flex items-center gap-1 px-2.5 py-1 bg-white hover:bg-emerald-50 hover:text-[#059669] text-slate-700 border border-slate-200 rounded-lg text-xs font-semibold transition cursor-pointer"
                             >
                               <UserPlus size={12} /> Add Member
                             </button>
                           </div>
 
                           {c.members?.length === 0 ? (
-                            <div className="bg-white rounded-xl p-4 border border-slate-200 text-center text-xs text-slate-400 italic">
-                              No team members assigned to this client workspace.
+                            <div className="bg-white rounded-xl p-3.5 border border-slate-200/80 text-center text-xs text-slate-400">
+                              No team members in this workspace.
                             </div>
                           ) : (
-                            <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+                            <div className="bg-white rounded-xl border border-slate-200/80 overflow-hidden">
                               <table className="w-full text-left text-xs">
                                 <thead>
-                                  <tr className="bg-slate-50 border-b border-slate-100 text-slate-400 text-[10px] uppercase font-bold">
-                                    <th className="py-2.5 px-4">Member</th>
-                                    <th className="py-2.5 px-4">Role &amp; Designation</th>
-                                    <th className="py-2.5 px-4">Assigned Projects</th>
-                                    <th className="py-2.5 px-4">Status</th>
-                                    <th className="py-2.5 px-4 pr-4 text-right">Actions</th>
+                                  <tr className="bg-slate-50 border-b border-slate-100 text-slate-500 text-[10px] font-semibold uppercase">
+                                    <th className="py-2 px-3.5">Member</th>
+                                    <th className="py-2 px-3.5">Role</th>
+                                    <th className="py-2 px-3.5">Projects</th>
+                                    <th className="py-2 px-3.5">Status</th>
+                                    <th className="py-2 px-3.5 pr-3.5 text-right">Actions</th>
                                   </tr>
                                 </thead>
-                                <tbody className="divide-y divide-slate-100 font-semibold">
+                                <tbody className="divide-y divide-slate-100">
                                   {c.members.map((mem) => (
                                     <tr key={mem.id} className="hover:bg-slate-50/80">
-                                      <td className="py-2.5 px-4">
+                                      <td className="py-2.5 px-3.5">
                                         <div className="flex items-center gap-2">
                                           <span className={cn(
                                             "w-2 h-2 rounded-full",
@@ -1478,21 +1495,21 @@ export default function AdminTeamPage() {
                                           <span className="text-[11px] text-slate-400 font-mono">({mem.email})</span>
                                         </div>
                                       </td>
-                                      <td className="py-2.5 px-4 text-slate-600">
+                                      <td className="py-2.5 px-3.5 text-slate-600">
                                         {mem.designation || 'Team Member'} • <span className="uppercase text-[10px] font-bold text-slate-400">{mem.role}</span>
                                       </td>
-                                      <td className="py-2.5 px-4 font-bold text-slate-700">
+                                      <td className="py-2.5 px-3.5 font-semibold text-slate-700">
                                         {mem.assigned_projects_count} projects
                                       </td>
-                                      <td className="py-2.5 px-4">
+                                      <td className="py-2.5 px-3.5">
                                         <span className="px-2 py-0.5 bg-emerald-50 text-[#059669] rounded text-[10px] font-bold">
                                           {mem.status}
                                         </span>
                                       </td>
-                                      <td className="py-2.5 px-4 text-right">
+                                      <td className="py-2.5 px-3.5 text-right">
                                         <button
                                           onClick={() => handleOpenMemberDrawer(mem.id)}
-                                          className="text-[#059669] hover:underline font-bold text-xs cursor-pointer"
+                                          className="text-[#059669] hover:underline font-semibold text-xs cursor-pointer"
                                         >
                                           View Profile
                                         </button>

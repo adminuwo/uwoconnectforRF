@@ -18,7 +18,7 @@ const PAGE_TITLES = {
   '/admin': 'Super Admin Control Center',
   '/admin/clients': 'Client Management Directory',
   '/admin/search': 'Global Platform Search',
-  '/admin/team': 'Platform Team Overview',
+  '/admin/team': 'Team & Projects',
   '/admin/channels': 'Channel & Integration Center',
   '/admin/inbox': 'Live Message & Chat Explorer',
   '/admin/ai': 'AI & Bot Control Center',
