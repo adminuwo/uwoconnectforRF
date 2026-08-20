@@ -105,7 +105,10 @@ export default function GlobalIncomingCallListener() {
     };
 
     // 4. Backend Active Call Poller (Cross-Device & Cross-Browser)
+    let isPollingCall = false;
     const pollInterval = setInterval(async () => {
+      if (isPollingCall) return;
+      isPollingCall = true;
       try {
         const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
         const res = await fetch(`${API_BASE_URL}/api/webrtc/call/active-check`, {
@@ -148,8 +151,11 @@ export default function GlobalIncomingCallListener() {
           }
           // If status is CONNECTED or other - do nothing, let the calls page handle it
         }
-      } catch (e) {}
-    }, 1800);
+      } catch (e) {
+      } finally {
+        isPollingCall = false;
+      }
+    }, 20000); // Increased from 5000ms to 20000ms to completely prevent network queuing
 
     return () => {
       clearInterval(pollInterval);

@@ -48,10 +48,92 @@ export default function ClientInboxPage() {
   const wsRef = useRef(null);
   const typingTimeoutRef = useRef(null);
   const selectedConvoIdRef = useRef(selectedConvoId);
+  const activeChannelFilterRef = useRef(activeChannelFilter);
+  const convoLimitRef = useRef(10);
+  const [convoLimit, setConvoLimit] = useState(10);
 
   useEffect(() => {
     selectedConvoIdRef.current = selectedConvoId;
   }, [selectedConvoId]);
+
+  const isMounted = useRef(false);
+
+  useEffect(() => {
+    if (!isMounted.current) return;
+    activeChannelFilterRef.current = activeChannelFilter;
+    if (convoLimit !== 10) {
+      setConvoLimit(10);
+      convoLimitRef.current = 10;
+    } else {
+      fetchConversationsOnly();
+    }
+  }, [activeChannelFilter]);
+
+  useEffect(() => {
+    if (!isMounted.current) return;
+    convoLimitRef.current = convoLimit;
+    fetchConversationsOnly();
+  }, [convoLimit]);
+
+  useEffect(() => {
+    isMounted.current = true;
+    fetchData();
+  }, []);
+
+  const [messagesOffset, setMessagesOffset] = useState(0);
+  const [isLoadingMoreMessages, setIsLoadingMoreMessages] = useState(false);
+  const [isLoadingMoreContacts, setIsLoadingMoreContacts] = useState(false);
+
+  const fetchConversationsOnly = async () => {
+    try {
+      if (convoLimitRef.current > 10) setIsLoadingMoreContacts(true);
+      const token = localStorage.getItem('token');
+      if (!token) return;
+      const headers = { Authorization: `Bearer ${token}` };
+      const apiUrl = API_BASE_URL;
+      
+      const channelParam = activeChannelFilterRef.current !== 'ALL' ? `&preferred_channel=${activeChannelFilterRef.current}` : '';
+      const limitParam = `?limit=${convoLimitRef.current}&offset=0`;
+
+      // Fetch contacts properly paginated and ordered by recent activity
+      const contactRes = await axios.get(`${apiUrl}/api/contacts/${limitParam}${channelParam}`, { headers });
+      
+      // Handle Django Rest Framework pagination format
+      let fetchedContacts = [];
+      if (Array.isArray(contactRes.data)) {
+        fetchedContacts = contactRes.data;
+      } else if (contactRes.data && Array.isArray(contactRes.data.results)) {
+        fetchedContacts = contactRes.data.results;
+      }
+      
+      const convoData = fetchedContacts.map(contactObj => ({
+        id: contactObj.platform_id || contactObj.phone_number || contactObj.id,
+        name: contactObj.name || contactObj.platform_id || contactObj.phone_number || 'Unknown Contact',
+        rawAddress: contactObj.phone_number || contactObj.platform_id,
+        lastMessage: 'Tap to view messages...',
+        time: contactObj.updated_at || contactObj.created_at,
+        unread: 0,
+        channel: contactObj.preferred_channel || 'WHATSAPP',
+        assignedTo: contactObj.assigned_to || null,
+        isLocked: false,
+        lockedBy: null,
+        status: contactObj.status || 'OPEN',
+        contactObj,
+        messages: []
+      }));
+      
+      setConversations(convoData);
+      
+      if (convoData.length > 0 && !selectedConvoIdRef.current) {
+        setSelectedConvoId(convoData[0].id);
+      }
+    } catch (err) {
+      console.warn('Failed to fetch conversations:', err);
+      setConversations([]);
+    } finally {
+      setIsLoadingMoreContacts(false);
+    }
+  };
 
   // 1. Initial Data Fetching
   const fetchData = async () => {
@@ -62,24 +144,29 @@ export default function ClientInboxPage() {
       const headers = { Authorization: `Bearer ${token}` };
       const apiUrl = API_BASE_URL;
 
-      const [msgRes, contactRes, profileRes, teamRes, statsRes] = await Promise.all([
-        axios.get(`${apiUrl}/api/messages/`, { headers }),
-        axios.get(`${apiUrl}/api/contacts/`, { headers }),
-        axios.get(`${apiUrl}/api/profile`, { headers }).catch(() => ({ data: { username: 'Admin', role: 'ADMIN' } })),
-        axios.get(`${apiUrl}/api/team/members/`, { headers }).catch(() => ({ data: [] })),
-        axios.get(`${apiUrl}/api/monitoring/stats/`, { headers }).catch(() => ({ data: null }))
+      // Fetch contacts and profile concurrently
+      const [contactRes, profileRes] = await Promise.all([
+        axios.get(`${apiUrl}/api/contacts/`, { headers }).catch(() => ({ data: [] })),
+        axios.get(`${apiUrl}/api/profile`, { headers }).catch(() => ({ data: { username: 'Admin', role: 'ADMIN' } }))
       ]);
 
-      setMessages(msgRes.data || []);
-      setContacts(contactRes.data || []);
-      setCurrentUser(profileRes.data);
-      setTeamMembers(teamRes.data || []);
-      if (statsRes.data) setStatsData(statsRes.data);
-
-      if (msgRes.data?.length > 0 && !selectedConvoIdRef.current) {
-        const firstSender = normalizeContactId(msgRes.data[0].from_address || msgRes.data[0].to_address);
-        setSelectedConvoId(firstSender);
+      // Safely extract contacts array (handles Django Rest Framework pagination format)
+      let extractedContacts = [];
+      if (Array.isArray(contactRes.data)) {
+        extractedContacts = contactRes.data;
+      } else if (contactRes.data && Array.isArray(contactRes.data.results)) {
+        extractedContacts = contactRes.data.results;
       }
+
+      setContacts(extractedContacts);
+      setCurrentUser(profileRes.data);
+      
+      await fetchConversationsOnly();
+
+      // Fetch team and stats in the background without blocking the UI
+      axios.get(`${apiUrl}/api/team/members/`, { headers }).then(res => setTeamMembers(res.data)).catch(()=>{});
+      axios.get(`${apiUrl}/api/monitoring/stats/`, { headers }).then(res => { if(res.data) setStatsData(res.data); }).catch(()=>{});
+
     } catch (err) {
       console.warn('Failed to fetch inbox initial data:', err);
     } finally {
@@ -87,11 +174,43 @@ export default function ClientInboxPage() {
     }
   };
 
+  const fetchMessages = async (contactId, offset = 0, append = false) => {
+    if (!contactId) return;
+    try {
+      if (append) setIsLoadingMoreMessages(true);
+      const token = localStorage.getItem('token');
+      const apiUrl = API_BASE_URL;
+      const res = await axios.get(`${apiUrl}/api/messages/?contact_id=${encodeURIComponent(contactId)}&limit=10&offset=${offset}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      // Messages come ordered by -created_at from backend. Reverse to show oldest first in chat.
+      const fetchedMessages = (res.data || []).reverse();
+      
+      if (append) {
+        setMessages(prev => {
+          // Prevent duplicates
+          const existingIds = new Set(prev.map(m => m.id));
+          const newUnique = fetchedMessages.filter(m => !existingIds.has(m.id));
+          return [...newUnique, ...prev]; // Prepend older messages
+        });
+      } else {
+        setMessages(fetchedMessages);
+      }
+    } catch (err) {
+      console.warn('Messages fetch error:', err);
+    } finally {
+      setIsLoadingMoreMessages(false);
+    }
+  };
+
+  // Removed duplicated fetchData useEffect here
+
   useEffect(() => {
-    fetchData();
-    const interval = setInterval(fetchData, 4000);
-    return () => clearInterval(interval);
-  }, []);
+    if (selectedConvoId) {
+      setMessagesOffset(0);
+      fetchMessages(selectedConvoId, 0, false);
+    }
+  }, [selectedConvoId]);
 
   // Normalize contact string (e.g. phone numbers or handles)
   const normalizeContactId = (rawId) => {
@@ -100,67 +219,13 @@ export default function ClientInboxPage() {
     return digits || rawId;
   };
 
-  // Group messages into structured conversation threads
-  const groupedConversations = messages.reduce((acc, msg) => {
-    const rawContact = msg.message_type === 'INCOMING' ? msg.from_address : msg.to_address;
-    const normRaw = normalizeContactId(rawContact);
-
-    // Match contact object across phone, platform_id, or name
-    const contactObj = contacts.find(c => {
-      const cPhone = normalizeContactId(c.phone_number);
-      const cPlatform = normalizeContactId(c.platform_id);
-      const cName = c.name?.toLowerCase().trim();
-      const rawLower = rawContact?.toLowerCase().trim();
-      return (cPhone && cPhone === normRaw) ||
-             (cPlatform && cPlatform === normRaw) ||
-             (cName && rawLower && (cName === rawLower || rawLower.includes(cName) || cName.includes(rawLower)));
-    });
-
-    const contactKey = contactObj
-      ? (normalizeContactId(contactObj.phone_number || contactObj.platform_id) || contactObj.name || normRaw)
-      : normRaw;
-    
-    if (!acc[contactKey]) {
-      acc[contactKey] = {
-        id: contactKey,
-        name: contactObj?.name || (rawContact?.startsWith('+') ? rawContact : `+${rawContact}`),
-        rawAddress: contactObj?.phone_number || contactObj?.platform_id || rawContact,
-        lastMessage: msg.body || '📎 [Attachment]',
-        time: msg.created_at,
-        unread: msg.message_type === 'INCOMING' ? 1 : 0,
-        channel: msg.channel || 'WHATSAPP',
-        assignedTo: contactObj?.assigned_to || null,
-        isLocked: false,
-        lockedBy: null,
-        status: 'OPEN',
-        contactObj,
-        messages: []
-      };
-    }
-    // Deduplicate by message ID, temp ID, or exact body + timestamp proximity
-    const isDuplicate = acc[contactKey].messages.some(m => 
-      m.id === msg.id || 
-      (m.id?.startsWith('temp_') && m.body === msg.body) ||
-      (m.body === msg.body && Math.abs(new Date(m.created_at) - new Date(msg.created_at)) < 3000)
-    );
-
-    if (!isDuplicate) {
-      acc[contactKey].messages.push(msg);
-      acc[contactKey].messages.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
-    }
-    
-    if (new Date(msg.created_at) > new Date(acc[contactKey].time)) {
-      acc[contactKey].lastMessage = msg.body || '📎 [Attachment]';
-      acc[contactKey].time = msg.created_at;
-      acc[contactKey].channel = msg.channel || 'WHATSAPP';
-    }
-    return acc;
-  }, {});
-
-  const convoList = Object.values(groupedConversations)
-    .filter(c => c.id.toLowerCase().includes(searchTerm.toLowerCase()) || c.name.toLowerCase().includes(searchTerm.toLowerCase()))
-    .filter(c => activeChannelFilter === 'ALL' || c.channel === activeChannelFilter)
-    .sort((a, b) => new Date(b.time) - new Date(a.time));
+  const convoList = conversations.map(c => ({
+    ...c,
+    messages: selectedConvoId === c.id ? messages : []
+  }))
+  .filter(c => c.id.toLowerCase().includes(searchTerm.toLowerCase()) || c.name.toLowerCase().includes(searchTerm.toLowerCase()))
+  .filter(c => activeChannelFilter === 'ALL' || c.channel === activeChannelFilter)
+  .sort((a, b) => new Date(b.time) - new Date(a.time));
 
   const activeConvo = convoList.find(c => c.id === selectedConvoId) || (convoList.length > 0 ? convoList[0] : null);
 
@@ -180,10 +245,18 @@ export default function ClientInboxPage() {
         const data = JSON.parse(event.data);
         
         if (data.type === 'new_message') {
-          setMessages(prev => {
-            if (prev.some(m => m.id === data.message.id)) return prev;
-            return [...prev, data.message];
-          });
+          const msg = data.message;
+          const isForCurrentConvo = 
+            msg.from_address === selectedConvoIdRef.current || 
+            msg.to_address === selectedConvoIdRef.current;
+            
+          if (isForCurrentConvo) {
+            setMessages(prev => {
+              if (prev.some(m => m.id === msg.id)) return prev;
+              return [...prev, msg];
+            });
+          }
+          fetchData(); // Refresh sidebar conversations list
         }
 
         // Live Presence / Viewing / Typing Broadcasting
@@ -517,6 +590,21 @@ export default function ClientInboxPage() {
                   No conversations match filters.
                 </div>
               )}
+              {convoList.length > 0 && convoList.length >= convoLimitRef.current && (
+                <div className="p-4 flex justify-center border-t border-slate-100">
+                  <button 
+                    disabled={isLoadingMoreContacts}
+                    onClick={() => setConvoLimit(prev => prev + 10)}
+                    className="text-[11px] font-bold text-emerald-600 hover:text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-4 py-2 rounded-lg transition-colors w-full disabled:opacity-70 flex justify-center items-center gap-2"
+                  >
+                    {isLoadingMoreContacts ? (
+                      <>Loading... <div className="w-3 h-3 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" /></>
+                    ) : (
+                      "Load More Chats"
+                    )}
+                  </button>
+                </div>
+              )}
             </div>
           </div>
 
@@ -605,6 +693,25 @@ export default function ClientInboxPage() {
 
               {/* Timeline Messages View */}
               <div ref={scrollRef} className="flex-1 overflow-y-auto p-6 space-y-4">
+                {activeConvo.messages && activeConvo.messages.length >= 10 && (
+                  <div className="flex justify-center mb-4">
+                    <button
+                      disabled={isLoadingMoreMessages}
+                      onClick={() => {
+                        const nextOffset = messagesOffset + 10;
+                        setMessagesOffset(nextOffset);
+                        fetchMessages(activeConvo.id, nextOffset, true);
+                      }}
+                      className="px-4 py-1.5 bg-white border border-slate-200 rounded-full text-xs font-semibold text-slate-500 hover:text-emerald-600 hover:border-emerald-200 transition-colors shadow-sm disabled:opacity-70 flex items-center gap-2"
+                    >
+                      {isLoadingMoreMessages ? (
+                        <>Loading... <div className="w-3 h-3 border-2 border-slate-400 border-t-transparent rounded-full animate-spin" /></>
+                      ) : (
+                        "Load Older Messages"
+                      )}
+                    </button>
+                  </div>
+                )}
                 {activeConvo.messages && activeConvo.messages.length > 0 ? (
                   activeConvo.messages.map((msg, index) => {
                     const isIncoming = msg.message_type === 'INCOMING';

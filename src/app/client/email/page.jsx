@@ -35,7 +35,8 @@ import {
   BarChart3,
   Users,
   PanelLeftClose,
-  PanelLeftOpen
+  PanelLeftOpen,
+  RefreshCw
 } from 'lucide-react';
 import axios from 'axios';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
@@ -118,6 +119,13 @@ const ClientEmailPage = () => {
 
 
 
+
+  const [emailOffset, setEmailOffset] = useState(0);
+  const [hasMoreEmails, setHasMoreEmails] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const emailLimit = 10;
+  const [isSyncing, setIsSyncing] = useState(false);
+
   const fetchClientData = async () => {
     try {
       const token = localStorage.getItem('token');
@@ -134,17 +142,37 @@ const ClientEmailPage = () => {
     }
   };
 
-  const fetchEmails = async () => {
+  const fetchEmails = async (append = false, forceSync = false, folder = activeFolder, provider = selectedProvider) => {
     try {
+      if (append) {
+        setIsLoadingMore(true);
+      } else {
+        setLoading(true);
+      }
       setFetchError(null);
       const token = localStorage.getItem('token');
       if (!token) return;
-      const res = await axios.get(`${API_BASE_URL}/api/email/messages/`, {
+
+      const currentOffset = append ? emailOffset : 0;
+      const skipSyncParam = forceSync ? 'false' : 'true';
+
+      const params = new URLSearchParams({
+        limit: emailLimit,
+        offset: currentOffset,
+        skip_sync: skipSyncParam,
+        folder: folder,
+        provider: provider
+      });
+
+      const res = await axios.get(`${API_BASE_URL}/api/email/messages/?${params.toString()}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
+      const rawMessages = res.data?.messages?.results || res.data?.messages || res.data?.results || res.data || [];
+      const hasMore = res.data?.messages?.next || res.data?.next || rawMessages.length === emailLimit;
+
       // Map backend EmailMessage to frontend message format
-      const apiMessages = (res.data?.messages || res.data || []).map(msg => ({
+      const apiMessages = rawMessages.map(msg => ({
         id: String(msg.id),
         folder: msg.folder || 'inbox',
         provider: msg.account_provider || (msg.sender_email?.includes('gmail') ? 'gmail' : 'outlook'),
@@ -163,7 +191,13 @@ const ClientEmailPage = () => {
         meeting_info: msg.meeting_invite_data || null
       }));
 
-      setMessages(apiMessages);
+      if (append) {
+        setMessages(prev => [...prev, ...apiMessages]);
+      } else {
+        setMessages(apiMessages);
+      }
+      setEmailOffset(currentOffset + emailLimit);
+      setHasMoreEmails(!!hasMore);
 
       // Set folder counts from API response
       if (res.data?.folder_counts) {
@@ -174,32 +208,29 @@ const ClientEmailPage = () => {
       setFetchError(err.response?.data?.error || err.response?.data?.detail || err.message);
     } finally {
       setLoading(false);
+      setIsSyncing(false);
+      setIsLoadingMore(false);
     }
   };
 
   useEffect(() => {
     fetchClientData();
-    fetchEmails();
+    // fetchEmails is called below when activeFolder or selectedProvider changes
   }, []);
 
   useEffect(() => {
-    // Filter messages by the currently selected provider
-    const providerMsgs = messages.filter(m => m.provider === selectedProvider);
-    const counts = {
-      inbox: providerMsgs.filter(m => m.folder === 'inbox').length,
-      sent: providerMsgs.filter(m => m.folder === 'sent').length,
-      drafts: providerMsgs.filter(m => m.folder === 'drafts').length,
-      scheduled: providerMsgs.filter(m => m.folder === 'scheduled').length,
-      trash: providerMsgs.filter(m => m.folder === 'trash').length,
-      spam: providerMsgs.filter(m => m.folder === 'spam').length,
-      archive: providerMsgs.filter(m => m.folder === 'archive').length
-    };
-    setFolderCounts(counts);
+    setMessages([]);
+    setEmailOffset(0);
+    fetchEmails(false, false, activeFolder, selectedProvider);
+  }, [activeFolder, selectedProvider]);
 
-    const folderMsgs = providerMsgs.filter(m => m.folder === activeFolder);
-    if (folderMsgs.length > 0) setSelectedMessage(folderMsgs[0]);
-    else setSelectedMessage(null);
-  }, [activeFolder, messages, selectedProvider]);
+  useEffect(() => {
+    if (messages.length > 0 && !selectedMessage) {
+      setSelectedMessage(messages[0]);
+    } else if (messages.length === 0) {
+      setSelectedMessage(null);
+    }
+  }, [messages]);
 
   const connectedEmail = client?.outlook_config?.email_address || 'Abha@uwo24.com';
 
@@ -215,8 +246,8 @@ const ClientEmailPage = () => {
   ];
 
   // Filtered Messages (by provider + folder + search)
-  const folderMessages = messages.filter(m => m.provider === selectedProvider && m.folder === activeFolder);
-  const filteredMessages = folderMessages.filter(m => {
+  // Filtered Messages (by search)
+  const filteredMessages = messages.filter(m => {
     if (!searchQuery) return true;
     const q = searchQuery.toLowerCase();
     return m.subject?.toLowerCase().includes(q) ||
@@ -494,13 +525,24 @@ const ClientEmailPage = () => {
 
             {/* 2. CENTER: EMAIL LIST */}
             <div className="w-80 bg-white border-r border-slate-200/70 flex flex-col shrink-0">
-              <div className="px-3.5 py-2.5 border-b border-slate-100 flex items-center gap-2">
-                <span className={cn("w-1.5 h-1.5 rounded-full", selectedProvider === 'gmail' ? "bg-red-500" : "bg-blue-500")} />
-                <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide">
-                  {activeFolder}
-                </span>
-                <span className="text-[11px] text-slate-400">·</span>
-                <span className="text-[11px] text-slate-400">{filteredMessages.length}</span>
+              <div className="px-3.5 py-2.5 border-b border-slate-100 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className={cn("w-1.5 h-1.5 rounded-full", selectedProvider === 'gmail' ? "bg-red-500" : "bg-blue-500")} />
+                  <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide">
+                    {activeFolder}
+                  </span>
+                  <span className="text-[11px] text-slate-400">·</span>
+                  <span className="text-[11px] text-slate-400">{filteredMessages.length}</span>
+                </div>
+                <button
+                  onClick={() => fetchEmails(false, true)}
+                  disabled={isSyncing}
+                  className="flex items-center gap-1.5 px-2.5 py-1 bg-[#00AB56]/10 text-[#00AB56] rounded hover:bg-[#00AB56]/20 transition-colors disabled:opacity-50 text-[10px] font-semibold"
+                  title="Sync with Gmail/Outlook"
+                >
+                  <RefreshCw size={12} className={isSyncing ? "animate-spin" : ""} />
+                  {isSyncing ? "SYNCING..." : "SYNC NOW"}
+                </button>
               </div>
 
               {fetchError && (
@@ -566,6 +608,22 @@ const ClientEmailPage = () => {
                       </div>
                     );
                   })
+                )}
+                
+                {filteredMessages.length > 0 && hasMoreEmails && (
+                  <div className="p-4 flex justify-center border-t border-slate-50">
+                    <button
+                      onClick={() => fetchEmails(true, false)}
+                      disabled={isLoadingMore}
+                      className="px-4 py-1.5 text-[11px] font-semibold text-slate-500 bg-slate-100 hover:bg-slate-200 hover:text-slate-700 rounded-full transition-colors flex items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+                    >
+                      {isLoadingMore ? (
+                        <>Loading... <div className="w-3 h-3 border-2 border-slate-400 border-t-transparent rounded-full animate-spin" /></>
+                      ) : (
+                        <>Load More <ChevronDown size={14} /></>
+                      )}
+                    </button>
+                  </div>
                 )}
               </div>
             </div>

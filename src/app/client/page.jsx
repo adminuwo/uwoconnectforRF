@@ -184,7 +184,7 @@ const ClientOverview = () => {
 
       try {
         const res = await axios.get(
-          `${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/client/stats`,
+          `${API_BASE_URL}/api/client/stats`,
           { headers }
         );
         if (res.data) {
@@ -199,7 +199,7 @@ const ClientOverview = () => {
 
       try {
         const ytRes = await axios.get(
-          `${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/youtube/analytics`,
+          `${API_BASE_URL}/api/youtube/analytics`,
           { headers }
         );
         if (ytRes.data && !ytRes.data.error) {
@@ -211,7 +211,7 @@ const ClientOverview = () => {
 
       try {
         const contactsRes = await axios.get(
-          `${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/contacts/`,
+          `${API_BASE_URL}/api/contacts/?limit=1`,
           { headers }
         );
         setContacts(contactsRes.data || []);
@@ -221,7 +221,7 @@ const ClientOverview = () => {
 
       try {
         const newsRes = await axios.get(
-          `${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/google-news/feed?query=technology`,
+          `${API_BASE_URL}/api/google-news/feed?query=technology`,
           { headers }
         );
         if (newsRes.data && newsRes.data.articles) {

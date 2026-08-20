@@ -5,6 +5,7 @@ import { Plus, Trash2, Loader2, MessageCircle, Star, Sparkles, Key, CheckCircle2
 import axios from 'axios';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { cn } from '@/lib/utils';
+import { API_BASE_URL } from '@/config/apiConfig';
 
 const FacebookIcon = ({ size = 15, className }) => (
   <svg
@@ -70,12 +71,12 @@ const ClientAutomationsPage = () => {
       setLoading(true);
       const token = localStorage.getItem('token');
       
-      const autoRes = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/automations/`, {
+      const autoRes = await axios.get(`${API_BASE_URL}/api/automations/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setAutomations(autoRes.data);
 
-      const profileRes = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/profile`, {
+      const profileRes = await axios.get(`${API_BASE_URL}/api/profile`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setClient(profileRes.data.client);
@@ -113,14 +114,14 @@ const ClientAutomationsPage = () => {
       const welcomeAutomation = automations.find(a => a.trigger_type === 'START_CHAT' && a.channels.includes(selectedChannel));
 
       if (welcomeAutomation) {
-        await axios.patch(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/automations/${welcomeAutomation.id}/`, {
+        await axios.patch(`${API_BASE_URL}/api/automations/${welcomeAutomation.id}/`, {
           enabled: enabled,
           response: greetingData.message
         }, {
           headers: { Authorization: `Bearer ${token}` }
         });
       } else {
-        await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/automations/`, {
+        await axios.post(`${API_BASE_URL}/api/automations/`, {
           name: `Welcome Greeting (${selectedChannel})`,
           trigger_type: 'START_CHAT',
           response: greetingData.message,
@@ -146,7 +147,7 @@ const ClientAutomationsPage = () => {
     try {
       const token = localStorage.getItem('token');
       const enabled = newEnabledState !== null ? newEnabledState : aiData.enabled;
-      await axios.patch(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/profile`, {
+      await axios.patch(`${API_BASE_URL}/api/profile`, {
         ai_enabled: enabled,
         ai_context: aiData.context
       }, {
@@ -168,7 +169,7 @@ const ClientAutomationsPage = () => {
     setSavingKey('create_kw');
     try {
       const token = localStorage.getItem('token');
-      await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/automations/`, {
+      await axios.post(`${API_BASE_URL}/api/automations/`, {
         name: newKeyword.keywords.split(',')[0].trim(),
         trigger_type: 'KEYWORD',
         keywords: newKeyword.keywords.split(',').map(k => k.trim()),
@@ -193,7 +194,7 @@ const ClientAutomationsPage = () => {
   const handleToggleKeyword = async (id, currentStatus) => {
     try {
       const token = localStorage.getItem('token');
-      await axios.patch(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/automations/${id}/`, {
+      await axios.patch(`${API_BASE_URL}/api/automations/${id}/`, {
         enabled: !currentStatus
       }, {
         headers: { Authorization: `Bearer ${token}` }
@@ -209,7 +210,7 @@ const ClientAutomationsPage = () => {
   const handleDeleteKeyword = async (id) => {
     try {
       const token = localStorage.getItem('token');
-      await axios.delete(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/automations/${id}/`, {
+      await axios.delete(`${API_BASE_URL}/api/automations/${id}/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setAutomations(automations.filter(a => a.id !== id));
