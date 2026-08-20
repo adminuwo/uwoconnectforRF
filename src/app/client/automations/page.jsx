@@ -74,7 +74,8 @@ const ClientAutomationsPage = () => {
       const autoRes = await axios.get(`${API_BASE_URL}/api/automations/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setAutomations(autoRes.data);
+      const automationsData = Array.isArray(autoRes.data) ? autoRes.data : (autoRes.data?.results || []);
+      setAutomations(automationsData);
 
       const profileRes = await axios.get(`${API_BASE_URL}/api/profile`, {
         headers: { Authorization: `Bearer ${token}` }

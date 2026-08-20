@@ -30,7 +30,8 @@ export default function CampaignsPage() {
       const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/campaigns/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setCampaigns(res.data || []);
+      const campaignsData = Array.isArray(res.data) ? res.data : (res.data?.results || []);
+      setCampaigns(campaignsData);
     } catch (err) {
       console.error("Failed to fetch campaigns", err);
     } finally {

@@ -30,9 +30,9 @@ export default function WorkReportsPage() {
         axios.get(`${API}/api/team/reports/`, { headers: { Authorization: `Bearer ${token}` } }),
         axios.get(`${API}/api/team/tasks/`, { headers: { Authorization: `Bearer ${token}` } })
       ]);
-      setMembers(membersRes.data || []);
-      setReports(reportsRes.data || []);
-      setTasks(tasksRes.data || []);
+      setMembers(Array.isArray(membersRes.data) ? membersRes.data : (membersRes.data?.results || []));
+      setReports(Array.isArray(reportsRes.data) ? reportsRes.data : (reportsRes.data?.results || []));
+      setTasks(Array.isArray(tasksRes.data) ? tasksRes.data : (tasksRes.data?.results || []));
     } catch (err) {
       console.error('Failed to fetch data:', err);
     } finally {

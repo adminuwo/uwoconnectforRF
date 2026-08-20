@@ -81,6 +81,7 @@ export default function ClientInboxPage() {
   }, []);
 
   const [messagesOffset, setMessagesOffset] = useState(0);
+  const [isLoadingMessages, setIsLoadingMessages] = useState(false);
   const [isLoadingMoreMessages, setIsLoadingMoreMessages] = useState(false);
   const [isLoadingMoreContacts, setIsLoadingMoreContacts] = useState(false);
 
@@ -94,9 +95,10 @@ export default function ClientInboxPage() {
       
       const channelParam = activeChannelFilterRef.current !== 'ALL' ? `&preferred_channel=${activeChannelFilterRef.current}` : '';
       const limitParam = `?limit=${convoLimitRef.current}&offset=0`;
+      const searchParam = searchTerm ? `&search=${encodeURIComponent(searchTerm)}` : '';
 
       // Fetch contacts properly paginated and ordered by recent activity
-      const contactRes = await axios.get(`${apiUrl}/api/contacts/${limitParam}${channelParam}`, { headers });
+      const contactRes = await axios.get(`${apiUrl}/api/contacts/${limitParam}${channelParam}${searchParam}`, { headers });
       
       // Handle Django Rest Framework pagination format
       let fetchedContacts = [];
@@ -124,8 +126,13 @@ export default function ClientInboxPage() {
       
       setConversations(convoData);
       
-      if (convoData.length > 0 && !selectedConvoIdRef.current) {
-        setSelectedConvoId(convoData[0].id);
+      const currentSelectedExists = convoData.some(c => c.id === selectedConvoIdRef.current);
+      if (convoData.length > 0) {
+        if (!selectedConvoIdRef.current || !currentSelectedExists) {
+          setSelectedConvoId(convoData[0].id);
+        }
+      } else {
+        setSelectedConvoId(null);
       }
     } catch (err) {
       console.warn('Failed to fetch conversations:', err);
@@ -144,21 +151,9 @@ export default function ClientInboxPage() {
       const headers = { Authorization: `Bearer ${token}` };
       const apiUrl = API_BASE_URL;
 
-      // Fetch contacts and profile concurrently
-      const [contactRes, profileRes] = await Promise.all([
-        axios.get(`${apiUrl}/api/contacts/`, { headers }).catch(() => ({ data: [] })),
-        axios.get(`${apiUrl}/api/profile`, { headers }).catch(() => ({ data: { username: 'Admin', role: 'ADMIN' } }))
-      ]);
+      // Fetch profile concurrently
+      const profileRes = await axios.get(`${apiUrl}/api/profile`, { headers }).catch(() => ({ data: { username: 'Admin', role: 'ADMIN' } }));
 
-      // Safely extract contacts array (handles Django Rest Framework pagination format)
-      let extractedContacts = [];
-      if (Array.isArray(contactRes.data)) {
-        extractedContacts = contactRes.data;
-      } else if (contactRes.data && Array.isArray(contactRes.data.results)) {
-        extractedContacts = contactRes.data.results;
-      }
-
-      setContacts(extractedContacts);
       setCurrentUser(profileRes.data);
       
       await fetchConversationsOnly();
@@ -177,7 +172,11 @@ export default function ClientInboxPage() {
   const fetchMessages = async (contactId, offset = 0, append = false) => {
     if (!contactId) return;
     try {
-      if (append) setIsLoadingMoreMessages(true);
+      if (append) {
+        setIsLoadingMoreMessages(true);
+      } else {
+        setIsLoadingMessages(true);
+      }
       const token = localStorage.getItem('token');
       const apiUrl = API_BASE_URL;
       const res = await axios.get(`${apiUrl}/api/messages/?contact_id=${encodeURIComponent(contactId)}&limit=10&offset=${offset}`, {
@@ -199,7 +198,11 @@ export default function ClientInboxPage() {
     } catch (err) {
       console.warn('Messages fetch error:', err);
     } finally {
-      setIsLoadingMoreMessages(false);
+      if (append) {
+        setIsLoadingMoreMessages(false);
+      } else {
+        setIsLoadingMessages(false);
+      }
     }
   };
 
@@ -219,15 +222,24 @@ export default function ClientInboxPage() {
     return digits || rawId;
   };
 
+  // Removed client-side search since we do backend search in fetchConversationsOnly.
+  // The backend already returns filtered results based on activeChannelFilter and searchTerm
   const convoList = conversations.map(c => ({
     ...c,
     messages: selectedConvoId === c.id ? messages : []
   }))
-  .filter(c => c.id.toLowerCase().includes(searchTerm.toLowerCase()) || c.name.toLowerCase().includes(searchTerm.toLowerCase()))
-  .filter(c => activeChannelFilter === 'ALL' || c.channel === activeChannelFilter)
   .sort((a, b) => new Date(b.time) - new Date(a.time));
 
   const activeConvo = convoList.find(c => c.id === selectedConvoId) || (convoList.length > 0 ? convoList[0] : null);
+
+  // Re-fetch conversations when search term changes with debounce
+  useEffect(() => {
+    if (!isMounted.current) return;
+    const timer = setTimeout(() => {
+      fetchConversationsOnly();
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
 
   // 2. Real-Time WebSocket Connection & Event Handlers
   useEffect(() => {
@@ -693,26 +705,33 @@ export default function ClientInboxPage() {
 
               {/* Timeline Messages View */}
               <div ref={scrollRef} className="flex-1 overflow-y-auto p-6 space-y-4">
-                {activeConvo.messages && activeConvo.messages.length >= 10 && (
-                  <div className="flex justify-center mb-4">
-                    <button
-                      disabled={isLoadingMoreMessages}
-                      onClick={() => {
-                        const nextOffset = messagesOffset + 10;
-                        setMessagesOffset(nextOffset);
-                        fetchMessages(activeConvo.id, nextOffset, true);
-                      }}
-                      className="px-4 py-1.5 bg-white border border-slate-200 rounded-full text-xs font-semibold text-slate-500 hover:text-emerald-600 hover:border-emerald-200 transition-colors shadow-sm disabled:opacity-70 flex items-center gap-2"
-                    >
-                      {isLoadingMoreMessages ? (
-                        <>Loading... <div className="w-3 h-3 border-2 border-slate-400 border-t-transparent rounded-full animate-spin" /></>
-                      ) : (
-                        "Load Older Messages"
-                      )}
-                    </button>
+                {isLoadingMessages ? (
+                  <div className="flex flex-col items-center justify-center h-full min-h-[200px] text-emerald-600 gap-3">
+                    <Loader2 className="w-8 h-8 animate-spin" />
+                    <span className="text-xs font-bold text-slate-500">Loading messages...</span>
                   </div>
-                )}
-                {activeConvo.messages && activeConvo.messages.length > 0 ? (
+                ) : (
+                  <>
+                    {activeConvo.messages && activeConvo.messages.length >= 10 && (
+                      <div className="flex justify-center mb-4">
+                        <button
+                          disabled={isLoadingMoreMessages}
+                          onClick={() => {
+                            const nextOffset = messagesOffset + 10;
+                            setMessagesOffset(nextOffset);
+                            fetchMessages(activeConvo.id, nextOffset, true);
+                          }}
+                          className="px-4 py-1.5 bg-white border border-slate-200 rounded-full text-xs font-semibold text-slate-500 hover:text-emerald-600 hover:border-emerald-200 transition-colors shadow-sm disabled:opacity-70 flex items-center gap-2"
+                        >
+                          {isLoadingMoreMessages ? (
+                            <>Loading... <div className="w-3 h-3 border-2 border-slate-400 border-t-transparent rounded-full animate-spin" /></>
+                          ) : (
+                            "Load Older Messages"
+                          )}
+                        </button>
+                      </div>
+                    )}
+                    {activeConvo.messages && activeConvo.messages.length > 0 ? (
                   activeConvo.messages.map((msg, index) => {
                     const isIncoming = msg.message_type === 'INCOMING';
                     const isInternal = msg.message_type === 'INTERNAL';
@@ -915,6 +934,8 @@ export default function ClientInboxPage() {
                   <div className="text-center py-16 text-slate-400 text-xs">
                     Start replying or monitoring live.
                   </div>
+                )}
+                  </>
                 )}
               </div>
 

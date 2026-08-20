@@ -22,13 +22,22 @@ export default function CRMPage() {
   const [viewMode, setViewMode] = useState('kanban'); // 'kanban' or 'sheet'
   const [selectedContact, setSelectedContact] = useState(null);
 
-  const fetchContacts = async () => {
+  const fetchContacts = async (query = '') => {
     try {
+      setLoading(true);
       const token = localStorage.getItem('token');
-      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/contacts/`, {
+      const searchParam = query ? `&search=${encodeURIComponent(query)}` : '';
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/contacts/?limit=100&offset=0${searchParam}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setContacts(res.data);
+      // Handle Django Rest Framework pagination format
+      let fetchedContacts = [];
+      if (Array.isArray(res.data)) {
+        fetchedContacts = res.data;
+      } else if (res.data && Array.isArray(res.data.results)) {
+        fetchedContacts = res.data.results;
+      }
+      setContacts(fetchedContacts);
     } catch (error) {
       console.error("Error fetching contacts:", error);
     } finally {
@@ -36,9 +45,18 @@ export default function CRMPage() {
     }
   };
 
+  // Fetch initial
   useEffect(() => {
     fetchContacts();
   }, []);
+
+  // Debounced search
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      fetchContacts(searchQuery);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   const handleImport = async (e) => {
     const file = e.target.files[0];
@@ -123,10 +141,8 @@ export default function CRMPage() {
     document.body.removeChild(link);
   };
 
-  const filteredContacts = contacts.filter(c => 
-    (c.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (c.phone_number || '').includes(searchQuery)
-  );
+  // Removed client-side filtering, using the contacts array directly as it's filtered by backend
+  const filteredContacts = contacts;
 
   return (
     <DashboardLayout role="CLIENT">
