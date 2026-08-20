@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React, { useState, useEffect } from 'react';
 import { 
@@ -94,7 +94,8 @@ const ClientWorkflowsPage = () => {
       const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/workflows/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setWorkflows(res.data);
+      const workflowsData = Array.isArray(res.data) ? res.data : (res.data?.results || []);
+      setWorkflows(workflowsData);
     } catch (err) {
       console.error('Failed to fetch workflows');
     } finally {
