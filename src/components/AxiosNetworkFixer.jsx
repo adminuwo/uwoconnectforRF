@@ -49,8 +49,23 @@ export default function AxiosNetworkFixer() {
       return config;
     });
 
+    const responseInterceptorId = axios.interceptors.response.use((response) => {
+      // Automatically unwrap Django REST Framework paginated responses
+      if (response.data && response.data.results !== undefined && Array.isArray(response.data.results)) {
+        const arr = response.data.results;
+        arr.pagination = {
+          count: response.data.count,
+          next: response.data.next,
+          previous: response.data.previous
+        };
+        response.data = arr;
+      }
+      return response;
+    });
+
     return () => {
       axios.interceptors.request.eject(interceptorId);
+      axios.interceptors.response.eject(responseInterceptorId);
     };
   }, []);
 
