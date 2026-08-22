@@ -142,12 +142,8 @@ const LoginPage = () => {
         router.push('/client');
       }
     } catch (err) {
-      console.error('Login error:', err);
-      if (err.response?.data?.message) {
-        setError(err.response.data.message);
-      } else {
-        setError(err.message || 'Login failed.');
-      }
+      const msg = err.response?.data?.detail || err.response?.data?.message || 'Invalid email or password.';
+      setError(msg);
     } finally {
       setLoading(false);
     }

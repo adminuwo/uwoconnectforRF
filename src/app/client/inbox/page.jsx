@@ -25,32 +25,82 @@ const ClientInboxPage = () => {
   const [isSyncingGmail, setIsSyncingGmail] = useState(false);
   const [nextMessageUrl, setNextMessageUrl] = useState(null);
   const [timeframe, setTimeframe] = useState('48h');
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [hasNoMoreOlder, setHasNoMoreOlder] = useState(false);
   const scrollRef = useRef(null);
 
+  const sanitizeUrl = (rawUrl) => {
+    if (!rawUrl) return null;
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080';
+    try {
+      const parsedNext = new URL(rawUrl, typeof window !== 'undefined' ? window.location.origin : 'http://127.0.0.1:8080');
+      
+      if (apiUrl.startsWith('http://') || apiUrl.startsWith('https://')) {
+        const parsedApi = new URL(apiUrl);
+        parsedNext.protocol = parsedApi.protocol;
+        parsedNext.host = parsedApi.host;
+      } else if (typeof window !== 'undefined' && window.location.protocol === 'https:') {
+        parsedNext.protocol = 'https:';
+      }
+      return parsedNext.toString();
+    } catch (e) {
+      if (rawUrl.startsWith('/')) {
+        return `${apiUrl}${rawUrl}`;
+      }
+      return rawUrl;
+    }
+  };
+
   const loadMoreMessages = async () => {
+    if (isLoadingMore) return;
+    setIsLoadingMore(true);
     try {
       const token = localStorage.getItem('token');
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080';
+      const headers = { Authorization: `Bearer ${token}` };
+
       if (nextMessageUrl) {
-        const res = await axios.get(nextMessageUrl, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        if (res.data.results) {
-          setMessages(prev => [...prev, ...res.data.results]);
-          setNextMessageUrl(res.data.next);
+        const urlToFetch = sanitizeUrl(nextMessageUrl);
+        const res = await axios.get(urlToFetch, { headers });
+        const newMsgs = res.data.results || res.data || [];
+        if (Array.isArray(newMsgs) && newMsgs.length > 0) {
+          setMessages(prev => {
+            const existingIds = new Set(prev.map(m => m.id));
+            const uniqueNew = newMsgs.filter(m => !existingIds.has(m.id));
+            return [...prev, ...uniqueNew];
+          });
+        }
+        const nextUrl = res.data?.next ? sanitizeUrl(res.data.next) : null;
+        setNextMessageUrl(nextUrl);
+        if (!nextUrl && timeframe === 'older') {
+          setHasNoMoreOlder(true);
         }
       } else if (timeframe === '48h') {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080';
-        const res = await axios.get(`${apiUrl}/api/messages/?timeframe=older`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        if (res.data.results) {
-          setMessages(prev => [...prev, ...res.data.results]);
-          setNextMessageUrl(res.data.next);
-          setTimeframe('older');
+        const res = await axios.get(`${apiUrl}/api/messages/?timeframe=older`, { headers });
+        const newMsgs = res.data.results || res.data || [];
+        if (Array.isArray(newMsgs) && newMsgs.length > 0) {
+          setMessages(prev => {
+            const existingIds = new Set(prev.map(m => m.id));
+            const uniqueNew = newMsgs.filter(m => !existingIds.has(m.id));
+            return [...prev, ...uniqueNew];
+          });
+        }
+        const nextUrl = res.data?.next ? sanitizeUrl(res.data.next) : null;
+        setNextMessageUrl(nextUrl);
+        setTimeframe('older');
+        if (!nextUrl && newMsgs.length === 0) {
+          setHasNoMoreOlder(true);
         }
       }
     } catch (err) {
       console.error("Error loading older messages", err);
+      if (err?.response?.status === 401) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = '/auth/login';
+      }
+    } finally {
+      setIsLoadingMore(false);
     }
   };
 
@@ -62,7 +112,10 @@ const ClientInboxPage = () => {
 
     try {
       const token = localStorage.getItem('token');
-      if (!token) return;
+      if (!token) {
+        window.location.href = '/auth/login';
+        return;
+      }
       
       const headers = { Authorization: `Bearer ${token}` };
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080';
@@ -79,10 +132,20 @@ const ClientInboxPage = () => {
       const results = await Promise.all(promises);
       const msgRes = results[0];
       const msgData = msgRes.data.results || msgRes.data || [];
-      setMessages(msgData);
+
+      setMessages(prev => {
+        if (isInitialLoad || prev.length === 0) {
+          return msgData;
+        }
+        // Merge new messages during polling without wiping loaded older messages
+        const existingIds = new Set(prev.map(m => m.id));
+        const uniqueNew = msgData.filter(m => !existingIds.has(m.id));
+        if (uniqueNew.length === 0) return prev;
+        return [...prev, ...uniqueNew];
+      });
       
-      if (msgRes.data?.next) {
-        setNextMessageUrl(msgRes.data.next);
+      if (isInitialLoad && msgRes.data?.next) {
+        setNextMessageUrl(sanitizeUrl(msgRes.data.next));
       }
       
       if (results.length > 1) {
@@ -98,6 +161,11 @@ const ClientInboxPage = () => {
       }
     } catch (err) {
       console.warn('Failed to fetch messages and contacts', err);
+      if (err?.response?.status === 401) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = '/auth/login';
+      }
     } finally {
       setLoading(false);
       isFetchingRef.current = false;
@@ -472,14 +540,22 @@ const ClientInboxPage = () => {
                 </button>
               ))}
               
-              {(nextMessageUrl || timeframe === '48h') && (
+              {!hasNoMoreOlder && (nextMessageUrl || timeframe === '48h') ? (
                 <div className="p-4 text-center border-t border-slate-50">
                   <button 
                     onClick={loadMoreMessages}
-                    className="w-full px-4 py-3 bg-slate-50 hover:bg-slate-100 text-slate-500 font-bold text-[10px] uppercase tracking-wider rounded-xl transition-colors border border-slate-100"
+                    disabled={isLoadingMore}
+                    className="w-full px-4 py-3 bg-slate-50 hover:bg-slate-100 text-slate-500 font-bold text-[10px] uppercase tracking-wider rounded-xl transition-colors border border-slate-100 flex items-center justify-center gap-2 disabled:opacity-50"
                   >
-                    Load Older Conversations
+                    {isLoadingMore && <Loader2 size={14} className="animate-spin text-slate-400" />}
+                    {isLoadingMore ? 'Loading Older Conversations...' : 'Load Older Conversations'}
                   </button>
+                </div>
+              ) : (
+                <div className="p-3 text-center border-t border-slate-50">
+                  <p className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">
+                    All Conversations Loaded
+                  </p>
                 </div>
               )}
             </div>
