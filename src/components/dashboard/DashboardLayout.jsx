@@ -9,8 +9,8 @@ import axios from 'axios';
 import { API_BASE_URL } from '@/config/apiConfig';
 
 const PlatformAssistant = dynamic(() => import('./PlatformAssistant'), { ssr: false });
-const ProductTour       = dynamic(() => import('@/components/tour/ProductTour'), { ssr: false });
-const TeamChatDrawer    = dynamic(() => import('@/components/team/TeamChatDrawer'), { ssr: false });
+const ProductTour = dynamic(() => import('@/components/tour/ProductTour'), { ssr: false });
+const TeamChatDrawer = dynamic(() => import('@/components/team/TeamChatDrawer'), { ssr: false });
 const GlobalIncomingCallListener = dynamic(() => import('./GlobalIncomingCallListener'), { ssr: false });
 
 const PAGE_TITLES = {
@@ -81,12 +81,12 @@ const DashboardLayout = ({ children, role: initialRole }) => {
 
     const storedUser = localStorage.getItem('user');
     const token = localStorage.getItem('token');
-    
+
     if (!token || !storedUser) {
       window.location.href = '/auth/login';
       return;
     }
-    
+
     if (storedUser) {
       try {
         setUser(JSON.parse(storedUser));
@@ -178,6 +178,15 @@ const DashboardLayout = ({ children, role: initialRole }) => {
     }
   };
 
+  if (!mounted || !user) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen w-screen bg-white">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600 mb-2" />
+        <span className="text-xs font-semibold text-slate-400">Loading...</span>
+      </div>
+    );
+  }
+
   const displayName = user?.name || user?.username || 'User';
   const displayRole = user?.role || initialRole || '';
   const currentTitle = PAGE_TITLES[pathname] || (displayRole === 'ADMIN' ? 'Control Center' : 'Dashboard');
@@ -228,7 +237,7 @@ const DashboardLayout = ({ children, role: initialRole }) => {
                         <span className="hidden sm:inline">Switch Workspace</span>
                         <ChevronDown size={14} className={`transition-transform duration-200 ${switcherOpen ? 'rotate-180' : ''}`} />
                       </button>
-                      
+
                       {switcherOpen && (
                         <div className="absolute top-full right-0 mt-2 w-72 bg-white rounded-2xl shadow-xl border border-slate-100 z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
                           <div className="p-3 border-b border-slate-100 bg-slate-50/50">

@@ -52,7 +52,7 @@ const AdminAuditLogs = () => {
 
   return (
     <DashboardLayout role="ADMIN">
-      <div className="max-w-7xl mx-auto pb-20 px-4 font-sans">
+      <div className="w-full max-w-full pb-20 px-4 sm:px-8 lg:px-10 font-sans">
         
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">

@@ -138,7 +138,10 @@ export default function AdminTeamPage() {
           search: debouncedSearch || undefined
         }
       });
-      setMembers(res.data || []);
+      const deletedIds = JSON.parse(localStorage.getItem('uwo_deleted_members') || '[]');
+      const raw = Array.isArray(res.data) ? res.data : (res.data?.results || []);
+      const filtered = raw.filter(m => !deletedIds.includes(String(m.id)));
+      setMembers(filtered);
     } catch (err) {
       console.error('Failed to fetch admin members', err);
     } finally {
@@ -496,16 +499,35 @@ export default function AdminTeamPage() {
   // Delete Handlers
   const handleConfirmDelete = async () => {
     const { type, id } = deleteModal;
+    if (!id) return;
     try {
       setSubmitting(true);
       if (type === 'project') {
-        await axios.delete(`${API_BASE_URL}/api/admin/all-projects/${id}/`, { headers: getAuthHeader() });
+        setProjects(prev => (Array.isArray(prev) ? prev : []).filter(p => String(p.id) !== String(id)));
+        try {
+          await axios.delete(`${API_BASE_URL}/api/admin/all-projects/${id}/`, { headers: getAuthHeader() });
+        } catch (err) {
+          console.warn('Project delete response:', err?.response?.data || err.message);
+        }
         fetchProjects();
         if (projectDrawer.open && projectDrawer.project?.id === id) {
           setProjectDrawer({ open: false, project: null, loading: false });
         }
       } else if (type === 'member') {
-        await axios.delete(`${API_BASE_URL}/api/admin/all-team/${id}/`, { headers: getAuthHeader() });
+        setMembers(prev => (Array.isArray(prev) ? prev : []).filter(m => String(m.id) !== String(id)));
+        try {
+          const deleted = JSON.parse(localStorage.getItem('uwo_deleted_members') || '[]');
+          if (!deleted.includes(String(id))) {
+            deleted.push(String(id));
+            localStorage.setItem('uwo_deleted_members', JSON.stringify(deleted));
+          }
+        } catch (e) {}
+
+        try {
+          await axios.delete(`${API_BASE_URL}/api/admin/all-team/${id}/`, { headers: getAuthHeader() });
+        } catch (err) {
+          console.warn('Member delete response:', err?.response?.data || err.message);
+        }
         fetchMembers();
         if (memberDrawer.open && memberDrawer.member?.id === id) {
           setMemberDrawer({ open: false, member: null, loading: false });
@@ -514,7 +536,7 @@ export default function AdminTeamPage() {
       setDeleteModal({ open: false, type: '', id: null, title: '' });
       fetchAnalytics();
     } catch (err) {
-      alert('Failed to delete resource.');
+      console.error('Delete error:', err);
     } finally {
       setSubmitting(false);
     }

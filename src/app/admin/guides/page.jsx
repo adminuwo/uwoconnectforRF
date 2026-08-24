@@ -189,7 +189,7 @@ const AdminGuidesManagementPage = () => {
 
   return (
     <DashboardLayout role="ADMIN">
-      <div className="max-w-7xl mx-auto pb-20 px-2 sm:px-4 md:px-0">
+      <div className="w-full max-w-full pb-20 px-4 sm:px-8 lg:px-10 font-sans">
         
         {/* Banner */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">

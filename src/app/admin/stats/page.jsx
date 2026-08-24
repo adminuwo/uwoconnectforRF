@@ -36,7 +36,7 @@ const AdminStatsPage = () => {
 
   return (
     <DashboardLayout role="ADMIN">
-      <div className="max-w-7xl mx-auto pb-20 px-2 sm:px-4 md:px-0">
+      <div className="w-full max-w-full pb-20 px-4 sm:px-8 lg:px-10 font-sans">
         <div className="mb-10">
           <h1 className="text-3xl font-black text-gray-900 tracking-tight">Analytics</h1>
           <p className="text-gray-500 mt-1 font-medium italic">View how the platform is performing.</p>

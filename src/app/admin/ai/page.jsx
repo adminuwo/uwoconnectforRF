@@ -37,21 +37,13 @@ const AdminAIPage = () => {
 
   return (
     <DashboardLayout role="ADMIN">
-      <div className="max-w-7xl mx-auto pb-24 px-4 sm:px-6 font-sans">
+      <div className="w-full max-w-full pb-24 px-4 sm:px-8 lg:px-10 font-sans">
         
         {/* Header */}
-        <div className="my-8">
-          <div className="flex items-center gap-2 mb-2">
-            <span className="px-3 py-1 bg-purple-100 text-purple-700 text-[10px] font-black uppercase tracking-widest rounded-full">
-              AI Intelligence
-            </span>
-          </div>
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
+        <div className="flex items-center justify-between my-4 pb-3 border-b border-slate-100">
+          <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
             AI Assistant & Bot Control Center
           </h1>
-          <p className="text-slate-500 font-medium text-sm mt-1 italic">
-            Monitor autonomous AI assistants, RAG document embeddings, and automated conversation handoffs.
-          </p>
         </div>
 
         {/* AI Metrics Grid */}

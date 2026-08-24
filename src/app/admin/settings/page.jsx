@@ -25,7 +25,7 @@ const AdminSettingsPage = () => {
 
   return (
     <DashboardLayout role="ADMIN">
-      <div className="max-w-7xl mx-auto pb-20 px-2 sm:px-4 md:px-0">
+      <div className="w-full max-w-full pb-20 px-4 sm:px-8 lg:px-10 font-sans">
         <div className="mb-10">
           <h1 className="text-3xl font-black text-gray-900 tracking-tight flex items-center gap-3">
             <Settings className="text-slate-500" size={32} /> Platform Settings

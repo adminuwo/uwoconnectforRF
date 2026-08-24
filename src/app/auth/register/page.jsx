@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Loader2, Clock, Eye, EyeOff, ShieldCheck, User, Building2, Mail, Lock, AlertCircle, ArrowRight, CheckCircle2 } from 'lucide-react';
@@ -35,9 +35,24 @@ const RegisterPage = () => {
   const [showTerms, setShowTerms] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showUWOModal, setShowUWOModal] = useState(false);
+  const [inviteInfo, setInviteInfo] = useState(null);
   const router = useRouter();
 
   const API_URL = API_BASE_URL;
+
+  useEffect(() => {
+    if (inviteToken) {
+      axios.get(`${API_URL}/api/team/invites/validate/?token=${inviteToken}`)
+        .then(res => {
+          if (res.data.valid) {
+            setInviteInfo(res.data);
+          }
+        })
+        .catch(err => {
+          console.error('Invalid or expired invite token:', err);
+        });
+    }
+  }, [inviteToken, API_URL]);
 
   const handleBackendAuth = async (firebaseUser, extraData = {}) => {
     const idToken = await firebaseUser.getIdToken();
@@ -257,9 +272,24 @@ const RegisterPage = () => {
             Create Account
           </h1>
           <p className="text-slate-500 text-xs sm:text-sm font-medium">
-            Start automating your channels today
+            {inviteToken ? 'Join your team workspace on UwoConnect' : 'Start automating your channels today'}
           </p>
         </div>
+
+        {/* Workspace Invite Banner */}
+        {inviteToken && (
+          <div className="w-full mb-5 p-3.5 bg-emerald-50/90 text-emerald-800 text-xs font-bold rounded-2xl border border-emerald-200 flex items-center gap-3 shadow-xs animate-in fade-in duration-300">
+            <div className="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-sm">
+              <Building2 size={18} />
+            </div>
+            <div className="text-left">
+              <p className="text-[10px] uppercase tracking-wider text-emerald-600 font-black">Team Member Invitation</p>
+              <p className="text-xs font-bold text-slate-900">
+                Joining <span className="text-emerald-700 font-extrabold">{inviteInfo?.business_name || 'Workspace'}</span>
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Error Alert */}
         {error && (

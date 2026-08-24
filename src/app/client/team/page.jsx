@@ -5,7 +5,7 @@ import {
   Users, UserPlus, CheckSquare, MessageSquare, FileText, ShieldCheck, 
   BarChart3, Bot, Plus, Search, Filter, LayoutGrid, List, Calendar as CalendarIcon,
   Building2, Trash2, Mail, Shield, CheckCircle2, Clock, AlertTriangle, ChevronRight, FolderPlus, Layers,
-  Share2, Activity, ShieldAlert, Globe, Lock, UserX, UserCheck, RefreshCw, Key, ExternalLink, Eye, Smartphone
+  Share2, Activity, ShieldAlert, Globe, Lock, UserX, UserCheck, RefreshCw, Key, ExternalLink, Eye, Smartphone, QrCode
 } from 'lucide-react';
 import axios from 'axios';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
@@ -21,6 +21,7 @@ import TeamAnalyticsView from '@/components/team/TeamAnalyticsView';
 import TeamAICopilot from '@/components/team/TeamAICopilot';
 import ProjectModal from '@/components/team/ProjectModal';
 import AttendanceLeaveModal from '@/components/team/AttendanceLeaveModal';
+import QRCodeInviteModal from '@/components/team/QRCodeInviteModal';
 import MemberDetailDrawer from '@/components/team/MemberDetailDrawer';
 import ProjectDetailDrawer from '@/components/team/ProjectDetailDrawer';
 
@@ -30,6 +31,7 @@ export default function TeamPage() {
   const [projects, setProjects] = useState([]);
   const [tasks, setTasks] = useState([]);
   const [reports, setReports] = useState([]);
+  const [attendances, setAttendances] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -45,6 +47,7 @@ export default function TeamPage() {
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [isAttendanceModalOpen, setIsAttendanceModalOpen] = useState(false);
+  const [isQRModalOpen, setIsQRModalOpen] = useState(false);
 
   const [selectedTask, setSelectedTask] = useState(null);
   const [selectedMember, setSelectedMember] = useState(null);
@@ -84,9 +87,11 @@ export default function TeamPage() {
       const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/team/projects/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setProjects(res.data || []);
+      const data = Array.isArray(res.data) ? res.data : (res.data?.results || []);
+      setProjects(data);
     } catch (err) {
       console.warn('Failed to fetch projects:', err);
+      setProjects([]);
     }
   };
 
@@ -96,9 +101,11 @@ export default function TeamPage() {
       const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/team/tasks/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setTasks(res.data || []);
+      const data = Array.isArray(res.data) ? res.data : (res.data?.results || []);
+      setTasks(data);
     } catch (err) {
       console.warn('Failed to fetch tasks:', err);
+      setTasks([]);
     }
   };
 
@@ -108,9 +115,25 @@ export default function TeamPage() {
       const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/team/reports/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setReports(res.data || []);
+      const data = Array.isArray(res.data) ? res.data : (res.data?.results || []);
+      setReports(data);
     } catch (err) {
       console.warn('Failed to fetch reports:', err);
+      setReports([]);
+    }
+  };
+
+  const fetchAttendance = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/team/attendance/`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = Array.isArray(res.data) ? res.data : (res.data?.results || []);
+      setAttendances(data);
+    } catch (err) {
+      console.warn('Failed to fetch attendance:', err);
+      setAttendances([]);
     }
   };
 
@@ -131,7 +154,6 @@ export default function TeamPage() {
     if (!confirm('Are you sure you want to remove this team member?')) return;
     setMembers(prev => prev.filter(m => String(m.id) !== String(id)));
 
-    // Persist deleted ID to localStorage so page refresh never restores it
     try {
       const deleted = JSON.parse(localStorage.getItem('uwo_deleted_members') || '[]');
       if (!deleted.includes(String(id))) {
@@ -178,14 +200,15 @@ export default function TeamPage() {
         fetchMembers(),
         fetchProjects(),
         fetchTasks(),
-        fetchReports()
+        fetchReports(),
+        fetchAttendance()
       ]);
       setLoading(false);
     };
     init();
   }, []);
 
-  const filteredMembers = members.filter(m => {
+  const filteredMembers = (Array.isArray(members) ? members : []).filter(m => {
     const matchesSearch = (m.username || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
                           (m.email || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
                           (m.department || '').toLowerCase().includes(searchQuery.toLowerCase());
@@ -193,7 +216,7 @@ export default function TeamPage() {
     return matchesSearch && matchesDept;
   });
 
-  const filteredProjects = projects.filter(p => 
+  const filteredProjects = (Array.isArray(projects) ? projects : []).filter(p => 
     (p.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
     (p.description || '').toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -213,6 +236,12 @@ export default function TeamPage() {
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
+            <button
+              onClick={() => setIsQRModalOpen(true)}
+              className="px-4 py-2.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200/80 rounded-2xl text-xs font-bold transition-all shadow-2xs flex items-center gap-2 cursor-pointer"
+            >
+              <QrCode size={15} /> QR Code Invite
+            </button>
             <button
               onClick={() => {
                 setMemberToEdit(null);
@@ -376,15 +405,43 @@ export default function TeamPage() {
                     </div>
                   </div>
 
-                  {/* Channel Badges */}
-                  <div>
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Assigned Channels</p>
-                    <div className="flex flex-wrap gap-1.5">
-                      {(m.assigned_social_channels || ['wa_default', 'ig_main']).map((ch, idx) => (
-                        <span key={idx} className="px-2 py-0.5 bg-slate-100 text-slate-700 rounded-md text-[9px] font-bold">
-                          {ch}
-                        </span>
-                      ))}
+                  {/* Channel Badges & Quick Actions */}
+                  <div className="space-y-3 pt-2">
+                    <div>
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Assigned Channels</p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {(m.assigned_social_channels && m.assigned_social_channels.length > 0) ? (
+                          m.assigned_social_channels.map((ch, idx) => (
+                            <span key={idx} className="px-2 py-0.5 bg-slate-100 text-slate-700 rounded-md text-[9px] font-bold">
+                              {ch}
+                            </span>
+                          ))
+                        ) : (
+                          <span className="text-[10px] text-slate-400 font-semibold italic">No channels assigned yet</span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 pt-2 border-t border-slate-100">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setMemberToEdit(m);
+                          setIsMemberModalOpen(true);
+                        }}
+                        className="flex-1 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-xl text-[11px] font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
+                      >
+                        <Share2 size={13} /> Assign Channels
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setIsProjectModalOpen(true);
+                        }}
+                        className="flex-1 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-[11px] font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                      >
+                        <FolderPlus size={13} /> Assign Project
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -613,9 +670,9 @@ export default function TeamPage() {
             </div>
 
             {taskViewMode === 'KANBAN' ? (
-              <TaskKanbanBoard tasks={tasks} onSelectTask={(t) => setSelectedTask(t)} />
+              <TaskKanbanBoard tasks={Array.isArray(tasks) ? tasks : []} onSelectTask={(t) => setSelectedTask(t)} />
             ) : (
-              <TaskListTable tasks={tasks} onSelectTask={(t) => setSelectedTask(t)} />
+              <TaskListTable tasks={Array.isArray(tasks) ? tasks : []} onSelectTask={(t) => setSelectedTask(t)} />
             )}
           </div>
         )}
@@ -627,34 +684,186 @@ export default function TeamPage() {
           </div>
         )}
 
-        {/* --- TAB 7: ATTENDANCE --- */}
+        {/* --- TAB 7: ATTENDANCE & LOGIN LOG --- */}
         {activeTab === 'ATTENDANCE' && (
           <div className="space-y-6">
-            <div className="bg-white p-6 rounded-3xl border border-slate-200 space-y-4">
-              <h3 className="font-bold text-slate-900 text-sm">Daily Attendance & Clock In / Out Log</h3>
-              <p className="text-xs text-slate-400">Track member check-in times, working hours, and leave approvals</p>
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-slate-200 shadow-2xs">
+              <div>
+                <h3 className="font-extrabold text-slate-900 text-base flex items-center gap-2">
+                  <CalendarIcon className="text-emerald-600" size={20} /> Daily Attendance & Login/Logout Timings
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Track member check-in times, clock-out timestamps, working hours, and leave status
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setIsAttendanceModalOpen(true)}
+                  className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl text-xs font-bold transition-all shadow-sm flex items-center gap-2 cursor-pointer"
+                >
+                  <Clock size={15} /> Clock In / Clock Out & Leave
+                </button>
+              </div>
+            </div>
+
+            {/* Attendance Log Table */}
+            <div className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-2xs">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs font-semibold text-slate-700">
+                  <thead className="bg-slate-50 border-b border-slate-200 uppercase text-[9px] font-black text-slate-400 tracking-wider">
+                    <tr>
+                      <th className="p-4">Team Member</th>
+                      <th className="p-4">Department</th>
+                      <th className="p-4">Date</th>
+                      <th className="p-4">Clock In (Login)</th>
+                      <th className="p-4">Clock Out (Logout)</th>
+                      <th className="p-4">Working Hours</th>
+                      <th className="p-4">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {attendances.length === 0 ? (
+                      <tr>
+                        <td colSpan={7} className="p-8 text-center text-slate-400 text-xs font-medium">
+                          No attendance records found for today. Members can Clock In when logging into work.
+                        </td>
+                      </tr>
+                    ) : (
+                      attendances.map((att) => {
+                        const inTime = att.clock_in ? new Date(att.clock_in).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '--:--';
+                        const outTime = att.clock_out ? new Date(att.clock_out).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : (att.clock_in ? '🟢 Active Work' : '--:--');
+
+                        return (
+                          <tr key={att.id || att._id} className="hover:bg-slate-50/50">
+                            <td className="p-4">
+                              <div className="flex items-center gap-2.5">
+                                <div className="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-700 font-bold flex items-center justify-center shrink-0">
+                                  {(att.user_name || att.user_email || 'U').charAt(0).toUpperCase()}
+                                </div>
+                                <div>
+                                  <p className="font-bold text-slate-900">{att.user_name || 'Team Member'}</p>
+                                  <p className="text-[10px] text-slate-400">{att.user_email || ''}</p>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="p-4 text-slate-600 font-medium">{att.user_department || 'General'}</td>
+                            <td className="p-4 font-mono text-slate-600">{att.date}</td>
+                            <td className="p-4 font-mono font-bold text-emerald-700">{inTime}</td>
+                            <td className="p-4 font-mono font-bold text-slate-700">{outTime}</td>
+                            <td className="p-4 font-bold text-slate-800">{att.working_hours ? `${att.working_hours} hrs` : '--'}</td>
+                            <td className="p-4">
+                              <span className={`px-2.5 py-1 rounded-full text-[9px] font-black uppercase ${
+                                att.status === 'PRESENT' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
+                                att.status === 'LATE' ? 'bg-amber-50 text-amber-700 border border-amber-200' :
+                                att.status === 'ON_LEAVE' ? 'bg-blue-50 text-blue-700 border border-blue-200' :
+                                'bg-slate-100 text-slate-500'
+                              }`}>
+                                {att.status}
+                              </span>
+                            </td>
+                          </tr>
+                        );
+                      })
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         )}
 
-        {/* --- TAB 8: REPORTS --- */}
+        {/* --- TAB 8: DAILY WORK REPORTS STREAM --- */}
         {activeTab === 'REPORTS' && (
           <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {reports.map((r) => (
-                <div key={r.id} className="bg-white p-6 rounded-3xl border border-slate-200 space-y-3">
-                  <div className="flex justify-between items-center">
-                    <h4 className="font-bold text-slate-900 text-sm">{r.employee_name}</h4>
-                    <span className="text-[10px] font-bold bg-slate-100 px-2.5 py-1 rounded-full">{r.report_date}</span>
-                  </div>
-                  <p className="text-xs text-slate-600">{r.todays_work}</p>
-                </div>
-              ))}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-slate-200 shadow-2xs">
+              <div>
+                <h3 className="font-extrabold text-slate-900 text-base flex items-center gap-2">
+                  <FileText className="text-emerald-600" size={20} /> Daily Work Reports Stream
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Review daily accomplishments, completed tasks, hours logged, and blockers
+                </p>
+              </div>
+
+              <button
+                onClick={() => setIsReportModalOpen(true)}
+                className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl text-xs font-bold transition-all shadow-sm flex items-center gap-2 cursor-pointer shrink-0"
+              >
+                <Plus size={15} /> Submit Work Report
+              </button>
             </div>
+
+            {reports.length === 0 ? (
+              <div className="bg-white rounded-3xl p-12 text-center border border-slate-200 space-y-3">
+                <FileText size={36} className="text-slate-300 mx-auto" />
+                <h3 className="text-base font-bold text-slate-800">No daily reports submitted yet</h3>
+                <p className="text-xs text-slate-400 max-w-sm mx-auto">Team members can submit their daily work reports at the end of their shift.</p>
+                <button
+                  onClick={() => setIsReportModalOpen(true)}
+                  className="px-4 py-2.5 bg-emerald-600 text-white font-bold text-xs rounded-xl shadow-sm hover:bg-emerald-700 transition-all inline-flex items-center gap-1.5 cursor-pointer"
+                >
+                  <Plus size={15} /> Submit First Report
+                </button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                {reports.map((r) => (
+                  <div key={r.id || r._id} className="bg-white p-6 rounded-3xl border border-slate-200/90 shadow-2xs space-y-4 hover:shadow-md transition-all">
+                    <div className="flex justify-between items-start">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-2xl bg-slate-900 text-white font-bold flex items-center justify-center text-sm shadow-sm">
+                          {(r.employee_name || 'E').charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                          <h4 className="font-extrabold text-slate-900 text-sm">{r.employee_name || 'Team Member'}</h4>
+                          <p className="text-[10px] font-semibold text-slate-400">{r.employee_department || 'General'}</p>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col items-end gap-1">
+                        <span className="text-[10px] font-bold bg-slate-100 text-slate-600 px-3 py-1 rounded-full">{r.report_date}</span>
+                        {r.hours_worked && (
+                          <span className="text-[10px] font-bold bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-md flex items-center gap-1">
+                            <Clock size={10} /> {r.hours_worked} hrs
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="space-y-2 text-xs">
+                      <div>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1">Today's Work Accomplished</p>
+                        <p className="text-slate-700 font-medium bg-slate-50 p-3 rounded-2xl border border-slate-100 leading-relaxed whitespace-pre-wrap">{r.todays_work}</p>
+                      </div>
+
+                      {r.next_steps && (
+                        <div>
+                          <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1">Next Steps & Tomorrow's Plan</p>
+                          <p className="text-slate-600 font-medium text-xs">{r.next_steps}</p>
+                        </div>
+                      )}
+
+                      {r.need_help && (
+                        <div className="p-2.5 bg-rose-50 border border-rose-200 text-rose-700 rounded-xl text-[11px] font-bold flex items-center gap-2">
+                          <AlertCircle size={14} className="shrink-0 text-rose-500" />
+                          <span>Flagged Blocker: Needs assistance / review</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
         {/* --- MODALS --- */}
+        <QRCodeInviteModal
+          isOpen={isQRModalOpen}
+          onClose={() => setIsQRModalOpen(false)}
+        />
+
         <TeamMemberModal
           isOpen={isMemberModalOpen}
           editMember={memberToEdit}
@@ -689,7 +898,8 @@ export default function TeamPage() {
         <AttendanceLeaveModal
           isOpen={isAttendanceModalOpen}
           onClose={() => setIsAttendanceModalOpen(false)}
-          onSuccess={() => { fetchMembers(); }}
+          onSuccess={() => { fetchMembers(); fetchAttendance(); }}
+          onActionCompleted={() => { fetchMembers(); fetchAttendance(); }}
         />
 
         {selectedTask && (

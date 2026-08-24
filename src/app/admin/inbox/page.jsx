@@ -43,27 +43,17 @@ const AdminInboxPage = () => {
 
   return (
     <DashboardLayout role="ADMIN">
-      <div className="max-w-7xl mx-auto pb-24 px-4 sm:px-6 font-sans">
+      <div className="w-full max-w-full pb-24 px-4 sm:px-8 lg:px-10 font-sans">
         
         {/* Header */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between my-8 gap-4">
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <span className="px-3 py-1 bg-emerald-100 text-[#059669] text-[10px] font-black uppercase tracking-widest rounded-full">
-                Live Traffic
-              </span>
-            </div>
-            <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight flex items-center gap-3">
+        <div className="flex items-center justify-between my-4 pb-3 border-b border-slate-100">
+          <div className="flex items-center gap-2.5">
+            <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
               Live Message & Chat Explorer
             </h1>
-            <p className="text-slate-500 font-medium text-sm mt-1 italic">
-              Inspect real-time conversation messages across all client channels.
-            </p>
-          </div>
-
-          <div className="bg-white p-4 px-6 rounded-3xl border border-slate-200 shadow-sm text-center">
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Queried Messages</p>
-            <p className="text-2xl font-black text-slate-900">{messages.length}</p>
+            <span className="px-2.5 py-0.5 bg-emerald-50 text-emerald-700 text-xs font-bold rounded-full border border-emerald-200">
+              {messages.length} Messages
+            </span>
           </div>
         </div>
 

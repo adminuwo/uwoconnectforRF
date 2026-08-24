@@ -39,7 +39,7 @@ const AdminReportsPage = () => {
 
   return (
     <DashboardLayout role="ADMIN">
-      <div className="max-w-7xl mx-auto pb-24 px-4 sm:px-6 font-sans">
+      <div className="w-full max-w-full pb-24 px-4 sm:px-8 lg:px-10 font-sans">
         
         <div className="my-8">
           <div className="flex items-center gap-2 mb-2">

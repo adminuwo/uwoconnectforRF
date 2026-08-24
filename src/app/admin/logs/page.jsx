@@ -35,7 +35,7 @@ const AdminLogsPage = () => {
 
   return (
     <DashboardLayout role="ADMIN">
-      <div className="max-w-7xl mx-auto pb-20">
+      <div className="w-full max-w-full pb-20 px-4 sm:px-8 lg:px-10 font-sans">
         <div className="mb-10">
           <h1 className="text-3xl font-black text-gray-900 tracking-tight flex items-center gap-3">
             <Activity className="text-emerald-500" size={32} /> Activity Logs

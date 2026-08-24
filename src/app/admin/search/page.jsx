@@ -66,7 +66,7 @@ const GlobalAdminSearchPage = () => {
 
   return (
     <DashboardLayout role="ADMIN">
-      <div className="max-w-4xl mx-auto pb-24 px-4 sm:px-6 font-sans">
+      <div className="w-full max-w-full pb-24 px-4 sm:px-8 lg:px-10 font-sans">
         
         {/* Header */}
         <div className="my-8 text-center">
