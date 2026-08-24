@@ -88,7 +88,7 @@ export default function AdminClients() {
 
     try {
       if (isManualRefresh) setIsFetching(true);
-      else if (!summary) setLoading(true);
+      else if (clients.length === 0) setLoading(true);
       else setIsFetching(true);
 
       setError(null);
@@ -233,9 +233,9 @@ export default function AdminClients() {
               <span className="px-2.5 py-0.5 bg-emerald-50 text-emerald-700 text-xs font-bold rounded-full border border-emerald-100">
                 {totalCount} Total
               </span>
-              {isFetching && (
-                <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-600 animate-pulse">
-                  <RefreshCw size={11} className="animate-spin" /> Updating...
+              {(loading || isFetching) && (
+                <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200/60 shadow-2xs">
+                  <Loader2 size={11} className="animate-spin text-emerald-600" /> Fetching data...
                 </span>
               )}
             </div>
@@ -428,7 +428,14 @@ export default function AdminClients() {
         </div>
 
         {/* ── 4. Main Enterprise Client Management Table ── */}
-        <div className="bg-white rounded-2xl border border-slate-200/80 shadow-2xs overflow-hidden mb-8">
+        <div className="bg-white rounded-2xl border border-slate-200/80 shadow-2xs overflow-hidden mb-8 relative">
+          {/* Sleek top indeterminate progress bar when fetching */}
+          {isFetching && (
+            <div className="h-1 w-full bg-emerald-50 overflow-hidden absolute top-0 left-0 right-0 z-20">
+              <div className="h-full bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-600 animate-pulse" />
+            </div>
+          )}
+
           {error ? (
             <div className="py-12 px-4 text-center">
               <AlertCircle size={32} className="text-rose-500 mx-auto mb-2" />
@@ -495,31 +502,26 @@ export default function AdminClients() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 font-sans">
-                  {loading && clients.length === 0 ? (
-                    // Progressive Skeleton Rows
-                    Array.from({ length: 6 }).map((_, i) => (
-                      <tr key={i} className="animate-pulse">
-                        <td className="py-3.5 px-4 sticky left-0 bg-white z-10">
-                          <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-xl bg-slate-100" />
-                            <div className="space-y-1.5">
-                              <div className="h-3 w-32 bg-slate-100 rounded" />
-                              <div className="h-2 w-20 bg-slate-100 rounded" />
+                  {(loading || (isFetching && clients.length === 0)) ? (
+                    // High-End Animated Loader State
+                    <tr>
+                      <td colSpan={11} className="py-24 text-center">
+                        <div className="flex flex-col items-center justify-center gap-3.5">
+                          <div className="relative flex items-center justify-center">
+                            <div className="absolute w-14 h-14 rounded-2xl bg-emerald-500/15 animate-ping" />
+                            <div className="relative w-12 h-12 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white flex items-center justify-center shadow-lg shadow-emerald-500/20">
+                              <Loader2 className="w-6 h-6 animate-spin text-white" />
                             </div>
                           </div>
-                        </td>
-                        <td className="py-3.5 px-3"><div className="h-4 w-16 bg-slate-100 rounded-full" /></td>
-                        <td className="py-3.5 px-3"><div className="h-4 w-14 bg-slate-100 rounded-full" /></td>
-                        <td className="py-3.5 px-3 text-center"><div className="h-4 w-12 bg-slate-100 rounded mx-auto" /></td>
-                        <td className="py-3.5 px-3 text-center"><div className="h-3 w-8 bg-slate-100 rounded mx-auto" /></td>
-                        <td className="py-3.5 px-3 text-center"><div className="h-3 w-8 bg-slate-100 rounded mx-auto" /></td>
-                        <td className="py-3.5 px-3 text-center"><div className="h-3 w-12 bg-slate-100 rounded mx-auto" /></td>
-                        <td className="py-3.5 px-3 text-right"><div className="h-3 w-14 bg-slate-100 rounded ml-auto" /></td>
-                        <td className="py-3.5 px-3 text-center"><div className="h-3 w-16 bg-slate-100 rounded mx-auto" /></td>
-                        <td className="py-3.5 px-3"><div className="h-3 w-16 bg-slate-100 rounded" /></td>
-                        <td className="py-3.5 px-4 text-right sticky right-0 bg-white z-10"><div className="h-4 w-12 bg-slate-100 rounded ml-auto" /></td>
-                      </tr>
-                    ))
+                          <div>
+                            <p className="text-sm font-extrabold text-slate-800 tracking-tight">Loading Client Intelligence...</p>
+                            <p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
+                              Aggregating connected channels, projects, health score metrics, and business telemetry
+                            </p>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
                   ) : clients.length === 0 ? (
                     <tr>
                       <td colSpan={11} className="py-16 text-center text-slate-400">
@@ -528,7 +530,7 @@ export default function AdminClients() {
                           <p className="text-xs font-bold text-slate-600">No clients match your filter criteria.</p>
                           <button
                             onClick={() => { setSearchInput(''); setStatusFilter('ALL'); setApprovalFilter('ALL'); setPlanFilter('ALL'); }}
-                            className="text-xs text-emerald-600 font-semibold hover:underline"
+                            className="text-xs text-emerald-600 font-semibold hover:underline cursor-pointer"
                           >
                             Clear filters
                           </button>

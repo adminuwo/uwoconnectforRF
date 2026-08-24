@@ -178,14 +178,7 @@ const DashboardLayout = ({ children, role: initialRole }) => {
     }
   };
 
-  if (!mounted || !user) {
-    return (
-      <div className="flex flex-col items-center justify-center h-screen w-screen bg-white">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600 mb-2" />
-        <span className="text-xs font-semibold text-slate-400">Loading...</span>
-      </div>
-    );
-  }
+
 
   const displayName = user?.name || user?.username || 'User';
   const displayRole = user?.role || initialRole || '';
@@ -314,10 +307,14 @@ const DashboardLayout = ({ children, role: initialRole }) => {
       </div>
 
       {/* Fixed overlays */}
-      <PlatformAssistant />
-      <ProductTour />
-      <TeamChatDrawer isOpen={chatOpen} onClose={() => setChatOpen(false)} />
-      <GlobalIncomingCallListener />
+      {mounted && (
+        <>
+          <PlatformAssistant />
+          <ProductTour />
+          <TeamChatDrawer isOpen={chatOpen} onClose={() => setChatOpen(false)} />
+          <GlobalIncomingCallListener />
+        </>
+      )}
     </div>
   );
 };

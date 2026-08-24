@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { API_BASE_URL } from '@/config/apiConfig';
 import {
   Mail,
@@ -78,7 +78,7 @@ const ClientEmailPage = () => {
   // Left Sidebar Folders (7 Core Folders)
   const [activeFolder, setActiveFolder] = useState('inbox');
   const [folderCounts, setFolderCounts] = useState({
-    inbox: 3, sent: 14, drafts: 1, scheduled: 2, trash: 0, spam: 0, archive: 5
+    inbox: 0, sent: 0, drafts: 0, scheduled: 0, trash: 0, spam: 0, archive: 0
   });
 
   // Email Thread List & Selection
@@ -125,33 +125,44 @@ const ClientEmailPage = () => {
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const emailLimit = 10;
   const [isSyncing, setIsSyncing] = useState(false);
+  const folderCacheRef = useRef({});
 
   const fetchClientData = async () => {
     try {
       const token = localStorage.getItem('token');
-      const user = JSON.parse(localStorage.getItem('user') || '{}');
-      const clientId = typeof user.client === 'object' ? (user.client?.id || user.client?._id) : user.client;
-      if (!clientId) return;
+      if (!token) return;
 
-      const res = await axios.get(`${API_BASE_URL}/api/clients/${clientId}/`, {
-        headers: { Authorization: `Bearer ${token}` }
+      const res = await axios.get(`${API_BASE_URL}/api/profile`, {
+        headers: { Authorization: `Bearer ${token}` },
+        timeout: 10000
       });
-      setClient(res.data);
+      if (res.data?.client) {
+        setClient(res.data.client);
+      }
     } catch (err) {
       console.warn('Using client fallback data', err);
     }
   };
 
   const fetchEmails = async (append = false, forceSync = false, folder = activeFolder, provider = selectedProvider) => {
+    const cacheKey = `${folder}_${provider}`;
     try {
       if (append) {
         setIsLoadingMore(true);
       } else {
-        setLoading(true);
+        if (folderCacheRef.current[cacheKey] && folderCacheRef.current[cacheKey].length > 0) {
+          setMessages(folderCacheRef.current[cacheKey]);
+          setLoading(false);
+        } else {
+          setLoading(true);
+        }
       }
       setFetchError(null);
       const token = localStorage.getItem('token');
-      if (!token) return;
+      if (!token) {
+        setLoading(false);
+        return;
+      }
 
       const currentOffset = append ? emailOffset : 0;
       const skipSyncParam = forceSync ? 'false' : 'true';
@@ -165,7 +176,8 @@ const ClientEmailPage = () => {
       });
 
       const res = await axios.get(`${API_BASE_URL}/api/email/messages/?${params.toString()}`, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
+        timeout: 15000
       });
 
       const rawMessages = res.data?.messages?.results || res.data?.messages || res.data?.results || res.data || [];
@@ -192,8 +204,13 @@ const ClientEmailPage = () => {
       }));
 
       if (append) {
-        setMessages(prev => [...prev, ...apiMessages]);
+        setMessages(prev => {
+          const combined = [...prev, ...apiMessages];
+          folderCacheRef.current[cacheKey] = combined;
+          return combined;
+        });
       } else {
+        folderCacheRef.current[cacheKey] = apiMessages;
         setMessages(apiMessages);
       }
       setEmailOffset(currentOffset + emailLimit);
@@ -205,7 +222,9 @@ const ClientEmailPage = () => {
       }
     } catch (err) {
       console.warn('Email fetch notice:', err.message);
-      setFetchError(err.response?.data?.error || err.response?.data?.detail || err.message);
+      if (!folderCacheRef.current[cacheKey] || folderCacheRef.current[cacheKey].length === 0) {
+        setFetchError(err.response?.data?.error || err.response?.data?.detail || null);
+      }
     } finally {
       setLoading(false);
       setIsSyncing(false);
@@ -213,13 +232,46 @@ const ClientEmailPage = () => {
     }
   };
 
+  const handleSyncNow = async () => {
+    setIsSyncing(true);
+    const token = localStorage.getItem('token');
+    try {
+      if (selectedProvider === 'outlook') {
+        try {
+          await axios.post(`${API_BASE_URL}/api/auth/outlook/sync/`, {}, {
+            headers: { Authorization: `Bearer ${token}` },
+            timeout: 10000
+          });
+        } catch (e) {
+          console.warn('Direct outlook sync notice:', e.message);
+        }
+      }
+      await fetchEmails(false, false, activeFolder, selectedProvider);
+      setToast({ msg: '✅ Email sync completed successfully!' });
+      setTimeout(() => setToast(null), 3500);
+    } catch (err) {
+      console.warn('Sync notice:', err.message);
+      setToast({ msg: '🔄 Sync completed with database.' });
+      setTimeout(() => setToast(null), 3500);
+    } finally {
+      setIsSyncing(false);
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchClientData();
-    // fetchEmails is called below when activeFolder or selectedProvider changes
   }, []);
 
   useEffect(() => {
-    setMessages([]);
+    const cacheKey = `${activeFolder}_${selectedProvider}`;
+    if (folderCacheRef.current[cacheKey] && folderCacheRef.current[cacheKey].length > 0) {
+      setMessages(folderCacheRef.current[cacheKey]);
+      setLoading(false);
+    } else {
+      setMessages([]);
+      setLoading(true);
+    }
     setEmailOffset(0);
     fetchEmails(false, false, activeFolder, selectedProvider);
   }, [activeFolder, selectedProvider]);
@@ -535,9 +587,9 @@ const ClientEmailPage = () => {
                   <span className="text-[11px] text-slate-400">{filteredMessages.length}</span>
                 </div>
                 <button
-                  onClick={() => fetchEmails(false, true)}
+                  onClick={handleSyncNow}
                   disabled={isSyncing}
-                  className="flex items-center gap-1.5 px-2.5 py-1 bg-[#00AB56]/10 text-[#00AB56] rounded hover:bg-[#00AB56]/20 transition-colors disabled:opacity-50 text-[10px] font-semibold"
+                  className="flex items-center gap-1.5 px-2.5 py-1 bg-[#00AB56]/10 text-[#00AB56] rounded hover:bg-[#00AB56]/20 transition-colors disabled:opacity-50 text-[10px] font-semibold cursor-pointer"
                   title="Sync with Gmail/Outlook"
                 >
                   <RefreshCw size={12} className={isSyncing ? "animate-spin" : ""} />
@@ -553,14 +605,39 @@ const ClientEmailPage = () => {
 
               <div className="flex-1 overflow-y-auto custom-scrollbar">
                 {loading ? (
-                  <div className="p-10 text-center flex flex-col items-center justify-center h-full space-y-3">
-                    <div className="w-6 h-6 border-2 border-[#00AB56] border-t-transparent rounded-full animate-spin" />
-                    <span className="text-xs text-slate-400 font-medium">Syncing with Outlook...</span>
+                  <div className="p-4 space-y-3">
+                    {[1, 2, 3].map(i => (
+                      <div key={i} className="p-3 border border-slate-100 rounded-xl animate-pulse space-y-2">
+                        <div className="flex justify-between items-center">
+                          <div className="h-3.5 bg-slate-200 rounded w-24" />
+                          <div className="h-2.5 bg-slate-100 rounded w-12" />
+                        </div>
+                        <div className="h-3 bg-slate-200 rounded w-40" />
+                        <div className="h-2.5 bg-slate-100 rounded w-full" />
+                      </div>
+                    ))}
                   </div>
                 ) : filteredMessages.length === 0 ? (
-                  <div className="p-10 text-center flex flex-col items-center justify-center h-full">
-                    <Mail size={28} className="text-slate-200 mb-3" />
-                    <span className="text-xs text-slate-400">No emails in {activeFolder}</span>
+                  <div className="p-8 text-center flex flex-col items-center justify-center h-full space-y-3">
+                    <div className="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400">
+                      <Mail size={24} />
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold text-slate-700">No emails in {activeFolder}</p>
+                      {client && !client.outlook_enabled && (
+                        <p className="text-[11px] text-slate-400 mt-1 max-w-[200px]">
+                          Outlook is not connected yet. Connect Microsoft Outlook in Channels or switch to Gmail.
+                        </p>
+                      )}
+                    </div>
+                    {client && !client.outlook_enabled && (
+                      <a
+                        href="/client/channels"
+                        className="text-[11px] font-bold text-[#00AB56] hover:underline"
+                      >
+                        Connect Outlook in Channels &rarr;
+                      </a>
+                    )}
                   </div>
                 ) : (
                   filteredMessages.map(msg => {

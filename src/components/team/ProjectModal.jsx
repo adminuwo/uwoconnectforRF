@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { X, FolderPlus, Layers, Calendar, AlertCircle, Plus, Trash2, User, DollarSign, Clock, Tag } from 'lucide-react';
 import axios from 'axios';
+import { API_BASE_URL } from '@/config/apiConfig';
 
 const PROJECT_TYPES = ['Web Application', 'Mobile App', 'Marketing Campaign', 'CRM Integration', 'Infrastructure', 'Custom SaaS'];
 const PRIORITIES = ['LOW', 'MEDIUM', 'HIGH', 'URGENT'];
@@ -69,7 +70,7 @@ export default function ProjectModal({ isOpen, onClose, onSuccess, members = [] 
       const tagsArray = tagsInput.split(',').map(t => t.trim()).filter(Boolean);
 
       await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/team/projects/`,
+        `${API_BASE_URL}/api/team/projects/`,
         {
           name: name.trim(),
           description: description.trim(),

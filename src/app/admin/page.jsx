@@ -21,6 +21,7 @@ export default function SuperAdminOverview() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState(null);
   
   const [compSearch, setCompSearch] = useState('');
   const [compSortKey, setCompSortKey] = useState('messages');
@@ -32,6 +33,7 @@ export default function SuperAdminOverview() {
     try {
       if (isManualRefresh) setRefreshing(true);
       else setLoading(true);
+      setError(null);
 
       const token = localStorage.getItem('token');
       const [resOverview, resIntel] = await Promise.allSettled([
@@ -45,12 +47,19 @@ export default function SuperAdminOverview() {
 
       if (resOverview.status === 'fulfilled') {
         setData(resOverview.value.data);
+      } else {
+        console.error('Overview API failed:', resOverview.reason);
+        setError(resOverview.reason?.response?.data?.detail || resOverview.reason?.message || 'Failed to fetch overview data.');
       }
+      
       if (resIntel.status === 'fulfilled') {
         setIntelStats(resIntel.value.data);
+      } else {
+        console.error('Intel Stats API failed:', resIntel.reason);
       }
     } catch (err) {
       console.error('Failed to fetch super admin overview', err);
+      setError(err.message || 'An unexpected error occurred.');
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -116,12 +125,30 @@ export default function SuperAdminOverview() {
       return compSortOrder === 'asc' ? (valA || 0) - (valB || 0) : (valB || 0) - (valA || 0);
     });
 
-  if (loading) {
+  if (loading && !data) {
     return (
       <DashboardLayout role="ADMIN">
         <div className="max-w-full py-32 flex flex-col items-center justify-center gap-3">
           <Loader2 className="animate-spin text-[#059669]" size={36} />
           <p className="text-xs font-semibold text-slate-400">Loading Control Center...</p>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (error && !data) {
+    return (
+      <DashboardLayout role="ADMIN">
+        <div className="max-w-full py-32 flex flex-col items-center justify-center gap-3">
+          <ShieldAlert className="text-rose-500" size={48} />
+          <p className="text-sm font-bold text-slate-800">Failed to load dashboard</p>
+          <p className="text-xs font-medium text-slate-500">{error}</p>
+          <button 
+            onClick={() => fetchData(true)}
+            className="mt-4 px-4 py-2 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg text-xs font-bold transition-colors"
+          >
+            Try Again
+          </button>
         </div>
       </DashboardLayout>
     );

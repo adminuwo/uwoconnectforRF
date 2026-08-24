@@ -8,6 +8,7 @@ import {
   Share2, Activity, ShieldAlert, Globe, Lock, UserX, UserCheck, RefreshCw, Key, ExternalLink, Eye, Smartphone, QrCode
 } from 'lucide-react';
 import axios from 'axios';
+import { API_BASE_URL } from '@/config/apiConfig';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import TeamMemberModal from '@/components/team/TeamMemberModal';
 import TaskModal from '@/components/team/TaskModal';
@@ -24,6 +25,13 @@ import AttendanceLeaveModal from '@/components/team/AttendanceLeaveModal';
 import QRCodeInviteModal from '@/components/team/QRCodeInviteModal';
 import MemberDetailDrawer from '@/components/team/MemberDetailDrawer';
 import ProjectDetailDrawer from '@/components/team/ProjectDetailDrawer';
+import { 
+  SkeletonMemberCards, 
+  SkeletonProjectCards, 
+  SkeletonTaskKanban, 
+  SkeletonTableRows, 
+  ModernSpinner 
+} from '@/components/common/LoadingSkeleton';
 
 export default function TeamPage() {
   const [activeTab, setActiveTab] = useState('DIRECTORY'); // DIRECTORY, PROJECTS, TASKS, CHAT, ATTENDANCE, REPORTS
@@ -43,6 +51,7 @@ export default function TeamPage() {
   // Modals & Drawers
   const [isMemberModalOpen, setIsMemberModalOpen] = useState(false);
   const [memberToEdit, setMemberToEdit] = useState(null);
+  const [memberModalInitialTab, setMemberModalInitialTab] = useState('basic');
   const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
@@ -56,7 +65,7 @@ export default function TeamPage() {
   const fetchProfile = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/profile`, {
+      const res = await axios.get(`${API_BASE_URL}/api/profile`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setCurrentUser(res.data);
@@ -70,7 +79,7 @@ export default function TeamPage() {
       const token = localStorage.getItem('token');
       const deletedIds = JSON.parse(localStorage.getItem('uwo_deleted_members') || '[]');
 
-      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/team/members/`, {
+      const res = await axios.get(`${API_BASE_URL}/api/team/members/`, {
         headers: token ? { Authorization: `Bearer ${token}` } : {}
       });
       const rawMembers = Array.isArray(res.data) ? res.data : res.data.results || [];
@@ -84,7 +93,7 @@ export default function TeamPage() {
   const fetchProjects = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/team/projects/`, {
+      const res = await axios.get(`${API_BASE_URL}/api/team/projects/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = Array.isArray(res.data) ? res.data : (res.data?.results || []);
@@ -98,7 +107,7 @@ export default function TeamPage() {
   const fetchTasks = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/team/tasks/`, {
+      const res = await axios.get(`${API_BASE_URL}/api/team/tasks/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = Array.isArray(res.data) ? res.data : (res.data?.results || []);
@@ -112,7 +121,7 @@ export default function TeamPage() {
   const fetchReports = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/team/reports/`, {
+      const res = await axios.get(`${API_BASE_URL}/api/team/reports/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = Array.isArray(res.data) ? res.data : (res.data?.results || []);
@@ -126,7 +135,7 @@ export default function TeamPage() {
   const fetchAttendance = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/team/attendance/`, {
+      const res = await axios.get(`${API_BASE_URL}/api/team/attendance/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = Array.isArray(res.data) ? res.data : (res.data?.results || []);
@@ -141,7 +150,7 @@ export default function TeamPage() {
     if (!confirm('Are you sure you want to delete this project?')) return;
     try {
       const token = localStorage.getItem('token');
-      await axios.delete(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/team/projects/${id}/`, {
+      await axios.delete(`${API_BASE_URL}/api/team/projects/${id}/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       fetchProjects();
@@ -165,7 +174,7 @@ export default function TeamPage() {
     try {
       const token = localStorage.getItem('token');
       if (token) {
-        await axios.delete(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/team/members/${id}/`, {
+        await axios.delete(`${API_BASE_URL}/api/team/members/${id}/`, {
           headers: { Authorization: `Bearer ${token}` }
         });
       }
@@ -183,7 +192,7 @@ export default function TeamPage() {
       const token = localStorage.getItem('token');
       const target = members.find(m => m.id === id);
       const newStatus = target?.status === 'SUSPENDED' ? 'ACTIVE' : 'SUSPENDED';
-      await axios.patch(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/team/members/${id}/`, { status: newStatus }, {
+      await axios.patch(`${API_BASE_URL}/api/team/members/${id}/`, { status: newStatus }, {
         headers: { Authorization: `Bearer ${token}` }
       });
       fetchMembers();
@@ -338,115 +347,159 @@ export default function TeamPage() {
             </div>
 
             {/* Member Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              {filteredMembers.map((m) => (
-                <div
-                  key={m.id}
-                  onClick={() => setSelectedMember(m)}
-                  className={`bg-white rounded-3xl p-6 border cursor-pointer ${m.status === 'SUSPENDED' ? 'border-rose-200 bg-rose-50/20' : 'border-slate-200/90'} shadow-2xs hover:shadow-lg hover:border-emerald-200 transition-all flex flex-col justify-between space-y-4`}
+            {loading ? (
+              <SkeletonMemberCards count={6} />
+            ) : filteredMembers.length === 0 ? (
+              <div className="bg-white rounded-3xl p-12 text-center border border-slate-200 space-y-3">
+                <Users size={36} className="text-slate-300 mx-auto" />
+                <h3 className="text-base font-bold text-slate-800">No team members found</h3>
+                <p className="text-xs text-slate-400 max-w-sm mx-auto">Generate a QR code or add employees directly to start collaborating.</p>
+                <button
+                  onClick={() => setIsQRModalOpen(true)}
+                  className="px-4 py-2.5 bg-emerald-600 text-white font-bold text-xs rounded-xl shadow-sm hover:bg-emerald-700 transition-all inline-flex items-center gap-1.5 cursor-pointer"
                 >
-                  <div>
-                    <div className="flex items-start justify-between gap-3 mb-3">
-                      <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 rounded-2xl bg-emerald-600 text-white font-black flex items-center justify-center text-lg shrink-0 shadow-md">
-                          {m.username?.charAt(0)?.toUpperCase() || 'U'}
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <h4 className="font-bold text-slate-900 text-sm">{m.username}</h4>
-                            <span className={`w-2 h-2 rounded-full ${m.is_online ? 'bg-emerald-500 animate-pulse' : 'bg-slate-300'}`} />
-                          </div>
-                          <p className="text-xs text-slate-500">{m.designation || 'Team Member'}</p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-1">
-                        <button
-                          onClick={(e) => { e.stopPropagation(); handleSuspendMember(m.id); }}
-                          className={`p-1.5 rounded-xl text-xs transition-colors cursor-pointer ${m.status === 'SUSPENDED' ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-600'}`}
-                          title={m.status === 'SUSPENDED' ? 'Activate Member' : 'Suspend Member'}
-                        >
-                          {m.status === 'SUSPENDED' ? <UserCheck size={16} /> : <UserX size={16} />}
-                        </button>
-                        <button
-                          onClick={(e) => { 
-                            e.stopPropagation(); 
-                            setMemberToEdit(m); 
-                            setIsMemberModalOpen(true); 
-                          }}
-                          className="p-1.5 text-slate-400 hover:text-blue-500 rounded-xl hover:bg-blue-50 transition-colors cursor-pointer"
-                          title="Edit Member"
-                        >
-                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
-                        </button>
-                        <button
-                          onClick={(e) => { e.stopPropagation(); handleRemoveMember(m.id); }}
-                          className="p-1.5 text-slate-300 hover:text-rose-500 rounded-xl hover:bg-rose-50 transition-colors cursor-pointer"
-                          title="Delete Member"
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      </div>
-                    </div>
-
-                    <div className="space-y-2 py-3 border-t border-b border-slate-100 text-xs">
-                      <div className="flex justify-between items-center text-slate-600">
-                        <span className="text-slate-400">Department</span>
-                        <span className="font-semibold text-slate-800">{m.department || 'General'}</span>
-                      </div>
-                      <div className="flex justify-between items-center text-slate-600">
-                        <span className="text-slate-400">Role</span>
-                        <span className="font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full text-[10px]">{m.enterprise_role || m.role}</span>
-                      </div>
-                      <div className="flex justify-between items-center text-slate-600">
-                        <span className="text-slate-400">Employee ID</span>
-                        <span className="font-mono text-slate-700">{m.employee_id || 'N/A'}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Channel Badges & Quick Actions */}
-                  <div className="space-y-3 pt-2">
+                  <QrCode size={15} />
+                  <span>Generate QR Code Invite</span>
+                </button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                {filteredMembers.map((m) => (
+                  <div
+                    key={m.id}
+                    onClick={() => setSelectedMember(m)}
+                    className={`bg-white rounded-3xl p-6 border cursor-pointer ${m.status === 'SUSPENDED' ? 'border-rose-200 bg-rose-50/20' : 'border-slate-200/90'} shadow-2xs hover:shadow-lg hover:border-emerald-200 transition-all flex flex-col justify-between space-y-4`}
+                  >
                     <div>
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Assigned Channels</p>
-                      <div className="flex flex-wrap gap-1.5">
-                        {(m.assigned_social_channels && m.assigned_social_channels.length > 0) ? (
-                          m.assigned_social_channels.map((ch, idx) => (
-                            <span key={idx} className="px-2 py-0.5 bg-slate-100 text-slate-700 rounded-md text-[9px] font-bold">
-                              {ch}
-                            </span>
-                          ))
-                        ) : (
-                          <span className="text-[10px] text-slate-400 font-semibold italic">No channels assigned yet</span>
+                      <div className="flex items-start justify-between gap-3 mb-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-12 h-12 rounded-2xl bg-emerald-600 text-white font-black flex items-center justify-center text-lg shrink-0 shadow-md">
+                            {(m.name || m.first_name || m.username || 'U').charAt(0).toUpperCase()}
+                          </div>
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-2">
+                              <h4 className="font-bold text-slate-900 text-sm truncate">{m.name || m.first_name || m.username}</h4>
+                              <span className={`w-2 h-2 rounded-full shrink-0 ${m.is_online ? 'bg-emerald-500 animate-pulse' : 'bg-slate-300'}`} />
+                            </div>
+                            <p className="text-xs text-slate-500 truncate">{m.designation || 'Team Member'}</p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-1 shrink-0">
+                          <button
+                            onClick={(e) => { e.stopPropagation(); handleSuspendMember(m.id); }}
+                            className={`p-1.5 rounded-xl text-xs transition-colors cursor-pointer ${m.status === 'SUSPENDED' ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-600'}`}
+                            title={m.status === 'SUSPENDED' ? 'Activate Member' : 'Suspend Member'}
+                          >
+                            {m.status === 'SUSPENDED' ? <UserCheck size={16} /> : <UserX size={16} />}
+                          </button>
+                          <button
+                            onClick={(e) => { 
+                              e.stopPropagation(); 
+                              setMemberToEdit(m);
+                              setMemberModalInitialTab('basic');
+                              setIsMemberModalOpen(true); 
+                            }}
+                            className="p-1.5 text-slate-400 hover:text-emerald-600 rounded-xl hover:bg-emerald-50 transition-colors cursor-pointer"
+                            title="Edit Member / Role"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+                          </button>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); handleRemoveMember(m.id); }}
+                            className="p-1.5 text-slate-300 hover:text-rose-500 rounded-xl hover:bg-rose-50 transition-colors cursor-pointer"
+                            title="Delete Member"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Member Details */}
+                      <div className="space-y-2 py-3 border-t border-b border-slate-100 text-xs">
+                        {m.email && (
+                          <div className="flex items-center justify-between text-slate-600">
+                            <span className="text-slate-400 flex items-center gap-1.5"><Mail size={12} /> Email</span>
+                            <span className="font-semibold text-slate-800 truncate max-w-[180px]">{m.email}</span>
+                          </div>
                         )}
+                        {m.phone_number && (
+                          <div className="flex items-center justify-between text-slate-600">
+                            <span className="text-slate-400 flex items-center gap-1.5"><Smartphone size={12} /> Phone</span>
+                            <span className="font-semibold text-slate-800">{m.phone_number}</span>
+                          </div>
+                        )}
+                        <div className="flex justify-between items-center text-slate-600">
+                          <span className="text-slate-400">Department</span>
+                          <span className="font-semibold text-slate-800">{m.department || 'General'}</span>
+                        </div>
+                        <div className="flex justify-between items-center text-slate-600">
+                          <span className="text-slate-400">Role</span>
+                          <span className="font-bold text-emerald-700 bg-emerald-50 border border-emerald-200/60 px-2 py-0.5 rounded-full text-[10px]">
+                            {m.enterprise_role || m.role}
+                          </span>
+                        </div>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-2 pt-2 border-t border-slate-100">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setMemberToEdit(m);
-                          setIsMemberModalOpen(true);
-                        }}
-                        className="flex-1 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-xl text-[11px] font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
-                      >
-                        <Share2 size={13} /> Assign Channels
-                      </button>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setIsProjectModalOpen(true);
-                        }}
-                        className="flex-1 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-[11px] font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-                      >
-                        <FolderPlus size={13} /> Assign Project
-                      </button>
+                    {/* Channel Badges & Quick Actions */}
+                    <div className="space-y-3 pt-1">
+                      <div>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Assigned Channels</p>
+                        <div className="flex flex-wrap gap-1.5 min-h-[24px]">
+                          {(m.assigned_social_channels && m.assigned_social_channels.length > 0) ? (
+                            m.assigned_social_channels.map((ch, idx) => {
+                              const label = ch.includes('wa') ? 'WhatsApp' 
+                                : ch.includes('ig') ? 'Instagram' 
+                                : ch.includes('fb') ? 'Facebook' 
+                                : ch.includes('tg') ? 'Telegram' 
+                                : ch.includes('li') ? 'LinkedIn' : ch;
+                              const color = ch.includes('wa') ? 'bg-emerald-50 text-emerald-700 border-emerald-200/60'
+                                : ch.includes('ig') ? 'bg-pink-50 text-pink-700 border-pink-200/60'
+                                : ch.includes('fb') ? 'bg-blue-50 text-blue-700 border-blue-200/60'
+                                : ch.includes('tg') ? 'bg-sky-50 text-sky-700 border-sky-200/60'
+                                : 'bg-indigo-50 text-indigo-700 border-indigo-200/60';
+                              return (
+                                <span key={idx} className={`px-2 py-0.5 rounded-md text-[9px] font-bold border ${color}`}>
+                                  {label}
+                                </span>
+                              );
+                            })
+                          ) : (
+                            <span className="text-[10px] text-slate-400 font-medium italic">No channels assigned yet</span>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2 pt-2 border-t border-slate-100">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setMemberToEdit(m);
+                            setMemberModalInitialTab('channels');
+                            setIsMemberModalOpen(true);
+                          }}
+                          className="flex-1 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-xl text-[11px] font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
+                        >
+                          <Share2 size={13} /> Assign Channels
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setMemberToEdit(m);
+                            setMemberModalInitialTab('permissions');
+                            setIsMemberModalOpen(true);
+                          }}
+                          className="flex-1 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-[11px] font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                        >
+                          <Shield size={13} /> Assign Role
+                        </button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
@@ -569,7 +622,9 @@ export default function TeamPage() {
         {/* --- TAB 4: PROJECTS --- */}
         {activeTab === 'PROJECTS' && (
           <div className="space-y-4">
-            {projects.length === 0 ? (
+            {loading ? (
+              <SkeletonProjectCards count={3} />
+            ) : projects.length === 0 ? (
               <div className="bg-white rounded-2xl p-12 text-center border border-slate-200 space-y-3">
                 <FolderPlus size={36} className="text-slate-300 mx-auto" />
                 <h3 className="text-base font-bold text-slate-800">No active projects</h3>
@@ -669,7 +724,9 @@ export default function TeamPage() {
               </div>
             </div>
 
-            {taskViewMode === 'KANBAN' ? (
+            {loading ? (
+              <SkeletonTaskKanban />
+            ) : taskViewMode === 'KANBAN' ? (
               <TaskKanbanBoard tasks={Array.isArray(tasks) ? tasks : []} onSelectTask={(t) => setSelectedTask(t)} />
             ) : (
               <TaskListTable tasks={Array.isArray(tasks) ? tasks : []} onSelectTask={(t) => setSelectedTask(t)} />
@@ -723,7 +780,13 @@ export default function TeamPage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
-                    {attendances.length === 0 ? (
+                    {loading ? (
+                      <tr>
+                        <td colSpan={7} className="p-4">
+                          <SkeletonTableRows rows={5} cols={7} />
+                        </td>
+                      </tr>
+                    ) : attendances.length === 0 ? (
                       <tr>
                         <td colSpan={7} className="p-8 text-center text-slate-400 text-xs font-medium">
                           No attendance records found for today. Members can Clock In when logging into work.
@@ -794,7 +857,22 @@ export default function TeamPage() {
               </button>
             </div>
 
-            {reports.length === 0 ? (
+            {loading ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5 animate-in fade-in">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <div key={i} className="bg-white p-6 rounded-3xl border border-slate-200/90 shadow-2xs space-y-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-2xl bg-slate-100 animate-pulse" />
+                      <div className="space-y-1.5">
+                        <div className="h-4 w-32 bg-slate-100 rounded-md animate-pulse" />
+                        <div className="h-3 w-20 bg-slate-100 rounded-md animate-pulse" />
+                      </div>
+                    </div>
+                    <div className="h-16 bg-slate-50 rounded-2xl animate-pulse" />
+                  </div>
+                ))}
+              </div>
+            ) : reports.length === 0 ? (
               <div className="bg-white rounded-3xl p-12 text-center border border-slate-200 space-y-3">
                 <FileText size={36} className="text-slate-300 mx-auto" />
                 <h3 className="text-base font-bold text-slate-800">No daily reports submitted yet</h3>
@@ -867,6 +945,7 @@ export default function TeamPage() {
         <TeamMemberModal
           isOpen={isMemberModalOpen}
           editMember={memberToEdit}
+          initialTab={memberModalInitialTab}
           onClose={() => {
             setIsMemberModalOpen(false);
             setMemberToEdit(null);

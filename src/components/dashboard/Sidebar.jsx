@@ -159,7 +159,7 @@ const Sidebar = ({ role, isOpen, onClose, onToggle }) => {
     <aside
       data-tour="sidebar-nav"
       className={cn(
-        'relative h-screen bg-white border-r border-slate-100 flex flex-col z-40 font-sans transition-all duration-300 ease-in-out shrink-0 overflow-hidden',
+        'relative h-full bg-white border-r border-slate-100 flex flex-col z-40 font-sans transition-all duration-300 ease-in-out shrink-0 overflow-hidden',
         isOpen ? 'w-[220px]' : 'w-14'
       )}
     >
@@ -200,7 +200,7 @@ const Sidebar = ({ role, isOpen, onClose, onToggle }) => {
 
       {/* ── Navigation ── */}
       <nav className={cn(
-        'flex-1 py-3 space-y-0.5 overflow-y-auto custom-scrollbar',
+        'flex-1 min-h-0 py-3 space-y-0.5 overflow-y-auto custom-scrollbar',
         isOpen ? 'px-2' : 'px-2'
       )}>
         {isOpen && (

@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Loader2, Clock, Eye, EyeOff, ShieldCheck, User, Building2, Mail, Lock, AlertCircle, ArrowRight, CheckCircle2 } from 'lucide-react';
+import { Loader2, Clock, Eye, EyeOff, ShieldCheck, User, Building2, Mail, Lock, AlertCircle, ArrowRight, CheckCircle2, Phone, Briefcase, Layers } from 'lucide-react';
 import axios from 'axios';
 import TermsModal from '@/components/TermsModal';
 import UWOLoginModal from '@/components/UWOLoginModal';
@@ -24,6 +24,9 @@ const RegisterPage = () => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
+    phone: '',
+    designation: '',
+    department: 'Sales',
     businessName: '',
     password: '',
     invite_token: inviteToken || ''
@@ -60,6 +63,9 @@ const RegisterPage = () => {
       id_token: idToken,
       name: extraData.name || firebaseUser.displayName || '',
       business_name: extraData.businessName || '',
+      phone_number: extraData.phone || '',
+      designation: extraData.designation || 'Team Member',
+      department: extraData.department || 'General',
       invite_token: inviteToken || '',
     });
 
@@ -110,7 +116,7 @@ const RegisterPage = () => {
     setLoading(true);
     try {
       const result = await signInWithPopup(auth, googleProvider);
-      await handleBackendAuth(result.user);
+      await handleBackendAuth(result.user, formData);
     } catch (err) {
       console.error('Google registration error:', err);
       setError(parseAuthError(err, 'Google'));
@@ -129,7 +135,7 @@ const RegisterPage = () => {
     setLoading(true);
     try {
       const result = await signInWithPopup(auth, facebookProvider);
-      await handleBackendAuth(result.user);
+      await handleBackendAuth(result.user, formData);
     } catch (err) {
       console.error('Facebook registration error:', err);
       setError(parseAuthError(err, 'Facebook'));
@@ -148,7 +154,7 @@ const RegisterPage = () => {
     setLoading(true);
     try {
       const result = await signInWithPopup(auth, githubProvider);
-      await handleBackendAuth(result.user);
+      await handleBackendAuth(result.user, formData);
     } catch (err) {
       console.error('Github registration error:', err);
       setError(parseAuthError(err, 'GitHub'));
@@ -167,9 +173,12 @@ const RegisterPage = () => {
     setError('');
     try {
       const res = await axios.post(`${API_URL}/api/auth/register`, {
-        name: formData.name,
-        businessName: formData.businessName,
-        email: formData.email,
+        name: formData.name.trim(),
+        businessName: formData.businessName.trim(),
+        email: formData.email.trim(),
+        phone_number: formData.phone.trim(),
+        designation: formData.designation.trim(),
+        department: formData.department.trim(),
         password: formData.password,
         invite_token: inviteToken || '',
       });
@@ -237,7 +246,7 @@ const RegisterPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#edf7f0] font-sans flex flex-col items-center justify-center p-4 sm:p-6 relative overflow-hidden">
+    <div className="min-h-screen bg-[#edf7f0] font-sans flex flex-col items-center justify-center p-4 sm:p-6 relative overflow-hidden py-10">
       {/* Dynamic ambient background glow circles */}
       <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-emerald-300/30 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] bg-teal-300/30 rounded-full blur-[140px] pointer-events-none" />
@@ -252,9 +261,9 @@ const RegisterPage = () => {
         }}
       />
 
-      <div className="w-full max-w-[440px] z-10 bg-white/90 backdrop-blur-2xl border border-white/80 rounded-[32px] p-6 sm:p-8 shadow-[0_25px_60px_-15px_rgba(5,150,105,0.15),0_0_20px_rgba(255,255,255,0.8)_inset] flex flex-col items-center transition-all">
+      <div className="w-full max-w-[480px] z-10 bg-white/90 backdrop-blur-2xl border border-white/80 rounded-[32px] p-6 sm:p-8 shadow-[0_25px_60px_-15px_rgba(5,150,105,0.15),0_0_20px_rgba(255,255,255,0.8)_inset] flex flex-col items-center transition-all">
         {/* Brand Header */}
-        <div className="flex items-center gap-2.5 mb-5 px-4 py-1.5 rounded-full bg-emerald-50/80 border border-emerald-200/60 shadow-sm">
+        <div className="flex items-center gap-2.5 mb-4 px-4 py-1.5 rounded-full bg-emerald-50/80 border border-emerald-200/60 shadow-sm">
           <img 
             src="/download (3).gif" 
             alt="UwoConnect Logo" 
@@ -267,25 +276,25 @@ const RegisterPage = () => {
         </div>
 
         {/* Title Section */}
-        <div className="text-center mb-5 w-full">
+        <div className="text-center mb-4 w-full">
           <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight mb-1">
-            Create Account
+            {inviteToken ? 'Join Team' : 'Create Account'}
           </h1>
           <p className="text-slate-500 text-xs sm:text-sm font-medium">
-            {inviteToken ? 'Join your team workspace on UwoConnect' : 'Start automating your channels today'}
+            {inviteToken ? 'Complete your member profile to join the workspace' : 'Start automating your channels today'}
           </p>
         </div>
 
         {/* Workspace Invite Banner */}
         {inviteToken && (
-          <div className="w-full mb-5 p-3.5 bg-emerald-50/90 text-emerald-800 text-xs font-bold rounded-2xl border border-emerald-200 flex items-center gap-3 shadow-xs animate-in fade-in duration-300">
+          <div className="w-full mb-4 p-3.5 bg-emerald-50/90 text-emerald-800 text-xs font-bold rounded-2xl border border-emerald-200 flex items-center gap-3 shadow-xs animate-in fade-in duration-300">
             <div className="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-sm">
               <Building2 size={18} />
             </div>
             <div className="text-left">
-              <p className="text-[10px] uppercase tracking-wider text-emerald-600 font-black">Team Member Invitation</p>
+              <p className="text-[10px] uppercase tracking-wider text-emerald-600 font-black">Official Team Invitation</p>
               <p className="text-xs font-bold text-slate-900">
-                Joining <span className="text-emerald-700 font-extrabold">{inviteInfo?.business_name || 'Workspace'}</span>
+                Joining Workspace: <span className="text-emerald-700 font-extrabold">{inviteInfo?.business_name || 'uwo'}</span>
               </p>
             </div>
           </div>
@@ -301,9 +310,10 @@ const RegisterPage = () => {
 
         {/* Form */}
         <form onSubmit={handleRegister} className="w-full space-y-3">
+          {/* 1. Full Name */}
           <div className="space-y-1">
             <label className="block text-xs font-bold text-slate-700 ml-1">
-              Full Name
+              Full Name <span className="text-emerald-600">*</span>
             </label>
             <div className="relative">
               <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -312,16 +322,17 @@ const RegisterPage = () => {
                 required
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                placeholder="Alex Morgan"
+                placeholder="e.g. Rahul Sharma"
                 className="w-full bg-slate-50/90 text-slate-900 placeholder:text-slate-400 outline-none rounded-2xl py-2.5 pl-10 pr-4 font-medium text-sm border border-slate-200/80 focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 transition-all shadow-sm"
               />
             </div>
           </div>
 
+          {/* 2. Business Name (Only if NOT joining via invite) */}
           {!inviteToken && (
             <div className="space-y-1">
               <label className="block text-xs font-bold text-slate-700 ml-1">
-                Business Name
+                Business / Company Name <span className="text-emerald-600">*</span>
               </label>
               <div className="relative">
                 <Building2 className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -330,16 +341,17 @@ const RegisterPage = () => {
                   required
                   value={formData.businessName}
                   onChange={(e) => setFormData({ ...formData, businessName: e.target.value })}
-                  placeholder="Acme Studios"
+                  placeholder="e.g. Acme Enterprises"
                   className="w-full bg-slate-50/90 text-slate-900 placeholder:text-slate-400 outline-none rounded-2xl py-2.5 pl-10 pr-4 font-medium text-sm border border-slate-200/80 focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 transition-all shadow-sm"
                 />
               </div>
             </div>
           )}
 
+          {/* 3. Email Address */}
           <div className="space-y-1">
             <label className="block text-xs font-bold text-slate-700 ml-1">
-              Email Address
+              Email Address <span className="text-emerald-600">*</span>
             </label>
             <div className="relative">
               <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -354,9 +366,70 @@ const RegisterPage = () => {
             </div>
           </div>
 
+          {/* 4. Phone Number */}
           <div className="space-y-1">
             <label className="block text-xs font-bold text-slate-700 ml-1">
-              Password
+              Phone Number <span className="text-emerald-600">*</span>
+            </label>
+            <div className="relative">
+              <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <input
+                type="tel"
+                required
+                value={formData.phone}
+                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                placeholder="+91 98765 43210"
+                className="w-full bg-slate-50/90 text-slate-900 placeholder:text-slate-400 outline-none rounded-2xl py-2.5 pl-10 pr-4 font-medium text-sm border border-slate-200/80 focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 transition-all shadow-sm"
+              />
+            </div>
+          </div>
+
+          {/* 5. Designation & Department (Side by Side on medium screens) */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            <div className="space-y-1">
+              <label className="block text-xs font-bold text-slate-700 ml-1">
+                Designation / Role {inviteToken && <span className="text-emerald-600">*</span>}
+              </label>
+              <div className="relative">
+                <Briefcase className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <input
+                  type="text"
+                  required={Boolean(inviteToken)}
+                  value={formData.designation}
+                  onChange={(e) => setFormData({ ...formData, designation: e.target.value })}
+                  placeholder="e.g. Sales Executive"
+                  className="w-full bg-slate-50/90 text-slate-900 placeholder:text-slate-400 outline-none rounded-2xl py-2.5 pl-10 pr-3 font-medium text-xs border border-slate-200/80 focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 transition-all shadow-sm"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-1">
+              <label className="block text-xs font-bold text-slate-700 ml-1">
+                Department
+              </label>
+              <div className="relative">
+                <Layers className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <select
+                  value={formData.department}
+                  onChange={(e) => setFormData({ ...formData, department: e.target.value })}
+                  className="w-full bg-slate-50/90 text-slate-900 outline-none rounded-2xl py-2.5 pl-10 pr-3 font-medium text-xs border border-slate-200/80 focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 transition-all shadow-sm cursor-pointer"
+                >
+                  <option value="Sales">Sales</option>
+                  <option value="Support">Support & Success</option>
+                  <option value="Marketing">Marketing</option>
+                  <option value="Operations">Operations</option>
+                  <option value="Engineering">Engineering / IT</option>
+                  <option value="Management">Management</option>
+                  <option value="General">General</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          {/* 6. Password */}
+          <div className="space-y-1">
+            <label className="block text-xs font-bold text-slate-700 ml-1">
+              Password <span className="text-emerald-600">*</span>
             </label>
             <div className="relative">
               <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -371,7 +444,7 @@ const RegisterPage = () => {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 transition-colors p-1 rounded-lg focus:outline-none"
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 transition-colors p-1 rounded-lg focus:outline-none cursor-pointer"
               >
                 {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
               </button>
@@ -403,7 +476,7 @@ const RegisterPage = () => {
             </label>
           </div>
 
-          {/* Register Button */}
+          {/* Register / Join Button */}
           <div className="pt-2">
             <button
               type="submit"
@@ -414,7 +487,7 @@ const RegisterPage = () => {
                 <Loader2 className="animate-spin text-white w-5 h-5" />
               ) : (
                 <>
-                  <span>Create Account</span>
+                  <span>{inviteToken ? 'Complete & Join Workspace' : 'Create Account'}</span>
                   <ArrowRight className="w-4 h-4" />
                 </>
               )}
@@ -426,7 +499,7 @@ const RegisterPage = () => {
         <div className="w-full flex items-center gap-3 my-4">
           <div className="h-[1px] bg-slate-200 flex-1" />
           <span className="text-slate-400 text-[11px] font-bold uppercase tracking-wider">
-            Or register with
+            Or continue with
           </span>
           <div className="h-[1px] bg-slate-200 flex-1" />
         </div>

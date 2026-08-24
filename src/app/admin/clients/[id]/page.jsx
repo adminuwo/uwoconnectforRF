@@ -26,6 +26,7 @@ import {
 } from '@/components/admin/ClientIntelligenceComponents';
 import { cn } from '@/lib/utils';
 import { API_BASE_URL } from '@/config/apiConfig';
+import { CHANNEL_DEFINITIONS, GLOBAL_ACTIVE_CHANNELS } from '@/config/channelsConfig';
 
 export default function ClientAdminDetailDashboard({ params }) {
   const unwrappedParams = use(params);
@@ -39,6 +40,12 @@ export default function ClientAdminDetailDashboard({ params }) {
   const [clientData, setClientData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
+
+  // Channel Access Management State
+  const [channelAccessData, setChannelAccessData] = useState(null);
+  const [togglingChannel, setTogglingChannel] = useState(null);
+  const [auditLogs, setAuditLogs] = useState([]);
+  const [loadingAuditLogs, setLoadingAuditLogs] = useState(false);
 
   // Modals
   const [isAddMemberOpen, setIsAddMemberOpen] = useState(false);
@@ -123,9 +130,61 @@ export default function ClientAdminDetailDashboard({ params }) {
     }
   };
 
+  const fetchChannelAccess = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const res = await axios.get(`${API_BASE_URL}/api/admin/channel-access/client/${clientId}/`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setChannelAccessData(res.data);
+    } catch (err) {
+      console.error('Failed to fetch channel access data', err);
+    }
+  };
+
+  const fetchAuditLogs = async () => {
+    try {
+      setLoadingAuditLogs(true);
+      const token = localStorage.getItem('token');
+      const res = await axios.get(`${API_BASE_URL}/api/admin/channel-access/audit-logs/?client_id=${clientId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setAuditLogs(res.data.audit_logs || []);
+    } catch (err) {
+      console.error('Failed to fetch audit logs', err);
+    } finally {
+      setLoadingAuditLogs(false);
+    }
+  };
+
+  const handleToggleChannelAccess = async (channelKey, currentAccess) => {
+    try {
+      setTogglingChannel(channelKey);
+      const token = localStorage.getItem('token');
+      const newAccess = !currentAccess;
+      await axios.patch(`${API_BASE_URL}/api/admin/channel-access/client/${clientId}/`, {
+        channel: channelKey,
+        enabled: newAccess,
+        notes: `Admin toggled ${channelKey} to ${newAccess ? 'ENABLED' : 'DISABLED'}`
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      await fetchChannelAccess();
+      await fetchClientIntelligence();
+      await fetchAuditLogs();
+    } catch (err) {
+      console.error('Failed to toggle channel access', err);
+      alert(err?.response?.data?.error || 'Failed to update channel permission.');
+    } finally {
+      setTogglingChannel(null);
+    }
+  };
+
   useEffect(() => {
     if (clientId) {
       fetchClientIntelligence();
+      fetchChannelAccess();
+      fetchAuditLogs();
     }
   }, [clientId]);
 
@@ -213,7 +272,7 @@ export default function ClientAdminDetailDashboard({ params }) {
     { id: 'team', label: 'Team', icon: Users, count: tabs.team?.length || 0 },
     { id: 'channels', label: 'Channels', icon: Globe, count: tabs.channels?.filter(c => c.is_connected).length || 0 },
     { id: 'matrix', label: 'Channel Matrix', icon: ShieldCheck },
-    { id: 'activity', label: 'Activity Timeline', icon: Activity, count: tabs.activity?.length || 0 },
+
     { id: 'bot_usage', label: 'Bot & AI Usage', icon: Bot, count: tabs.bot_usage?.total_messages || 0 },
     { id: 'knowledge_base', label: 'Knowledge Base', icon: Brain, count: tabs.knowledge_base?.total_documents || 0 },
     { id: 'products', label: 'Products', icon: ShoppingBag, count: tabs.products?.length || 0 },
@@ -368,35 +427,7 @@ export default function ClientAdminDetailDashboard({ params }) {
                 </div>
               </div>
 
-              {/* Row 2: Quick Metrics Grid */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3">
-                <div className="bg-white p-4 rounded-xl border border-slate-200/80 shadow-2xs">
-                  <span className="text-[11px] text-slate-400 font-semibold">Active Channels</span>
-                  <div className="text-xl font-extrabold text-slate-900 mt-1">
-                    {tabs.channels?.filter(c => c.is_connected).length} / {tabs.channels?.length || 10}
-                  </div>
-                </div>
-                <div className="bg-white p-4 rounded-xl border border-slate-200/80 shadow-2xs">
-                  <span className="text-[11px] text-slate-400 font-semibold">Total Projects</span>
-                  <div className="text-xl font-extrabold text-slate-900 mt-1">{tabs.projects?.length || 0}</div>
-                </div>
-                <div className="bg-white p-4 rounded-xl border border-slate-200/80 shadow-2xs">
-                  <span className="text-[11px] text-slate-400 font-semibold">Team Members</span>
-                  <div className="text-xl font-extrabold text-slate-900 mt-1">{tabs.team?.length || 0}</div>
-                </div>
-                <div className="bg-white p-4 rounded-xl border border-slate-200/80 shadow-2xs">
-                  <span className="text-[11px] text-slate-400 font-semibold">Bot Messages</span>
-                  <div className="text-xl font-extrabold text-slate-900 mt-1">{tabs.bot_usage?.total_messages || 0}</div>
-                </div>
-                <div className="bg-white p-4 rounded-xl border border-slate-200/80 shadow-2xs">
-                  <span className="text-[11px] text-slate-400 font-semibold">KB Documents</span>
-                  <div className="text-xl font-extrabold text-slate-900 mt-1">{tabs.knowledge_base?.total_documents || 0}</div>
-                </div>
-                <div className="bg-white p-4 rounded-xl border border-slate-200/80 shadow-2xs">
-                  <span className="text-[11px] text-slate-400 font-semibold">Total Invoices</span>
-                  <div className="text-xl font-extrabold text-slate-900 mt-1">{tabs.invoices?.length || 0}</div>
-                </div>
-              </div>
+
 
               {/* Row 3: Pipeline & Channel Matrix Quick View */}
               <QuotationConversionPipeline
@@ -534,39 +565,276 @@ export default function ClientAdminDetailDashboard({ params }) {
             </div>
           )}
 
-          {/* TAB 4: CHANNELS */}
+          {/* TAB 4: CHANNEL ACCESS CONTROL & GOVERNANCE */}
           {activeTab === 'channels' && (
-            <div className="space-y-4 animate-in fade-in">
-              <div>
-                <h3 className="text-sm font-bold text-slate-900">Channels Overview</h3>
-                <p className="text-xs text-slate-400">Real-time status of all integrated communications and productivity channels.</p>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
-                {tabs.channels?.map((ch) => (
-                  <div key={ch.key} className="bg-white p-4.5 rounded-2xl border border-slate-200/80 shadow-2xs flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className={cn(
-                        "w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm",
-                        ch.is_connected ? "bg-emerald-50 text-emerald-700 border border-emerald-200" : "bg-slate-100 text-slate-400"
-                      )}>
-                        <Globe size={18} />
-                      </div>
-                      <div>
-                        <h4 className="text-xs font-bold text-slate-900">{ch.name}</h4>
-                        <p className="text-[10px] text-slate-400">{ch.details}</p>
-                      </div>
-                    </div>
-
-                    <span className={cn(
-                      "px-2.5 py-1 rounded-full text-[10px] font-bold uppercase border",
-                      ch.is_connected ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-slate-100 text-slate-500 border-slate-200"
-                    )}>
-                      {ch.status}
-                    </span>
+            <div className="space-y-8 animate-in fade-in">
+              
+              {/* Header & Quick stats */}
+              <div className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-2xs">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div>
+                    <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                      <ShieldCheck className="text-emerald-600" size={20} />
+                      Channel Feature Lock & Admin Access Control
+                    </h3>
+                    <p className="text-xs text-slate-400 mt-1 max-w-2xl">
+                      Control which communication channels are authorized for this client workspace. Revoking access restricts client visibility and blocks team member assignments immediately.
+                    </p>
                   </div>
-                ))}
+                  
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => {
+                        fetchChannelAccess();
+                        fetchAuditLogs();
+                      }}
+                      className="px-3 py-1.5 bg-slate-50 hover:bg-slate-100 text-slate-600 rounded-xl text-xs font-bold border border-slate-200 flex items-center gap-1.5 transition-colors cursor-pointer"
+                    >
+                      <RefreshCw size={13} className={cn(togglingChannel && "animate-spin")} />
+                      <span>Refresh Permissions</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Quick Status Cards */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 mt-6 pt-5 border-t border-slate-100">
+                  {GLOBAL_ACTIVE_CHANNELS.map((chKey) => {
+                    const chDef = CHANNEL_DEFINITIONS.find(c => c.key === chKey);
+                    const isPermitted = channelAccessData?.channel_access?.[chKey] ?? (chKey === 'whatsapp' ? (client.whatsapp_enabled ?? true) : true);
+                    const isConn = tabs.channels?.find(c => c.key === chKey)?.is_connected ?? false;
+
+                    return (
+                      <div key={chKey} className="p-4 rounded-xl bg-slate-50/70 border border-slate-200/80 flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className={cn(
+                            "w-10 h-10 rounded-xl flex items-center justify-center font-bold text-base shadow-2xs",
+                            isPermitted ? "bg-emerald-500 text-white" : "bg-slate-200 text-slate-500"
+                          )}>
+                            {chKey === 'whatsapp' ? 'WA' : chKey === 'facebook' ? 'FB' : 'IG'}
+                          </div>
+                          <div>
+                            <div className="text-xs font-bold text-slate-900">{chDef?.name || chKey}</div>
+                            <div className="text-[10px] text-slate-400 font-semibold">
+                              {isConn ? 'Account Connected' : 'Account Offline'}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="text-right">
+                          <span className={cn(
+                            "inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase",
+                            isPermitted ? "bg-emerald-50 text-emerald-700 border border-emerald-200" : "bg-rose-50 text-rose-700 border border-rose-200"
+                          )}>
+                            {isPermitted ? 'Enabled' : 'Disabled'}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
+
+              {/* Master Permission Matrix Table */}
+              <div className="bg-white rounded-2xl border border-slate-200/80 shadow-2xs overflow-hidden">
+                <div className="p-5 border-b border-slate-100 flex items-center justify-between">
+                  <div>
+                    <h4 className="text-sm font-bold text-slate-900">Platform Channels & Enterprise Connectors</h4>
+                    <p className="text-xs text-slate-400 mt-0.5">Toggle channel authorization for this client. When enabled by Admin, the connector immediately appears and unlocks on the client&apos;s dashboard.</p>
+                  </div>
+                </div>
+
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs border-collapse">
+                    <thead>
+                      <tr className="bg-slate-50/80 text-[10px] uppercase font-bold text-slate-400 tracking-wider border-b border-slate-200/70">
+                        <th className="py-3 px-5">Channel</th>
+                        <th className="py-3 px-4">Type</th>
+                        <th className="py-3 px-4">Admin Permission</th>
+                        <th className="py-3 px-4">Client Connection</th>
+                        <th className="py-3 px-5 text-right">Access Action</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 text-slate-700">
+                      {CHANNEL_DEFINITIONS.map((channel) => {
+                        const isPermitted = channelAccessData?.channel_access?.[channel.key] !== undefined
+                          ? Boolean(channelAccessData.channel_access[channel.key])
+                          : channel.key === 'whatsapp'
+                            ? Boolean(client.whatsapp_enabled ?? true)
+                            : (channel.key === 'facebook' || channel.key === 'instagram')
+                              ? true
+                              : Boolean(client[`${channel.key}_enabled`]);
+                        
+                        const connObj = tabs.channels?.find(c => c.key === channel.key);
+                        const isConnected = connObj?.is_connected ?? false;
+                        const isToggling = togglingChannel === channel.key;
+
+                        return (
+                          <tr key={channel.key} className="hover:bg-slate-50/50 transition-colors">
+                            {/* Channel */}
+                            <td className="py-4 px-5">
+                              <div className="flex items-center gap-3">
+                                <div className={cn(
+                                  "w-9 h-9 rounded-xl flex items-center justify-center font-bold text-xs shrink-0 shadow-2xs",
+                                  isPermitted ? "bg-emerald-50 text-emerald-700 border border-emerald-200/80" : "bg-slate-100 text-slate-400"
+                                )}>
+                                  {isPermitted ? <CheckCircle2 size={16} className="text-emerald-600" /> : <Lock size={15} className="text-slate-400" />}
+                                </div>
+                                <div>
+                                  <div className="font-bold text-slate-900 flex items-center gap-1.5">
+                                    <span>{channel.name}</span>
+                                    {channel.isCore ? (
+                                      <span className="px-1.5 py-0.2 rounded text-[9px] font-extrabold uppercase bg-blue-50 text-blue-700 border border-blue-200">
+                                        Core Channel
+                                      </span>
+                                    ) : !isPermitted ? (
+                                      <span className="px-1.5 py-0.2 rounded text-[9px] font-extrabold uppercase bg-slate-100 text-slate-500 border border-slate-200">
+                                        Default Locked
+                                      </span>
+                                    ) : (
+                                      <span className="px-1.5 py-0.2 rounded text-[9px] font-extrabold uppercase bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                        Custom Allotted
+                                      </span>
+                                    )}
+                                  </div>
+                                  <div className="text-[11px] text-slate-400 font-normal mt-0.5">{channel.tagline}</div>
+                                </div>
+                              </div>
+                            </td>
+
+                            {/* Type */}
+                            <td className="py-4 px-4">
+                              <span className="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase bg-slate-100 text-slate-600">
+                                {channel.category}
+                              </span>
+                            </td>
+
+                            {/* Admin Permission */}
+                            <td className="py-4 px-4">
+                              <span className={cn(
+                                "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold border",
+                                isPermitted ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-rose-50 text-rose-700 border-rose-200"
+                              )}>
+                                {isPermitted ? <CheckCircle2 size={12} /> : <XCircle size={12} />}
+                                <span>{isPermitted ? 'Access Enabled' : 'Access Restricted'}</span>
+                              </span>
+                            </td>
+
+                            {/* Client Connection */}
+                            <td className="py-4 px-4">
+                              <div className="flex items-center gap-1.5">
+                                <span className={cn("w-2 h-2 rounded-full", isConnected ? "bg-emerald-500 animate-pulse" : "bg-slate-300")} />
+                                <span className="font-semibold text-slate-700">{isConnected ? 'Connected' : 'Not Connected'}</span>
+                              </div>
+                            </td>
+
+                            {/* Action */}
+                            <td className="py-4 px-5 text-right">
+                              <button
+                                onClick={() => handleToggleChannelAccess(channel.key, isPermitted)}
+                                disabled={isToggling}
+                                className={cn(
+                                  "px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all inline-flex items-center gap-1.5 cursor-pointer shadow-2xs disabled:opacity-50",
+                                  isPermitted
+                                    ? "bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200"
+                                    : "bg-emerald-600 hover:bg-emerald-700 text-white"
+                                )}
+                              >
+                                {isToggling ? (
+                                  <Loader2 size={12} className="animate-spin" />
+                                ) : isPermitted ? (
+                                  <Power size={12} />
+                                ) : (
+                                  <Check size={12} />
+                                )}
+                                <span>{isPermitted ? 'Revoke Access' : 'Grant Access'}</span>
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* Audit Log Section */}
+              <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-2xs space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h4 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                      <Clock size={16} className="text-slate-500" />
+                      Channel Permission Audit Log
+                    </h4>
+                    <p className="text-xs text-slate-400 mt-0.5">Chronological record of admin permission changes for this workspace.</p>
+                  </div>
+                  
+                  <span className="text-xs text-slate-400 font-mono font-semibold">
+                    {auditLogs.length} Records
+                  </span>
+                </div>
+
+                {loadingAuditLogs ? (
+                  <div className="py-8 text-center text-xs text-slate-400 flex items-center justify-center gap-2">
+                    <Loader2 size={15} className="animate-spin" />
+                    <span>Loading audit records...</span>
+                  </div>
+                ) : auditLogs.length === 0 ? (
+                  <div className="py-8 text-center text-xs text-slate-400 bg-slate-50/50 rounded-xl border border-dashed border-slate-200">
+                    No permission change events recorded yet for this client.
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs">
+                      <thead>
+                        <tr className="bg-slate-50/80 text-[10px] uppercase font-bold text-slate-400 tracking-wider border-b border-slate-200/70">
+                          <th className="py-2.5 px-3">Timestamp</th>
+                          <th className="py-2.5 px-3">Admin</th>
+                          <th className="py-2.5 px-3">Channel</th>
+                          <th className="py-2.5 px-3">Action</th>
+                          <th className="py-2.5 px-3">State Change</th>
+                          <th className="py-2.5 px-3">Notes</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {auditLogs.map((log) => (
+                          <tr key={log.id} className="hover:bg-slate-50/50">
+                            <td className="py-3 px-3 font-mono text-slate-500 text-[11px] whitespace-nowrap">
+                              {new Date(log.timestamp).toLocaleString()}
+                            </td>
+                            <td className="py-3 px-3 font-bold text-slate-900">
+                              {log.admin_name}
+                            </td>
+                            <td className="py-3 px-3 uppercase font-extrabold text-[11px] text-slate-700">
+                              {log.channel}
+                            </td>
+                            <td className="py-3 px-3">
+                              <span className={cn(
+                                "px-2 py-0.5 rounded-md text-[10px] font-bold uppercase",
+                                log.action === 'GRANTED' ? "bg-emerald-50 text-emerald-700" : "bg-rose-50 text-rose-700"
+                              )}>
+                                {log.action}
+                              </span>
+                            </td>
+                            <td className="py-3 px-3 text-slate-600 font-medium">
+                              <span className={log.previous_state ? "text-emerald-600" : "text-rose-600"}>
+                                {log.previous_state ? 'Enabled' : 'Disabled'}
+                              </span>
+                              <span className="mx-1 text-slate-400">&rarr;</span>
+                              <span className={log.new_state ? "text-emerald-600 font-bold" : "text-rose-600 font-bold"}>
+                                {log.new_state ? 'Enabled' : 'Disabled'}
+                              </span>
+                            </td>
+                            <td className="py-3 px-3 text-slate-500 italic max-w-xs truncate">
+                              {log.notes || '—'}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+
             </div>
           )}
 
@@ -582,48 +850,7 @@ export default function ClientAdminDetailDashboard({ params }) {
             </div>
           )}
 
-          {/* TAB 6: ACTIVITY TIMELINE */}
-          {activeTab === 'activity' && (
-            <div className="space-y-4 animate-in fade-in">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-sm font-bold text-slate-900">Client Activity Monitoring Timeline</h3>
-                  <p className="text-xs text-slate-400">Complete audit log of actions, configuration changes, and logins.</p>
-                </div>
-              </div>
 
-              <div className="bg-white rounded-2xl border border-slate-200/80 shadow-2xs divide-y divide-slate-100">
-                {tabs.activity?.length === 0 ? (
-                  <div className="p-12 text-center text-xs text-slate-400 font-semibold">
-                    No activity logs recorded yet.
-                  </div>
-                ) : (
-                  tabs.activity?.map((act) => (
-                    <div key={act.id} className="p-4 flex items-start justify-between gap-4 hover:bg-slate-50/50 transition-colors">
-                      <div className="flex items-start gap-3">
-                        <div className="w-8 h-8 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center shrink-0 mt-0.5">
-                          <Activity size={14} />
-                        </div>
-                        <div>
-                          <div className="text-xs font-bold text-slate-900">
-                            <span className="text-emerald-700">{act.user}</span>: {act.action}
-                          </div>
-                          <div className="text-[11px] text-slate-500 mt-0.5">
-                            Module: <span className="font-semibold text-slate-700">{act.module}</span>
-                            {act.after_value && <span className="ml-2 text-slate-400">• {act.after_value}</span>}
-                          </div>
-                        </div>
-                      </div>
-                      <div className="text-right text-[10px] text-slate-400 shrink-0 font-medium">
-                        <div>{act.formatted_time}</div>
-                        {act.ip_address && <div className="font-mono text-[9px]">{act.ip_address}</div>}
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
-          )}
 
           {/* TAB 7: BOT & AI USAGE */}
           {activeTab === 'bot_usage' && (

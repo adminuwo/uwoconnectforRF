@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { X, QrCode, Copy, Check, RefreshCw, Download, ShieldCheck, Sparkles } from 'lucide-react';
 import axios from 'axios';
 import { API_BASE_URL } from '@/config/apiConfig';
+import { ModernSpinner } from '@/components/common/LoadingSkeleton';
 
 export default function QRCodeInviteModal({ isOpen, onClose }) {
   const [loading, setLoading] = useState(false);
@@ -122,9 +123,8 @@ export default function QRCodeInviteModal({ isOpen, onClose }) {
 
         {/* Body Content */}
         {loading ? (
-          <div className="py-12 flex flex-col items-center justify-center space-y-3">
-            <RefreshCw size={32} className="animate-spin text-emerald-600" />
-            <p className="text-xs font-semibold text-slate-500">Generating secure QR code...</p>
+          <div className="py-8">
+            <ModernSpinner label="Generating secure QR code..." size="md" />
           </div>
         ) : error ? (
           <div className="bg-rose-50 border border-rose-200 text-rose-700 p-4 rounded-2xl text-xs text-center font-medium my-4">

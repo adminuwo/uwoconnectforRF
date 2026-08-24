@@ -17,6 +17,39 @@ import MonitoringAnalyticsModal from '@/components/inbox/MonitoringAnalyticsModa
 import { cn } from '@/lib/utils';
 import { API_BASE_URL } from '@/config/apiConfig';
 
+const WhatsAppIcon = ({ size = 14, className = '' }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+    <path fillRule="evenodd" clipRule="evenodd" d="M20.52 3.48A11.93 11.93 0 0012.04 0C5.43 0 .07 5.36.07 11.96c0 2.11.55 4.17 1.6 5.98L0 24l6.23-1.63a11.91 11.91 0 005.81 1.5h.01c6.6 0 11.96-5.36 11.96-11.96 0-3.2-1.25-6.2-3.49-8.43zM12.04 21.84h-.01a9.88 9.88 0 01-5.04-1.38l-.36-.21-3.74.98 1-3.65-.24-.38a9.88 9.88 0 01-1.52-5.24C2.17 6.52 6.6 2.08 12.04 2.08c2.64 0 5.12 1.03 6.98 2.89a9.82 9.82 0 012.9 6.99c0 5.44-4.43 9.88-9.88 9.88zm5.42-7.4c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.64.08-.3-.15-1.26-.46-2.39-1.48-.88-.79-1.48-1.76-1.65-2.06-.17-.3-.02-.46.13-.61.14-.13.3-.35.45-.52.15-.18.2-.3.3-.5.1-.2.05-.38-.03-.53-.07-.15-.67-1.62-.92-2.22-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.79.37-.27.3-1.04 1.02-1.04 2.48 0 1.47 1.07 2.88 1.22 3.08.15.2 2.1 3.2 5.08 4.49.71.31 1.26.49 1.69.63.71.23 1.36.2 1.87.12.57-.08 1.76-.72 2.01-1.41.25-.7.25-1.29.17-1.42-.07-.12-.27-.2-.57-.35z" fill="currentColor"/>
+  </svg>
+);
+
+const InstagramIcon = ({ size = 14, className = '' }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+    <path fillRule="evenodd" clipRule="evenodd" d="M12 0C8.74 0 8.33.01 7.05.07 5.78.13 4.9.33 4.14.63c-.79.3-1.46.73-2.12 1.39C1.36 2.68.93 3.35.63 4.14.33 4.9.13 5.78.07 7.05.01 8.33 0 8.74 0 12c0 3.26.01 3.67.07 4.95.06 1.27.26 2.15.56 2.91.3.79.73 1.46 1.39 2.12.66.66 1.33 1.09 2.12 1.39.76.3 1.64.5 2.91.56 1.28.06 1.69.07 4.95.07 3.26 0 3.67-.01 4.95-.07 1.27-.06 2.15-.26 2.91-.56.79-.3 1.46-.73 2.12-1.39.66-.66 1.09-1.33 1.39-2.12.3-.76.5-1.64.56-2.91.06-1.28.07-1.69.07-4.95 0-3.26-.01-3.67-.07-4.95-.06-1.27-.26-2.15-.56-2.91-.3-.79-.73-1.46-1.39-2.12C21.32 1.36 20.65.93 19.86.63c-.76-.3-1.64-.5-2.91-.56C15.67.01 15.26 0 12 0zm0 2.16c3.2 0 3.59.01 4.85.07 1.17.05 1.8.25 2.22.41.56.22.96.48 1.38.9.42.42.68.82.9 1.38.16.42.36 1.05.41 2.22.06 1.26.07 1.65.07 4.86 0 3.2-.01 3.59-.07 4.85-.05 1.17-.25 1.8-.41 2.22-.22.56-.48.96-.9 1.38-.42.42-.82.68-1.38.9-.42.16-1.05.36-2.22.41-1.26.06-1.65.07-4.86.07-3.2 0-3.59-.01-4.85-.07-1.17-.05-1.8-.25-2.22-.41-.56-.22-.96-.48-1.38-.9-.42-.42-.68-.82-.9-1.38-.16-.42-.36-1.05-.41-2.22-.06-1.26-.07-1.65-.07-4.86 0-3.2.01-3.59.07-4.85.05-1.17.25-1.8.41-2.22.22-.56.48-.96.9-1.38.42-.42.82-.68 1.38-.9.42-.16 1.05-.36 2.22-.41 1.26-.06 1.65-.07 4.85-.07zm0 3.68a6.16 6.16 0 100 12.32 6.16 6.16 0 000-12.32zM12 16a4 4 0 110-8 4 4 0 010 8zm6.4-10.84a1.44 1.44 0 100 2.88 1.44 1.44 0 000-2.88z" fill="currentColor"/>
+  </svg>
+);
+
+const FacebookIcon = ({ size = 14, className = '' }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" fill="currentColor"/>
+  </svg>
+);
+
+const TelegramIcon = ({ size = 14, className = '' }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+    <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.121l-6.871 4.326-2.962-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.832.942z" fill="currentColor"/>
+  </svg>
+);
+
+const CHANNEL_TABS = [
+  { id: 'ALL', label: 'All', icon: MessageSquare, color: 'text-slate-700' },
+  { id: 'WHATSAPP', label: 'WhatsApp', icon: WhatsAppIcon, color: 'text-[#25D366]' },
+  { id: 'INSTAGRAM', label: 'Instagram', icon: InstagramIcon, color: 'text-[#E4405F]' },
+  { id: 'FACEBOOK', label: 'Facebook', icon: FacebookIcon, color: 'text-[#1877F2]' },
+  { id: 'TELEGRAM', label: 'Telegram', icon: TelegramIcon, color: 'text-[#229ED9]' },
+  { id: 'GMAIL', label: 'Gmail', icon: Mail, color: 'text-[#EA4335]' },
+];
+
 export default function ClientInboxPage() {
   const [messages, setMessages] = useState([]);
   const [contacts, setContacts] = useState([]);
@@ -510,28 +543,44 @@ export default function ClientInboxPage() {
               </div>
 
               {/* Social Channels Tabs */}
-              <div className="flex items-center gap-1 overflow-x-auto pb-1 no-scrollbar">
-                {['ALL', 'WHATSAPP', 'INSTAGRAM', 'FACEBOOK', 'TELEGRAM', 'GMAIL'].map(ch => (
-                  <button
-                    key={ch}
-                    onClick={() => setActiveChannelFilter(ch)}
-                    className={`px-2.5 py-1 rounded-lg text-[10px] font-extrabold tracking-wider transition-all uppercase whitespace-nowrap ${
-                      activeChannelFilter === ch 
-                        ? 'bg-emerald-600 text-white shadow-xs' 
-                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-900'
-                    }`}
-                  >
-                    {ch}
-                  </button>
-                ))}
+              <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar scroll-smooth">
+                {CHANNEL_TABS.map(tab => {
+                  const Icon = tab.icon;
+                  const isActive = activeChannelFilter === tab.id;
+                  return (
+                    <button
+                      key={tab.id}
+                      onClick={() => setActiveChannelFilter(tab.id)}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold transition-all whitespace-nowrap cursor-pointer shrink-0 ${
+                        isActive 
+                          ? 'bg-slate-900 text-white shadow-xs' 
+                          : 'bg-slate-100 text-slate-600 hover:bg-slate-200/80 hover:text-slate-900'
+                      }`}
+                    >
+                      <Icon size={13} className={isActive ? 'text-white' : tab.color || 'text-slate-500'} />
+                      <span>{tab.label}</span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
             {/* Conversation Items */}
             <div className="flex-1 overflow-y-auto divide-y divide-slate-100">
               {loading ? (
-                <div className="flex items-center justify-center h-48 text-emerald-600">
-                  <Loader2 className="w-6 h-6 animate-spin" />
+                <div className="p-3 space-y-2.5">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <div key={i} className="flex items-center gap-3 p-3 rounded-2xl bg-slate-50/70 border border-slate-100 animate-pulse">
+                      <div className="w-11 h-11 rounded-full bg-slate-200 shrink-0" />
+                      <div className="flex-1 space-y-2">
+                        <div className="flex justify-between items-center">
+                          <div className="h-3.5 bg-slate-200 rounded-md w-24" />
+                          <div className="h-2.5 bg-slate-200 rounded-md w-10" />
+                        </div>
+                        <div className="h-2.5 bg-slate-100 rounded-md w-36" />
+                      </div>
+                    </div>
+                  ))}
                 </div>
               ) : convoList.length > 0 ? (
                 convoList.map(convo => {
@@ -706,9 +755,40 @@ export default function ClientInboxPage() {
               {/* Timeline Messages View */}
               <div ref={scrollRef} className="flex-1 overflow-y-auto p-6 space-y-4">
                 {isLoadingMessages ? (
-                  <div className="flex flex-col items-center justify-center h-full min-h-[200px] text-emerald-600 gap-3">
-                    <Loader2 className="w-8 h-8 animate-spin" />
-                    <span className="text-xs font-bold text-slate-500">Loading messages...</span>
+                  <div className="space-y-4 py-4 animate-pulse">
+                    {/* Incoming bubble skeleton */}
+                    <div className="flex items-start gap-2.5 max-w-md">
+                      <div className="w-8 h-8 rounded-full bg-slate-200 shrink-0" />
+                      <div className="space-y-1.5 flex-1">
+                        <div className="bg-white p-3.5 rounded-2xl rounded-tl-sm border border-slate-100 shadow-2xs space-y-2">
+                          <div className="h-3 bg-slate-200 rounded-md w-3/4" />
+                          <div className="h-3 bg-slate-100 rounded-md w-1/2" />
+                        </div>
+                        <div className="h-2 bg-slate-200 rounded w-12" />
+                      </div>
+                    </div>
+
+                    {/* Outgoing bubble skeleton */}
+                    <div className="flex items-end justify-end gap-2.5">
+                      <div className="space-y-1.5 max-w-md flex flex-col items-end">
+                        <div className="bg-emerald-600/20 p-3.5 rounded-2xl rounded-tr-sm border border-emerald-500/20 shadow-2xs space-y-2 w-64">
+                          <div className="h-3 bg-emerald-700/30 rounded-md w-full" />
+                          <div className="h-3 bg-emerald-700/20 rounded-md w-2/3" />
+                        </div>
+                        <div className="h-2 bg-slate-200 rounded w-12" />
+                      </div>
+                    </div>
+
+                    {/* Another incoming bubble skeleton */}
+                    <div className="flex items-start gap-2.5 max-w-md">
+                      <div className="w-8 h-8 rounded-full bg-slate-200 shrink-0" />
+                      <div className="space-y-1.5 flex-1">
+                        <div className="bg-white p-3.5 rounded-2xl rounded-tl-sm border border-slate-100 shadow-2xs space-y-2">
+                          <div className="h-3 bg-slate-200 rounded-md w-4/5" />
+                        </div>
+                        <div className="h-2 bg-slate-200 rounded w-12" />
+                      </div>
+                    </div>
                   </div>
                 ) : (
                   <>
@@ -994,7 +1074,50 @@ export default function ClientInboxPage() {
                 </div>
               </div>
             </div>
-          ) : null}
+          ) : loading ? (
+            <div className="flex-1 flex flex-col items-center justify-center bg-white p-8 animate-in fade-in duration-300">
+              <div className="relative flex items-center justify-center mb-5">
+                <div className="absolute inset-0 rounded-full bg-emerald-500/20 blur-2xl animate-pulse" />
+                <div className="w-16 h-16 rounded-full border-3 border-emerald-100 border-t-emerald-600 animate-spin" />
+                <div className="absolute inset-0 flex items-center justify-center text-emerald-600">
+                  <Sparkles size={22} className="animate-pulse" />
+                </div>
+              </div>
+              <h3 className="text-base font-extrabold text-slate-900">Loading Omnichannel Inbox</h3>
+              <p className="text-xs text-slate-400 mt-1 max-w-sm text-center">
+                Syncing live conversations from WhatsApp, Instagram, Facebook, and Telegram...
+              </p>
+            </div>
+          ) : (
+            <div className="hidden md:flex flex-1 flex-col items-center justify-center bg-slate-50/40 p-8 text-center animate-in fade-in duration-300">
+              <div className="max-w-md space-y-5 bg-white p-8 rounded-3xl border border-slate-200/80 shadow-sm">
+                <div className="w-16 h-16 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600 mx-auto shadow-inner">
+                  <MessageSquare size={32} />
+                </div>
+                <div>
+                  <h3 className="text-lg font-black text-slate-900">Unified Omnichannel Inbox</h3>
+                  <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">
+                    Select a customer conversation from the left to start live chatting, reply with templates, assign agents, or monitor real-time message streams.
+                  </p>
+                </div>
+
+                <div className="flex flex-wrap items-center justify-center gap-2 pt-2 border-t border-slate-100">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-2xs">
+                    <WhatsAppIcon size={13} /> WhatsApp
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold bg-pink-50 text-pink-700 border border-pink-200 shadow-2xs">
+                    <InstagramIcon size={13} /> Instagram
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold bg-blue-50 text-blue-700 border border-blue-200 shadow-2xs">
+                    <FacebookIcon size={13} /> Facebook
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold bg-sky-50 text-sky-700 border border-sky-200 shadow-2xs">
+                    <TelegramIcon size={13} /> Telegram
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

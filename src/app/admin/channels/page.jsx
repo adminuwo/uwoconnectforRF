@@ -7,15 +7,18 @@ import {
   ExternalLink, Layers, RefreshCw, MessageCircle,
   Mail, FolderOpen, Calendar, FileText, Database,
   AlertCircle, X, Phone, FileSpreadsheet, LayoutGrid,
-  Table as TableIcon
+  Table as TableIcon, Lock, ShieldCheck, ShieldAlert,
+  Power, Check, Clock, Filter, Users, ChevronRight,
+  SlidersHorizontal, CheckSquare, Square
 } from 'lucide-react';
 import axios from 'axios';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { cn } from '@/lib/utils';
 import { API_BASE_URL } from '@/config/apiConfig';
+import { CHANNEL_DEFINITIONS, GLOBAL_ACTIVE_CHANNELS } from '@/config/channelsConfig';
 
-// Custom SVG Icons for brands
-const InstagramIcon = ({ size = 14, className = "" }) => (
+// Custom Brand Icons
+const InstagramIcon = ({ size = 16, className = "" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <rect width="20" height="20" x="2" y="2" rx="5" ry="5"/>
     <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
@@ -23,521 +26,767 @@ const InstagramIcon = ({ size = 14, className = "" }) => (
   </svg>
 );
 
-const FacebookIcon = ({ size = 14, className = "" }) => (
+const FacebookIcon = ({ size = 16, className = "" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
   </svg>
 );
 
-const YoutubeIcon = ({ size = 14, className = "" }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <path d="M2.5 17a24.12 24.12 0 0 1 0-10 2 2 0 0 1 1.4-1.4 49.56 49.56 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24.12 24.12 0 0 1 0 10 2 2 0 0 1-16.2 0A2 2 0 0 1 2.5 17"/>
-    <polygon points="10 15 15 12 10 9 10 15" fill="currentColor"/>
-  </svg>
-);
-
-const CHANNEL_DEFINITIONS = [
-  { key: 'whatsapp', name: 'WhatsApp Cloud API', shortName: 'WhatsApp', category: 'MESSAGING', icon: MessageCircle, bg: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
-  { key: 'instagram', name: 'Instagram Direct', shortName: 'Instagram', category: 'MESSAGING', icon: InstagramIcon, bg: 'bg-pink-50 text-pink-700 border-pink-200' },
-  { key: 'facebook', name: 'Facebook Messenger', shortName: 'Facebook', category: 'MESSAGING', icon: FacebookIcon, bg: 'bg-blue-50 text-blue-700 border-blue-200' },
-  { key: 'youtube', name: 'YouTube Channel', shortName: 'YouTube', category: 'MESSAGING', icon: YoutubeIcon, bg: 'bg-red-50 text-red-700 border-red-200' },
-  { key: 'gmail', name: 'Gmail Workspace', shortName: 'Gmail', category: 'PRODUCTIVITY', icon: Mail, bg: 'bg-rose-50 text-rose-700 border-rose-200' },
-  { key: 'outlook', name: 'Microsoft Outlook', shortName: 'Outlook', category: 'PRODUCTIVITY', icon: Mail, bg: 'bg-sky-50 text-sky-700 border-sky-200' },
-  { key: 'google_sheets', name: 'Google Sheets', shortName: 'Google Sheets', category: 'STORAGE', icon: FileSpreadsheet, bg: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
-  { key: 'onedrive', name: 'Microsoft OneDrive', shortName: 'OneDrive', category: 'STORAGE', icon: FolderOpen, bg: 'bg-blue-50 text-blue-700 border-blue-200' },
-  { key: 'google_calendar', name: 'Google Calendar', shortName: 'G-Calendar', category: 'PRODUCTIVITY', icon: Calendar, bg: 'bg-amber-50 text-amber-700 border-amber-200' },
-  { key: 'google_docs', name: 'Google Docs', shortName: 'G-Docs', category: 'STORAGE', icon: FileText, bg: 'bg-indigo-50 text-indigo-700 border-indigo-200' },
-  { key: 'google_slides', name: 'Google Slides', shortName: 'G-Slides', category: 'STORAGE', icon: FileText, bg: 'bg-amber-50 text-amber-700 border-amber-200' },
-  { key: 'zoho', name: 'Zoho CRM', shortName: 'Zoho CRM', category: 'CRM', icon: Database, bg: 'bg-orange-50 text-orange-700 border-orange-200' },
-  { key: 'google_news', name: 'Google News', shortName: 'Google News', category: 'CRM', icon: Globe, bg: 'bg-teal-50 text-teal-700 border-teal-200' }
-];
-
 export default function AdminChannelsPage() {
-  const [channelsData, setChannelsData] = useState([]);
+  const [activeMainTab, setActiveMainTab] = useState('matrix'); // 'matrix' | 'audit_logs'
+  const [clients, setClients] = useState([]);
+  const [summary, setSummary] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState('ALL');
-  const [viewMode, setViewMode] = useState('table'); // 'table' | 'cards'
-  const [selectedWorkspaceModal, setSelectedWorkspaceModal] = useState(null);
+  const [channelFilter, setChannelFilter] = useState('ALL'); // 'ALL' | 'whatsapp' | 'facebook' | 'instagram'
+  
+  // Selection & Bulk Actions
+  const [selectedClientIds, setSelectedClientIds] = useState(new Set());
+  const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
+  const [bulkActionConfig, setBulkActionConfig] = useState({
+    channel: 'whatsapp',
+    action: 'grant',
+    notes: ''
+  });
+  const [bulkLoading, setBulkLoading] = useState(false);
 
-  const fetchChannels = async (isManual = false) => {
+  // Single Toggle Action State
+  const [togglingClientChannel, setTogglingClientChannel] = useState(null); // 'clientId_channelKey'
+
+  // Audit Logs State
+  const [auditLogs, setAuditLogs] = useState([]);
+  const [loadingAuditLogs, setLoadingAuditLogs] = useState(false);
+
+  const fetchMatrix = async (isManual = false) => {
     try {
       if (isManual) setIsRefreshing(true);
       else setLoading(true);
 
       const token = localStorage.getItem('token');
-      const res = await axios.get(`${API_BASE_URL}/api/admin/all-channels/`, {
+      const res = await axios.get(`${API_BASE_URL}/api/admin/channel-access/matrix/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setChannelsData(res.data || []);
+
+      setClients(res.data.clients || []);
+      setSummary(res.data.summary || null);
     } catch (err) {
-      console.error('[AdminChannels] Error loading channels inventory:', err);
+      console.error('[AdminChannels] Error loading channel matrix:', err);
     } finally {
       setLoading(false);
       setIsRefreshing(false);
     }
   };
 
+  const fetchAuditLogs = async () => {
+    try {
+      setLoadingAuditLogs(true);
+      const token = localStorage.getItem('token');
+      const res = await axios.get(`${API_BASE_URL}/api/admin/channel-access/audit-logs/`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setAuditLogs(res.data.audit_logs || []);
+    } catch (err) {
+      console.error('[AdminChannels] Error loading audit logs:', err);
+    } finally {
+      setLoadingAuditLogs(false);
+    }
+  };
+
   useEffect(() => {
-    fetchChannels();
+    fetchMatrix();
+    fetchAuditLogs();
   }, []);
 
-  // Filter Workspaces
-  const filteredWorkspaces = useMemo(() => {
-    return channelsData.filter(client => {
+  // Filtered Clients
+  const filteredClients = useMemo(() => {
+    return clients.filter(c => {
       const matchesSearch = 
-        client.client_name?.toLowerCase().includes(search.toLowerCase()) ||
-        client.client_id?.toLowerCase().includes(search.toLowerCase()) ||
-        client.whatsapp?.phone_number_id?.toLowerCase().includes(search.toLowerCase());
+        c.client_name?.toLowerCase().includes(search.toLowerCase()) ||
+        c.owner_name?.toLowerCase().includes(search.toLowerCase()) ||
+        c.email?.toLowerCase().includes(search.toLowerCase()) ||
+        String(c.client_id).includes(search);
 
       if (!matchesSearch) return false;
 
-      const activeCount = CHANNEL_DEFINITIONS.filter(def => 
-        def.key === 'whatsapp' ? client.whatsapp?.connected : client[def.key]
-      ).length;
-
-      if (statusFilter === 'CONNECTED_ONLY' && activeCount === 0) return false;
-      if (statusFilter === 'NO_CHANNELS' && activeCount > 0) return false;
+      if (channelFilter === 'whatsapp') return c.channel_access?.whatsapp;
+      if (channelFilter === 'facebook') return c.channel_access?.facebook;
+      if (channelFilter === 'instagram') return c.channel_access?.instagram;
 
       return true;
     });
-  }, [channelsData, search, statusFilter]);
+  }, [clients, search, channelFilter]);
 
-  const handleOpenClientWorkspace = async (client) => {
+  // Handle Single Toggle
+  const handleToggleAccess = async (clientId, channelKey, currentVal) => {
+    const toggleKey = `${clientId}_${channelKey}`;
     try {
+      setTogglingClientChannel(toggleKey);
       const token = localStorage.getItem('token');
-      const currentUser = localStorage.getItem('user');
+      const newVal = !currentVal;
 
-      localStorage.setItem('admin_backup_token', token);
-      localStorage.setItem('admin_backup_user', currentUser);
+      await axios.patch(`${API_BASE_URL}/api/admin/channel-access/client/${clientId}/`, {
+        channel: channelKey,
+        enabled: newVal,
+        notes: `Admin toggled ${channelKey} to ${newVal ? 'ENABLED' : 'DISABLED'} via Matrix`
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
 
-      const res = await axios.post(
-        `${API_BASE_URL}/api/admin/impersonate/`,
-        { client_id: client.client_id },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      // Optimistic update
+      setClients(prev => prev.map(c => {
+        if (c.client_id === clientId) {
+          return {
+            ...c,
+            channel_access: {
+              ...c.channel_access,
+              [channelKey]: newVal
+            }
+          };
+        }
+        return c;
+      }));
 
-      if (res.data.access) {
-        localStorage.setItem('token', res.data.access);
-        localStorage.setItem('user', JSON.stringify(res.data.user));
-        localStorage.setItem('impersonation_session', JSON.stringify({
-          client_id: client.client_id,
-          client_name: client.client_name,
-          admin_name: res.data.impersonating?.impersonator_name || 'Admin'
-        }));
-
-        window.location.href = '/client';
-      }
+      // Refresh in background
+      fetchAuditLogs();
     } catch (err) {
-      alert(err.response?.data?.error || 'Failed to open client workspace.');
+      console.error('Failed to toggle channel access:', err);
+      alert(err?.response?.data?.error || 'Failed to update channel permission.');
+      fetchMatrix();
+    } finally {
+      setTogglingClientChannel(null);
+    }
+  };
+
+  // Handle Select All / Toggle Select
+  const handleSelectAll = () => {
+    if (selectedClientIds.size === filteredClients.length) {
+      setSelectedClientIds(new Set());
+    } else {
+      setSelectedClientIds(new Set(filteredClients.map(c => c.client_id)));
+    }
+  };
+
+  const handleToggleSelect = (clientId) => {
+    const newSet = new Set(selectedClientIds);
+    if (newSet.has(clientId)) newSet.delete(clientId);
+    else newSet.add(clientId);
+    setSelectedClientIds(newSet);
+  };
+
+  // Handle Bulk Action Submit
+  const handleBulkSubmit = async () => {
+    if (selectedClientIds.size === 0) return;
+    try {
+      setBulkLoading(true);
+      const token = localStorage.getItem('token');
+      await axios.post(`${API_BASE_URL}/api/admin/channel-access/bulk/`, {
+        client_ids: Array.from(selectedClientIds),
+        channel: bulkActionConfig.channel,
+        action: bulkActionConfig.action,
+        notes: bulkActionConfig.notes || `Bulk ${bulkActionConfig.action} for ${bulkActionConfig.channel}`
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      setIsBulkModalOpen(false);
+      setSelectedClientIds(new Set());
+      await fetchMatrix();
+      await fetchAuditLogs();
+    } catch (err) {
+      console.error('Bulk update error:', err);
+      alert(err?.response?.data?.error || 'Bulk channel update failed.');
+    } finally {
+      setBulkLoading(false);
+    }
+  };
+
+  // Impersonate / Open Client
+  const handleOpenClientWorkspace = (client) => {
+    if (typeof window !== 'undefined') {
+      window.open(`/client/channels?impersonate_client_id=${client.client_id}`, '_blank');
     }
   };
 
   return (
     <DashboardLayout role="ADMIN">
-      <div className="w-full max-w-full pb-24 px-4 sm:px-8 lg:px-10 font-sans">
-        
-        {/* ── 1. Ultra-Clean Minimalist Header (Subtitle Line Removed) ── */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 my-6 pb-4 border-b border-slate-100">
+      <div className="max-w-full pb-24 px-4 sm:px-10 lg:px-12 font-sans space-y-6">
+
+        {/* ── 1. Page Header ── */}
+        <div className="pt-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
-                Channel Management & Integrations
-              </h1>
-              <span className="px-2.5 py-0.5 bg-slate-100 text-slate-700 text-xs font-bold rounded-full">
-                {channelsData.length} Workspaces
-              </span>
+            <div className="flex items-center gap-2.5">
+              <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-700 flex items-center justify-center border border-emerald-200/80 shadow-2xs">
+                <ShieldCheck size={22} />
+              </div>
+              <div>
+                <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
+                  <span>Channel Feature Lock & Access Governance</span>
+                </h1>
+                <p className="text-xs text-slate-400 font-medium mt-0.5">
+                  Control active communication channels (WhatsApp, Facebook, Instagram) per workspace and manage global connector locks.
+                </p>
+              </div>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
             <button
-              onClick={() => fetchChannels(true)}
+              onClick={() => {
+                fetchMatrix(true);
+                fetchAuditLogs();
+              }}
               disabled={isRefreshing}
-              className="p-2 bg-white hover:bg-slate-50 text-slate-600 rounded-xl border border-slate-200 shadow-2xs transition-all cursor-pointer"
-              title="Refresh Channels"
+              className="flex items-center gap-2 px-3.5 py-2 bg-white hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-bold border border-slate-200 shadow-2xs transition-all cursor-pointer"
             >
-              <RefreshCw size={15} className={cn(isRefreshing && "animate-spin text-emerald-600")} />
+              <RefreshCw size={14} className={cn(isRefreshing && "animate-spin text-emerald-600")} />
+              <span>Refresh Matrix</span>
             </button>
-            <Link
-              href="/admin/clients"
-              className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs shadow-2xs transition-all flex items-center gap-1.5"
-            >
-              <Layers size={14} /> Manage Clients
-            </Link>
           </div>
         </div>
 
-        {/* ── 2. Search, Status Filter & Table/Card View Toggle ── */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mb-6">
-          <div className="relative w-full sm:w-80">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
-            <input
-              type="text"
-              placeholder="Search by client name or ID..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-9 pr-8 py-2 bg-white border border-slate-200/90 rounded-xl text-xs text-slate-800 outline-none focus:border-emerald-500 font-medium transition-all shadow-2xs"
-            />
-            {search && (
-              <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
-                <X size={13} />
-              </button>
-            )}
+        {/* ── 2. Top Summary KPI Cards ── */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-2xs">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Workspaces</span>
+              <div className="w-8 h-8 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center font-bold text-xs">
+                <Users size={16} />
+              </div>
+            </div>
+            <div className="text-2xl font-black text-slate-900 mt-2 font-mono">{summary?.total_clients || clients.length}</div>
+            <div className="text-[11px] text-slate-400 font-medium mt-0.5">Active client organizations</div>
           </div>
 
-          <div className="flex items-center gap-2.5 w-full sm:w-auto">
-            {/* Status Filter */}
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 outline-none focus:border-emerald-500 cursor-pointer shadow-2xs"
-            >
-              <option value="ALL">All Workspaces</option>
-              <option value="CONNECTED_ONLY">Has Active Connections</option>
-              <option value="NO_CHANNELS">No Connected Channels</option>
-            </select>
-
-            {/* View Mode Toggle: Table vs Cards */}
-            <div className="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200">
-              <button
-                onClick={() => setViewMode('table')}
-                className={cn(
-                  "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer",
-                  viewMode === 'table' ? "bg-white text-slate-900 shadow-2xs" : "text-slate-600 hover:text-slate-900"
-                )}
-                title="Switch to Table Format"
-              >
-                <TableIcon size={14} />
-                <span>Table</span>
-              </button>
-              <button
-                onClick={() => setViewMode('cards')}
-                className={cn(
-                  "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer",
-                  viewMode === 'cards' ? "bg-white text-slate-900 shadow-2xs" : "text-slate-600 hover:text-slate-900"
-                )}
-                title="Switch to Cards Format"
-              >
-                <LayoutGrid size={14} />
-                <span>Cards</span>
-              </button>
+          <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-2xs">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-emerald-700 uppercase tracking-wider">WhatsApp Enabled</span>
+              <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-xs">
+                <MessageCircle size={16} />
+              </div>
             </div>
+            <div className="text-2xl font-black text-slate-900 mt-2 font-mono">{summary?.whatsapp_enabled_count ?? '—'}</div>
+            <div className="text-[11px] text-emerald-600 font-bold mt-0.5">Active messaging API seats</div>
+          </div>
+
+          <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-2xs">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-blue-700 uppercase tracking-wider">Facebook Enabled</span>
+              <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-xs">
+                <FacebookIcon size={16} />
+              </div>
+            </div>
+            <div className="text-2xl font-black text-slate-900 mt-2 font-mono">{summary?.facebook_enabled_count ?? '—'}</div>
+            <div className="text-[11px] text-blue-600 font-bold mt-0.5">Page Messenger authorized</div>
+          </div>
+
+          <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-2xs">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-pink-700 uppercase tracking-wider">Instagram Enabled</span>
+              <div className="w-8 h-8 rounded-xl bg-pink-50 text-pink-600 flex items-center justify-center font-bold text-xs">
+                <InstagramIcon size={16} />
+              </div>
+            </div>
+            <div className="text-2xl font-black text-slate-900 mt-2 font-mono">{summary?.instagram_enabled_count ?? '—'}</div>
+            <div className="text-[11px] text-pink-600 font-bold mt-0.5">Direct Message seats</div>
           </div>
         </div>
 
-        {/* ── 3. Data View Rendering (Table or Cards) ── */}
-        {loading ? (
-          <div className="p-12 text-center text-slate-400 bg-white rounded-2xl border border-slate-200">
-            <Loader2 size={24} className="animate-spin text-emerald-600 mx-auto mb-2" />
-            <span className="text-xs font-bold">Loading Channels Inventory...</span>
+        {/* ── 3. Tabs Navigation (Matrix vs Audit Logs) ── */}
+        <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setActiveMainTab('matrix')}
+              className={cn(
+                "px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2",
+                activeMainTab === 'matrix' ? "bg-slate-900 text-white shadow-xs" : "text-slate-600 hover:bg-slate-100"
+              )}
+            >
+              <SlidersHorizontal size={14} />
+              <span>Channel Access Matrix</span>
+              <span className="px-2 py-0.2 rounded-full text-[10px] bg-slate-800 text-slate-300 font-mono">
+                {filteredClients.length}
+              </span>
+            </button>
+            <button
+              onClick={() => setActiveMainTab('audit_logs')}
+              className={cn(
+                "px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2",
+                activeMainTab === 'audit_logs' ? "bg-slate-900 text-white shadow-xs" : "text-slate-600 hover:bg-slate-100"
+              )}
+            >
+              <Clock size={14} />
+              <span>Permission Audit Logs</span>
+              <span className="px-2 py-0.2 rounded-full text-[10px] bg-slate-800 text-slate-300 font-mono">
+                {auditLogs.length}
+              </span>
+            </button>
           </div>
-        ) : filteredWorkspaces.length === 0 ? (
-          <div className="bg-white rounded-2xl border border-slate-200/80 p-12 text-center text-slate-400">
-            <AlertCircle size={28} className="mx-auto text-slate-300 mb-2" />
-            <p className="text-xs font-bold text-slate-700">No workspaces found matching your search.</p>
-          </div>
-        ) : viewMode === 'table' ? (
-          /* ── Table View Format ── */
-          <div className="bg-white rounded-2xl border border-slate-200/80 shadow-2xs overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs border-collapse font-sans">
-                <thead>
-                  <tr className="bg-slate-50/80 border-b border-slate-200 text-slate-500 font-bold uppercase text-[10px] tracking-wider whitespace-nowrap">
-                    <th className="py-3.5 px-4">Client Workspace</th>
-                    <th className="py-3.5 px-3 text-center">Active Count</th>
-                    <th className="py-3.5 px-4">Connected Integrations</th>
-                    <th className="py-3.5 px-3">WhatsApp Phone ID</th>
-                    <th className="py-3.5 px-4 text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {filteredWorkspaces.map((client) => {
-                    const activeChannels = CHANNEL_DEFINITIONS.filter(def => 
-                      def.key === 'whatsapp' ? Boolean(client.whatsapp?.connected) : Boolean(client[def.key])
-                    );
 
-                    return (
-                      <tr key={client.client_id} className="hover:bg-slate-50/60 transition-colors">
-                        {/* Workspace Info */}
-                        <td className="py-3.5 px-4 whitespace-nowrap">
-                          <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center font-bold text-xs uppercase border border-emerald-100">
-                              {client.client_name?.charAt(0) || 'W'}
-                            </div>
-                            <div>
-                              <div className="font-extrabold text-slate-900 text-xs">
-                                {client.client_name}
-                              </div>
-                              <div className="text-[10px] text-slate-400 font-mono">
-                                ID: #{client.client_id.slice(-8)}
-                              </div>
-                            </div>
-                          </div>
-                        </td>
-
-                        {/* Active Count */}
-                        <td className="py-3.5 px-3 text-center whitespace-nowrap">
-                          <span className={cn(
-                            "px-2.5 py-1 rounded-full text-[11px] font-bold border inline-flex items-center gap-1",
-                            activeChannels.length > 0
-                              ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                              : "bg-slate-50 text-slate-500 border-slate-200"
-                          )}>
-                            <span className={cn(
-                              "w-1.5 h-1.5 rounded-full",
-                              activeChannels.length > 0 ? "bg-emerald-500" : "bg-slate-400"
-                            )} />
-                            {activeChannels.length} / 13 Active
-                          </span>
-                        </td>
-
-                        {/* Connected Integrations Chips */}
-                        <td className="py-3.5 px-4">
-                          {activeChannels.length === 0 ? (
-                            <span className="text-slate-400 text-xs italic">No active integrations</span>
-                          ) : (
-                            <div className="flex flex-wrap gap-1">
-                              {activeChannels.map(channel => {
-                                const Icon = channel.icon;
-                                return (
-                                  <span
-                                    key={channel.key}
-                                    className={cn(
-                                      "inline-flex items-center gap-1 px-2 py-0.5 rounded-md border text-[11px] font-bold whitespace-nowrap",
-                                      channel.bg
-                                    )}
-                                  >
-                                    <Icon size={12} />
-                                    <span>{channel.shortName}</span>
-                                  </span>
-                                );
-                              })}
-                            </div>
-                          )}
-                        </td>
-
-                        {/* Phone ID */}
-                        <td className="py-3.5 px-3 whitespace-nowrap font-mono text-[11px] text-slate-600">
-                          {client.whatsapp?.phone_number_id || '—'}
-                        </td>
-
-                        {/* Actions */}
-                        <td className="py-3.5 px-4 text-right whitespace-nowrap">
-                          <div className="flex items-center justify-end gap-2">
-                            <button
-                              onClick={() => setSelectedWorkspaceModal(client)}
-                              className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold transition-all cursor-pointer"
-                            >
-                              Audit All 13
-                            </button>
-                            <button
-                              onClick={() => handleOpenClientWorkspace(client)}
-                              className="p-1.5 hover:bg-purple-50 text-slate-500 hover:text-purple-700 rounded-lg transition-all"
-                              title="Impersonate & Open Client Workspace"
-                            >
-                              <ExternalLink size={14} />
-                            </button>
-                            <Link
-                              href={`/admin/clients/${client.client_id}?tab=channels`}
-                              className="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold text-xs transition-all shadow-2xs"
-                            >
-                              Configure
-                            </Link>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+          {/* Bulk Action Trigger Bar (When selected) */}
+          {selectedClientIds.size > 0 && activeMainTab === 'matrix' && (
+            <div className="flex items-center gap-2.5 animate-in fade-in slide-in-from-top-2 duration-200">
+              <span className="text-xs font-bold text-slate-700 bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-200">
+                {selectedClientIds.size} Clients Selected
+              </span>
+              <button
+                onClick={() => setIsBulkModalOpen(true)}
+                className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer"
+              >
+                <Power size={13} />
+                <span>Bulk Update Channels</span>
+              </button>
             </div>
-          </div>
-        ) : (
-          /* ── Cards View Format ── */
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {filteredWorkspaces.map((client) => {
-              const activeChannels = CHANNEL_DEFINITIONS.filter(def => 
-                def.key === 'whatsapp' ? Boolean(client.whatsapp?.connected) : Boolean(client[def.key])
-              );
+          )}
+        </div>
 
-              return (
-                <div
-                  key={client.client_id}
-                  className="bg-white rounded-2xl border border-slate-200/80 shadow-2xs hover:border-slate-300 transition-all p-5 flex flex-col justify-between"
+        {/* ── 4. Main Tab 1: MATRIX VIEW ── */}
+        {activeMainTab === 'matrix' && (
+          <div className="space-y-4">
+            
+            {/* Search & Filter Bar */}
+            <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-2xs flex flex-col sm:flex-row items-center justify-between gap-3">
+              <div className="relative w-full sm:w-80">
+                <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="Search workspace, owner, or email..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200/80 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 font-medium"
+                />
+              </div>
+
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                <select
+                  value={channelFilter}
+                  onChange={(e) => setChannelFilter(e.target.value)}
+                  className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 cursor-pointer focus:outline-none"
                 >
-                  <div>
-                    {/* Header */}
-                    <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-3">
-                      <div className="flex items-center gap-2.5 truncate">
-                        <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center font-bold text-xs uppercase border border-emerald-100 shrink-0">
-                          {client.client_name?.charAt(0) || 'W'}
-                        </div>
-                        <div className="truncate">
-                          <h3 className="font-extrabold text-slate-900 text-sm truncate">
-                            {client.client_name}
-                          </h3>
-                          <span className="text-[10px] text-slate-400 font-mono">
-                            ID: #{client.client_id.slice(-6)}
-                          </span>
-                        </div>
-                      </div>
+                  <option value="ALL">All Permissions</option>
+                  <option value="whatsapp">WhatsApp Enabled Only</option>
+                  <option value="facebook">Facebook Enabled Only</option>
+                  <option value="instagram">Instagram Enabled Only</option>
+                </select>
+              </div>
+            </div>
 
-                      <span className={cn(
-                        "px-2.5 py-0.5 rounded-full text-[10px] font-bold border shrink-0",
-                        activeChannels.length > 0
-                          ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                          : "bg-slate-50 text-slate-500 border-slate-200"
-                      )}>
-                        {activeChannels.length} Active
-                      </span>
-                    </div>
+            {/* Matrix Table */}
+            {loading ? (
+              <div className="p-16 text-center text-slate-400 bg-white rounded-2xl border border-slate-200 shadow-2xs">
+                <Loader2 size={24} className="animate-spin text-emerald-600 mx-auto mb-2" />
+                <span className="text-xs font-bold">Loading Matrix Access Data...</span>
+              </div>
+            ) : filteredClients.length === 0 ? (
+              <div className="bg-white rounded-2xl border border-slate-200/80 p-16 text-center text-slate-400 shadow-2xs">
+                <AlertCircle size={28} className="mx-auto text-slate-300 mb-2" />
+                <p className="text-xs font-bold text-slate-700">No workspaces match the current criteria.</p>
+              </div>
+            ) : (
+              <div className="bg-white rounded-2xl border border-slate-200/80 shadow-2xs overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs border-collapse">
+                    <thead>
+                      <tr className="bg-slate-50/80 border-b border-slate-200 text-slate-500 font-bold uppercase text-[10px] tracking-wider whitespace-nowrap">
+                        <th className="py-3.5 px-4 w-10 text-center">
+                          <button
+                            onClick={handleSelectAll}
+                            className="text-slate-400 hover:text-slate-700 cursor-pointer"
+                          >
+                            {selectedClientIds.size === filteredClients.length && filteredClients.length > 0 ? (
+                              <CheckSquare size={16} className="text-emerald-600" />
+                            ) : (
+                              <Square size={16} />
+                            )}
+                          </button>
+                        </th>
+                        <th className="py-3.5 px-4">Client Workspace</th>
+                        <th className="py-3.5 px-4 text-center">WhatsApp Access</th>
+                        <th className="py-3.5 px-4 text-center">Facebook Access</th>
+                        <th className="py-3.5 px-4 text-center">Instagram Access</th>
+                        <th className="py-3.5 px-4 text-center">Other Connectors</th>
+                        <th className="py-3.5 px-4 text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {filteredClients.map((client) => {
+                        const isSelected = selectedClientIds.has(client.client_id);
+                        const waEnabled = Boolean(client.channel_access?.whatsapp);
+                        const waConnected = Boolean(client.channels_status?.whatsapp?.connected);
 
-                    {/* Active Connected Brand Chips */}
-                    <div className="space-y-2 mb-4">
-                      <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                        Connected Integrations
-                      </div>
+                        const fbEnabled = Boolean(client.channel_access?.facebook);
+                        const fbConnected = Boolean(client.channels_status?.facebook?.connected);
 
-                      {activeChannels.length === 0 ? (
-                        <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 text-[11px] text-slate-400 font-medium">
-                          No active integrations connected.
-                        </div>
-                      ) : (
-                        <div className="flex flex-wrap gap-1.5">
-                          {activeChannels.map(channel => {
-                            const Icon = channel.icon;
-                            return (
-                              <span
-                                key={channel.key}
-                                className={cn(
-                                  "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-bold",
-                                  channel.bg
-                                )}
+                        const igEnabled = Boolean(client.channel_access?.instagram);
+                        const igConnected = Boolean(client.channels_status?.instagram?.connected);
+
+                        const isTogglingWa = togglingClientChannel === `${client.client_id}_whatsapp`;
+                        const isTogglingFb = togglingClientChannel === `${client.client_id}_facebook`;
+                        const isTogglingIg = togglingClientChannel === `${client.client_id}_instagram`;
+
+                        return (
+                          <tr key={client.client_id} className={cn("hover:bg-slate-50/60 transition-colors", isSelected && "bg-emerald-50/30")}>
+                            {/* Checkbox */}
+                            <td className="py-3.5 px-4 text-center">
+                              <button
+                                onClick={() => handleToggleSelect(client.client_id)}
+                                className="text-slate-400 hover:text-slate-700 cursor-pointer"
                               >
-                                <Icon size={13} />
-                                <span>{channel.shortName}</span>
-                                <CheckCircle2 size={12} className="text-emerald-600 ml-0.5" />
-                              </span>
-                            );
-                          })}
-                        </div>
-                      )}
+                                {isSelected ? (
+                                  <CheckSquare size={16} className="text-emerald-600" />
+                                ) : (
+                                  <Square size={16} />
+                                )}
+                              </button>
+                            </td>
 
-                      {/* WhatsApp Phone Snippet */}
-                      {client.whatsapp?.connected && (
-                        <div className="text-[11px] text-slate-600 font-mono bg-slate-50 px-2.5 py-1.5 rounded-lg border border-slate-100 mt-2 flex items-center gap-1.5">
-                          <Phone size={12} className="text-emerald-600" />
-                          <span className="truncate">WA Phone ID: {client.whatsapp.phone_number_id}</span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
+                            {/* Client Workspace Info */}
+                            <td className="py-3.5 px-4">
+                              <div className="flex items-center gap-3">
+                                <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center font-black text-xs uppercase border border-emerald-100 shrink-0">
+                                  {client.client_name?.charAt(0) || 'W'}
+                                </div>
+                                <div>
+                                  <div className="font-extrabold text-slate-900 text-xs">
+                                    {client.client_name}
+                                  </div>
+                                  <div className="text-[11px] text-slate-500 font-medium">
+                                    {client.owner_name} • {client.email}
+                                  </div>
+                                  <div className="text-[10px] text-slate-400 font-mono">
+                                    ID: #{client.client_id} • {client.team_members_count || 0} Team Members
+                                  </div>
+                                </div>
+                              </div>
+                            </td>
 
-                  {/* Footer Actions */}
-                  <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs gap-2">
-                    <button
-                      onClick={() => setSelectedWorkspaceModal(client)}
-                      className="text-xs font-bold text-slate-600 hover:text-emerald-700 transition-colors cursor-pointer"
-                    >
-                      Audit All 13 Channels &rarr;
-                    </button>
+                            {/* WhatsApp Cell */}
+                            <td className="py-3.5 px-4 text-center">
+                              <div className="inline-flex flex-col items-center gap-1.5">
+                                <button
+                                  onClick={() => handleToggleAccess(client.client_id, 'whatsapp', waEnabled)}
+                                  disabled={isTogglingWa}
+                                  className={cn(
+                                    "px-3 py-1 rounded-full text-[11px] font-extrabold transition-all border inline-flex items-center gap-1.5 cursor-pointer shadow-2xs",
+                                    waEnabled
+                                      ? "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100"
+                                      : "bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100"
+                                  )}
+                                >
+                                  {isTogglingWa ? (
+                                    <Loader2 size={11} className="animate-spin" />
+                                  ) : (
+                                    <Power size={11} />
+                                  )}
+                                  <span>{waEnabled ? 'Enabled' : 'Disabled'}</span>
+                                </button>
+                                <span className={cn(
+                                  "text-[10px] font-semibold flex items-center gap-1",
+                                  waConnected ? "text-emerald-600" : "text-slate-400"
+                                )}>
+                                  <span className={cn("w-1.5 h-1.5 rounded-full", waConnected ? "bg-emerald-500" : "bg-slate-300")} />
+                                  <span>{waConnected ? 'Connected' : 'Offline'}</span>
+                                </span>
+                              </div>
+                            </td>
 
-                    <div className="flex items-center gap-1.5">
-                      <button
-                        onClick={() => handleOpenClientWorkspace(client)}
-                        className="p-1.5 hover:bg-purple-50 text-slate-500 hover:text-purple-700 rounded-lg transition-all"
-                        title="Impersonate & Open Client Workspace"
-                      >
-                        <ExternalLink size={14} />
-                      </button>
-                      <Link
-                        href={`/admin/clients/${client.client_id}?tab=channels`}
-                        className="px-3 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-bold text-xs transition-all"
-                      >
-                        Configure
-                      </Link>
-                    </div>
-                  </div>
+                            {/* Facebook Cell */}
+                            <td className="py-3.5 px-4 text-center">
+                              <div className="inline-flex flex-col items-center gap-1.5">
+                                <button
+                                  onClick={() => handleToggleAccess(client.client_id, 'facebook', fbEnabled)}
+                                  disabled={isTogglingFb}
+                                  className={cn(
+                                    "px-3 py-1 rounded-full text-[11px] font-extrabold transition-all border inline-flex items-center gap-1.5 cursor-pointer shadow-2xs",
+                                    fbEnabled
+                                      ? "bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100"
+                                      : "bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100"
+                                  )}
+                                >
+                                  {isTogglingFb ? (
+                                    <Loader2 size={11} className="animate-spin" />
+                                  ) : (
+                                    <Power size={11} />
+                                  )}
+                                  <span>{fbEnabled ? 'Enabled' : 'Disabled'}</span>
+                                </button>
+                                <span className={cn(
+                                  "text-[10px] font-semibold flex items-center gap-1",
+                                  fbConnected ? "text-blue-600" : "text-slate-400"
+                                )}>
+                                  <span className={cn("w-1.5 h-1.5 rounded-full", fbConnected ? "bg-blue-500" : "bg-slate-300")} />
+                                  <span>{fbConnected ? 'Connected' : 'Offline'}</span>
+                                </span>
+                              </div>
+                            </td>
 
+                            {/* Instagram Cell */}
+                            <td className="py-3.5 px-4 text-center">
+                              <div className="inline-flex flex-col items-center gap-1.5">
+                                <button
+                                  onClick={() => handleToggleAccess(client.client_id, 'instagram', igEnabled)}
+                                  disabled={isTogglingIg}
+                                  className={cn(
+                                    "px-3 py-1 rounded-full text-[11px] font-extrabold transition-all border inline-flex items-center gap-1.5 cursor-pointer shadow-2xs",
+                                    igEnabled
+                                      ? "bg-pink-50 text-pink-700 border-pink-200 hover:bg-pink-100"
+                                      : "bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100"
+                                  )}
+                                >
+                                  {isTogglingIg ? (
+                                    <Loader2 size={11} className="animate-spin" />
+                                  ) : (
+                                    <Power size={11} />
+                                  )}
+                                  <span>{igEnabled ? 'Enabled' : 'Disabled'}</span>
+                                </button>
+                                <span className={cn(
+                                  "text-[10px] font-semibold flex items-center gap-1",
+                                  igConnected ? "text-pink-600" : "text-slate-400"
+                                )}>
+                                  <span className={cn("w-1.5 h-1.5 rounded-full", igConnected ? "bg-pink-500" : "bg-slate-300")} />
+                                  <span>{igConnected ? 'Connected' : 'Offline'}</span>
+                                </span>
+                              </div>
+                            </td>
+
+                            {/* Other Connectors */}
+                            <td className="py-3.5 px-4 text-center">
+                              {(() => {
+                                const extraActive = Object.entries(client.channel_access || {})
+                                  .filter(([k, v]) => !['whatsapp', 'facebook', 'instagram'].includes(k) && Boolean(v));
+                                if (extraActive.length > 0) {
+                                  return (
+                                    <Link
+                                      href={`/admin/clients/${client.client_id}?tab=channels`}
+                                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 transition-colors"
+                                      title={extraActive.map(([k]) => k).join(', ')}
+                                    >
+                                      <CheckCircle2 size={10} className="text-emerald-600" />
+                                      <span>+{extraActive.length} Custom Active</span>
+                                    </Link>
+                                  );
+                                }
+                                return (
+                                  <Link
+                                    href={`/admin/clients/${client.client_id}?tab=channels`}
+                                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-slate-100 text-slate-500 border border-slate-200 hover:bg-slate-200 transition-colors"
+                                  >
+                                    <Lock size={10} /> + Allot More
+                                  </Link>
+                                );
+                              })()}
+                            </td>
+
+                            {/* Actions */}
+                            <td className="py-3.5 px-4 text-right whitespace-nowrap">
+                              <div className="flex items-center justify-end gap-2">
+                                <button
+                                  onClick={() => handleOpenClientWorkspace(client)}
+                                  className="p-1.5 hover:bg-purple-50 text-slate-500 hover:text-purple-700 rounded-lg transition-all cursor-pointer"
+                                  title="Open Client Dashboard View"
+                                >
+                                  <ExternalLink size={14} />
+                                </button>
+                                <Link
+                                  href={`/admin/clients/${client.client_id}?tab=channels`}
+                                  className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold text-xs transition-all shadow-2xs flex items-center gap-1"
+                                >
+                                  <span>Manage</span>
+                                  <ChevronRight size={12} />
+                                </Link>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
                 </div>
-              );
-            })}
+              </div>
+            )}
+
           </div>
         )}
 
-        {/* ── 4. Audit Modal (Shows All 13 Channels when clicked) ── */}
-        {selectedWorkspaceModal && (
+        {/* ── 5. Main Tab 2: AUDIT LOGS VIEW ── */}
+        {activeMainTab === 'audit_logs' && (
+          <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-2xs space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                  <Clock size={18} className="text-slate-600" />
+                  System-Wide Channel Permission Audit Trail
+                </h3>
+                <p className="text-xs text-slate-400 mt-0.5">
+                  Complete immutable record of all channel permission grants, revocations, and bulk administrative events.
+                </p>
+              </div>
+
+              <button
+                onClick={fetchAuditLogs}
+                disabled={loadingAuditLogs}
+                className="px-3 py-1.5 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-xl text-xs font-bold border border-slate-200 transition-colors flex items-center gap-1.5 cursor-pointer"
+              >
+                <RefreshCw size={12} className={cn(loadingAuditLogs && "animate-spin")} />
+                <span>Refresh Logs</span>
+              </button>
+            </div>
+
+            {loadingAuditLogs ? (
+              <div className="py-12 text-center text-xs text-slate-400 flex items-center justify-center gap-2">
+                <Loader2 size={16} className="animate-spin text-emerald-600" />
+                <span>Loading permission logs...</span>
+              </div>
+            ) : auditLogs.length === 0 ? (
+              <div className="py-12 text-center text-xs text-slate-400 bg-slate-50 rounded-xl border border-dashed border-slate-200">
+                No channel permission changes recorded in system yet.
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs">
+                  <thead>
+                    <tr className="bg-slate-50/80 text-[10px] uppercase font-bold text-slate-400 tracking-wider border-b border-slate-200">
+                      <th className="py-3 px-3">Timestamp</th>
+                      <th className="py-3 px-3">Admin</th>
+                      <th className="py-3 px-3">Client Organization</th>
+                      <th className="py-3 px-3">Channel</th>
+                      <th className="py-3 px-3">Action</th>
+                      <th className="py-3 px-3">State Transition</th>
+                      <th className="py-3 px-3">Notes</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {auditLogs.map((log) => (
+                      <tr key={log.id} className="hover:bg-slate-50/50">
+                        <td className="py-3 px-3 font-mono text-slate-500 text-[11px] whitespace-nowrap">
+                          {new Date(log.timestamp).toLocaleString()}
+                        </td>
+                        <td className="py-3 px-3 font-bold text-slate-900">
+                          {log.admin_name}
+                        </td>
+                        <td className="py-3 px-3 font-semibold text-slate-800">
+                          {log.client_name} (ID: #{log.client_id})
+                        </td>
+                        <td className="py-3 px-3 uppercase font-extrabold text-[11px] text-slate-700">
+                          {log.channel}
+                        </td>
+                        <td className="py-3 px-3">
+                          <span className={cn(
+                            "px-2 py-0.5 rounded-md text-[10px] font-bold uppercase",
+                            log.action === 'GRANTED' ? "bg-emerald-50 text-emerald-700" : "bg-rose-50 text-rose-700"
+                          )}>
+                            {log.action}
+                          </span>
+                        </td>
+                        <td className="py-3 px-3 text-slate-600 font-medium">
+                          <span className={log.previous_state ? "text-emerald-600" : "text-rose-600"}>
+                            {log.previous_state ? 'Enabled' : 'Disabled'}
+                          </span>
+                          <span className="mx-1 text-slate-400">&rarr;</span>
+                          <span className={log.new_state ? "text-emerald-600 font-bold" : "text-rose-600 font-bold"}>
+                            {log.new_state ? 'Enabled' : 'Disabled'}
+                          </span>
+                        </td>
+                        <td className="py-3 px-3 text-slate-500 italic max-w-sm truncate">
+                          {log.notes || '—'}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ── 6. Bulk Action Modal ── */}
+        {isBulkModalOpen && (
           <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in">
-            <div className="bg-white w-full max-w-xl rounded-2xl shadow-2xl border border-slate-100 overflow-hidden flex flex-col max-h-[85vh]">
-              
-              {/* Modal Header */}
-              <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+            <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl border border-slate-100 overflow-hidden">
+              <div className="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
                 <div>
-                  <h3 className="font-extrabold text-slate-900 text-sm">{selectedWorkspaceModal.client_name}</h3>
-                  <p className="text-[10px] text-slate-400 font-mono">Workspace ID: #{selectedWorkspaceModal.client_id}</p>
+                  <h3 className="font-extrabold text-slate-900 text-sm">Bulk Update Channel Access</h3>
+                  <p className="text-xs text-slate-400 mt-0.5">Apply channel permission to {selectedClientIds.size} selected workspaces</p>
                 </div>
                 <button
-                  onClick={() => setSelectedWorkspaceModal(null)}
-                  className="p-1 text-slate-400 hover:text-slate-600 rounded-lg"
+                  onClick={() => setIsBulkModalOpen(false)}
+                  className="p-1 text-slate-400 hover:text-slate-600 rounded-lg cursor-pointer"
                 >
                   <X size={16} />
                 </button>
               </div>
 
-              {/* Modal Body - 13 Channels Breakdown */}
-              <div className="p-5 overflow-y-auto space-y-2 text-xs">
-                <div className="font-bold text-slate-500 uppercase text-[10px] tracking-wider mb-2">
-                  Full Integrations Matrix (13 Connectors)
+              <div className="p-6 space-y-4 text-xs">
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1.5 uppercase text-[10px] tracking-wider">Target Channel</label>
+                  <select
+                    value={bulkActionConfig.channel}
+                    onChange={(e) => setBulkActionConfig({ ...bulkActionConfig, channel: e.target.value })}
+                    className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-900 focus:outline-none"
+                  >
+                    <option value="whatsapp">WhatsApp Business Cloud API</option>
+                    <option value="facebook">Facebook Page Messenger</option>
+                    <option value="instagram">Instagram Direct Message</option>
+                  </select>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  {CHANNEL_DEFINITIONS.map(def => {
-                    const isConn = def.key === 'whatsapp'
-                      ? Boolean(selectedWorkspaceModal.whatsapp?.connected)
-                      : Boolean(selectedWorkspaceModal[def.key]);
-                    const Icon = def.icon;
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1.5 uppercase text-[10px] tracking-wider">Action</label>
+                  <div className="grid grid-cols-2 gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setBulkActionConfig({ ...bulkActionConfig, action: 'grant' })}
+                      className={cn(
+                        "p-3 rounded-xl border text-xs font-bold flex items-center justify-center gap-2 cursor-pointer transition-all",
+                        bulkActionConfig.action === 'grant' ? "bg-emerald-50 text-emerald-800 border-emerald-300 shadow-2xs" : "bg-slate-50 text-slate-600 border-slate-200"
+                      )}
+                    >
+                      <Check size={14} className="text-emerald-600" />
+                      <span>Grant Access</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setBulkActionConfig({ ...bulkActionConfig, action: 'revoke' })}
+                      className={cn(
+                        "p-3 rounded-xl border text-xs font-bold flex items-center justify-center gap-2 cursor-pointer transition-all",
+                        bulkActionConfig.action === 'revoke' ? "bg-rose-50 text-rose-800 border-rose-300 shadow-2xs" : "bg-slate-50 text-slate-600 border-slate-200"
+                      )}
+                    >
+                      <X size={14} className="text-rose-600" />
+                      <span>Revoke Access</span>
+                    </button>
+                  </div>
+                </div>
 
-                    return (
-                      <div
-                        key={def.key}
-                        className={cn(
-                          "p-2.5 rounded-xl border flex items-center justify-between text-xs font-semibold",
-                          isConn ? "bg-emerald-50/50 border-emerald-200 text-slate-900" : "bg-slate-50/60 border-slate-100 text-slate-400"
-                        )}
-                      >
-                        <div className="flex items-center gap-2 truncate">
-                          <Icon size={14} className={isConn ? "text-emerald-600" : "text-slate-400"} />
-                          <span className="truncate">{def.name}</span>
-                        </div>
-                        {isConn ? (
-                          <span className="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded-full text-[9px] font-bold">Connected</span>
-                        ) : (
-                          <span className="text-[10px] text-slate-400">Disabled</span>
-                        )}
-                      </div>
-                    );
-                  })}
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1.5 uppercase text-[10px] tracking-wider">Admin Notes (Optional)</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Plan upgrade or compliance update"
+                    value={bulkActionConfig.notes}
+                    onChange={(e) => setBulkActionConfig({ ...bulkActionConfig, notes: e.target.value })}
+                    className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:outline-none"
+                  />
                 </div>
               </div>
 
-              {/* Modal Footer */}
-              <div className="p-3.5 border-t border-slate-100 bg-slate-50/50 flex items-center justify-end gap-2 text-xs">
+              <div className="p-4 border-t border-slate-100 bg-slate-50/50 flex items-center justify-end gap-2 text-xs">
                 <button
-                  onClick={() => setSelectedWorkspaceModal(null)}
-                  className="px-3.5 py-1.5 font-bold text-slate-600 hover:bg-slate-100 rounded-xl"
+                  onClick={() => setIsBulkModalOpen(false)}
+                  className="px-4 py-2 font-bold text-slate-600 hover:bg-slate-100 rounded-xl cursor-pointer"
                 >
-                  Close
+                  Cancel
                 </button>
-                <Link
-                  href={`/admin/clients/${selectedWorkspaceModal.client_id}?tab=channels`}
-                  className="px-4 py-1.5 font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-2xs"
+                <button
+                  onClick={handleBulkSubmit}
+                  disabled={bulkLoading}
+                  className="px-5 py-2 font-bold text-white bg-slate-900 hover:bg-slate-800 rounded-xl shadow-2xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
                 >
-                  Edit Configuration
-                </Link>
+                  {bulkLoading ? <Loader2 size={13} className="animate-spin" /> : <Power size={13} />}
+                  <span>Execute Bulk Update</span>
+                </button>
               </div>
-
             </div>
           </div>
         )}

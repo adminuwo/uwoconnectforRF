@@ -17,7 +17,7 @@ import { API_BASE_URL } from '@/config/apiConfig';
 
 const ClientOverview = () => {
   const router = useRouter();
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [userName, setUserName] = useState('User');
   const [contacts, setContacts] = useState([]);
 
@@ -183,52 +183,33 @@ const ClientOverview = () => {
       const headers = { Authorization: `Bearer ${token}` };
 
       try {
-        const res = await axios.get(
-          `${API_BASE_URL}/api/client/stats`,
-          { headers }
-        );
-        if (res.data) {
-          setStatsData(res.data);
-          if (res.data.resourceCounts) {
-            setResourceCounts(prev => ({ ...prev, ...res.data.resourceCounts }));
+        const [statsRes, ytRes, contactsRes, newsRes] = await Promise.allSettled([
+          axios.get(`${API_BASE_URL}/api/client/stats`, { headers, timeout: 7000 }),
+          axios.get(`${API_BASE_URL}/api/youtube/analytics`, { headers, timeout: 7000 }),
+          axios.get(`${API_BASE_URL}/api/contacts/?limit=1`, { headers, timeout: 7000 }),
+          axios.get(`${API_BASE_URL}/api/google-news/feed?query=technology`, { headers, timeout: 7000 }),
+        ]);
+
+        if (statsRes.status === 'fulfilled' && statsRes.value?.data) {
+          setStatsData(statsRes.value.data);
+          if (statsRes.value.data.resourceCounts) {
+            setResourceCounts(prev => ({ ...prev, ...statsRes.value.data.resourceCounts }));
           }
         }
-      } catch (err) {
-        console.warn("Dashboard stats notice:", err.message);
-      }
 
-      try {
-        const ytRes = await axios.get(
-          `${API_BASE_URL}/api/youtube/analytics`,
-          { headers }
-        );
-        if (ytRes.data && !ytRes.data.error) {
-          setYtData(ytRes.data);
+        if (ytRes.status === 'fulfilled' && ytRes.value?.data && !ytRes.value.data.error) {
+          setYtData(ytRes.value.data);
+        }
+
+        if (contactsRes.status === 'fulfilled' && contactsRes.value?.data) {
+          setContacts(contactsRes.value.data || []);
+        }
+
+        if (newsRes.status === 'fulfilled' && newsRes.value?.data?.articles) {
+          setDashboardNews(newsRes.value.data.articles.slice(0, 4));
         }
       } catch (err) {
-        console.warn("YouTube analytics notice:", err.message);
-      }
-
-      try {
-        const contactsRes = await axios.get(
-          `${API_BASE_URL}/api/contacts/?limit=1`,
-          { headers }
-        );
-        setContacts(contactsRes.data || []);
-      } catch (err) {
-        console.warn("Contacts fetch notice:", err.message);
-      }
-
-      try {
-        const newsRes = await axios.get(
-          `${API_BASE_URL}/api/google-news/feed?query=technology`,
-          { headers }
-        );
-        if (newsRes.data && newsRes.data.articles) {
-          setDashboardNews(newsRes.data.articles.slice(0, 4));
-        }
-      } catch (err) {
-        console.warn("News feed notice:", err.message);
+        console.warn("Dashboard fetch notice:", err.message);
       } finally {
         setLoading(false);
       }

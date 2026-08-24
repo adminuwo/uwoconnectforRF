@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { X, CheckSquare, Plus, Trash2, Calendar, Clock, AlertCircle, Building2, User } from 'lucide-react';
 import axios from 'axios';
+import { API_BASE_URL } from '@/config/apiConfig';
 
 const PRIORITIES = ['LOW', 'MEDIUM', 'HIGH', 'URGENT'];
 const STATUSES = ['NOT_STARTED', 'IN_PROGRESS', 'UNDER_REVIEW', 'WAITING_APPROVAL', 'BLOCKED', 'COMPLETED'];
@@ -52,7 +53,7 @@ export default function TaskModal({ isOpen, onClose, onSuccess, members = [] }) 
     try {
       const token = localStorage.getItem('token');
       await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/team/tasks/`,
+        `${API_BASE_URL}/api/team/tasks/`,
         {
           title: title.trim(),
           description: description.trim(),
