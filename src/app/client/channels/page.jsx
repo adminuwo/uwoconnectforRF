@@ -497,8 +497,6 @@ const ClientChannelsPage = () => {
             }
             await fetchClient();
             setToast({ msg: '✅ WhatsApp Business connected successfully!', type: 'success' });
-            setTimeout(() => setToast(null), 4000);
-          } catch (err) {
             console.error("Error connecting WhatsApp", err);
             setToast({ msg: err.response?.data?.error || 'Failed to connect WhatsApp', type: 'error' });
             setTimeout(() => setToast(null), 4000);
@@ -509,6 +507,47 @@ const ClientChannelsPage = () => {
         connectWhatsApp();
       }
     }
+
+    // Listen for Meta Embedded Signup postMessage events from popup
+    const handleMetaMessage = async (event) => {
+      if (
+        event.origin !== 'https://www.facebook.com' &&
+        event.origin !== 'https://web.facebook.com' &&
+        event.origin !== 'https://business.facebook.com'
+      ) {
+        return;
+      }
+      try {
+        const data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
+        if (data && (data.type === 'WA_EMBEDDED_SIGNUP' || data.event === 'FINISH' || data.event === 'FINISH_ALL')) {
+          console.log('Received Meta WA_EMBEDDED_SIGNUP event:', data);
+          const phone_number_id = data?.data?.phone_number_id || data?.phone_number_id;
+          const waba_id = data?.data?.waba_id || data?.waba_id;
+          
+          if (waba_id || phone_number_id) {
+            setToast({ msg: 'Saving WhatsApp configuration...', type: 'success' });
+            const token = localStorage.getItem('token');
+            await axios.put(`${API_BASE_URL}/api/profile`, {
+              whatsapp_waba_id: waba_id,
+              whatsapp_phone_number_id: phone_number_id,
+              whatsapp_enabled: true
+            }, {
+              headers: { Authorization: `Bearer ${token}` }
+            });
+            await fetchClient();
+            setToast({ msg: '✅ WhatsApp connected successfully!', type: 'success' });
+            setTimeout(() => setToast(null), 4000);
+          }
+        }
+      } catch (err) {
+        console.error('Error handling Meta message event', err);
+      }
+    };
+    window.addEventListener('message', handleMetaMessage);
+
+    return () => {
+      window.removeEventListener('message', handleMetaMessage);
+    };
   }, []);
 
   const handleWhatsAppSaved = (updatedClient) => {
@@ -646,7 +685,16 @@ const ClientChannelsPage = () => {
     const origin = typeof window !== 'undefined' ? window.location.origin : 'https://uwoconnect.aisa24.com';
     const redirectUri = encodeURIComponent(`${origin}/client/channels?state=whatsapp`);
     const appId = process.env.NEXT_PUBLIC_META_APP_ID || '991147863536661';
-    window.location.href = `https://business.facebook.com/messaging/whatsapp/onboard/?app_id=${appId}&config_id=970003505994896&extras=%7B%22sessionInfoVersion%22%3A%223%22%2C%22version%22%3A%22v4%22%7D&redirect_uri=${redirectUri}`;
+    const url = `https://business.facebook.com/messaging/whatsapp/onboard/?app_id=${appId}&config_id=970003505994896&extras=%7B%22sessionInfoVersion%22%3A%223%22%2C%22version%22%3A%22v4%22%7D&redirect_uri=${redirectUri}`;
+
+    const width = 600;
+    const height = 750;
+    const left = (window.innerWidth - width) / 2 + window.screenX;
+    const top = (window.innerHeight - height) / 2 + window.screenY;
+    const popup = window.open(url, 'WhatsAppEmbeddedSignup', `width=${width},height=${height},top=${top},left=${left},status=no,resizable=yes,toolbar=no,menubar=no,scrollbars=yes`);
+    if (!popup || popup.closed || typeof popup.closed === 'undefined') {
+      window.location.href = url;
+    }
   };
 
   const handleFacebookConnect = () => {
