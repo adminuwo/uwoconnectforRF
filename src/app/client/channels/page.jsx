@@ -646,7 +646,7 @@ const ClientChannelsPage = () => {
     const origin = typeof window !== 'undefined' ? window.location.origin : 'https://uwoconnect.aisa24.com';
     const redirectUri = encodeURIComponent(`${origin}/client/channels?state=whatsapp`);
     const appId = process.env.NEXT_PUBLIC_META_APP_ID || '991147863536661';
-    window.location.href = `https://www.facebook.com/v20.0/dialog/oauth?client_id=${appId}&redirect_uri=${redirectUri}&config_id=1048515390903125&response_type=code&state=whatsapp`;
+    window.location.href = `https://business.facebook.com/messaging/whatsapp/onboard/?app_id=${appId}&config_id=970003505994896&extras=%7B%22sessionInfoVersion%22%3A%223%22%2C%22version%22%3A%22v4%22%7D&redirect_uri=${redirectUri}`;
   };
 
   const handleFacebookConnect = () => {
