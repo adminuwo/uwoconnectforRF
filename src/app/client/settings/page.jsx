@@ -133,7 +133,7 @@ const ClientSettingsPage = () => {
       const processWhatsAppCode = async () => {
         try {
           const token = localStorage.getItem('token');
-          await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/auth/whatsapp/embedded-signup`, { code }, {
+          await axios.post(`${API_BASE_URL}/api/auth/whatsapp/embedded-signup`, { code }, {
             headers: { Authorization: `Bearer ${token}` }
           });
           alert("WhatsApp Embedded Signup successful!");

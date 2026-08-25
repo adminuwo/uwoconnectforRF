@@ -141,21 +141,41 @@ export default function ClientInboxPage() {
         fetchedContacts = contactRes.data.results;
       }
       
-      const convoData = fetchedContacts.map(contactObj => ({
-        id: contactObj.platform_id || contactObj.phone_number || contactObj.id,
-        name: contactObj.name || contactObj.platform_id || contactObj.phone_number || 'Unknown Contact',
-        rawAddress: contactObj.phone_number || contactObj.platform_id,
-        lastMessage: 'Tap to view messages...',
-        time: contactObj.updated_at || contactObj.created_at,
-        unread: 0,
-        channel: contactObj.preferred_channel || 'WHATSAPP',
-        assignedTo: contactObj.assigned_to || null,
-        isLocked: false,
-        lockedBy: null,
-        status: contactObj.status || 'OPEN',
-        contactObj,
-        messages: []
-      }));
+      const convoData = fetchedContacts.map(contactObj => {
+        let channel = (contactObj.preferred_channel || '').toUpperCase();
+        const pid = (contactObj.platform_id || '').toLowerCase();
+        const name = (contactObj.name || '').toLowerCase();
+
+        if (!channel || channel === 'WHATSAPP') {
+          if (pid.includes('@') || (contactObj.email && contactObj.email.length > 0)) {
+            channel = 'GMAIL';
+          } else if (pid.startsWith('ig_') || name.includes('instagram')) {
+            channel = 'INSTAGRAM';
+          } else if (pid.startsWith('fb_') || name.includes('facebook')) {
+            channel = 'FACEBOOK';
+          } else if (pid.startsWith('tg_') || name.includes('telegram')) {
+            channel = 'TELEGRAM';
+          } else {
+            channel = 'WHATSAPP';
+          }
+        }
+
+        return {
+          id: contactObj.platform_id || contactObj.phone_number || contactObj.id,
+          name: contactObj.name || contactObj.platform_id || contactObj.phone_number || 'Unknown Contact',
+          rawAddress: contactObj.phone_number || contactObj.platform_id,
+          lastMessage: 'Tap to view messages...',
+          time: contactObj.updated_at || contactObj.created_at,
+          unread: 0,
+          channel: channel,
+          assignedTo: contactObj.assigned_to || null,
+          isLocked: false,
+          lockedBy: null,
+          status: contactObj.status || 'OPEN',
+          contactObj,
+          messages: []
+        };
+      });
       
       setConversations(convoData);
       
@@ -172,6 +192,7 @@ export default function ClientInboxPage() {
       setConversations([]);
     } finally {
       setIsLoadingMoreContacts(false);
+      setLoading(false);
     }
   };
 
@@ -255,13 +276,17 @@ export default function ClientInboxPage() {
     return digits || rawId;
   };
 
-  // Removed client-side search since we do backend search in fetchConversationsOnly.
-  // The backend already returns filtered results based on activeChannelFilter and searchTerm
-  const convoList = conversations.map(c => ({
-    ...c,
-    messages: selectedConvoId === c.id ? messages : []
-  }))
-  .sort((a, b) => new Date(b.time) - new Date(a.time));
+  // Filter contacts by active channel tab (WhatsApp, Instagram, Facebook, etc.)
+  const convoList = conversations
+    .filter(c => {
+      if (!activeChannelFilter || activeChannelFilter === 'ALL') return true;
+      return (c.channel || 'WHATSAPP').toUpperCase() === activeChannelFilter.toUpperCase();
+    })
+    .map(c => ({
+      ...c,
+      messages: selectedConvoId === c.id ? messages : []
+    }))
+    .sort((a, b) => new Date(b.time) - new Date(a.time));
 
   const activeConvo = convoList.find(c => c.id === selectedConvoId) || (convoList.length > 0 ? convoList[0] : null);
 

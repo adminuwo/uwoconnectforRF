@@ -156,35 +156,24 @@ const CopyButton = ({ text }) => {
 
 const ClientChannelsPage = () => {
   const router = useRouter();
-  const [client, setClient] = useState(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const cached = localStorage.getItem('cached_client_channels');
-        if (cached) return JSON.parse(cached);
-      } catch (e) {}
-    }
-    return null;
-  });
-
-  const [razorpayConn, setRazorpayConn] = useState(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const cached = localStorage.getItem('cached_razorpay_status');
-        if (cached) return JSON.parse(cached);
-      } catch (e) {}
-    }
-    return null;
-  });
-
-  const [loading, setLoading] = useState(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        return !localStorage.getItem('cached_client_channels');
-      } catch (e) {}
-    }
-    return true;
-  });
+  const [mounted, setMounted] = useState(false);
+  const [client, setClient] = useState(null);
+  const [razorpayConn, setRazorpayConn] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    try {
+      const cached = localStorage.getItem('cached_client_channels');
+      if (cached) {
+        setClient(JSON.parse(cached));
+        setLoading(false);
+      }
+      const cachedRzp = localStorage.getItem('cached_razorpay_status');
+      if (cachedRzp) setRazorpayConn(JSON.parse(cachedRzp));
+    } catch (e) {}
+  }, []);
 
   const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
   const [isFacebookConfigModalOpen, setIsFacebookConfigModalOpen] = useState(false);
@@ -452,7 +441,7 @@ const ClientChannelsPage = () => {
         const connectFacebook = async () => {
           try {
             const token = localStorage.getItem('token');
-            await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/auth/facebook/embedded-signup`,
+            await axios.post(`${API_BASE_URL}/api/auth/facebook/embedded-signup`,
               { code: code },
               { headers: { Authorization: `Bearer ${token}` } }
             );
@@ -468,12 +457,12 @@ const ClientChannelsPage = () => {
           }
         };
         connectFacebook();
-      } else {
+      } else if (state === 'instagram') {
         setToast({ msg: 'Connecting Instagram...', type: 'success' });
         const connectInstagram = async () => {
           try {
             const token = localStorage.getItem('token');
-            await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/auth/instagram/embedded-signup`,
+            await axios.post(`${API_BASE_URL}/api/auth/instagram/embedded-signup`,
               { code: code },
               { headers: { Authorization: `Bearer ${token}` } }
             );
@@ -489,6 +478,35 @@ const ClientChannelsPage = () => {
           }
         };
         connectInstagram();
+      } else {
+        // WhatsApp Embedded Signup callback (state === 'whatsapp' or default)
+        setToast({ msg: 'Connecting WhatsApp Business...', type: 'success' });
+        const connectWhatsApp = async () => {
+          try {
+            const token = localStorage.getItem('token');
+            const res = await axios.post(`${API_BASE_URL}/api/auth/whatsapp/embedded-signup`,
+              { code: code },
+              { headers: { Authorization: `Bearer ${token}` } }
+            );
+            if (res.data?.whatsapp_config) {
+              setClient(prev => ({
+                ...prev,
+                ...res.data.whatsapp_config,
+                whatsapp_enabled: true
+              }));
+            }
+            await fetchClient();
+            setToast({ msg: '✅ WhatsApp Business connected successfully!', type: 'success' });
+            setTimeout(() => setToast(null), 4000);
+          } catch (err) {
+            console.error("Error connecting WhatsApp", err);
+            setToast({ msg: err.response?.data?.error || 'Failed to connect WhatsApp', type: 'error' });
+            setTimeout(() => setToast(null), 4000);
+          } finally {
+            window.history.replaceState({}, document.title, window.location.pathname);
+          }
+        };
+        connectWhatsApp();
       }
     }
   }, []);
@@ -626,46 +644,17 @@ const ClientChannelsPage = () => {
 
   const handleWhatsAppConnect = () => {
     const origin = typeof window !== 'undefined' ? window.location.origin : 'https://uwoconnect.aisa24.com';
-    const redirectUri = encodeURIComponent(`${origin}/client/settings`);
-    window.location.href = `https://business.facebook.com/messaging/whatsapp/onboard/?app_id=991147863536661&config_id=1048515390903125&extras=%7B%22version%22%3A%22v4%22%2C%22sessionInfoVersion%22%3A%223%22%2C%22featureType%22%3A%22whatsapp_business_app_onboarding%22%7D&redirect_uri=${redirectUri}`;
+    const redirectUri = encodeURIComponent(`${origin}/client/channels?state=whatsapp`);
+    const appId = process.env.NEXT_PUBLIC_META_APP_ID || '991147863536661';
+    window.location.href = `https://www.facebook.com/v20.0/dialog/oauth?client_id=${appId}&redirect_uri=${redirectUri}&config_id=1048515390903125&response_type=code&state=whatsapp`;
   };
 
   const handleFacebookConnect = () => {
-    if (!window.FB) {
-      setToast({ msg: 'Facebook SDK not loaded yet. Please try again.', type: 'error' });
-      setTimeout(() => setToast(null), 4000);
-      return;
-    }
-    setFbLoading(true);
-    window.FB.login(async (response) => {
-      if (response.status !== 'connected') {
-        setFbLoading(false);
-        setToast({ msg: 'Facebook login was cancelled or failed.', type: 'error' });
-        setTimeout(() => setToast(null), 4000);
-        return;
-      }
-      try {
-        const token = localStorage.getItem('token');
-        const res = await axios.post(
-          `${API_BASE_URL}/api/auth/facebook/embedded-signup`,
-          { access_token: response.authResponse.accessToken },
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        setClient(prev => ({ ...prev, ...res.data.facebook_config ? { facebook_config: res.data.facebook_config, facebook_enabled: true } : {} }));
-        await fetchClient();
-        setToast({ msg: '✅ Facebook Page connected!', type: 'success' });
-        setTimeout(() => setToast(null), 4000);
-      } catch (err) {
-        const msg = err?.response?.data?.error || 'Failed to connect Facebook.';
-        setToast({ msg, type: 'error' });
-        setTimeout(() => setToast(null), 5000);
-      } finally {
-        setFbLoading(false);
-      }
-    }, {
-      scope: 'public_profile,email,pages_show_list,pages_read_engagement,pages_messaging',
-      return_scopes: true,
-    });
+    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://uwoconnect.aisa24.com';
+    const redirectUri = encodeURIComponent(`${origin}/client/channels?state=facebook`);
+    const appId = process.env.NEXT_PUBLIC_META_APP_ID || '991147863536661';
+    const scope = encodeURIComponent('public_profile,email,pages_show_list,pages_read_engagement,pages_messaging');
+    window.location.href = `https://www.facebook.com/v20.0/dialog/oauth?client_id=${appId}&redirect_uri=${redirectUri}&scope=${scope}&response_type=code&state=facebook`;
   };
 
   const handleInstagramConnect = () => {
@@ -674,6 +663,16 @@ const ClientChannelsPage = () => {
     const instagramOAuthUrl = `https://www.instagram.com/oauth/authorize?force_reauth=true&client_id=1704328300882543&redirect_uri=${redirectUri}&response_type=code&scope=instagram_business_basic%2Cinstagram_business_manage_messages%2Cinstagram_business_manage_comments%2Cinstagram_business_content_publish%2Cinstagram_business_manage_insights&state=instagram`;
     window.location.href = instagramOAuthUrl;
   };
+
+  if (!mounted) {
+    return (
+      <DashboardLayout role="CLIENT">
+        <div className="w-full h-[60vh] flex items-center justify-center">
+          <Loader2 className="animate-spin text-emerald-600" size={32} />
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout role="CLIENT">
