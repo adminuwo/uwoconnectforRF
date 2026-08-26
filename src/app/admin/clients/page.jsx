@@ -473,22 +473,41 @@ function AdminClientsContent() {
 
         {/* ── 3. Clean Search & Filter Bar ── */}
         <div className="bg-white p-3.5 rounded-2xl border border-slate-200/80 shadow-2xs mb-6 flex flex-col md:flex-row items-center justify-between gap-3">
-          {/* Search Input with Debounce */}
-          <div className="relative w-full md:w-96">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={15} />
+          {/* Search Input with Anti-Autofill Protection */}
+          <form 
+            role="search" 
+            onSubmit={(e) => e.preventDefault()} 
+            autoComplete="off" 
+            className="relative w-full md:w-96"
+          >
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={15} />
             <input
-              type="text"
+              type="search"
+              name="search_clients_directory_query"
+              id="search_clients_directory_input"
+              autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="off"
+              spellCheck="false"
+              data-form-type="other"
+              data-lpignore="true"
+              data-1p-ignore="true"
+              data-bwignore="true"
               placeholder="Search by client, business, email, phone..."
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
               className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200/80 rounded-xl text-xs text-slate-800 outline-none focus:bg-white focus:border-emerald-500 transition-all font-medium"
             />
             {searchInput && (
-              <button onClick={() => setSearchInput('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer">
+              <button 
+                type="button" 
+                onClick={() => setSearchInput('')} 
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
+              >
                 <X size={13} />
               </button>
             )}
-          </div>
+          </form>
 
           {/* Filter Dropdowns */}
           <div className="flex items-center gap-2.5 w-full md:w-auto overflow-x-auto pb-1 md:pb-0">
@@ -905,6 +924,8 @@ function AdminClientsContent() {
                       <Key size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
                       <input
                         type={showPasswordInModal ? "text" : "password"}
+                        name="client_password_reset_field"
+                        autoComplete="new-password"
                         placeholder="Type new password to override..."
                         value={modalNewPassword}
                         onChange={(e) => setModalNewPassword(e.target.value)}
@@ -1210,6 +1231,8 @@ function AdminClientsContent() {
                 </p>
                 <input
                   type="password"
+                  name="standalone_override_password"
+                  autoComplete="new-password"
                   placeholder="New password"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
