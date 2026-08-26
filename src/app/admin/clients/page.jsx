@@ -591,19 +591,18 @@ export default function AdminClients() {
                         <ArrowUpDown size={11} className="text-slate-400" />
                       </div>
                     </th>
-                    <th className="py-3.5 px-6 text-center">
-                      <div className="flex items-center justify-center gap-1">
+                    <th className="py-3.5 px-6 text-right sticky right-0 bg-slate-50 z-10">
+                      <div className="flex items-center justify-end gap-1">
                         <Eye size={12} className="text-slate-400" />
                         View Profile
                       </div>
                     </th>
-                    <th className="py-3.5 px-6 text-right sticky right-0 bg-slate-50 z-10">Approval Decision & Access</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 font-sans">
                   {(loading || (isFetching && clients.length === 0)) ? (
                     <tr>
-                      <td colSpan={5} className="py-24 text-center">
+                      <td colSpan={4} className="py-24 text-center">
                         <div className="flex flex-col items-center justify-center gap-3.5">
                           <div className="relative flex items-center justify-center">
                             <div className="absolute w-14 h-14 rounded-2xl bg-emerald-500/15 animate-ping" />
@@ -622,7 +621,7 @@ export default function AdminClients() {
                     </tr>
                   ) : clients.length === 0 ? (
                     <tr>
-                      <td colSpan={5} className="py-16 text-center text-slate-400">
+                      <td colSpan={4} className="py-16 text-center text-slate-400">
                         <div className="flex flex-col items-center justify-center gap-2">
                           <AlertCircle size={28} className="text-slate-300" />
                           <p className="text-xs font-bold text-slate-600">No clients match your filter criteria.</p>
@@ -636,11 +635,7 @@ export default function AdminClients() {
                       </td>
                     </tr>
                   ) : (
-                    clients.map((client, index) => {
-                      const isMenuOpen = activeMenuId === client.id;
-                      const isRowActionLoading = actionLoading[client.id];
-                      const openUpward = index >= 2;
-
+                    clients.map((client) => {
                       return (
                         <tr key={client.id} className="hover:bg-slate-50/60 transition-colors">
                           {/* 1. Client & Business */}
@@ -696,12 +691,12 @@ export default function AdminClients() {
                                 {client.approval_status || 'APPROVED'}
                               </span>
 
-                              {/* Quick 1-click toggles */}
+                              {/* Quick 1-click toggles for pending */}
                               {client.approval_status === 'PENDING' && (
                                 <div className="flex items-center gap-1">
                                   <button
                                     onClick={() => handleClientAction(client.id, 'SET_APPROVAL_STATUS', { approval_status: 'APPROVED' })}
-                                    disabled={isRowActionLoading}
+                                    disabled={actionLoading[client.id]}
                                     className="p-1 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors cursor-pointer"
                                     title="Approve immediately"
                                   >
@@ -709,7 +704,7 @@ export default function AdminClients() {
                                   </button>
                                   <button
                                     onClick={() => handleClientAction(client.id, 'SET_APPROVAL_STATUS', { approval_status: 'REJECTED' })}
-                                    disabled={isRowActionLoading}
+                                    disabled={actionLoading[client.id]}
                                     className="p-1 text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
                                     title="Reject access"
                                   >
@@ -729,132 +724,15 @@ export default function AdminClients() {
                           </td>
 
                           {/* 4. Dedicated View Profile Column */}
-                          <td className="py-4 px-6 whitespace-nowrap text-center">
+                          <td className="py-4 px-6 whitespace-nowrap text-right sticky right-0 bg-white border-l border-slate-100 z-10">
                             <button
                               onClick={() => handleViewProfile(client)}
-                              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200/80 rounded-xl font-bold text-xs shadow-2xs transition-all hover:scale-[1.02] cursor-pointer group"
+                              className="inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200/80 rounded-xl font-bold text-xs shadow-2xs transition-all hover:scale-[1.02] cursor-pointer group"
                               title="View and manage client ID, password & profile"
                             >
-                              <Eye size={13} className="text-emerald-600 group-hover:text-emerald-700 transition-colors" />
+                              <Eye size={14} className="text-emerald-600 group-hover:text-emerald-700 transition-colors" />
                               <span>View Profile</span>
                             </button>
-                          </td>
-
-                          {/* 5. Decision & Actions / Access */}
-                          <td className={cn(
-                            "py-4 px-6 text-right sticky right-0 bg-white border-l border-slate-100",
-                            isMenuOpen ? "z-30" : "z-10"
-                          )}>
-                            <div className="flex items-center justify-end gap-2" onClick={(e) => e.stopPropagation()}>
-                              {/* 1-Click Direct Approval Decision */}
-                              {client.approval_status === 'PENDING' ? (
-                                <div className="flex items-center gap-1.5">
-                                  <button
-                                    onClick={() => handleClientAction(client.id, 'SET_APPROVAL_STATUS', { approval_status: 'APPROVED' })}
-                                    disabled={isRowActionLoading}
-                                    className="inline-flex items-center gap-1 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs shadow-2xs transition-all disabled:opacity-50 cursor-pointer"
-                                  >
-                                    <CheckCircle2 size={13} />
-                                    <span>Approve</span>
-                                  </button>
-                                  <button
-                                    onClick={() => handleClientAction(client.id, 'SET_APPROVAL_STATUS', { approval_status: 'REJECTED' })}
-                                    disabled={isRowActionLoading}
-                                    className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-xl font-bold text-xs transition-all disabled:opacity-50 cursor-pointer"
-                                  >
-                                    <XCircle size={13} />
-                                    <span>Reject</span>
-                                  </button>
-                                </div>
-                              ) : client.approval_status === 'REJECTED' ? (
-                                <button
-                                  onClick={() => handleClientAction(client.id, 'SET_APPROVAL_STATUS', { approval_status: 'APPROVED' })}
-                                  disabled={isRowActionLoading}
-                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-xl font-bold text-xs transition-all disabled:opacity-50 cursor-pointer"
-                                >
-                                  <CheckCircle2 size={13} />
-                                  <span>Re-Approve</span>
-                                </button>
-                              ) : (
-                                <button
-                                  onClick={() => handleClientAction(client.id, 'SET_APPROVAL_STATUS', { approval_status: 'REJECTED' })}
-                                  disabled={isRowActionLoading}
-                                  className="inline-flex items-center gap-1 px-2 py-1.5 bg-slate-50 hover:bg-rose-50 text-slate-500 hover:text-rose-700 border border-slate-200 hover:border-rose-200 rounded-xl font-semibold text-xs transition-all disabled:opacity-50 cursor-pointer"
-                                  title="Revoke access"
-                                >
-                                  <XCircle size={12} />
-                                  <span>Revoke</span>
-                                </button>
-                              )}
-
-                              {/* Direct Access Workspace Button */}
-                              <button
-                                onClick={() => handleOpenClientWorkspace(client)}
-                                className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200/80 rounded-xl font-bold text-xs transition-all cursor-pointer"
-                                title="Login and access client workspace"
-                              >
-                                <ExternalLink size={12} />
-                                <span className="hidden xl:inline">Access</span>
-                              </button>
-
-                              {/* Secondary Options Menu */}
-                              <div className="relative inline-block text-left">
-                                <button
-                                  onClick={() => setActiveMenuId(isMenuOpen ? null : client.id)}
-                                  className="p-1.5 hover:bg-slate-100 text-slate-500 rounded-xl transition-all cursor-pointer"
-                                  title="More options"
-                                >
-                                  <MoreVertical size={15} />
-                                </button>
-
-                                {isMenuOpen && (
-                                  <div className={cn(
-                                    "absolute right-0 w-48 bg-white rounded-xl shadow-xl border border-slate-200 z-50 py-1.5 animate-in fade-in zoom-in-95 text-left text-xs",
-                                    openUpward 
-                                      ? "bottom-full mb-1.5 origin-bottom-right" 
-                                      : "top-full mt-1.5 origin-top-right"
-                                  )}>
-                                    <button
-                                      onClick={() => handleViewProfile(client)}
-                                      className="w-full flex items-center gap-2 px-3.5 py-2 hover:bg-emerald-50 text-emerald-800 font-semibold text-left cursor-pointer"
-                                    >
-                                      <Eye size={14} className="text-emerald-600" />
-                                      View Profile & Credentials
-                                    </button>
-                                    <button
-                                      onClick={() => handleOpenClientWorkspace(client)}
-                                      className="w-full flex items-center gap-2 px-3.5 py-2 hover:bg-purple-50 text-purple-700 font-semibold cursor-pointer"
-                                    >
-                                      <ExternalLink size={14} />
-                                      Access Workspace
-                                    </button>
-                                    <div className="my-1 border-t border-slate-100" />
-                                    <button
-                                      onClick={() => {
-                                        setClientForPassword(client);
-                                        setIsPasswordModalOpen(true);
-                                        setActiveMenuId(null);
-                                      }}
-                                      className="w-full flex items-center gap-2 px-3.5 py-2 hover:bg-amber-50 text-slate-700 cursor-pointer"
-                                    >
-                                      <Key size={14} className="text-amber-500" />
-                                      Change Password
-                                    </button>
-                                    <button
-                                      onClick={() => {
-                                        setClientToDelete(client);
-                                        setIsDeleteModalOpen(true);
-                                        setActiveMenuId(null);
-                                      }}
-                                      className="w-full flex items-center gap-2 px-3.5 py-2 hover:bg-rose-50 text-rose-600 font-semibold cursor-pointer"
-                                    >
-                                      <Trash2 size={14} />
-                                      Delete Client
-                                    </button>
-                                  </div>
-                                )}
-                              </div>
-                            </div>
                           </td>
                         </tr>
                       );
