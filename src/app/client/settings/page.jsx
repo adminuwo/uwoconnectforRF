@@ -301,11 +301,11 @@ const ClientSettingsPage = () => {
           </div>
         </div>
 
-        <div className="space-y-10">
-          {/* Company Branding & Logo System */}
-          <div className="space-y-1">
-            <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-4 ml-1">Company Branding & Document Settings</h3>
-            <div className="bg-white border border-slate-100 rounded-3xl p-6 space-y-6">
+        <div className="space-y-8">
+          {/* ── 1. Company Branding & Business Details ── */}
+          <div className="space-y-2">
+            <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] ml-1">Company & Brand Information</h3>
+            <div className="bg-white border border-slate-200/80 rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xs">
               
               {/* Logo Upload & Preview (Always Active 1-Click Upload) */}
               <div className="flex flex-col sm:flex-row items-center gap-6 border-b border-slate-100 pb-6">
@@ -340,7 +340,7 @@ const ClientSettingsPage = () => {
 
                 <div className="space-y-2 flex-1 text-center sm:text-left">
                   <div className="flex items-center justify-center sm:justify-start gap-2 flex-wrap">
-                    <h4 className="text-sm font-bold text-slate-900">Company Brand Logo</h4>
+                    <h4 className="text-base font-bold text-slate-900">Company Logo</h4>
                     {logoSuccessMessage && (
                       <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full animate-in fade-in">
                         ✓ {logoSuccessMessage}
@@ -348,7 +348,7 @@ const ClientSettingsPage = () => {
                     )}
                   </div>
                   <p className="text-xs text-slate-500 font-medium leading-relaxed">
-                    Appears top-left on all Proposals, Quotations, Invoices (web & PDF), and Admin Dashboard. Supported: PNG, JPG, WEBP (Max 3MB).
+                    Appears on all Proposals, Quotations, Invoices, and Admin Dashboard. Supported: PNG, JPG, WEBP (Max 5MB).
                   </p>
                   
                   {/* Always Visible Upload & Remove Buttons */}
@@ -380,476 +380,190 @@ const ClientSettingsPage = () => {
                 </div>
               </div>
 
-              {/* Company Meta Fields */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Business Name</label>
+              {/* Company Fields: Business Name, GST (Optional), Plan */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                {/* 1. Company Name */}
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Company / Business Name</label>
                   {isEditing ? (
                     <input 
                       value={editData.business_name} 
                       onChange={e => setEditData({...editData, business_name: e.target.value})} 
-                      className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-4 py-3 outline-none focus:border-emerald-500 font-semibold text-xs" 
+                      placeholder="e.g. Unified Web Options"
+                      className="w-full bg-slate-50 border border-slate-200/80 rounded-2xl px-4 py-3 outline-none focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 font-semibold text-xs transition-all" 
                     />
                   ) : (
-                    <div className="bg-slate-50 rounded-2xl px-4 py-3 font-semibold text-slate-900 text-xs">
+                    <div className="bg-slate-50 border border-slate-100 rounded-2xl px-4 py-3 font-semibold text-slate-900 text-xs">
                       {client?.business_name || 'Not Configured'}
                     </div>
                   )}
                 </div>
 
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">GSTIN / Tax ID</label>
+                {/* 2. GSTIN / Tax ID (Optional) */}
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between ml-1">
+                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">GSTIN / Tax ID</label>
+                    <span className="text-[9px] font-bold text-slate-400 uppercase bg-slate-100 px-1.5 py-0.5 rounded">Optional</span>
+                  </div>
                   {isEditing ? (
                     <input 
                       value={editData.tax_id_gstin} 
                       onChange={e => setEditData({...editData, tax_id_gstin: e.target.value})} 
-                      className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-4 py-3 outline-none focus:border-emerald-500 font-semibold text-xs" 
-                      placeholder="e.g. 07AAAAA0000A1Z5"
+                      className="w-full bg-slate-50 border border-slate-200/80 rounded-2xl px-4 py-3 outline-none focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 font-semibold text-xs font-mono transition-all" 
+                      placeholder="e.g. 07AAAAA0000A1Z5 (Optional)"
                     />
                   ) : (
-                    <div className="bg-slate-50 rounded-2xl px-4 py-3 font-semibold text-slate-900 text-xs">
-                      {client?.tax_id_gstin || 'Not Configured'}
+                    <div className="bg-slate-50 border border-slate-100 rounded-2xl px-4 py-3 font-semibold text-slate-900 text-xs font-mono">
+                      {client?.tax_id_gstin || 'Not Configured (Optional)'}
                     </div>
                   )}
                 </div>
 
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Document Prefix</label>
-                  {isEditing ? (
-                    <input 
-                      value={editData.invoice_prefix} 
-                      onChange={e => setEditData({...editData, invoice_prefix: e.target.value})} 
-                      className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-4 py-3 outline-none focus:border-emerald-500 font-semibold text-xs" 
-                      placeholder="e.g. INV"
-                    />
-                  ) : (
-                    <div className="bg-slate-50 rounded-2xl px-4 py-3 font-semibold text-slate-900 text-xs">
-                      {client?.invoice_prefix || 'INV'}
+                {/* 3. Subscription Plan */}
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Active Plan</label>
+                  <div className="bg-slate-50 border border-slate-100 rounded-2xl px-4 py-2.5 flex items-center justify-between">
+                    <div>
+                      <span className="text-xs font-extrabold text-slate-900 uppercase tracking-tight">
+                        {client?.plan || 'Free'} Tier
+                      </span>
+                      <span className="text-[10px] text-emerald-600 font-bold block">Active</span>
                     </div>
-                  )}
+                    <button
+                      type="button"
+                      onClick={() => setSelectedPlanModal('GROWTH')}
+                      className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-[11px] transition-all shadow-xs cursor-pointer"
+                    >
+                      Upgrade
+                    </button>
+                  </div>
                 </div>
               </div>
+
             </div>
           </div>
 
-          {/* Personal & Business Information */}
-          <div className="space-y-1">
-            <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-4 ml-1">Personal & Contact Details</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="flex items-center gap-4 p-5 bg-white border border-slate-100 rounded-3xl transition-all hover:border-emerald-100 group">
-                <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center transition-colors group-hover:bg-emerald-600 group-hover:text-white shrink-0">
-                  <User size={22} strokeWidth={2} />
+          {/* ── 2. Personal & Contact Details ── */}
+          <div className="space-y-2">
+            <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] ml-1">Personal & Contact Details</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              
+              {/* Full Name */}
+              <div className="flex items-center gap-4 p-5 bg-white border border-slate-200/80 rounded-3xl transition-all hover:border-emerald-200 shadow-2xs">
+                <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-700 flex items-center justify-center font-bold shrink-0 border border-emerald-100">
+                  <User size={20} strokeWidth={2} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Full Name</p>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Full Name</p>
                   {isEditing ? (
-                    <input value={editData.name} onChange={e => setEditData({...editData, name: e.target.value})} className="w-full bg-slate-50 border-none p-0 focus:ring-0 font-semibold text-slate-900 text-base" />
+                    <input 
+                      value={editData.name} 
+                      onChange={e => setEditData({...editData, name: e.target.value})} 
+                      placeholder="Enter full name"
+                      className="w-full bg-slate-50 border border-slate-200/80 rounded-xl px-3 py-1.5 outline-none focus:bg-white focus:border-emerald-500 font-semibold text-slate-900 text-sm transition-all" 
+                    />
                   ) : (
-                    <p className="text-base font-semibold text-slate-900 tracking-tight truncate">{client?.name || user.username}</p>
+                    <p className="text-sm font-bold text-slate-900 tracking-tight truncate">{client?.name || user.first_name || user.username}</p>
                   )}
                 </div>
               </div>
 
-              <div className="flex items-center gap-4 p-5 bg-white border border-slate-100 rounded-3xl transition-all opacity-60">
-                <div className="w-12 h-12 rounded-2xl bg-slate-50 text-slate-400 flex items-center justify-center shrink-0">
-                  <Mail size={22} strokeWidth={2} />
+              {/* Email Address */}
+              <div className="flex items-center gap-4 p-5 bg-white border border-slate-200/80 rounded-3xl transition-all shadow-2xs">
+                <div className="w-12 h-12 rounded-2xl bg-slate-50 text-slate-500 flex items-center justify-center shrink-0 border border-slate-200/60">
+                  <Mail size={20} strokeWidth={2} />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Email Address</p>
-                  <p className="text-base font-semibold text-slate-900 tracking-tight truncate">{user.email || 'N/A'}</p>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Mail ID</p>
+                  <p className="text-sm font-bold text-slate-900 tracking-tight truncate">{user.email || client?.email || 'N/A'}</p>
                 </div>
               </div>
 
-              <div className="flex items-center gap-4 p-5 bg-white border border-slate-100 rounded-3xl transition-all hover:border-emerald-100 group">
-                <div className="w-12 h-12 rounded-2xl bg-slate-50 text-slate-400 flex items-center justify-center transition-colors group-hover:bg-emerald-600 group-hover:text-white shrink-0">
-                  <Phone size={22} strokeWidth={2} />
+              {/* Phone Number */}
+              <div className="flex items-center gap-4 p-5 bg-white border border-slate-200/80 rounded-3xl transition-all hover:border-emerald-200 shadow-2xs">
+                <div className="w-12 h-12 rounded-2xl bg-slate-50 text-slate-700 flex items-center justify-center shrink-0 border border-slate-200/60">
+                  <Phone size={20} strokeWidth={2} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Phone Number</p>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Phone Number</p>
                   {isEditing ? (
-                    <input value={editData.phone_number} onChange={e => setEditData({...editData, phone_number: e.target.value})} className="w-full bg-slate-50 border-none p-0 focus:ring-0 font-semibold text-slate-900 text-base" placeholder="e.g. +91 9876543210" />
+                    <input 
+                      value={editData.phone_number} 
+                      onChange={e => setEditData({...editData, phone_number: e.target.value})} 
+                      className="w-full bg-slate-50 border border-slate-200/80 rounded-xl px-3 py-1.5 outline-none focus:bg-white focus:border-emerald-500 font-semibold text-slate-900 text-sm font-mono transition-all" 
+                      placeholder="e.g. +91 9876543210" 
+                    />
                   ) : (
-                    <p className="text-base font-semibold text-slate-900 tracking-tight truncate">{client?.phone_number || 'Not Linked'}</p>
+                    <p className="text-sm font-bold text-slate-900 tracking-tight font-mono truncate">{client?.phone_number || 'Not Linked'}</p>
                   )}
                 </div>
               </div>
 
-              <div className="flex items-start gap-4 p-5 bg-white border border-slate-100 rounded-3xl transition-all hover:border-emerald-100 group">
-                <div className="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center transition-colors group-hover:bg-rose-600 group-hover:text-white shrink-0">
-                  <MapPin size={22} strokeWidth={2} />
+              {/* Location / Address */}
+              <div className="flex items-start gap-4 p-5 bg-white border border-slate-200/80 rounded-3xl transition-all hover:border-emerald-200 shadow-2xs">
+                <div className="w-12 h-12 rounded-2xl bg-slate-50 text-slate-700 flex items-center justify-center shrink-0 border border-slate-200/60 mt-0.5">
+                  <MapPin size={20} strokeWidth={2} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Business Address & Map Location</p>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Location / Office Address</p>
                   {isEditing ? (
                     <textarea 
                       value={editData.address} 
                       onChange={e => setEditData({...editData, address: e.target.value})} 
                       rows={2}
-                      className="w-full bg-slate-50 border border-slate-100 rounded-xl p-2 font-semibold text-slate-900 text-sm focus:outline-none focus:border-emerald-500" 
+                      className="w-full bg-slate-50 border border-slate-200/80 rounded-xl p-2.5 font-semibold text-slate-900 text-xs focus:bg-white focus:outline-none focus:border-emerald-500 transition-all" 
                       placeholder="e.g. Shop 12, Main Market, MG Road, Connaught Place, New Delhi" 
                     />
                   ) : (
                     <div>
-                      <p className="text-sm font-semibold text-slate-900 tracking-tight">{client?.address || 'No address configured'}</p>
+                      <p className="text-xs font-semibold text-slate-800 leading-relaxed">{client?.address || 'No address configured'}</p>
                       {client?.address && (
                         <a 
                           href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(client.address)}`} 
                           target="_blank" 
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 text-xs font-bold text-emerald-600 hover:text-emerald-700 mt-1"
+                          className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 hover:text-emerald-700 mt-1"
                         >
-                          <span>View Map Path & Directions</span>
-                          <ArrowUpRight size={12} />
+                          <span>View on Google Maps</span>
+                          <ArrowUpRight size={11} />
                         </a>
                       )}
                     </div>
                   )}
                 </div>
               </div>
+
             </div>
           </div>
 
-          {/* WhatsApp Integration Section */}
-          <div className="space-y-1">
-            <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-4 ml-1">WhatsApp Integration</h3>
-            <div className="bg-white border border-slate-100 rounded-[24px] sm:rounded-[32px] p-4 sm:p-8 space-y-6 sm:space-y-8">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
-                <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Phone Number ID</label>
-                  {isEditing ? (
-                    <input 
-                      value={editData.whatsapp_phone_number_id} 
-                      onChange={e => setEditData({...editData, whatsapp_phone_number_id: e.target.value})} 
-                      className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-4 outline-none focus:border-emerald-500 transition-all font-semibold text-sm" 
-                      placeholder="e.g. 1151075064754011"
-                    />
-                  ) : (
-                    <div className="bg-slate-50 rounded-2xl px-5 py-4 font-semibold text-slate-700 text-sm border border-transparent">
-                      {client?.whatsapp_phone_number_id || 'Not configured'}
-                    </div>
-                  )}
-                </div>
-                <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">WABA ID (Business Account ID)</label>
-                  {isEditing ? (
-                    <input 
-                      value={editData.whatsapp_waba_id} 
-                      onChange={e => setEditData({...editData, whatsapp_waba_id: e.target.value})} 
-                      className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-4 outline-none focus:border-emerald-500 transition-all font-semibold text-sm" 
-                      placeholder="e.g. 1003621608783022"
-                    />
-                  ) : (
-                    <div className="bg-slate-50 rounded-2xl px-5 py-4 font-semibold text-slate-700 text-sm border border-transparent">
-                      {client?.whatsapp_waba_id || 'Not configured'}
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Access Token</label>
-                {isEditing ? (
-                  <textarea 
-                    value={editData.whatsapp_access_token} 
-                    onChange={e => setEditData({...editData, whatsapp_access_token: e.target.value})} 
-                    className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-4 outline-none focus:border-emerald-500 transition-all font-semibold text-sm h-24 resize-none" 
-                    placeholder="Enter your Meta Access Token here..."
-                  />
-                ) : (
-                  <div className="bg-slate-50 rounded-2xl px-5 py-4 font-mono text-slate-500 text-[10px] border border-transparent break-all line-clamp-2">
-                    {client?.whatsapp_access_token ? '••••••••••••••••••••••••••••••••' : 'Not configured'}
-                  </div>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Webhook Verify Token</label>
-                <div className="flex flex-col sm:flex-row gap-4">
-                  {isEditing ? (
-                    <input 
-                      value={editData.whatsapp_verify_token} 
-                      onChange={e => setEditData({...editData, whatsapp_verify_token: e.target.value})} 
-                      className="flex-1 bg-slate-50 border border-slate-100 rounded-2xl px-5 py-4 outline-none focus:border-emerald-500 transition-all font-semibold text-sm" 
-                      placeholder="e.g. my_secure_token_123"
-                    />
-                  ) : (
-                    <div className="flex-1 bg-slate-50 rounded-2xl px-5 py-4 font-semibold text-slate-700 text-sm border border-transparent">
-                      {client?.whatsapp_verify_token || 'Not configured'}
-                    </div>
-                  )}
-                  <button 
-                    onClick={() => {
-                      const token = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-                      setEditData({...editData, whatsapp_verify_token: token});
-                    }}
-                    disabled={!isEditing}
-                    className="px-6 py-4 bg-slate-100 text-slate-600 rounded-2xl text-[10px] font-bold uppercase tracking-widest hover:bg-slate-200 transition-all disabled:opacity-0"
-                  >
-                    Generate
-                  </button>
-                </div>
-                <p className="text-[10px] text-slate-400 italic ml-1 mt-2">Use this token when setting up the Webhook in Meta Developer Dashboard.</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Account Identity */}
-          <div className="space-y-1">
-            <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-4 ml-1">System Identity</h3>
-            <div className="flex items-center gap-4 p-5 bg-white border border-slate-100 rounded-3xl group">
-              <div className="w-12 h-12 rounded-2xl bg-slate-50 text-slate-400 flex items-center justify-center">
-                <Hash size={22} strokeWidth={2} />
-              </div>
-              <div>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Profile ID</p>
-                <p className="text-base font-semibold text-slate-700 tracking-tight italic">#KB-{client?.id || '0000'}</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Enterprise Features */}
-          <div className="space-y-1">
-            <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-4 ml-1">Enterprise Features</h3>
-            <div className="bg-white border border-slate-100 rounded-[24px] sm:rounded-[32px] p-4 sm:p-8 space-y-6 sm:space-y-8">
-              <div className="space-y-2">
-                <label className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1"><Key size={12}/> API Key</label>
-                <div className="flex flex-col sm:flex-row gap-4">
-                  {isEditing ? (
-                    <input 
-                      value={editData.api_key} 
-                      onChange={e => setEditData({...editData, api_key: e.target.value})} 
-                      className="flex-1 bg-slate-50 border border-slate-100 rounded-2xl px-5 py-4 outline-none focus:border-emerald-500 transition-all font-semibold text-sm" 
-                      placeholder="e.g. sk_live_xxxxxxxxxx"
-                    />
-                  ) : (
-                    <div className="flex-1 bg-slate-50 rounded-2xl px-5 py-4 font-mono text-slate-700 text-sm border border-transparent">
-                      {client?.api_key || 'No API Key generated'}
-                    </div>
-                  )}
-                  <button 
-                    onClick={() => {
-                      const uuid = crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-                      setEditData({...editData, api_key: 'ak_' + uuid.replace(/-/g, '')});
-                    }}
-                    disabled={!isEditing}
-                    className="px-6 py-4 bg-slate-100 text-slate-600 rounded-2xl text-[10px] font-bold uppercase tracking-widest hover:bg-slate-200 transition-all disabled:opacity-0"
-                  >
-                    Generate
-                  </button>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
-                <div className="space-y-2">
-                  <label className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1"><Paintbrush size={12}/> White-label Name</label>
-                  {isEditing ? (
-                    <input 
-                      value={editData.white_label_name} 
-                      onChange={e => setEditData({...editData, white_label_name: e.target.value})} 
-                      className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-4 outline-none focus:border-emerald-500 transition-all font-semibold text-sm" 
-                      placeholder="e.g. My Agency"
-                    />
-                  ) : (
-                    <div className="bg-slate-50 rounded-2xl px-5 py-4 font-semibold text-slate-700 text-sm border border-transparent">
-                      {client?.white_label_name || 'Not configured'}
-                    </div>
-                  )}
-                </div>
-                <div className="space-y-2">
-                  <label className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1"><Globe size={12}/> White-label Domain</label>
-                  {isEditing ? (
-                    <input 
-                      value={editData.white_label_domain} 
-                      onChange={e => setEditData({...editData, white_label_domain: e.target.value})} 
-                      className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-4 outline-none focus:border-emerald-500 transition-all font-semibold text-sm" 
-                      placeholder="e.g. app.myagency.com"
-                    />
-                  ) : (
-                    <div className="bg-slate-50 rounded-2xl px-5 py-4 font-semibold text-slate-700 text-sm border border-transparent">
-                      {client?.white_label_domain || 'Not configured'}
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Google Sheets Integration Section */}
-          <div className="space-y-1">
-            <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-4 ml-1">Integrations & Sync</h3>
-            <div className="bg-white border border-slate-100 rounded-[24px] sm:rounded-[32px] p-4 sm:p-8 space-y-6 sm:space-y-8">
-              <div className="flex items-center justify-between p-1">
-                <div>
-                  <h4 className="text-sm font-bold text-slate-900">Google Sheets Sync</h4>
-                  <p className="text-[10px] text-slate-400 italic mt-0.5">Automatically sync newly captured leads to a Google Spreadsheet.</p>
-                </div>
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input 
-                    type="checkbox" 
-                    checked={editData.google_sheets_enabled}
-                    disabled={!isEditing}
-                    onChange={e => setEditData({...editData, google_sheets_enabled: e.target.checked})}
-                    className="sr-only peer"
-                  />
-                  <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
-                </label>
-              </div>
-
-              {editData.google_sheets_enabled && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 pt-2">
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Spreadsheet ID</label>
-                    {isEditing ? (
-                      <input 
-                        value={editData.google_spreadsheet_id} 
-                        onChange={e => setEditData({...editData, google_spreadsheet_id: e.target.value})} 
-                        className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-4 outline-none focus:border-emerald-500 transition-all font-semibold text-sm" 
-                        placeholder="e.g. 1a2b3c4d5e6f7g8h9i0j..."
-                      />
-                    ) : (
-                      <div className="bg-slate-50 rounded-2xl px-5 py-4 font-semibold text-slate-700 text-sm border border-transparent truncate">
-                        {editData.google_spreadsheet_id || 'Not configured'}
-                      </div>
-                    )}
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Google OAuth Access Token</label>
-                    {isEditing ? (
-                      <input 
-                        type="password"
-                        value={editData.google_access_token} 
-                        onChange={e => setEditData({...editData, google_access_token: e.target.value})} 
-                        className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-4 outline-none focus:border-emerald-500 transition-all font-semibold text-sm" 
-                        placeholder="Paste your access token..."
-                      />
-                    ) : (
-                      <div className="bg-slate-50 rounded-2xl px-5 py-4 font-semibold text-slate-500 text-sm border border-transparent truncate">
-                        {editData.google_access_token ? '••••••••••••••••••••••••••••••••' : 'Not configured'}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Subscription & Billing Section */}
-          <div className="space-y-4">
-            <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] ml-1">Plan & Billing</h3>
-            
-            {/* Active Plan Card */}
-            <div className="bg-gradient-to-br from-slate-900 via-[#111827] to-slate-900 border border-slate-800 text-white rounded-[24px] sm:rounded-[32px] p-6 sm:p-8 relative overflow-hidden shadow-xl">
-              <div className="absolute top-0 right-0 w-64 h-64 bg-[#10B981]/10 rounded-full blur-3xl pointer-events-none" />
-              
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
-                <div className="space-y-2">
-                  <div className="flex items-center gap-3">
-                    <span className="px-3 py-1 bg-[#10B981]/20 border border-[#10B981]/40 text-[#10B981] text-[10px] font-bold uppercase tracking-widest rounded-full">
-                      Current Active Plan
-                    </span>
-                    <span className="text-xs text-slate-400">Cashfree Billing</span>
-                  </div>
-                  <h4 className="text-3xl font-extrabold text-white tracking-tight capitalize">
-                    {client?.plan || 'Free'} Plan
-                  </h4>
-                  <p className="text-xs text-slate-400 max-w-md">
-                    Full access to automated messaging, WhatsApp Meta API, and AI integrations for your business.
-                  </p>
-                </div>
-
-                <div className="flex flex-wrap items-center gap-3">
-                  <button
-                    onClick={() => setSelectedPlanModal('STARTER')}
-                    className="px-5 py-3 bg-white/10 hover:bg-white/20 text-white text-xs font-bold rounded-2xl transition-all cursor-pointer border border-white/10"
-                  >
-                    Starter (₹3,999)
-                  </button>
-                  <button
-                    onClick={() => setSelectedPlanModal('GROWTH')}
-                    className="px-5 py-3 bg-[#10B981] hover:bg-[#059669] text-black font-bold text-xs rounded-2xl transition-all cursor-pointer shadow-[0_0_20px_rgba(16,185,129,0.3)] flex items-center gap-1.5"
-                  >
-                    <Sparkles size={14} /> Upgrade to Growth
-                  </button>
-                  <button
-                    onClick={() => setSelectedPlanModal('ENTERPRISE')}
-                    className="px-5 py-3 bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold rounded-2xl transition-all cursor-pointer border border-slate-700"
-                  >
-                    Enterprise
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* Payment History Table */}
-            <div className="bg-white border border-slate-100 rounded-[24px] sm:rounded-[32px] p-6 space-y-4">
-              <div className="flex items-center justify-between">
-                <h4 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                  <CreditCard size={16} className="text-emerald-600" /> Payment & Order History
-                </h4>
-                <span className="text-xs text-slate-400 font-medium">{paymentOrders.length} transactions</span>
-              </div>
-
-              {paymentOrders.length === 0 ? (
-                <div className="text-center py-8 bg-slate-50 rounded-2xl border border-slate-100">
-                  <p className="text-xs text-slate-400 font-medium italic">No past Cashfree payment transactions found.</p>
-                </div>
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs">
-                    <thead>
-                      <tr className="border-b border-slate-100 text-slate-400 font-bold uppercase tracking-wider text-[10px]">
-                        <th className="pb-3">Order ID</th>
-                        <th className="pb-3">Plan</th>
-                        <th className="pb-3">Cycle</th>
-                        <th className="pb-3">Amount</th>
-                        <th className="pb-3">Date</th>
-                        <th className="pb-3 text-right">Status</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100">
-                      {paymentOrders.map((order) => (
-                        <tr key={order.id} className="hover:bg-slate-50/50 transition-colors">
-                          <td className="py-3 font-mono font-medium text-slate-700">{order.order_id}</td>
-                          <td className="py-3 font-bold text-slate-900">{order.plan}</td>
-                          <td className="py-3 text-slate-500 capitalize">{order.billing_cycle?.toLowerCase()}</td>
-                          <td className="py-3 font-bold text-emerald-600">₹{parseFloat(order.amount).toLocaleString('en-IN')}</td>
-                          <td className="py-3 text-slate-400">{new Date(order.created_at).toLocaleDateString()}</td>
-                          <td className="py-3 text-right">
-                            <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                              order.status === 'PAID' ? 'bg-emerald-100 text-emerald-700' :
-                              order.status === 'PENDING' ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700'
-                            }`}>
-                              {order.status}
-                            </span>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </div>
-          </div>
-
-
-          {/* Security Actions */}
-          <div className="space-y-1">
-            <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-4 ml-1">Security & Access</h3>
+          {/* ── 3. Security & Access ── */}
+          <div className="space-y-2">
+            <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] ml-1">Security & Access</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <button onClick={() => setIsPasswordModalOpen(true)} className="flex items-center gap-4 p-5 bg-white border border-slate-100 rounded-3xl hover:border-emerald-100 transition-all group text-left">
-                <div className="w-10 h-10 rounded-xl bg-slate-50 text-slate-400 flex items-center justify-center transition-colors group-hover:bg-emerald-600 group-hover:text-white shrink-0">
+              <button 
+                onClick={() => setIsPasswordModalOpen(true)} 
+                className="flex items-center gap-4 p-5 bg-white border border-slate-200/80 rounded-3xl hover:border-emerald-300 transition-all group text-left shadow-2xs cursor-pointer"
+              >
+                <div className="w-10 h-10 rounded-xl bg-slate-50 text-slate-600 flex items-center justify-center transition-colors group-hover:bg-emerald-600 group-hover:text-white shrink-0">
                   <Lock size={18} strokeWidth={2} />
                 </div>
-                <span className="text-sm font-semibold text-slate-900">Change Password</span>
+                <div>
+                  <span className="text-xs font-bold text-slate-900 block">Change Account Password</span>
+                  <span className="text-[10px] text-slate-400">Update your login security credentials</span>
+                </div>
               </button>
+
               <button 
                 onClick={() => { localStorage.removeItem('token'); localStorage.removeItem('user'); window.location.href = '/auth/login'; }}
-                className="flex items-center gap-4 p-5 bg-white border border-slate-100 rounded-3xl hover:border-red-100 transition-all group text-left"
+                className="flex items-center gap-4 p-5 bg-white border border-slate-200/80 rounded-3xl hover:border-rose-300 transition-all group text-left shadow-2xs cursor-pointer"
               >
-                <div className="w-10 h-10 rounded-xl bg-red-50 text-red-500 flex items-center justify-center transition-colors group-hover:bg-red-600 group-hover:text-white shrink-0">
+                <div className="w-10 h-10 rounded-xl bg-rose-50 text-rose-500 flex items-center justify-center transition-colors group-hover:bg-rose-600 group-hover:text-white shrink-0">
                   <LogOut size={18} strokeWidth={2} />
                 </div>
-                <span className="text-sm font-semibold text-slate-900">Sign Out Account</span>
+                <div>
+                  <span className="text-xs font-bold text-slate-900 block">Sign Out</span>
+                  <span className="text-[10px] text-slate-400">Securely sign out of your current session</span>
+                </div>
               </button>
             </div>
           </div>
