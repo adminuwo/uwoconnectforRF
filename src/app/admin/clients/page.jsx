@@ -662,25 +662,22 @@ function AdminClientsContent() {
                             <div className="flex items-center gap-3.5 group">
                               <button 
                                 onClick={() => handleViewProfile(client)}
-                                className="w-10 h-10 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 flex items-center justify-center font-extrabold text-sm uppercase border border-emerald-100 group-hover:scale-105 transition-all shadow-2xs cursor-pointer"
-                                title="Click to view full profile & credentials"
+                                className="w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center font-extrabold text-sm uppercase border border-slate-200/80 group-hover:scale-105 transition-all shadow-2xs cursor-pointer"
+                                title="Click to view profile & credentials"
                               >
                                 {client.business_name?.charAt(0) || 'C'}
                               </button>
                               <div>
                                 <button 
                                   onClick={() => handleViewProfile(client)}
-                                  className="font-bold text-slate-900 hover:text-emerald-700 transition-colors text-sm text-left cursor-pointer flex items-center gap-1.5"
+                                  className="font-bold text-slate-900 hover:text-emerald-700 transition-colors text-sm text-left cursor-pointer block"
                                 >
-                                  <span>{client.business_name}</span>
-                                  <span className="text-[10px] text-emerald-600 font-mono bg-emerald-50 px-1 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity">
-                                    ID: {client.id?.slice(-5)}
-                                  </span>
+                                  {client.business_name}
                                 </button>
                                 <div className="text-xs text-slate-400 flex items-center gap-2 mt-0.5">
                                   <span className="text-slate-600 font-medium">{client.client_name || client.email}</span>
                                   <span>•</span>
-                                  <span className="uppercase text-[10px] font-bold text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded">{client.plan}</span>
+                                  <span className="uppercase text-[10px] font-bold text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200/60">{client.plan}</span>
                                   {client.phone_number && (
                                     <>
                                       <span>•</span>
@@ -746,10 +743,10 @@ function AdminClientsContent() {
                           <td className="py-4 px-6 whitespace-nowrap text-right sticky right-0 bg-white border-l border-slate-100 z-10">
                             <button
                               onClick={() => handleViewProfile(client)}
-                              className="inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200/80 rounded-xl font-bold text-xs shadow-2xs transition-all hover:scale-[1.02] cursor-pointer group"
+                              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 border border-slate-200 rounded-xl font-bold text-xs shadow-2xs transition-all hover:scale-[1.01] cursor-pointer group"
                               title="View and manage client ID, password & profile"
                             >
-                              <Eye size={14} className="text-emerald-600 group-hover:text-emerald-700 transition-colors" />
+                              <Eye size={14} className="text-slate-500 group-hover:text-slate-800 transition-colors" />
                               <span>View Profile</span>
                             </button>
                           </td>
