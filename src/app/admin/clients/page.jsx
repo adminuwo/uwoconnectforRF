@@ -19,7 +19,7 @@ import { ClientHealthBadge, AdminAddTeamMemberModal, AdminAssignProjectModal } f
 import { cn } from '@/lib/utils';
 import { API_BASE_URL } from '@/config/apiConfig';
 
-export default function AdminClients() {
+function AdminClientsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -1274,5 +1274,22 @@ export default function AdminClients() {
 
       </div>
     </DashboardLayout>
+  );
+}
+
+export default function AdminClients() {
+  return (
+    <React.Suspense fallback={
+      <DashboardLayout role="ADMIN">
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="flex flex-col items-center gap-3">
+            <Loader2 className="w-8 h-8 animate-spin text-emerald-600" />
+            <p className="text-xs text-slate-500 font-semibold">Loading Client Directory...</p>
+          </div>
+        </div>
+      </DashboardLayout>
+    }>
+      <AdminClientsContent />
+    </React.Suspense>
   );
 }
