@@ -80,6 +80,44 @@ const ClientSettingsPage = () => {
     }
   };
 
+  const compressImage = (file, maxWidth = 400, maxHeight = 400, quality = 0.85) => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        img.src = e.target.result;
+      };
+      reader.onerror = reject;
+      img.onload = () => {
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > maxWidth) {
+            height = Math.round((height * maxWidth) / width);
+            width = maxWidth;
+          }
+        } else {
+          if (height > maxHeight) {
+            width = Math.round((width * maxHeight) / height);
+            height = maxHeight;
+          }
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        const mimeType = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
+        const dataUrl = canvas.toDataURL(mimeType, quality);
+        resolve(dataUrl);
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
   const handleLogoUpload = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -90,39 +128,37 @@ const ClientSettingsPage = () => {
       return;
     }
 
-    if (file.size > 3 * 1024 * 1024) {
-      alert("File size exceeds 3MB. Please select a smaller logo file.");
+    if (file.size > 5 * 1024 * 1024) {
+      alert("File size exceeds 5MB. Please select a smaller logo file.");
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = async (uploadEvent) => {
-      const logoDataUrl = uploadEvent.target.result;
+    try {
+      setLogoSaving(true);
+      const compressedLogoDataUrl = await compressImage(file, 400, 400, 0.85);
+
       setEditData((prev) => ({
         ...prev,
-        company_logo_url: logoDataUrl
+        company_logo_url: compressedLogoDataUrl
       }));
 
-      // Immediate auto-save so user doesn't have to enter edit mode first
-      try {
-        setLogoSaving(true);
-        const token = localStorage.getItem('token');
-        await axios.patch(`${API_BASE_URL}/api/profile`, {
-          company_logo_url: logoDataUrl
-        }, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        setClient(prev => prev ? { ...prev, company_logo_url: logoDataUrl } : prev);
-        setLogoSuccessMessage("Logo saved successfully!");
-        setTimeout(() => setLogoSuccessMessage(null), 3500);
-      } catch (err) {
-        console.error("Failed to auto-save logo", err);
-        alert("Failed to save logo. Please try again.");
-      } finally {
-        setLogoSaving(false);
-      }
-    };
-    reader.readAsDataURL(file);
+      // Immediate auto-save to backend
+      const token = localStorage.getItem('token');
+      await axios.patch(`${API_BASE_URL}/api/profile`, {
+        company_logo_url: compressedLogoDataUrl
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      setClient(prev => prev ? { ...prev, company_logo_url: compressedLogoDataUrl } : prev);
+      setLogoSuccessMessage("Logo saved successfully!");
+      setTimeout(() => setLogoSuccessMessage(null), 3500);
+    } catch (err) {
+      console.error("Failed to process or save logo", err);
+      alert(err.response?.data?.message || err.response?.data?.error || "Failed to save logo. Please try again.");
+    } finally {
+      setLogoSaving(false);
+    }
   };
 
   const handleRemoveLogo = async () => {

@@ -219,27 +219,55 @@ function AdminClientsContent() {
   };
 
   // Upload or Change Logo from Admin Profile Modal
-  const handleAdminLogoUpload = (e) => {
-    const file = e.target.files[0];
+  const handleAdminLogoUpload = async (e) => {
+    const file = e.target.files?.[0];
     if (!file) return;
     const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
     if (!allowedTypes.includes(file.type.toLowerCase())) {
       showToast("Invalid image format. PNG, JPG, WEBP allowed.", "error");
       return;
     }
-    if (file.size > 3 * 1024 * 1024) {
-      showToast("Logo size exceeds 3MB.", "error");
+    if (file.size > 5 * 1024 * 1024) {
+      showToast("Logo size exceeds 5MB.", "error");
       return;
     }
-    const reader = new FileReader();
-    reader.onload = (uploadEvent) => {
-      setProfileFormState(prev => ({
-        ...prev,
-        company_logo_url: uploadEvent.target.result
-      }));
-      showToast("Logo loaded! Click 'Save Changes' to apply.", "success");
-    };
-    reader.readAsDataURL(file);
+    try {
+      const img = new Image();
+      const reader = new FileReader();
+      reader.onload = (uploadEvent) => {
+        img.src = uploadEvent.target.result;
+      };
+      img.onload = () => {
+        let width = img.width;
+        let height = img.height;
+        const maxDim = 400;
+        if (width > height) {
+          if (width > maxDim) {
+            height = Math.round((height * maxDim) / width);
+            width = maxDim;
+          }
+        } else {
+          if (height > maxDim) {
+            width = Math.round((width * maxDim) / height);
+            height = maxDim;
+          }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        const dataUrl = canvas.toDataURL(file.type === 'image/png' ? 'image/png' : 'image/jpeg', 0.85);
+        setProfileFormState(prev => ({
+          ...prev,
+          company_logo_url: dataUrl
+        }));
+        showToast("Logo loaded! Click 'Save Changes' to apply.", "success");
+      };
+      reader.readAsDataURL(file);
+    } catch (err) {
+      showToast("Failed to process image.", "error");
+    }
   };
 
   // Generate strong random temporary password
