@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { User, Mail, Phone, Hash, CreditCard, Lock, Settings, Loader2, ShieldCheck, LogOut, MapPin, Key, Globe, Paintbrush, Sparkles, Calendar, ArrowUpRight, Upload, Trash2, Check } from 'lucide-react';
+import { User, Mail, Phone, Lock, Loader2, ShieldCheck, LogOut, MapPin, Sparkles, ArrowUpRight, Upload, Trash2, Check, Building2, CheckCircle2, Camera } from 'lucide-react';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import axios from 'axios';
 import { useTour } from '@/context/TourContext';
@@ -27,16 +27,9 @@ const ClientSettingsPage = () => {
     name: '', 
     phone_number: '',
     address: '',
-    whatsapp_access_token: '',
-    whatsapp_phone_number_id: '',
-    whatsapp_waba_id: '',
-    whatsapp_verify_token: '',
-    api_key: '',
-    white_label_name: '',
-    white_label_domain: '',
-    google_sheets_enabled: false,
-    google_spreadsheet_id: '',
-    google_access_token: ''
+    business_name: '',
+    tax_id_gstin: '',
+    company_logo_url: ''
   });
   
   const user = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('user') || '{}') : {};
@@ -50,28 +43,13 @@ const ClientSettingsPage = () => {
       });
       setClient(res.data.client);
       
-      const clientSettings = res.data.client.settings || {};
-      const sheetsConfig = clientSettings.google_sheets || {};
-      
       setEditData({
-        name: res.data.user.name,
+        name: res.data.user.name || res.data.user.first_name || '',
         business_name: res.data.client.business_name || '',
         phone_number: res.data.client.phone_number || '',
         address: res.data.client.address || '',
         company_logo_url: res.data.client.company_logo_url || '',
-        tax_id_gstin: res.data.client.tax_id_gstin || '',
-        invoice_prefix: res.data.client.invoice_prefix || 'INV',
-        website: res.data.client.website || '',
-        whatsapp_access_token: res.data.client.whatsapp_access_token || '',
-        whatsapp_phone_number_id: res.data.client.whatsapp_phone_number_id || '',
-        whatsapp_waba_id: res.data.client.whatsapp_waba_id || '',
-        whatsapp_verify_token: res.data.client.whatsapp_verify_token || '',
-        api_key: res.data.client.api_key || '',
-        white_label_name: res.data.client.white_label_name || '',
-        white_label_domain: res.data.client.white_label_domain || '',
-        google_sheets_enabled: sheetsConfig.enabled || false,
-        google_spreadsheet_id: sheetsConfig.spreadsheet_id || '',
-        google_access_token: sheetsConfig.access_token || ''
+        tax_id_gstin: res.data.client.tax_id_gstin || ''
       });
     } catch (err) {
       console.error('Failed to fetch profile');
@@ -201,46 +179,18 @@ const ClientSettingsPage = () => {
     fetchPaymentHistory();
   }, []);
 
-  useEffect(() => {
-    const code = searchParams.get('code');
-    if (code) {
-      const processWhatsAppCode = async () => {
-        try {
-          const token = localStorage.getItem('token');
-          await axios.post(`${API_BASE_URL}/api/auth/whatsapp/embedded-signup`, { code }, {
-            headers: { Authorization: `Bearer ${token}` }
-          });
-          alert("WhatsApp Embedded Signup successful!");
-          fetchProfile();
-          // Optional: clear the code from the URL
-          window.history.replaceState({}, document.title, window.location.pathname);
-        } catch (err) {
-          console.error('Failed to process WhatsApp code', err);
-          alert("Failed to complete WhatsApp signup. Check console for details.");
-        }
-      };
-      processWhatsAppCode();
-    }
-  }, [searchParams]);
-
   const handleUpdate = async () => {
     try {
       setIsSaving(true);
       const token = localStorage.getItem('token');
-      
-      // Build client settings payload matching backend structure
-      const updatedSettings = {
-        ...(client?.settings || {}),
-        google_sheets: {
-          enabled: editData.google_sheets_enabled,
-          spreadsheet_id: editData.google_spreadsheet_id,
-          access_token: editData.google_access_token
-        }
-      };
 
       const payload = {
-        ...editData,
-        settings: updatedSettings
+        name: editData.name,
+        business_name: editData.business_name,
+        phone_number: editData.phone_number,
+        address: editData.address,
+        tax_id_gstin: editData.tax_id_gstin,
+        company_logo_url: editData.company_logo_url
       };
 
       await axios.patch(`${API_BASE_URL}/api/profile`, payload, {
@@ -248,6 +198,8 @@ const ClientSettingsPage = () => {
       });
       setIsEditing(false);
       fetchProfile();
+      setLogoSuccessMessage("Profile updated successfully!");
+      setTimeout(() => setLogoSuccessMessage(null), 3500);
     } catch (err) {
       alert('Failed to update profile');
     } finally {
@@ -255,319 +207,391 @@ const ClientSettingsPage = () => {
     }
   };
 
-  if (loading) return <DashboardLayout role="CLIENT"><div className="flex justify-center py-24"><Loader2 className="animate-spin text-emerald-600" /></div></DashboardLayout>;
+  if (loading) return (
+    <DashboardLayout role="CLIENT">
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-3">
+        <Loader2 className="w-8 h-8 animate-spin text-emerald-600" />
+        <p className="text-xs font-semibold text-slate-500">Loading Account Settings...</p>
+      </div>
+    </DashboardLayout>
+  );
 
   return (
     <DashboardLayout role="CLIENT">
-      <div className="max-w-7xl mx-auto w-full p-4 sm:p-6 pb-20">
-        <div className="mb-8 flex items-center justify-between flex-wrap gap-4">
+      <div className="max-w-6xl mx-auto w-full p-4 sm:p-8 pb-24 space-y-8 animate-in fade-in duration-300">
+        
+        {/* ── 1. Modern Page Header ── */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white border border-slate-200/80 rounded-3xl p-6 sm:p-8 shadow-2xs">
           <div>
-            <h1 className="text-3xl font-bold text-slate-900 tracking-tight mb-2">Account Settings</h1>
-            <p className="text-slate-500 font-medium italic">Manage your profile, integration and security.</p>
+            <div className="flex items-center gap-2.5 mb-1.5 flex-wrap">
+              <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200">
+                Workspace Profile
+              </span>
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-slate-100 text-slate-700 border border-slate-200">
+                {client?.plan || 'FREE'} PLAN
+              </span>
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+              Account Profile & Settings
+            </h1>
+            <p className="text-xs sm:text-sm text-slate-500 font-medium mt-1">
+              Manage your company branding, profile details, and account security.
+            </p>
           </div>
-          <div className="flex items-center gap-3 flex-wrap w-full sm:w-auto">
-            {/* View Complete Guide Button */}
-            <button
-              onClick={() => setIsGuideOpen(true)}
-              className="flex items-center justify-center gap-2 px-5 py-3 bg-slate-900 text-white rounded-2xl font-bold text-xs hover:bg-black transition-all shadow-md flex-1 sm:flex-initial text-center cursor-pointer"
-              title="Open step-by-step documentation guide for Settings"
-            >
-              <Sparkles size={15} className="text-emerald-400" />
-              View Complete Guide
-            </button>
-            {/* Restart Product Tour button */}
-            <button
-              onClick={resetTour}
-              className="flex items-center justify-center gap-2 px-5 py-3 bg-white border-2 border-emerald-200 text-emerald-700 rounded-2xl font-bold text-xs hover:bg-emerald-50 hover:border-emerald-400 transition-all shadow-sm group flex-1 sm:flex-initial text-center cursor-pointer"
-              title="Replay the guided product tour"
-            >
-              <MapPin size={15} className="group-hover:animate-bounce" />
-              Restart Tour
-            </button>
+
+          <div className="flex items-center gap-3 flex-wrap">
             {!isEditing ? (
-              <button onClick={() => setIsEditing(true)} className="px-6 py-3 bg-emerald-600 text-white rounded-2xl font-bold text-xs hover:bg-emerald-700 transition-all shadow-xl shadow-emerald-100 flex-1 sm:flex-initial text-center cursor-pointer">
-                Edit Settings
+              <button 
+                onClick={() => setIsEditing(true)} 
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs shadow-md shadow-emerald-600/20 transition-all cursor-pointer"
+              >
+                <Sparkles size={14} />
+                <span>Edit Profile</span>
               </button>
             ) : (
-              <div className="flex items-center gap-3 flex-1 sm:flex-initial w-full sm:w-auto">
-                <button onClick={() => setIsEditing(false)} className="px-6 py-3 bg-slate-100 text-slate-600 rounded-2xl font-bold text-xs hover:bg-slate-200 transition-all flex-1 text-center">
+              <div className="flex items-center gap-2.5">
+                <button 
+                  onClick={() => { setIsEditing(false); fetchProfile(); }} 
+                  className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold text-xs transition-all cursor-pointer"
+                >
                   Cancel
                 </button>
-                <button onClick={handleUpdate} disabled={isSaving} className="px-6 py-3 bg-emerald-600 text-white rounded-2xl font-bold text-xs hover:bg-emerald-700 transition-all shadow-xl shadow-emerald-100 disabled:opacity-50 flex items-center justify-center gap-2 flex-1 text-center">
-                  {isSaving ? <Loader2 size={16} className="animate-spin" /> : 'Save'}
+                <button 
+                  onClick={handleUpdate} 
+                  disabled={isSaving} 
+                  className="inline-flex items-center gap-1.5 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs shadow-md shadow-emerald-600/20 transition-all disabled:opacity-50 cursor-pointer"
+                >
+                  {isSaving ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
+                  <span>Save Changes</span>
                 </button>
               </div>
             )}
           </div>
         </div>
 
-        <div className="space-y-8">
-          {/* ── 1. Company Branding & Business Details ── */}
-          <div className="space-y-2">
-            <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] ml-1">Company & Brand Information</h3>
-            <div className="bg-white border border-slate-200/80 rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xs">
-              
-              {/* Logo Upload & Preview (Always Active 1-Click Upload) */}
-              <div className="flex flex-col sm:flex-row items-center gap-6 border-b border-slate-100 pb-6">
-                <label className="relative group cursor-pointer shrink-0">
-                  <div className="w-24 h-24 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-center overflow-hidden p-2 group-hover:border-emerald-500 group-hover:shadow-md transition-all shadow-2xs">
-                    {(editData.company_logo_url || client?.company_logo_url) ? (
-                      <img 
-                        src={editData.company_logo_url || client?.company_logo_url} 
-                        alt="Company Logo" 
-                        className="w-full h-full object-contain" 
-                      />
-                    ) : (
-                      <div className="text-center text-slate-400 group-hover:text-emerald-600 transition-colors">
-                        <Upload size={22} className="mx-auto mb-1 text-slate-400 group-hover:text-emerald-600 transition-colors" />
-                        <span className="text-[9px] font-bold uppercase tracking-wider block">Upload</span>
-                      </div>
-                    )}
-                    {logoSaving && (
-                      <div className="absolute inset-0 bg-white/80 backdrop-blur-xs flex items-center justify-center rounded-2xl">
-                        <Loader2 size={22} className="animate-spin text-emerald-600" />
-                      </div>
-                    )}
-                  </div>
-                  <input 
-                    type="file" 
-                    accept="image/png, image/jpeg, image/jpg, image/webp" 
-                    onChange={handleLogoUpload} 
-                    disabled={logoSaving}
-                    className="hidden" 
-                  />
-                </label>
-
-                <div className="space-y-2 flex-1 text-center sm:text-left">
-                  <div className="flex items-center justify-center sm:justify-start gap-2 flex-wrap">
-                    <h4 className="text-base font-bold text-slate-900">Company Logo</h4>
-                    {logoSuccessMessage && (
-                      <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full animate-in fade-in">
-                        ✓ {logoSuccessMessage}
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-xs text-slate-500 font-medium leading-relaxed">
-                    Appears on all Proposals, Quotations, Invoices, and Admin Dashboard. Supported: PNG, JPG, WEBP (Max 5MB).
-                  </p>
-                  
-                  {/* Always Visible Upload & Remove Buttons */}
-                  <div className="flex items-center justify-center sm:justify-start gap-2.5 pt-1 flex-wrap">
-                    <label className="inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold cursor-pointer transition shadow-md shadow-emerald-600/20">
-                      {logoSaving ? <Loader2 size={13} className="animate-spin" /> : <Upload size={13} />}
-                      <span>{(editData.company_logo_url || client?.company_logo_url) ? 'Change Logo' : 'Upload Logo'}</span>
-                      <input 
-                        type="file" 
-                        accept="image/png, image/jpeg, image/jpg, image/webp" 
-                        onChange={handleLogoUpload} 
-                        disabled={logoSaving}
-                        className="hidden" 
-                      />
-                    </label>
-
-                    {(editData.company_logo_url || client?.company_logo_url) && (
-                      <button
-                        type="button"
-                        onClick={handleRemoveLogo}
-                        disabled={logoSaving}
-                        className="inline-flex items-center gap-1 px-3.5 py-2 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-xl text-xs font-bold transition cursor-pointer border border-rose-200/80 disabled:opacity-50"
-                      >
-                        <Trash2 size={13} />
-                        <span>Remove</span>
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Company Fields: Business Name, GST (Optional), Plan */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-                {/* 1. Company Name */}
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Company / Business Name</label>
-                  {isEditing ? (
-                    <input 
-                      value={editData.business_name} 
-                      onChange={e => setEditData({...editData, business_name: e.target.value})} 
-                      placeholder="e.g. Unified Web Options"
-                      className="w-full bg-slate-50 border border-slate-200/80 rounded-2xl px-4 py-3 outline-none focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 font-semibold text-xs transition-all" 
+        {/* ── 2. Hero Company Brand Card ── */}
+        <div className="bg-gradient-to-br from-white via-white to-emerald-50/30 border border-slate-200/80 rounded-3xl p-6 sm:p-8 shadow-2xs">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+            
+            {/* Logo Section with 1-Click Upload */}
+            <div className="flex items-center gap-5">
+              <label className="relative group cursor-pointer shrink-0">
+                <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-3xl bg-slate-50 border-2 border-dashed border-slate-200 group-hover:border-emerald-500 group-hover:shadow-lg transition-all flex items-center justify-center overflow-hidden p-2.5 shadow-2xs relative">
+                  {(editData.company_logo_url || client?.company_logo_url) ? (
+                    <img 
+                      src={editData.company_logo_url || client?.company_logo_url} 
+                      alt="Company Logo" 
+                      className="w-full h-full object-contain" 
                     />
                   ) : (
-                    <div className="bg-slate-50 border border-slate-100 rounded-2xl px-4 py-3 font-semibold text-slate-900 text-xs">
-                      {client?.business_name || 'Not Configured'}
+                    <div className="text-center text-slate-400 group-hover:text-emerald-600 transition-colors">
+                      <Camera size={26} className="mx-auto mb-1 text-slate-400 group-hover:text-emerald-600 transition-colors" />
+                      <span className="text-[10px] font-bold uppercase tracking-wider block">Add Logo</span>
+                    </div>
+                  )}
+
+                  {/* Hover upload overlay */}
+                  <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-2xs opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white text-[10px] font-bold">
+                    <Upload size={18} className="mb-0.5" />
+                    <span>Upload</span>
+                  </div>
+
+                  {logoSaving && (
+                    <div className="absolute inset-0 bg-white/90 backdrop-blur-xs flex items-center justify-center">
+                      <Loader2 size={24} className="animate-spin text-emerald-600" />
                     </div>
                   )}
                 </div>
 
-                {/* 2. GSTIN / Tax ID (Optional) */}
-                <div className="space-y-1.5">
-                  <div className="flex items-center justify-between ml-1">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">GSTIN / Tax ID</label>
-                    <span className="text-[9px] font-bold text-slate-400 uppercase bg-slate-100 px-1.5 py-0.5 rounded">Optional</span>
-                  </div>
-                  {isEditing ? (
-                    <input 
-                      value={editData.tax_id_gstin} 
-                      onChange={e => setEditData({...editData, tax_id_gstin: e.target.value})} 
-                      className="w-full bg-slate-50 border border-slate-200/80 rounded-2xl px-4 py-3 outline-none focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 font-semibold text-xs font-mono transition-all" 
-                      placeholder="e.g. 07AAAAA0000A1Z5 (Optional)"
-                    />
-                  ) : (
-                    <div className="bg-slate-50 border border-slate-100 rounded-2xl px-4 py-3 font-semibold text-slate-900 text-xs font-mono">
-                      {client?.tax_id_gstin || 'Not Configured (Optional)'}
-                    </div>
+                <input 
+                  type="file" 
+                  accept="image/png, image/jpeg, image/jpg, image/webp" 
+                  onChange={handleLogoUpload} 
+                  disabled={logoSaving}
+                  className="hidden" 
+                />
+              </label>
+
+              <div className="space-y-1.5">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h3 className="text-lg sm:text-xl font-extrabold text-slate-900 tracking-tight">
+                    {client?.business_name || editData.business_name || 'Your Company Name'}
+                  </h3>
+                  {logoSuccessMessage && (
+                    <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full animate-in fade-in">
+                      ✓ {logoSuccessMessage}
+                    </span>
                   )}
                 </div>
-
-                {/* 3. Subscription Plan */}
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Active Plan</label>
-                  <div className="bg-slate-50 border border-slate-100 rounded-2xl px-4 py-2.5 flex items-center justify-between">
-                    <div>
-                      <span className="text-xs font-extrabold text-slate-900 uppercase tracking-tight">
-                        {client?.plan || 'Free'} Tier
-                      </span>
-                      <span className="text-[10px] text-emerald-600 font-bold block">Active</span>
-                    </div>
+                <p className="text-xs text-slate-500 max-w-md leading-relaxed">
+                  Upload your brand logo (PNG, JPG, WEBP). It will be featured across your workspace, invoices, and proposals.
+                </p>
+                <div className="flex items-center gap-2 pt-1">
+                  <label className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-bold cursor-pointer transition shadow-2xs">
+                    <Upload size={13} className="text-emerald-600" />
+                    <span>{(editData.company_logo_url || client?.company_logo_url) ? 'Change Logo' : 'Upload Logo'}</span>
+                    <input 
+                      type="file" 
+                      accept="image/png, image/jpeg, image/jpg, image/webp" 
+                      onChange={handleLogoUpload} 
+                      disabled={logoSaving}
+                      className="hidden" 
+                    />
+                  </label>
+                  {(editData.company_logo_url || client?.company_logo_url) && (
                     <button
                       type="button"
-                      onClick={() => setSelectedPlanModal('GROWTH')}
-                      className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-[11px] transition-all shadow-xs cursor-pointer"
+                      onClick={handleRemoveLogo}
+                      disabled={logoSaving}
+                      className="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-xl text-xs font-bold transition cursor-pointer border border-rose-200/60"
                     >
-                      Upgrade
+                      Remove
                     </button>
-                  </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Plan Tier Highlight Card */}
+            <div className="w-full md:w-auto bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-2xs flex items-center justify-between gap-5">
+              <div>
+                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Subscription Plan</div>
+                <div className="text-base font-extrabold text-slate-900 uppercase mt-0.5">
+                  {client?.plan || 'Free'} Tier
+                </div>
+                <div className="text-[10px] text-emerald-600 font-bold flex items-center gap-1 mt-0.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                  <span>Active & Verified</span>
                 </div>
               </div>
 
+              <button
+                type="button"
+                onClick={() => setSelectedPlanModal('GROWTH')}
+                className="px-4 py-2 bg-slate-900 hover:bg-black text-white rounded-xl text-xs font-bold transition-all shadow-md cursor-pointer whitespace-nowrap"
+              >
+                Upgrade Plan
+              </button>
+            </div>
+
+          </div>
+        </div>
+
+        {/* ── 3. Profile Information Grid ── */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          
+          {/* Card 1: Company Identity */}
+          <div className="bg-white border border-slate-200/80 rounded-3xl p-6 sm:p-7 space-y-5 shadow-2xs">
+            <div className="flex items-center gap-2.5 pb-3 border-b border-slate-100">
+              <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center font-bold">
+                <Building2 size={16} />
+              </div>
+              <div>
+                <h2 className="text-sm font-bold text-slate-900">Company Identity</h2>
+                <p className="text-[11px] text-slate-400">Official business registration details</p>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              {/* Company Name */}
+              <div>
+                <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  Company / Business Name
+                </label>
+                {isEditing ? (
+                  <input
+                    type="text"
+                    value={editData.business_name}
+                    onChange={(e) => setEditData({ ...editData, business_name: e.target.value })}
+                    placeholder="e.g. Unified Web Options"
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-900 outline-none focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 transition-all"
+                  />
+                ) : (
+                  <div className="px-4 py-2.5 bg-slate-50 border border-slate-100 rounded-xl text-xs font-bold text-slate-900">
+                    {client?.business_name || editData.business_name || 'Not Configured'}
+                  </div>
+                )}
+              </div>
+
+              {/* GSTIN (Optional) */}
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="text-[11px] font-bold text-slate-700 uppercase tracking-wider">
+                    GSTIN / Tax ID
+                  </label>
+                  <span className="text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-md">
+                    Optional
+                  </span>
+                </div>
+                {isEditing ? (
+                  <input
+                    type="text"
+                    value={editData.tax_id_gstin}
+                    onChange={(e) => setEditData({ ...editData, tax_id_gstin: e.target.value })}
+                    placeholder="e.g. 07AAAAA0000A1Z5 (Optional)"
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono font-semibold text-slate-900 outline-none focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 transition-all uppercase"
+                  />
+                ) : (
+                  <div className="px-4 py-2.5 bg-slate-50 border border-slate-100 rounded-xl text-xs font-mono font-semibold text-slate-800">
+                    {client?.tax_id_gstin || 'Not Configured (Optional)'}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
-          {/* ── 2. Personal & Contact Details ── */}
-          <div className="space-y-2">
-            <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] ml-1">Personal & Contact Details</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              
-              {/* Full Name */}
-              <div className="flex items-center gap-4 p-5 bg-white border border-slate-200/80 rounded-3xl transition-all hover:border-emerald-200 shadow-2xs">
-                <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-700 flex items-center justify-center font-bold shrink-0 border border-emerald-100">
-                  <User size={20} strokeWidth={2} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Full Name</p>
+          {/* Card 2: Contact & Personal Details */}
+          <div className="bg-white border border-slate-200/80 rounded-3xl p-6 sm:p-7 space-y-5 shadow-2xs">
+            <div className="flex items-center gap-2.5 pb-3 border-b border-slate-100">
+              <div className="w-8 h-8 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center font-bold">
+                <User size={16} />
+              </div>
+              <div>
+                <h2 className="text-sm font-bold text-slate-900">Personal & Contact Details</h2>
+                <p className="text-[11px] text-slate-400">Primary workspace administrator information</p>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                {/* Full Name */}
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    Full Name
+                  </label>
                   {isEditing ? (
-                    <input 
-                      value={editData.name} 
-                      onChange={e => setEditData({...editData, name: e.target.value})} 
-                      placeholder="Enter full name"
-                      className="w-full bg-slate-50 border border-slate-200/80 rounded-xl px-3 py-1.5 outline-none focus:bg-white focus:border-emerald-500 font-semibold text-slate-900 text-sm transition-all" 
+                    <input
+                      type="text"
+                      value={editData.name}
+                      onChange={(e) => setEditData({ ...editData, name: e.target.value })}
+                      placeholder="Enter Full Name"
+                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-900 outline-none focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 transition-all"
                     />
                   ) : (
-                    <p className="text-sm font-bold text-slate-900 tracking-tight truncate">{client?.name || user.first_name || user.username}</p>
+                    <div className="px-4 py-2.5 bg-slate-50 border border-slate-100 rounded-xl text-xs font-bold text-slate-900 truncate">
+                      {client?.name || user.first_name || user.username || 'N/A'}
+                    </div>
                   )}
                 </div>
-              </div>
 
-              {/* Email Address */}
-              <div className="flex items-center gap-4 p-5 bg-white border border-slate-200/80 rounded-3xl transition-all shadow-2xs">
-                <div className="w-12 h-12 rounded-2xl bg-slate-50 text-slate-500 flex items-center justify-center shrink-0 border border-slate-200/60">
-                  <Mail size={20} strokeWidth={2} />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Mail ID</p>
-                  <p className="text-sm font-bold text-slate-900 tracking-tight truncate">{user.email || client?.email || 'N/A'}</p>
+                {/* Email Address */}
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    Mail ID
+                  </label>
+                  <div className="px-4 py-2.5 bg-slate-50 border border-slate-100 rounded-xl text-xs font-bold text-slate-700 truncate flex items-center justify-between">
+                    <span>{user.email || client?.email || 'N/A'}</span>
+                    <CheckCircle2 size={13} className="text-emerald-600 shrink-0" />
+                  </div>
                 </div>
               </div>
 
               {/* Phone Number */}
-              <div className="flex items-center gap-4 p-5 bg-white border border-slate-200/80 rounded-3xl transition-all hover:border-emerald-200 shadow-2xs">
-                <div className="w-12 h-12 rounded-2xl bg-slate-50 text-slate-700 flex items-center justify-center shrink-0 border border-slate-200/60">
-                  <Phone size={20} strokeWidth={2} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Phone Number</p>
-                  {isEditing ? (
-                    <input 
-                      value={editData.phone_number} 
-                      onChange={e => setEditData({...editData, phone_number: e.target.value})} 
-                      className="w-full bg-slate-50 border border-slate-200/80 rounded-xl px-3 py-1.5 outline-none focus:bg-white focus:border-emerald-500 font-semibold text-slate-900 text-sm font-mono transition-all" 
-                      placeholder="e.g. +91 9876543210" 
-                    />
-                  ) : (
-                    <p className="text-sm font-bold text-slate-900 tracking-tight font-mono truncate">{client?.phone_number || 'Not Linked'}</p>
-                  )}
-                </div>
+              <div>
+                <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  Phone Number
+                </label>
+                {isEditing ? (
+                  <input
+                    type="text"
+                    value={editData.phone_number}
+                    onChange={(e) => setEditData({ ...editData, phone_number: e.target.value })}
+                    placeholder="e.g. +91 9876543210"
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono font-semibold text-slate-900 outline-none focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 transition-all"
+                  />
+                ) : (
+                  <div className="px-4 py-2.5 bg-slate-50 border border-slate-100 rounded-xl text-xs font-mono font-bold text-slate-900">
+                    {client?.phone_number || 'Not Linked'}
+                  </div>
+                )}
               </div>
 
-              {/* Location / Address */}
-              <div className="flex items-start gap-4 p-5 bg-white border border-slate-200/80 rounded-3xl transition-all hover:border-emerald-200 shadow-2xs">
-                <div className="w-12 h-12 rounded-2xl bg-slate-50 text-slate-700 flex items-center justify-center shrink-0 border border-slate-200/60 mt-0.5">
-                  <MapPin size={20} strokeWidth={2} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Location / Office Address</p>
-                  {isEditing ? (
-                    <textarea 
-                      value={editData.address} 
-                      onChange={e => setEditData({...editData, address: e.target.value})} 
-                      rows={2}
-                      className="w-full bg-slate-50 border border-slate-200/80 rounded-xl p-2.5 font-semibold text-slate-900 text-xs focus:bg-white focus:outline-none focus:border-emerald-500 transition-all" 
-                      placeholder="e.g. Shop 12, Main Market, MG Road, Connaught Place, New Delhi" 
-                    />
-                  ) : (
-                    <div>
-                      <p className="text-xs font-semibold text-slate-800 leading-relaxed">{client?.address || 'No address configured'}</p>
-                      {client?.address && (
-                        <a 
-                          href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(client.address)}`} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 hover:text-emerald-700 mt-1"
-                        >
-                          <span>View on Google Maps</span>
-                          <ArrowUpRight size={11} />
-                        </a>
-                      )}
-                    </div>
-                  )}
-                </div>
+              {/* Location / Office Address */}
+              <div>
+                <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  Location / Office Address
+                </label>
+                {isEditing ? (
+                  <textarea
+                    rows={2}
+                    value={editData.address}
+                    onChange={(e) => setEditData({ ...editData, address: e.target.value })}
+                    placeholder="e.g. Shop 12, Main Market, MG Road, Connaught Place, New Delhi"
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-900 outline-none focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 transition-all"
+                  />
+                ) : (
+                  <div className="px-4 py-2.5 bg-slate-50 border border-slate-100 rounded-xl text-xs text-slate-800">
+                    <p className="font-semibold">{client?.address || 'No address configured'}</p>
+                    {client?.address && (
+                      <a
+                        href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(client.address)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 hover:text-emerald-700 mt-1"
+                      >
+                        <MapPin size={12} />
+                        <span>View on Google Maps</span>
+                        <ArrowUpRight size={11} />
+                      </a>
+                    )}
+                  </div>
+                )}
               </div>
-
             </div>
           </div>
 
-          {/* ── 3. Security & Access ── */}
-          <div className="space-y-2">
-            <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] ml-1">Security & Access</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <button 
-                onClick={() => setIsPasswordModalOpen(true)} 
-                className="flex items-center gap-4 p-5 bg-white border border-slate-200/80 rounded-3xl hover:border-emerald-300 transition-all group text-left shadow-2xs cursor-pointer"
-              >
-                <div className="w-10 h-10 rounded-xl bg-slate-50 text-slate-600 flex items-center justify-center transition-colors group-hover:bg-emerald-600 group-hover:text-white shrink-0">
-                  <Lock size={18} strokeWidth={2} />
-                </div>
-                <div>
-                  <span className="text-xs font-bold text-slate-900 block">Change Account Password</span>
-                  <span className="text-[10px] text-slate-400">Update your login security credentials</span>
-                </div>
-              </button>
+        </div>
 
-              <button 
-                onClick={() => { localStorage.removeItem('token'); localStorage.removeItem('user'); window.location.href = '/auth/login'; }}
-                className="flex items-center gap-4 p-5 bg-white border border-slate-200/80 rounded-3xl hover:border-rose-300 transition-all group text-left shadow-2xs cursor-pointer"
-              >
-                <div className="w-10 h-10 rounded-xl bg-rose-50 text-rose-500 flex items-center justify-center transition-colors group-hover:bg-rose-600 group-hover:text-white shrink-0">
-                  <LogOut size={18} strokeWidth={2} />
+        {/* ── 4. Security & Account Access ── */}
+        <div className="bg-white border border-slate-200/80 rounded-3xl p-6 sm:p-7 shadow-2xs">
+          <div className="flex items-center gap-2.5 pb-4 mb-4 border-b border-slate-100">
+            <div className="w-8 h-8 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center font-bold">
+              <ShieldCheck size={16} />
+            </div>
+            <div>
+              <h2 className="text-sm font-bold text-slate-900">Security & Account Access</h2>
+              <p className="text-[11px] text-slate-400">Manage login credentials and workspace session</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <button
+              type="button"
+              onClick={() => setIsPasswordModalOpen(true)}
+              className="flex items-center justify-between p-4 bg-slate-50 hover:bg-slate-100/80 border border-slate-200/80 rounded-2xl transition-all group text-left cursor-pointer"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-white border border-slate-200 text-slate-700 flex items-center justify-center group-hover:border-emerald-400 group-hover:text-emerald-700 transition-colors shadow-2xs">
+                  <Lock size={16} />
                 </div>
                 <div>
-                  <span className="text-xs font-bold text-slate-900 block">Sign Out</span>
-                  <span className="text-[10px] text-slate-400">Securely sign out of your current session</span>
+                  <span className="text-xs font-bold text-slate-900 block">Change Password</span>
+                  <span className="text-[10px] text-slate-400">Update your account login password</span>
                 </div>
-              </button>
-            </div>
+              </div>
+              <span className="text-xs font-bold text-emerald-700 group-hover:translate-x-0.5 transition-transform">→</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => { localStorage.removeItem('token'); localStorage.removeItem('user'); window.location.href = '/auth/login'; }}
+              className="flex items-center justify-between p-4 bg-rose-50/50 hover:bg-rose-50 border border-rose-200/60 rounded-2xl transition-all group text-left cursor-pointer"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-white border border-rose-200 text-rose-600 flex items-center justify-center group-hover:border-rose-400 transition-colors shadow-2xs">
+                  <LogOut size={16} />
+                </div>
+                <div>
+                  <span className="text-xs font-bold text-rose-900 block">Sign Out</span>
+                  <span className="text-[10px] text-rose-600/80">End your active login session</span>
+                </div>
+              </div>
+              <span className="text-xs font-bold text-rose-600 group-hover:translate-x-0.5 transition-transform">→</span>
+            </button>
           </div>
         </div>
+
+      </div>
 
         {/* Password Change Modal */}
         
