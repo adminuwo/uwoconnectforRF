@@ -21,9 +21,8 @@ export default function Home() {
 
   return (
     <div
-      className={`min-h-screen font-sans selection:bg-[#00AB56]/20 selection:text-[#00AB56] transition-colors duration-300 ${
-        isDark ? 'bg-[#06080E] text-white' : 'bg-[#F0FDF4] text-gray-900'
-      }`}
+      className={`min-h-screen font-sans selection:bg-[#00AB56]/20 selection:text-[#00AB56] transition-colors duration-300 ${isDark ? 'bg-[#06080E] text-white' : 'bg-[#F0FDF4] text-gray-900'
+        }`}
     >
       {/* Top Fixed Sticky Navbar */}
       <KinsoNavbar isDark={isDark} setIsDark={setIsDark} />

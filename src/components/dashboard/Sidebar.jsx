@@ -37,38 +37,38 @@ import { cn } from '@/lib/utils';
 
 // Tour ID → sidebar link name mapping
 const TOUR_IDS = {
-  'Dashboard':      'sidebar-dashboard',
-  'Channels':       'sidebar-channels',
-  'YouTube':        'sidebar-youtube',
-  'Google News':    'sidebar-google-news',
-  'Auto Replies':   'sidebar-automations',
-  'Workflows':      'sidebar-workflows',
-  'Leads (CRM)':    'sidebar-crm',
-  'Messages':       'sidebar-inbox',
-  'Broadcasts':     'sidebar-campaigns',
+  'Dashboard': 'sidebar-dashboard',
+  'Channels': 'sidebar-channels',
+  'YouTube': 'sidebar-youtube',
+  'Google News': 'sidebar-google-news',
+  'Auto Replies': 'sidebar-automations',
+  'Workflows': 'sidebar-workflows',
+  'Leads (CRM)': 'sidebar-crm',
+  'Messages': 'sidebar-inbox',
+  'Broadcasts': 'sidebar-campaigns',
   'Knowledge Base': 'sidebar-knowledge',
-  'Catalog':        'sidebar-catalog',
-  'Payments':       'sidebar-payments',
-  'Orders':         'sidebar-orders',
-  'Quotations':     'sidebar-quotations',
-  'Proposals':      'sidebar-proposals',
-  'Invoices':       'sidebar-invoices',
-  'Team':           'sidebar-team',
-  'Work Reports':   'sidebar-reports',
-  'Settings':       'sidebar-settings',
-  'Support':        'sidebar-support',
+  'Catalog': 'sidebar-catalog',
+  'Payments': 'sidebar-payments',
+  'Orders': 'sidebar-orders',
+  'Quotations': 'sidebar-quotations',
+  'Proposals': 'sidebar-proposals',
+  'Invoices': 'sidebar-invoices',
+  'Team': 'sidebar-team',
+  'Work Reports': 'sidebar-reports',
+  'Settings': 'sidebar-settings',
+  'Support': 'sidebar-support',
 };
 
 const YoutubeIcon = ({ size = 16, className }) => (
   <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="currentColor" className={className}>
-    <path d="M23.498 6.163a3.003 3.003 0 0 0-2.11-2.107C19.528 3.545 12 3.545 12 3.545s-7.528 0-9.388.511a3.003 3.003 0 0 0-2.11 2.107A30.213 30.213 0 0 0 0 12c0 1.944.15 3.89.49 5.837a3.003 3.003 0 0 0 2.11 2.107c1.86.51 9.388.51 9.388.51s7.528 0 9.388-.51a3.003 3.003 0 0 0 2.11-2.107A30.213 30.213 0 0 0 24 12a30.213 30.213 0 0 0-.502-5.837zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+    <path d="M23.498 6.163a3.003 3.003 0 0 0-2.11-2.107C19.528 3.545 12 3.545 12 3.545s-7.528 0-9.388.511a3.003 3.003 0 0 0-2.11 2.107A30.213 30.213 0 0 0 0 12c0 1.944.15 3.89.49 5.837a3.003 3.003 0 0 0 2.11 2.107c1.86.51 9.388.51 9.388.51s7.528 0 9.388-.51a3.003 3.003 0 0 0 2.11-2.107A30.213 30.213 0 0 0 24 12a30.213 30.213 0 0 0-.502-5.837zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
   </svg>
 );
 
 const TeamsIcon = ({ size = 16, className }) => (
   <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="currentColor" className={className}>
-    <path d="M20.625 7.875a2.625 2.625 0 1 0 0-5.25 2.625 2.625 0 0 0 0 5.25zm0-1.5a1.125 1.125 0 1 1 0-2.25 1.125 1.125 0 0 1 0 2.25zM15.75 9a.75.75 0 0 1 .75.75v4.5a4.5 4.5 0 0 1-4.5 4.5h-.75v2.25a.75.75 0 0 1-1.5 0V18.75H9a4.5 4.5 0 0 1-4.5-4.5v-4.5A.75.75 0 0 1 5.25 9h10.5zM9.375 5.625a2.625 2.625 0 1 0 0-5.25 2.625 2.625 0 0 0 0 5.25zm0-1.5a1.125 1.125 0 1 1 0-2.25 1.125 1.125 0 0 1 0 2.25z"/>
-    <path d="M17.25 9.75h1.5a3 3 0 0 1 3 3v2.25a3 3 0 0 1-3 3h-1.5v-1.5H18.75a1.5 1.5 0 0 0 1.5-1.5v-2.25a1.5 1.5 0 0 0-1.5-1.5h-1.5V9.75z"/>
+    <path d="M20.625 7.875a2.625 2.625 0 1 0 0-5.25 2.625 2.625 0 0 0 0 5.25zm0-1.5a1.125 1.125 0 1 1 0-2.25 1.125 1.125 0 0 1 0 2.25zM15.75 9a.75.75 0 0 1 .75.75v4.5a4.5 4.5 0 0 1-4.5 4.5h-.75v2.25a.75.75 0 0 1-1.5 0V18.75H9a4.5 4.5 0 0 1-4.5-4.5v-4.5A.75.75 0 0 1 5.25 9h10.5zM9.375 5.625a2.625 2.625 0 1 0 0-5.25 2.625 2.625 0 0 0 0 5.25zm0-1.5a1.125 1.125 0 1 1 0-2.25 1.125 1.125 0 0 1 0 2.25z" />
+    <path d="M17.25 9.75h1.5a3 3 0 0 1 3 3v2.25a3 3 0 0 1-3 3h-1.5v-1.5H18.75a1.5 1.5 0 0 0 1.5-1.5v-2.25a1.5 1.5 0 0 0-1.5-1.5h-1.5V9.75z" />
   </svg>
 );
 
@@ -133,13 +133,13 @@ const Sidebar = ({ role, isOpen, onClose, onToggle }) => {
 
   const agentLinks = [
     { name: 'Dashboard', href: '/client', icon: LayoutDashboard },
+    { name: 'Team & Projects', href: '/client/team', icon: ShieldCheck },
     { name: 'Voice & Video Calls', href: '/client/calls', icon: PhoneCall },
     { name: 'Leads (CRM)', href: '/client/crm', icon: Users },
     { name: 'Quotations', href: '/client/quotations', icon: FileCheck },
     { name: 'Proposals', href: '/client/proposals', icon: FileText },
     { name: 'Invoices', href: '/client/invoices', icon: Receipt },
     { name: 'Messages', href: '/client/inbox', icon: MessageSquare },
-    { name: 'Team Chat', href: '/client/team-chat', icon: MessagesSquare },
     { name: 'Knowledge Base', href: '/client/knowledge', icon: Brain },
     { name: 'Catalog', href: '/client/catalog', icon: ShoppingBag },
     { name: 'Orders', href: '/client/orders', icon: Receipt },
@@ -159,7 +159,7 @@ const Sidebar = ({ role, isOpen, onClose, onToggle }) => {
     <aside
       data-tour="sidebar-nav"
       className={cn(
-        'relative h-screen bg-white border-r border-slate-100 flex flex-col z-40 font-sans transition-all duration-300 ease-in-out shrink-0 overflow-hidden',
+        'relative h-full bg-white border-r border-slate-100 flex flex-col z-40 font-sans transition-all duration-300 ease-in-out shrink-0 overflow-hidden',
         isOpen ? 'w-[220px]' : 'w-14'
       )}
     >
@@ -200,7 +200,7 @@ const Sidebar = ({ role, isOpen, onClose, onToggle }) => {
 
       {/* ── Navigation ── */}
       <nav className={cn(
-        'flex-1 py-3 space-y-0.5 overflow-y-auto custom-scrollbar',
+        'flex-1 min-h-0 py-3 space-y-0.5 overflow-y-auto custom-scrollbar',
         isOpen ? 'px-2' : 'px-2'
       )}>
         {isOpen && (

@@ -226,17 +226,6 @@ const tourSteps = [
     icon: '💬',
   },
   {
-    id: 'platform-assistant',
-    page: null,
-    selector: '[data-tour="platform-assistant"]',
-    title: '✨ Copilot AI Assistant',
-    description: 'Ask our trained AI assistant helper any questions about platform tools or setup instructions.',
-    why: 'Instant 24/7 interactive guidance right inside your screen.',
-    tip: null,
-    placement: 'top',
-    icon: '✨',
-  },
-  {
     id: 'sidebar-logout',
     page: null,
     selector: '[data-tour="sidebar-logout"]',

@@ -8,9 +8,8 @@ import { MessageCircle, Building2, ChevronDown, Search } from 'lucide-react';
 import axios from 'axios';
 import { API_BASE_URL } from '@/config/apiConfig';
 
-const PlatformAssistant = dynamic(() => import('./PlatformAssistant'), { ssr: false });
-const ProductTour       = dynamic(() => import('@/components/tour/ProductTour'), { ssr: false });
-const TeamChatDrawer    = dynamic(() => import('@/components/team/TeamChatDrawer'), { ssr: false });
+const ProductTour = dynamic(() => import('@/components/tour/ProductTour'), { ssr: false });
+const TeamChatDrawer = dynamic(() => import('@/components/team/TeamChatDrawer'), { ssr: false });
 const GlobalIncomingCallListener = dynamic(() => import('./GlobalIncomingCallListener'), { ssr: false });
 
 const PAGE_TITLES = {
@@ -18,7 +17,7 @@ const PAGE_TITLES = {
   '/admin': 'Super Admin Control Center',
   '/admin/clients': 'Client Management Directory',
   '/admin/search': 'Global Platform Search',
-  '/admin/team': 'Platform Team Overview',
+  '/admin/team': 'Team & Projects',
   '/admin/channels': 'Channel & Integration Center',
   '/admin/inbox': 'Live Message & Chat Explorer',
   '/admin/ai': 'AI & Bot Control Center',
@@ -81,12 +80,12 @@ const DashboardLayout = ({ children, role: initialRole }) => {
 
     const storedUser = localStorage.getItem('user');
     const token = localStorage.getItem('token');
-    
+
     if (!token || !storedUser) {
       window.location.href = '/auth/login';
       return;
     }
-    
+
     if (storedUser) {
       try {
         setUser(JSON.parse(storedUser));
@@ -178,6 +177,8 @@ const DashboardLayout = ({ children, role: initialRole }) => {
     }
   };
 
+
+
   const displayName = user?.name || user?.username || 'User';
   const displayRole = user?.role || initialRole || '';
   const currentTitle = PAGE_TITLES[pathname] || (displayRole === 'ADMIN' ? 'Control Center' : 'Dashboard');
@@ -228,7 +229,7 @@ const DashboardLayout = ({ children, role: initialRole }) => {
                         <span className="hidden sm:inline">Switch Workspace</span>
                         <ChevronDown size={14} className={`transition-transform duration-200 ${switcherOpen ? 'rotate-180' : ''}`} />
                       </button>
-                      
+
                       {switcherOpen && (
                         <div className="absolute top-full right-0 mt-2 w-72 bg-white rounded-2xl shadow-xl border border-slate-100 z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
                           <div className="p-3 border-b border-slate-100 bg-slate-50/50">
@@ -305,10 +306,13 @@ const DashboardLayout = ({ children, role: initialRole }) => {
       </div>
 
       {/* Fixed overlays */}
-      <PlatformAssistant />
-      <ProductTour />
-      <TeamChatDrawer isOpen={chatOpen} onClose={() => setChatOpen(false)} />
-      <GlobalIncomingCallListener />
+      {mounted && (
+        <>
+          <ProductTour />
+          <TeamChatDrawer isOpen={chatOpen} onClose={() => setChatOpen(false)} />
+          <GlobalIncomingCallListener />
+        </>
+      )}
     </div>
   );
 };

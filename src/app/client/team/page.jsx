@@ -4,10 +4,11 @@ import React, { useState, useEffect } from 'react';
 import { 
   Users, UserPlus, CheckSquare, MessageSquare, FileText, ShieldCheck, 
   BarChart3, Bot, Plus, Search, Filter, LayoutGrid, List, Calendar as CalendarIcon,
-  Building2, Trash2, Mail, Shield, CheckCircle2, Clock, AlertTriangle, ChevronRight, FolderPlus, Layers,
-  Share2, Activity, ShieldAlert, Globe, Lock, UserX, UserCheck, RefreshCw, Key, ExternalLink, Eye, Smartphone
+  Building2, Trash2, Mail, Shield, CheckCircle2, Clock, AlertTriangle, AlertCircle, ChevronRight, FolderPlus, Layers,
+  Share2, Activity, ShieldAlert, Globe, Lock, UserX, UserCheck, RefreshCw, Key, ExternalLink, Eye, Smartphone, QrCode
 } from 'lucide-react';
 import axios from 'axios';
+import { API_BASE_URL } from '@/config/apiConfig';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import TeamMemberModal from '@/components/team/TeamMemberModal';
 import TaskModal from '@/components/team/TaskModal';
@@ -16,13 +17,22 @@ import TaskKanbanBoard from '@/components/team/TaskKanbanBoard';
 import TaskListTable from '@/components/team/TaskListTable';
 import TeamChatWindow from '@/components/team/TeamChatWindow';
 import WorkReportModal from '@/components/team/WorkReportModal';
+import WorkReportsCalendarView from '@/components/team/WorkReportsCalendarView';
 import ApprovalManagerModal from '@/components/team/ApprovalManagerModal';
 import TeamAnalyticsView from '@/components/team/TeamAnalyticsView';
 import TeamAICopilot from '@/components/team/TeamAICopilot';
 import ProjectModal from '@/components/team/ProjectModal';
 import AttendanceLeaveModal from '@/components/team/AttendanceLeaveModal';
+import QRCodeInviteModal from '@/components/team/QRCodeInviteModal';
 import MemberDetailDrawer from '@/components/team/MemberDetailDrawer';
 import ProjectDetailDrawer from '@/components/team/ProjectDetailDrawer';
+import { 
+  SkeletonMemberCards, 
+  SkeletonProjectCards, 
+  SkeletonTaskKanban, 
+  SkeletonTableRows, 
+  ModernSpinner 
+} from '@/components/common/LoadingSkeleton';
 
 export default function TeamPage() {
   const [activeTab, setActiveTab] = useState('DIRECTORY'); // DIRECTORY, PROJECTS, TASKS, CHAT, ATTENDANCE, REPORTS
@@ -30,7 +40,20 @@ export default function TeamPage() {
   const [projects, setProjects] = useState([]);
   const [tasks, setTasks] = useState([]);
   const [reports, setReports] = useState([]);
-  const [currentUser, setCurrentUser] = useState(null);
+  const [attendances, setAttendances] = useState([]);
+  const [leaves, setLeaves] = useState([]);
+  const [channels, setChannels] = useState([]);
+  const [selectedReportDate, setSelectedReportDate] = useState(() => new Date().toISOString().split('T')[0]);
+  const [currentUser, setCurrentUser] = useState(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        return JSON.parse(localStorage.getItem('user') || '{}');
+      } catch (e) {
+        return {};
+      }
+    }
+    return {};
+  });
   const [loading, setLoading] = useState(true);
 
   // Filters & Search
@@ -41,10 +64,12 @@ export default function TeamPage() {
   // Modals & Drawers
   const [isMemberModalOpen, setIsMemberModalOpen] = useState(false);
   const [memberToEdit, setMemberToEdit] = useState(null);
+  const [memberModalInitialTab, setMemberModalInitialTab] = useState('basic');
   const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [isAttendanceModalOpen, setIsAttendanceModalOpen] = useState(false);
+  const [isQRModalOpen, setIsQRModalOpen] = useState(false);
 
   const [selectedTask, setSelectedTask] = useState(null);
   const [selectedMember, setSelectedMember] = useState(null);
@@ -53,10 +78,13 @@ export default function TeamPage() {
   const fetchProfile = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/profile`, {
+      const res = await axios.get(`${API_BASE_URL}/api/profile`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setCurrentUser(res.data);
+      const userData = res.data?.user || res.data;
+      if (userData && (userData.id || userData.role || userData.username || userData.email)) {
+        setCurrentUser(userData);
+      }
     } catch (err) {
       console.warn('Failed to fetch profile:', err);
     }
@@ -67,7 +95,7 @@ export default function TeamPage() {
       const token = localStorage.getItem('token');
       const deletedIds = JSON.parse(localStorage.getItem('uwo_deleted_members') || '[]');
 
-      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/team/members/`, {
+      const res = await axios.get(`${API_BASE_URL}/api/team/members/`, {
         headers: token ? { Authorization: `Bearer ${token}` } : {}
       });
       const rawMembers = Array.isArray(res.data) ? res.data : res.data.results || [];
@@ -81,36 +109,84 @@ export default function TeamPage() {
   const fetchProjects = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/team/projects/`, {
+      const res = await axios.get(`${API_BASE_URL}/api/team/projects/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setProjects(Array.isArray(res.data) ? res.data : (res.data?.results || []));
+      const data = Array.isArray(res.data) ? res.data : (res.data?.results || []);
+      setProjects(data);
     } catch (err) {
       console.warn('Failed to fetch projects:', err);
+      setProjects([]);
     }
   };
 
   const fetchTasks = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/team/tasks/`, {
+      const res = await axios.get(`${API_BASE_URL}/api/team/tasks/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setTasks(Array.isArray(res.data) ? res.data : (res.data?.results || []));
+      const data = Array.isArray(res.data) ? res.data : (res.data?.results || []);
+      setTasks(data);
     } catch (err) {
       console.warn('Failed to fetch tasks:', err);
+      setTasks([]);
     }
   };
 
   const fetchReports = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/team/reports/`, {
+      const res = await axios.get(`${API_BASE_URL}/api/team/reports/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setReports(Array.isArray(res.data) ? res.data : (res.data?.results || []));
+      const data = Array.isArray(res.data) ? res.data : (res.data?.results || []);
+      setReports(data);
     } catch (err) {
       console.warn('Failed to fetch reports:', err);
+      setReports([]);
+    }
+  };
+
+  const fetchAttendance = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const res = await axios.get(`${API_BASE_URL}/api/team/attendance/`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = Array.isArray(res.data) ? res.data : (res.data?.results || []);
+      setAttendances(data);
+    } catch (err) {
+      console.warn('Failed to fetch attendance:', err);
+      setAttendances([]);
+    }
+  };
+
+  const fetchLeaves = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const res = await axios.get(`${API_BASE_URL}/api/team/leaves/`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = Array.isArray(res.data) ? res.data : (res.data?.results || []);
+      setLeaves(data);
+    } catch (err) {
+      console.warn('Failed to fetch leaves:', err);
+      setLeaves([]);
+    }
+  };
+
+  const fetchChannels = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const res = await axios.get(`${API_BASE_URL}/api/team/channels/`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
+      });
+      const data = Array.isArray(res.data) ? res.data : (res.data?.results || []);
+      setChannels(data);
+    } catch (err) {
+      console.warn('Failed to fetch channels:', err);
+      setChannels([]);
     }
   };
 
@@ -118,7 +194,7 @@ export default function TeamPage() {
     if (!confirm('Are you sure you want to delete this project?')) return;
     try {
       const token = localStorage.getItem('token');
-      await axios.delete(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/team/projects/${id}/`, {
+      await axios.delete(`${API_BASE_URL}/api/team/projects/${id}/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       fetchProjects();
@@ -131,7 +207,6 @@ export default function TeamPage() {
     if (!confirm('Are you sure you want to remove this team member?')) return;
     setMembers(prev => prev.filter(m => String(m.id) !== String(id)));
 
-    // Persist deleted ID to localStorage so page refresh never restores it
     try {
       const deleted = JSON.parse(localStorage.getItem('uwo_deleted_members') || '[]');
       if (!deleted.includes(String(id))) {
@@ -143,7 +218,7 @@ export default function TeamPage() {
     try {
       const token = localStorage.getItem('token');
       if (token) {
-        await axios.delete(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/team/members/${id}/`, {
+        await axios.delete(`${API_BASE_URL}/api/team/members/${id}/`, {
           headers: { Authorization: `Bearer ${token}` }
         });
       }
@@ -161,7 +236,7 @@ export default function TeamPage() {
       const token = localStorage.getItem('token');
       const target = members.find(m => m.id === id);
       const newStatus = target?.status === 'SUSPENDED' ? 'ACTIVE' : 'SUSPENDED';
-      await axios.patch(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/team/members/${id}/`, { status: newStatus }, {
+      await axios.patch(`${API_BASE_URL}/api/team/members/${id}/`, { status: newStatus }, {
         headers: { Authorization: `Bearer ${token}` }
       });
       fetchMembers();
@@ -178,14 +253,51 @@ export default function TeamPage() {
         fetchMembers(),
         fetchProjects(),
         fetchTasks(),
-        fetchReports()
+        fetchReports(),
+        fetchAttendance(),
+        fetchLeaves(),
+        fetchChannels()
       ]);
       setLoading(false);
     };
     init();
   }, []);
 
-  const filteredMembers = members.filter(m => {
+  const storedUser = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('user') || '{}') : {};
+  const activeUser = (currentUser && (currentUser.id || currentUser.role || currentUser.username)) ? { ...storedUser, ...currentUser } : storedUser;
+  const isAgent = (activeUser?.role === 'AGENT') || (activeUser?.enterprise_role === 'EMPLOYEE') || (activeUser?.enterprise_role === 'INTERN');
+  const isClientRole = !isAgent;
+  const currentUserId = String(activeUser?.id || activeUser?._id || '');
+  const currentUsername = (activeUser?.username || '').toLowerCase();
+
+  const visibleProjects = isClientRole ? projects : projects.filter(p => {
+    const memberDetails = p.members_details || [];
+    const rawMembers = Array.isArray(p.members) ? p.members : [];
+    
+    // If no specific members are assigned, it is open to the entire workspace
+    if (memberDetails.length === 0 && rawMembers.length === 0) return true;
+
+    const isMember = memberDetails.some(m => String(m.id) === currentUserId || (m.username && m.username.toLowerCase() === currentUsername) || (m.email && m.email.toLowerCase() === currentUsername)) ||
+      rawMembers.some(m => String(m) === currentUserId || (typeof m === 'object' && String(m.id || m._id) === currentUserId));
+    const isOwner = String(p.owner) === currentUserId || (p.owner_name && p.owner_name.toLowerCase() === currentUsername);
+    return isMember || isOwner;
+  });
+
+  const visibleReports = isClientRole ? reports : reports.filter(r => {
+    const allowedUsernames = new Set([currentUsername]);
+    const allowedIds = new Set([currentUserId]);
+    visibleProjects.forEach(p => {
+      (p.members_details || []).forEach(m => {
+        if (m.username) allowedUsernames.add(m.username.toLowerCase());
+        if (m.id) allowedIds.add(String(m.id));
+      });
+    });
+    const rEmpId = r.employee ? String(r.employee) : '';
+    const rEmpName = (r.employee_name || '').toLowerCase();
+    return allowedIds.has(rEmpId) || allowedUsernames.has(rEmpName);
+  });
+
+  const filteredMembers = (Array.isArray(members) ? members : []).filter(m => {
     const matchesSearch = (m.username || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
                           (m.email || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
                           (m.department || '').toLowerCase().includes(searchQuery.toLowerCase());
@@ -193,7 +305,7 @@ export default function TeamPage() {
     return matchesSearch && matchesDept;
   });
 
-  const filteredProjects = projects.filter(p => 
+  const filteredProjects = (Array.isArray(projects) ? projects : []).filter(p => 
     (p.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
     (p.description || '').toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -213,6 +325,12 @@ export default function TeamPage() {
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
+            <button
+              onClick={() => setIsQRModalOpen(true)}
+              className="px-4 py-2.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200/80 rounded-2xl text-xs font-bold transition-all shadow-2xs flex items-center gap-2 cursor-pointer"
+            >
+              <QrCode size={15} /> QR Code Invite
+            </button>
             <button
               onClick={() => {
                 setMemberToEdit(null);
@@ -309,87 +427,159 @@ export default function TeamPage() {
             </div>
 
             {/* Member Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              {filteredMembers.map((m) => (
-                <div
-                  key={m.id}
-                  onClick={() => setSelectedMember(m)}
-                  className={`bg-white rounded-3xl p-6 border cursor-pointer ${m.status === 'SUSPENDED' ? 'border-rose-200 bg-rose-50/20' : 'border-slate-200/90'} shadow-2xs hover:shadow-lg hover:border-emerald-200 transition-all flex flex-col justify-between space-y-4`}
+            {loading ? (
+              <SkeletonMemberCards count={6} />
+            ) : filteredMembers.length === 0 ? (
+              <div className="bg-white rounded-3xl p-12 text-center border border-slate-200 space-y-3">
+                <Users size={36} className="text-slate-300 mx-auto" />
+                <h3 className="text-base font-bold text-slate-800">No team members found</h3>
+                <p className="text-xs text-slate-400 max-w-sm mx-auto">Generate a QR code or add employees directly to start collaborating.</p>
+                <button
+                  onClick={() => setIsQRModalOpen(true)}
+                  className="px-4 py-2.5 bg-emerald-600 text-white font-bold text-xs rounded-xl shadow-sm hover:bg-emerald-700 transition-all inline-flex items-center gap-1.5 cursor-pointer"
                 >
-                  <div>
-                    <div className="flex items-start justify-between gap-3 mb-3">
-                      <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 rounded-2xl bg-emerald-600 text-white font-black flex items-center justify-center text-lg shrink-0 shadow-md">
-                          {m.username?.charAt(0)?.toUpperCase() || 'U'}
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <h4 className="font-bold text-slate-900 text-sm">{m.username}</h4>
-                            <span className={`w-2 h-2 rounded-full ${m.is_online ? 'bg-emerald-500 animate-pulse' : 'bg-slate-300'}`} />
+                  <QrCode size={15} />
+                  <span>Generate QR Code Invite</span>
+                </button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                {filteredMembers.map((m) => (
+                  <div
+                    key={m.id}
+                    onClick={() => setSelectedMember(m)}
+                    className={`bg-white rounded-3xl p-6 border cursor-pointer ${m.status === 'SUSPENDED' ? 'border-rose-200 bg-rose-50/20' : 'border-slate-200/90'} shadow-2xs hover:shadow-lg hover:border-emerald-200 transition-all flex flex-col justify-between space-y-4`}
+                  >
+                    <div>
+                      <div className="flex items-start justify-between gap-3 mb-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-12 h-12 rounded-2xl bg-emerald-600 text-white font-black flex items-center justify-center text-lg shrink-0 shadow-md">
+                            {(m.name || m.first_name || m.username || 'U').charAt(0).toUpperCase()}
                           </div>
-                          <p className="text-xs text-slate-500">{m.designation || 'Team Member'}</p>
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-2">
+                              <h4 className="font-bold text-slate-900 text-sm truncate">{m.name || m.first_name || m.username}</h4>
+                              <span className={`w-2 h-2 rounded-full shrink-0 ${m.is_online ? 'bg-emerald-500 animate-pulse' : 'bg-slate-300'}`} />
+                            </div>
+                            <p className="text-xs text-slate-500 truncate">{m.designation || 'Team Member'}</p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-1 shrink-0">
+                          <button
+                            onClick={(e) => { e.stopPropagation(); handleSuspendMember(m.id); }}
+                            className={`p-1.5 rounded-xl text-xs transition-colors cursor-pointer ${m.status === 'SUSPENDED' ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-600'}`}
+                            title={m.status === 'SUSPENDED' ? 'Activate Member' : 'Suspend Member'}
+                          >
+                            {m.status === 'SUSPENDED' ? <UserCheck size={16} /> : <UserX size={16} />}
+                          </button>
+                          <button
+                            onClick={(e) => { 
+                              e.stopPropagation(); 
+                              setMemberToEdit(m);
+                              setMemberModalInitialTab('basic');
+                              setIsMemberModalOpen(true); 
+                            }}
+                            className="p-1.5 text-slate-400 hover:text-emerald-600 rounded-xl hover:bg-emerald-50 transition-colors cursor-pointer"
+                            title="Edit Member / Role"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+                          </button>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); handleRemoveMember(m.id); }}
+                            className="p-1.5 text-slate-300 hover:text-rose-500 rounded-xl hover:bg-rose-50 transition-colors cursor-pointer"
+                            title="Delete Member"
+                          >
+                            <Trash2 size={16} />
+                          </button>
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-1">
+                      {/* Member Details */}
+                      <div className="space-y-2 py-3 border-t border-b border-slate-100 text-xs">
+                        {m.email && (
+                          <div className="flex items-center justify-between text-slate-600">
+                            <span className="text-slate-400 flex items-center gap-1.5"><Mail size={12} /> Email</span>
+                            <span className="font-semibold text-slate-800 truncate max-w-[180px]">{m.email}</span>
+                          </div>
+                        )}
+                        {m.phone_number && (
+                          <div className="flex items-center justify-between text-slate-600">
+                            <span className="text-slate-400 flex items-center gap-1.5"><Smartphone size={12} /> Phone</span>
+                            <span className="font-semibold text-slate-800">{m.phone_number}</span>
+                          </div>
+                        )}
+                        <div className="flex justify-between items-center text-slate-600">
+                          <span className="text-slate-400">Department</span>
+                          <span className="font-semibold text-slate-800">{m.department || 'General'}</span>
+                        </div>
+                        <div className="flex justify-between items-center text-slate-600">
+                          <span className="text-slate-400">Role</span>
+                          <span className="font-bold text-emerald-700 bg-emerald-50 border border-emerald-200/60 px-2 py-0.5 rounded-full text-[10px]">
+                            {m.enterprise_role || m.role}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Channel Badges & Quick Actions */}
+                    <div className="space-y-3 pt-1">
+                      <div>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Assigned Channels</p>
+                        <div className="flex flex-wrap gap-1.5 min-h-[24px]">
+                          {(m.assigned_social_channels && m.assigned_social_channels.length > 0) ? (
+                            m.assigned_social_channels.map((ch, idx) => {
+                              const label = ch.includes('wa') ? 'WhatsApp' 
+                                : ch.includes('ig') ? 'Instagram' 
+                                : ch.includes('fb') ? 'Facebook' 
+                                : ch.includes('tg') ? 'Telegram' 
+                                : ch.includes('li') ? 'LinkedIn' : ch;
+                              const color = ch.includes('wa') ? 'bg-emerald-50 text-emerald-700 border-emerald-200/60'
+                                : ch.includes('ig') ? 'bg-pink-50 text-pink-700 border-pink-200/60'
+                                : ch.includes('fb') ? 'bg-blue-50 text-blue-700 border-blue-200/60'
+                                : ch.includes('tg') ? 'bg-sky-50 text-sky-700 border-sky-200/60'
+                                : 'bg-indigo-50 text-indigo-700 border-indigo-200/60';
+                              return (
+                                <span key={idx} className={`px-2 py-0.5 rounded-md text-[9px] font-bold border ${color}`}>
+                                  {label}
+                                </span>
+                              );
+                            })
+                          ) : (
+                            <span className="text-[10px] text-slate-400 font-medium italic">No channels assigned yet</span>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2 pt-2 border-t border-slate-100">
                         <button
-                          onClick={(e) => { e.stopPropagation(); handleSuspendMember(m.id); }}
-                          className={`p-1.5 rounded-xl text-xs transition-colors cursor-pointer ${m.status === 'SUSPENDED' ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-600'}`}
-                          title={m.status === 'SUSPENDED' ? 'Activate Member' : 'Suspend Member'}
-                        >
-                          {m.status === 'SUSPENDED' ? <UserCheck size={16} /> : <UserX size={16} />}
-                        </button>
-                        <button
-                          onClick={(e) => { 
-                            e.stopPropagation(); 
-                            setMemberToEdit(m); 
-                            setIsMemberModalOpen(true); 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setMemberToEdit(m);
+                            setMemberModalInitialTab('channels');
+                            setIsMemberModalOpen(true);
                           }}
-                          className="p-1.5 text-slate-400 hover:text-blue-500 rounded-xl hover:bg-blue-50 transition-colors cursor-pointer"
-                          title="Edit Member"
+                          className="flex-1 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-xl text-[11px] font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
                         >
-                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+                          <Share2 size={13} /> Assign Channels
                         </button>
                         <button
-                          onClick={(e) => { e.stopPropagation(); handleRemoveMember(m.id); }}
-                          className="p-1.5 text-slate-300 hover:text-rose-500 rounded-xl hover:bg-rose-50 transition-colors cursor-pointer"
-                          title="Delete Member"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setMemberToEdit(m);
+                            setMemberModalInitialTab('permissions');
+                            setIsMemberModalOpen(true);
+                          }}
+                          className="flex-1 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-[11px] font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                         >
-                          <Trash2 size={16} />
+                          <Shield size={13} /> Assign Role
                         </button>
                       </div>
                     </div>
-
-                    <div className="space-y-2 py-3 border-t border-b border-slate-100 text-xs">
-                      <div className="flex justify-between items-center text-slate-600">
-                        <span className="text-slate-400">Department</span>
-                        <span className="font-semibold text-slate-800">{m.department || 'General'}</span>
-                      </div>
-                      <div className="flex justify-between items-center text-slate-600">
-                        <span className="text-slate-400">Role</span>
-                        <span className="font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full text-[10px]">{m.enterprise_role || m.role}</span>
-                      </div>
-                      <div className="flex justify-between items-center text-slate-600">
-                        <span className="text-slate-400">Employee ID</span>
-                        <span className="font-mono text-slate-700">{m.employee_id || 'N/A'}</span>
-                      </div>
-                    </div>
                   </div>
-
-                  {/* Channel Badges */}
-                  <div>
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Assigned Channels</p>
-                    <div className="flex flex-wrap gap-1.5">
-                      {(m.assigned_social_channels || ['wa_default', 'ig_main']).map((ch, idx) => (
-                        <span key={idx} className="px-2 py-0.5 bg-slate-100 text-slate-700 rounded-md text-[9px] font-bold">
-                          {ch}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
@@ -512,23 +702,33 @@ export default function TeamPage() {
         {/* --- TAB 4: PROJECTS --- */}
         {activeTab === 'PROJECTS' && (
           <div className="space-y-4">
-            {projects.length === 0 ? (
+            {loading ? (
+              <SkeletonProjectCards count={3} />
+            ) : visibleProjects.length === 0 ? (
               <div className="bg-white rounded-2xl p-12 text-center border border-slate-200 space-y-3">
                 <FolderPlus size={36} className="text-slate-300 mx-auto" />
-                <h3 className="text-base font-bold text-slate-800">No active projects</h3>
-                <p className="text-xs text-slate-400 max-w-sm mx-auto">Create a new project to start managing milestones, progress bars, and team tasks.</p>
-                <button
-                  onClick={() => setIsProjectModalOpen(true)}
-                  className="px-4 py-2.5 bg-emerald-600 text-white font-bold text-xs rounded-xl shadow-sm hover:bg-emerald-700 transition-all inline-flex items-center gap-1.5"
-                >
-                  <FolderPlus size={15} />
-                  <span>Create First Project</span>
-                </button>
+                <h3 className="text-base font-bold text-slate-800">
+                  {isClientRole ? 'No active projects' : 'No projects assigned to you yet'}
+                </h3>
+                <p className="text-xs text-slate-400 max-w-sm mx-auto">
+                  {isClientRole 
+                    ? 'Create a new project to start managing milestones, progress bars, and team tasks.'
+                    : 'When the admin or client assigns you to a project, it will appear here with milestones.'}
+                </p>
+                {isClientRole && (
+                  <button
+                    onClick={() => setIsProjectModalOpen(true)}
+                    className="px-4 py-2.5 bg-emerald-600 text-white font-bold text-xs rounded-xl shadow-sm hover:bg-emerald-700 transition-all inline-flex items-center gap-1.5"
+                  >
+                    <FolderPlus size={15} />
+                    <span>Create First Project</span>
+                  </button>
+                )}
               </div>
             ) : (
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              {projects.map((p) => {
+              {visibleProjects.map((p) => {
                 const milestones = p.milestones || [];
                 const completedMilestones = milestones.filter(m => m.completed || m.status === 'COMPLETED').length;
                 const totalMilestones = milestones.length;
@@ -612,10 +812,12 @@ export default function TeamPage() {
               </div>
             </div>
 
-            {taskViewMode === 'KANBAN' ? (
-              <TaskKanbanBoard tasks={tasks} onSelectTask={(t) => setSelectedTask(t)} />
+            {loading ? (
+              <SkeletonTaskKanban />
+            ) : taskViewMode === 'KANBAN' ? (
+              <TaskKanbanBoard tasks={Array.isArray(tasks) ? tasks : []} onSelectTask={(t) => setSelectedTask(t)} />
             ) : (
-              <TaskListTable tasks={tasks} onSelectTask={(t) => setSelectedTask(t)} />
+              <TaskListTable tasks={Array.isArray(tasks) ? tasks : []} onSelectTask={(t) => setSelectedTask(t)} />
             )}
           </div>
         )}
@@ -623,41 +825,139 @@ export default function TeamPage() {
         {/* --- TAB 6: CHAT --- */}
         {activeTab === 'CHAT' && (
           <div className="h-[650px] bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm">
-            <TeamChatWindow />
+            <TeamChatWindow 
+              currentUser={activeUser} 
+              channels={channels} 
+              projects={visibleProjects}
+              members={members}
+              onChannelCreated={fetchChannels} 
+            />
           </div>
         )}
 
-        {/* --- TAB 7: ATTENDANCE --- */}
+        {/* --- TAB 7: ATTENDANCE & LOGIN LOG --- */}
         {activeTab === 'ATTENDANCE' && (
           <div className="space-y-6">
-            <div className="bg-white p-6 rounded-3xl border border-slate-200 space-y-4">
-              <h3 className="font-bold text-slate-900 text-sm">Daily Attendance & Clock In / Out Log</h3>
-              <p className="text-xs text-slate-400">Track member check-in times, working hours, and leave approvals</p>
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-slate-200 shadow-2xs">
+              <div>
+                <h3 className="font-extrabold text-slate-900 text-base flex items-center gap-2">
+                  <CalendarIcon className="text-emerald-600" size={20} /> Daily Attendance & Login/Logout Timings
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Track member check-in times, clock-out timestamps, working hours, and leave status
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setIsAttendanceModalOpen(true)}
+                  className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl text-xs font-bold transition-all shadow-sm flex items-center gap-2 cursor-pointer"
+                >
+                  <Clock size={15} /> Clock In / Clock Out & Leave
+                </button>
+              </div>
+            </div>
+
+            {/* Attendance Log Table */}
+            <div className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-2xs">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs font-semibold text-slate-700">
+                  <thead className="bg-slate-50 border-b border-slate-200 uppercase text-[9px] font-black text-slate-400 tracking-wider">
+                    <tr>
+                      <th className="p-4">Team Member</th>
+                      <th className="p-4">Department</th>
+                      <th className="p-4">Date</th>
+                      <th className="p-4">Clock In (Login)</th>
+                      <th className="p-4">Clock Out (Logout)</th>
+                      <th className="p-4">Working Hours</th>
+                      <th className="p-4">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {loading ? (
+                      <tr>
+                        <td colSpan={7} className="p-4">
+                          <SkeletonTableRows rows={5} cols={7} />
+                        </td>
+                      </tr>
+                    ) : attendances.length === 0 ? (
+                      <tr>
+                        <td colSpan={7} className="p-8 text-center text-slate-400 text-xs font-medium">
+                          No attendance records found for today. Members can Clock In when logging into work.
+                        </td>
+                      </tr>
+                    ) : (
+                      attendances.map((att) => {
+                        const inTime = att.clock_in ? new Date(att.clock_in).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '--:--';
+                        const outTime = att.clock_out ? new Date(att.clock_out).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : (att.clock_in ? '🟢 Active Work' : '--:--');
+
+                        return (
+                          <tr key={att.id || att._id} className="hover:bg-slate-50/50">
+                            <td className="p-4">
+                              <div className="flex items-center gap-2.5">
+                                <div className="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-700 font-bold flex items-center justify-center shrink-0">
+                                  {(att.user_name || att.user_email || 'U').charAt(0).toUpperCase()}
+                                </div>
+                                <div>
+                                  <p className="font-bold text-slate-900">{att.user_name || 'Team Member'}</p>
+                                  <p className="text-[10px] text-slate-400">{att.user_email || ''}</p>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="p-4 text-slate-600 font-medium">{att.user_department || 'General'}</td>
+                            <td className="p-4 font-mono text-slate-600">{att.date}</td>
+                            <td className="p-4 font-mono font-bold text-emerald-700">{inTime}</td>
+                            <td className="p-4 font-mono font-bold text-slate-700">{outTime}</td>
+                            <td className="p-4 font-bold text-slate-800">{att.working_hours ? `${att.working_hours} hrs` : '--'}</td>
+                            <td className="p-4">
+                              <span className={`px-2.5 py-1 rounded-full text-[9px] font-black uppercase ${
+                                att.status === 'PRESENT' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
+                                att.status === 'LATE' ? 'bg-amber-50 text-amber-700 border border-amber-200' :
+                                att.status === 'ON_LEAVE' ? 'bg-blue-50 text-blue-700 border border-blue-200' :
+                                'bg-slate-100 text-slate-500'
+                              }`}>
+                                {att.status}
+                              </span>
+                            </td>
+                          </tr>
+                        );
+                      })
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         )}
 
-        {/* --- TAB 8: REPORTS --- */}
+        {/* --- TAB 8: DAILY WORK REPORTS STREAM WITH CALENDAR NAVIGATOR --- */}
         {activeTab === 'REPORTS' && (
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {reports.map((r) => (
-                <div key={r.id} className="bg-white p-6 rounded-3xl border border-slate-200 space-y-3">
-                  <div className="flex justify-between items-center">
-                    <h4 className="font-bold text-slate-900 text-sm">{r.employee_name}</h4>
-                    <span className="text-[10px] font-bold bg-slate-100 px-2.5 py-1 rounded-full">{r.report_date}</span>
-                  </div>
-                  <p className="text-xs text-slate-600">{r.todays_work}</p>
-                </div>
-              ))}
-            </div>
-          </div>
+          <WorkReportsCalendarView
+            reports={visibleReports}
+            leaves={leaves}
+            attendances={attendances}
+            members={members}
+            loading={loading}
+            isClientRole={isClientRole}
+            selectedDate={selectedReportDate}
+            onDateSelect={(d) => setSelectedReportDate(d)}
+            onOpenSubmitModal={(dateToSubmit) => {
+              if (dateToSubmit) setSelectedReportDate(dateToSubmit);
+              setIsReportModalOpen(true);
+            }}
+          />
         )}
 
         {/* --- MODALS --- */}
+        <QRCodeInviteModal
+          isOpen={isQRModalOpen}
+          onClose={() => setIsQRModalOpen(false)}
+        />
+
         <TeamMemberModal
           isOpen={isMemberModalOpen}
           editMember={memberToEdit}
+          initialTab={memberModalInitialTab}
           onClose={() => {
             setIsMemberModalOpen(false);
             setMemberToEdit(null);
@@ -682,14 +982,19 @@ export default function TeamPage() {
 
         <WorkReportModal
           isOpen={isReportModalOpen}
+          initialDate={selectedReportDate}
           onClose={() => setIsReportModalOpen(false)}
-          onSuccess={fetchReports}
+          onSuccess={() => {
+            fetchReports();
+            setIsReportModalOpen(false);
+          }}
         />
 
         <AttendanceLeaveModal
           isOpen={isAttendanceModalOpen}
           onClose={() => setIsAttendanceModalOpen(false)}
-          onSuccess={() => { fetchMembers(); }}
+          onSuccess={() => { fetchMembers(); fetchAttendance(); fetchLeaves(); }}
+          onActionCompleted={() => { fetchMembers(); fetchAttendance(); fetchLeaves(); }}
         />
 
         {selectedTask && (
@@ -714,6 +1019,7 @@ export default function TeamPage() {
             isOpen={!!selectedProject}
             onClose={() => setSelectedProject(null)}
             onUpdate={() => { fetchProjects(); }}
+            availableMembers={members}
           />
         )}
 

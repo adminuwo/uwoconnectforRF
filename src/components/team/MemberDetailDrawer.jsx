@@ -255,11 +255,23 @@ export default function MemberDetailDrawer({ member, tasks = [], onClose }) {
               <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2">Assigned Channels</h4>
               <div className="flex flex-wrap gap-1.5">
                 {(member.assigned_social_channels || []).length > 0 ? (
-                  member.assigned_social_channels.map((ch, idx) => (
-                    <span key={idx} className="px-2.5 py-1 bg-slate-100 text-slate-700 rounded-lg text-[10px] font-bold">
-                      {ch}
-                    </span>
-                  ))
+                  member.assigned_social_channels.map((ch, idx) => {
+                    const label = ch.includes('wa') ? 'WhatsApp' 
+                      : ch.includes('ig') ? 'Instagram' 
+                      : ch.includes('fb') ? 'Facebook' 
+                      : ch.includes('tg') ? 'Telegram' 
+                      : ch.includes('li') ? 'LinkedIn' : ch;
+                    const color = ch.includes('wa') ? 'bg-emerald-50 text-emerald-700 border-emerald-200/60'
+                      : ch.includes('ig') ? 'bg-pink-50 text-pink-700 border-pink-200/60'
+                      : ch.includes('fb') ? 'bg-blue-50 text-blue-700 border-blue-200/60'
+                      : ch.includes('tg') ? 'bg-sky-50 text-sky-700 border-sky-200/60'
+                      : 'bg-indigo-50 text-indigo-700 border-indigo-200/60';
+                    return (
+                      <span key={idx} className={`px-2.5 py-1 rounded-lg text-[10px] font-bold border ${color}`}>
+                        {label}
+                      </span>
+                    );
+                  })
                 ) : (
                   <span className="text-xs text-slate-400">No channels assigned</span>
                 )}

@@ -106,14 +106,22 @@ export default function GlobalIncomingCallListener() {
 
     // 4. Backend Active Call Poller (Cross-Device & Cross-Browser)
     let isPollingCall = false;
-    const pollInterval = setInterval(async () => {
+    let pollInterval = null;
+
+    const runActiveCheck = async () => {
       if (isPollingCall) return;
       isPollingCall = true;
       try {
         const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3500);
+
         const res = await fetch(`${API_BASE_URL}/api/webrtc/call/active-check`, {
-          headers: token ? { Authorization: `Bearer ${token}` } : {}
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+          signal: controller.signal
         });
+        clearTimeout(timeoutId);
+
         if (res.ok) {
           const data = await res.json();
           const wasActed = data.session_id && (
@@ -149,16 +157,22 @@ export default function GlobalIncomingCallListener() {
             stopRingtone();
             setIncomingCall(null);
           }
-          // If status is CONNECTED or other - do nothing, let the calls page handle it
         }
       } catch (e) {
       } finally {
         isPollingCall = false;
       }
-    }, 20000); // Increased from 5000ms to 20000ms to completely prevent network queuing
+    };
+
+    // Delay start of background polling by 4s so initial page loads render instantly
+    const initialTimer = setTimeout(() => {
+      runActiveCheck();
+      pollInterval = setInterval(runActiveCheck, 20000);
+    }, 4000);
 
     return () => {
-      clearInterval(pollInterval);
+      clearTimeout(initialTimer);
+      if (pollInterval) clearInterval(pollInterval);
       if (wsRef.current) wsRef.current.close();
       stopRingtone();
     };

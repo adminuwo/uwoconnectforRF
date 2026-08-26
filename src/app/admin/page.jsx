@@ -21,23 +21,45 @@ export default function SuperAdminOverview() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState(null);
   
   const [compSearch, setCompSearch] = useState('');
   const [compSortKey, setCompSortKey] = useState('messages');
   const [compSortOrder, setCompSortOrder] = useState('desc');
 
+  const [intelStats, setIntelStats] = useState(null);
+
   const fetchData = async (isManualRefresh = false) => {
     try {
       if (isManualRefresh) setRefreshing(true);
       else setLoading(true);
+      setError(null);
 
       const token = localStorage.getItem('token');
-      const res = await axios.get(`${API_BASE_URL}/api/admin/overview/`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setData(res.data);
+      const [resOverview, resIntel] = await Promise.allSettled([
+        axios.get(`${API_BASE_URL}/api/admin/overview/`, {
+          headers: { Authorization: `Bearer ${token}` }
+        }),
+        axios.get(`${API_BASE_URL}/api/admin/client-intelligence/stats/`, {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+      ]);
+
+      if (resOverview.status === 'fulfilled') {
+        setData(resOverview.value.data);
+      } else {
+        console.error('Overview API failed:', resOverview.reason);
+        setError(resOverview.reason?.response?.data?.detail || resOverview.reason?.message || 'Failed to fetch overview data.');
+      }
+      
+      if (resIntel.status === 'fulfilled') {
+        setIntelStats(resIntel.value.data);
+      } else {
+        console.error('Intel Stats API failed:', resIntel.reason);
+      }
     } catch (err) {
       console.error('Failed to fetch super admin overview', err);
+      setError(err.message || 'An unexpected error occurred.');
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -53,13 +75,31 @@ export default function SuperAdminOverview() {
   const recentActivity = data?.recentActivity || [];
   const recentLogins = data?.recentLogins || [];
 
+  const approvalData = intelStats?.approvalStatus || {
+    total: kpis.totalClients || 0,
+    approved: kpis.activeClients || 0,
+    pending: 0,
+    rejected: 0,
+    approvedPercentage: 100,
+    pendingPercentage: 0,
+    rejectedPercentage: 0
+  };
+
+  const overviewData = intelStats?.overview || {
+    totalClients: kpis.totalClients || 0,
+    activeClients: kpis.activeClients || 0,
+    inactiveClients: 0
+  };
+
+  const rowMetrics = intelStats?.rowMetrics || {};
+
   const mainKpis = [
-    { name: 'Total Clients', value: kpis.totalClients ?? 0, sub: `${kpis.activeClients ?? 0} active`, icon: Users, href: '/admin/clients' },
+    { name: 'Total Team Members', value: rowMetrics.totalTeamMembers ?? (kpis.totalTeamMembers ?? 0), sub: 'Across workspaces', icon: Users, href: '/admin/team' },
     { name: 'Channels Active', value: kpis.activeChannels ?? 0, sub: `${kpis.totalChannels ?? 0} configured`, icon: Globe, href: '/admin/channels' },
     { name: 'Total Messages', value: (kpis.totalMessages ?? 0).toLocaleString(), sub: `${kpis.botMessages ?? 0} bot handled`, icon: MessageSquare, href: '/admin/inbox' },
     { name: 'Active AI Bots', value: kpis.activeBots ?? 0, sub: `${kpis.humanTakeoverCount ?? 0} handoffs`, icon: Bot, href: '/admin/ai' },
-    { name: 'Total Invoices', value: kpis.totalInvoices ?? 0, sub: `₹${(kpis.totalInvoiceValue || 0).toLocaleString()}`, icon: Receipt, href: '/admin/invoices' },
-    { name: 'Active Projects', value: kpis.activeProjects ?? 0, sub: `${kpis.totalProjects ?? 0} total`, icon: Layers, href: '/admin/clients' },
+    { name: 'Total Invoices', value: kpis.totalInvoices ?? (rowMetrics.totalInvoices ?? 0), sub: `₹${(kpis.totalInvoiceValue || rowMetrics.totalRevenue || 0).toLocaleString()}`, icon: Receipt, href: '/admin/invoices' },
+    { name: 'Active Projects', value: rowMetrics.activeProjects ?? (kpis.activeProjects ?? 0), sub: `${rowMetrics.totalProjects ?? (kpis.totalProjects ?? 0)} total`, icon: Layers, href: '/admin/team' },
   ];
 
   const handleSort = (key) => {
@@ -85,12 +125,30 @@ export default function SuperAdminOverview() {
       return compSortOrder === 'asc' ? (valA || 0) - (valB || 0) : (valB || 0) - (valA || 0);
     });
 
-  if (loading) {
+  if (loading && !data) {
     return (
       <DashboardLayout role="ADMIN">
         <div className="max-w-full py-32 flex flex-col items-center justify-center gap-3">
           <Loader2 className="animate-spin text-[#059669]" size={36} />
           <p className="text-xs font-semibold text-slate-400">Loading Control Center...</p>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (error && !data) {
+    return (
+      <DashboardLayout role="ADMIN">
+        <div className="max-w-full py-32 flex flex-col items-center justify-center gap-3">
+          <ShieldAlert className="text-rose-500" size={48} />
+          <p className="text-sm font-bold text-slate-800">Failed to load dashboard</p>
+          <p className="text-xs font-medium text-slate-500">{error}</p>
+          <button 
+            onClick={() => fetchData(true)}
+            className="mt-4 px-4 py-2 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg text-xs font-bold transition-colors"
+          >
+            Try Again
+          </button>
         </div>
       </DashboardLayout>
     );
@@ -126,6 +184,137 @@ export default function SuperAdminOverview() {
             >
               <RefreshCw size={15} className={cn(refreshing && "animate-spin text-[#059669]")} />
             </button>
+          </div>
+        </div>
+
+        {/* ── 1. Admin Overview — Client Summary (Interactive & Clickable) ── */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 mb-8">
+          {/* Total Clients Card */}
+          <div className="lg:col-span-4 bg-white p-5 rounded-2xl border border-slate-200/80 shadow-2xs flex flex-col justify-between">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+                <Users size={14} className="text-emerald-600" />
+                Client Summary
+              </span>
+              <Link
+                href="/admin/clients"
+                className="text-xs font-bold text-emerald-600 hover:text-emerald-700 flex items-center gap-1 hover:underline"
+              >
+                View All <ChevronRight size={13} />
+              </Link>
+            </div>
+            
+            <div className="flex items-baseline justify-between mb-4">
+              <div>
+                <h3 className="text-3xl font-extrabold text-slate-900 tracking-tight">
+                  {overviewData.totalClients}
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5">Total Registered Clients</p>
+              </div>
+              <div className="text-right">
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-bold">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  {overviewData.activeClients} Active
+                </span>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-3 gap-2 pt-3 border-t border-slate-100 text-center">
+              <Link href="/admin/clients?status=ACTIVE" className="p-2 rounded-xl hover:bg-slate-50 transition-all">
+                <div className="text-xs font-bold text-slate-900">{overviewData.activeClients}</div>
+                <div className="text-[10px] text-slate-400 font-medium">Active</div>
+              </Link>
+              <Link href="/admin/clients?status=TRIAL" className="p-2 rounded-xl hover:bg-slate-50 transition-all">
+                <div className="text-xs font-bold text-slate-900">{overviewData.trialClients || 0}</div>
+                <div className="text-[10px] text-slate-400 font-medium">Trial</div>
+              </Link>
+              <Link href="/admin/clients?status=SUSPENDED" className="p-2 rounded-xl hover:bg-slate-50 transition-all">
+                <div className="text-xs font-bold text-slate-900">{overviewData.suspendedClients || 0}</div>
+                <div className="text-[10px] text-slate-400 font-medium">Suspended</div>
+              </Link>
+            </div>
+          </div>
+
+          {/* Approval Status Distribution Card */}
+          <div className="lg:col-span-8 bg-white p-5 rounded-2xl border border-slate-200/80 shadow-2xs flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+                  <ShieldCheck size={14} className="text-emerald-600" />
+                  Approval Status Distribution
+                </span>
+                <span className="text-[11px] font-semibold text-slate-400">
+                  {approvalData.total} Total Registered
+                </span>
+              </div>
+
+              {/* Status Visual Distribution Bar */}
+              <div className="w-full bg-slate-100 h-3 rounded-full overflow-hidden flex gap-0.5 mb-4 p-0.5">
+                <div 
+                  className="bg-emerald-500 h-full rounded-l-full transition-all duration-500" 
+                  style={{ width: `${Math.max(4, approvalData.approvedPercentage || 0)}%` }} 
+                  title={`Approved: ${approvalData.approved} (${approvalData.approvedPercentage}%)`}
+                />
+                <div 
+                  className="bg-amber-400 h-full transition-all duration-500" 
+                  style={{ width: `${Math.max(approvalData.pending > 0 ? 4 : 0, approvalData.pendingPercentage || 0)}%` }} 
+                  title={`Pending: ${approvalData.pending} (${approvalData.pendingPercentage}%)`}
+                />
+                <div 
+                  className="bg-rose-500 h-full rounded-r-full transition-all duration-500" 
+                  style={{ width: `${Math.max(approvalData.rejected > 0 ? 4 : 0, approvalData.rejectedPercentage || 0)}%` }} 
+                  title={`Rejected: ${approvalData.rejected} (${approvalData.rejectedPercentage}%)`}
+                />
+              </div>
+            </div>
+
+            {/* Clickable Filter Tiles */}
+            <div className="grid grid-cols-3 gap-3">
+              {/* Approved */}
+              <Link
+                href="/admin/clients?approval=APPROVED"
+                className="p-3 rounded-xl bg-emerald-50/70 hover:bg-emerald-100/70 border border-emerald-200/60 transition-all flex items-center justify-between group"
+              >
+                <div>
+                  <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-800">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                    Approved
+                  </div>
+                  <div className="text-2xl font-extrabold text-emerald-950 mt-1">{approvalData.approved}</div>
+                </div>
+                <ChevronRight size={16} className="text-emerald-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+              </Link>
+
+              {/* Pending */}
+              <Link
+                href="/admin/clients?approval=PENDING"
+                className="p-3 rounded-xl bg-amber-50/70 hover:bg-amber-100/70 border border-amber-200/60 transition-all flex items-center justify-between group"
+              >
+                <div>
+                  <div className="flex items-center gap-1.5 text-xs font-bold text-amber-800">
+                    <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
+                    Pending Approval
+                  </div>
+                  <div className="text-2xl font-extrabold text-amber-950 mt-1">{approvalData.pending}</div>
+                </div>
+                <ChevronRight size={16} className="text-amber-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+              </Link>
+
+              {/* Rejected */}
+              <Link
+                href="/admin/clients?approval=REJECTED"
+                className="p-3 rounded-xl bg-rose-50/70 hover:bg-rose-100/70 border border-rose-200/60 transition-all flex items-center justify-between group"
+              >
+                <div>
+                  <div className="flex items-center gap-1.5 text-xs font-bold text-rose-800">
+                    <span className="w-2 h-2 rounded-full bg-rose-500" />
+                    Rejected
+                  </div>
+                  <div className="text-2xl font-extrabold text-rose-950 mt-1">{approvalData.rejected}</div>
+                </div>
+                <ChevronRight size={16} className="text-rose-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+              </Link>
+            </div>
           </div>
         </div>
 

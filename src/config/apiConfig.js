@@ -10,10 +10,19 @@
 const PRIVATE_IP_REGEX = /^(127\.|10\.|192\.168\.|172\.(1[6-9]|2[0-9]|3[01])\.)/;
 
 const getApiBaseUrl = () => {
-  if (process.env.NODE_ENV === 'development') {
-    return 'http://localhost:8080';
+  if (typeof window !== 'undefined' && window.location) {
+    const currentHost = window.location.hostname;
+    if (currentHost === 'localhost' || currentHost === '127.0.0.1') {
+      return 'http://127.0.0.1:8080';
+    }
+    if (PRIVATE_IP_REGEX.test(currentHost)) {
+      return `http://${currentHost}:8080`;
+    }
   }
-  return process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app';
+  if (process.env.NEXT_PUBLIC_API_URL) {
+    return process.env.NEXT_PUBLIC_API_URL;
+  }
+  return 'https://uwoconnectforrb-743928421487.asia-south1.run.app';
 };
 
 export const getUnifiedApiBaseUrl = () => {
@@ -26,7 +35,7 @@ export const getUnifiedApiBaseUrl = () => {
       );
     }
   }
-  return process.env.NEXT_PUBLIC_UNIFIED_BACKEND_API || 'http://localhost:8000/api';
+  return process.env.NEXT_PUBLIC_UNIFIED_BACKEND_API || 'https://unified-dashboard-977864306871.asia-south1.run.app/api';
 };
 
 export const UNIFIED_API_BASE_URL = getUnifiedApiBaseUrl();

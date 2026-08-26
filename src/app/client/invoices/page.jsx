@@ -13,6 +13,7 @@ import InvoicePreviewModal from '@/components/invoices/InvoicePreviewModal';
 import { cn } from '@/lib/utils';
 import InvoiceCreateModal from '@/components/invoices/InvoiceCreateModal';
 import { API_BASE_URL } from '@/config/apiConfig';
+import { SkeletonTableRows } from '@/components/common/LoadingSkeleton';
 
 const getStatusBadge = (status) => {
   const mapping = {
@@ -280,9 +281,8 @@ export default function InvoicesPage() {
         {/* Invoices List Table */}
         <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
           {loading ? (
-            <div className="flex items-center justify-center py-16 text-slate-400 text-xs gap-2">
-              <Loader2 className="w-5 h-5 animate-spin text-emerald-600" />
-              Loading invoices...
+            <div className="p-4">
+              <SkeletonTableRows rows={6} cols={6} />
             </div>
           ) : filteredInvoices.length > 0 ? (
             <div className="overflow-x-auto">

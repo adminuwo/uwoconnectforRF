@@ -17,16 +17,23 @@ import { API_BASE_URL } from '@/config/apiConfig';
 
 const ClientOverview = () => {
   const router = useRouter();
-  const [loading, setLoading] = useState(true);
+  const [mounted, setMounted] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [userName, setUserName] = useState('User');
   const [contacts, setContacts] = useState([]);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        router.push('/auth/login');
-      }
+    setMounted(true);
+    const token = localStorage.getItem('token');
+    if (!token) {
+      router.push('/auth/login');
+    }
+    const userStr = localStorage.getItem('user');
+    if (userStr) {
+      try {
+        const u = JSON.parse(userStr);
+        setUserName(u.name || u.first_name || u.username || u.business_name || 'User');
+      } catch (e) {}
     }
   }, [router]);
 
@@ -90,6 +97,7 @@ const ClientOverview = () => {
   });
   const [ytData, setYtData] = useState(null);
   const [dashboardNews, setDashboardNews] = useState([]);
+  const [assignedProjects, setAssignedProjects] = useState([]);
   const [sendingNewsAlert, setSendingNewsAlert] = useState({});
   const [toast, setToast] = useState(null);
   const [activeFeatureDrawer, setActiveFeatureDrawer] = useState(null);
@@ -183,52 +191,39 @@ const ClientOverview = () => {
       const headers = { Authorization: `Bearer ${token}` };
 
       try {
-        const res = await axios.get(
-          `${API_BASE_URL}/api/client/stats`,
-          { headers }
-        );
-        if (res.data) {
-          setStatsData(res.data);
-          if (res.data.resourceCounts) {
-            setResourceCounts(prev => ({ ...prev, ...res.data.resourceCounts }));
+        const [statsRes, ytRes, contactsRes, newsRes, projectsRes] = await Promise.allSettled([
+          axios.get(`${API_BASE_URL}/api/client/stats`, { headers, timeout: 7000 }),
+          axios.get(`${API_BASE_URL}/api/youtube/analytics`, { headers, timeout: 7000 }),
+          axios.get(`${API_BASE_URL}/api/contacts/?limit=1`, { headers, timeout: 7000 }),
+          axios.get(`${API_BASE_URL}/api/google-news/feed?query=technology`, { headers, timeout: 7000 }),
+          axios.get(`${API_BASE_URL}/api/team/projects/`, { headers, timeout: 7000 }),
+        ]);
+
+        if (statsRes.status === 'fulfilled' && statsRes.value?.data) {
+          setStatsData(statsRes.value.data);
+          if (statsRes.value.data.resourceCounts) {
+            setResourceCounts(prev => ({ ...prev, ...statsRes.value.data.resourceCounts }));
           }
         }
-      } catch (err) {
-        console.warn("Dashboard stats notice:", err.message);
-      }
 
-      try {
-        const ytRes = await axios.get(
-          `${API_BASE_URL}/api/youtube/analytics`,
-          { headers }
-        );
-        if (ytRes.data && !ytRes.data.error) {
-          setYtData(ytRes.data);
+        if (ytRes.status === 'fulfilled' && ytRes.value?.data && !ytRes.value.data.error) {
+          setYtData(ytRes.value.data);
+        }
+
+        if (contactsRes.status === 'fulfilled' && contactsRes.value?.data) {
+          setContacts(contactsRes.value.data || []);
+        }
+
+        if (newsRes.status === 'fulfilled' && newsRes.value?.data?.articles) {
+          setDashboardNews(newsRes.value.data.articles.slice(0, 4));
+        }
+
+        if (projectsRes.status === 'fulfilled' && projectsRes.value?.data) {
+          const rawProjs = Array.isArray(projectsRes.value.data) ? projectsRes.value.data : (projectsRes.value.data.results || []);
+          setAssignedProjects(rawProjs);
         }
       } catch (err) {
-        console.warn("YouTube analytics notice:", err.message);
-      }
-
-      try {
-        const contactsRes = await axios.get(
-          `${API_BASE_URL}/api/contacts/?limit=1`,
-          { headers }
-        );
-        setContacts(Array.isArray(contactsRes.data) ? contactsRes.data : (contactsRes.data?.results || []));
-      } catch (err) {
-        console.warn("Contacts fetch notice:", err.message);
-      }
-
-      try {
-        const newsRes = await axios.get(
-          `${API_BASE_URL}/api/google-news/feed?query=technology`,
-          { headers }
-        );
-        if (newsRes.data && newsRes.data.articles) {
-          setDashboardNews(newsRes.data.articles.slice(0, 4));
-        }
-      } catch (err) {
-        console.warn("News feed notice:", err.message);
+        console.warn("Dashboard fetch notice:", err.message);
       } finally {
         setLoading(false);
       }
@@ -380,6 +375,106 @@ const ClientOverview = () => {
               );
             })}
           </div>
+        </div>
+
+        {/* ── Assigned Projects & Milestones Widget ── */}
+        <div className="mb-10 p-6 rounded-3xl bg-white border border-slate-200/90 shadow-sm relative overflow-hidden">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100 mb-5">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100 font-bold">
+                <FolderKanban size={20} />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                  My Assigned Projects & Milestones
+                  <span className="px-2 py-0.5 bg-emerald-50 text-emerald-700 text-[10px] font-bold rounded-full border border-emerald-200">
+                    {assignedProjects.length} Active
+                  </span>
+                </h3>
+                <p className="text-xs text-slate-400">Live tracking of your assigned projects, milestone progress, and deliverables.</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => router.push('/client/reports')}
+                className="px-3.5 py-2 bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold rounded-xl text-xs transition-all border border-slate-200 cursor-pointer flex items-center gap-1.5"
+              >
+                <FileText size={13} /> Submit Report
+              </button>
+              <button
+                onClick={() => router.push('/client/team')}
+                className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs transition-all cursor-pointer flex items-center gap-1.5 shadow-2xs"
+              >
+                View All Projects <ArrowUpRight size={13} />
+              </button>
+            </div>
+          </div>
+
+          {assignedProjects.length === 0 ? (
+            <div className="text-center py-8 bg-slate-50/50 rounded-2xl border border-dashed border-slate-200 text-slate-400 text-xs">
+              <p className="font-semibold text-slate-600">No assigned projects yet.</p>
+              <p className="text-[11px] text-slate-400 mt-0.5">When the admin assigns you to a workspace project, it will appear here with live milestones.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {assignedProjects.map((p) => {
+                const milestones = p.milestones || [];
+                const completedMilestones = milestones.filter(m => m.completed || m.status === 'COMPLETED').length;
+                const totalMilestones = milestones.length;
+                const progressPercent = totalMilestones > 0 
+                  ? Math.round((completedMilestones / totalMilestones) * 100) 
+                  : (p.progress_percentage || 0);
+
+                return (
+                  <div
+                    key={p.id || p._id}
+                    onClick={() => router.push('/client/team')}
+                    className="p-4 rounded-2xl bg-slate-50/60 hover:bg-slate-50 border border-slate-200/80 hover:border-emerald-300 transition-all cursor-pointer group flex flex-col justify-between space-y-3"
+                  >
+                    <div>
+                      <div className="flex items-center justify-between gap-2">
+                        <span className={cn(
+                          "px-2 py-0.5 rounded-full text-[9px] font-bold uppercase",
+                          p.status === 'COMPLETED' ? "bg-emerald-100 text-emerald-800" :
+                          p.status === 'IN_PROGRESS' ? "bg-blue-100 text-blue-800" :
+                          "bg-slate-200 text-slate-700"
+                        )}>
+                          {p.status?.replace('_', ' ') || 'PLANNING'}
+                        </span>
+                        {p.deadline && (
+                          <span className="text-[10px] text-slate-400 font-medium flex items-center gap-1">
+                            <Clock size={10} /> {p.deadline.split('T')[0]}
+                          </span>
+                        )}
+                      </div>
+
+                      <h4 className="font-bold text-slate-900 text-sm mt-2 group-hover:text-emerald-700 transition-colors line-clamp-1">
+                        {p.name}
+                      </h4>
+                      {p.description && (
+                        <p className="text-[11px] text-slate-400 line-clamp-1 mt-0.5">{p.description}</p>
+                      )}
+                    </div>
+
+                    {/* Progress */}
+                    <div className="space-y-1.5 pt-1">
+                      <div className="flex justify-between text-[11px] font-bold text-slate-700">
+                        <span className="text-slate-400 font-semibold">{completedMilestones} / {totalMilestones} Milestones</span>
+                        <span className="text-emerald-600 font-black">{progressPercent}%</span>
+                      </div>
+                      <div className="w-full bg-slate-200/80 h-2 rounded-full overflow-hidden">
+                        <div
+                          className="bg-emerald-500 h-full rounded-full transition-all duration-300"
+                          style={{ width: `${progressPercent}%` }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         {/* YouTube Channel Stats Widget */}

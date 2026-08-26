@@ -3,8 +3,10 @@
 import React, { useState } from 'react';
 import { X, FileText, AlertTriangle, Clock } from 'lucide-react';
 import axios from 'axios';
+import { API_BASE_URL } from '@/config/apiConfig';
 
-export default function WorkReportModal({ isOpen, onClose, onSuccess }) {
+export default function WorkReportModal({ isOpen, onClose, onSuccess, initialDate }) {
+  const [reportDate, setReportDate] = useState(() => initialDate || new Date().toISOString().split('T')[0]);
   const [todaysWork, setTodaysWork] = useState('');
   const [completedWork, setCompletedWork] = useState('');
   const [remainingWork, setRemainingWork] = useState('');
@@ -13,6 +15,12 @@ export default function WorkReportModal({ isOpen, onClose, onSuccess }) {
   const [hoursWorked, setHoursWorked] = useState(8.0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
+
+  React.useEffect(() => {
+    if (initialDate) {
+      setReportDate(initialDate);
+    }
+  }, [initialDate, isOpen]);
 
   if (!isOpen) return null;
 
@@ -28,8 +36,9 @@ export default function WorkReportModal({ isOpen, onClose, onSuccess }) {
     try {
       const token = localStorage.getItem('token');
       await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/team/reports/`,
+        `${API_BASE_URL}/api/team/reports/`,
         {
+          report_date: reportDate,
           todays_work: todaysWork.trim(),
           completed_work: completedWork.trim(),
           remaining_work: remainingWork.trim(),
@@ -41,6 +50,11 @@ export default function WorkReportModal({ isOpen, onClose, onSuccess }) {
       );
       onSuccess();
       onClose();
+      setTodaysWork('');
+      setCompletedWork('');
+      setRemainingWork('');
+      setBlockers('');
+      setNeedHelp(false);
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to submit work report');
     } finally {
@@ -73,6 +87,17 @@ export default function WorkReportModal({ isOpen, onClose, onSuccess }) {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4 text-xs">
+          <div>
+            <label className="block text-slate-700 font-semibold mb-1">Report Date *</label>
+            <input
+              type="date"
+              value={reportDate}
+              onChange={(e) => setReportDate(e.target.value)}
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 font-medium text-slate-800"
+              required
+            />
+          </div>
+
           <div>
             <label className="block text-slate-600 font-medium mb-1.5">Today's Accomplishments & Work *</label>
             <textarea

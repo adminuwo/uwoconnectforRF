@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, Clock, Calendar, CheckCircle, AlertCircle, Play, Square, FileText } from 'lucide-react';
 import axios from 'axios';
+import { API_BASE_URL } from '@/config/apiConfig';
 
 export default function AttendanceLeaveModal({ isOpen, onClose, onActionCompleted, todayAttendance }) {
   const [activeTab, setActiveTab] = useState('ATTENDANCE'); // ATTENDANCE or LEAVE
@@ -23,7 +24,7 @@ export default function AttendanceLeaveModal({ isOpen, onClose, onActionComplete
     try {
       const token = localStorage.getItem('token');
       await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/team/attendance/clock_in/`,
+        `${API_BASE_URL}/api/team/attendance/clock_in/`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -44,7 +45,7 @@ export default function AttendanceLeaveModal({ isOpen, onClose, onActionComplete
     try {
       const token = localStorage.getItem('token');
       await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/team/attendance/clock_out/`,
+        `${API_BASE_URL}/api/team/attendance/clock_out/`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -70,7 +71,7 @@ export default function AttendanceLeaveModal({ isOpen, onClose, onActionComplete
     try {
       const token = localStorage.getItem('token');
       await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/team/leaves/`,
+        `${API_BASE_URL}/api/team/leaves/`,
         {
           leave_type: leaveType,
           start_date: startDate,

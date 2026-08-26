@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { X, CheckCircle, RotateCcw, ShieldCheck, User, Calendar, MessageSquare } from 'lucide-react';
 import axios from 'axios';
+import { API_BASE_URL } from '@/config/apiConfig';
 
 export default function ApprovalManagerModal({ approval, isOpen, onClose, onSuccess }) {
   const [feedback, setFeedback] = useState('');
@@ -15,7 +16,7 @@ export default function ApprovalManagerModal({ approval, isOpen, onClose, onSucc
     try {
       const token = localStorage.getItem('token');
       await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/team/approvals/`,
+        `${API_BASE_URL}/api/team/approvals/`,
         {
           approval_id: approval.id,
           action: actionType,

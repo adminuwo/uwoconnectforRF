@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { X, FolderPlus, Layers, Calendar, AlertCircle, Plus, Trash2, User, DollarSign, Clock, Tag } from 'lucide-react';
 import axios from 'axios';
+import { API_BASE_URL } from '@/config/apiConfig';
 
 const PROJECT_TYPES = ['Web Application', 'Mobile App', 'Marketing Campaign', 'CRM Integration', 'Infrastructure', 'Custom SaaS'];
 const PRIORITIES = ['LOW', 'MEDIUM', 'HIGH', 'URGENT'];
@@ -69,7 +70,7 @@ export default function ProjectModal({ isOpen, onClose, onSuccess, members = [] 
       const tagsArray = tagsInput.split(',').map(t => t.trim()).filter(Boolean);
 
       await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/team/projects/`,
+        `${API_BASE_URL}/api/team/projects/`,
         {
           name: name.trim(),
           description: description.trim(),
@@ -160,7 +161,7 @@ export default function ProjectModal({ isOpen, onClose, onSuccess, members = [] 
             />
           </div>
 
-          {/* Project Type & Client Name */}
+          {/* Project Type & Department */}
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block font-semibold text-slate-700 mb-1">Project Type</label>
@@ -176,20 +177,6 @@ export default function ProjectModal({ isOpen, onClose, onSuccess, members = [] 
             </div>
 
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">Client Name (Optional)</label>
-              <input
-                type="text"
-                value={clientName}
-                onChange={(e) => setClientName(e.target.value)}
-                placeholder="e.g. Acme Corp"
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 outline-none"
-              />
-            </div>
-          </div>
-
-          {/* Department, Priority & Status */}
-          <div className="grid grid-cols-3 gap-3">
-            <div>
               <label className="block font-semibold text-slate-700 mb-1">Department</label>
               <select
                 value={department}
@@ -201,36 +188,10 @@ export default function ProjectModal({ isOpen, onClose, onSuccess, members = [] 
                 ))}
               </select>
             </div>
-
-            <div>
-              <label className="block font-semibold text-slate-700 mb-1">Priority</label>
-              <select
-                value={priority}
-                onChange={(e) => setPriority(e.target.value)}
-                className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-white font-medium outline-none"
-              >
-                {PRIORITIES.map(p => (
-                  <option key={p} value={p}>{p}</option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block font-semibold text-slate-700 mb-1">Status</label>
-              <select
-                value={status}
-                onChange={(e) => setStatus(e.target.value)}
-                className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-white font-medium outline-none"
-              >
-                {STATUSES.map(s => (
-                  <option key={s} value={s}>{s.replace('_', ' ')}</option>
-                ))}
-              </select>
-            </div>
           </div>
 
-          {/* Dates & Hours */}
-          <div className="grid grid-cols-3 gap-3">
+          {/* Start Date & Target Deadline */}
+          <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block font-semibold text-slate-700 mb-1 flex items-center gap-1">
                 <Calendar size={12} className="text-slate-400" /> Start Date
@@ -251,18 +212,6 @@ export default function ProjectModal({ isOpen, onClose, onSuccess, members = [] 
                 type="date"
                 value={deadline}
                 onChange={(e) => setDeadline(e.target.value)}
-                className="w-full px-3 py-2.5 rounded-xl border border-slate-200 outline-none"
-              />
-            </div>
-
-            <div>
-              <label className="block font-semibold text-slate-700 mb-1 flex items-center gap-1">
-                <Clock size={12} className="text-slate-400" /> Est. Hours
-              </label>
-              <input
-                type="number"
-                value={estimatedHours}
-                onChange={(e) => setEstimatedHours(e.target.value)}
                 className="w-full px-3 py-2.5 rounded-xl border border-slate-200 outline-none"
               />
             </div>

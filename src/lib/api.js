@@ -12,6 +12,15 @@
 const PRIVATE_IP_REGEX = /^(127\.|10\.|192\.168\.|172\.(1[6-9]|2[0-9]|3[01])\.)/;
 
 export function getApiBase() {
+  if (typeof window !== 'undefined' && window.location) {
+    const currentHost = window.location.hostname;
+    if (currentHost === 'localhost' || currentHost === '127.0.0.1') {
+      return 'http://127.0.0.1:8080';
+    }
+    if (PRIVATE_IP_REGEX.test(currentHost)) {
+      return `http://${currentHost}:8080`;
+    }
+  }
   return process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app';
 }
 

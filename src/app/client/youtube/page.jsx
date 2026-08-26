@@ -1020,11 +1020,10 @@ const YouTubeManager = () => {
                             </div>
                           </div>
 
-                          {/* Comment text */}
-                          <div 
-                            className="text-xs text-slate-600 leading-relaxed font-medium pl-1 bg-white p-2 rounded-xl border border-slate-50/50 shadow-inner"
-                            dangerouslySetInnerHTML={{ __html: comment.text }}
-                          />
+                          {/* Comment text - Rendered safely to prevent XSS */}
+                          <div className="text-xs text-slate-600 leading-relaxed font-medium pl-1 bg-white p-2 rounded-xl border border-slate-50/50 shadow-inner whitespace-pre-wrap break-words">
+                            {comment.text}
+                          </div>
 
                           {/* Existing Replies */}
                           {comment.replies && comment.replies.length > 0 && (
@@ -1048,10 +1047,9 @@ const YouTubeManager = () => {
                                       <span className="text-[8px] font-bold text-slate-400">{new Date(reply.published_at).toLocaleDateString()}</span>
                                     </div>
                                   </div>
-                                  <div 
-                                    className="text-[10px] text-slate-600 leading-relaxed font-medium pl-1"
-                                    dangerouslySetInnerHTML={{ __html: reply.text }}
-                                  />
+                                  <div className="text-[10px] text-slate-600 leading-relaxed font-medium pl-1 whitespace-pre-wrap break-words">
+                                    {reply.text}
+                                  </div>
                                 </div>
                               ))}
                             </div>
@@ -1204,6 +1202,42 @@ const YouTubeManager = () => {
             </div>
           </div>
         )}
+
+        {/* YouTube API Services Compliance Footer */}
+        <div className="mt-12 p-4 bg-slate-50 border border-slate-200/80 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-3 text-slate-500 text-[11px]">
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span className="font-semibold text-slate-700">YouTube API Compliance:</span>
+            <span>By using this YouTube integration, you agree to be bound by the</span>
+            <a 
+              href="https://www.youtube.com/t/terms" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="text-red-600 font-bold hover:underline inline-flex items-center gap-0.5"
+            >
+              YouTube Terms of Service ↗
+            </a>
+            <span>and the</span>
+            <a 
+              href="https://policies.google.com/privacy" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="text-red-600 font-bold hover:underline inline-flex items-center gap-0.5"
+            >
+              Google Privacy Policy ↗
+            </a>.
+          </div>
+          <div>
+            <span>You can revoke UwoConnect access at any time via</span>
+            <a 
+              href="https://myaccount.google.com/permissions" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="text-blue-600 font-bold hover:underline ml-1 inline-flex items-center gap-0.5"
+            >
+              Google Security Settings ↗
+            </a>
+          </div>
+        </div>
 
       </div>
     </DashboardLayout>

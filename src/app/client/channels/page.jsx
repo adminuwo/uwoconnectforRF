@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from 'react';
 import {
-  MessageCircle,
   CheckCircle2,
   Loader2,
   Copy,
@@ -10,14 +9,19 @@ import {
   Settings,
   RefreshCw,
   Plus,
-  Calendar,
   Sparkles,
-  Trash2
+  Lock,
+  Clock,
+  ExternalLink,
+  ChevronRight
 } from 'lucide-react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import axios from 'axios';
+import { API_BASE_URL } from '@/config/apiConfig';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { cn } from '@/lib/utils';
+import { CHANNEL_DEFINITIONS, getChannelAccessState } from '@/config/channelsConfig';
+import ComingSoonChannelModal from '@/components/channels/ComingSoonChannelModal';
 import ZohoConfigModal, { ZohoIcon } from '@/components/channels/ZohoConfigModal';
 import WhatsAppConfigModal from '@/components/channels/WhatsAppConfigModal';
 import FacebookConfigModal from '@/components/channels/FacebookConfigModal';
@@ -29,66 +33,52 @@ import GoogleDocsConfigModal, { GoogleDocsIcon } from '@/components/channels/Goo
 import GoogleSlidesConfigModal, { GoogleSlidesIcon } from '@/components/channels/GoogleSlidesConfigModal';
 import GoogleNewsConfigModal, { GoogleNewsIcon } from '@/components/channels/GoogleNewsConfigModal';
 import OutlookConfigModal, { OutlookIcon } from '@/components/channels/OutlookConfigModal';
+import YouTubeConfigModal, { YouTubeBrandIcon } from '@/components/channels/YouTubeConfigModal';
 import LearningCenterModal from '@/components/guides/LearningCenterModal';
 
-const FacebookIcon = ({ size = 22, className }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={className}
-  >
-    <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
+// ═════════════════════════════════════════════════════════════════════════════════
+// ── AUTHENTIC BRAND VECTOR ICONS ──
+// ═════════════════════════════════════════════════════════════════════════════════
+
+const WhatsAppBrandIcon = ({ size = 24, className = "" }) => (
+  <svg width={size} height={size} viewBox="0 0 48 48" fill="none" className={className}>
+    <circle cx="24" cy="24" r="24" fill="#25D366" />
+    <path fillRule="evenodd" clipRule="evenodd" d="M35.2 12.8C32.3 9.9 28.3 8.3 24.1 8.3C15.4 8.3 8.4 15.3 8.4 24C8.4 26.8 9.1 29.5 10.5 31.9L8.4 39.6L16.3 37.5C18.6 38.8 21.3 39.5 24.1 39.5C32.8 39.5 39.8 32.5 39.8 23.8C39.8 19.6 38.1 15.6 35.2 12.8ZM24.1 36.8C21.7 36.8 19.4 36.1 17.4 35L16.9 34.7L12.2 35.9L13.5 31.3L13.2 30.8C12 28.7 11.3 26.4 11.3 24C11.3 17 17 11.3 24.1 11.3C27.5 11.3 30.7 12.6 33.1 15C35.5 17.4 36.8 20.6 36.8 24C36.8 31 31.1 36.8 24.1 36.8ZM31 27.2C30.6 27 28.7 26.1 28.4 26C28 25.8 27.8 25.7 27.5 26.1C27.2 26.5 26.5 27.4 26.3 27.6C26.1 27.9 25.8 27.9 25.4 27.7C25 27.5 23.7 27.1 22.2 25.7C21 24.7 20.2 23.4 20 23C19.8 22.6 20 22.4 20.2 22.2C20.4 22 20.6 21.7 20.8 21.5C21 21.3 21.1 21.1 21.2 20.9C21.3 20.7 21.3 20.5 21.2 20.3C21.1 20.1 20.3 18.2 20 17.4C19.7 16.6 19.4 16.7 19.1 16.7H18.4C18.1 16.7 17.7 16.8 17.3 17.2C16.9 17.6 16 18.5 16 20.3C16 22.1 17.3 23.9 17.5 24.1C17.7 24.3 20.1 28 23.7 29.6C24.6 30 25.2 30.2 25.8 30.4C26.7 30.7 27.5 30.6 28.2 30.5C28.9 30.4 30.5 29.5 30.8 28.6C31.1 27.8 31.1 27.1 31 27.2Z" fill="white"/>
   </svg>
 );
 
-const InstagramIcon = ({ size = 22, className }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={className}
-  >
-    <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
-    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
-    <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
+const FacebookBrandIcon = ({ size = 24, className = "" }) => (
+  <svg width={size} height={size} viewBox="0 0 48 48" fill="none" className={className}>
+    <circle cx="24" cy="24" r="24" fill="#1877F2"/>
+    <path d="M29.5 25.1L30.3 19.9H25.3V16.5C25.3 15.1 26 13.7 28.2 13.7H30.5V9.3C30.5 9.3 28.4 9 26.4 9C22.3 9 19.6 11.5 19.6 16V19.9H15V25.1H19.6V37.7C20.5 37.9 21.5 38 22.5 38C23.5 38 24.4 37.9 25.3 37.7V25.1H29.5Z" fill="white"/>
   </svg>
 );
 
-const GmailIcon = ({ size = 22, className }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={className}
-  >
-    <path d="M4 7.00005L10.2 11.65C11.2667 12.45 12.7333 12.45 13.8 11.65L20 7" />
-    <rect x="3" y="5" width="18" height="14" rx="2" />
+const InstagramBrandIcon = ({ size = 24, className = "" }) => (
+  <svg width={size} height={size} viewBox="0 0 48 48" fill="none" className={className}>
+    <defs>
+      <linearGradient id="igClientGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+        <stop offset="0%" stopColor="#FFD600" />
+        <stop offset="25%" stopColor="#FF7A00" />
+        <stop offset="50%" stopColor="#FF0069" />
+        <stop offset="75%" stopColor="#D300C5" />
+        <stop offset="100%" stopColor="#7638FA" />
+      </linearGradient>
+    </defs>
+    <rect width="48" height="48" rx="12" fill="url(#igClientGrad)"/>
+    <rect x="11" y="11" width="26" height="26" rx="7" stroke="white" strokeWidth="3" fill="none"/>
+    <circle cx="24" cy="24" r="6" stroke="white" strokeWidth="3" fill="none"/>
+    <circle cx="31.5" cy="16.5" r="1.75" fill="white"/>
   </svg>
 );
 
-const RazorpayLogo = () => (
-  <svg width="22" height="22" viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M16 56L28.5 16H44L36.5 40H50L22 56H16Z" fill="#3395FF"/>
-    <path d="M36.5 40L44 16H58L50 40H36.5Z" fill="#072654"/>
+const GmailBrandIcon = ({ size = 24, className = "" }) => (
+  <svg width={size} height={size} viewBox="0 0 48 48" fill="none" className={className}>
+    <path d="M10 38V18.8L3 13.5V35C3 36.6 4.3 38 6 38H10Z" fill="#4285F4"/>
+    <path d="M38 38V18.8L45 13.5V35C45 36.6 43.7 38 42 38H38Z" fill="#34A853"/>
+    <path d="M38 18.8V10L24 20.5L10 10V18.8L24 29.3L38 18.8Z" fill="#EA4335"/>
+    <path d="M10 10L3 13.5L10 18.8V10Z" fill="#C5221F"/>
+    <path d="M38 10L45 13.5L38 18.8V10Z" fill="#FBBC04"/>
   </svg>
 );
 
@@ -120,7 +110,9 @@ const ClientChannelsPage = () => {
   const [razorpayConn, setRazorpayConn] = useState(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
 
+  // Modals state
   const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
   const [isFacebookConfigModalOpen, setIsFacebookConfigModalOpen] = useState(false);
   const [isInstagramConfigModalOpen, setIsInstagramConfigModalOpen] = useState(false);
@@ -132,14 +124,13 @@ const ClientChannelsPage = () => {
   const [isGoogleNewsConfigModalOpen, setIsGoogleNewsConfigModalOpen] = useState(false);
   const [isZohoConfigModalOpen, setIsZohoConfigModalOpen] = useState(false);
   const [isYouTubeConfigModalOpen, setIsYouTubeConfigModalOpen] = useState(false);
-  const [youtubeLoading, setYoutubeLoading] = useState(false);
+  const [isOutlookConfigOpen, setIsOutlookConfigOpen] = useState(false);
+  const [isGuideOpen, setIsGuideOpen] = useState(false);
+  const [comingSoonModalChannel, setComingSoonModalChannel] = useState(null);
 
   const [fbLoading, setFbLoading] = useState(false);
   const [igLoading, setIgLoading] = useState(false);
-
   const [toast, setToast] = useState(null);
-  const [isGuideOpen, setIsGuideOpen] = useState(false);
-  const [isOutlookConfigOpen, setIsOutlookConfigOpen] = useState(false);
 
   useEffect(() => {
     const handleOpenModal = () => {
@@ -163,60 +154,120 @@ const ClientChannelsPage = () => {
     if (isManualRefresh) setRefreshing(true);
     try {
       const token = localStorage.getItem('token');
-      const user = JSON.parse(localStorage.getItem('user') || '{}');
-      const clientId = typeof user.client === 'object' ? (user.client?.id || user.client?._id) : user.client;
-      if (!clientId) return;
-
-      // 1. Fetch client channels info
-      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/clients/${clientId}/`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setClient(res.data);
-
-      // 2. Fetch Razorpay connection status
-      try {
-        const rzpRes = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/razorpay/status`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        setRazorpayConn(rzpRes.data);
-      } catch (rzpErr) {
-        console.warn('Failed to fetch Razorpay connection status', rzpErr);
+      if (!token) {
+        setLoading(false);
+        setRefreshing(false);
+        return;
       }
+
+      // Fetch client profile, global connectors status, and effective connectors concurrently
+      const [profileRes, globalRes, connRes] = await Promise.allSettled([
+        axios.get(`${API_BASE_URL}/api/profile`, {
+          headers: { Authorization: `Bearer ${token}` },
+          timeout: 10000,
+        }),
+        axios.get(`${API_BASE_URL}/api/connectors/global-status/`, {
+          headers: { Authorization: `Bearer ${token}` },
+          timeout: 10000,
+        }),
+        axios.get(`${API_BASE_URL}/api/connectors/effective/`, {
+          headers: { Authorization: `Bearer ${token}` },
+          timeout: 10000,
+        })
+      ]);
+
+      let baseClient = {};
+      if (profileRes.status === 'fulfilled' && profileRes.value?.data) {
+        const pData = profileRes.value.data.client || profileRes.value.data;
+        if (pData && typeof pData === 'object') {
+          baseClient = { ...pData };
+        }
+      }
+
+      let liveGlobalMap = {};
+      if (globalRes.status === 'fulfilled' && globalRes.value?.data?.global_connectors) {
+        liveGlobalMap = globalRes.value.data.global_connectors;
+      } else if (profileRes.status === 'fulfilled' && profileRes.value?.data?.global_connectors) {
+        liveGlobalMap = profileRes.value.data.global_connectors;
+      }
+
+      let effMap = {};
+      if (connRes.status === 'fulfilled' && connRes.value?.data?.effective_connectors) {
+        const eff = connRes.value.data.effective_connectors;
+        Object.keys(eff).forEach(k => {
+          effMap[k] = eff[k].effective_access;
+          if (liveGlobalMap[k] === undefined && eff[k].global_active !== undefined) {
+            liveGlobalMap[k] = eff[k].global_active;
+          }
+        });
+      }
+
+      setClient(prev => {
+        const merged = {
+          ...(prev || {}),
+          ...baseClient,
+          global_connectors: liveGlobalMap,
+          effective_connectors: effMap
+        };
+        try {
+          localStorage.setItem('cached_client_channels', JSON.stringify(merged));
+        } catch (e) {}
+        return merged;
+      });
 
       if (isManualRefresh) {
         setToast({ msg: 'Channels updated', type: 'success' });
         setTimeout(() => setToast(null), 3000);
       }
     } catch (err) {
-      console.warn('Failed to fetch client', err);
+      console.warn('Failed to fetch client profile', err);
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
   };
 
-  // Load the Meta / Facebook JS SDK once on mount
   useEffect(() => {
-    if (document.getElementById('facebook-jssdk')) return;
-    const script = document.createElement('script');
-    script.id = 'facebook-jssdk';
-    script.src = 'https://connect.facebook.net/en_US/sdk.js';
-    script.async = true;
-    script.onload = () => {
-      if (window.FB) {
-        window.FB.init({
-          appId: process.env.NEXT_PUBLIC_META_APP_ID || '991147863536661',
-          version: 'v20.0',
-          cookie: true,
-          xfbml: false,
-        });
+    setIsMounted(true);
+    try {
+      const cached = localStorage.getItem('cached_client_channels');
+      if (cached) {
+        setClient(JSON.parse(cached));
+        setLoading(false);
       }
-    };
-    document.body.appendChild(script);
+    } catch (e) {}
+
+    fetchClient();
   }, []);
 
+  // Facebook JS SDK
   useEffect(() => {
-    fetchClient();
+    const timer = setTimeout(() => {
+      if (document.getElementById('facebook-jssdk')) return;
+      const script = document.createElement('script');
+      script.id = 'facebook-jssdk';
+      script.src = 'https://connect.facebook.net/en_US/sdk.js';
+      script.async = true;
+      script.defer = true;
+      script.crossOrigin = 'anonymous';
+      script.onload = () => {
+        if (window.FB) {
+          window.FB.init({
+            appId: '991147863536661',
+            cookie: true,
+            xfbml: true,
+            version: 'v19.0'
+          });
+        }
+      };
+      document.body.appendChild(script);
+    }, 1200);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // OAuth & Meta Embedded Signup callback handler
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
 
     const params = new URLSearchParams(window.location.search);
     const code = params.get('code');
@@ -229,9 +280,8 @@ const ClientChannelsPage = () => {
         setIgLoading(true);
         try {
           const token = localStorage.getItem('token');
-          const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app';
           await axios.post(
-            `${apiUrl}/api/auth/instagram/oauth-callback`,
+            `${API_BASE_URL}/api/auth/instagram/oauth-callback`,
             {
               code,
               redirect_uri: `${window.location.origin}/client/channels`
@@ -252,12 +302,16 @@ const ClientChannelsPage = () => {
     }
     // Gmail callback
     else if (params.get('gmail_connected') === 'true') {
-      setToast({ msg: 'Gmail connected successfully!', type: 'success' });
+      fetchClient();
+      setToast({ msg: '✅ Gmail connected successfully!', type: 'success' });
+      setTimeout(() => setToast(null), 4000);
       window.history.replaceState({}, document.title, window.location.pathname);
     } else if (params.get('gmail_error')) {
       setToast({ msg: `Gmail connection failed: ${params.get('gmail_error')}`, type: 'error' });
+      setTimeout(() => setToast(null), 5000);
       window.history.replaceState({}, document.title, window.location.pathname);
-    }    // OneDrive callback
+    }
+    // OneDrive callback
     else if (params.get('onedrive_connected') === 'true') {
       fetchClient();
       setToast({ msg: '✅ OneDrive connected successfully!', type: 'success' });
@@ -315,20 +369,6 @@ const ClientChannelsPage = () => {
       setToast({ msg, type: 'error' });
       setTimeout(() => setToast(null), 5000);
       window.history.replaceState({}, document.title, window.location.pathname);
-    } else if (params.get('gmail_error')) {
-      const err = params.get('gmail_error');
-      const msg = err === 'access_denied' ? 'Google OAuth permission was cancelled.' : `Google connection failed: ${err}`;
-      setToast({ msg, type: 'error' });
-      setTimeout(() => setToast(null), 5000);
-      window.history.replaceState({}, document.title, window.location.pathname);
-    }
-    // Google Calendar callback
-    else if (params.get('google_calendar_connected') === 'true') {
-      setToast({ msg: 'Google Calendar connected successfully!', type: 'success' });
-      window.history.replaceState({}, document.title, window.location.pathname);
-    } else if (params.get('google_calendar_error')) {
-      setToast({ msg: `Google Calendar connection failed: ${params.get('google_calendar_error')}`, type: 'error' });
-      window.history.replaceState({}, document.title, window.location.pathname);
     }
     // YouTube callback
     else if (params.get('youtube_connected') === 'true') {
@@ -343,7 +383,7 @@ const ClientChannelsPage = () => {
       setTimeout(() => setToast(null), 5000);
       window.history.replaceState({}, document.title, window.location.pathname);
     }
-    // Microsoft Outlook OAuth callback (backend redirects here after token exchange)
+    // Microsoft Outlook OAuth callback
     else if (params.get('outlook_connected') === 'true') {
       window.history.replaceState({}, document.title, window.location.pathname);
       fetchClient();
@@ -357,18 +397,13 @@ const ClientChannelsPage = () => {
       setTimeout(() => setToast(null), 5000);
     }
 
-    if (params.get('channel') === 'outlook' || params.get('channel') === 'gmail' || params.get('channel') === 'email') {
-      setIsOutlookConfigOpen(true);
-    }
-
-
     if (code) {
       if (state === 'facebook') {
         setToast({ msg: 'Connecting Facebook...', type: 'success' });
         const connectFacebook = async () => {
           try {
             const token = localStorage.getItem('token');
-            await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/auth/facebook/embedded-signup`,
+            await axios.post(`${API_BASE_URL}/api/auth/facebook/embedded-signup`,
               { code: code },
               { headers: { Authorization: `Bearer ${token}` } }
             );
@@ -384,12 +419,12 @@ const ClientChannelsPage = () => {
           }
         };
         connectFacebook();
-      } else {
+      } else if (state === 'instagram') {
         setToast({ msg: 'Connecting Instagram...', type: 'success' });
         const connectInstagram = async () => {
           try {
             const token = localStorage.getItem('token');
-            await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/auth/instagram/embedded-signup`,
+            await axios.post(`${API_BASE_URL}/api/auth/instagram/embedded-signup`,
               { code: code },
               { headers: { Authorization: `Bearer ${token}` } }
             );
@@ -405,8 +440,77 @@ const ClientChannelsPage = () => {
           }
         };
         connectInstagram();
+      } else if (state === 'whatsapp') {
+        setToast({ msg: 'Connecting WhatsApp Business...', type: 'success' });
+        const connectWhatsApp = async () => {
+          try {
+            const token = localStorage.getItem('token');
+            const res = await axios.post(`${API_BASE_URL}/api/auth/whatsapp/embedded-signup`,
+              { code: code },
+              { headers: { Authorization: `Bearer ${token}` } }
+            );
+            if (res.data?.whatsapp_config) {
+              setClient(prev => ({
+                ...prev,
+                ...res.data.whatsapp_config,
+                whatsapp_enabled: true
+              }));
+            }
+            await fetchClient();
+            setToast({ msg: '✅ WhatsApp Business connected successfully!', type: 'success' });
+            setTimeout(() => setToast(null), 4000);
+          } catch (err) {
+            console.error("Error connecting WhatsApp", err);
+            setToast({ msg: err.response?.data?.error || 'Failed to connect WhatsApp', type: 'error' });
+            setTimeout(() => setToast(null), 4000);
+          } finally {
+            window.history.replaceState({}, document.title, window.location.pathname);
+          }
+        };
+        connectWhatsApp();
       }
     }
+
+    // Listen for Meta Embedded Signup postMessage events from popup
+    const handleMetaMessage = async (event) => {
+      if (
+        event.origin !== 'https://www.facebook.com' &&
+        event.origin !== 'https://web.facebook.com' &&
+        event.origin !== 'https://business.facebook.com'
+      ) {
+        return;
+      }
+      try {
+        const data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
+        if (data && (data.type === 'WA_EMBEDDED_SIGNUP' || data.event === 'FINISH' || data.event === 'FINISH_ALL')) {
+          console.log('Received Meta WA_EMBEDDED_SIGNUP event:', data);
+          const phone_number_id = data?.data?.phone_number_id || data?.phone_number_id;
+          const waba_id = data?.data?.waba_id || data?.waba_id;
+          
+          if (waba_id || phone_number_id) {
+            setToast({ msg: 'Saving WhatsApp configuration...', type: 'success' });
+            const token = localStorage.getItem('token');
+            await axios.put(`${API_BASE_URL}/api/profile`, {
+              whatsapp_waba_id: waba_id,
+              whatsapp_phone_number_id: phone_number_id,
+              whatsapp_enabled: true
+            }, {
+              headers: { Authorization: `Bearer ${token}` }
+            });
+            await fetchClient();
+            setToast({ msg: '✅ WhatsApp connected successfully!', type: 'success' });
+            setTimeout(() => setToast(null), 4000);
+          }
+        }
+      } catch (err) {
+        console.error('Error handling Meta message event', err);
+      }
+    };
+    window.addEventListener('message', handleMetaMessage);
+
+    return () => {
+      window.removeEventListener('message', handleMetaMessage);
+    };
   }, []);
 
   const handleWhatsAppSaved = (updatedClient) => {
@@ -464,50 +568,26 @@ const ClientChannelsPage = () => {
     setTimeout(() => setToast(null), 3000);
   };
 
-  const isWhatsAppConnected = Boolean(client?.whatsapp_access_token && client?.whatsapp_phone_number_id);
-  const isFacebookConnected = Boolean(client?.facebook_enabled && client?.facebook_config?.page_id);
-  const isInstagramConnected = Boolean(client?.instagram_enabled && (client?.instagram_config?.instagram_business_id || client?.instagram_config?.instagram_business_account_id || client?.instagram_config?.access_token));
-  const isGmailConnected = Boolean(client?.gmail_enabled && (client?.gmail_config?.email_address || client?.gmail_config?.email || client?.gmail_config?.token || client?.gmail_config?.access_token));
-  const isOneDriveConnected = Boolean(client?.onedrive_enabled);
-  const isGoogleCalendarConnected = Boolean(client?.google_calendar_enabled);
-  const isGoogleSheetsConnected = Boolean(client?.google_sheets_enabled);
-  const isGoogleDocsConnected = Boolean(client?.google_docs_enabled);
-  const isGoogleSlidesConnected = Boolean(client?.google_slides_enabled);
-  const isYouTubeConnected = Boolean(client?.youtube_enabled);
-  const isRazorpayConnected = Boolean(razorpayConn?.connected && razorpayConn?.connection_status === 'CONNECTED');
+  // Connection state checks
+  const isWhatsAppConnected = Boolean((client?.whatsapp_access_token && client?.whatsapp_phone_number_id) || client?.whatsapp_waba_id || client?.whatsapp_phone_number_id || client?.whatsapp_access_token);
+  const isFacebookConnected = Boolean(client?.facebook_enabled || client?.facebook_config?.page_id || client?.facebook_config?.access_token || client?.facebook_config?.page_name);
+  const isInstagramConnected = Boolean(client?.instagram_enabled || client?.instagram_config?.instagram_business_id || client?.instagram_config?.instagram_business_account_id || client?.instagram_config?.access_token || client?.instagram_config?.username);
+  const isGmailConnected = Boolean(client?.gmail_enabled || client?.gmail_config?.email_address || client?.gmail_config?.email || client?.gmail_config?.token || client?.gmail_config?.access_token);
+  const isOutlookConnected = Boolean(client?.outlook_enabled || client?.outlook_config?.email_address || client?.outlook_config?.access_token);
+  const isOneDriveConnected = Boolean(client?.onedrive_enabled || client?.onedrive_config?.access_token || client?.onedrive_config?.user_id || client?.onedrive_config?.account_name || client?.onedrive_config?.drive_id);
+  const isGoogleCalendarConnected = Boolean(client?.google_calendar_enabled || client?.google_calendar_config?.calendar_id || client?.google_calendar_config?.primary_calendar_id || client?.google_calendar_config?.access_token || client?.google_calendar_config?.account_email);
+  const isGoogleSheetsConnected = Boolean(client?.google_sheets_enabled || client?.google_sheets_config?.spreadsheet_id || client?.google_sheets_config?.access_token || client?.google_sheets_config?.account_email);
+  const isGoogleDocsConnected = Boolean(client?.google_docs_enabled || client?.google_docs_config?.document_id || client?.google_docs_config?.default_doc_id || client?.google_docs_config?.access_token || client?.google_docs_config?.account_email);
+  const isGoogleSlidesConnected = Boolean(client?.google_slides_enabled || client?.google_slides_config?.presentation_id || client?.google_slides_config?.default_presentation_id || client?.google_slides_config?.access_token || client?.google_slides_config?.account_email);
+  const isGoogleNewsConnected = Boolean(client?.google_news_enabled || client?.google_news_config?.topic || client?.google_news_config?.query);
+  const isYouTubeConnected = Boolean(client?.youtube_enabled || client?.youtube_config?.channel_id || client?.youtube_config?.access_token || client?.youtube_config?.channel_title);
+  const isZohoConnected = Boolean(client?.zoho_enabled || client?.zoho_config?.access_token || client?.zoho_config?.refresh_token);
 
-  const connectedCount = [
-    isWhatsAppConnected, isFacebookConnected, isInstagramConnected, isGmailConnected,
-    isOneDriveConnected, isGoogleCalendarConnected, isGoogleSheetsConnected, isGoogleDocsConnected,
-    isGoogleSlidesConnected, isYouTubeConnected, isRazorpayConnected
-  ].filter(Boolean).length;
-
-  const [gmailDisconnecting, setGmailDisconnecting] = useState(false);
-
-  const handleDisconnectGmail = async () => {
-    if (!confirm('Are you sure you want to disconnect Gmail?')) return;
-    setGmailDisconnecting(true);
-    try {
-      const token = localStorage.getItem('token');
-      await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/auth/gmail/disconnect`, {}, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      fetchClient(true);
-      setToast({ msg: 'Gmail disconnected successfully', type: 'success' });
-      setTimeout(() => setToast(null), 3000);
-    } catch (err) {
-      console.warn("Error disconnecting Gmail", err);
-      setToast({ msg: 'Failed to disconnect Gmail', type: 'error' });
-      setTimeout(() => setToast(null), 3000);
-    } finally {
-      setGmailDisconnecting(false);
-    }
-  };
-
+  // Connect actions
   const handleConnectGmail = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/auth/gmail/connect`, {
+      const res = await axios.get(`${API_BASE_URL}/api/auth/gmail/connect`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.data.url) {
@@ -515,52 +595,57 @@ const ClientChannelsPage = () => {
       }
     } catch (err) {
       console.warn("Error connecting Gmail", err);
-      setToast({ msg: 'Failed to initiate Gmail connect', type: 'error' });
-      setTimeout(() => setToast(null), 3000);
+      setIsOutlookConfigOpen(true);
     }
   };
 
   const handleConnectGoogleCalendar = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/auth/google-calendar/connect`, {
+      const res = await axios.get(`${API_BASE_URL}/api/auth/google-calendar/connect`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.data.url) {
         window.location.href = res.data.url;
       }
     } catch (err) {
-      console.warn("Error connecting Google Calendar", err);
-      setToast({ msg: 'Failed to initiate Google Calendar connect', type: 'error' });
-      setTimeout(() => setToast(null), 3000);
+      setIsGoogleCalendarConfigModalOpen(true);
     }
   };
 
   const handleWhatsAppConnect = () => {
     const origin = typeof window !== 'undefined' ? window.location.origin : 'https://uwoconnect.aisa24.com';
-    const redirectUri = encodeURIComponent(`${origin}/client/settings`);
-    window.location.href = `https://business.facebook.com/messaging/whatsapp/onboard/?app_id=991147863536661&config_id=1048515390903125&extras=%7B%22version%22%3A%22v4%22%2C%22sessionInfoVersion%22%3A%223%22%2C%22featureType%22%3A%22whatsapp_business_app_onboarding%22%7D&redirect_uri=${redirectUri}`;
+    const redirectUri = encodeURIComponent(`${origin}/client/channels?state=whatsapp`);
+    const appId = process.env.NEXT_PUBLIC_META_APP_ID || '991147863536661';
+    const url = `https://business.facebook.com/messaging/whatsapp/onboard/?app_id=${appId}&config_id=970003505994896&extras=%7B%22sessionInfoVersion%22%3A%223%22%2C%22version%22%3A%22v4%22%7D&redirect_uri=${redirectUri}`;
+
+    const width = 600;
+    const height = 750;
+    const left = (window.innerWidth - width) / 2 + window.screenX;
+    const top = (window.innerHeight - height) / 2 + window.screenY;
+    const popup = window.open(url, 'WhatsAppEmbeddedSignup', `width=${width},height=${height},top=${top},left=${left},status=no,resizable=yes,toolbar=no,menubar=no,scrollbars=yes`);
+    if (!popup || popup.closed || typeof popup.closed === 'undefined') {
+      window.location.href = url;
+    }
   };
 
   const handleFacebookConnect = () => {
     if (!window.FB) {
-      setToast({ msg: 'Facebook SDK not loaded yet. Please try again.', type: 'error' });
-      setTimeout(() => setToast(null), 4000);
+      setToast({ msg: 'Facebook SDK loading, opening configuration...', type: 'info' });
+      setIsFacebookConfigModalOpen(true);
       return;
     }
     setFbLoading(true);
     window.FB.login(async (response) => {
       if (response.status !== 'connected') {
         setFbLoading(false);
-        setToast({ msg: 'Facebook login was cancelled or failed.', type: 'error' });
-        setTimeout(() => setToast(null), 4000);
+        setIsFacebookConfigModalOpen(true);
         return;
       }
       try {
         const token = localStorage.getItem('token');
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app';
         const res = await axios.post(
-          `${apiUrl}/api/auth/facebook/embedded-signup`,
+          `${API_BASE_URL}/api/auth/facebook/embedded-signup`,
           { access_token: response.authResponse.accessToken },
           { headers: { Authorization: `Bearer ${token}` } }
         );
@@ -569,9 +654,7 @@ const ClientChannelsPage = () => {
         setToast({ msg: '✅ Facebook Page connected!', type: 'success' });
         setTimeout(() => setToast(null), 4000);
       } catch (err) {
-        const msg = err?.response?.data?.error || 'Failed to connect Facebook.';
-        setToast({ msg, type: 'error' });
-        setTimeout(() => setToast(null), 5000);
+        setIsFacebookConfigModalOpen(true);
       } finally {
         setFbLoading(false);
       }
@@ -582,47 +665,69 @@ const ClientChannelsPage = () => {
   };
 
   const handleInstagramConnect = () => {
-    // Use Instagram Business Login OAuth flow
     const redirectUri = encodeURIComponent(`${window.location.origin}/client/channels`);
     const instagramOAuthUrl = `https://www.instagram.com/oauth/authorize?force_reauth=true&client_id=1704328300882543&redirect_uri=${redirectUri}&response_type=code&scope=instagram_business_basic%2Cinstagram_business_manage_messages%2Cinstagram_business_manage_comments%2Cinstagram_business_content_publish%2Cinstagram_business_manage_insights&state=instagram`;
     window.location.href = instagramOAuthUrl;
   };
 
+  const openComingSoon = (channelDef) => {
+    setComingSoonModalChannel(channelDef);
+  };
+
   return (
     <DashboardLayout role="CLIENT">
-      <div className="max-w-5xl mx-auto pb-16 px-4 sm:px-6 relative font-['Times_New_Roman',_Georgia,_serif]">
+      <div className="w-full pb-16 px-4 sm:px-6 lg:px-8 relative font-sans space-y-10">
+        
         {/* Toast Alert */}
         {toast && (
-          <div className="fixed top-6 right-6 z-[120] flex items-center gap-2.5 px-4 py-2.5 rounded-xl shadow-lg font-medium text-xs bg-slate-900 text-white animate-in fade-in duration-200">
-            <CheckCircle2 size={15} className="text-emerald-400" />
+          <div className="fixed top-6 right-6 z-[120] flex items-center gap-2.5 px-4 py-3 rounded-2xl shadow-xl font-semibold text-xs bg-slate-900/95 backdrop-blur-md text-white border border-slate-700/50 animate-in fade-in duration-200">
+            <CheckCircle2 size={16} className="text-emerald-400 shrink-0" />
             <span>{toast.msg}</span>
           </div>
         )}
 
-        {/* Clean Header */}
-        <div className="py-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 border-b border-slate-100">
+        {/* ── Top Header Section ── */}
+        <div className="py-4 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Channels</h1>
-            <p className="text-slate-400 text-xs mt-0.5 font-normal">Connect your social messaging accounts to automate replies.</p>
+            <div className="flex items-center gap-2.5 mb-1">
+              <h1 className="text-2xl font-black text-slate-900 tracking-tight">Channels & Integrations</h1>
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200">
+                Official APIs
+              </span>
+            </div>
+            <p className="text-slate-500 text-xs font-normal max-w-2xl">
+              Connect official Meta messaging channels, automate inbound customer inquiries with AI, and manage team communication.
+            </p>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5 self-start md:self-auto shrink-0">
+            <div className="px-3.5 py-1.5 rounded-xl bg-slate-100/80 border border-slate-200/80 flex items-center gap-2 text-xs">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="text-slate-600 font-semibold text-[11px]">
+                <strong className="text-slate-900 font-bold">
+                  {[
+                    isWhatsAppConnected,
+                    isFacebookConnected,
+                    isInstagramConnected
+                  ].filter(Boolean).length}
+                </strong> / 3 Channels Live
+              </span>
+            </div>
+
             <button
               onClick={() => setIsGuideOpen(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-xl font-bold text-xs hover:bg-black transition-all shadow-sm cursor-pointer"
+              className="flex items-center gap-1.5 px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold text-xs transition-all shadow-sm cursor-pointer"
               title="Open Connectors & Integrations Master Guide"
             >
-              <Sparkles size={14} className="text-emerald-400" />
-              View Complete Guide
+              <Sparkles size={13} className="text-amber-400" />
+              <span>Guide</span>
             </button>
-            <span className="text-xs text-slate-400 font-medium">
-              <strong className="text-slate-700">{connectedCount}</strong> of 11 connected
-            </span>
+
             <button
               onClick={() => fetchClient(true)}
               disabled={refreshing}
-              className="p-2 text-slate-400 hover:text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-lg transition-colors cursor-pointer disabled:opacity-50"
-              title="Refresh"
+              className="p-2 text-slate-400 hover:text-slate-700 bg-white hover:bg-slate-50 border border-slate-200/80 rounded-xl transition-all cursor-pointer shadow-2xs disabled:opacity-50"
+              title="Refresh Status"
             >
               <RefreshCw size={14} className={cn(refreshing && "animate-spin text-emerald-600")} />
             </button>
@@ -630,1148 +735,866 @@ const ClientChannelsPage = () => {
         </div>
 
         {/* Loading State */}
-        {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 py-8">
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="h-64 bg-slate-50/60 rounded-2xl border border-slate-100 animate-pulse" />
+        {(!isMounted || loading) ? (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 py-6">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-64 bg-slate-50/80 rounded-3xl border border-slate-100 animate-pulse" />
             ))}
           </div>
         ) : (
-          <div className="space-y-16 animate-in fade-in slide-in-from-bottom-4 duration-300">
+          <div className="space-y-12 animate-in fade-in duration-300">
             
-            {/* ================= SECTION 1: COMMUNICATION CHANNELS ================= */}
-            <div>
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-1.5 h-6 bg-slate-900 rounded-full" />
-                <div>
-                  <h2 className="text-lg font-bold text-slate-900 tracking-tight">Communication Channels</h2>
-                  <p className="text-slate-400 text-[11px] mt-0.5 font-normal">Connect your social messaging and email accounts to automate customer replies.</p>
+            {/* ================= 1. ACTIVE CORE MESSAGING CHANNELS ================= */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-2.5">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-xs shadow-emerald-500/50" />
+                  <h2 className="text-sm font-extrabold uppercase tracking-wider text-slate-800">
+                    Active Messaging Channels
+                  </h2>
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                    3 Channels
+                  </span>
                 </div>
+                <span className="text-[11px] text-slate-400 font-medium hidden sm:inline">
+                  Automated by UWO AI Agent & Bot Dispatcher
+                </span>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-                {/* --- WHATSAPP CARD --- */}
-                <div className="bg-white rounded-2xl border border-slate-200/80 p-6 flex flex-col justify-between hover:border-slate-300 transition-all shadow-xs min-h-[380px]">
-                  <div>
-                    {/* Header */}
-                    <div className="flex flex-col gap-3.5 mb-5">
-                      <div className="flex items-center gap-3">
-                        <div className="w-11 h-11 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100/80 shrink-0">
-                          <MessageCircle size={22} strokeWidth={2} />
-                        </div>
-                        <div>
-                          <h3 className="font-semibold text-slate-900 text-base">WhatsApp</h3>
-                          <p className="text-[11px] text-slate-400">Cloud API</p>
-                        </div>
-                      </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                
+                {/* ── CARD 1: WHATSAPP BUSINESS ── */}
+                {(() => {
+                  const state = getChannelAccessState('whatsapp', client);
+                  const isComingSoon = state.status === 'COMING_SOON';
+                  const isConn = state.status === 'CONNECTED' && !isComingSoon;
 
+                  return (
+                    <div className={cn(
+                      "bg-white rounded-3xl border p-6 flex flex-col justify-between transition-all duration-300 shadow-sm hover:shadow-md relative overflow-hidden group",
+                      isComingSoon 
+                        ? "border-amber-200/80 bg-amber-50/15" 
+                        : "border-slate-200/90 hover:border-emerald-300"
+                    )}>
                       <div>
-                        <div className={cn(
-                          "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium",
-                          isWhatsAppConnected ? "bg-emerald-50 text-emerald-700 border border-emerald-200/50" : "bg-slate-100 text-slate-400"
-                        )}>
-                          <span className={cn("w-1.5 h-1.5 rounded-full", isWhatsAppConnected ? "bg-emerald-500" : "bg-slate-300")} />
-                          <span>{isWhatsAppConnected ? 'Connected' : 'Offline'}</span>
-                        </div>
-                      </div>
-                    </div>
+                        {/* Top Header */}
+                        <div className="flex items-start justify-between gap-3 mb-4">
+                          <div className="flex items-center gap-3.5">
+                            <div className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 drop-shadow-sm">
+                              <WhatsAppBrandIcon size={34} />
+                            </div>
+                            <div>
+                              <h3 className="font-extrabold text-slate-900 text-base">
+                                WhatsApp Business
+                              </h3>
+                              <span className="inline-block text-[10px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200/60 mt-0.5">
+                                Cloud API
+                              </span>
+                            </div>
+                          </div>
 
-                    <p className="text-xs text-slate-500 leading-relaxed mb-5">
-                      Official WhatsApp Business Cloud API for automated messaging and customer support.
-                    </p>
-
-                    {/* Details */}
-                    {isWhatsAppConnected ? (
-                      <div className="space-y-4 py-4 border-t border-slate-100 text-xs">
-                        <div className="flex flex-col gap-1">
-                          <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Business Name</span>
-                          <span className="font-medium text-slate-700 truncate">{client?.business_name || 'N/A'}</span>
-                        </div>
-                        <div className="flex flex-col gap-1">
-                          <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Phone</span>
-                          <div className="flex items-center gap-2">
-                            <span className="font-medium text-slate-700 truncate">{client?.phone_number || 'N/A'}</span>
-                            <CopyButton text={client?.phone_number} />
+                          <div>
+                            {isComingSoon ? (
+                              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
+                                <Sparkles size={11} /> Coming Soon
+                              </span>
+                            ) : isConn ? (
+                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                <span>Connected</span>
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-slate-50 text-slate-500 border border-slate-200">
+                                <span className="w-1.5 h-1.5 rounded-full bg-slate-300" />
+                                <span>Offline</span>
+                              </span>
+                            )}
                           </div>
                         </div>
-                        <div className="flex flex-col gap-1">
-                          <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">WABA ID</span>
-                          <div className="flex items-center gap-2">
-                            <span className="font-medium text-slate-700 truncate">{client?.whatsapp_waba_id || 'N/A'}</span>
-                            <CopyButton text={client?.whatsapp_waba_id} />
+
+                        <p className="text-xs text-slate-500 leading-relaxed mb-4">
+                          Official Meta Cloud API for customer conversations, broadcast marketing campaigns, and 24/7 AI smart auto-replies.
+                        </p>
+
+                        {/* Content Body */}
+                        {isComingSoon ? (
+                          <div className="p-3.5 rounded-2xl bg-amber-50/70 border border-amber-200/60 text-amber-900 text-xs space-y-1 mb-4">
+                            <div className="font-bold flex items-center gap-1.5 text-amber-950 text-[11px]">
+                              <Clock size={13} className="text-amber-600 shrink-0" />
+                              <span>Launching Soon</span>
+                            </div>
+                            <p className="text-[10px] text-amber-800 leading-relaxed font-medium">
+                              This channel is being scheduled by the platform administrator and will go live shortly.
+                            </p>
+                          </div>
+                        ) : isConn ? (
+                          <div className="space-y-2 py-3 px-3.5 rounded-2xl bg-slate-50/80 border border-slate-100 text-xs mb-4">
+                            <div className="flex justify-between items-center text-[11px]">
+                              <span className="text-slate-400 font-bold uppercase tracking-wider text-[9px]">Business</span>
+                              <span className="font-bold text-slate-800 truncate max-w-[150px]">{client?.business_name || 'Verified Account'}</span>
+                            </div>
+                            <div className="flex justify-between items-center text-[11px]">
+                              <span className="text-slate-400 font-bold uppercase tracking-wider text-[9px]">Phone</span>
+                              <div className="flex items-center gap-1 font-bold text-slate-800">
+                                <span>{client?.phone_number || 'N/A'}</span>
+                                <CopyButton text={client?.phone_number} />
+                              </div>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="space-y-1.5 py-3 px-3.5 rounded-2xl bg-emerald-50/40 border border-emerald-100/60 mb-4 text-[11px] font-medium text-slate-600">
+                            <div className="flex items-center gap-2">
+                              <CheckCircle2 size={13} className="text-emerald-600 shrink-0" />
+                              <span>Verified Cloud API (WABA)</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <CheckCircle2 size={13} className="text-emerald-600 shrink-0" />
+                              <span>24/7 AI Smart Bot Auto-Replies</span>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Action Button */}
+                      <div className="pt-2">
+                        {isComingSoon ? (
+                          <button
+                            onClick={() => openComingSoon({ name: 'WhatsApp Business', key: 'whatsapp' })}
+                            className="w-full py-2.5 px-4 bg-amber-100 hover:bg-amber-200 text-amber-900 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 border border-amber-300 shadow-sm cursor-pointer"
+                          >
+                            <Clock size={13} className="text-amber-700" />
+                            <span>Coming Soon</span>
+                          </button>
+                        ) : isConn ? (
+                          <button
+                            onClick={() => setIsConfigModalOpen(true)}
+                            className="w-full py-2.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer border border-slate-200 shadow-sm"
+                          >
+                            <Settings size={13} className="text-slate-600" />
+                            <span>Configure WhatsApp</span>
+                          </button>
+                        ) : (
+                          <button
+                            onClick={handleWhatsAppConnect}
+                            className="w-full py-2.5 px-4 bg-[#25D366] hover:bg-[#20bd5a] text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer shadow-md shadow-emerald-600/20"
+                          >
+                            <WhatsAppBrandIcon size={16} />
+                            <span>Connect WhatsApp</span>
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })()}
+
+                {/* ── CARD 2: FACEBOOK MESSENGER ── */}
+                {(() => {
+                  const state = getChannelAccessState('facebook', client);
+                  const isComingSoon = state.status === 'COMING_SOON';
+                  const isConn = state.status === 'CONNECTED' && !isComingSoon;
+
+                  return (
+                    <div className={cn(
+                      "bg-white rounded-3xl border p-6 flex flex-col justify-between transition-all duration-300 shadow-sm hover:shadow-md relative overflow-hidden group",
+                      isComingSoon 
+                        ? "border-amber-200/80 bg-amber-50/15" 
+                        : "border-slate-200/90 hover:border-blue-300"
+                    )}>
+                      <div>
+                        {/* Top Header */}
+                        <div className="flex items-start justify-between gap-3 mb-4">
+                          <div className="flex items-center gap-3.5">
+                            <div className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 drop-shadow-sm">
+                              <FacebookBrandIcon size={34} />
+                            </div>
+                            <div>
+                              <h3 className="font-extrabold text-slate-900 text-base">
+                                Facebook
+                              </h3>
+                              <span className="inline-block text-[10px] font-bold uppercase tracking-wider text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-200/60 mt-0.5">
+                                Page Messenger
+                              </span>
+                            </div>
+                          </div>
+
+                          <div>
+                            {isComingSoon ? (
+                              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
+                                <Sparkles size={11} /> Coming Soon
+                              </span>
+                            ) : isConn ? (
+                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
+                                <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
+                                <span>Connected</span>
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-slate-50 text-slate-500 border border-slate-200">
+                                <span className="w-1.5 h-1.5 rounded-full bg-slate-300" />
+                                <span>Offline</span>
+                              </span>
+                            )}
                           </div>
                         </div>
+
+                        <p className="text-xs text-slate-500 leading-relaxed mb-4">
+                          Connect official Facebook Business Pages to automate Messenger interactions, capture inbound leads, and answer FAQs.
+                        </p>
+
+                        {/* Content Body */}
+                        {isComingSoon ? (
+                          <div className="p-3.5 rounded-2xl bg-amber-50/70 border border-amber-200/60 text-amber-900 text-xs space-y-1 mb-4">
+                            <div className="font-bold flex items-center gap-1.5 text-amber-950 text-[11px]">
+                              <Clock size={13} className="text-amber-600 shrink-0" />
+                              <span>Launching Soon</span>
+                            </div>
+                            <p className="text-[10px] text-amber-800 leading-relaxed font-medium">
+                              This channel is currently deactivated by admin and will be enabled shortly.
+                            </p>
+                          </div>
+                        ) : isConn ? (
+                          <div className="space-y-2 py-3 px-3.5 rounded-2xl bg-slate-50/80 border border-slate-100 text-xs mb-4">
+                            <div className="flex justify-between items-center text-[11px]">
+                              <span className="text-slate-400 font-bold uppercase tracking-wider text-[9px]">Page Name</span>
+                              <span className="font-bold text-slate-800 truncate max-w-[150px]">{client?.facebook_config?.page_name || 'Facebook Page'}</span>
+                            </div>
+                            <div className="flex justify-between items-center text-[11px]">
+                              <span className="text-slate-400 font-bold uppercase tracking-wider text-[9px]">Status</span>
+                              <span className="font-bold text-emerald-600 flex items-center gap-1">
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> Active Sync
+                              </span>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="space-y-1.5 py-3 px-3.5 rounded-2xl bg-blue-50/40 border border-blue-100/60 mb-4 text-[11px] font-medium text-slate-600">
+                            <div className="flex items-center gap-2">
+                              <CheckCircle2 size={13} className="text-blue-600 shrink-0" />
+                              <span>Facebook Page Messenger Sync</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <CheckCircle2 size={13} className="text-blue-600 shrink-0" />
+                              <span>Instant Lead Capture & FAQ Bot</span>
+                            </div>
+                          </div>
+                        )}
                       </div>
-                    ) : (
-                      <p className="text-xs text-slate-400 py-6 text-center">No WhatsApp account connected.</p>
-                    )}
-                  </div>
 
-                  {/* Action Button */}
-                  <div className="mt-6 pt-4 border-t border-slate-100">
-                    {isWhatsAppConnected ? (
-                      <button
-                        onClick={() => setIsConfigModalOpen(true)}
-                        className="w-full py-2.5 px-4 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer border border-slate-200/60"
-                      >
-                        <Settings size={14} className="text-slate-400" />
-                        <span>Configure</span>
-                      </button>
-                    ) : (
-                      <button
-                        onClick={handleWhatsAppConnect}
-                        className="w-full py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
-                      >
-                        <Plus size={14} />
-                        <span>Connect</span>
-                      </button>
-                    )}
-                  </div>
-                </div>
-
-                {/* --- FACEBOOK CARD --- */}
-                <div className="bg-white rounded-2xl border border-slate-200/80 p-6 flex flex-col justify-between hover:border-slate-300 transition-all shadow-xs min-h-[380px]">
-                  <div>
-                    {/* Header */}
-                    <div className="flex flex-col gap-3.5 mb-5">
-                      <div className="flex items-center gap-3">
-                        <div className="w-11 h-11 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100/80 shrink-0">
-                          <FacebookIcon size={22} />
-                        </div>
-                        <div>
-                          <h3 className="font-semibold text-slate-900 text-base">Facebook</h3>
-                          <p className="text-[11px] text-slate-400">Messenger</p>
-                        </div>
-                      </div>
-
-                      <div>
-                        <div className={cn(
-                          "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium",
-                          isFacebookConnected ? "bg-blue-50 text-blue-700 border border-blue-200/50" : "bg-slate-100 text-slate-400"
-                        )}>
-                          <span className={cn("w-1.5 h-1.5 rounded-full", isFacebookConnected ? "bg-blue-500" : "bg-slate-300")} />
-                          <span>{isFacebookConnected ? 'Connected' : 'Offline'}</span>
-                        </div>
+                      {/* Action Button */}
+                      <div className="pt-2">
+                        {isComingSoon ? (
+                          <button
+                            onClick={() => openComingSoon({ name: 'Facebook Messenger', key: 'facebook' })}
+                            className="w-full py-2.5 px-4 bg-amber-100 hover:bg-amber-200 text-amber-900 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 border border-amber-300 shadow-sm cursor-pointer"
+                          >
+                            <Clock size={13} className="text-amber-700" />
+                            <span>Coming Soon</span>
+                          </button>
+                        ) : isConn ? (
+                          <button
+                            onClick={() => setIsFacebookConfigModalOpen(true)}
+                            className="w-full py-2.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer border border-slate-200 shadow-sm"
+                          >
+                            <Settings size={13} className="text-slate-600" />
+                            <span>Configure Facebook</span>
+                          </button>
+                        ) : (
+                          <button
+                            onClick={handleFacebookConnect}
+                            disabled={fbLoading}
+                            className="w-full py-2.5 px-4 bg-[#1877F2] hover:bg-[#1565d8] text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer shadow-md shadow-blue-600/20 disabled:opacity-50"
+                          >
+                            {fbLoading ? <Loader2 size={14} className="animate-spin" /> : <FacebookBrandIcon size={16} />}
+                            <span>Connect Facebook</span>
+                          </button>
+                        )}
                       </div>
                     </div>
+                  );
+                })()}
 
-                    <p className="text-xs text-slate-500 leading-relaxed mb-5">
-                      Connect your Facebook Business Pages to automate Messenger customer interactions.
-                    </p>
+                {/* ── CARD 3: INSTAGRAM DIRECT ── */}
+                {(() => {
+                  const state = getChannelAccessState('instagram', client);
+                  const isComingSoon = state.status === 'COMING_SOON';
+                  const isConn = state.status === 'CONNECTED' && !isComingSoon;
 
-                    {/* Details */}
-                    {isFacebookConnected ? (
-                      <div className="space-y-4 py-4 border-t border-slate-100 text-xs">
-                        <div className="flex flex-col gap-1">
-                          <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Page Name</span>
-                          <span className="font-medium text-slate-700 truncate">{client?.facebook_config?.page_name || 'N/A'}</span>
-                        </div>
-                        <div className="flex flex-col gap-1">
-                          <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Page ID</span>
-                          <div className="flex items-center gap-2">
-                            <span className="font-medium text-slate-700 truncate">{client?.facebook_config?.page_id || 'N/A'}</span>
-                            <CopyButton text={client?.facebook_config?.page_id} />
+                  return (
+                    <div className={cn(
+                      "bg-white rounded-3xl border p-6 flex flex-col justify-between transition-all duration-300 shadow-sm hover:shadow-md relative overflow-hidden group",
+                      isComingSoon 
+                        ? "border-amber-200/80 bg-amber-50/15" 
+                        : "border-slate-200/90 hover:border-pink-300"
+                    )}>
+                      <div>
+                        {/* Top Header */}
+                        <div className="flex items-start justify-between gap-3 mb-4">
+                          <div className="flex items-center gap-3.5">
+                            <div className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 drop-shadow-sm">
+                              <InstagramBrandIcon size={34} />
+                            </div>
+                            <div>
+                              <h3 className="font-extrabold text-slate-900 text-base">
+                                Instagram
+                              </h3>
+                              <span className="inline-block text-[10px] font-bold uppercase tracking-wider text-pink-700 bg-pink-50 px-2 py-0.5 rounded-md border border-pink-200/60 mt-0.5">
+                                Direct Message
+                              </span>
+                            </div>
+                          </div>
+
+                          <div>
+                            {isComingSoon ? (
+                              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
+                                <Sparkles size={11} /> Coming Soon
+                              </span>
+                            ) : isConn ? (
+                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-pink-50 text-pink-700 border border-pink-200">
+                                <span className="w-1.5 h-1.5 rounded-full bg-pink-500 animate-pulse" />
+                                <span>Connected</span>
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-slate-50 text-slate-500 border border-slate-200">
+                                <span className="w-1.5 h-1.5 rounded-full bg-slate-300" />
+                                <span>Offline</span>
+                              </span>
+                            )}
                           </div>
                         </div>
-                      </div>
-                    ) : (
-                      <p className="text-xs text-slate-400 py-6 text-center">No Facebook Page connected.</p>
-                    )}
-                  </div>
 
-                  {/* Action Button */}
-                  <div className="mt-6 pt-4 border-t border-slate-100">
-                    {isFacebookConnected ? (
-                      <button
-                        onClick={() => setIsFacebookConfigModalOpen(true)}
-                        className="w-full py-2.5 px-4 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer border border-slate-200/60"
-                      >
-                        <Settings size={14} className="text-slate-400" />
-                        <span>Configure</span>
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => {
-                          window.location.href = "https://www.facebook.com/v20.0/dialog/oauth?client_id=991147863536661&redirect_uri=https://uwoconnect.aisa24.com/client/channels&response_type=code&scope=pages_messaging%2Cpages_show_list%2Cpages_manage_metadata%2Cpages_read_engagement&state=facebook";
-                        }}
-                        className="w-full py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
-                      >
-                        <Plus size={14} />
-                        <span>Connect</span>
-                      </button>
-                    )}
-                  </div>
-                </div>
+                        <p className="text-xs text-slate-500 leading-relaxed mb-4">
+                          Automate customer Direct Messages (DMs), story mentions, and comment-to-DM interactions into qualified sales leads.
+                        </p>
 
-                {/* --- INSTAGRAM CARD --- */}
-                <div className="bg-white rounded-2xl border border-slate-200/80 p-6 flex flex-col justify-between hover:border-slate-300 transition-all shadow-xs min-h-[380px]">
-                  <div>
-                    {/* Header */}
-                    <div className="flex flex-col gap-3.5 mb-5">
-                      <div className="flex items-center gap-3">
-                        <div className="w-11 h-11 rounded-2xl bg-pink-50 text-pink-600 flex items-center justify-center border border-pink-100/80 shrink-0">
-                          <InstagramIcon size={22} />
-                        </div>
-                        <div>
-                          <h3 className="font-semibold text-slate-900 text-base">Instagram</h3>
-                          <p className="text-[11px] text-slate-400">Direct Message</p>
-                        </div>
-                      </div>
-
-                      <div>
-                        <div className={cn(
-                          "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium",
-                          isInstagramConnected ? "bg-pink-50 text-pink-700 border border-pink-200/50" : "bg-slate-100 text-slate-400"
-                        )}>
-                          <span className={cn("w-1.5 h-1.5 rounded-full", isInstagramConnected ? "bg-pink-500" : "bg-slate-300")} />
-                          <span>{isInstagramConnected ? 'Connected' : 'Offline'}</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <p className="text-xs text-slate-500 leading-relaxed mb-5">
-                      Automate replies for Instagram DMs, story mentions, and customer comments.
-                    </p>
-
-                    {/* Details */}
-                    {isInstagramConnected ? (
-                      <div className="space-y-4 py-4 border-t border-slate-100 text-xs">
-                        <div className="flex flex-col gap-1">
-                          <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Account Name</span>
-                          <span className="font-medium text-slate-700 truncate">{client?.instagram_config?.page_name || 'N/A'}</span>
-                        </div>
-                        <div className="flex flex-col gap-1">
-                          <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Instagram ID</span>
-                          <div className="flex items-center gap-2">
-                            <span className="font-medium text-slate-700 truncate">{client?.instagram_config?.instagram_business_id || client?.instagram_config?.instagram_business_account_id || 'N/A'}</span>
-                            <CopyButton text={client?.instagram_config?.instagram_business_id || client?.instagram_config?.instagram_business_account_id} />
+                        {/* Content Body */}
+                        {isComingSoon ? (
+                          <div className="p-3.5 rounded-2xl bg-amber-50/70 border border-amber-200/60 text-amber-900 text-xs space-y-1 mb-4">
+                            <div className="font-bold flex items-center gap-1.5 text-amber-950 text-[11px]">
+                              <Clock size={13} className="text-amber-600 shrink-0" />
+                              <span>Launching Soon</span>
+                            </div>
+                            <p className="text-[10px] text-amber-800 leading-relaxed font-medium">
+                              This channel is currently deactivated by admin and will be enabled shortly.
+                            </p>
                           </div>
-                        </div>
-                      </div>
-                    ) : (
-                      <p className="text-xs text-slate-400 py-6 text-center">No Instagram account connected.</p>
-                    )}
-                  </div>
-
-                  {/* Action Button */}
-                  <div className="mt-6 pt-4 border-t border-slate-100">
-                    {isInstagramConnected ? (
-                      <button
-                        onClick={() => setIsInstagramConfigModalOpen(true)}
-                        className="w-full py-2.5 px-4 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer border border-slate-200/60"
-                      >
-                        <Settings size={14} className="text-slate-400" />
-                        <span>Configure</span>
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => {
-                          window.location.href = "https://www.instagram.com/oauth/authorize?force_reauth=true&client_id=991147863536661&redirect_uri=https://uwoconnect.aisa24.com/client/channels&response_type=code&scope=instagram_business_basic%2Cinstagram_business_manage_messages%2Cinstagram_business_manage_comments%2Cinstagram_business_content_publish%2Cinstagram_business_manage_insights&state=instagram";
-                        }}
-                        className="w-full py-2.5 px-4 bg-pink-600 hover:bg-pink-700 text-white rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
-                      >
-                        <Plus size={14} />
-                        <span>Connect</span>
-                      </button>
-                    )}
-                  </div>
-                </div>
-
-                {/* --- GMAIL CARD --- */}
-                <div className="bg-white rounded-2xl border border-slate-200/80 p-6 flex flex-col justify-between hover:border-slate-300 transition-all shadow-xs min-h-[380px]">
-                  <div>
-                    {/* Header */}
-                    <div className="flex flex-col gap-3.5 mb-5">
-                      <div className="flex items-center gap-3">
-                        <div className="w-11 h-11 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center border border-red-100/80 shrink-0">
-                          <GmailIcon size={22} />
-                        </div>
-                        <div>
-                          <h3 className="font-semibold text-slate-900 text-base">Gmail</h3>
-                          <p className="text-[11px] text-slate-400">Email Sync</p>
-                        </div>
-                      </div>
-
-                      <div>
-                        <div className={cn(
-                          "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium",
-                          isGmailConnected ? "bg-red-50 text-red-700 border border-red-200/50" : "bg-slate-100 text-slate-400"
-                        )}>
-                          <span className={cn("w-1.5 h-1.5 rounded-full", isGmailConnected ? "bg-red-500" : "bg-slate-300")} />
-                          <span>{isGmailConnected ? 'Connected' : 'Offline'}</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <p className="text-xs text-slate-500 leading-relaxed mb-5">
-                      Connect your Google Workspace or Gmail account to send and receive emails.
-                    </p>
-
-                    {/* Details */}
-                    {isGmailConnected ? (
-                      <div className="space-y-4 py-4 border-t border-slate-100 text-xs">
-                        <div className="flex flex-col gap-1">
-                          <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Email Address</span>
-                          <div className="flex items-center gap-2">
-                            <span className="font-medium text-slate-700 truncate">{client?.gmail_config?.email_address || client?.gmail_config?.email || 'Connected'}</span>
-                            <CopyButton text={client?.gmail_config?.email_address || client?.gmail_config?.email} />
+                        ) : isConn ? (
+                          <div className="space-y-2 py-3 px-3.5 rounded-2xl bg-slate-50/80 border border-slate-100 text-xs mb-4">
+                            <div className="flex justify-between items-center text-[11px]">
+                              <span className="text-slate-400 font-bold uppercase tracking-wider text-[9px]">Account</span>
+                              <span className="font-bold text-slate-800 truncate max-w-[150px]">{client?.instagram_config?.username || client?.instagram_config?.page_name || 'Instagram Account'}</span>
+                            </div>
+                            <div className="flex justify-between items-center text-[11px]">
+                              <span className="text-slate-400 font-bold uppercase tracking-wider text-[9px]">Status</span>
+                              <span className="font-bold text-emerald-600 flex items-center gap-1">
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> Active Sync
+                              </span>
+                            </div>
                           </div>
-                        </div>
-                      </div>
-                    ) : (
-                      <p className="text-xs text-slate-400 py-6 text-center">No Gmail account connected.</p>
-                    )}
-                  </div>
-
-                  {/* Action Button */}
-                  <div className="mt-6 pt-4 border-t border-slate-100 flex gap-2">
-                    {isGmailConnected ? (
-                      <button
-                        onClick={handleDisconnectGmail}
-                        disabled={gmailDisconnecting}
-                        className="flex-1 py-2.5 px-4 rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer bg-red-50 hover:bg-red-100 text-red-700 border border-red-200/60 disabled:opacity-50"
-                      >
-                        {gmailDisconnecting ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
-                        <span>Disconnect Gmail</span>
-                      </button>
-                    ) : (
-                      <button
-                        onClick={handleConnectGmail}
-                        className="flex-1 py-2.5 px-4 rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer bg-red-600 hover:bg-red-700 text-white shadow-xs"
-                      >
-                        <Plus size={14} />
-                        <span>Connect Gmail</span>
-                      </button>
-                    )}
-                  </div>
-                </div>
-
-                {/* --- OUTLOOK CARD --- */}
-                <div className="bg-white rounded-2xl border border-slate-200/80 p-6 flex flex-col justify-between hover:border-slate-300 transition-all shadow-xs min-h-[380px]">
-                  <div>
-                    {/* Header */}
-                    <div className="flex flex-col gap-3.5 mb-5">
-                      <div className="flex items-center gap-3">
-                        <div className="w-11 h-11 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100/80 shrink-0">
-                          <OutlookIcon size={22} />
-                        </div>
-                        <div>
-                          <h3 className="font-semibold text-slate-900 text-base">Outlook</h3>
-                          <p className="text-[11px] text-slate-400">Email Sync</p>
-                        </div>
-                      </div>
-
-                      <div>
-                        <div className={cn(
-                          "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium",
-                          client?.outlook_enabled ? "bg-emerald-50 text-emerald-700 border border-emerald-200/50" : "bg-slate-100 text-slate-400"
-                        )}>
-                          <span className={cn("w-1.5 h-1.5 rounded-full", client?.outlook_enabled ? "bg-emerald-500" : "bg-slate-300")} />
-                          <span>{client?.outlook_enabled ? 'Connected' : 'Offline'}</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <p className="text-xs text-slate-500 leading-relaxed mb-5">
-                      Automate emails, AI replies, CRM lead capture, and attachments via Microsoft Graph API.
-                    </p>
-
-                    {/* Details */}
-                    {client?.outlook_enabled ? (
-                      <div className="space-y-4 py-4 border-t border-slate-100 text-xs">
-                        <div className="flex flex-col gap-1">
-                          <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Scopes</span>
-                          <div className="flex flex-wrap gap-1.5 mt-1">
-                            {['Mail.Read', 'Mail.Send', 'User.Read', 'Graph API'].map(tag => (
-                              <span key={tag} className="text-[9px] px-1.5 py-0.5 bg-blue-50 text-blue-700 border border-blue-100 rounded font-semibold">{tag}</span>
-                            ))}
+                        ) : (
+                          <div className="space-y-1.5 py-3 px-3.5 rounded-2xl bg-pink-50/40 border border-pink-100/60 mb-4 text-[11px] font-medium text-slate-600">
+                            <div className="flex items-center gap-2">
+                              <CheckCircle2 size={13} className="text-pink-600 shrink-0" />
+                              <span>Direct Message (DM) Automation</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <CheckCircle2 size={13} className="text-pink-600 shrink-0" />
+                              <span>Story Mention & Comment Replies</span>
+                            </div>
                           </div>
-                        </div>
-                      </div>
-                    ) : (
-                      <p className="text-xs text-slate-400 py-6 text-center">No Outlook account connected.</p>
-                    )}
-                  </div>
-
-                  {/* Action Button */}
-                  <div className="mt-6 pt-4 border-t border-slate-100">
-                    <button
-                      onClick={() => setIsOutlookConfigOpen(true)}
-                      className="w-full py-2.5 px-4 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer border border-slate-200/60"
-                    >
-                      <Settings size={14} className="text-slate-400" />
-                      <span>Configure Outlook</span>
-                    </button>
-                  </div>
-                </div>
-
-              </div>
-            </div>
-
-            {/* ================= SECTION 2: INTEGRATIONS & CONNECTORS ================= */}
-            <div>
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-1.5 h-6 bg-emerald-500 rounded-full" />
-                <div>
-                  <h2 className="text-lg font-bold text-slate-900 tracking-tight">Integrations & Connectors</h2>
-                  <p className="text-slate-400 text-[11px] mt-0.5 font-normal">Sync documents, spreadsheets, calendars, and payments to power your workflows.</p>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-                {/* --- ONEDRIVE CARD --- */}
-                <div className="bg-white rounded-2xl border border-slate-200/80 p-6 flex flex-col justify-between hover:border-slate-300 transition-all shadow-xs min-h-[380px]">
-                  <div>
-                    {/* Header */}
-                    <div className="flex flex-col gap-3.5 mb-5">
-                      <div className="flex items-center gap-3">
-                        <div className="w-11 h-11 rounded-2xl bg-[#0078D4]/10 text-[#0078D4] flex items-center justify-center border border-[#0078D4]/20 shrink-0">
-                          <OneDriveIcon size={22} />
-                        </div>
-                        <div>
-                          <h3 className="font-semibold text-slate-900 text-base">OneDrive</h3>
-                          <p className="text-[11px] text-slate-400">Document Backup</p>
-                        </div>
+                        )}
                       </div>
 
-                      <div>
-                        <div className={cn(
-                          "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium",
-                          isOneDriveConnected ? "bg-[#0078D4]/10 text-[#0078D4] border border-[#0078D4]/20" : "bg-slate-100 text-slate-400"
-                        )}>
-                          <span className={cn("w-1.5 h-1.5 rounded-full", isOneDriveConnected ? "bg-[#0078D4]" : "bg-slate-300")} />
-                          <span>{isOneDriveConnected ? 'Connected' : 'Offline'}</span>
-                        </div>
+                      {/* Action Button */}
+                      <div className="pt-2">
+                        {isComingSoon ? (
+                          <button
+                            onClick={() => openComingSoon({ name: 'Instagram Direct', key: 'instagram' })}
+                            className="w-full py-2.5 px-4 bg-amber-100 hover:bg-amber-200 text-amber-900 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 border border-amber-300 shadow-sm cursor-pointer"
+                          >
+                            <Clock size={13} className="text-amber-700" />
+                            <span>Coming Soon</span>
+                          </button>
+                        ) : isConn ? (
+                          <button
+                            onClick={() => setIsInstagramConfigModalOpen(true)}
+                            className="w-full py-2.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer border border-slate-200 shadow-sm"
+                          >
+                            <Settings size={13} className="text-slate-600" />
+                            <span>Configure Instagram</span>
+                          </button>
+                        ) : (
+                          <button
+                            onClick={handleInstagramConnect}
+                            disabled={igLoading}
+                            className="w-full py-2.5 px-4 bg-gradient-to-r from-[#E1306C] via-[#C13584] to-[#833AB4] hover:opacity-95 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer shadow-md shadow-pink-600/20 disabled:opacity-50"
+                          >
+                            {igLoading ? <Loader2 size={14} className="animate-spin" /> : <InstagramBrandIcon size={16} />}
+                            <span>Connect Instagram</span>
+                          </button>
+                        )}
                       </div>
                     </div>
-
-                    <p className="text-xs text-slate-500 leading-relaxed mb-5">
-                      Automatically back up all documents received across channels to your Microsoft OneDrive.
-                    </p>
-
-                    {/* Details */}
-                    {isOneDriveConnected ? (
-                      <div className="space-y-4 py-4 border-t border-slate-100 text-xs">
-                        <div className="flex flex-col gap-1">
-                          <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Account</span>
-                          <span className="font-medium text-slate-700 truncate">{client?.onedrive_config?.account_name || 'N/A'}</span>
-                        </div>
-                        <div className="flex flex-col gap-1">
-                          <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Drive Name</span>
-                          <span className="font-medium text-slate-700 truncate">{client?.onedrive_config?.drive_name || 'N/A'}</span>
-                        </div>
-                        <div className="flex flex-col gap-1">
-                          <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Last Sync</span>
-                          <span className="font-medium text-slate-700 truncate">
-                            {client?.onedrive_config?.last_sync_time
-                              ? new Date(client.onedrive_config.last_sync_time).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' })
-                              : 'Never'}
-                          </span>
-                        </div>
-                      </div>
-                    ) : (
-                      <p className="text-xs text-slate-400 py-6 text-center">No OneDrive account connected.</p>
-                    )}
-                  </div>
-
-                  {/* Action Button */}
-                  <div className="mt-6 pt-4 border-t border-slate-100">
-                    {isOneDriveConnected ? (
-                      <button
-                        onClick={() => setIsOneDriveConfigModalOpen(true)}
-                        className="w-full py-2.5 px-4 rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200/60"
-                      >
-                        <Settings size={14} className="text-slate-400" />
-                        <span>Configure</span>
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => setIsOneDriveConfigModalOpen(true)}
-                        className="w-full py-2.5 px-4 rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer bg-[#0078D4] hover:bg-[#106EBE] text-white"
-                      >
-                        <Plus size={14} />
-                        <span>Connect OneDrive</span>
-                      </button>
-                    )}
-                  </div>
-                </div>
-
-                {/* --- GOOGLE CALENDAR CARD --- */}
-                <div className="bg-white rounded-2xl border border-slate-200/80 p-6 flex flex-col justify-between hover:border-slate-300 transition-all shadow-xs min-h-[380px]">
-                  <div>
-                    {/* Header */}
-                    <div className="flex flex-col gap-3.5 mb-5">
-                      <div className="flex items-center gap-3">
-                        <div className="w-11 h-11 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100/80 shrink-0">
-                          <GoogleCalendarIcon size={24} />
-                        </div>
-                        <div>
-                          <h3 className="font-bold text-slate-900 text-sm tracking-tight">Google Calendar</h3>
-                          <p className="text-[11px] text-slate-400 font-normal mt-0.5">Appointment & Event Sync</p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center">
-                        <div className={cn(
-                          "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium border transition-colors",
-                          isGoogleCalendarConnected
-                            ? "bg-emerald-50 text-emerald-700 border-emerald-200/70"
-                            : "bg-slate-50 text-slate-500 border-slate-200/60"
-                        )}>
-                          <span className={cn(
-                            "w-1.5 h-1.5 rounded-full shrink-0",
-                            isGoogleCalendarConnected ? "bg-emerald-500 animate-pulse" : "bg-slate-400"
-                          )} />
-                          <span>{isGoogleCalendarConnected ? 'Connected' : 'Not Connected'}</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Body Info */}
-                    <p className="text-xs text-slate-500 mb-5 leading-relaxed font-normal">
-                      Sync lead appointments, customer meeting requests from WhatsApp/CRM into Google Calendar.
-                    </p>
-
-                    {isGoogleCalendarConnected ? (
-                      <div className="bg-slate-50/70 rounded-xl p-3.5 border border-slate-100 flex flex-col gap-2.5 text-xs">
-                        <div className="flex flex-col gap-1">
-                          <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Account</span>
-                          <span className="font-medium text-slate-700 truncate">{client?.google_calendar_config?.account_email || 'Connected'}</span>
-                        </div>
-                        <div className="flex flex-col gap-1">
-                          <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Timezone</span>
-                          <span className="font-medium text-slate-700 truncate">{client?.google_calendar_config?.timezone || 'Asia/Kolkata'}</span>
-                        </div>
-                        <div className="flex flex-col gap-1">
-                          <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Last Sync</span>
-                          <span className="font-medium text-slate-700 truncate">
-                            {client?.google_calendar_config?.last_sync_time
-                              ? new Date(client.google_calendar_config.last_sync_time).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' })
-                              : 'Never'}
-                          </span>
-                        </div>
-                      </div>
-                    ) : (
-                      <p className="text-xs text-slate-400 py-6 text-center">No Google Calendar account connected.</p>
-                    )}
-                  </div>
-
-                  {/* Action Button */}
-                  <div className="mt-6 pt-4 border-t border-slate-100">
-                    {isGoogleCalendarConnected ? (
-                      <button
-                        onClick={() => setIsGoogleCalendarConfigModalOpen(true)}
-                        className="w-full py-2.5 px-4 rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200/60"
-                      >
-                        <Settings size={14} className="text-slate-400" />
-                        <span>Configure</span>
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => setIsGoogleCalendarConfigModalOpen(true)}
-                        className="w-full py-2.5 px-4 rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer bg-blue-600 hover:bg-blue-700 text-white shadow-xs"
-                      >
-                        <Plus size={14} />
-                        <span>Connect Google Calendar</span>
-                      </button>
-                    )}
-                  </div>
-                </div>
-
-                {/* --- GOOGLE SHEETS CARD --- */}
-                <div className="bg-white rounded-2xl border border-slate-200/80 p-6 flex flex-col justify-between hover:border-slate-300 transition-all shadow-xs min-h-[380px]">
-                  <div>
-                    {/* Header */}
-                    <div className="flex flex-col gap-3.5 mb-5">
-                      <div className="flex items-center gap-3">
-                        <div className="w-11 h-11 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100/80 shrink-0">
-                          <GoogleSheetsIcon size={24} />
-                        </div>
-                        <div>
-                          <h3 className="font-bold text-slate-900 text-sm tracking-tight">Google Sheets</h3>
-                          <p className="text-[11px] text-slate-400 font-normal mt-0.5">Real-time Lead Export</p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center">
-                        <div className={cn(
-                          "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium border transition-colors",
-                          isGoogleSheetsConnected
-                            ? "bg-emerald-50 text-emerald-700 border-emerald-200/70"
-                            : "bg-slate-50 text-slate-500 border-slate-200/60"
-                        )}>
-                          <span className={cn(
-                            "w-1.5 h-1.5 rounded-full shrink-0",
-                            isGoogleSheetsConnected ? "bg-emerald-500 animate-pulse" : "bg-slate-400"
-                          )} />
-                          <span>{isGoogleSheetsConnected ? 'Connected' : 'Not Connected'}</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Body Info */}
-                    <p className="text-xs text-slate-500 mb-5 leading-relaxed font-normal">
-                      Export incoming leads, WhatsApp messages, orders, and CRM contacts into live Google Spreadsheets.
-                    </p>
-
-                    {isGoogleSheetsConnected ? (
-                      <div className="bg-slate-50/70 rounded-xl p-3.5 border border-slate-100 flex flex-col gap-2.5 text-xs">
-                        <div className="flex flex-col gap-1">
-                          <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Account</span>
-                          <span className="font-medium text-slate-700 truncate">{client?.google_sheets_config?.account_email || 'Connected'}</span>
-                        </div>
-                        <div className="flex flex-col gap-1">
-                          <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Spreadsheet</span>
-                          <span className="font-medium text-emerald-700 truncate">{client?.google_sheets_config?.spreadsheet_name || 'UWOConnect Leads'}</span>
-                        </div>
-                        <div className="flex flex-col gap-1">
-                          <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Rows Exported</span>
-                          <span className="font-medium text-slate-700 truncate">{client?.google_sheets_config?.rows_synced || 0} Rows</span>
-                        </div>
-                      </div>
-                    ) : (
-                      <p className="text-xs text-slate-400 py-6 text-center">No Google Sheets account connected.</p>
-                    )}
-                  </div>
-
-                  {/* Action Button */}
-                  <div className="mt-6 pt-4 border-t border-slate-100">
-                    {isGoogleSheetsConnected ? (
-                      <button
-                        onClick={() => setIsGoogleSheetsConfigModalOpen(true)}
-                        className="w-full py-2.5 px-4 rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200/60"
-                      >
-                        <Settings size={14} className="text-slate-400" />
-                        <span>Configure</span>
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => setIsGoogleSheetsConfigModalOpen(true)}
-                        className="w-full py-2.5 px-4 rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer bg-[#0F9D58] hover:bg-[#0B8043] text-white shadow-xs"
-                      >
-                        <Plus size={14} />
-                        <span>Connect Google Sheets</span>
-                      </button>
-                    )}
-                  </div>
-                </div>
-
-                {/* --- GOOGLE DOCS CARD --- */}
-                <div className="bg-white rounded-2xl border border-slate-200/80 p-6 flex flex-col justify-between hover:border-slate-300 transition-all shadow-xs min-h-[380px]">
-                  <div>
-                    {/* Header */}
-                    <div className="flex flex-col gap-3.5 mb-5">
-                      <div className="flex items-center gap-3">
-                        <div className="w-11 h-11 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100/80 shrink-0">
-                          <GoogleDocsIcon size={24} />
-                        </div>
-                        <div>
-                          <h3 className="font-bold text-slate-900 text-sm tracking-tight">Google Docs</h3>
-                          <p className="text-[11px] text-slate-400 font-normal mt-0.5">Automated Contracts & Briefs</p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center">
-                        <div className={cn(
-                          "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium border transition-colors",
-                          isGoogleDocsConnected
-                            ? "bg-[#4285F4]/10 text-[#4285F4] border-[#4285F4]/20"
-                            : "bg-slate-50 text-slate-500 border-slate-200/60"
-                        )}>
-                          <span className={cn(
-                            "w-1.5 h-1.5 rounded-full shrink-0",
-                            isGoogleDocsConnected ? "bg-[#4285F4] animate-pulse" : "bg-slate-400"
-                          )} />
-                          <span>{isGoogleDocsConnected ? 'Connected' : 'Not Connected'}</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Body Info */}
-                    <p className="text-xs text-slate-500 mb-5 leading-relaxed font-normal">
-                      Auto-generate customer contracts, order receipts, proposals, and lead summary briefs in Google Docs.
-                    </p>
-
-                    {isGoogleDocsConnected ? (
-                      <div className="bg-slate-50/70 rounded-xl p-3.5 border border-slate-100 flex flex-col gap-2.5 text-xs">
-                        <div className="flex flex-col gap-1">
-                          <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Account</span>
-                          <span className="font-medium text-slate-700 truncate">{client?.google_docs_config?.account_email || 'Connected'}</span>
-                        </div>
-                        <div className="flex flex-col gap-1">
-                          <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Default Document</span>
-                          <span className="font-medium text-blue-700 truncate">{client?.google_docs_config?.default_doc_name || 'UWOConnect Documents'}</span>
-                        </div>
-                        <div className="flex flex-col gap-1">
-                          <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Documents Created</span>
-                          <span className="font-medium text-slate-700 truncate">{client?.google_docs_config?.docs_created_count || 0} Documents</span>
-                        </div>
-                      </div>
-                    ) : (
-                      <p className="text-xs text-slate-400 py-6 text-center">No Google Docs account connected.</p>
-                    )}
-                  </div>
-
-                  {/* Action Button */}
-                  <div className="mt-6 pt-4 border-t border-slate-100">
-                    {isGoogleDocsConnected ? (
-                      <button
-                        onClick={() => setIsGoogleDocsConfigModalOpen(true)}
-                        className="w-full py-2.5 px-4 rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200/60"
-                      >
-                        <Settings size={14} className="text-slate-400" />
-                        <span>Configure</span>
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => setIsGoogleDocsConfigModalOpen(true)}
-                        className="w-full py-2.5 px-4 rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer bg-[#4285F4] hover:bg-[#3367D6] text-white shadow-xs"
-                      >
-                        <Plus size={14} />
-                        <span>Connect Google Docs</span>
-                      </button>
-                    )}
-                  </div>
-                </div>
-
-                {/* --- GOOGLE SLIDES CARD --- */}
-                <div className="bg-white rounded-2xl border border-slate-200/80 p-6 flex flex-col justify-between hover:border-slate-300 transition-all shadow-xs min-h-[380px]">
-                  <div>
-                    {/* Header */}
-                    <div className="flex flex-col gap-3.5 mb-5">
-                      <div className="flex items-center gap-3">
-                        <div className="w-11 h-11 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center border border-amber-100/80 shrink-0">
-                          <GoogleSlidesIcon size={24} />
-                        </div>
-                        <div>
-                          <h3 className="font-bold text-slate-900 text-sm tracking-tight">Google Slides</h3>
-                          <p className="text-[11px] text-slate-400 font-normal mt-0.5">Automated Pitch Decks & Slides</p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center">
-                        <div className={cn(
-                          "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium border transition-colors",
-                          isGoogleSlidesConnected
-                            ? "bg-[#F4B400]/10 text-[#F4B400] border-[#F4B400]/20"
-                            : "bg-slate-50 text-slate-500 border-slate-200/60"
-                        )}>
-                          <span className={cn(
-                            "w-1.5 h-1.5 rounded-full shrink-0",
-                            isGoogleSlidesConnected ? "bg-[#F4B400] animate-pulse" : "bg-slate-400"
-                          )} />
-                          <span>{isGoogleSlidesConnected ? 'Connected' : 'Not Connected'}</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Body Info */}
-                    <p className="text-xs text-slate-500 mb-5 leading-relaxed font-normal">
-                      Auto-generate sales pitch decks, product catalog showcases, and client presentation decks in Google Slides.
-                    </p>
-
-                    {isGoogleSlidesConnected ? (
-                      <div className="bg-slate-50/70 rounded-xl p-3.5 border border-slate-100 flex flex-col gap-2.5 text-xs">
-                        <div className="flex flex-col gap-1">
-                          <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Account</span>
-                          <span className="font-medium text-slate-700 truncate">{client?.google_slides_config?.account_email || 'Connected'}</span>
-                        </div>
-                        <div className="flex flex-col gap-1">
-                          <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Default Presentation</span>
-                          <span className="font-medium text-amber-700 truncate">{client?.google_slides_config?.default_presentation_name || 'UWOConnect Presentation'}</span>
-                        </div>
-                        <div className="flex flex-col gap-1">
-                          <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Slide Decks Created</span>
-                          <span className="font-medium text-slate-700 truncate">{client?.google_slides_config?.presentations_created_count || 0} Decks</span>
-                        </div>
-                      </div>
-                    ) : (
-                      <p className="text-xs text-slate-400 py-6 text-center">No Google Slides account connected.</p>
-                    )}
-                  </div>
-
-                  {/* Action Button */}
-                  <div className="mt-6 pt-4 border-t border-slate-100">
-                    {isGoogleSlidesConnected ? (
-                      <button
-                        onClick={() => setIsGoogleSlidesConfigModalOpen(true)}
-                        className="w-full py-2.5 px-4 rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200/60"
-                      >
-                        <Settings size={14} className="text-slate-400" />
-                        <span>Configure</span>
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => setIsGoogleSlidesConfigModalOpen(true)}
-                        className="w-full py-2.5 px-4 rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer bg-[#F4B400] hover:bg-[#E3A300] text-white shadow-xs"
-                      >
-                        <Plus size={14} />
-                        <span>Connect Google Slides</span>
-                      </button>
-                    )}
-                  </div>
-                </div>
-
-                {/* --- GOOGLE NEWS CARD --- */}
-                <div className="bg-white rounded-2xl border border-slate-200/80 p-6 flex flex-col justify-between hover:border-slate-300 transition-all shadow-xs min-h-[380px]">
-                  <div>
-                    {/* Header */}
-                    <div className="flex flex-col gap-3.5 mb-5">
-                      <div className="flex items-center gap-3">
-                        <div className="w-11 h-11 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100/80 shrink-0">
-                          <GoogleNewsIcon size={24} />
-                        </div>
-                        <div>
-                          <h3 className="font-semibold text-slate-900 text-base">Google News</h3>
-                          <p className="text-[11px] text-slate-400">Live RSS & AI Summarizer</p>
-                        </div>
-                      </div>
-
-                      <div>
-                        <div className={cn(
-                          "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium",
-                          client?.google_news_enabled ? "bg-blue-50 text-blue-700 border border-blue-200/50" : "bg-slate-100 text-slate-400"
-                        )}>
-                          <span className={cn("w-1.5 h-1.5 rounded-full", client?.google_news_enabled ? "bg-blue-600 animate-pulse" : "bg-slate-300")} />
-                          <span>{client?.google_news_enabled ? 'Connected' : 'Not Connected'}</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <p className="text-xs text-slate-500 leading-relaxed mb-5">
-                      Monitor live Google News feeds by topic or keyword, generate AI executive summaries, and broadcast news digests to WhatsApp contacts.
-                    </p>
-
-                    {client?.google_news_enabled ? (
-                      <div className="bg-slate-50/70 rounded-xl p-3.5 border border-slate-100 flex flex-col gap-2.5 text-xs">
-                        <div className="flex flex-col gap-1">
-                          <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Default Topic</span>
-                          <span className="font-medium text-blue-700 uppercase font-bold">{client?.google_news_config?.default_topic || 'TECHNOLOGY'}</span>
-                        </div>
-                        <div className="flex flex-col gap-1">
-                          <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Tracked Keywords</span>
-                          <span className="font-medium text-slate-700 truncate">{Array.isArray(client?.google_news_config?.keywords) ? client?.google_news_config?.keywords.join(', ') : 'AI, Tech, Business'}</span>
-                        </div>
-                      </div>
-                    ) : (
-                      <p className="text-xs text-slate-400 py-6 text-center">Google News feed monitoring disabled.</p>
-                    )}
-                  </div>
-
-                  {/* Action Button */}
-                  <div className="mt-6 pt-4 border-t border-slate-100">
-                    {client?.google_news_enabled ? (
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => router.push('/client/google-news')}
-                          className="flex-1 py-2.5 px-3 rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer bg-blue-600 hover:bg-blue-700 text-white shadow-xs"
-                        >
-                          <Settings size={14} />
-                          <span>Workspace</span>
-                        </button>
-                        <button
-                          onClick={() => setIsGoogleNewsConfigModalOpen(true)}
-                          className="py-2.5 px-3 rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200/60"
-                          title="Configure Google News settings"
-                        >
-                          <Settings size={14} />
-                          <span>Configure</span>
-                        </button>
-                      </div>
-                    ) : (
-                      <button
-                        onClick={() => setIsGoogleNewsConfigModalOpen(true)}
-                        className="w-full py-2.5 px-4 rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer bg-[#4285F4] hover:bg-[#3367D6] text-white shadow-xs"
-                      >
-                        <Plus size={14} />
-                        <span>Connect Google News</span>
-                      </button>
-                    )}
-                  </div>
-                </div>
-
-                {/* --- YOUTUBE CARD --- */}
-                <div className="bg-white rounded-2xl border border-slate-200/80 p-6 flex flex-col justify-between hover:border-slate-300 transition-all shadow-xs min-h-[380px]">
-                  <div>
-                    {/* Header */}
-                    <div className="flex flex-col gap-3.5 mb-5">
-                      <div className="flex items-center gap-3">
-                        <div className="w-11 h-11 rounded-2xl bg-red-50 text-[#FF0000] flex items-center justify-center border border-red-100/80 shrink-0">
-                          <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-                          </svg>
-                        </div>
-                        <div>
-                          <h3 className="font-semibold text-slate-900 text-base">YouTube</h3>
-                          <p className="text-[11px] text-slate-400">Video & Channel Management</p>
-                        </div>
-                      </div>
-
-                      <div>
-                        <div className={cn(
-                          "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium",
-                          isYouTubeConnected ? "bg-red-50 text-red-700 border border-red-200/50" : "bg-slate-100 text-slate-400"
-                        )}>
-                          <span className={cn("w-1.5 h-1.5 rounded-full", isYouTubeConnected ? "bg-red-500" : "bg-slate-300")} />
-                          <span>{isYouTubeConnected ? 'Connected' : 'Not Connected'}</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <p className="text-xs text-slate-500 leading-relaxed mb-5">
-                      Connect your YouTube channel to manage videos, schedule uploads, and sync content with your WhatsApp broadcast campaigns.
-                    </p>
-
-                    {/* Details */}
-                    {isYouTubeConnected ? (
-                      <div className="space-y-4 py-4 border-t border-slate-100 text-xs">
-                        <div className="flex flex-col gap-1">
-                          <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Channel</span>
-                          <span className="font-medium text-slate-700 truncate">{client?.youtube_config?.channel_title || 'N/A'}</span>
-                        </div>
-                        <div className="flex flex-col gap-1">
-                          <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Email</span>
-                          <span className="font-medium text-slate-700 truncate">{client?.youtube_config?.email || 'N/A'}</span>
-                        </div>
-                        <div className="flex flex-col gap-1">
-                          <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Channel ID</span>
-                          <div className="flex items-center gap-2">
-                            <span className="font-medium text-slate-700 truncate">{client?.youtube_config?.channel_id || 'N/A'}</span>
-                            <CopyButton text={client?.youtube_config?.channel_id} />
-                          </div>
-                        </div>
-                      </div>
-                    ) : (
-                      <p className="text-xs text-slate-400 py-6 text-center">No YouTube channel connected.</p>
-                    )}
-                  </div>
-
-                  {/* Action Button */}
-                  <div className="mt-6 pt-4 border-t border-slate-100">
-                    {isYouTubeConnected ? (
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => { window.location.href = '/client/youtube'; }}
-                          className="flex-1 py-2.5 px-3 rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer bg-[#FF0000] hover:bg-[#CC0000] text-white shadow-xs"
-                        >
-                          <Settings size={14} />
-                          <span>Dashboard</span>
-                        </button>
-                        <button
-                          onClick={async () => {
-                            setYoutubeLoading(true);
-                            try {
-                              const token = localStorage.getItem('token');
-                              const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/auth/youtube/connect`, {
-                                headers: { Authorization: `Bearer ${token}` }
-                              });
-                              if (res.data.url) window.location.href = res.data.url;
-                            } catch (err) {
-                              setToast({ msg: 'Failed to reconnect YouTube', type: 'error' });
-                              setTimeout(() => setToast(null), 4000);
-                            } finally { setYoutubeLoading(false); }
-                          }}
-                          disabled={youtubeLoading}
-                          className="py-2.5 px-3 rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200/60 disabled:opacity-50"
-                          title="Reconnect YouTube"
-                        >
-                          <RefreshCw size={14} className={cn("text-slate-400", youtubeLoading && "animate-spin")} />
-                          <span>Reconnect</span>
-                        </button>
-                      </div>
-                    ) : (
-                      <button
-                        onClick={async () => {
-                          setYoutubeLoading(true);
-                          try {
-                            const token = localStorage.getItem('token');
-                            const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/auth/youtube/connect`, {
-                              headers: { Authorization: `Bearer ${token}` }
-                            });
-                            if (res.data.url) window.location.href = res.data.url;
-                          } catch (err) {
-                            setToast({ msg: 'Failed to connect YouTube', type: 'error' });
-                            setTimeout(() => setToast(null), 4000);
-                          } finally { setYoutubeLoading(false); }
-                        }}
-                        disabled={youtubeLoading}
-                        className="w-full py-2.5 px-4 rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer bg-[#FF0000] hover:bg-[#CC0000] text-white disabled:opacity-50"
-                      >
-                        {youtubeLoading ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />}
-                        <span>Connect YouTube</span>
-                      </button>
-                    )}
-                  </div>
-                </div>
-
-                {/* --- RAZORPAY CARD --- */}
-                <div className="bg-white rounded-2xl border border-slate-200/80 p-6 flex flex-col justify-between hover:border-slate-300 transition-all shadow-xs min-h-[380px]">
-                  <div>
-                    {/* Header */}
-                    <div className="flex flex-col gap-3.5 mb-5">
-                      <div className="flex items-center gap-3">
-                        <div className="w-11 h-11 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100/80 shrink-0">
-                          <RazorpayLogo />
-                        </div>
-                        <div>
-                          <h3 className="font-semibold text-slate-900 text-base">Razorpay</h3>
-                          <p className="text-[11px] text-slate-400">Payment Gateway</p>
-                        </div>
-                      </div>
-
-                      <div>
-                        <div className={cn(
-                          "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium",
-                          isRazorpayConnected ? "bg-emerald-50 text-emerald-700 border border-emerald-200/50" : "bg-slate-100 text-slate-400"
-                        )}>
-                          <span className={cn("w-1.5 h-1.5 rounded-full", isRazorpayConnected ? "bg-emerald-500" : "bg-slate-300")} />
-                          <span>{isRazorpayConnected ? 'Connected' : 'Offline'}</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <p className="text-xs text-slate-500 leading-relaxed mb-5">
-                      Connect your Razorpay account to accept online payments for your catalog products.
-                    </p>
-
-                    {/* Details */}
-                    {isRazorpayConnected ? (
-                      <div className="space-y-4 py-4 border-t border-slate-100 text-xs">
-                        <div className="flex flex-col gap-1">
-                          <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Account ID</span>
-                          <div className="flex items-center gap-2">
-                            <span className="font-medium text-slate-700 truncate">{razorpayConn?.razorpay_account_id || razorpayConn?.linked_key_id || 'Connected'}</span>
-                            <CopyButton text={razorpayConn?.razorpay_account_id || razorpayConn?.linked_key_id} />
-                          </div>
-                        </div>
-                        <div className="flex flex-col gap-1">
-                          <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Gateway Mode</span>
-                          <span className="font-bold text-slate-700 uppercase">{razorpayConn?.mode || 'TEST'} MODE</span>
-                        </div>
-                      </div>
-                    ) : (
-                      <p className="text-xs text-slate-400 py-6 text-center">No Razorpay account connected.</p>
-                    )}
-                  </div>
-
-                  {/* Action Button */}
-                  <div className="mt-6 pt-4 border-t border-slate-100">
-                    <button
-                      onClick={() => router.push('/client/payments')}
-                      className="w-full py-2.5 px-4 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer border border-slate-200/60"
-                    >
-                      <Settings size={14} className="text-slate-400" />
-                      <span>Configure Payments</span>
-                    </button>
-                  </div>
-                </div>
+                  );
+                })()}
 
               </div>
             </div>
+
+            {/* ================= 2. ACTIVE CONNECTORS & BUSINESS TOOLS ================= */}
+            {(() => {
+              const allConnectorsList = [
+                {
+                  key: 'gmail',
+                  name: 'Gmail / Google Workspace',
+                  desc: 'Sync customer emails, send automated replies, and route inbound support tickets.',
+                  icon: <GmailBrandIcon size={28} />,
+                  isConnected: isGmailConnected,
+                  connectedInfo: client?.gmail_config?.email || client?.gmail_config?.email_address || 'Gmail Active',
+                  onConnect: handleConnectGmail,
+                  onConfigure: () => setIsOutlookConfigOpen(true),
+                  badge: 'Google Mail',
+                  btnColor: 'bg-[#EA4335] hover:bg-[#d9382b] text-white'
+                },
+                {
+                  key: 'outlook',
+                  name: 'Microsoft Outlook',
+                  desc: 'Office 365 Exchange sync for corporate emails, calendar bookings, and ticketing.',
+                  icon: <OutlookIcon size={28} />,
+                  isConnected: isOutlookConnected,
+                  connectedInfo: client?.outlook_config?.email || client?.outlook_config?.email_address || 'Outlook Active',
+                  onConnect: () => setIsOutlookConfigOpen(true),
+                  onConfigure: () => setIsOutlookConfigOpen(true),
+                  badge: 'Office 365',
+                  btnColor: 'bg-[#0078D4] hover:bg-[#006abc] text-white'
+                },
+                {
+                  key: 'onedrive',
+                  name: 'Microsoft OneDrive',
+                  desc: 'Enterprise cloud document storage for automatic PDF quotation & invoice backups.',
+                  icon: <OneDriveIcon size={28} />,
+                  isConnected: isOneDriveConnected,
+                  connectedInfo: client?.onedrive_config?.account_name || 'OneDrive Synced',
+                  onConnect: () => setIsOneDriveConfigModalOpen(true),
+                  onConfigure: () => setIsOneDriveConfigModalOpen(true),
+                  badge: 'Cloud Docs',
+                  btnColor: 'bg-[#0078D4] hover:bg-[#006abc] text-white'
+                },
+                {
+                  key: 'google_calendar',
+                  name: 'Google Calendar',
+                  desc: 'Automated appointment scheduling, customer consultation bookings, and reminders.',
+                  icon: <GoogleCalendarIcon size={28} />,
+                  isConnected: isGoogleCalendarConnected,
+                  connectedInfo: client?.google_calendar_config?.account_email || 'Calendar Synced',
+                  onConnect: handleConnectGoogleCalendar,
+                  onConfigure: () => setIsGoogleCalendarConfigModalOpen(true),
+                  badge: 'Scheduling',
+                  btnColor: 'bg-[#4285F4] hover:bg-[#3367d6] text-white'
+                },
+                {
+                  key: 'google_sheets',
+                  name: 'Google Sheets',
+                  desc: 'Export live leads, chat logs, and order history directly into Google Spreadsheets.',
+                  icon: <GoogleSheetsIcon size={28} />,
+                  isConnected: isGoogleSheetsConnected,
+                  connectedInfo: client?.google_sheets_config?.spreadsheet_id ? 'Spreadsheet Synced' : 'Sheets Connected',
+                  onConnect: () => setIsGoogleSheetsConfigModalOpen(true),
+                  onConfigure: () => setIsGoogleSheetsConfigModalOpen(true),
+                  badge: 'Spreadsheets',
+                  btnColor: 'bg-[#0F9D58] hover:bg-[#0b8043] text-white'
+                },
+                {
+                  key: 'google_docs',
+                  name: 'Google Docs',
+                  desc: 'Dynamic template document generation for proposals, agreements, and invoices.',
+                  icon: <GoogleDocsIcon size={28} />,
+                  isConnected: isGoogleDocsConnected,
+                  connectedInfo: client?.google_docs_config?.document_id ? 'Template Synced' : 'Docs Connected',
+                  onConnect: () => setIsGoogleDocsConfigModalOpen(true),
+                  onConfigure: () => setIsGoogleDocsConfigModalOpen(true),
+                  badge: 'Documents',
+                  btnColor: 'bg-[#4285F4] hover:bg-[#3367d6] text-white'
+                },
+                {
+                  key: 'google_slides',
+                  name: 'Google Slides',
+                  desc: 'Automated presentation generation and sales deck pitch customization.',
+                  icon: <GoogleSlidesIcon size={28} />,
+                  isConnected: isGoogleSlidesConnected,
+                  connectedInfo: client?.google_slides_config?.presentation_id ? 'Deck Synced' : 'Slides Connected',
+                  onConnect: () => setIsGoogleSlidesConfigModalOpen(true),
+                  onConfigure: () => setIsGoogleSlidesConfigModalOpen(true),
+                  badge: 'Pitch Decks',
+                  btnColor: 'bg-[#F4B400] hover:bg-[#e0a400] text-slate-900'
+                },
+                {
+                  key: 'zoho',
+                  name: 'Zoho CRM',
+                  desc: 'Bidirectional sync for customer leads, deal pipelines, and contact management.',
+                  icon: <ZohoIcon size={28} />,
+                  isConnected: isZohoConnected,
+                  connectedInfo: 'Synced with Zoho CRM',
+                  onConnect: () => setIsZohoConfigModalOpen(true),
+                  onConfigure: () => setIsZohoConfigModalOpen(true),
+                  badge: 'CRM Pipeline',
+                  btnColor: 'bg-[#E42528] hover:bg-[#c91d20] text-white'
+                },
+                {
+                  key: 'youtube',
+                  name: 'YouTube Channel',
+                  desc: 'Sync video comments, live stream chat moderation, and automated community replies.',
+                  icon: <YouTubeBrandIcon size={28} />,
+                  isConnected: isYouTubeConnected,
+                  connectedInfo: client?.youtube_config?.channel_title || 'Channel Connected',
+                  onConnect: () => setIsYouTubeConfigModalOpen(true),
+                  onConfigure: () => setIsYouTubeConfigModalOpen(true),
+                  badge: 'Video & Live',
+                  btnColor: 'bg-[#FF0000] hover:bg-[#cc0000] text-white'
+                },
+                {
+                  key: 'google_news',
+                  name: 'Google News Feed',
+                  desc: 'Track industry news, brand keywords, and real-time market trends automatically.',
+                  icon: <GoogleNewsIcon size={28} />,
+                  isConnected: isGoogleNewsConnected,
+                  connectedInfo: client?.google_news_config?.query ? `Query: ${client.google_news_config.query}` : 'News Feed Active',
+                  onConnect: () => setIsGoogleNewsConfigModalOpen(true),
+                  onConfigure: () => setIsGoogleNewsConfigModalOpen(true),
+                  badge: 'Market Alerts',
+                  btnColor: 'bg-[#4285F4] hover:bg-[#3367d6] text-white'
+                }
+              ];
+
+              const activeConnectors = allConnectorsList.filter(item => getChannelAccessState(item.key, client).status !== 'COMING_SOON');
+              const comingSoonConnectors = allConnectorsList.filter(item => getChannelAccessState(item.key, client).status === 'COMING_SOON');
+
+              return (
+                <>
+                  {/* Category 2: Active Connectors */}
+                  {activeConnectors.length > 0 && (
+                    <div className="pt-8 border-t border-slate-200/80 space-y-6">
+                      <div className="flex items-center justify-between gap-4">
+                        <div className="flex items-center gap-2.5">
+                          <span className="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-xs shadow-blue-500/50" />
+                          <h2 className="text-sm font-extrabold uppercase tracking-wider text-slate-800">
+                            Available Connectors & Business Tools
+                          </h2>
+                          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-blue-50 text-blue-700 border border-blue-200">
+                            {activeConnectors.length} Available
+                          </span>
+                        </div>
+                        <span className="text-xs text-slate-400 font-medium hidden sm:inline">
+                          Productivity, Storage, CRM & Media Integrations
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {activeConnectors.map((item) => {
+                          const state = getChannelAccessState(item.key, client);
+                          const isConn = item.isConnected;
+
+                          return (
+                            <div
+                              key={item.key}
+                              className="bg-white rounded-3xl border border-slate-200/90 hover:border-slate-300 p-6 sm:p-7 flex flex-col justify-between transition-all duration-300 shadow-sm hover:shadow-md relative group"
+                            >
+                              <div>
+                                {/* Header */}
+                                <div className="flex items-start justify-between gap-3.5 mb-4">
+                                  <div className="flex items-center gap-3.5 min-w-0">
+                                    <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-slate-50 border border-slate-100 shadow-xs shrink-0">
+                                      {item.icon}
+                                    </div>
+                                    <div className="min-w-0">
+                                      <h3 className="font-extrabold text-slate-900 text-base truncate">
+                                        {item.name}
+                                      </h3>
+                                      <span className="inline-block text-[10px] font-bold uppercase tracking-wider text-slate-500 bg-slate-100 px-2.5 py-0.5 rounded-md mt-0.5">
+                                        {item.badge}
+                                      </span>
+                                    </div>
+                                  </div>
+
+                                  <div className="shrink-0">
+                                    {isConn ? (
+                                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                        <span>Connected</span>
+                                      </span>
+                                    ) : (
+                                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold bg-slate-50 text-slate-500 border border-slate-200">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-slate-300" />
+                                        <span>Offline</span>
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+
+                                <p className="text-xs text-slate-500 leading-relaxed mb-4">
+                                  {item.desc}
+                                </p>
+
+                                {isConn && (
+                                  <div className="px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-100 text-xs font-semibold text-slate-700 truncate mb-4">
+                                    <span className="text-slate-400 font-normal">Status: </span>
+                                    <span>{item.connectedInfo}</span>
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* Action Button */}
+                              <div className="pt-2">
+                                {isConn ? (
+                                  <button
+                                    onClick={item.onConfigure}
+                                    className="w-full py-2.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer border border-slate-200 shadow-xs"
+                                  >
+                                    <Settings size={13} className="text-slate-600" />
+                                    <span>Configure</span>
+                                  </button>
+                                ) : (
+                                  <button
+                                    onClick={item.onConnect}
+                                    className={cn(
+                                      "w-full py-2.5 px-4 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer shadow-sm",
+                                      item.btnColor
+                                    )}
+                                  >
+                                    <Plus size={14} />
+                                    <span>Connect</span>
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Category 3: Dedicated Coming Soon Integrations */}
+                  {comingSoonConnectors.length > 0 && (
+                    <div className="pt-8 border-t border-slate-200/80 space-y-6">
+                      <div className="flex items-center justify-between gap-4">
+                        <div className="flex items-center gap-2.5">
+                          <span className="w-2.5 h-2.5 rounded-full bg-amber-500 shadow-xs shadow-amber-500/50" />
+                          <h2 className="text-sm font-extrabold uppercase tracking-wider text-slate-800">
+                            Coming Soon Integrations
+                          </h2>
+                          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-50 text-amber-700 border border-amber-200">
+                            {comingSoonConnectors.length} Scheduled
+                          </span>
+                        </div>
+                        <span className="text-xs text-slate-400 font-medium hidden sm:inline">
+                          Scheduled to go live soon by platform administrator
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {comingSoonConnectors.map((item) => (
+                          <div
+                            key={item.key}
+                            className="bg-white rounded-3xl border border-amber-200/80 bg-amber-50/15 p-6 sm:p-7 flex flex-col justify-between transition-all duration-300 shadow-sm hover:shadow-md relative group"
+                          >
+                            <div>
+                              {/* Header */}
+                              <div className="flex items-start justify-between gap-3.5 mb-4">
+                                <div className="flex items-center gap-3.5 min-w-0">
+                                  <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-slate-50 border border-slate-100 shadow-xs shrink-0">
+                                    {item.icon}
+                                  </div>
+                                  <div className="min-w-0">
+                                    <h3 className="font-extrabold text-slate-900 text-base truncate">
+                                      {item.name}
+                                    </h3>
+                                    <span className="inline-block text-[10px] font-bold uppercase tracking-wider text-slate-500 bg-slate-100 px-2.5 py-0.5 rounded-md mt-0.5">
+                                      {item.badge}
+                                    </span>
+                                  </div>
+                                </div>
+
+                                <div className="shrink-0">
+                                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
+                                    <Sparkles size={11} /> Coming Soon
+                                  </span>
+                                </div>
+                              </div>
+
+                              <p className="text-xs text-slate-500 leading-relaxed mb-4">
+                                {item.desc}
+                              </p>
+
+                              {/* Coming soon notice */}
+                              <div className="px-3.5 py-2 rounded-xl bg-amber-50/70 border border-amber-200/60 text-xs font-medium text-amber-900 mb-4 flex items-center gap-1.5">
+                                <Clock size={13} className="text-amber-600 shrink-0" />
+                                <span>Scheduled to go live soon by admin.</span>
+                              </div>
+                            </div>
+
+                            {/* Action Button */}
+                            <div className="pt-2">
+                              <button
+                                onClick={() => openComingSoon({ name: item.name, key: item.key })}
+                                className="w-full py-2.5 px-4 bg-amber-100 hover:bg-amber-200 text-amber-900 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer border border-amber-300 shadow-xs"
+                              >
+                                <Clock size={13} className="text-amber-700" />
+                                <span>Coming Soon</span>
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </>
+              );
+            })()}
 
           </div>
         )}
 
+        {/* Coming Soon Channel Modal */}
+        <ComingSoonChannelModal
+          isOpen={Boolean(comingSoonModalChannel)}
+          onClose={() => setComingSoonModalChannel(null)}
+          channel={comingSoonModalChannel}
+        />
 
         {/* WhatsApp Configuration Modal */}
-        <WhatsAppConfigModal
-          isOpen={isConfigModalOpen}
-          onClose={() => setIsConfigModalOpen(false)}
-          client={client}
-          onSaved={handleWhatsAppSaved}
-        />
+        {isConfigModalOpen && (
+          <WhatsAppConfigModal
+            isOpen={isConfigModalOpen}
+            onClose={() => setIsConfigModalOpen(false)}
+            client={client}
+            onSaved={handleWhatsAppSaved}
+          />
+        )}
 
         {/* Facebook Configuration Modal */}
-        <FacebookConfigModal
-          isOpen={isFacebookConfigModalOpen}
-          onClose={() => setIsFacebookConfigModalOpen(false)}
-          client={client}
-          onSaved={handleFacebookSaved}
-        />
+        {isFacebookConfigModalOpen && (
+          <FacebookConfigModal
+            isOpen={isFacebookConfigModalOpen}
+            onClose={() => setIsFacebookConfigModalOpen(false)}
+            client={client}
+            onSaved={handleFacebookSaved}
+          />
+        )}
 
         {/* Instagram Configuration Modal */}
-        <InstagramConfigModal
-          isOpen={isInstagramConfigModalOpen}
-          onClose={() => setIsInstagramConfigModalOpen(false)}
-          client={client}
-          onSaved={handleInstagramSaved}
-        />
+        {isInstagramConfigModalOpen && (
+          <InstagramConfigModal
+            isOpen={isInstagramConfigModalOpen}
+            onClose={() => setIsInstagramConfigModalOpen(false)}
+            client={client}
+            onSaved={handleInstagramSaved}
+          />
+        )}
 
         {/* OneDrive Configuration Modal */}
-        <OneDriveConfigModal
-          isOpen={isOneDriveConfigModalOpen}
-          onClose={() => setIsOneDriveConfigModalOpen(false)}
-          client={client}
-          onSaved={handleOneDriveSaved}
-        />
+        {isOneDriveConfigModalOpen && (
+          <OneDriveConfigModal
+            isOpen={isOneDriveConfigModalOpen}
+            onClose={() => setIsOneDriveConfigModalOpen(false)}
+            client={client}
+            onSaved={handleOneDriveSaved}
+          />
+        )}
 
         {/* Google Calendar Configuration Modal */}
-        <GoogleCalendarConfigModal
-          isOpen={isGoogleCalendarConfigModalOpen}
-          onClose={() => setIsGoogleCalendarConfigModalOpen(false)}
-          client={client}
-          onSaved={handleGoogleCalendarSaved}
-        />
+        {isGoogleCalendarConfigModalOpen && (
+          <GoogleCalendarConfigModal
+            isOpen={isGoogleCalendarConfigModalOpen}
+            onClose={() => setIsGoogleCalendarConfigModalOpen(false)}
+            client={client}
+            onSaved={handleGoogleCalendarSaved}
+          />
+        )}
 
         {/* Google Sheets Configuration Modal */}
-        <GoogleSheetsConfigModal
-          isOpen={isGoogleSheetsConfigModalOpen}
-          onClose={() => setIsGoogleSheetsConfigModalOpen(false)}
-          client={client}
-          onSaved={handleGoogleSheetsSaved}
-        />
+        {isGoogleSheetsConfigModalOpen && (
+          <GoogleSheetsConfigModal
+            isOpen={isGoogleSheetsConfigModalOpen}
+            onClose={() => setIsGoogleSheetsConfigModalOpen(false)}
+            client={client}
+            onSaved={handleGoogleSheetsSaved}
+          />
+        )}
 
         {/* Google Docs Configuration Modal */}
-        <GoogleDocsConfigModal
-          isOpen={isGoogleDocsConfigModalOpen}
-          onClose={() => setIsGoogleDocsConfigModalOpen(false)}
-          client={client}
-          onSaved={handleGoogleDocsSaved}
-        />
+        {isGoogleDocsConfigModalOpen && (
+          <GoogleDocsConfigModal
+            isOpen={isGoogleDocsConfigModalOpen}
+            onClose={() => setIsGoogleDocsConfigModalOpen(false)}
+            client={client}
+            onSaved={handleGoogleDocsSaved}
+          />
+        )}
 
         {/* Google Slides Configuration Modal */}
-        <GoogleSlidesConfigModal
-          isOpen={isGoogleSlidesConfigModalOpen}
-          onClose={() => setIsGoogleSlidesConfigModalOpen(false)}
-          client={client}
-          onSaved={handleGoogleSlidesSaved}
-        />
+        {isGoogleSlidesConfigModalOpen && (
+          <GoogleSlidesConfigModal
+            isOpen={isGoogleSlidesConfigModalOpen}
+            onClose={() => setIsGoogleSlidesConfigModalOpen(false)}
+            client={client}
+            onSaved={handleGoogleSlidesSaved}
+          />
+        )}
 
         {/* Google News Configuration Modal */}
-        <GoogleNewsConfigModal
-          isOpen={isGoogleNewsConfigModalOpen}
-          onClose={() => setIsGoogleNewsConfigModalOpen(false)}
-          client={client}
-          onSaved={() => fetchClient(true)}
-        />
+        {isGoogleNewsConfigModalOpen && (
+          <GoogleNewsConfigModal
+            isOpen={isGoogleNewsConfigModalOpen}
+            onClose={() => setIsGoogleNewsConfigModalOpen(false)}
+            client={client}
+            onSaved={() => fetchClient(true)}
+          />
+        )}
 
         {/* Zoho Configuration Modal */}
-        <ZohoConfigModal
-          isOpen={isZohoConfigModalOpen}
-          onClose={() => setIsZohoConfigModalOpen(false)}
-          client={client}
-          onSaved={handleZohoSaved}
-        />
+        {isZohoConfigModalOpen && (
+          <ZohoConfigModal
+            isOpen={isZohoConfigModalOpen}
+            onClose={() => setIsZohoConfigModalOpen(false)}
+            client={client}
+            onSaved={handleZohoSaved}
+          />
+        )}
+
+        {/* YouTube Configuration Modal */}
+        {isYouTubeConfigModalOpen && (
+          <YouTubeConfigModal
+            isOpen={isYouTubeConfigModalOpen}
+            onClose={() => setIsYouTubeConfigModalOpen(false)}
+            client={client}
+            onSaved={(updatedClient) => {
+              setClient(updatedClient);
+              setToast({ msg: 'YouTube configuration saved!', type: 'success' });
+              setTimeout(() => setToast(null), 3000);
+            }}
+          />
+        )}
 
         {/* Microsoft Outlook Configuration Modal */}
-        <OutlookConfigModal
-          isOpen={isOutlookConfigOpen}
-          onClose={() => {
-            setIsOutlookConfigOpen(false);
-            if (typeof window !== 'undefined' && window.location.search.includes('channel=')) {
-              window.history.replaceState({}, '', window.location.pathname);
-            }
-          }}
-          client={client}
-          onSaved={() => fetchClient(true)}
-        />
+        {isOutlookConfigOpen && (
+          <OutlookConfigModal
+            isOpen={isOutlookConfigOpen}
+            onClose={() => {
+              setIsOutlookConfigOpen(false);
+              if (typeof window !== 'undefined' && window.location.search.includes('channel=')) {
+                window.history.replaceState({}, '', window.location.pathname);
+              }
+            }}
+            client={client}
+            onSaved={() => fetchClient(true)}
+          />
+        )}
 
         {/* Interactive Connectors Learning Guide Modal */}
-        <LearningCenterModal
-          guideSlug="connectors"
-          isOpen={isGuideOpen}
-          onClose={() => setIsGuideOpen(false)}
-        />
+        {isGuideOpen && (
+          <LearningCenterModal
+            guideSlug="connectors"
+            isOpen={isGuideOpen}
+            onClose={() => setIsGuideOpen(false)}
+          />
+        )}
       </div>
     </DashboardLayout>
   );

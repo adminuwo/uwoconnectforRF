@@ -3,13 +3,17 @@
 import React, { useState } from 'react';
 import { 
   X, CheckCircle2, Circle, Clock, Calendar, AlertTriangle, 
-  FolderPlus, User, Tag, Shield, Loader2, Flag, Target, TrendingUp, CheckSquare
+  FolderPlus, User, Tag, Shield, Loader2, Flag, Target, TrendingUp, CheckSquare, Plus, UserPlus
 } from 'lucide-react';
 import axios from 'axios';
 
-const API = process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app';
+import { API_BASE_URL } from '@/config/apiConfig';
 
-export default function ProjectDetailDrawer({ project, isOpen, onClose, onUpdate }) {
+export default function ProjectDetailDrawer({ project, isOpen, onClose, onUpdate, availableMembers = [] }) {
+  const [showAddMember, setShowAddMember] = useState(false);
+  const [selectedMemberToAdd, setSelectedMemberToAdd] = useState('');
+  const [isUpdatingMembers, setIsUpdatingMembers] = useState(false);
+
   if (!isOpen || !project) return null;
 
   const milestones = project.milestones || [];
@@ -24,6 +28,8 @@ export default function ProjectDetailDrawer({ project, isOpen, onClose, onUpdate
   const isOverdue = project.deadline && new Date(project.deadline) < new Date() && calculatedProgress < 100;
   const riskLevel = isOverdue ? 'High Risk' : (calculatedProgress < 50 ? 'Medium Risk' : 'Low Risk');
   const riskColor = isOverdue ? 'bg-rose-50 text-rose-700 border-rose-200' : (calculatedProgress < 50 ? 'bg-amber-50 text-amber-700 border-amber-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200');
+
+  const cleanId = typeof project.id === 'object' ? (project.id.$oid || project.id.toString()) : (project.id || project._id);
 
   const handleToggleMilestone = async (index) => {
     const updatedMilestones = milestones.map((m, idx) => {
@@ -43,10 +49,8 @@ export default function ProjectDetailDrawer({ project, isOpen, onClose, onUpdate
 
     try {
       const token = localStorage.getItem('token');
-      const cleanId = typeof project.id === 'object' ? (project.id.$oid || project.id.toString()) : (project.id || project._id);
-      
       const res = await axios.patch(
-        `${API}/api/team/projects/${cleanId}/`,
+        `${API_BASE_URL}/api/team/projects/${cleanId}/`,
         {
           milestones: updatedMilestones,
           progress_percentage: newProgress,
@@ -60,6 +64,56 @@ export default function ProjectDetailDrawer({ project, isOpen, onClose, onUpdate
       console.error('Failed to update milestone:', err);
     }
   };
+
+  const projectMembers = project.members_details || (Array.isArray(project.members) ? project.members : []);
+  const currentMemberIds = projectMembers.map(m => typeof m === 'object' ? String(m.id) : String(m));
+
+  // Add Member
+  const handleAddMember = async () => {
+    if (!selectedMemberToAdd) return;
+    try {
+      setIsUpdatingMembers(true);
+      const token = localStorage.getItem('token');
+      const updatedIds = [...currentMemberIds, selectedMemberToAdd];
+
+      const res = await axios.patch(
+        `${API_BASE_URL}/api/team/projects/${cleanId}/`,
+        { members: updatedIds },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      setSelectedMemberToAdd('');
+      setShowAddMember(false);
+      if (onUpdate) onUpdate(res.data);
+    } catch (err) {
+      alert(err.response?.data?.error || 'Failed to add member to project');
+    } finally {
+      setIsUpdatingMembers(false);
+    }
+  };
+
+  // Remove Member
+  const handleRemoveMember = async (memberId) => {
+    try {
+      setIsUpdatingMembers(true);
+      const token = localStorage.getItem('token');
+      const updatedIds = currentMemberIds.filter(id => String(id) !== String(memberId));
+
+      const res = await axios.patch(
+        `${API_BASE_URL}/api/team/projects/${cleanId}/`,
+        { members: updatedIds },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      if (onUpdate) onUpdate(res.data);
+    } catch (err) {
+      alert(err.response?.data?.error || 'Failed to remove member');
+    } finally {
+      setIsUpdatingMembers(false);
+    }
+  };
+
+  const unassignedMembers = availableMembers.filter(m => !currentMemberIds.includes(String(m.id)));
 
   return (
     <>
@@ -85,7 +139,7 @@ export default function ProjectDetailDrawer({ project, isOpen, onClose, onUpdate
             </div>
           </div>
 
-          <button onClick={onClose} className="p-2 text-slate-400 hover:text-slate-700 rounded-xl hover:bg-slate-100">
+          <button onClick={onClose} className="p-2 text-slate-400 hover:text-slate-700 rounded-xl hover:bg-slate-100 cursor-pointer">
             <X size={18} />
           </button>
         </div>
@@ -119,24 +173,86 @@ export default function ProjectDetailDrawer({ project, isOpen, onClose, onUpdate
 
             <div className="flex justify-between items-center text-[10px] text-slate-300 font-medium pt-1">
               <span>{completedMilestones} / {totalMilestones} Milestones Completed</span>
-              <span>Target: {project.deadline || 'No deadline'}</span>
+              <span>Deadline: {project.deadline || 'Flexible'}</span>
             </div>
           </div>
 
-          {/* Project Details Grid */}
-          <div className="grid grid-cols-3 gap-3 p-4 bg-slate-50 rounded-2xl border border-slate-100">
-            <div>
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Priority</span>
-              <span className="font-bold text-slate-800 uppercase">{project.priority || 'MEDIUM'}</span>
+          {/* Assigned Team Members Info (With Direct Add & Remove) */}
+          <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
+            <div className="flex items-center justify-between mb-2.5">
+              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">
+                Assigned Team Members ({projectMembers.length})
+              </span>
+              <button
+                onClick={() => setShowAddMember(!showAddMember)}
+                className="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200/80 rounded-lg text-[11px] font-bold transition-all cursor-pointer shadow-2xs"
+              >
+                <UserPlus size={12} />
+                <span>{showAddMember ? 'Cancel' : '+ Add Member'}</span>
+              </button>
             </div>
-            <div>
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Est. Hours</span>
-              <span className="font-bold text-slate-800">{project.estimated_hours || 40} hrs</span>
-            </div>
-            <div>
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Status</span>
-              <span className="font-bold text-emerald-600 uppercase">{project.status?.replace('_', ' ') || 'PLANNING'}</span>
-            </div>
+
+            {/* Inline Add Member Picker */}
+            {showAddMember && (
+              <div className="mb-3 p-3 bg-white border border-emerald-200 rounded-xl space-y-2 animate-in fade-in">
+                <label className="block text-[11px] font-bold text-slate-700">Select Member from Workspace:</label>
+                {unassignedMembers.length === 0 ? (
+                  <p className="text-[11px] text-slate-400 italic">All workspace members are already assigned.</p>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <select
+                      value={selectedMemberToAdd}
+                      onChange={(e) => setSelectedMemberToAdd(e.target.value)}
+                      className="flex-1 px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 outline-none"
+                    >
+                      <option value="">-- Choose Member --</option>
+                      {unassignedMembers.map(m => (
+                        <option key={m.id} value={m.id}>
+                          {m.username || m.name} ({m.department || 'Team'})
+                        </option>
+                      ))}
+                    </select>
+                    <button
+                      onClick={handleAddMember}
+                      disabled={!selectedMemberToAdd || isUpdatingMembers}
+                      className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold disabled:opacity-50 cursor-pointer shadow-2xs"
+                    >
+                      {isUpdatingMembers ? <Loader2 size={12} className="animate-spin" /> : 'Assign'}
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {projectMembers.length === 0 ? (
+              <p className="text-[11px] text-slate-400 italic">
+                No team members assigned yet. Click "+ Add Member" above to assign contributors.
+              </p>
+            ) : (
+              <div className="flex flex-wrap gap-2">
+                {projectMembers.map((m, i) => {
+                  const memberId = typeof m === 'object' ? m.id : m;
+                  const memberName = typeof m === 'object' ? (m.name || m.username) : `Member #${memberId}`;
+
+                  return (
+                    <div key={memberId || i} className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-800 shadow-2xs group">
+                      <div className="w-4 h-4 rounded-full bg-emerald-600 text-white text-[9px] font-bold flex items-center justify-center uppercase">
+                        {memberName.charAt(0)}
+                      </div>
+                      <span>{memberName}</span>
+                      <button
+                        onClick={() => handleRemoveMember(memberId)}
+                        disabled={isUpdatingMembers}
+                        className="text-slate-300 hover:text-rose-600 p-0.5 hover:bg-rose-50 rounded transition-colors cursor-pointer ml-1"
+                        title={`Remove ${memberName} from project`}
+                      >
+                        <X size={12} />
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
           {/* Interactive Milestones Checklist */}
