@@ -263,7 +263,7 @@ export default function ClientAdminDetailDashboard({ params }) {
       <DashboardLayout role="ADMIN">
         <div className="max-w-6xl mx-auto py-32 flex flex-col items-center justify-center gap-3">
           <Loader2 className="animate-spin text-emerald-600" size={36} />
-          <p className="text-xs font-semibold text-slate-400">Loading 360° Client Intelligence...</p>
+          <p className="text-xs font-semibold text-slate-400">Loading Client Profile & Details...</p>
         </div>
       </DashboardLayout>
     );

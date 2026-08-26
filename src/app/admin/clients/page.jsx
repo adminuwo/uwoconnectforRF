@@ -819,15 +819,8 @@ export default function AdminClients() {
                                       className="w-full flex items-center gap-2 px-3.5 py-2 hover:bg-emerald-50 text-emerald-800 font-semibold text-left cursor-pointer"
                                     >
                                       <Eye size={14} className="text-emerald-600" />
-                                      View Credentials & Info
+                                      View Profile & Credentials
                                     </button>
-                                    <Link
-                                      href={`/admin/clients/${client.id}`}
-                                      className="flex items-center gap-2 px-3.5 py-2 hover:bg-slate-50 text-slate-700 font-semibold"
-                                    >
-                                      <Building2 size={14} className="text-slate-500" />
-                                      Full 360° Profile
-                                    </Link>
                                     <button
                                       onClick={() => handleOpenClientWorkspace(client)}
                                       className="w-full flex items-center gap-2 px-3.5 py-2 hover:bg-purple-50 text-purple-700 font-semibold cursor-pointer"
@@ -1212,16 +1205,8 @@ export default function AdminClients() {
                     className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-bold text-xs shadow-md shadow-purple-600/20 transition-all cursor-pointer"
                   >
                     <ExternalLink size={14} />
-                    <span>Access Workspace</span>
+                    <span>Access Workspace (Login)</span>
                   </button>
-
-                  <Link
-                    href={`/admin/clients/${selectedProfileClient.id}`}
-                    className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3.5 py-2 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-xl font-bold text-xs shadow-2xs transition-all"
-                  >
-                    <Globe size={14} className="text-emerald-600" />
-                    <span>360° Profile</span>
-                  </Link>
                 </div>
 
                 <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
