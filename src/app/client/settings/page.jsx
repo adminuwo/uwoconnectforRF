@@ -93,12 +93,17 @@ const ClientSettingsPage = () => {
       const processWhatsAppCode = async () => {
         try {
           const token = localStorage.getItem('token');
-          await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/auth/whatsapp/embedded-signup`, { code }, {
-            headers: { Authorization: `Bearer ${token}` }
-          });
+          const origin = typeof window !== 'undefined' ? window.location.origin : 'https://uwoconnect.aisa24.com';
+          await axios.post(
+            `${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080'}/api/auth/whatsapp/embedded-signup`,
+            { 
+              code,
+              redirect_uri: `${origin}/client/settings`
+            },
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
           alert("WhatsApp Embedded Signup successful!");
           fetchProfile();
-          // Optional: clear the code from the URL
           window.history.replaceState({}, document.title, window.location.pathname);
         } catch (err) {
           console.error('Failed to process WhatsApp code', err);

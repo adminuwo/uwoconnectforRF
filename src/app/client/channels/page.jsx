@@ -116,6 +116,7 @@ const ClientChannelsPage = () => {
 
   const [fbLoading, setFbLoading] = useState(false);
   const [igLoading, setIgLoading] = useState(false);
+  const [waLoading, setWaLoading] = useState(false);
 
   const [toast, setToast] = useState(null);
 
@@ -150,12 +151,14 @@ const ClientChannelsPage = () => {
     script.src = 'https://connect.facebook.net/en_US/sdk.js';
     script.async = true;
     script.onload = () => {
-      window.FB && window.FB.init({
-        appId: process.env.NEXT_PUBLIC_META_APP_ID || '991147863536661',
-        version: 'v20.0',
-        cookie: true,
-        xfbml: false,
-      });
+      if (window.FB) {
+        window.FB.init({
+          appId: process.env.NEXT_PUBLIC_META_APP_ID || '991147863536661',
+          version: 'v20.0',
+          cookie: true,
+          xfbml: false,
+        });
+      }
     };
     document.body.appendChild(script);
   }, []);
@@ -192,6 +195,36 @@ const ClientChannelsPage = () => {
           setTimeout(() => setToast(null), 5000);
         } finally {
           setIgLoading(false);
+        }
+      })();
+    }
+    // WhatsApp OAuth / Embedded Signup redirect callback
+    else if (code && state !== 'instagram') {
+      window.history.replaceState({}, document.title, window.location.pathname);
+      (async () => {
+        setWaLoading(true);
+        setToast({ msg: 'Connecting WhatsApp...', type: 'info' });
+        try {
+          const token = localStorage.getItem('token');
+          const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080';
+          await axios.post(
+            `${apiUrl}/api/auth/whatsapp/embedded-signup`,
+            {
+              code,
+              redirect_uri: `${window.location.origin}/client/channels`
+            },
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+          await fetchClient();
+          setToast({ msg: '✅ WhatsApp connected successfully!', type: 'success' });
+          setTimeout(() => setToast(null), 4000);
+        } catch (err) {
+          console.error('Failed to process WhatsApp code', err);
+          const msg = err?.response?.data?.error || err?.response?.data?.details?.error?.message || 'Failed to complete WhatsApp signup.';
+          setToast({ msg: `❌ ${msg}`, type: 'error' });
+          setTimeout(() => setToast(null), 6000);
+        } finally {
+          setWaLoading(false);
         }
       })();
     }
@@ -370,8 +403,70 @@ const ClientChannelsPage = () => {
 
   const handleWhatsAppConnect = () => {
     const origin = typeof window !== 'undefined' ? window.location.origin : 'https://uwoconnect.aisa24.com';
-    const redirectUri = encodeURIComponent(`${origin}/client/settings`);
-    window.location.href = `https://business.facebook.com/messaging/whatsapp/onboard/?app_id=991147863536661&config_id=1048515390903125&extras=%7B%22version%22%3A%22v4%22%2C%22sessionInfoVersion%22%3A%223%22%2C%22featureType%22%3A%22whatsapp_business_app_onboarding%22%7D&redirect_uri=${redirectUri}`;
+    const redirectUri = `${origin}/client/channels`;
+
+    if (window.FB) {
+      setWaLoading(true);
+      let sessionInfo = {};
+      const messageHandler = (event) => {
+        if (event.origin !== "https://www.facebook.com" && event.origin !== "https://web.facebook.com") return;
+        try {
+          const data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
+          if (data.type === 'WA_EMBEDDED_SIGNUP') {
+            if (data.event === 'FINISH' || data.event === 'SUCCESS') {
+              sessionInfo = data.data || {};
+            }
+          }
+        } catch (e) {}
+      };
+      window.addEventListener('message', messageHandler);
+
+      window.FB.login((response) => {
+        (async () => {
+          window.removeEventListener('message', messageHandler);
+          if (response.authResponse?.code || response.authResponse?.accessToken) {
+            try {
+              const token = localStorage.getItem('token');
+              const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080';
+              const payload = {
+                code: response.authResponse.code,
+                access_token: response.authResponse.accessToken,
+                waba_id: sessionInfo.waba_id,
+                phone_number_id: sessionInfo.phone_number_id,
+                phone_number: sessionInfo.phone_number,
+                redirect_uri: redirectUri
+              };
+              await axios.post(`${apiUrl}/api/auth/whatsapp/embedded-signup`, payload, {
+                headers: { Authorization: `Bearer ${token}` }
+              });
+              await fetchClient();
+              setToast({ msg: '✅ WhatsApp connected successfully!', type: 'success' });
+              setTimeout(() => setToast(null), 4000);
+            } catch (err) {
+              const msg = err?.response?.data?.error || err?.response?.data?.details?.error?.message || 'Failed to connect WhatsApp.';
+              setToast({ msg: `❌ ${msg}`, type: 'error' });
+              setTimeout(() => setToast(null), 6000);
+            } finally {
+              setWaLoading(false);
+            }
+          } else {
+            setWaLoading(false);
+          }
+        })();
+      }, {
+        config_id: '1048515390903125',
+        response_type: 'code',
+        override_default_response_type: true,
+        extras: {
+          sessionInfoVersion: '3',
+          featureType: 'whatsapp_business_app_onboarding'
+        }
+      });
+    } else {
+      // Fallback redirect flow
+      const encodedRedirect = encodeURIComponent(redirectUri);
+      window.location.href = `https://business.facebook.com/messaging/whatsapp/onboard/?app_id=991147863536661&config_id=1048515390903125&extras=%7B%22version%22%3A%22v4%22%2C%22sessionInfoVersion%22%3A%223%22%2C%22featureType%22%3A%22whatsapp_business_app_onboarding%22%7D&redirect_uri=${encodedRedirect}`;
+    }
   };
 
   const handleFacebookConnect = () => {
@@ -535,10 +630,11 @@ const ClientChannelsPage = () => {
                 ) : (
                   <button
                     onClick={handleWhatsAppConnect}
-                    className="w-full py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                    disabled={waLoading}
+                    className="w-full py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-60"
                   >
-                    <Plus size={14} />
-                    <span>Connect</span>
+                    {waLoading ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />}
+                    <span>{waLoading ? 'Connecting...' : 'Connect'}</span>
                   </button>
                 )}
               </div>
