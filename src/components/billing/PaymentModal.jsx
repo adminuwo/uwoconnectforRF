@@ -1,4 +1,19 @@
+'use client';
+
+import React, { useState } from 'react';
+import axios from 'axios';
 import { API_BASE_URL } from '@/config/apiConfig';
+import { initiateRazorpayCheckout } from '@/utils/razorpay';
+import {
+  X,
+  CheckCircle2,
+  Zap,
+  Loader2,
+  CreditCard,
+  AlertCircle,
+  Lock,
+  ShieldCheck
+} from 'lucide-react';
 
 const DEFAULT_PLANS = {
   FREE: {
@@ -133,6 +148,7 @@ export default function PaymentModal({ isOpen, onClose, selectedPlan = 'PROFESSI
     try {
       setVerifying(true);
       setError('');
+      const token = localStorage.getItem('token');
       const res = await axios.post(
         `${API_BASE_URL}/api/payments/verify-order`,
         {

@@ -825,7 +825,7 @@ export default function ClientInboxPage() {
                   No conversations match filters.
                 </div>
               )}
-              {convoList.length > 0 && convoList.length >= convoLimitRef.current && (
+              {convoList.length > 0 && convoList.length >= convoLimit && (
                 <div className="p-4 flex justify-center border-t border-slate-100">
                   <button 
                     disabled={isLoadingMoreContacts}

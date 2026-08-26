@@ -11,6 +11,8 @@ const eslintConfig = defineConfig([
     ".next/**",
     "out/**",
     "build/**",
+    "node_modules/**",
+    ".git/**",
     "next-env.d.ts",
     // Root-level debug/test scripts — not part of the app source
     "test_axios.js",
@@ -33,6 +35,7 @@ const eslintConfig = defineConfig([
       "react-hooks/immutability": "off",
       "react-hooks/preserve-manual-memoization": "off",
       "react-hooks/purity": "off",
+      "react-hooks/refs": "off",
 
       // ── TypeScript rules ─────────────────────────────────────────────────
       // Unused vars are non-blocking warnings

@@ -13,7 +13,7 @@ import {
   ChevronDown, Filter, Search, Download, Trash2, Edit3, Plus,
   Send, UserCheck, UserX, ArrowUpRight, TrendingUp, AlertCircle,
   Smartphone, Share2, CornerDownRight, Inbox, Tag, File, Lock,
-  Key, Cloud, BookOpen, Briefcase, Copy, EyeOff, Building2, Shield
+  Key, Cloud, BookOpen, Briefcase, Copy, EyeOff, Building2, Shield, X
 } from 'lucide-react';
 import axios from 'axios';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
