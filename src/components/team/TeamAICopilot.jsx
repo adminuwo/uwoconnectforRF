@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { Bot, Sparkles, Send, FileText, AlertTriangle, CheckSquare } from 'lucide-react';
 import axios from 'axios';
+import { API_BASE_URL } from '@/config/apiConfig';
 
 export default function TeamAICopilot() {
   const [prompt, setPrompt] = useState('');
@@ -18,7 +19,7 @@ export default function TeamAICopilot() {
     try {
       const token = localStorage.getItem('token');
       const res = await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/team/ai-copilot/`,
+        `${API_BASE_URL}/api/team/ai-copilot/`,
         { action, prompt: prompt.trim() },
         { headers: { Authorization: `Bearer ${token}` } }
       );

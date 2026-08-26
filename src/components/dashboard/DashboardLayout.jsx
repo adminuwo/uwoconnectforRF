@@ -8,7 +8,6 @@ import { MessageCircle, Building2, ChevronDown, Search } from 'lucide-react';
 import axios from 'axios';
 import { API_BASE_URL } from '@/config/apiConfig';
 
-const PlatformAssistant = dynamic(() => import('./PlatformAssistant'), { ssr: false });
 const ProductTour = dynamic(() => import('@/components/tour/ProductTour'), { ssr: false });
 const TeamChatDrawer = dynamic(() => import('@/components/team/TeamChatDrawer'), { ssr: false });
 const GlobalIncomingCallListener = dynamic(() => import('./GlobalIncomingCallListener'), { ssr: false });
@@ -309,7 +308,6 @@ const DashboardLayout = ({ children, role: initialRole }) => {
       {/* Fixed overlays */}
       {mounted && (
         <>
-          <PlatformAssistant />
           <ProductTour />
           <TeamChatDrawer isOpen={chatOpen} onClose={() => setChatOpen(false)} />
           <GlobalIncomingCallListener />

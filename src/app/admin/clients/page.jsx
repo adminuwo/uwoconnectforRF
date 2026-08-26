@@ -134,6 +134,12 @@ export default function AdminClients() {
     fetchClientDirectory();
   }, [debouncedSearch, statusFilter, approvalFilter, planFilter, sortKey, sortOrder, page, pageSize]);
 
+  useEffect(() => {
+    const handleOutsideClick = () => setActiveMenuId(null);
+    window.addEventListener('click', handleOutsideClick);
+    return () => window.removeEventListener('click', handleOutsideClick);
+  }, []);
+
   const handleSort = (key) => {
     if (sortKey === key) {
       setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
@@ -228,7 +234,7 @@ export default function AdminClients() {
           <div>
             <div className="flex items-center gap-2.5">
               <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-                Client Intelligence & Management
+                Client Approvals & Directory
               </h1>
               <span className="px-2.5 py-0.5 bg-emerald-50 text-emerald-700 text-xs font-bold rounded-full border border-emerald-100">
                 {totalCount} Total
@@ -240,7 +246,7 @@ export default function AdminClients() {
               )}
             </div>
             <p className="text-slate-500 text-xs sm:text-sm mt-1">
-              Multi-client monitoring, messaging volume, active channels, and business telemetry.
+              Review client registrations, approve or reject access requests, and manage active workspaces.
             </p>
           </div>
 
@@ -449,63 +455,36 @@ export default function AdminClients() {
               </button>
             </div>
           ) : (
-            <div className="overflow-x-auto custom-scrollbar">
+            <div className="overflow-x-auto custom-scrollbar min-h-[360px]">
               <table className="w-full text-left border-collapse text-xs">
                 <thead>
                   <tr className="bg-slate-50/70 border-b border-slate-200 text-slate-500 font-bold uppercase text-[10px] tracking-wider whitespace-nowrap">
-                    <th className="py-3.5 px-4 sticky left-0 bg-slate-50 z-10 cursor-pointer" onClick={() => handleSort('business_name')}>
+                    <th className="py-3.5 px-6 sticky left-0 bg-slate-50 z-10 cursor-pointer" onClick={() => handleSort('business_name')}>
                       <div className="flex items-center gap-1">
                         Client & Business
                         <ArrowUpDown size={11} className="text-slate-400" />
                       </div>
                     </th>
-                    <th className="py-3.5 px-3">Approval</th>
-                    <th className="py-3.5 px-3">Health</th>
-                    <th className="py-3.5 px-3 text-center cursor-pointer" onClick={() => handleSort('active_channels')}>
-                      <div className="flex items-center justify-center gap-1">
-                        Channels
-                        <ArrowUpDown size={11} className="text-slate-400" />
-                      </div>
-                    </th>
-                    <th className="py-3.5 px-3 text-center cursor-pointer" onClick={() => handleSort('total_projects')}>
-                      <div className="flex items-center justify-center gap-1">
-                        Projects
-                        <ArrowUpDown size={11} className="text-slate-400" />
-                      </div>
-                    </th>
-                    <th className="py-3.5 px-3 text-center cursor-pointer" onClick={() => handleSort('total_team')}>
-                      <div className="flex items-center justify-center gap-1">
-                        Team
-                        <ArrowUpDown size={11} className="text-slate-400" />
-                      </div>
-                    </th>
-                    <th className="py-3.5 px-3 text-center cursor-pointer" onClick={() => handleSort('bot_usage')}>
-                      <div className="flex items-center justify-center gap-1">
-                        Bot / AI
-                        <ArrowUpDown size={11} className="text-slate-400" />
-                      </div>
-                    </th>
-                    <th className="py-3.5 px-3 text-right cursor-pointer" onClick={() => handleSort('revenue')}>
-                      <div className="flex items-center justify-end gap-1">
-                        Sales / Rev
-                        <ArrowUpDown size={11} className="text-slate-400" />
-                      </div>
-                    </th>
-                    <th className="py-3.5 px-3 text-center">Docs & Invoices</th>
-                    <th className="py-3.5 px-3 cursor-pointer" onClick={() => handleSort('last_activity')}>
+                    <th className="py-3.5 px-6 cursor-pointer" onClick={() => handleSort('approval_status')}>
                       <div className="flex items-center gap-1">
-                        Last Active
+                        Approval Status
                         <ArrowUpDown size={11} className="text-slate-400" />
                       </div>
                     </th>
-                    <th className="py-3.5 px-4 text-right sticky right-0 bg-slate-50 z-10">Actions</th>
+                    <th className="py-3.5 px-6 cursor-pointer" onClick={() => handleSort('created_at')}>
+                      <div className="flex items-center gap-1">
+                        Registered Date
+                        <ArrowUpDown size={11} className="text-slate-400" />
+                      </div>
+                    </th>
+                    <th className="py-3.5 px-6 text-right sticky right-0 bg-slate-50 z-10">Approval Decision & Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 font-sans">
                   {(loading || (isFetching && clients.length === 0)) ? (
                     // High-End Animated Loader State
                     <tr>
-                      <td colSpan={11} className="py-24 text-center">
+                      <td colSpan={4} className="py-24 text-center">
                         <div className="flex flex-col items-center justify-center gap-3.5">
                           <div className="relative flex items-center justify-center">
                             <div className="absolute w-14 h-14 rounded-2xl bg-emerald-500/15 animate-ping" />
@@ -514,9 +493,9 @@ export default function AdminClients() {
                             </div>
                           </div>
                           <div>
-                            <p className="text-sm font-extrabold text-slate-800 tracking-tight">Loading Client Intelligence...</p>
+                            <p className="text-sm font-extrabold text-slate-800 tracking-tight">Loading Clients...</p>
                             <p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
-                              Aggregating connected channels, projects, health score metrics, and business telemetry
+                              Fetching client approval statuses and workspace records
                             </p>
                           </div>
                         </div>
@@ -524,7 +503,7 @@ export default function AdminClients() {
                     </tr>
                   ) : clients.length === 0 ? (
                     <tr>
-                      <td colSpan={11} className="py-16 text-center text-slate-400">
+                      <td colSpan={4} className="py-16 text-center text-slate-400">
                         <div className="flex flex-col items-center justify-center gap-2">
                           <AlertCircle size={28} className="text-slate-300" />
                           <p className="text-xs font-bold text-slate-600">No clients match your filter criteria.</p>
@@ -538,41 +517,48 @@ export default function AdminClients() {
                       </td>
                     </tr>
                   ) : (
-                    clients.map((client) => {
+                    clients.map((client, index) => {
                       const isMenuOpen = activeMenuId === client.id;
                       const isRowActionLoading = actionLoading[client.id];
+                      const openUpward = index >= 2;
 
                       return (
                         <tr key={client.id} className="hover:bg-slate-50/60 transition-colors">
                           {/* 1. Client & Business */}
-                          <td className="py-3.5 px-4 sticky left-0 bg-white z-10 border-r border-slate-100">
-                            <Link href={`/admin/clients/${client.id}`} className="flex items-center gap-3 group">
-                              <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center font-extrabold text-xs uppercase border border-emerald-100 group-hover:scale-105 transition-transform">
+                          <td className="py-4 px-6 sticky left-0 bg-white z-10 border-r border-slate-100">
+                            <Link href={`/admin/clients/${client.id}`} className="flex items-center gap-3.5 group">
+                              <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center font-extrabold text-sm uppercase border border-emerald-100 group-hover:scale-105 transition-transform shadow-2xs">
                                 {client.business_name?.charAt(0) || 'C'}
                               </div>
-                              <div className="truncate max-w-[180px]">
-                                <div className="font-bold text-slate-900 group-hover:text-emerald-700 transition-colors truncate">
+                              <div>
+                                <div className="font-bold text-slate-900 group-hover:text-emerald-700 transition-colors text-sm">
                                   {client.business_name}
                                 </div>
-                                <div className="text-[10px] text-slate-400 truncate flex items-center gap-1.5">
+                                <div className="text-xs text-slate-400 flex items-center gap-2 mt-0.5">
                                   <span>{client.client_name || client.email}</span>
                                   <span>•</span>
-                                  <span className="uppercase text-[9px] font-bold text-slate-500">{client.plan}</span>
+                                  <span className="uppercase text-[10px] font-bold text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded">{client.plan}</span>
+                                  {client.phone_number && (
+                                    <>
+                                      <span>•</span>
+                                      <span className="text-slate-500">{client.phone_number}</span>
+                                    </>
+                                  )}
                                 </div>
                               </div>
                             </Link>
                           </td>
 
                           {/* 2. Approval Status */}
-                          <td className="py-3.5 px-3 whitespace-nowrap">
+                          <td className="py-4 px-6 whitespace-nowrap">
                             <span className={cn(
-                              "px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wide uppercase inline-flex items-center gap-1 border",
+                              "px-3 py-1.5 rounded-full text-xs font-bold tracking-wide uppercase inline-flex items-center gap-1.5 border shadow-2xs",
                               client.approval_status === 'APPROVED' ? "bg-emerald-50 text-emerald-700 border-emerald-200" :
                               client.approval_status === 'PENDING' ? "bg-amber-50 text-amber-700 border-amber-200" :
                               "bg-rose-50 text-rose-700 border-rose-200"
                             )}>
                               <span className={cn(
-                                "w-1.5 h-1.5 rounded-full",
+                                "w-2 h-2 rounded-full",
                                 client.approval_status === 'APPROVED' ? "bg-emerald-500" :
                                 client.approval_status === 'PENDING' ? "bg-amber-500 animate-pulse" :
                                 "bg-rose-500"
@@ -581,192 +567,118 @@ export default function AdminClients() {
                             </span>
                           </td>
 
-                          {/* 3. Health Score */}
-                          <td className="py-3.5 px-3 whitespace-nowrap">
-                            <ClientHealthBadge health={client.health} size="sm" />
-                          </td>
-
-                          {/* 4. Active Channels */}
-                          <td className="py-3.5 px-3 text-center whitespace-nowrap">
-                            <div className="inline-flex items-center gap-1 bg-slate-50 px-2 py-1 rounded-lg border border-slate-200/60" title={`${client.active_channels_count} / ${client.total_channels_count || 10} Active Channels`}>
-                              <Globe size={13} className="text-emerald-600" />
-                              <span className="font-bold text-slate-800 text-[11px]">{client.active_channels_count || 0}</span>
-                              <span className="text-slate-400 text-[10px]">/{client.total_channels_count || 10}</span>
+                          {/* 3. Registered Date / Last Active */}
+                          <td className="py-4 px-6 whitespace-nowrap text-slate-600 text-xs font-medium">
+                            <div className="flex items-center gap-1.5">
+                              <Clock size={13} className="text-slate-400" />
+                              <span>{client.created_date_formatted || client.last_activity_formatted || 'Recently'}</span>
                             </div>
                           </td>
 
-                          {/* 5. Total Projects */}
-                          <td className="py-3.5 px-3 text-center whitespace-nowrap">
-                            <span className="font-bold text-slate-800 text-xs">{client.total_projects || 0}</span>
-                            {client.active_projects > 0 && (
-                              <span className="text-[10px] text-emerald-600 font-semibold ml-1">({client.active_projects} active)</span>
-                            )}
-                          </td>
-
-                          {/* 6. Total Team */}
-                          <td className="py-3.5 px-3 text-center whitespace-nowrap">
-                            <div className="inline-flex items-center gap-1 text-xs font-bold text-slate-800">
-                              <Users size={12} className="text-slate-400" />
-                              <span>{client.total_team_members || 1}</span>
-                            </div>
-                          </td>
-
-                          {/* 7. Bot Usage */}
-                          <td className="py-3.5 px-3 text-center whitespace-nowrap">
-                            <div className="flex flex-col items-center">
-                              <span className="font-bold text-slate-800 text-xs">{client.bot_usage?.total_messages || 0} msgs</span>
-                              <span className="text-[9px] font-semibold text-emerald-600">
-                                {client.bot_usage?.ai_enabled ? 'AI Enabled' : 'Auto Bot'}
-                              </span>
-                            </div>
-                          </td>
-
-                          {/* 8. Sales / Revenue */}
-                          <td className="py-3.5 px-3 text-right whitespace-nowrap font-mono">
-                            <div className="font-bold text-slate-900 text-xs">
-                              {client.sales?.currency_symbol || '₹'}{(client.sales?.total_revenue || 0).toLocaleString()}
-                            </div>
-                            <div className="text-[10px] text-slate-400 font-sans">
-                              {client.sales?.orders_count || 0} orders
-                            </div>
-                          </td>
-
-                          {/* 9. Docs & Invoices */}
-                          <td className="py-3.5 px-3 text-center whitespace-nowrap">
-                            <div className="text-[11px] font-bold text-slate-800">
-                              {client.invoices?.total || 0} Invoices • {client.kb_docs_count || 0} KB
-                            </div>
-                            <div className="text-[10px] text-slate-400">
-                              {client.quotations?.total || 0} quotes / {client.proposals?.total || 0} props
-                            </div>
-                          </td>
-
-                          {/* 10. Last Active */}
-                          <td className="py-3.5 px-3 whitespace-nowrap text-slate-500 text-[11px]">
-                            {client.last_activity_formatted || client.created_date_formatted}
-                          </td>
-
-                          {/* 11. Actions Menu */}
-                          <td className="py-3.5 px-4 text-right sticky right-0 bg-white z-10 border-l border-slate-100">
-                            <div className="relative inline-block text-left" onClick={(e) => e.stopPropagation()}>
-                              <div className="flex items-center justify-end gap-1.5">
-                                {/* Open 360 View */}
-                                <Link
-                                  href={`/admin/clients/${client.id}`}
-                                  className="p-1.5 hover:bg-emerald-50 text-slate-500 hover:text-emerald-700 rounded-lg transition-all"
-                                  title="Open 360° Client Intelligence"
-                                >
-                                  <Eye size={15} />
-                                </Link>
-
-                                {/* Open Client Workspace Impersonation */}
+                          {/* 4. Decision & Actions */}
+                          <td className={cn(
+                            "py-4 px-6 text-right sticky right-0 bg-white border-l border-slate-100",
+                            isMenuOpen ? "z-30" : "z-10"
+                          )}>
+                            <div className="flex items-center justify-end gap-2" onClick={(e) => e.stopPropagation()}>
+                              {/* Direct 1-Click Approval Decision */}
+                              {client.approval_status === 'PENDING' ? (
+                                <div className="flex items-center gap-2">
+                                  <button
+                                    onClick={() => handleClientAction(client.id, 'SET_APPROVAL_STATUS', { approval_status: 'APPROVED' })}
+                                    disabled={isRowActionLoading}
+                                    className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs shadow-2xs transition-all disabled:opacity-50 cursor-pointer"
+                                  >
+                                    <CheckCircle2 size={14} />
+                                    <span>Approve</span>
+                                  </button>
+                                  <button
+                                    onClick={() => handleClientAction(client.id, 'SET_APPROVAL_STATUS', { approval_status: 'REJECTED' })}
+                                    disabled={isRowActionLoading}
+                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-xl font-bold text-xs transition-all disabled:opacity-50 cursor-pointer"
+                                  >
+                                    <XCircle size={14} />
+                                    <span>Reject</span>
+                                  </button>
+                                </div>
+                              ) : client.approval_status === 'REJECTED' ? (
                                 <button
-                                  onClick={() => handleOpenClientWorkspace(client)}
-                                  className="p-1.5 hover:bg-purple-50 text-slate-500 hover:text-purple-700 rounded-lg transition-all"
-                                  title="Open Client Dashboard (Impersonate)"
+                                  onClick={() => handleClientAction(client.id, 'SET_APPROVAL_STATUS', { approval_status: 'APPROVED' })}
+                                  disabled={isRowActionLoading}
+                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-xl font-bold text-xs transition-all disabled:opacity-50 cursor-pointer"
                                 >
-                                  <ExternalLink size={15} />
+                                  <CheckCircle2 size={14} />
+                                  <span>Re-Approve</span>
                                 </button>
+                              ) : (
+                                <button
+                                  onClick={() => handleClientAction(client.id, 'SET_APPROVAL_STATUS', { approval_status: 'REJECTED' })}
+                                  disabled={isRowActionLoading}
+                                  className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-slate-50 hover:bg-rose-50 text-slate-500 hover:text-rose-700 border border-slate-200 hover:border-rose-200 rounded-xl font-semibold text-xs transition-all disabled:opacity-50 cursor-pointer"
+                                  title="Revoke access"
+                                >
+                                  <XCircle size={13} />
+                                  <span>Revoke</span>
+                                </button>
+                              )}
 
-                                {/* More Dropdown */}
+                              {/* Secondary Options Menu */}
+                              <div className="relative inline-block text-left">
                                 <button
                                   onClick={() => setActiveMenuId(isMenuOpen ? null : client.id)}
-                                  className="p-1.5 hover:bg-slate-100 text-slate-500 rounded-lg transition-all"
+                                  className="p-2 hover:bg-slate-100 text-slate-500 rounded-xl transition-all cursor-pointer"
+                                  title="More options"
                                 >
                                   <MoreVertical size={15} />
                                 </button>
+
+                                {isMenuOpen && (
+                                  <div className={cn(
+                                    "absolute right-0 w-48 bg-white rounded-xl shadow-xl border border-slate-200 z-50 py-1.5 animate-in fade-in zoom-in-95 text-left text-xs",
+                                    openUpward 
+                                      ? "bottom-full mb-1.5 origin-bottom-right" 
+                                      : "top-full mt-1.5 origin-top-right"
+                                  )}>
+                                    <Link
+                                      href={`/admin/clients/${client.id}`}
+                                      className="flex items-center gap-2 px-3.5 py-2 hover:bg-slate-50 text-slate-700 font-semibold"
+                                    >
+                                      <Eye size={14} className="text-emerald-600" />
+                                      360° Profile
+                                    </Link>
+                                    <button
+                                      onClick={() => handleOpenClientWorkspace(client)}
+                                      className="w-full flex items-center gap-2 px-3.5 py-2 hover:bg-purple-50 text-purple-700 font-semibold"
+                                    >
+                                      <ExternalLink size={14} />
+                                      Open Workspace
+                                    </button>
+                                    <div className="my-1 border-t border-slate-100" />
+                                    <button
+                                      onClick={() => {
+                                        setClientForPassword(client);
+                                        setIsPasswordModalOpen(true);
+                                        setActiveMenuId(null);
+                                      }}
+                                      className="w-full flex items-center gap-2 px-3.5 py-2 hover:bg-slate-50 text-slate-700"
+                                    >
+                                      <Key size={14} className="text-amber-500" />
+                                      Change Password
+                                    </button>
+                                    <button
+                                      onClick={() => {
+                                        setClientToDelete(client);
+                                        setIsDeleteModalOpen(true);
+                                        setActiveMenuId(null);
+                                      }}
+                                      className="w-full flex items-center gap-2 px-3.5 py-2 hover:bg-rose-50 text-rose-600 font-semibold"
+                                    >
+                                      <Trash2 size={14} />
+                                      Delete Client
+                                    </button>
+                                  </div>
+                                )}
                               </div>
-
-                              {/* Dropdown Menu */}
-                              {isMenuOpen && (
-                                <div className="absolute right-0 top-full mt-1 w-52 bg-white rounded-xl shadow-xl border border-slate-200 z-50 py-1.5 animate-in fade-in zoom-in-95 text-left text-xs">
-                                  <Link
-                                    href={`/admin/clients/${client.id}`}
-                                    className="flex items-center gap-2 px-3.5 py-2 hover:bg-slate-50 text-slate-700 font-semibold"
-                                  >
-                                    <Eye size={14} className="text-emerald-600" />
-                                    360° Client Profile
-                                  </Link>
-                                  <button
-                                    onClick={() => handleOpenClientWorkspace(client)}
-                                    className="w-full flex items-center gap-2 px-3.5 py-2 hover:bg-purple-50 text-purple-700 font-semibold"
-                                  >
-                                    <ExternalLink size={14} />
-                                    Open Client Dashboard
-                                  </button>
-                                  
-                                  <div className="my-1 border-t border-slate-100" />
-
-                                  <Link
-                                    href={`/admin/clients/${client.id}?tab=projects`}
-                                    className="flex items-center gap-2 px-3.5 py-2 hover:bg-slate-50 text-slate-700"
-                                  >
-                                    <Layers size={14} className="text-blue-500" />
-                                    Manage Projects
-                                  </Link>
-                                  <Link
-                                    href={`/admin/clients/${client.id}?tab=team`}
-                                    className="flex items-center gap-2 px-3.5 py-2 hover:bg-slate-50 text-slate-700"
-                                  >
-                                    <Users size={14} className="text-indigo-500" />
-                                    Manage Team Members
-                                  </Link>
-                                  <Link
-                                    href={`/admin/clients/${client.id}?tab=channels`}
-                                    className="flex items-center gap-2 px-3.5 py-2 hover:bg-slate-50 text-slate-700"
-                                  >
-                                    <Globe size={14} className="text-emerald-500" />
-                                    Manage Channels
-                                  </Link>
-
-                                  <div className="my-1 border-t border-slate-100" />
-
-                                  {/* Approval Actions */}
-                                  {client.approval_status !== 'APPROVED' && (
-                                    <button
-                                      onClick={() => handleClientAction(client.id, 'SET_APPROVAL_STATUS', { approval_status: 'APPROVED' })}
-                                      className="w-full flex items-center gap-2 px-3.5 py-2 hover:bg-emerald-50 text-emerald-700 font-semibold"
-                                    >
-                                      <CheckCircle2 size={14} />
-                                      Approve Client
-                                    </button>
-                                  )}
-                                  {client.approval_status !== 'REJECTED' && (
-                                    <button
-                                      onClick={() => handleClientAction(client.id, 'SET_APPROVAL_STATUS', { approval_status: 'REJECTED' })}
-                                      className="w-full flex items-center gap-2 px-3.5 py-2 hover:bg-rose-50 text-rose-700"
-                                    >
-                                      <XCircle size={14} />
-                                      Reject Client
-                                    </button>
-                                  )}
-
-                                  <div className="my-1 border-t border-slate-100" />
-
-                                  <button
-                                    onClick={() => {
-                                      setClientForPassword(client);
-                                      setIsPasswordModalOpen(true);
-                                      setActiveMenuId(null);
-                                    }}
-                                    className="w-full flex items-center gap-2 px-3.5 py-2 hover:bg-slate-50 text-slate-700"
-                                  >
-                                    <Key size={14} className="text-amber-500" />
-                                    Change Password
-                                  </button>
-                                  <button
-                                    onClick={() => {
-                                      setClientToDelete(client);
-                                      setIsDeleteModalOpen(true);
-                                      setActiveMenuId(null);
-                                    }}
-                                    className="w-full flex items-center gap-2 px-3.5 py-2 hover:bg-rose-50 text-rose-600 font-semibold"
-                                  >
-                                    <Trash2 size={14} />
-                                    Delete Client
-                                  </button>
-                                </div>
-                              )}
                             </div>
                           </td>
                         </tr>

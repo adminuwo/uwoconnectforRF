@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { X, CheckCircle2, Circle, Send, MessageSquare, Paperclip, Clock, Calendar, AlertCircle, Copy, ShieldAlert, Check } from 'lucide-react';
 import axios from 'axios';
+import { API_BASE_URL } from '@/config/apiConfig';
 
 export default function TaskDetailDrawer({ task, isOpen, onClose, onUpdate }) {
   const [newComment, setNewComment] = useState('');
@@ -17,7 +18,7 @@ export default function TaskDetailDrawer({ task, isOpen, onClose, onUpdate }) {
     try {
       const token = localStorage.getItem('token');
       const res = await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/team/tasks/${task.id}/toggle_checklist/`,
+        `${API_BASE_URL}/api/team/tasks/${task.id}/toggle_checklist/`,
         { item_id: itemId },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -35,14 +36,14 @@ export default function TaskDetailDrawer({ task, isOpen, onClose, onUpdate }) {
     try {
       const token = localStorage.getItem('token');
       await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/team/tasks/${task.id}/add_comment/`,
+        `${API_BASE_URL}/api/team/tasks/${task.id}/add_comment/`,
         { text: newComment.trim() },
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setNewComment('');
       // Refetch task updates
       const res = await axios.get(
-        `${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/team/tasks/${task.id}/`,
+        `${API_BASE_URL}/api/team/tasks/${task.id}/`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       onUpdate(res.data);
@@ -58,7 +59,7 @@ export default function TaskDetailDrawer({ task, isOpen, onClose, onUpdate }) {
     try {
       const token = localStorage.getItem('token');
       const res = await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/team/tasks/${task.id}/submit_for_approval/`,
+        `${API_BASE_URL}/api/team/tasks/${task.id}/submit_for_approval/`,
         { notes: approvalNotes },
         { headers: { Authorization: `Bearer ${token}` } }
       );

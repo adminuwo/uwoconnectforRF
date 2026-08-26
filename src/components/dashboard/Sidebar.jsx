@@ -133,13 +133,13 @@ const Sidebar = ({ role, isOpen, onClose, onToggle }) => {
 
   const agentLinks = [
     { name: 'Dashboard', href: '/client', icon: LayoutDashboard },
+    { name: 'Team & Projects', href: '/client/team', icon: ShieldCheck },
     { name: 'Voice & Video Calls', href: '/client/calls', icon: PhoneCall },
     { name: 'Leads (CRM)', href: '/client/crm', icon: Users },
     { name: 'Quotations', href: '/client/quotations', icon: FileCheck },
     { name: 'Proposals', href: '/client/proposals', icon: FileText },
     { name: 'Invoices', href: '/client/invoices', icon: Receipt },
     { name: 'Messages', href: '/client/inbox', icon: MessageSquare },
-    { name: 'Team Chat', href: '/client/team-chat', icon: MessagesSquare },
     { name: 'Knowledge Base', href: '/client/knowledge', icon: Brain },
     { name: 'Catalog', href: '/client/catalog', icon: ShoppingBag },
     { name: 'Orders', href: '/client/orders', icon: Receipt },

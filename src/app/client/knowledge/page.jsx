@@ -74,12 +74,15 @@ const KnowledgeBasePage = () => {
     if (!confirm('Are you sure you want to delete this document? The AI assistant will no longer have access to this information.')) return;
     try {
       const token = localStorage.getItem('token');
+      setDocuments(prev => prev.filter(d => String(d.id) !== String(id)));
       await axios.delete(`${API}/api/knowledge/${id}/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       fetchDocuments();
     } catch (err) {
-      alert('Failed to delete document');
+      console.error('Delete knowledge doc error:', err);
+      alert(err.response?.data?.message || err.response?.data?.error || 'Failed to delete document');
+      fetchDocuments();
     }
   };
 

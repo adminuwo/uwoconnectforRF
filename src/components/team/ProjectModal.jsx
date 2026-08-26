@@ -161,7 +161,7 @@ export default function ProjectModal({ isOpen, onClose, onSuccess, members = [] 
             />
           </div>
 
-          {/* Project Type & Client Name */}
+          {/* Project Type & Department */}
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block font-semibold text-slate-700 mb-1">Project Type</label>
@@ -177,20 +177,6 @@ export default function ProjectModal({ isOpen, onClose, onSuccess, members = [] 
             </div>
 
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">Client Name (Optional)</label>
-              <input
-                type="text"
-                value={clientName}
-                onChange={(e) => setClientName(e.target.value)}
-                placeholder="e.g. Acme Corp"
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 outline-none"
-              />
-            </div>
-          </div>
-
-          {/* Department, Priority & Status */}
-          <div className="grid grid-cols-3 gap-3">
-            <div>
               <label className="block font-semibold text-slate-700 mb-1">Department</label>
               <select
                 value={department}
@@ -202,36 +188,10 @@ export default function ProjectModal({ isOpen, onClose, onSuccess, members = [] 
                 ))}
               </select>
             </div>
-
-            <div>
-              <label className="block font-semibold text-slate-700 mb-1">Priority</label>
-              <select
-                value={priority}
-                onChange={(e) => setPriority(e.target.value)}
-                className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-white font-medium outline-none"
-              >
-                {PRIORITIES.map(p => (
-                  <option key={p} value={p}>{p}</option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block font-semibold text-slate-700 mb-1">Status</label>
-              <select
-                value={status}
-                onChange={(e) => setStatus(e.target.value)}
-                className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-white font-medium outline-none"
-              >
-                {STATUSES.map(s => (
-                  <option key={s} value={s}>{s.replace('_', ' ')}</option>
-                ))}
-              </select>
-            </div>
           </div>
 
-          {/* Dates & Hours */}
-          <div className="grid grid-cols-3 gap-3">
+          {/* Start Date & Target Deadline */}
+          <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block font-semibold text-slate-700 mb-1 flex items-center gap-1">
                 <Calendar size={12} className="text-slate-400" /> Start Date
@@ -252,18 +212,6 @@ export default function ProjectModal({ isOpen, onClose, onSuccess, members = [] 
                 type="date"
                 value={deadline}
                 onChange={(e) => setDeadline(e.target.value)}
-                className="w-full px-3 py-2.5 rounded-xl border border-slate-200 outline-none"
-              />
-            </div>
-
-            <div>
-              <label className="block font-semibold text-slate-700 mb-1 flex items-center gap-1">
-                <Clock size={12} className="text-slate-400" /> Est. Hours
-              </label>
-              <input
-                type="number"
-                value={estimatedHours}
-                onChange={(e) => setEstimatedHours(e.target.value)}
                 className="w-full px-3 py-2.5 rounded-xl border border-slate-200 outline-none"
               />
             </div>

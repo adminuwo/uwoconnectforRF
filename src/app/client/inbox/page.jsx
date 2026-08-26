@@ -1,13 +1,13 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { 
   MessageSquare, Search, Loader2, User, Phone, Mail, 
   MapPin, Send, Plus, MoreHorizontal, Filter, 
   Smile, Paperclip, Zap, ArrowLeft, Check, CheckCheck, Archive, Sparkles, Lock, Unlock,
   FileText, Download, Image as ImageIcon, Music, Film, Video, ExternalLink,
   Shield, ShieldAlert, ArrowRightLeft, History, BarChart3, Activity, Users, Eye, StickyNote,
-  Clock, Tag, RefreshCw, AlertCircle, Bot
+  Clock, Tag, RefreshCw, AlertCircle, Bot, ChevronLeft, ChevronRight
 } from 'lucide-react';
 import axios from 'axios';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
@@ -42,12 +42,11 @@ const TelegramIcon = ({ size = 14, className = '' }) => (
 );
 
 const CHANNEL_TABS = [
-  { id: 'ALL', label: 'All', icon: MessageSquare, color: 'text-slate-700' },
-  { id: 'WHATSAPP', label: 'WhatsApp', icon: WhatsAppIcon, color: 'text-[#25D366]' },
-  { id: 'INSTAGRAM', label: 'Instagram', icon: InstagramIcon, color: 'text-[#E4405F]' },
-  { id: 'FACEBOOK', label: 'Facebook', icon: FacebookIcon, color: 'text-[#1877F2]' },
-  { id: 'TELEGRAM', label: 'Telegram', icon: TelegramIcon, color: 'text-[#229ED9]' },
-  { id: 'GMAIL', label: 'Gmail', icon: Mail, color: 'text-[#EA4335]' },
+  { id: 'ALL', label: 'All', icon: MessageSquare, color: 'text-slate-700', activeClass: 'bg-emerald-600 text-white shadow-emerald-500/20' },
+  { id: 'WHATSAPP', label: 'WhatsApp', icon: WhatsAppIcon, color: 'text-[#25D366]', activeClass: 'bg-[#25D366] text-white shadow-[#25D366]/30' },
+  { id: 'INSTAGRAM', label: 'Instagram', icon: InstagramIcon, color: 'text-[#E4405F]', activeClass: 'bg-gradient-to-r from-purple-600 via-pink-600 to-rose-500 text-white shadow-pink-500/30' },
+  { id: 'FACEBOOK', label: 'Facebook', icon: FacebookIcon, color: 'text-[#1877F2]', activeClass: 'bg-[#1877F2] text-white shadow-blue-500/30' },
+  { id: 'GMAIL', label: 'Gmail', icon: Mail, color: 'text-[#EA4335]', activeClass: 'bg-[#EA4335] text-white shadow-red-500/30' },
 ];
 
 export default function ClientInboxPage() {
@@ -78,12 +77,22 @@ export default function ClientInboxPage() {
   const [analyticsData, setAnalyticsData] = useState([]);
 
   const scrollRef = useRef(null);
+  const channelTabsRef = useRef(null);
   const wsRef = useRef(null);
   const typingTimeoutRef = useRef(null);
   const selectedConvoIdRef = useRef(selectedConvoId);
   const activeChannelFilterRef = useRef(activeChannelFilter);
   const convoLimitRef = useRef(10);
   const [convoLimit, setConvoLimit] = useState(10);
+
+  const scrollTabs = (direction) => {
+    if (channelTabsRef.current) {
+      channelTabsRef.current.scrollBy({
+        left: direction === 'left' ? -120 : 120,
+        behavior: 'smooth'
+      });
+    }
+  };
 
   useEffect(() => {
     selectedConvoIdRef.current = selectedConvoId;
@@ -126,12 +135,11 @@ export default function ClientInboxPage() {
       const headers = { Authorization: `Bearer ${token}` };
       const apiUrl = API_BASE_URL;
       
-      const channelParam = activeChannelFilterRef.current !== 'ALL' ? `&preferred_channel=${activeChannelFilterRef.current}` : '';
-      const limitParam = `?limit=${convoLimitRef.current}&offset=0`;
+      const limitParam = `?limit=${Math.max(convoLimitRef.current, 50)}&offset=0`;
       const searchParam = searchTerm ? `&search=${encodeURIComponent(searchTerm)}` : '';
 
       // Fetch contacts properly paginated and ordered by recent activity
-      const contactRes = await axios.get(`${apiUrl}/api/contacts/${limitParam}${channelParam}${searchParam}`, { headers });
+      const contactRes = await axios.get(`${apiUrl}/api/contacts/${limitParam}${searchParam}`, { headers });
       
       // Handle Django Rest Framework pagination format
       let fetchedContacts = [];
@@ -141,21 +149,77 @@ export default function ClientInboxPage() {
         fetchedContacts = contactRes.data.results;
       }
       
-      const convoData = fetchedContacts.map(contactObj => ({
-        id: contactObj.platform_id || contactObj.phone_number || contactObj.id,
-        name: contactObj.name || contactObj.platform_id || contactObj.phone_number || 'Unknown Contact',
-        rawAddress: contactObj.phone_number || contactObj.platform_id,
-        lastMessage: 'Tap to view messages...',
-        time: contactObj.updated_at || contactObj.created_at,
-        unread: 0,
-        channel: contactObj.preferred_channel || 'WHATSAPP',
-        assignedTo: contactObj.assigned_to || null,
-        isLocked: false,
-        lockedBy: null,
-        status: contactObj.status || 'OPEN',
-        contactObj,
-        messages: []
-      }));
+      let convoData = fetchedContacts.map(contactObj => {
+        let channel = (contactObj.preferred_channel || '').toUpperCase();
+        const nameUpper = (contactObj.name || '').toUpperCase();
+        const pid = (contactObj.platform_id || '').toLowerCase();
+        
+        if (nameUpper.includes('INSTAGRAM') || pid.startsWith('ig') || pid.includes('instagram')) {
+          channel = 'INSTAGRAM';
+        } else if (nameUpper.includes('FACEBOOK') || pid.startsWith('fb') || pid.includes('facebook')) {
+          channel = 'FACEBOOK';
+        } else if (pid.includes('@') || (contactObj.email && contactObj.email.includes('@'))) {
+          channel = 'GMAIL';
+        } else if (pid.includes('tg') || pid.includes('telegram')) {
+          channel = 'TELEGRAM';
+        } else if (!channel) {
+          channel = 'WHATSAPP';
+        }
+
+        return {
+          id: contactObj.platform_id || contactObj.phone_number || contactObj.id,
+          name: contactObj.name || contactObj.platform_id || contactObj.phone_number || 'Customer',
+          rawAddress: contactObj.phone_number || contactObj.platform_id,
+          lastMessage: 'Tap to view messages...',
+          time: contactObj.updated_at || contactObj.created_at,
+          unread: 0,
+          channel: channel,
+          assignedTo: contactObj.assigned_to || null,
+          isLocked: false,
+          lockedBy: null,
+          status: contactObj.status || 'OPEN',
+          contactObj,
+          messages: []
+        };
+      });
+
+      // Fallback: If no contacts found in Contact collection, parse unique conversations from live Messages
+      if (convoData.length === 0) {
+        try {
+          const msgChannelParam = activeChannelFilterRef.current !== 'ALL' ? `&channel=${activeChannelFilterRef.current}` : '';
+          const msgRes = await axios.get(`${apiUrl}/api/messages/?limit=50${msgChannelParam}`, { headers });
+          const rawMsgs = msgRes.data || [];
+          const seen = new Set();
+          const fallbackConvos = [];
+          for (const m of rawMsgs) {
+            const isInc = m.message_type === 'INCOMING';
+            const contactAddr = isInc ? m.from_address : m.to_address;
+            if (contactAddr && !seen.has(contactAddr)) {
+              seen.add(contactAddr);
+              fallbackConvos.push({
+                id: contactAddr,
+                name: m.sender_name || contactAddr,
+                rawAddress: contactAddr,
+                lastMessage: m.body || 'Recent message',
+                time: m.created_at,
+                unread: 0,
+                channel: m.channel || 'WHATSAPP',
+                assignedTo: null,
+                isLocked: false,
+                lockedBy: null,
+                status: 'OPEN',
+                contactObj: { platform_id: contactAddr, phone_number: contactAddr, name: m.sender_name || contactAddr },
+                messages: []
+              });
+            }
+          }
+          if (fallbackConvos.length > 0) {
+            convoData = fallbackConvos;
+          }
+        } catch (mErr) {
+          console.warn('Fallback messages error:', mErr);
+        }
+      }
       
       setConversations(convoData);
       
@@ -255,24 +319,39 @@ export default function ClientInboxPage() {
     return digits || rawId;
   };
 
-  // Removed client-side search since we do backend search in fetchConversationsOnly.
-  // The backend already returns filtered results based on activeChannelFilter and searchTerm
-  const convoList = conversations.map(c => ({
-    ...c,
-    messages: selectedConvoId === c.id ? messages : []
-  }))
-  .sort((a, b) => new Date(b.time) - new Date(a.time));
+  // Instant reactive client-side & backend filtered conversations
+  const convoList = useMemo(() => {
+    let list = conversations;
+    if (activeChannelFilter && activeChannelFilter !== 'ALL') {
+      list = list.filter(c => (c.channel || '').toUpperCase() === activeChannelFilter.toUpperCase());
+    }
+    if (searchTerm) {
+      const q = searchTerm.toLowerCase();
+      list = list.filter(c => 
+        (c.name || '').toLowerCase().includes(q) ||
+        (c.rawAddress || '').toLowerCase().includes(q) ||
+        (c.lastMessage || '').toLowerCase().includes(q)
+      );
+    }
+    return list.map(c => ({
+      ...c,
+      messages: selectedConvoId === c.id ? messages : []
+    })).sort((a, b) => new Date(b.time || 0) - new Date(a.time || 0));
+  }, [conversations, activeChannelFilter, searchTerm, selectedConvoId, messages]);
 
   const activeConvo = convoList.find(c => c.id === selectedConvoId) || (convoList.length > 0 ? convoList[0] : null);
 
-  // Re-fetch conversations when search term changes with debounce
+  // When activeChannelFilter changes, auto-select first conversation of that channel
   useEffect(() => {
-    if (!isMounted.current) return;
-    const timer = setTimeout(() => {
-      fetchConversationsOnly();
-    }, 500);
-    return () => clearTimeout(timer);
-  }, [searchTerm]);
+    if (convoList.length > 0) {
+      const exists = convoList.some(c => c.id === selectedConvoId);
+      if (!exists) {
+        setSelectedConvoId(convoList[0].id);
+      }
+    } else {
+      setSelectedConvoId(null);
+    }
+  }, [activeChannelFilter, convoList]);
 
   // 2. Real-Time WebSocket Connection & Event Handlers
   useEffect(() => {
@@ -502,9 +581,7 @@ export default function ClientInboxPage() {
   const channelBadges = {
     WHATSAPP: { name: 'WhatsApp', bg: 'bg-emerald-500', text: 'text-white' },
     INSTAGRAM: { name: 'Instagram', bg: 'bg-gradient-to-r from-purple-500 to-pink-500', text: 'text-white' },
-    FACEBOOK: { name: 'Messenger', bg: 'bg-blue-600', text: 'text-white' },
-    TELEGRAM: { name: 'Telegram', bg: 'bg-sky-500', text: 'text-white' },
-    LINKEDIN: { name: 'LinkedIn', bg: 'bg-blue-700', text: 'text-white' },
+    FACEBOOK: { name: 'Facebook', bg: 'bg-blue-600', text: 'text-white' },
     GMAIL: { name: 'Gmail', bg: 'bg-rose-500', text: 'text-white' }
   };
 
@@ -542,26 +619,56 @@ export default function ClientInboxPage() {
                 />
               </div>
 
-              {/* Social Channels Tabs */}
-              <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar scroll-smooth">
-                {CHANNEL_TABS.map(tab => {
-                  const Icon = tab.icon;
-                  const isActive = activeChannelFilter === tab.id;
-                  return (
-                    <button
-                      key={tab.id}
-                      onClick={() => setActiveChannelFilter(tab.id)}
-                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold transition-all whitespace-nowrap cursor-pointer shrink-0 ${
-                        isActive 
-                          ? 'bg-slate-900 text-white shadow-xs' 
-                          : 'bg-slate-100 text-slate-600 hover:bg-slate-200/80 hover:text-slate-900'
-                      }`}
-                    >
-                      <Icon size={13} className={isActive ? 'text-white' : tab.color || 'text-slate-500'} />
-                      <span>{tab.label}</span>
-                    </button>
-                  );
-                })}
+              {/* Social Channels Tabs with Scroll Controls & Mouse Wheel Support */}
+              <div className="relative flex items-center group">
+                <button
+                  type="button"
+                  onClick={() => scrollTabs('left')}
+                  className="shrink-0 mr-1 w-5 h-7 bg-white border border-slate-200 shadow-2xs rounded-md text-slate-500 hover:text-slate-900 flex items-center justify-center cursor-pointer transition-all hover:bg-slate-50"
+                  title="Scroll Left"
+                >
+                  <ChevronLeft size={13} />
+                </button>
+
+                <div 
+                  ref={channelTabsRef}
+                  onWheel={(e) => {
+                    if (e.deltaY !== 0 && channelTabsRef.current) {
+                      e.preventDefault();
+                      channelTabsRef.current.scrollLeft += e.deltaY;
+                    }
+                  }}
+                  className="flex items-center gap-1.5 overflow-x-auto py-1 scroll-smooth w-full no-scrollbar select-none"
+                >
+                  {CHANNEL_TABS.map(tab => {
+                    const Icon = tab.icon;
+                    const isActive = activeChannelFilter === tab.id;
+                    return (
+                      <button
+                        key={tab.id}
+                        onClick={() => setActiveChannelFilter(tab.id)}
+                        className={cn(
+                          "flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold transition-all whitespace-nowrap cursor-pointer shrink-0 border",
+                          isActive 
+                            ? cn(tab.activeClass, "border-transparent")
+                            : "bg-slate-100/90 text-slate-600 hover:bg-slate-200/80 hover:text-slate-900 border-slate-200/60"
+                        )}
+                      >
+                        <Icon size={13} className={isActive ? 'text-white' : tab.color || 'text-slate-500'} />
+                        <span>{tab.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => scrollTabs('right')}
+                  className="shrink-0 ml-1 w-5 h-7 bg-white border border-slate-200 shadow-2xs rounded-md text-slate-500 hover:text-slate-900 flex items-center justify-center cursor-pointer transition-all hover:bg-slate-50"
+                  title="Scroll Right"
+                >
+                  <ChevronRight size={13} />
+                </button>
               </div>
             </div>
 
@@ -1111,8 +1218,8 @@ export default function ClientInboxPage() {
                   <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold bg-blue-50 text-blue-700 border border-blue-200 shadow-2xs">
                     <FacebookIcon size={13} /> Facebook
                   </span>
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold bg-sky-50 text-sky-700 border border-sky-200 shadow-2xs">
-                    <TelegramIcon size={13} /> Telegram
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold bg-red-50 text-red-700 border border-red-200 shadow-2xs">
+                    <Mail size={13} /> Gmail
                   </span>
                 </div>
               </div>

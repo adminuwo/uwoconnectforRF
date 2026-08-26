@@ -2,8 +2,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { X, Send, User, MessageCircle, Hash, Plus, Users, ChevronLeft } from 'lucide-react';
+import { API_BASE_URL } from '@/config/apiConfig';
 
-const API = process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app';
+const API = API_BASE_URL;
 
 export default function TeamChatDrawer({ isOpen, onClose }) {
   const [channels, setChannels] = useState([]);

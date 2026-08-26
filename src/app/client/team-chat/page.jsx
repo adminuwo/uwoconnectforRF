@@ -4,8 +4,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { Send, Loader2, MessagesSquare, User, Hash, Plus, X, Users } from 'lucide-react';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
+import { API_BASE_URL } from '@/config/apiConfig';
 
-const API = process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app';
+const API = API_BASE_URL;
 
 export default function TeamChatPage() {
   const [channels, setChannels] = useState([]);

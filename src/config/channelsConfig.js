@@ -7,7 +7,7 @@ export const GLOBAL_ACTIVE_CHANNELS = ['whatsapp', 'facebook', 'instagram'];
 export const GLOBAL_ALL_CHANNELS = [
   'whatsapp', 'facebook', 'instagram', 'gmail', 'outlook', 'onedrive',
   'google_calendar', 'google_sheets', 'google_docs', 'google_slides',
-  'zoho', 'youtube', 'google_news', 'telegram', 'linkedin', 'twitter', 'tiktok'
+  'zoho', 'youtube', 'google_news'
 ];
 
 export const CHANNEL_DEFINITIONS = [
@@ -169,54 +169,6 @@ export const CHANNEL_DEFINITIONS = [
     color: '#4285F4',
     badgeBg: 'bg-blue-50 text-blue-700 border-blue-200',
     iconColor: 'text-blue-600 bg-blue-50 border-blue-100',
-  },
-  {
-    key: 'telegram',
-    name: 'Telegram Bot',
-    shortName: 'Telegram',
-    category: 'MESSAGING',
-    tagline: 'Bot API Connector',
-    description: 'Automated Telegram broadcast channels and custom support bots with end-to-end integration.',
-    isCore: false,
-    color: '#229ED9',
-    badgeBg: 'bg-sky-50 text-sky-700 border-sky-200',
-    iconColor: 'text-sky-600 bg-sky-50 border-sky-100',
-  },
-  {
-    key: 'linkedin',
-    name: 'LinkedIn Company',
-    shortName: 'LinkedIn',
-    category: 'MESSAGING',
-    tagline: 'B2B InMail Automation',
-    description: 'Enterprise B2B lead generation, company page interaction, and sponsored InMail sync.',
-    isCore: false,
-    color: '#0A66C2',
-    badgeBg: 'bg-indigo-50 text-indigo-700 border-indigo-200',
-    iconColor: 'text-indigo-600 bg-indigo-50 border-indigo-100',
-  },
-  {
-    key: 'twitter',
-    name: 'X (Twitter)',
-    shortName: 'X / Twitter',
-    category: 'MESSAGING',
-    tagline: 'Direct Messages & Mentions',
-    description: 'Real-time social listening, automatic tweet reply bots, and customer support DMs.',
-    isCore: false,
-    color: '#000000',
-    badgeBg: 'bg-slate-100 text-slate-700 border-slate-300',
-    iconColor: 'text-slate-900 bg-slate-100 border-slate-200',
-  },
-  {
-    key: 'tiktok',
-    name: 'TikTok Business',
-    shortName: 'TikTok',
-    category: 'MEDIA',
-    tagline: 'Direct Messages & Leads',
-    description: 'Instant lead sync from TikTok Instant Forms and automated creator message routing.',
-    isCore: false,
-    color: '#000000',
-    badgeBg: 'bg-slate-100 text-slate-700 border-slate-300',
-    iconColor: 'text-slate-900 bg-slate-100 border-slate-200',
   }
 ];
 
@@ -230,41 +182,58 @@ export const CHANNEL_DEFINITIONS = [
 export function getChannelAccessState(channelKey, clientData) {
   const key = String(channelKey).toLowerCase().trim();
 
-  // 1. Admin Permission Check on Client
-  const channelAccess = clientData?.channel_access || {};
-  let isPermitted = false;
+  // 0. Level 1: Global Admin Master Check
+  const gConnectors = clientData?.global_connectors;
+  const effConnectors = clientData?.effective_connectors;
 
-  if (channelAccess[key] !== undefined) {
-    isPermitted = Boolean(channelAccess[key]);
-  } else if (key === 'whatsapp') {
-    isPermitted = clientData?.whatsapp_enabled !== false;
-  } else if (key === 'facebook' || key === 'instagram') {
-    isPermitted = true;
-  } else if (clientData && Boolean(clientData[`${key}_enabled`])) {
-    isPermitted = true;
-  }
-
-  // If Admin has NOT granted permission:
-  if (!isPermitted) {
-    if (['whatsapp', 'facebook', 'instagram'].includes(key)) {
-      return {
-        status: 'DISABLED_BY_ADMIN',
-        label: 'Access Disabled',
-        reason: 'Access disabled by administrator for this workspace',
-        canConnect: false,
-        canConfigure: false,
-        isDisabled: true,
-        badgeColor: 'bg-rose-50 text-rose-700 border-rose-200'
-      };
-    }
+  if (gConnectors && gConnectors[key] === false) {
     return {
       status: 'COMING_SOON',
       label: 'Coming Soon',
-      reason: 'Connector locked. Contact Administrator to enable access for your workspace.',
+      reason: 'This integration is coming soon and will be activated shortly by the administrator.',
       canConnect: false,
       canConfigure: false,
       isDisabled: true,
-      badgeColor: 'bg-slate-100 text-slate-500 border-slate-200'
+      badgeColor: 'bg-amber-50 text-amber-700 border-amber-200'
+    };
+  }
+
+  if (effConnectors && effConnectors[key] && effConnectors[key].global_active === false) {
+    return {
+      status: 'COMING_SOON',
+      label: 'Coming Soon',
+      reason: 'This integration is coming soon and will be activated shortly by the administrator.',
+      canConnect: false,
+      canConfigure: false,
+      isDisabled: true,
+      badgeColor: 'bg-amber-50 text-amber-700 border-amber-200'
+    };
+  }
+
+  // 1. Level 2: Admin Permission Check on Client
+  const channelAccess = clientData?.channel_access || {};
+  let isPermitted = true;
+
+  if (channelAccess[key] !== undefined) {
+    isPermitted = Boolean(channelAccess[key]);
+  } else if (effConnectors && effConnectors[key] && effConnectors[key].client_enabled !== undefined) {
+    isPermitted = Boolean(effConnectors[key].client_enabled);
+  } else if (key === 'whatsapp') {
+    isPermitted = clientData?.whatsapp_enabled !== false;
+  } else if (clientData && clientData[`${key}_enabled`] !== undefined) {
+    isPermitted = Boolean(clientData[`${key}_enabled`]);
+  }
+
+  // If Admin has explicitly revoked permission for this workspace:
+  if (!isPermitted) {
+    return {
+      status: 'COMING_SOON',
+      label: 'Coming Soon',
+      reason: 'This feature is coming soon for your workspace.',
+      canConnect: false,
+      canConfigure: false,
+      isDisabled: true,
+      badgeColor: 'bg-amber-50 text-amber-700 border-amber-200'
     };
   }
 

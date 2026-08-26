@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   Users, UserPlus, CheckSquare, MessageSquare, FileText, ShieldCheck, 
   BarChart3, Bot, Plus, Search, Filter, LayoutGrid, List, Calendar as CalendarIcon,
-  Building2, Trash2, Mail, Shield, CheckCircle2, Clock, AlertTriangle, ChevronRight, FolderPlus, Layers,
+  Building2, Trash2, Mail, Shield, CheckCircle2, Clock, AlertTriangle, AlertCircle, ChevronRight, FolderPlus, Layers,
   Share2, Activity, ShieldAlert, Globe, Lock, UserX, UserCheck, RefreshCw, Key, ExternalLink, Eye, Smartphone, QrCode
 } from 'lucide-react';
 import axios from 'axios';
@@ -17,6 +17,7 @@ import TaskKanbanBoard from '@/components/team/TaskKanbanBoard';
 import TaskListTable from '@/components/team/TaskListTable';
 import TeamChatWindow from '@/components/team/TeamChatWindow';
 import WorkReportModal from '@/components/team/WorkReportModal';
+import WorkReportsCalendarView from '@/components/team/WorkReportsCalendarView';
 import ApprovalManagerModal from '@/components/team/ApprovalManagerModal';
 import TeamAnalyticsView from '@/components/team/TeamAnalyticsView';
 import TeamAICopilot from '@/components/team/TeamAICopilot';
@@ -40,7 +41,19 @@ export default function TeamPage() {
   const [tasks, setTasks] = useState([]);
   const [reports, setReports] = useState([]);
   const [attendances, setAttendances] = useState([]);
-  const [currentUser, setCurrentUser] = useState(null);
+  const [leaves, setLeaves] = useState([]);
+  const [channels, setChannels] = useState([]);
+  const [selectedReportDate, setSelectedReportDate] = useState(() => new Date().toISOString().split('T')[0]);
+  const [currentUser, setCurrentUser] = useState(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        return JSON.parse(localStorage.getItem('user') || '{}');
+      } catch (e) {
+        return {};
+      }
+    }
+    return {};
+  });
   const [loading, setLoading] = useState(true);
 
   // Filters & Search
@@ -68,7 +81,10 @@ export default function TeamPage() {
       const res = await axios.get(`${API_BASE_URL}/api/profile`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setCurrentUser(res.data);
+      const userData = res.data?.user || res.data;
+      if (userData && (userData.id || userData.role || userData.username || userData.email)) {
+        setCurrentUser(userData);
+      }
     } catch (err) {
       console.warn('Failed to fetch profile:', err);
     }
@@ -146,6 +162,34 @@ export default function TeamPage() {
     }
   };
 
+  const fetchLeaves = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const res = await axios.get(`${API_BASE_URL}/api/team/leaves/`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = Array.isArray(res.data) ? res.data : (res.data?.results || []);
+      setLeaves(data);
+    } catch (err) {
+      console.warn('Failed to fetch leaves:', err);
+      setLeaves([]);
+    }
+  };
+
+  const fetchChannels = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const res = await axios.get(`${API_BASE_URL}/api/team/channels/`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
+      });
+      const data = Array.isArray(res.data) ? res.data : (res.data?.results || []);
+      setChannels(data);
+    } catch (err) {
+      console.warn('Failed to fetch channels:', err);
+      setChannels([]);
+    }
+  };
+
   const handleDeleteProject = async (id) => {
     if (!confirm('Are you sure you want to delete this project?')) return;
     try {
@@ -210,12 +254,48 @@ export default function TeamPage() {
         fetchProjects(),
         fetchTasks(),
         fetchReports(),
-        fetchAttendance()
+        fetchAttendance(),
+        fetchLeaves(),
+        fetchChannels()
       ]);
       setLoading(false);
     };
     init();
   }, []);
+
+  const storedUser = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('user') || '{}') : {};
+  const activeUser = (currentUser && (currentUser.id || currentUser.role || currentUser.username)) ? { ...storedUser, ...currentUser } : storedUser;
+  const isAgent = (activeUser?.role === 'AGENT') || (activeUser?.enterprise_role === 'EMPLOYEE') || (activeUser?.enterprise_role === 'INTERN');
+  const isClientRole = !isAgent;
+  const currentUserId = String(activeUser?.id || activeUser?._id || '');
+  const currentUsername = (activeUser?.username || '').toLowerCase();
+
+  const visibleProjects = isClientRole ? projects : projects.filter(p => {
+    const memberDetails = p.members_details || [];
+    const rawMembers = Array.isArray(p.members) ? p.members : [];
+    
+    // If no specific members are assigned, it is open to the entire workspace
+    if (memberDetails.length === 0 && rawMembers.length === 0) return true;
+
+    const isMember = memberDetails.some(m => String(m.id) === currentUserId || (m.username && m.username.toLowerCase() === currentUsername) || (m.email && m.email.toLowerCase() === currentUsername)) ||
+      rawMembers.some(m => String(m) === currentUserId || (typeof m === 'object' && String(m.id || m._id) === currentUserId));
+    const isOwner = String(p.owner) === currentUserId || (p.owner_name && p.owner_name.toLowerCase() === currentUsername);
+    return isMember || isOwner;
+  });
+
+  const visibleReports = isClientRole ? reports : reports.filter(r => {
+    const allowedUsernames = new Set([currentUsername]);
+    const allowedIds = new Set([currentUserId]);
+    visibleProjects.forEach(p => {
+      (p.members_details || []).forEach(m => {
+        if (m.username) allowedUsernames.add(m.username.toLowerCase());
+        if (m.id) allowedIds.add(String(m.id));
+      });
+    });
+    const rEmpId = r.employee ? String(r.employee) : '';
+    const rEmpName = (r.employee_name || '').toLowerCase();
+    return allowedIds.has(rEmpId) || allowedUsernames.has(rEmpName);
+  });
 
   const filteredMembers = (Array.isArray(members) ? members : []).filter(m => {
     const matchesSearch = (m.username || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -624,23 +704,31 @@ export default function TeamPage() {
           <div className="space-y-4">
             {loading ? (
               <SkeletonProjectCards count={3} />
-            ) : projects.length === 0 ? (
+            ) : visibleProjects.length === 0 ? (
               <div className="bg-white rounded-2xl p-12 text-center border border-slate-200 space-y-3">
                 <FolderPlus size={36} className="text-slate-300 mx-auto" />
-                <h3 className="text-base font-bold text-slate-800">No active projects</h3>
-                <p className="text-xs text-slate-400 max-w-sm mx-auto">Create a new project to start managing milestones, progress bars, and team tasks.</p>
-                <button
-                  onClick={() => setIsProjectModalOpen(true)}
-                  className="px-4 py-2.5 bg-emerald-600 text-white font-bold text-xs rounded-xl shadow-sm hover:bg-emerald-700 transition-all inline-flex items-center gap-1.5"
-                >
-                  <FolderPlus size={15} />
-                  <span>Create First Project</span>
-                </button>
+                <h3 className="text-base font-bold text-slate-800">
+                  {isClientRole ? 'No active projects' : 'No projects assigned to you yet'}
+                </h3>
+                <p className="text-xs text-slate-400 max-w-sm mx-auto">
+                  {isClientRole 
+                    ? 'Create a new project to start managing milestones, progress bars, and team tasks.'
+                    : 'When the admin or client assigns you to a project, it will appear here with milestones.'}
+                </p>
+                {isClientRole && (
+                  <button
+                    onClick={() => setIsProjectModalOpen(true)}
+                    className="px-4 py-2.5 bg-emerald-600 text-white font-bold text-xs rounded-xl shadow-sm hover:bg-emerald-700 transition-all inline-flex items-center gap-1.5"
+                  >
+                    <FolderPlus size={15} />
+                    <span>Create First Project</span>
+                  </button>
+                )}
               </div>
             ) : (
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              {projects.map((p) => {
+              {visibleProjects.map((p) => {
                 const milestones = p.milestones || [];
                 const completedMilestones = milestones.filter(m => m.completed || m.status === 'COMPLETED').length;
                 const totalMilestones = milestones.length;
@@ -737,7 +825,13 @@ export default function TeamPage() {
         {/* --- TAB 6: CHAT --- */}
         {activeTab === 'CHAT' && (
           <div className="h-[650px] bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm">
-            <TeamChatWindow />
+            <TeamChatWindow 
+              currentUser={activeUser} 
+              channels={channels} 
+              projects={visibleProjects}
+              members={members}
+              onChannelCreated={fetchChannels} 
+            />
           </div>
         )}
 
@@ -836,104 +930,22 @@ export default function TeamPage() {
           </div>
         )}
 
-        {/* --- TAB 8: DAILY WORK REPORTS STREAM --- */}
+        {/* --- TAB 8: DAILY WORK REPORTS STREAM WITH CALENDAR NAVIGATOR --- */}
         {activeTab === 'REPORTS' && (
-          <div className="space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-slate-200 shadow-2xs">
-              <div>
-                <h3 className="font-extrabold text-slate-900 text-base flex items-center gap-2">
-                  <FileText className="text-emerald-600" size={20} /> Daily Work Reports Stream
-                </h3>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  Review daily accomplishments, completed tasks, hours logged, and blockers
-                </p>
-              </div>
-
-              <button
-                onClick={() => setIsReportModalOpen(true)}
-                className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl text-xs font-bold transition-all shadow-sm flex items-center gap-2 cursor-pointer shrink-0"
-              >
-                <Plus size={15} /> Submit Work Report
-              </button>
-            </div>
-
-            {loading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5 animate-in fade-in">
-                {Array.from({ length: 4 }).map((_, i) => (
-                  <div key={i} className="bg-white p-6 rounded-3xl border border-slate-200/90 shadow-2xs space-y-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-2xl bg-slate-100 animate-pulse" />
-                      <div className="space-y-1.5">
-                        <div className="h-4 w-32 bg-slate-100 rounded-md animate-pulse" />
-                        <div className="h-3 w-20 bg-slate-100 rounded-md animate-pulse" />
-                      </div>
-                    </div>
-                    <div className="h-16 bg-slate-50 rounded-2xl animate-pulse" />
-                  </div>
-                ))}
-              </div>
-            ) : reports.length === 0 ? (
-              <div className="bg-white rounded-3xl p-12 text-center border border-slate-200 space-y-3">
-                <FileText size={36} className="text-slate-300 mx-auto" />
-                <h3 className="text-base font-bold text-slate-800">No daily reports submitted yet</h3>
-                <p className="text-xs text-slate-400 max-w-sm mx-auto">Team members can submit their daily work reports at the end of their shift.</p>
-                <button
-                  onClick={() => setIsReportModalOpen(true)}
-                  className="px-4 py-2.5 bg-emerald-600 text-white font-bold text-xs rounded-xl shadow-sm hover:bg-emerald-700 transition-all inline-flex items-center gap-1.5 cursor-pointer"
-                >
-                  <Plus size={15} /> Submit First Report
-                </button>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                {reports.map((r) => (
-                  <div key={r.id || r._id} className="bg-white p-6 rounded-3xl border border-slate-200/90 shadow-2xs space-y-4 hover:shadow-md transition-all">
-                    <div className="flex justify-between items-start">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-2xl bg-slate-900 text-white font-bold flex items-center justify-center text-sm shadow-sm">
-                          {(r.employee_name || 'E').charAt(0).toUpperCase()}
-                        </div>
-                        <div>
-                          <h4 className="font-extrabold text-slate-900 text-sm">{r.employee_name || 'Team Member'}</h4>
-                          <p className="text-[10px] font-semibold text-slate-400">{r.employee_department || 'General'}</p>
-                        </div>
-                      </div>
-
-                      <div className="flex flex-col items-end gap-1">
-                        <span className="text-[10px] font-bold bg-slate-100 text-slate-600 px-3 py-1 rounded-full">{r.report_date}</span>
-                        {r.hours_worked && (
-                          <span className="text-[10px] font-bold bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-md flex items-center gap-1">
-                            <Clock size={10} /> {r.hours_worked} hrs
-                          </span>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="space-y-2 text-xs">
-                      <div>
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1">Today's Work Accomplished</p>
-                        <p className="text-slate-700 font-medium bg-slate-50 p-3 rounded-2xl border border-slate-100 leading-relaxed whitespace-pre-wrap">{r.todays_work}</p>
-                      </div>
-
-                      {r.next_steps && (
-                        <div>
-                          <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1">Next Steps & Tomorrow's Plan</p>
-                          <p className="text-slate-600 font-medium text-xs">{r.next_steps}</p>
-                        </div>
-                      )}
-
-                      {r.need_help && (
-                        <div className="p-2.5 bg-rose-50 border border-rose-200 text-rose-700 rounded-xl text-[11px] font-bold flex items-center gap-2">
-                          <AlertCircle size={14} className="shrink-0 text-rose-500" />
-                          <span>Flagged Blocker: Needs assistance / review</span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+          <WorkReportsCalendarView
+            reports={visibleReports}
+            leaves={leaves}
+            attendances={attendances}
+            members={members}
+            loading={loading}
+            isClientRole={isClientRole}
+            selectedDate={selectedReportDate}
+            onDateSelect={(d) => setSelectedReportDate(d)}
+            onOpenSubmitModal={(dateToSubmit) => {
+              if (dateToSubmit) setSelectedReportDate(dateToSubmit);
+              setIsReportModalOpen(true);
+            }}
+          />
         )}
 
         {/* --- MODALS --- */}
@@ -970,15 +982,19 @@ export default function TeamPage() {
 
         <WorkReportModal
           isOpen={isReportModalOpen}
+          initialDate={selectedReportDate}
           onClose={() => setIsReportModalOpen(false)}
-          onSuccess={fetchReports}
+          onSuccess={() => {
+            fetchReports();
+            setIsReportModalOpen(false);
+          }}
         />
 
         <AttendanceLeaveModal
           isOpen={isAttendanceModalOpen}
           onClose={() => setIsAttendanceModalOpen(false)}
-          onSuccess={() => { fetchMembers(); fetchAttendance(); }}
-          onActionCompleted={() => { fetchMembers(); fetchAttendance(); }}
+          onSuccess={() => { fetchMembers(); fetchAttendance(); fetchLeaves(); }}
+          onActionCompleted={() => { fetchMembers(); fetchAttendance(); fetchLeaves(); }}
         />
 
         {selectedTask && (
@@ -1003,6 +1019,7 @@ export default function TeamPage() {
             isOpen={!!selectedProject}
             onClose={() => setSelectedProject(null)}
             onUpdate={() => { fetchProjects(); }}
+            availableMembers={members}
           />
         )}
 
