@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { User, Mail, Phone, Hash, CreditCard, Lock, Settings, Loader2, ShieldCheck, LogOut, MapPin, Key, Globe, Paintbrush, Sparkles, Calendar, ArrowUpRight } from 'lucide-react';
+import { User, Mail, Phone, Hash, CreditCard, Lock, Settings, Loader2, ShieldCheck, LogOut, MapPin, Key, Globe, Paintbrush, Sparkles, Calendar, ArrowUpRight, Upload, Trash2, Check } from 'lucide-react';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import axios from 'axios';
 import { useTour } from '@/context/TourContext';
@@ -18,6 +18,8 @@ const ClientSettingsPage = () => {
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [logoSaving, setLogoSaving] = useState(false);
+  const [logoSuccessMessage, setLogoSuccessMessage] = useState(null);
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const [paymentOrders, setPaymentOrders] = useState([]);
   const [selectedPlanModal, setSelectedPlanModal] = useState(null);
@@ -78,8 +80,8 @@ const ClientSettingsPage = () => {
     }
   };
 
-  const handleLogoUpload = (e) => {
-    const file = e.target.files[0];
+  const handleLogoUpload = async (e) => {
+    const file = e.target.files?.[0];
     if (!file) return;
 
     const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
@@ -94,20 +96,56 @@ const ClientSettingsPage = () => {
     }
 
     const reader = new FileReader();
-    reader.onload = (uploadEvent) => {
+    reader.onload = async (uploadEvent) => {
+      const logoDataUrl = uploadEvent.target.result;
       setEditData((prev) => ({
         ...prev,
-        company_logo_url: uploadEvent.target.result
+        company_logo_url: logoDataUrl
       }));
+
+      // Immediate auto-save so user doesn't have to enter edit mode first
+      try {
+        setLogoSaving(true);
+        const token = localStorage.getItem('token');
+        await axios.patch(`${API_BASE_URL}/api/profile`, {
+          company_logo_url: logoDataUrl
+        }, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setClient(prev => prev ? { ...prev, company_logo_url: logoDataUrl } : prev);
+        setLogoSuccessMessage("Logo saved successfully!");
+        setTimeout(() => setLogoSuccessMessage(null), 3500);
+      } catch (err) {
+        console.error("Failed to auto-save logo", err);
+        alert("Failed to save logo. Please try again.");
+      } finally {
+        setLogoSaving(false);
+      }
     };
     reader.readAsDataURL(file);
   };
 
-  const handleRemoveLogo = () => {
-    setEditData((prev) => ({
-      ...prev,
-      company_logo_url: ''
-    }));
+  const handleRemoveLogo = async () => {
+    try {
+      setLogoSaving(true);
+      setEditData((prev) => ({
+        ...prev,
+        company_logo_url: ''
+      }));
+      const token = localStorage.getItem('token');
+      await axios.patch(`${API_BASE_URL}/api/profile`, {
+        company_logo_url: ''
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setClient(prev => prev ? { ...prev, company_logo_url: '' } : prev);
+      setLogoSuccessMessage("Logo removed successfully.");
+      setTimeout(() => setLogoSuccessMessage(null), 3000);
+    } catch (err) {
+      alert("Failed to remove logo");
+    } finally {
+      setLogoSaving(false);
+    }
   };
 
   const fetchPaymentHistory = async () => {
@@ -233,42 +271,76 @@ const ClientSettingsPage = () => {
             <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-4 ml-1">Company Branding & Document Settings</h3>
             <div className="bg-white border border-slate-100 rounded-3xl p-6 space-y-6">
               
-              {/* Logo Upload & Preview */}
+              {/* Logo Upload & Preview (Always Active 1-Click Upload) */}
               <div className="flex flex-col sm:flex-row items-center gap-6 border-b border-slate-100 pb-6">
-                <div className="w-24 h-24 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-center overflow-hidden p-2 shrink-0">
-                  {editData.company_logo_url ? (
-                    <img src={editData.company_logo_url} alt="Company Logo" className="w-full h-full object-contain" />
-                  ) : (
-                    <div className="text-center text-slate-400">
-                      <Paintbrush size={24} className="mx-auto mb-1 text-slate-300" />
-                      <span className="text-[9px] font-bold uppercase tracking-wider block">No Logo</span>
-                    </div>
-                  )}
-                </div>
+                <label className="relative group cursor-pointer shrink-0">
+                  <div className="w-24 h-24 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-center overflow-hidden p-2 group-hover:border-emerald-500 group-hover:shadow-md transition-all shadow-2xs">
+                    {(editData.company_logo_url || client?.company_logo_url) ? (
+                      <img 
+                        src={editData.company_logo_url || client?.company_logo_url} 
+                        alt="Company Logo" 
+                        className="w-full h-full object-contain" 
+                      />
+                    ) : (
+                      <div className="text-center text-slate-400 group-hover:text-emerald-600 transition-colors">
+                        <Upload size={22} className="mx-auto mb-1 text-slate-400 group-hover:text-emerald-600 transition-colors" />
+                        <span className="text-[9px] font-bold uppercase tracking-wider block">Upload</span>
+                      </div>
+                    )}
+                    {logoSaving && (
+                      <div className="absolute inset-0 bg-white/80 backdrop-blur-xs flex items-center justify-center rounded-2xl">
+                        <Loader2 size={22} className="animate-spin text-emerald-600" />
+                      </div>
+                    )}
+                  </div>
+                  <input 
+                    type="file" 
+                    accept="image/png, image/jpeg, image/jpg, image/webp" 
+                    onChange={handleLogoUpload} 
+                    disabled={logoSaving}
+                    className="hidden" 
+                  />
+                </label>
 
                 <div className="space-y-2 flex-1 text-center sm:text-left">
-                  <h4 className="text-sm font-bold text-slate-900">Company Logo</h4>
+                  <div className="flex items-center justify-center sm:justify-start gap-2 flex-wrap">
+                    <h4 className="text-sm font-bold text-slate-900">Company Brand Logo</h4>
+                    {logoSuccessMessage && (
+                      <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full animate-in fade-in">
+                        ✓ {logoSuccessMessage}
+                      </span>
+                    )}
+                  </div>
                   <p className="text-xs text-slate-500 font-medium leading-relaxed">
-                    Appears top-left on all Proposals, Quotations, and Invoices (web & PDF). Supported: PNG, JPG, WEBP (Max 3MB).
+                    Appears top-left on all Proposals, Quotations, Invoices (web & PDF), and Admin Dashboard. Supported: PNG, JPG, WEBP (Max 3MB).
                   </p>
                   
-                  {isEditing && (
-                    <div className="flex items-center justify-center sm:justify-start gap-3 pt-1">
-                      <label className="px-4 py-2 bg-slate-900 hover:bg-black text-white rounded-xl text-xs font-bold cursor-pointer transition">
-                        Upload Logo
-                        <input type="file" accept="image/png, image/jpeg, image/jpg, image/webp" onChange={handleLogoUpload} className="hidden" />
-                      </label>
-                      {editData.company_logo_url && (
-                        <button
-                          type="button"
-                          onClick={handleRemoveLogo}
-                          className="px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl text-xs font-bold transition cursor-pointer"
-                        >
-                          Remove Logo
-                        </button>
-                      )}
-                    </div>
-                  )}
+                  {/* Always Visible Upload & Remove Buttons */}
+                  <div className="flex items-center justify-center sm:justify-start gap-2.5 pt-1 flex-wrap">
+                    <label className="inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold cursor-pointer transition shadow-md shadow-emerald-600/20">
+                      {logoSaving ? <Loader2 size={13} className="animate-spin" /> : <Upload size={13} />}
+                      <span>{(editData.company_logo_url || client?.company_logo_url) ? 'Change Logo' : 'Upload Logo'}</span>
+                      <input 
+                        type="file" 
+                        accept="image/png, image/jpeg, image/jpg, image/webp" 
+                        onChange={handleLogoUpload} 
+                        disabled={logoSaving}
+                        className="hidden" 
+                      />
+                    </label>
+
+                    {(editData.company_logo_url || client?.company_logo_url) && (
+                      <button
+                        type="button"
+                        onClick={handleRemoveLogo}
+                        disabled={logoSaving}
+                        className="inline-flex items-center gap-1 px-3.5 py-2 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-xl text-xs font-bold transition cursor-pointer border border-rose-200/80 disabled:opacity-50"
+                      >
+                        <Trash2 size={13} />
+                        <span>Remove</span>
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
 
