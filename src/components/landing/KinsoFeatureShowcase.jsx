@@ -14,13 +14,6 @@ import {
   Shield,
   Zap,
   Globe,
-  MessageCircle,
-  Mail,
-  Share2,
-  FileSpreadsheet,
-  FileText,
-  HardDrive,
-  Cloud,
   Layers,
   Cpu
 } from 'lucide-react';
@@ -44,7 +37,7 @@ export default function KinsoFeatureShowcase({ isDark }) {
         <div className="space-y-3">
           <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-2">
             <div className="flex items-center justify-between text-xs">
-              <span className="font-bold text-[#16A34A]">WhatsApp + Gmail + Instagram</span>
+              <span className="font-bold text-[#00AB56]">WhatsApp + Gmail + Instagram</span>
               <span className="text-gray-400">Live Thread</span>
             </div>
             <p className="text-xs text-gray-300">
@@ -66,12 +59,12 @@ export default function KinsoFeatureShowcase({ isDark }) {
         'Tone adjustment & sentiment-aware responses',
       ],
       icon: Sparkles,
-      gradient: 'from-[#16A34A]/20 to-emerald-500/20',
+      gradient: 'from-[#00AB56]/20 to-emerald-500/20',
       mockContent: (
-        <div className="p-4 rounded-2xl bg-[#16A34A]/10 border border-[#16A34A]/30 space-y-2">
+        <div className="p-4 rounded-2xl bg-[#00AB56]/10 border border-[#00AB56]/30 space-y-2">
           <div className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-[#16A34A]" />
-            <span className="text-xs font-bold text-[#16A34A]">AI Draft (99% Accuracy)</span>
+            <Sparkles className="w-4 h-4 text-[#00AB56]" />
+            <span className="text-xs font-bold text-[#00AB56]">AI Draft (99% Accuracy)</span>
           </div>
           <p className="text-xs italic text-gray-700 dark:text-gray-300">
             "We have verified your account tier and activated your priority API keys."
@@ -175,7 +168,7 @@ export default function KinsoFeatureShowcase({ isDark }) {
             </div>
             <div className="p-2 rounded-lg bg-white/5">
               <span className="text-[10px] text-gray-400">Resolution Rate</span>
-              <span className="block font-bold text-[#16A34A] text-sm">99.2%</span>
+              <span className="block font-bold text-[#00AB56] text-sm">99.2%</span>
             </div>
           </div>
         </div>
@@ -211,32 +204,30 @@ export default function KinsoFeatureShowcase({ isDark }) {
   ];
 
   return (
-    <section id="features" className="py-24 relative overflow-hidden">
-      <div className="max-w-7xl mx-auto px-6 space-y-32">
+    <section id="features" className="py-16 sm:py-24 relative overflow-hidden">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 space-y-20 sm:space-y-32">
         {/* Section Header */}
-        <div className="text-center max-w-3xl mx-auto space-y-4">
-          <span className="text-xs font-bold uppercase tracking-widest text-[#16A34A] px-3.5 py-1.5 rounded-full bg-[#16A34A]/10 border border-[#16A34A]/20">
+        <div className="text-center max-w-3xl mx-auto space-y-3 sm:space-y-4">
+          <span className="text-[11px] sm:text-xs font-bold uppercase tracking-widest text-[#00AB56] px-3.5 py-1.5 rounded-full bg-[#00AB56]/10 border border-[#00AB56]/20">
             Core Platform Capabilities
           </span>
-          <h2 className={`text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight ${isDark ? 'text-white' : 'text-gray-900'}`}>
+          <h2 className={`text-2xl sm:text-4xl md:text-5xl font-extrabold tracking-tight ${isDark ? 'text-white' : 'text-gray-900'}`}>
             Everything you need to scale customer conversations.
           </h2>
-          <p className={`text-base sm:text-lg ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+          <p className={`text-sm sm:text-base md:text-lg ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
             Designed for high-growth enterprises and support teams requiring speed, intelligence, and reliability.
           </p>
         </div>
 
         {/* Alternating Feature Showcase List */}
-        <div className="space-y-24">
+        <div className="space-y-16 sm:space-y-24">
           {features.map((feat, idx) => {
             const Icon = feat.icon;
             const isEven = idx % 2 === 0;
             return (
               <div
                 key={feat.id}
-                className={`grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center ${
-                  isEven ? '' : 'lg:flex-row-reverse'
-                }`}
+                className="grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-12 lg:gap-16 items-center"
               >
                 {/* Text Content */}
                 <motion.div
@@ -244,22 +235,22 @@ export default function KinsoFeatureShowcase({ isDark }) {
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.6 }}
-                  className={`lg:col-span-6 space-y-6 ${isEven ? '' : 'lg:order-2'}`}
+                  className={`lg:col-span-6 space-y-4 sm:space-y-6 ${isEven ? 'order-1' : 'order-1 lg:order-2'}`}
                 >
-                  <span className="text-xs font-bold uppercase tracking-widest text-[#16A34A]">
+                  <span className="text-[11px] sm:text-xs font-bold uppercase tracking-widest text-[#00AB56]">
                     {feat.badge}
                   </span>
-                  <h3 className={`text-2xl sm:text-3xl font-bold tracking-tight ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                  <h3 className={`text-xl sm:text-3xl font-extrabold tracking-tight ${isDark ? 'text-white' : 'text-gray-900'}`}>
                     {feat.title}
                   </h3>
-                  <p className={`text-base leading-relaxed ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                  <p className={`text-sm sm:text-base leading-relaxed ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                     {feat.description}
                   </p>
 
-                  <ul className="space-y-3 pt-2">
+                  <ul className="space-y-2.5 sm:space-y-3 pt-1 sm:pt-2">
                     {feat.points.map((pt) => (
-                      <li key={pt} className="flex items-center gap-3 text-sm font-medium">
-                        <CheckCircle2 className="w-4 h-4 text-[#16A34A] shrink-0" />
+                      <li key={pt} className="flex items-start sm:items-center gap-2.5 sm:gap-3 text-xs sm:text-sm font-medium">
+                        <CheckCircle2 className="w-4 h-4 text-[#00AB56] shrink-0 mt-0.5 sm:mt-0" />
                         <span className={isDark ? 'text-gray-300' : 'text-gray-700'}>{pt}</span>
                       </li>
                     ))}
@@ -272,15 +263,15 @@ export default function KinsoFeatureShowcase({ isDark }) {
                   whileInView={{ opacity: 1, scale: 1 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.6 }}
-                  className={`lg:col-span-6 ${isEven ? '' : 'lg:order-1'}`}
+                  className={`lg:col-span-6 ${isEven ? 'order-2' : 'order-2 lg:order-1'}`}
                 >
                   <div
-                    className={`rounded-3xl border p-8 relative overflow-hidden transition-all duration-300 hover:shadow-xl ${
-                      isDark ? 'bg-[#0E131F] border-white/10' : 'bg-white border-gray-200 shadow-md'
+                    className={`rounded-2xl sm:rounded-3xl border p-5 sm:p-8 relative overflow-hidden transition-all duration-300 hover:shadow-xl ${
+                      isDark ? 'bg-[#0E131F] border-white/10' : 'bg-white border-gray-200 shadow-sm sm:shadow-md'
                     }`}
                   >
-                    <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${feat.gradient} flex items-center justify-center mb-6`}>
-                      <Icon className="w-6 h-6 text-[#16A34A]" />
+                    <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-gradient-to-br ${feat.gradient} flex items-center justify-center mb-4 sm:mb-6`}>
+                      <Icon className="w-5 h-5 sm:w-6 sm:h-6 text-[#00AB56]" />
                     </div>
 
                     {feat.mockContent}
@@ -292,32 +283,32 @@ export default function KinsoFeatureShowcase({ isDark }) {
         </div>
 
         {/* Section 5 — Connectors Grid */}
-        <div id="connectors" className="pt-16 space-y-12 border-t border-gray-200 dark:border-white/10">
-          <div className="text-center max-w-2xl mx-auto space-y-4">
-            <span className="text-xs font-bold uppercase tracking-widest text-[#16A34A] px-3.5 py-1.5 rounded-full bg-[#16A34A]/10 border border-[#16A34A]/20">
+        <div id="connectors" className="pt-12 sm:pt-16 space-y-8 sm:space-y-12 border-t border-gray-200 dark:border-white/10">
+          <div className="text-center max-w-2xl mx-auto space-y-3 sm:space-y-4">
+            <span className="text-[11px] sm:text-xs font-bold uppercase tracking-widest text-[#00AB56] px-3.5 py-1.5 rounded-full bg-[#00AB56]/10 border border-[#00AB56]/20">
               Seamless Ecosystem
             </span>
-            <h3 className={`text-3xl font-bold tracking-tight ${isDark ? 'text-white' : 'text-gray-900'}`}>
+            <h3 className={`text-2xl sm:text-3xl font-extrabold tracking-tight ${isDark ? 'text-white' : 'text-gray-900'}`}>
               Connect Every Platform & Tool You Rely On.
             </h3>
-            <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+            <p className={`text-xs sm:text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
               Pre-built 1-click connectors for messaging, CRMs, cloud storage, and APIs.
             </p>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4">
             {connectors.map((conn) => (
               <motion.div
                 key={conn.name}
                 whileHover={{ y: -4, scale: 1.02 }}
-                className={`p-4 rounded-2xl border transition-all cursor-pointer flex flex-col items-center text-center space-y-2 ${
+                className={`p-3.5 sm:p-4 rounded-2xl border transition-all cursor-pointer flex flex-col items-center text-center space-y-1.5 sm:space-y-2 ${
                   isDark
-                    ? 'bg-white/[0.02] border-white/5 hover:border-[#16A34A]/40 hover:bg-white/[0.05]'
-                    : 'bg-white border-gray-200 hover:border-[#16A34A]/40 hover:shadow-md'
+                    ? 'bg-white/[0.02] border-white/5 hover:border-[#00AB56]/40 hover:bg-white/[0.05]'
+                    : 'bg-white border-gray-200 hover:border-[#00AB56]/40 shadow-2xs hover:shadow-md'
                 }`}
               >
-                <span className="text-2xl">{conn.icon}</span>
-                <span className={`text-xs font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                <span className="text-xl sm:text-2xl">{conn.icon}</span>
+                <span className={`text-xs font-bold truncate max-w-full ${isDark ? 'text-white' : 'text-gray-900'}`}>
                   {conn.name}
                 </span>
                 <span className="text-[10px] text-gray-400 font-medium">{conn.category}</span>
@@ -326,12 +317,12 @@ export default function KinsoFeatureShowcase({ isDark }) {
 
             {/* Coming Soon Card */}
             <div
-              className={`p-4 rounded-2xl border border-dashed flex flex-col items-center justify-center text-center space-y-1 ${
+              className={`p-3.5 sm:p-4 rounded-2xl border border-dashed flex flex-col items-center justify-center text-center space-y-1 ${
                 isDark ? 'border-white/15 bg-white/[0.01]' : 'border-gray-300 bg-gray-50'
               }`}
             >
-              <span className="text-xl">✨</span>
-              <span className="text-xs font-bold text-[#16A34A]">More Coming Soon</span>
+              <span className="text-lg sm:text-xl">✨</span>
+              <span className="text-xs font-bold text-[#00AB56]">More Coming Soon</span>
               <span className="text-[10px] text-gray-400">Custom Webhooks Ready</span>
             </div>
           </div>

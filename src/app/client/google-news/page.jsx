@@ -209,7 +209,7 @@ export default function GoogleNewsPage() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6 pb-12 animate-fadeIn">
+      <div className="p-3 sm:p-6 pb-16 space-y-4 sm:space-y-6 animate-fadeIn w-full max-w-7xl mx-auto">
         
         {/* Toast Notification */}
         {toast && (
@@ -221,70 +221,70 @@ export default function GoogleNewsPage() {
         )}
 
         {/* 1. Header Banner */}
-        <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-slate-800 rounded-3xl p-6 text-white shadow-xl relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-slate-800 rounded-2xl sm:rounded-3xl p-4 sm:p-6 text-white shadow-xl relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-1.5 z-10">
-            <div className="flex items-center gap-2.5">
-              <div className="p-2.5 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20">
-                <GoogleNewsIcon size={28} />
+            <div className="flex items-start sm:items-center gap-2.5 sm:gap-3">
+              <div className="p-2 sm:p-2.5 bg-white/10 backdrop-blur-md rounded-xl sm:rounded-2xl border border-white/20 shrink-0">
+                <GoogleNewsIcon size={24} />
               </div>
               <div>
-                <h1 className="text-xl font-black tracking-tight flex items-center gap-2">
+                <h1 className="text-lg sm:text-xl font-black tracking-tight flex flex-wrap items-center gap-2">
                   Google News Hub
-                  <span className="px-2.5 py-0.5 bg-emerald-400/20 text-emerald-300 text-[10px] font-extrabold rounded-full border border-emerald-400/30">
+                  <span className="px-2 py-0.5 bg-emerald-400/20 text-emerald-300 text-[9px] sm:text-[10px] font-extrabold rounded-full border border-emerald-400/30 shrink-0">
                     LIVE RSS
                   </span>
                 </h1>
-                <p className="text-xs text-blue-100/90 font-medium">
+                <p className="text-xs text-blue-100/90 font-medium leading-relaxed">
                   Real-time trend monitoring, keyword search & AI content summaries
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="flex items-center gap-2.5 z-10">
+          <div className="flex flex-wrap items-center gap-2 z-10 w-full sm:w-auto">
             <button
               onClick={() => fetchNews(activeCategory, searchQuery)}
-              className="px-3.5 py-2 bg-white/10 hover:bg-white/20 backdrop-blur-md text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 border border-white/15"
+              className="flex-1 sm:flex-initial justify-center px-3 sm:px-3.5 py-2 bg-white/10 hover:bg-white/20 backdrop-blur-md text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 border border-white/15 cursor-pointer"
             >
-              <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
-              Refresh Feed
+              <RefreshCw size={13} className={loading ? 'animate-spin' : ''} />
+              <span>Refresh Feed</span>
             </button>
             <button
               onClick={() => setIsConfigModalOpen(true)}
-              className="px-4 py-2 bg-white text-blue-700 hover:bg-blue-50 rounded-xl text-xs font-black shadow-md transition-all flex items-center gap-1.5"
+              className="flex-1 sm:flex-initial justify-center px-3.5 sm:px-4 py-2 bg-white text-blue-700 hover:bg-blue-50 rounded-xl text-xs font-black shadow-md transition-all flex items-center gap-1.5 cursor-pointer"
             >
-              <Settings size={14} />
-              Configure
+              <Settings size={13} />
+              <span>Configure</span>
             </button>
           </div>
         </div>
 
         {/* 2. Controls & Search Bar */}
-        <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm space-y-3">
+        <div className="bg-white p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-slate-200/80 shadow-sm space-y-3">
           <form onSubmit={handleSearchSubmit} className="relative">
-            <Search className="absolute left-3.5 top-3 text-slate-400" size={16} />
+            <Search className="absolute left-3 top-2.5 sm:top-3 text-slate-400" size={16} />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search any keyword or topic on Google News (e.g. AI memory, real estate, electric vehicles)..."
-              className="w-full pl-10 pr-24 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800 focus:outline-none focus:border-blue-500 transition-all"
+              placeholder="Search keyword or topic on Google News..."
+              className="w-full pl-9 sm:pl-10 pr-20 sm:pr-24 py-2 sm:py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800 focus:outline-none focus:border-blue-500 transition-all"
             />
             <button
               type="submit"
-              className="absolute right-1.5 top-1.5 px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg transition-all"
+              className="absolute right-1 top-1 sm:right-1.5 sm:top-1.5 px-3 sm:px-4 py-1 sm:py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg transition-all cursor-pointer"
             >
               Search
             </button>
           </form>
 
           {/* Category Pills */}
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
+          <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto pb-1 scrollbar-none">
             {CATEGORIES.map((cat) => (
               <button
                 key={cat.id}
                 onClick={() => handleCategorySelect(cat.id)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all border ${
+                className={`px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl text-[11px] sm:text-xs font-bold whitespace-nowrap transition-all border shrink-0 cursor-pointer ${
                   activeCategory === cat.id && !searchQuery
                     ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
                     : 'bg-slate-50 text-slate-600 hover:bg-slate-100 border-slate-200'
@@ -297,61 +297,61 @@ export default function GoogleNewsPage() {
         </div>
 
         {/* 3. Main Articles Grid & AI Panel Drawer */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6">
           
           {/* Left / Main Articles List (8 cols) */}
-          <div className={selectedArticle ? 'lg:col-span-7 space-y-4' : 'lg:col-span-12 space-y-4'}>
+          <div className={selectedArticle ? 'lg:col-span-7 space-y-3 sm:space-y-4' : 'lg:col-span-12 space-y-3 sm:space-y-4'}>
             <div className="flex items-center justify-between px-1">
-              <span className="text-xs font-bold text-slate-600 uppercase tracking-wider">
+              <span className="text-[11px] sm:text-xs font-bold text-slate-600 uppercase tracking-wider">
                 {searchQuery ? `Search Results for "${searchQuery}"` : `${activeCategory || 'TOP'} Stories`} ({articles.length})
               </span>
             </div>
 
             {loading ? (
-              <div className="h-64 flex flex-col items-center justify-center bg-white rounded-2xl border border-slate-200/80">
+              <div className="h-64 flex flex-col items-center justify-center bg-white rounded-xl sm:rounded-2xl border border-slate-200/80">
                 <Loader2 className="animate-spin text-blue-600 mb-2" size={32} />
                 <p className="text-xs font-bold text-slate-500">Fetching Google News XML Feed...</p>
               </div>
             ) : articles.length === 0 ? (
-              <div className="h-48 flex flex-col items-center justify-center bg-white rounded-2xl border border-slate-200/80 p-6 text-center text-slate-400 space-y-2">
+              <div className="h-48 flex flex-col items-center justify-center bg-white rounded-xl sm:rounded-2xl border border-slate-200/80 p-6 text-center text-slate-400 space-y-2">
                 <Newspaper size={36} className="text-slate-300" />
                 <p className="text-xs font-bold text-slate-600">No news articles found for this topic.</p>
                 <p className="text-[11px] text-slate-400">Try searching for a different keyword or selecting another topic tab.</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                 {articles.map((article, idx) => (
                   <div 
                     key={idx} 
-                    className={`bg-white p-4 rounded-2xl border transition-all duration-200 flex flex-col justify-between space-y-3 ${
+                    className={`bg-white p-3.5 sm:p-4 rounded-xl sm:rounded-2xl border transition-all duration-200 flex flex-col justify-between space-y-2.5 sm:space-y-3 ${
                       selectedArticle?.link === article.link 
                         ? 'border-blue-500 shadow-md ring-2 ring-blue-500/20' 
                         : 'border-slate-200/80 hover:border-slate-300 hover:shadow-sm'
                     }`}
                   >
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between text-[10px] font-bold text-slate-400">
-                        <span className="px-2 py-0.5 bg-blue-50 text-blue-700 rounded-md font-extrabold border border-blue-100 truncate max-w-[140px]">
+                    <div className="space-y-1.5 sm:space-y-2">
+                      <div className="flex items-center justify-between text-[10px] font-bold text-slate-400 gap-2">
+                        <span className="px-2 py-0.5 bg-blue-50 text-blue-700 rounded-md font-extrabold border border-blue-100 truncate max-w-[120px] sm:max-w-[140px] shrink-0">
                           {article.source}
                         </span>
-                        <span>{article.pub_date ? new Date(article.pub_date).toLocaleDateString() : 'Recent'}</span>
+                        <span className="shrink-0">{article.pub_date ? new Date(article.pub_date).toLocaleDateString() : 'Recent'}</span>
                       </div>
 
                       <a 
                         href={article.link} 
                         target="_blank" 
                         rel="noreferrer" 
-                        className="text-xs font-black text-slate-800 hover:text-blue-600 transition-colors line-clamp-2 block leading-snug"
+                        className="text-xs sm:text-sm font-black text-slate-800 hover:text-blue-600 transition-colors line-clamp-2 block leading-snug break-words"
                       >
                         {article.title}
                       </a>
 
-                      <p className="text-[11px] text-slate-500 line-clamp-3 leading-relaxed">
+                      <p className="text-[11px] text-slate-500 line-clamp-3 leading-relaxed break-words">
                         {article.snippet}
                       </p>
                     </div>
 
-                    <div className="pt-2 border-t border-slate-100 flex items-center justify-between gap-1">
+                    <div className="pt-2 border-t border-slate-100 flex flex-wrap items-center justify-between gap-1.5 sm:gap-2">
                       <a
                         href={article.link}
                         target="_blank"
@@ -364,14 +364,14 @@ export default function GoogleNewsPage() {
                       <div className="flex items-center gap-1">
                         <button
                           onClick={() => handleGenerateAI(article, 'SUMMARIZE')}
-                          className="px-2.5 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 text-[10px] font-bold rounded-lg transition-colors flex items-center gap-1"
+                          className="px-2 sm:px-2.5 py-1 sm:py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 text-[10px] font-bold rounded-lg transition-colors flex items-center gap-1 cursor-pointer"
                         >
                           <Sparkles size={11} />
                           AI Summary
                         </button>
                         <button
                           onClick={() => handleGenerateAI(article, 'BROADCAST')}
-                          className="px-2.5 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-[10px] font-bold rounded-lg transition-colors flex items-center gap-1"
+                          className="px-2 sm:px-2.5 py-1 sm:py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-[10px] font-bold rounded-lg transition-colors flex items-center gap-1 cursor-pointer"
                         >
                           <Send size={11} />
                           Broadcast
@@ -386,7 +386,7 @@ export default function GoogleNewsPage() {
 
           {/* Right / AI Drawer Drawer (5 cols) */}
           {selectedArticle && (
-            <div className="lg:col-span-5 bg-white p-5 rounded-2xl border border-slate-200 shadow-lg space-y-4 h-fit sticky top-6 animate-fadeIn">
+            <div className="lg:col-span-5 bg-white p-4 sm:p-5 rounded-xl sm:rounded-2xl border border-slate-200 shadow-lg space-y-3 sm:space-y-4 h-fit sticky top-6 animate-fadeIn">
               <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                 <div className="flex items-center gap-2">
                   <Sparkles className="text-blue-600" size={18} />
@@ -394,7 +394,7 @@ export default function GoogleNewsPage() {
                 </div>
                 <button 
                   onClick={() => setSelectedArticle(null)}
-                  className="text-slate-400 hover:text-slate-600 text-xs font-bold"
+                  className="text-slate-400 hover:text-slate-600 text-xs font-bold cursor-pointer"
                 >
                   Close ✕
                 </button>

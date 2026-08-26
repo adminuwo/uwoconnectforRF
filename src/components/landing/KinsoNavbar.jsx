@@ -2,8 +2,8 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
-import { Menu, X, Sun, Moon, ArrowRight, Sparkles } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Menu, X, Sun, Moon, ArrowRight } from 'lucide-react';
 
 export default function KinsoNavbar({ isDark, setIsDark }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -21,25 +21,27 @@ export default function KinsoNavbar({ isDark, setIsDark }) {
     <header
       className={`sticky top-0 z-50 w-full backdrop-blur-xl transition-colors duration-300 border-b ${
         isDark
-          ? 'bg-[#090D16]/80 border-white/10 text-white'
-          : 'bg-[#F0FDF4]/85 border-[#00AB56]/15 text-gray-900'
+          ? 'bg-[#090D16]/90 border-white/10 text-white'
+          : 'bg-[#F0FDF4]/90 border-[#00AB56]/15 text-gray-900'
       }`}
     >
-      <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 sm:h-20 flex items-center justify-between">
         {/* Brand Logo */}
-        <Link href="/" className="flex items-center gap-3 group">
-          <div className="w-10 h-10 rounded-xl overflow-hidden shadow-md shadow-[#00AB56]/20 group-hover:scale-105 transition-transform duration-300 flex items-center justify-center bg-white p-0.5 border border-[#00AB56]/20">
+        <Link href="/" className="flex items-center gap-2.5 sm:gap-3 group shrink-0">
+          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl overflow-hidden shadow-md shadow-[#00AB56]/20 group-hover:scale-105 transition-transform duration-300 flex items-center justify-center bg-white p-0.5 border border-[#00AB56]/20 shrink-0">
             <img
               src="/download (3).gif"
               alt="UWO Connect Logo"
               className="w-full h-full object-cover rounded-lg"
+              width={40}
+              height={40}
             />
           </div>
           <div className="flex flex-col">
-            <span className="font-bold text-lg tracking-tight leading-none">
+            <span className="font-bold text-base sm:text-lg tracking-tight leading-none">
               UWO <span className="text-[#00AB56]">Connect</span>
             </span>
-            <span className="text-[10px] tracking-widest uppercase text-gray-400 font-semibold mt-0.5">
+            <span className="text-[9px] sm:text-[10px] tracking-widest uppercase text-gray-400 font-semibold mt-0.5">
               AI Workspace
             </span>
           </div>
@@ -61,10 +63,10 @@ export default function KinsoNavbar({ isDark, setIsDark }) {
         </nav>
 
         {/* Desktop Right CTAs */}
-        <div className="hidden lg:flex items-center gap-4">
+        <div className="hidden lg:flex items-center gap-3.5">
           <button
             onClick={() => setIsDark(!isDark)}
-            className={`p-2 rounded-xl border transition-all ${
+            className={`p-2 rounded-xl border transition-all cursor-pointer ${
               isDark
                 ? 'border-white/10 text-gray-300 hover:text-white hover:bg-white/5'
                 : 'border-gray-200 text-gray-600 hover:text-gray-900 hover:bg-gray-100'
@@ -96,21 +98,23 @@ export default function KinsoNavbar({ isDark, setIsDark }) {
         </div>
 
         {/* Mobile Toggle Button */}
-        <div className="flex lg:hidden items-center gap-3">
+        <div className="flex lg:hidden items-center gap-2">
           <button
             onClick={() => setIsDark(!isDark)}
-            className={`p-2 rounded-xl border ${
+            className={`p-2 rounded-xl border transition-colors cursor-pointer ${
               isDark ? 'border-white/10 text-gray-300' : 'border-gray-200 text-gray-600'
             }`}
+            aria-label="Toggle Theme"
           >
             {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
           </button>
 
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className={`p-2 rounded-xl border ${
+            className={`p-2 rounded-xl border transition-colors cursor-pointer ${
               isDark ? 'border-white/10 text-gray-300' : 'border-gray-200 text-gray-600'
             }`}
+            aria-label="Toggle Menu"
           >
             {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
@@ -120,21 +124,23 @@ export default function KinsoNavbar({ isDark, setIsDark }) {
       {/* Mobile Drawer */}
       {mobileMenuOpen && (
         <motion.div
-          initial={{ opacity: 0, y: -10 }}
+          initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -10 }}
-          className={`lg:hidden border-b px-6 py-6 space-y-4 ${
+          exit={{ opacity: 0, y: -8 }}
+          className={`lg:hidden border-b px-5 py-5 space-y-4 shadow-xl ${
             isDark ? 'bg-[#090D16] border-white/10' : 'bg-white border-gray-200'
           }`}
         >
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-1">
             {navLinks.map((link) => (
               <a
                 key={link.name}
                 href={link.href}
                 onClick={() => setMobileMenuOpen(false)}
-                className={`text-base font-medium py-1.5 transition-colors ${
-                  isDark ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-[#16A34A]'
+                className={`text-sm font-semibold py-2.5 px-3 rounded-lg transition-colors ${
+                  isDark
+                    ? 'text-gray-300 hover:text-white hover:bg-white/5'
+                    : 'text-gray-700 hover:text-[#00AB56] hover:bg-gray-50'
                 }`}
               >
                 {link.name}
@@ -142,20 +148,23 @@ export default function KinsoNavbar({ isDark, setIsDark }) {
             ))}
           </div>
 
-          <div className="pt-4 border-t border-gray-200 dark:border-white/10 flex flex-col gap-3">
+          <div className="pt-3 border-t border-gray-200 dark:border-white/10 flex flex-col gap-2.5">
             <Link
               href="/auth/login"
-              className={`w-full py-2.5 text-center font-medium rounded-xl border ${
-                isDark ? 'border-white/10 text-white' : 'border-gray-200 text-gray-900'
+              onClick={() => setMobileMenuOpen(false)}
+              className={`w-full py-2.5 text-center text-sm font-semibold rounded-xl border ${
+                isDark ? 'border-white/10 text-white hover:bg-white/5' : 'border-gray-200 text-gray-900 hover:bg-gray-50'
               }`}
             >
               Log in
             </Link>
             <Link
               href="/auth/register"
-              className="w-full py-2.5 text-center font-medium text-white bg-[#16A34A] hover:bg-[#15803D] rounded-xl shadow-sm"
+              onClick={() => setMobileMenuOpen(false)}
+              className="w-full py-3 text-center text-sm font-semibold text-white bg-gradient-to-r from-[#00AB56] to-[#00AE8B] rounded-xl shadow-md shadow-[#00AB56]/20 flex items-center justify-center gap-2"
             >
-              Start Free
+              <span>Start Free</span>
+              <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
         </motion.div>

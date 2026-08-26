@@ -676,7 +676,7 @@ const ClientChannelsPage = () => {
 
   return (
     <DashboardLayout role="CLIENT">
-      <div className="w-full pb-16 px-4 sm:px-6 lg:px-8 relative font-sans space-y-10">
+      <div className="w-full pb-16 px-3 sm:px-6 lg:px-8 relative font-sans space-y-6 sm:space-y-10">
         
         {/* Toast Alert */}
         {toast && (
@@ -687,11 +687,11 @@ const ClientChannelsPage = () => {
         )}
 
         {/* ── Top Header Section ── */}
-        <div className="py-4 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="py-3 sm:py-4 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4">
           <div>
-            <div className="flex items-center gap-2.5 mb-1">
-              <h1 className="text-2xl font-black text-slate-900 tracking-tight">Channels & Integrations</h1>
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200">
+            <div className="flex flex-wrap items-center gap-2 mb-1">
+              <h1 className="text-lg sm:text-2xl font-black text-slate-900 tracking-tight">Channels & Integrations</h1>
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0">
                 Official APIs
               </span>
             </div>
@@ -746,13 +746,13 @@ const ClientChannelsPage = () => {
             
             {/* ================= 1. ACTIVE CORE MESSAGING CHANNELS ================= */}
             <div className="space-y-4">
-              <div className="flex items-center justify-between gap-4">
-                <div className="flex items-center gap-2.5">
-                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-xs shadow-emerald-500/50" />
-                  <h2 className="text-sm font-extrabold uppercase tracking-wider text-slate-800">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-xs shadow-emerald-500/50 shrink-0" />
+                  <h2 className="text-xs sm:text-sm font-extrabold uppercase tracking-wider text-slate-800">
                     Active Messaging Channels
                   </h2>
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0">
                     3 Channels
                   </span>
                 </div>
@@ -761,7 +761,7 @@ const ClientChannelsPage = () => {
                 </span>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                 
                 {/* ── CARD 1: WHATSAPP BUSINESS ── */}
                 {(() => {
@@ -771,40 +771,40 @@ const ClientChannelsPage = () => {
 
                   return (
                     <div className={cn(
-                      "bg-white rounded-3xl border p-6 flex flex-col justify-between transition-all duration-300 shadow-sm hover:shadow-md relative overflow-hidden group",
+                      "bg-white rounded-2xl sm:rounded-3xl border p-4 sm:p-6 lg:p-7 flex flex-col justify-between transition-all duration-300 shadow-sm hover:shadow-md relative overflow-hidden group",
                       isComingSoon 
                         ? "border-amber-200/80 bg-amber-50/15" 
                         : "border-slate-200/90 hover:border-emerald-300"
                     )}>
                       <div>
                         {/* Top Header */}
-                        <div className="flex items-start justify-between gap-3 mb-4">
-                          <div className="flex items-center gap-3.5">
-                            <div className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 drop-shadow-sm">
-                              <WhatsAppBrandIcon size={34} />
+                        <div className="flex items-start justify-between gap-2.5 mb-3 sm:mb-4">
+                          <div className="flex items-center gap-2.5 sm:gap-3.5 min-w-0 flex-1">
+                            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center shrink-0 drop-shadow-sm">
+                              <WhatsAppBrandIcon size={30} />
                             </div>
-                            <div>
-                              <h3 className="font-extrabold text-slate-900 text-base">
+                            <div className="min-w-0 flex-1">
+                              <h3 className="font-extrabold text-slate-900 text-sm sm:text-base leading-tight break-words">
                                 WhatsApp Business
                               </h3>
-                              <span className="inline-block text-[10px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200/60 mt-0.5">
+                              <span className="inline-block text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200/60 mt-0.5">
                                 Cloud API
                               </span>
                             </div>
                           </div>
 
-                          <div>
+                          <div className="shrink-0">
                             {isComingSoon ? (
-                              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
-                                <Sparkles size={11} /> Coming Soon
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[9px] sm:text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200 whitespace-nowrap">
+                                <Sparkles size={10} /> Soon
                               </span>
                             ) : isConn ? (
-                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[9px] sm:text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 whitespace-nowrap">
                                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                                 <span>Connected</span>
                               </span>
                             ) : (
-                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-slate-50 text-slate-500 border border-slate-200">
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[9px] sm:text-[10px] font-bold bg-slate-50 text-slate-500 border border-slate-200 whitespace-nowrap">
                                 <span className="w-1.5 h-1.5 rounded-full bg-slate-300" />
                                 <span>Offline</span>
                               </span>
@@ -812,15 +812,15 @@ const ClientChannelsPage = () => {
                           </div>
                         </div>
 
-                        <p className="text-xs text-slate-500 leading-relaxed mb-4">
+                        <p className="text-xs text-slate-500 leading-relaxed mb-3 sm:mb-4">
                           Official Meta Cloud API for customer conversations, broadcast marketing campaigns, and 24/7 AI smart auto-replies.
                         </p>
 
                         {/* Content Body */}
                         {isComingSoon ? (
-                          <div className="p-3.5 rounded-2xl bg-amber-50/70 border border-amber-200/60 text-amber-900 text-xs space-y-1 mb-4">
+                          <div className="p-3 sm:p-3.5 rounded-xl sm:rounded-2xl bg-amber-50/70 border border-amber-200/60 text-amber-900 text-xs space-y-1 mb-3 sm:mb-4">
                             <div className="font-bold flex items-center gap-1.5 text-amber-950 text-[11px]">
-                              <Clock size={13} className="text-amber-600 shrink-0" />
+                              <Clock size={12} className="text-amber-600 shrink-0" />
                               <span>Launching Soon</span>
                             </div>
                             <p className="text-[10px] text-amber-800 leading-relaxed font-medium">
@@ -828,7 +828,7 @@ const ClientChannelsPage = () => {
                             </p>
                           </div>
                         ) : isConn ? (
-                          <div className="space-y-2 py-3 px-3.5 rounded-2xl bg-slate-50/80 border border-slate-100 text-xs mb-4">
+                          <div className="space-y-2 py-2.5 sm:py-3 px-3 sm:px-3.5 rounded-xl sm:rounded-2xl bg-slate-50/80 border border-slate-100 text-xs mb-3 sm:mb-4">
                             <div className="flex justify-between items-center text-[11px]">
                               <span className="text-slate-400 font-bold uppercase tracking-wider text-[9px]">Business</span>
                               <span className="font-bold text-slate-800 truncate max-w-[150px]">{client?.business_name || 'Verified Account'}</span>
@@ -842,7 +842,7 @@ const ClientChannelsPage = () => {
                             </div>
                           </div>
                         ) : (
-                          <div className="space-y-1.5 py-3 px-3.5 rounded-2xl bg-emerald-50/40 border border-emerald-100/60 mb-4 text-[11px] font-medium text-slate-600">
+                          <div className="space-y-1.5 py-2.5 sm:py-3 px-3 sm:px-3.5 rounded-xl sm:rounded-2xl bg-emerald-50/40 border border-emerald-100/60 mb-3 sm:mb-4 text-[11px] font-medium text-slate-600">
                             <div className="flex items-center gap-2">
                               <CheckCircle2 size={13} className="text-emerald-600 shrink-0" />
                               <span>Verified Cloud API (WABA)</span>
@@ -856,11 +856,11 @@ const ClientChannelsPage = () => {
                       </div>
 
                       {/* Action Button */}
-                      <div className="pt-2">
+                      <div className="pt-1 sm:pt-2">
                         {isComingSoon ? (
                           <button
                             onClick={() => openComingSoon({ name: 'WhatsApp Business', key: 'whatsapp' })}
-                            className="w-full py-2.5 px-4 bg-amber-100 hover:bg-amber-200 text-amber-900 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 border border-amber-300 shadow-sm cursor-pointer"
+                            className="w-full py-2 sm:py-2.5 px-3 sm:px-4 bg-amber-100 hover:bg-amber-200 text-amber-900 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 border border-amber-300 shadow-sm cursor-pointer"
                           >
                             <Clock size={13} className="text-amber-700" />
                             <span>Coming Soon</span>
@@ -868,7 +868,7 @@ const ClientChannelsPage = () => {
                         ) : isConn ? (
                           <button
                             onClick={() => setIsConfigModalOpen(true)}
-                            className="w-full py-2.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer border border-slate-200 shadow-sm"
+                            className="w-full py-2 sm:py-2.5 px-3 sm:px-4 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer border border-slate-200 shadow-sm"
                           >
                             <Settings size={13} className="text-slate-600" />
                             <span>Configure WhatsApp</span>
@@ -876,7 +876,7 @@ const ClientChannelsPage = () => {
                         ) : (
                           <button
                             onClick={handleWhatsAppConnect}
-                            className="w-full py-2.5 px-4 bg-[#25D366] hover:bg-[#20bd5a] text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer shadow-md shadow-emerald-600/20"
+                            className="w-full py-2 sm:py-2.5 px-3 sm:px-4 bg-[#25D366] hover:bg-[#20bd5a] text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer shadow-md shadow-emerald-600/20"
                           >
                             <WhatsAppBrandIcon size={16} />
                             <span>Connect WhatsApp</span>
@@ -895,40 +895,40 @@ const ClientChannelsPage = () => {
 
                   return (
                     <div className={cn(
-                      "bg-white rounded-3xl border p-6 flex flex-col justify-between transition-all duration-300 shadow-sm hover:shadow-md relative overflow-hidden group",
+                      "bg-white rounded-2xl sm:rounded-3xl border p-4 sm:p-6 lg:p-7 flex flex-col justify-between transition-all duration-300 shadow-sm hover:shadow-md relative overflow-hidden group",
                       isComingSoon 
                         ? "border-amber-200/80 bg-amber-50/15" 
                         : "border-slate-200/90 hover:border-blue-300"
                     )}>
                       <div>
                         {/* Top Header */}
-                        <div className="flex items-start justify-between gap-3 mb-4">
-                          <div className="flex items-center gap-3.5">
-                            <div className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 drop-shadow-sm">
-                              <FacebookBrandIcon size={34} />
+                        <div className="flex items-start justify-between gap-2.5 mb-3 sm:mb-4">
+                          <div className="flex items-center gap-2.5 sm:gap-3.5 min-w-0 flex-1">
+                            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center shrink-0 drop-shadow-sm">
+                              <FacebookBrandIcon size={30} />
                             </div>
-                            <div>
-                              <h3 className="font-extrabold text-slate-900 text-base">
+                            <div className="min-w-0 flex-1">
+                              <h3 className="font-extrabold text-slate-900 text-sm sm:text-base leading-tight break-words">
                                 Facebook
                               </h3>
-                              <span className="inline-block text-[10px] font-bold uppercase tracking-wider text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-200/60 mt-0.5">
+                              <span className="inline-block text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-200/60 mt-0.5">
                                 Page Messenger
                               </span>
                             </div>
                           </div>
 
-                          <div>
+                          <div className="shrink-0">
                             {isComingSoon ? (
-                              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
-                                <Sparkles size={11} /> Coming Soon
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[9px] sm:text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200 whitespace-nowrap">
+                                <Sparkles size={10} /> Soon
                               </span>
                             ) : isConn ? (
-                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[9px] sm:text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200 whitespace-nowrap">
                                 <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
                                 <span>Connected</span>
                               </span>
                             ) : (
-                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-slate-50 text-slate-500 border border-slate-200">
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[9px] sm:text-[10px] font-bold bg-slate-50 text-slate-500 border border-slate-200 whitespace-nowrap">
                                 <span className="w-1.5 h-1.5 rounded-full bg-slate-300" />
                                 <span>Offline</span>
                               </span>
@@ -936,15 +936,15 @@ const ClientChannelsPage = () => {
                           </div>
                         </div>
 
-                        <p className="text-xs text-slate-500 leading-relaxed mb-4">
+                        <p className="text-xs text-slate-500 leading-relaxed mb-3 sm:mb-4">
                           Connect official Facebook Business Pages to automate Messenger interactions, capture inbound leads, and answer FAQs.
                         </p>
 
                         {/* Content Body */}
                         {isComingSoon ? (
-                          <div className="p-3.5 rounded-2xl bg-amber-50/70 border border-amber-200/60 text-amber-900 text-xs space-y-1 mb-4">
+                          <div className="p-3 sm:p-3.5 rounded-xl sm:rounded-2xl bg-amber-50/70 border border-amber-200/60 text-amber-900 text-xs space-y-1 mb-3 sm:mb-4">
                             <div className="font-bold flex items-center gap-1.5 text-amber-950 text-[11px]">
-                              <Clock size={13} className="text-amber-600 shrink-0" />
+                              <Clock size={12} className="text-amber-600 shrink-0" />
                               <span>Launching Soon</span>
                             </div>
                             <p className="text-[10px] text-amber-800 leading-relaxed font-medium">
@@ -952,7 +952,7 @@ const ClientChannelsPage = () => {
                             </p>
                           </div>
                         ) : isConn ? (
-                          <div className="space-y-2 py-3 px-3.5 rounded-2xl bg-slate-50/80 border border-slate-100 text-xs mb-4">
+                          <div className="space-y-2 py-2.5 sm:py-3 px-3 sm:px-3.5 rounded-xl sm:rounded-2xl bg-slate-50/80 border border-slate-100 text-xs mb-3 sm:mb-4">
                             <div className="flex justify-between items-center text-[11px]">
                               <span className="text-slate-400 font-bold uppercase tracking-wider text-[9px]">Page Name</span>
                               <span className="font-bold text-slate-800 truncate max-w-[150px]">{client?.facebook_config?.page_name || 'Facebook Page'}</span>
@@ -965,7 +965,7 @@ const ClientChannelsPage = () => {
                             </div>
                           </div>
                         ) : (
-                          <div className="space-y-1.5 py-3 px-3.5 rounded-2xl bg-blue-50/40 border border-blue-100/60 mb-4 text-[11px] font-medium text-slate-600">
+                          <div className="space-y-1.5 py-2.5 sm:py-3 px-3 sm:px-3.5 rounded-xl sm:rounded-2xl bg-blue-50/40 border border-blue-100/60 mb-3 sm:mb-4 text-[11px] font-medium text-slate-600">
                             <div className="flex items-center gap-2">
                               <CheckCircle2 size={13} className="text-blue-600 shrink-0" />
                               <span>Facebook Page Messenger Sync</span>
@@ -979,11 +979,11 @@ const ClientChannelsPage = () => {
                       </div>
 
                       {/* Action Button */}
-                      <div className="pt-2">
+                      <div className="pt-1 sm:pt-2">
                         {isComingSoon ? (
                           <button
                             onClick={() => openComingSoon({ name: 'Facebook Messenger', key: 'facebook' })}
-                            className="w-full py-2.5 px-4 bg-amber-100 hover:bg-amber-200 text-amber-900 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 border border-amber-300 shadow-sm cursor-pointer"
+                            className="w-full py-2 sm:py-2.5 px-3 sm:px-4 bg-amber-100 hover:bg-amber-200 text-amber-900 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 border border-amber-300 shadow-sm cursor-pointer"
                           >
                             <Clock size={13} className="text-amber-700" />
                             <span>Coming Soon</span>
@@ -991,7 +991,7 @@ const ClientChannelsPage = () => {
                         ) : isConn ? (
                           <button
                             onClick={() => setIsFacebookConfigModalOpen(true)}
-                            className="w-full py-2.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer border border-slate-200 shadow-sm"
+                            className="w-full py-2 sm:py-2.5 px-3 sm:px-4 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer border border-slate-200 shadow-sm"
                           >
                             <Settings size={13} className="text-slate-600" />
                             <span>Configure Facebook</span>
@@ -1000,7 +1000,7 @@ const ClientChannelsPage = () => {
                           <button
                             onClick={handleFacebookConnect}
                             disabled={fbLoading}
-                            className="w-full py-2.5 px-4 bg-[#1877F2] hover:bg-[#1565d8] text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer shadow-md shadow-blue-600/20 disabled:opacity-50"
+                            className="w-full py-2 sm:py-2.5 px-3 sm:px-4 bg-[#1877F2] hover:bg-[#166fe5] text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer shadow-md shadow-blue-600/20 disabled:opacity-50"
                           >
                             {fbLoading ? <Loader2 size={14} className="animate-spin" /> : <FacebookBrandIcon size={16} />}
                             <span>Connect Facebook</span>
@@ -1019,40 +1019,40 @@ const ClientChannelsPage = () => {
 
                   return (
                     <div className={cn(
-                      "bg-white rounded-3xl border p-6 flex flex-col justify-between transition-all duration-300 shadow-sm hover:shadow-md relative overflow-hidden group",
+                      "bg-white rounded-2xl sm:rounded-3xl border p-4 sm:p-6 lg:p-7 flex flex-col justify-between transition-all duration-300 shadow-sm hover:shadow-md relative overflow-hidden group",
                       isComingSoon 
                         ? "border-amber-200/80 bg-amber-50/15" 
                         : "border-slate-200/90 hover:border-pink-300"
                     )}>
                       <div>
                         {/* Top Header */}
-                        <div className="flex items-start justify-between gap-3 mb-4">
-                          <div className="flex items-center gap-3.5">
-                            <div className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 drop-shadow-sm">
-                              <InstagramBrandIcon size={34} />
+                        <div className="flex items-start justify-between gap-2.5 mb-3 sm:mb-4">
+                          <div className="flex items-center gap-2.5 sm:gap-3.5 min-w-0 flex-1">
+                            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center shrink-0 drop-shadow-sm">
+                              <InstagramBrandIcon size={30} />
                             </div>
-                            <div>
-                              <h3 className="font-extrabold text-slate-900 text-base">
-                                Instagram
+                            <div className="min-w-0 flex-1">
+                              <h3 className="font-extrabold text-slate-900 text-sm sm:text-base leading-tight break-words">
+                                Instagram Direct
                               </h3>
-                              <span className="inline-block text-[10px] font-bold uppercase tracking-wider text-pink-700 bg-pink-50 px-2 py-0.5 rounded-md border border-pink-200/60 mt-0.5">
-                                Direct Message
+                              <span className="inline-block text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-pink-700 bg-pink-50 px-2 py-0.5 rounded-md border border-pink-200/60 mt-0.5">
+                                Meta Business API
                               </span>
                             </div>
                           </div>
 
-                          <div>
+                          <div className="shrink-0">
                             {isComingSoon ? (
-                              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
-                                <Sparkles size={11} /> Coming Soon
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[9px] sm:text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200 whitespace-nowrap">
+                                <Sparkles size={10} /> Soon
                               </span>
                             ) : isConn ? (
-                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-pink-50 text-pink-700 border border-pink-200">
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[9px] sm:text-[10px] font-bold bg-pink-50 text-pink-700 border border-pink-200 whitespace-nowrap">
                                 <span className="w-1.5 h-1.5 rounded-full bg-pink-500 animate-pulse" />
                                 <span>Connected</span>
                               </span>
                             ) : (
-                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-slate-50 text-slate-500 border border-slate-200">
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[9px] sm:text-[10px] font-bold bg-slate-50 text-slate-500 border border-slate-200 whitespace-nowrap">
                                 <span className="w-1.5 h-1.5 rounded-full bg-slate-300" />
                                 <span>Offline</span>
                               </span>
@@ -1060,15 +1060,15 @@ const ClientChannelsPage = () => {
                           </div>
                         </div>
 
-                        <p className="text-xs text-slate-500 leading-relaxed mb-4">
+                        <p className="text-xs text-slate-500 leading-relaxed mb-3 sm:mb-4">
                           Automate customer Direct Messages (DMs), story mentions, and comment-to-DM interactions into qualified sales leads.
                         </p>
 
                         {/* Content Body */}
                         {isComingSoon ? (
-                          <div className="p-3.5 rounded-2xl bg-amber-50/70 border border-amber-200/60 text-amber-900 text-xs space-y-1 mb-4">
+                          <div className="p-3 sm:p-3.5 rounded-xl sm:rounded-2xl bg-amber-50/70 border border-amber-200/60 text-amber-900 text-xs space-y-1 mb-3 sm:mb-4">
                             <div className="font-bold flex items-center gap-1.5 text-amber-950 text-[11px]">
-                              <Clock size={13} className="text-amber-600 shrink-0" />
+                              <Clock size={12} className="text-amber-600 shrink-0" />
                               <span>Launching Soon</span>
                             </div>
                             <p className="text-[10px] text-amber-800 leading-relaxed font-medium">
@@ -1076,7 +1076,7 @@ const ClientChannelsPage = () => {
                             </p>
                           </div>
                         ) : isConn ? (
-                          <div className="space-y-2 py-3 px-3.5 rounded-2xl bg-slate-50/80 border border-slate-100 text-xs mb-4">
+                          <div className="space-y-2 py-2.5 sm:py-3 px-3 sm:px-3.5 rounded-xl sm:rounded-2xl bg-slate-50/80 border border-slate-100 text-xs mb-3 sm:mb-4">
                             <div className="flex justify-between items-center text-[11px]">
                               <span className="text-slate-400 font-bold uppercase tracking-wider text-[9px]">Account</span>
                               <span className="font-bold text-slate-800 truncate max-w-[150px]">{client?.instagram_config?.username || client?.instagram_config?.page_name || 'Instagram Account'}</span>
@@ -1089,7 +1089,7 @@ const ClientChannelsPage = () => {
                             </div>
                           </div>
                         ) : (
-                          <div className="space-y-1.5 py-3 px-3.5 rounded-2xl bg-pink-50/40 border border-pink-100/60 mb-4 text-[11px] font-medium text-slate-600">
+                          <div className="space-y-1.5 py-2.5 sm:py-3 px-3 sm:px-3.5 rounded-xl sm:rounded-2xl bg-pink-50/40 border border-pink-100/60 mb-3 sm:mb-4 text-[11px] font-medium text-slate-600">
                             <div className="flex items-center gap-2">
                               <CheckCircle2 size={13} className="text-pink-600 shrink-0" />
                               <span>Direct Message (DM) Automation</span>
@@ -1103,11 +1103,11 @@ const ClientChannelsPage = () => {
                       </div>
 
                       {/* Action Button */}
-                      <div className="pt-2">
+                      <div className="pt-1 sm:pt-2">
                         {isComingSoon ? (
                           <button
                             onClick={() => openComingSoon({ name: 'Instagram Direct', key: 'instagram' })}
-                            className="w-full py-2.5 px-4 bg-amber-100 hover:bg-amber-200 text-amber-900 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 border border-amber-300 shadow-sm cursor-pointer"
+                            className="w-full py-2 sm:py-2.5 px-3 sm:px-4 bg-amber-100 hover:bg-amber-200 text-amber-900 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 border border-amber-300 shadow-sm cursor-pointer"
                           >
                             <Clock size={13} className="text-amber-700" />
                             <span>Coming Soon</span>
@@ -1115,7 +1115,7 @@ const ClientChannelsPage = () => {
                         ) : isConn ? (
                           <button
                             onClick={() => setIsInstagramConfigModalOpen(true)}
-                            className="w-full py-2.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer border border-slate-200 shadow-sm"
+                            className="w-full py-2 sm:py-2.5 px-3 sm:px-4 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer border border-slate-200 shadow-sm"
                           >
                             <Settings size={13} className="text-slate-600" />
                             <span>Configure Instagram</span>
@@ -1124,7 +1124,7 @@ const ClientChannelsPage = () => {
                           <button
                             onClick={handleInstagramConnect}
                             disabled={igLoading}
-                            className="w-full py-2.5 px-4 bg-gradient-to-r from-[#E1306C] via-[#C13584] to-[#833AB4] hover:opacity-95 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer shadow-md shadow-pink-600/20 disabled:opacity-50"
+                            className="w-full py-2 sm:py-2.5 px-3 sm:px-4 bg-gradient-to-r from-[#E1306C] via-[#C13584] to-[#833AB4] hover:opacity-95 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer shadow-md shadow-pink-600/20 disabled:opacity-50"
                           >
                             {igLoading ? <Loader2 size={14} className="animate-spin" /> : <InstagramBrandIcon size={16} />}
                             <span>Connect Instagram</span>
@@ -1270,23 +1270,23 @@ const ClientChannelsPage = () => {
                 <>
                   {/* Category 2: Active Connectors */}
                   {activeConnectors.length > 0 && (
-                    <div className="pt-8 border-t border-slate-200/80 space-y-6">
-                      <div className="flex items-center justify-between gap-4">
-                        <div className="flex items-center gap-2.5">
-                          <span className="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-xs shadow-blue-500/50" />
-                          <h2 className="text-sm font-extrabold uppercase tracking-wider text-slate-800">
+                    <div className="pt-6 sm:pt-8 border-t border-slate-200/80 space-y-4 sm:space-y-6">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="w-2 h-2 rounded-full bg-blue-500 shadow-xs shadow-blue-500/50 shrink-0" />
+                          <h2 className="text-xs sm:text-sm font-extrabold uppercase tracking-wider text-slate-800">
                             Available Connectors & Business Tools
                           </h2>
-                          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-blue-50 text-blue-700 border border-blue-200">
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-blue-50 text-blue-700 border border-blue-200 shrink-0">
                             {activeConnectors.length} Available
                           </span>
                         </div>
-                        <span className="text-xs text-slate-400 font-medium hidden sm:inline">
+                        <span className="text-xs text-slate-400 font-medium hidden md:inline">
                           Productivity, Storage, CRM & Media Integrations
                         </span>
                       </div>
 
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                         {activeConnectors.map((item) => {
                           const state = getChannelAccessState(item.key, client);
                           const isConn = item.isConnected;
@@ -1294,20 +1294,20 @@ const ClientChannelsPage = () => {
                           return (
                             <div
                               key={item.key}
-                              className="bg-white rounded-3xl border border-slate-200/90 hover:border-slate-300 p-6 sm:p-7 flex flex-col justify-between transition-all duration-300 shadow-sm hover:shadow-md relative group"
+                              className="bg-white rounded-2xl sm:rounded-3xl border border-slate-200/90 hover:border-slate-300 p-4 sm:p-6 lg:p-7 flex flex-col justify-between transition-all duration-300 shadow-sm hover:shadow-md relative group"
                             >
                               <div>
                                 {/* Header */}
-                                <div className="flex items-start justify-between gap-3.5 mb-4">
-                                  <div className="flex items-center gap-3.5 min-w-0">
-                                    <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-slate-50 border border-slate-100 shadow-xs shrink-0">
+                                <div className="flex items-start justify-between gap-2.5 mb-3 sm:mb-4">
+                                  <div className="flex items-center gap-2.5 sm:gap-3.5 min-w-0 flex-1">
+                                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center bg-slate-50 border border-slate-100 shadow-xs shrink-0">
                                       {item.icon}
                                     </div>
-                                    <div className="min-w-0">
-                                      <h3 className="font-extrabold text-slate-900 text-base truncate">
+                                    <div className="min-w-0 flex-1">
+                                      <h3 className="font-extrabold text-slate-900 text-sm sm:text-base leading-tight break-words">
                                         {item.name}
                                       </h3>
-                                      <span className="inline-block text-[10px] font-bold uppercase tracking-wider text-slate-500 bg-slate-100 px-2.5 py-0.5 rounded-md mt-0.5">
+                                      <span className="inline-block text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md mt-0.5">
                                         {item.badge}
                                       </span>
                                     </div>
@@ -1315,12 +1315,12 @@ const ClientChannelsPage = () => {
 
                                   <div className="shrink-0">
                                     {isConn ? (
-                                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                      <span className="inline-flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[9px] sm:text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 whitespace-nowrap">
                                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                                         <span>Connected</span>
                                       </span>
                                     ) : (
-                                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold bg-slate-50 text-slate-500 border border-slate-200">
+                                      <span className="inline-flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[9px] sm:text-[10px] font-bold bg-slate-50 text-slate-500 border border-slate-200 whitespace-nowrap">
                                         <span className="w-1.5 h-1.5 rounded-full bg-slate-300" />
                                         <span>Offline</span>
                                       </span>
@@ -1328,12 +1328,12 @@ const ClientChannelsPage = () => {
                                   </div>
                                 </div>
 
-                                <p className="text-xs text-slate-500 leading-relaxed mb-4">
+                                <p className="text-xs text-slate-500 leading-relaxed mb-3 sm:mb-4">
                                   {item.desc}
                                 </p>
 
                                 {isConn && (
-                                  <div className="px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-100 text-xs font-semibold text-slate-700 truncate mb-4">
+                                  <div className="px-3 py-2 rounded-xl bg-slate-50 border border-slate-100 text-[11px] sm:text-xs font-semibold text-slate-700 truncate mb-3 sm:mb-4">
                                     <span className="text-slate-400 font-normal">Status: </span>
                                     <span>{item.connectedInfo}</span>
                                   </div>
@@ -1341,11 +1341,11 @@ const ClientChannelsPage = () => {
                               </div>
 
                               {/* Action Button */}
-                              <div className="pt-2">
+                              <div className="pt-1 sm:pt-2">
                                 {isConn ? (
                                   <button
                                     onClick={item.onConfigure}
-                                    className="w-full py-2.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer border border-slate-200 shadow-xs"
+                                    className="w-full py-2 sm:py-2.5 px-3 sm:px-4 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer border border-slate-200 shadow-xs"
                                   >
                                     <Settings size={13} className="text-slate-600" />
                                     <span>Configure</span>
@@ -1354,7 +1354,7 @@ const ClientChannelsPage = () => {
                                   <button
                                     onClick={item.onConnect}
                                     className={cn(
-                                      "w-full py-2.5 px-4 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer shadow-sm",
+                                      "w-full py-2 sm:py-2.5 px-3 sm:px-4 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer shadow-sm",
                                       item.btnColor
                                     )}
                                   >
@@ -1372,68 +1372,69 @@ const ClientChannelsPage = () => {
 
                   {/* Category 3: Dedicated Coming Soon Integrations */}
                   {comingSoonConnectors.length > 0 && (
-                    <div className="pt-8 border-t border-slate-200/80 space-y-6">
-                      <div className="flex items-center justify-between gap-4">
-                        <div className="flex items-center gap-2.5">
-                          <span className="w-2.5 h-2.5 rounded-full bg-amber-500 shadow-xs shadow-amber-500/50" />
-                          <h2 className="text-sm font-extrabold uppercase tracking-wider text-slate-800">
+                    <div className="pt-6 sm:pt-8 border-t border-slate-200/80 space-y-4 sm:space-y-6">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="w-2 h-2 rounded-full bg-amber-500 shadow-xs shadow-amber-500/50 shrink-0" />
+                          <h2 className="text-xs sm:text-sm font-extrabold uppercase tracking-wider text-slate-800">
                             Coming Soon Integrations
                           </h2>
-                          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-50 text-amber-700 border border-amber-200">
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-50 text-amber-700 border border-amber-200 shrink-0">
                             {comingSoonConnectors.length} Scheduled
                           </span>
                         </div>
-                        <span className="text-xs text-slate-400 font-medium hidden sm:inline">
+                        <span className="text-xs text-slate-400 font-medium hidden md:inline">
                           Scheduled to go live soon by platform administrator
                         </span>
                       </div>
 
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                         {comingSoonConnectors.map((item) => (
                           <div
                             key={item.key}
-                            className="bg-white rounded-3xl border border-amber-200/80 bg-amber-50/15 p-6 sm:p-7 flex flex-col justify-between transition-all duration-300 shadow-sm hover:shadow-md relative group"
+                            className="bg-white rounded-2xl sm:rounded-3xl border border-amber-200/80 bg-amber-50/15 p-4 sm:p-6 lg:p-7 flex flex-col justify-between transition-all duration-300 shadow-sm hover:shadow-md relative group"
                           >
                             <div>
                               {/* Header */}
-                              <div className="flex items-start justify-between gap-3.5 mb-4">
-                                <div className="flex items-center gap-3.5 min-w-0">
-                                  <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-slate-50 border border-slate-100 shadow-xs shrink-0">
+                              <div className="flex items-start justify-between gap-2.5 mb-3 sm:mb-4">
+                                <div className="flex items-center gap-2.5 sm:gap-3.5 min-w-0 flex-1">
+                                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center bg-slate-50 border border-slate-100 shadow-xs shrink-0">
                                     {item.icon}
                                   </div>
-                                  <div className="min-w-0">
-                                    <h3 className="font-extrabold text-slate-900 text-base truncate">
+                                  <div className="min-w-0 flex-1">
+                                    <h3 className="font-extrabold text-slate-900 text-sm sm:text-base leading-tight break-words">
                                       {item.name}
                                     </h3>
-                                    <span className="inline-block text-[10px] font-bold uppercase tracking-wider text-slate-500 bg-slate-100 px-2.5 py-0.5 rounded-md mt-0.5">
+                                    <span className="inline-block text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md mt-0.5">
                                       {item.badge}
                                     </span>
                                   </div>
                                 </div>
 
                                 <div className="shrink-0">
-                                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
-                                    <Sparkles size={11} /> Coming Soon
+                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[9px] sm:text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200 whitespace-nowrap">
+                                    <Sparkles size={10} />
+                                    <span>Soon</span>
                                   </span>
                                 </div>
                               </div>
 
-                              <p className="text-xs text-slate-500 leading-relaxed mb-4">
+                              <p className="text-xs text-slate-500 leading-relaxed mb-3 sm:mb-4">
                                 {item.desc}
                               </p>
 
                               {/* Coming soon notice */}
-                              <div className="px-3.5 py-2 rounded-xl bg-amber-50/70 border border-amber-200/60 text-xs font-medium text-amber-900 mb-4 flex items-center gap-1.5">
-                                <Clock size={13} className="text-amber-600 shrink-0" />
+                              <div className="px-3 py-2 rounded-xl bg-amber-50/70 border border-amber-200/60 text-[11px] sm:text-xs font-medium text-amber-900 mb-3 sm:mb-4 flex items-center gap-1.5">
+                                <Clock size={12} className="text-amber-600 shrink-0" />
                                 <span>Scheduled to go live soon by admin.</span>
                               </div>
                             </div>
 
                             {/* Action Button */}
-                            <div className="pt-2">
+                            <div className="pt-1 sm:pt-2">
                               <button
                                 onClick={() => openComingSoon({ name: item.name, key: item.key })}
-                                className="w-full py-2.5 px-4 bg-amber-100 hover:bg-amber-200 text-amber-900 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer border border-amber-300 shadow-xs"
+                                className="w-full py-2 sm:py-2.5 px-3 sm:px-4 bg-amber-100 hover:bg-amber-200 text-amber-900 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer border border-amber-300 shadow-xs"
                               >
                                 <Clock size={13} className="text-amber-700" />
                                 <span>Coming Soon</span>

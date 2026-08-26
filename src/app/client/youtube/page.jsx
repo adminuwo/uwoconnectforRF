@@ -425,7 +425,7 @@ const YouTubeManager = () => {
 
   return (
     <DashboardLayout role="CLIENT">
-      <div className="max-w-7xl mx-auto w-full p-4 sm:p-6 pb-20">
+      <div className="max-w-7xl mx-auto w-full p-3 sm:p-6 pb-20 space-y-6 sm:space-y-10">
         
         {/* Toast Notification */}
         {toast && (
@@ -440,7 +440,7 @@ const YouTubeManager = () => {
         {/* Back navigation */}
         <button 
           onClick={() => router.push('/client/channels')}
-          className="mb-6 flex items-center gap-2 text-slate-500 hover:text-red-600 font-bold transition-all text-sm group"
+          className="flex items-center gap-2 text-slate-500 hover:text-red-600 font-bold transition-all text-sm group"
         >
           <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-all" />
           <span>Back to Integrations</span>
@@ -448,27 +448,29 @@ const YouTubeManager = () => {
 
         {/* Channel Banner Header */}
         {ytData && (
-          <div className="mb-10 p-8 rounded-3xl glass-panel border border-red-100 bg-red-50/10 shadow-sm relative overflow-hidden">
+          <div className="p-4 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl glass-panel border border-red-100 bg-red-50/10 shadow-sm relative overflow-hidden">
             <div className="absolute top-0 right-0 w-80 h-80 bg-red-500/5 rounded-full blur-3xl pointer-events-none" />
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 sm:gap-6">
               
-              <div className="flex items-center gap-5">
+              <div className="flex items-start sm:items-center gap-3 sm:gap-5 min-w-0">
                 {ytData.channel_thumbnail ? (
                   <img 
                     src={ytData.channel_thumbnail} 
                     alt={ytData.channel_name} 
-                    className="w-20 h-20 rounded-full border-4 border-red-500 shadow-md object-cover"
+                    className="w-14 h-14 sm:w-20 sm:h-20 rounded-full border-2 sm:border-4 border-red-500 shadow-md object-cover shrink-0"
                   />
                 ) : (
-                  <div className="w-20 h-20 rounded-full bg-red-100 flex items-center justify-center border-4 border-red-500 shadow-md">
-                    <Youtube className="text-red-600" size={36} />
+                  <div className="w-14 h-14 sm:w-20 sm:h-20 rounded-full bg-red-100 flex items-center justify-center border-2 sm:border-4 border-red-500 shadow-md shrink-0">
+                    <Youtube className="text-red-600" size={28} />
                   </div>
                 )}
-                <div>
-                  <h1 className="text-2xl sm:text-3xl font-black text-slate-900 flex items-center gap-3">
-                    {ytData.channel_name || 'YouTube Dashboard'}
-                    <span className="text-xs font-black px-2 py-1 bg-red-100 text-red-700 rounded-lg uppercase tracking-wider">Active</span>
-                  </h1>
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h1 className="text-lg sm:text-2xl md:text-3xl font-black text-slate-900 leading-tight break-words">
+                      {ytData.channel_name || 'YouTube Dashboard'}
+                    </h1>
+                    <span className="text-[10px] sm:text-xs font-black px-2 py-0.5 sm:py-1 bg-red-100 text-red-700 rounded-lg uppercase tracking-wider shrink-0">Active</span>
+                  </div>
                   
                   {isEditingDescription ? (
                     <div className="mt-2 flex flex-col gap-2">
@@ -498,13 +500,13 @@ const YouTubeManager = () => {
                       </div>
                     </div>
                   ) : (
-                    <div className="flex items-start gap-2 mt-1.5 group/desc max-w-lg">
+                    <div className="flex items-start gap-2 mt-1 sm:mt-1.5 group/desc max-w-lg">
                       <p className="text-xs sm:text-sm text-slate-500 italic font-medium leading-relaxed">
                         {ytData.channel_description || 'No channel description provided.'}
                       </p>
                       <button
                         onClick={() => setIsEditingDescription(true)}
-                        className="p-1 text-slate-400 hover:text-slate-800 transition-colors opacity-0 group-hover/desc:opacity-100"
+                        className="p-1 text-slate-400 hover:text-slate-800 transition-colors opacity-70 sm:opacity-0 sm:group-hover/desc:opacity-100 shrink-0"
                         title="Edit Description"
                       >
                         ✏️
@@ -515,18 +517,18 @@ const YouTubeManager = () => {
               </div>
 
               {/* Stats Counters */}
-              <div className="grid grid-cols-3 gap-6 bg-white/70 p-5 rounded-2xl border border-red-100/50 shadow-sm backdrop-blur-sm">
-                <div className="text-center px-2">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block mb-1">Subscribers</span>
-                  <span className="text-xl font-black text-red-600">{ytData.subscribers?.toLocaleString() || 0}</span>
+              <div className="grid grid-cols-3 gap-2 sm:gap-6 bg-white/80 p-3 sm:p-5 rounded-xl sm:rounded-2xl border border-red-100/50 shadow-sm backdrop-blur-sm w-full md:w-auto">
+                <div className="text-center px-1 sm:px-2">
+                  <span className="text-[9px] sm:text-[10px] text-slate-400 font-bold uppercase tracking-wider block mb-0.5 sm:mb-1">Subscribers</span>
+                  <span className="text-base sm:text-xl font-black text-red-600">{ytData.subscribers?.toLocaleString() || 0}</span>
                 </div>
-                <div className="text-center px-4 border-x border-slate-100">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block mb-1">Total Views</span>
-                  <span className="text-xl font-black text-slate-800">{ytData.total_views?.toLocaleString() || 0}</span>
+                <div className="text-center px-2 sm:px-4 border-x border-slate-100">
+                  <span className="text-[9px] sm:text-[10px] text-slate-400 font-bold uppercase tracking-wider block mb-0.5 sm:mb-1">Total Views</span>
+                  <span className="text-base sm:text-xl font-black text-slate-800">{ytData.total_views?.toLocaleString() || 0}</span>
                 </div>
-                <div className="text-center px-2">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block mb-1">Videos</span>
-                  <span className="text-xl font-black text-slate-800">{!loadingVideos ? videos.length : (ytData.video_count || 0)}</span>
+                <div className="text-center px-1 sm:px-2">
+                  <span className="text-[9px] sm:text-[10px] text-slate-400 font-bold uppercase tracking-wider block mb-0.5 sm:mb-1">Videos</span>
+                  <span className="text-base sm:text-xl font-black text-slate-800">{!loadingVideos ? videos.length : (ytData.video_count || 0)}</span>
                 </div>
               </div>
 
@@ -538,39 +540,39 @@ const YouTubeManager = () => {
         <div className="space-y-10">
 
           {/* Row 2: Uploaded Videos */}
-          <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-                <Video size={18} className="text-red-600" />
+          <div className="space-y-4 sm:space-y-6">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <h2 className="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
+                <Video size={18} className="text-red-600 shrink-0" />
                 <span>Uploads & Performance</span>
               </h2>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 sm:gap-3">
                 <button
                   onClick={() => setIsUploadModalOpen(true)}
-                  className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-bold transition-all shadow-sm flex items-center gap-1.5"
+                  className="px-3 sm:px-4 py-1.5 sm:py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-bold transition-all shadow-sm flex items-center gap-1.5 cursor-pointer"
                 >
                   <Plus size={14} /> Upload Video
                 </button>
-                <span className="text-xs text-slate-400 font-bold italic">{videos.length} videos found</span>
+                <span className="text-[11px] sm:text-xs text-slate-400 font-bold italic">{videos.length} videos found</span>
               </div>
             </div>
 
             {loadingVideos ? (
-              <div className="h-48 flex items-center justify-center bg-white border border-slate-100 rounded-3xl">
+              <div className="h-48 flex items-center justify-center bg-white border border-slate-100 rounded-2xl sm:rounded-3xl">
                 <Loader2 className="animate-spin text-red-600" size={32} />
               </div>
             ) : videos.length === 0 ? (
-              <div className="h-48 flex flex-col items-center justify-center bg-white border border-slate-100 rounded-3xl p-6 text-center">
+              <div className="h-48 flex flex-col items-center justify-center bg-white border border-slate-100 rounded-2xl sm:rounded-3xl p-6 text-center">
                 <Youtube className="text-slate-200 mb-3" size={48} />
                 <p className="text-slate-400 text-sm font-bold">No videos found on this channel.</p>
               </div>
             ) : (
-              <div className="flex gap-5 overflow-x-auto pb-4 pt-1 scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent">
+              <div className="flex gap-4 sm:gap-5 overflow-x-auto pb-4 pt-1 scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent">
                 {videos.map((vid) => (
                   <div 
                     key={vid.id}
                     onClick={() => loadComments(vid)}
-                    className={`min-w-[280px] max-w-[280px] p-4 rounded-3xl border transition-all cursor-pointer relative overflow-hidden group flex flex-col justify-between shrink-0 snap-start ${
+                    className={`min-w-[220px] sm:min-w-[280px] max-w-[240px] sm:max-w-[280px] p-3 sm:p-4 rounded-2xl sm:rounded-3xl border transition-all cursor-pointer relative overflow-hidden group flex flex-col justify-between shrink-0 snap-start ${
                       selectedVideo?.id === vid.id 
                         ? 'bg-red-50/20 border-red-400 shadow-md ring-2 ring-red-500/10' 
                         : 'bg-white hover:bg-slate-50/50 border-slate-100 hover:shadow-sm'
@@ -583,7 +585,7 @@ const YouTubeManager = () => {
                         target="_blank"
                         rel="noopener noreferrer"
                         onClick={(e) => e.stopPropagation()}
-                        className="relative rounded-2xl overflow-hidden aspect-video border border-slate-100/50 mb-3 block"
+                        className="relative rounded-xl sm:rounded-2xl overflow-hidden aspect-video border border-slate-100/50 mb-2.5 sm:mb-3 block"
                       >
                         <img 
                           src={vid.thumbnail} 
@@ -591,7 +593,7 @@ const YouTubeManager = () => {
                           className="w-full h-full object-cover group-hover:scale-105 transition-all duration-300"
                         />
                         <div className="absolute inset-0 bg-black/10 group-hover:bg-black/30 transition-all flex items-center justify-center">
-                          <Play className="text-white opacity-60 group-hover:opacity-100 group-hover:scale-110 transition-all drop-shadow" size={28} />
+                          <Play className="text-white opacity-60 group-hover:opacity-100 group-hover:scale-110 transition-all drop-shadow" size={24} />
                         </div>
                         <button
                           onClick={(e) => {
@@ -626,7 +628,7 @@ const YouTubeManager = () => {
                           <ThumbsUp size={12} /> {vid.likes?.toLocaleString()}
                         </span>
                         <span className={`flex items-center gap-1 ${vid.comments > 0 ? 'text-red-600' : ''}`}>
-                          <MessageSquare size={12} /> {vid.comments || 0} Comments
+                          <MessageSquare size={12} /> {vid.comments || 0}
                         </span>
                       </div>
                     </div>
@@ -637,16 +639,16 @@ const YouTubeManager = () => {
           </div>
 
           {/* Row 3: YouTube Automation Settings */}
-          <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm space-y-6">
-            <div className="border-b border-slate-100 pb-3 flex items-center justify-between">
-              <h3 className="text-sm font-black text-slate-900 flex items-center gap-2">
-                <Youtube className="text-red-600" size={20} />
+          <div className="bg-white border border-slate-100 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-sm space-y-4 sm:space-y-6">
+            <div className="border-b border-slate-100 pb-3 flex flex-wrap items-center justify-between gap-2">
+              <h3 className="text-xs sm:text-sm font-black text-slate-900 flex items-center gap-2">
+                <Youtube className="text-red-600 shrink-0" size={18} />
                 <span>YouTube Automation & AI Bot Control</span>
               </h3>
-              <span className="text-[10px] font-bold text-slate-400 bg-slate-50 border border-slate-100 px-2.5 py-1 rounded-full uppercase tracking-wider">Configure Automation Mode</span>
+              <span className="text-[9px] sm:text-[10px] font-bold text-slate-400 bg-slate-50 border border-slate-100 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full uppercase tracking-wider shrink-0">Configure Automation Mode</span>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               
               {/* Column 1: WhatsApp Broadcasting */}
               <div className="p-4 bg-slate-50/50 rounded-2xl border border-slate-100 flex flex-col justify-between space-y-3">
@@ -886,20 +888,20 @@ const YouTubeManager = () => {
           </div>
 
           {/* Row 4: Engagement Hub & Comments list */}
-          <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm space-y-6">
+          <div className="bg-white border border-slate-100 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-sm space-y-4 sm:space-y-6">
             
             {/* Header with Search and Dropdown Selector */}
-            <div className="border-b border-slate-100 pb-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="border-b border-slate-100 pb-4 flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4">
               <div className="flex items-center gap-2">
-                <MessageSquare className="text-red-600" size={20} />
+                <MessageSquare className="text-red-600 shrink-0" size={20} />
                 <div>
-                  <h3 className="text-sm font-black text-slate-900">Engagement Hub & Comment Workspace</h3>
+                  <h3 className="text-xs sm:text-sm font-black text-slate-900">Engagement Hub & Comment Workspace</h3>
                   <p className="text-[9px] text-slate-400 font-bold">Select video and moderate comment threads using RAG AI suggestions</p>
                 </div>
               </div>
 
               {/* Controls: Video Select + Comment Search */}
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 flex-1 max-w-2xl justify-end">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 flex-1 max-w-full sm:max-w-2xl justify-end">
                 {/* Video Select Dropdown */}
                 <select 
                   value={selectedVideo?.id || ''} 
@@ -907,7 +909,7 @@ const YouTubeManager = () => {
                     const video = videos.find(v => v.id === e.target.value);
                     if (video) loadComments(video);
                   }}
-                  className="text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-red-500 font-bold bg-white max-w-xs shrink-0"
+                  className="text-xs p-2 sm:p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-red-500 font-bold bg-white w-full sm:w-auto sm:max-w-xs shrink-0"
                 >
                   <option value="">-- Choose Video to Moderate --</option>
                   {videos.map(v => (
@@ -920,10 +922,10 @@ const YouTubeManager = () => {
                   <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 text-xs">🔍</span>
                   <input 
                     type="text" 
-                    placeholder="Search comments by text or username..." 
+                    placeholder="Search comments..." 
                     value={commentSearch} 
                     onChange={(e) => setCommentSearch(e.target.value)} 
-                    className="w-full text-xs pl-8 pr-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-red-500 font-medium"
+                    className="w-full text-xs pl-8 pr-4 py-2 sm:py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-red-500 font-medium"
                   />
                 </div>
               </div>

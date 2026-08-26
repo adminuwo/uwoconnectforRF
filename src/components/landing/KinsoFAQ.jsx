@@ -36,23 +36,23 @@ export default function KinsoFAQ({ isDark }) {
   ];
 
   return (
-    <section id="faq" className="py-24 relative overflow-hidden">
-      <div className="max-w-4xl mx-auto px-6 space-y-12">
+    <section id="faq" className="py-14 sm:py-20 lg:py-24 relative overflow-hidden">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 space-y-8 sm:space-y-12">
         {/* Header */}
-        <div className="text-center space-y-4">
-          <span className="text-xs font-bold uppercase tracking-widest text-[#16A34A] px-3.5 py-1.5 rounded-full bg-[#16A34A]/10 border border-[#16A34A]/20">
+        <div className="text-center space-y-3 sm:space-y-4">
+          <span className="text-[11px] sm:text-xs font-bold uppercase tracking-widest text-[#00AB56] px-3.5 py-1.5 rounded-full bg-[#00AB56]/10 border border-[#00AB56]/20">
             Got Questions?
           </span>
-          <h2 className={`text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight ${isDark ? 'text-white' : 'text-gray-900'}`}>
+          <h2 className={`text-2xl sm:text-4xl md:text-5xl font-extrabold tracking-tight ${isDark ? 'text-white' : 'text-gray-900'}`}>
             Frequently Asked Questions
           </h2>
-          <p className={`text-base ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+          <p className={`text-sm sm:text-base ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
             Everything you need to know about UWO Connect features, security, and onboarding.
           </p>
         </div>
 
         {/* Accordion List */}
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
           {faqs.map((faq, idx) => {
             const isOpen = openIndex === idx;
             return (
@@ -61,16 +61,16 @@ export default function KinsoFAQ({ isDark }) {
                 className={`rounded-2xl border transition-all duration-200 overflow-hidden ${
                   isDark
                     ? 'bg-[#0E131F] border-white/10'
-                    : 'bg-white border-gray-200 shadow-sm'
+                    : 'bg-white border-gray-200 shadow-2xs'
                 }`}
               >
                 <button
                   onClick={() => setOpenIndex(isOpen ? -1 : idx)}
-                  className="w-full p-6 text-left flex items-center justify-between gap-4 font-bold text-base sm:text-lg focus:outline-none"
+                  className="w-full p-4 sm:p-6 text-left flex items-center justify-between gap-3 font-bold text-sm sm:text-base md:text-lg focus:outline-none cursor-pointer"
                 >
                   <span className={isDark ? 'text-white' : 'text-gray-900'}>{faq.question}</span>
                   <ChevronDown
-                    className={`w-5 h-5 text-[#16A34A] shrink-0 transition-transform duration-300 ${
+                    className={`w-4 h-4 sm:w-5 sm:h-5 text-[#00AB56] shrink-0 transition-transform duration-300 ${
                       isOpen ? 'rotate-180' : ''
                     }`}
                   />
@@ -82,9 +82,9 @@ export default function KinsoFAQ({ isDark }) {
                       initial={{ opacity: 0, height: 0 }}
                       animate={{ opacity: 1, height: 'auto' }}
                       exit={{ opacity: 0, height: 0 }}
-                      transition={{ duration: 0.3 }}
+                      transition={{ duration: 0.25 }}
                     >
-                      <div className={`px-6 pb-6 text-sm sm:text-base leading-relaxed border-t pt-4 ${
+                      <div className={`px-4 pb-4 sm:px-6 sm:pb-6 text-xs sm:text-sm md:text-base leading-relaxed border-t pt-3 sm:pt-4 ${
                         isDark ? 'text-gray-400 border-white/5' : 'text-gray-600 border-gray-100'
                       }`}>
                         {faq.answer}

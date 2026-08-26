@@ -608,7 +608,7 @@ export default function ClientInboxPage() {
           }`}>
             
             {/* Search & Channel Filter */}
-            <div className="p-3.5 border-b border-slate-200 space-y-2.5">
+            <div className="p-3 sm:p-3.5 border-b border-slate-200 space-y-2.5">
               <div className="relative">
                 <Search className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
                 <input
@@ -620,56 +620,28 @@ export default function ClientInboxPage() {
                 />
               </div>
 
-              {/* Social Channels Tabs with Scroll Controls & Mouse Wheel Support */}
-              <div className="relative flex items-center group">
-                <button
-                  type="button"
-                  onClick={() => scrollTabs('left')}
-                  className="shrink-0 mr-1 w-5 h-7 bg-white border border-slate-200 shadow-2xs rounded-md text-slate-500 hover:text-slate-900 flex items-center justify-center cursor-pointer transition-all hover:bg-slate-50"
-                  title="Scroll Left"
-                >
-                  <ChevronLeft size={13} />
-                </button>
-
-                <div 
-                  ref={channelTabsRef}
-                  onWheel={(e) => {
-                    if (e.deltaY !== 0 && channelTabsRef.current) {
-                      e.preventDefault();
-                      channelTabsRef.current.scrollLeft += e.deltaY;
-                    }
-                  }}
-                  className="flex items-center gap-1.5 overflow-x-auto py-1 scroll-smooth w-full no-scrollbar select-none"
-                >
-                  {CHANNEL_TABS.map(tab => {
-                    const Icon = tab.icon;
-                    const isActive = activeChannelFilter === tab.id;
-                    return (
-                      <button
-                        key={tab.id}
-                        onClick={() => setActiveChannelFilter(tab.id)}
-                        className={cn(
-                          "flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold transition-all whitespace-nowrap cursor-pointer shrink-0 border",
-                          isActive 
-                            ? cn(tab.activeClass, "border-transparent")
-                            : "bg-slate-100/90 text-slate-600 hover:bg-slate-200/80 hover:text-slate-900 border-slate-200/60"
-                        )}
-                      >
-                        <Icon size={13} className={isActive ? 'text-white' : tab.color || 'text-slate-500'} />
-                        <span>{tab.label}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => scrollTabs('right')}
-                  className="shrink-0 ml-1 w-5 h-7 bg-white border border-slate-200 shadow-2xs rounded-md text-slate-500 hover:text-slate-900 flex items-center justify-center cursor-pointer transition-all hover:bg-slate-50"
-                  title="Scroll Right"
-                >
-                  <ChevronRight size={13} />
-                </button>
+              {/* Social Channels Filter Tabs - Sleek single-row horizontal capsule rail */}
+              <div className="flex items-center gap-1.5 overflow-x-auto py-0.5 scrollbar-none select-none -mx-0.5 px-0.5">
+                {CHANNEL_TABS.map(tab => {
+                  const Icon = tab.icon;
+                  const isActive = activeChannelFilter === tab.id;
+                  return (
+                    <button
+                      key={tab.id}
+                      type="button"
+                      onClick={() => setActiveChannelFilter(tab.id)}
+                      className={cn(
+                        "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all whitespace-nowrap cursor-pointer shrink-0 border",
+                        isActive 
+                          ? cn(tab.activeClass, "border-transparent shadow-xs")
+                          : "bg-slate-100/80 text-slate-600 hover:bg-slate-200/70 hover:text-slate-900 border-slate-200/80"
+                      )}
+                    >
+                      <Icon size={13} className={isActive ? 'text-white' : tab.color || 'text-slate-500'} />
+                      <span>{tab.label}</span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
@@ -703,30 +675,30 @@ export default function ClientInboxPage() {
                         setSelectedConvoId(convo.id);
                         setMobileShowChat(true);
                       }}
-                      className={`p-4 cursor-pointer transition-all border-l-4 ${
+                      className={`p-3 sm:p-4 cursor-pointer transition-all border-l-4 ${
                         isSelected 
                           ? 'bg-emerald-50/80 border-emerald-500' 
                           : 'border-transparent hover:bg-slate-50'
                       }`}
                     >
                       <div className="flex items-start justify-between gap-2">
-                        <div className="flex items-center gap-3">
-                          <div className="relative">
-                            <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center font-bold text-slate-700">
+                        <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
+                          <div className="relative shrink-0">
+                            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-slate-200 flex items-center justify-center font-bold text-slate-700 text-xs sm:text-sm">
                               {convo.name.charAt(0).toUpperCase()}
                             </div>
-                            <span className={`absolute -bottom-1 -right-1 text-[9px] px-1.5 py-0.5 rounded-full font-bold shadow-2xs ${channelInfo.bg} ${channelInfo.text}`}>
+                            <span className={`absolute -bottom-1 -right-1 text-[8px] sm:text-[9px] px-1 sm:px-1.5 py-0.5 rounded-full font-bold shadow-2xs ${channelInfo.bg} ${channelInfo.text}`}>
                               {convo.channel.slice(0, 2)}
                             </span>
                           </div>
-                          <div>
-                            <h4 className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
-                              {convo.name}
+                          <div className="min-w-0 flex-1">
+                            <h4 className="text-xs font-bold text-slate-900 flex items-center gap-1.5 truncate">
+                              <span className="truncate">{convo.name}</span>
                               {convo.isLocked && (
-                                <Lock className="w-3 h-3 text-amber-500" title="Locked by team handler" />
+                                <Lock className="w-3 h-3 text-amber-500 shrink-0" title="Locked by team handler" />
                               )}
                             </h4>
-                            <p className="text-[11px] text-slate-500 line-clamp-1 mt-0.5">
+                            <p className="text-[11px] text-slate-500 truncate mt-0.5">
                               {liveState?.isTyping ? (
                                 <span className="text-emerald-600 font-bold animate-pulse">
                                   ✍️ {liveState.typingUser || 'Employee'} is typing...
@@ -738,13 +710,13 @@ export default function ClientInboxPage() {
                           </div>
                         </div>
 
-                        <div className="text-right">
-                          <span className="text-[10px] text-slate-400 font-medium">
+                        <div className="text-right shrink-0 flex flex-col items-end">
+                          <span className="text-[10px] text-slate-400 font-medium whitespace-nowrap">
                             {new Date(convo.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                           </span>
                           {liveState?.viewer && (
                             <div className="mt-1 flex justify-end">
-                              <span className="inline-flex items-center gap-1 text-[9px] px-1.5 py-0.5 rounded-md bg-blue-100 text-blue-700 font-bold">
+                              <span className="inline-flex items-center gap-1 text-[9px] px-1.5 py-0.5 rounded-md bg-blue-100 text-blue-700 font-bold max-w-[110px] truncate">
                                 🟢 {liveState.viewer}
                               </span>
                             </div>
@@ -786,72 +758,69 @@ export default function ClientInboxPage() {
             }`}>
               
               {/* Live Chat Header & Control Bar */}
-              <div className="bg-white border-b border-slate-200 p-4 flex flex-wrap items-center justify-between gap-3 shadow-2xs">
-                
-                {/* Customer Details & Live Indicator */}
-                <div className="flex items-center gap-3">
-                  <button 
-                    onClick={() => setMobileShowChat(false)}
-                    className="md:hidden p-1.5 rounded-lg text-slate-500 hover:bg-slate-100"
-                  >
-                    <ArrowLeft className="w-5 h-5" />
-                  </button>
+              <div className="bg-white border-b border-slate-200 p-2.5 sm:p-4 shadow-2xs space-y-2">
+                <div className="flex items-center justify-between gap-2">
+                  
+                  {/* Customer Details & Live Indicator */}
+                  <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                    <button 
+                      onClick={() => setMobileShowChat(false)}
+                      className="md:hidden p-1.5 rounded-lg text-slate-500 hover:bg-slate-100 shrink-0 cursor-pointer"
+                      title="Back to conversations"
+                    >
+                      <ArrowLeft className="w-5 h-5" />
+                    </button>
 
-                  <div className="w-10 h-10 rounded-full bg-emerald-600 text-white flex items-center justify-center font-black text-sm shadow-sm">
-                    {activeConvo.name.charAt(0).toUpperCase()}
-                  </div>
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-emerald-600 text-white flex items-center justify-center font-black text-xs sm:text-sm shadow-sm shrink-0">
+                      {activeConvo.name.charAt(0).toUpperCase()}
+                    </div>
 
-                  <div>
-                    <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                      {activeConvo.name}
-                      <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
-                        {activeConvo.channel}
-                      </span>
-                    </h3>
-                    <div className="flex items-center gap-2 text-xs mt-0.5">
-                      {livePresence[activeConvo.id]?.isTyping ? (
-                        <span className="text-emerald-600 font-bold flex items-center gap-1 animate-pulse">
-                          ✍️ {livePresence[activeConvo.id]?.typingUser || 'Abha'} is typing...
+                    <div className="min-w-0 flex-1">
+                      <h3 className="text-xs sm:text-sm font-bold text-slate-900 flex items-center gap-1.5 truncate">
+                        <span className="truncate">{activeConvo.name}</span>
+                        <span className="text-[8px] sm:text-[10px] font-extrabold px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 shrink-0">
+                          {activeConvo.channel}
                         </span>
-                      ) : livePresence[activeConvo.id]?.viewer ? (
-                        <span className="text-blue-600 font-semibold flex items-center gap-1">
-                          🟢 {livePresence[activeConvo.id]?.viewer} is viewing
-                        </span>
-                      ) : (
-                        <span className="text-slate-500 font-medium">👀 Admin & Team Watching</span>
-                      )}
+                      </h3>
+                      <div className="flex items-center gap-1.5 text-[10px] sm:text-xs text-slate-500 mt-0.5 truncate">
+                        {livePresence[activeConvo.id]?.isTyping ? (
+                          <span className="text-emerald-600 font-bold flex items-center gap-1 animate-pulse truncate">
+                            ✍️ Typing...
+                          </span>
+                        ) : livePresence[activeConvo.id]?.viewer ? (
+                          <span className="text-blue-600 font-semibold flex items-center gap-1 truncate">
+                            🟢 {livePresence[activeConvo.id]?.viewer}
+                          </span>
+                        ) : (
+                          <span className="text-slate-400 truncate">Online</span>
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                {/* Active Handler & Admin Actions */}
-                <div className="flex flex-col items-end gap-2">
-                  <div className="flex items-center gap-2">
-                    <div className="flex items-center gap-1.5 text-[11px] font-semibold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-200 shadow-sm">
-                      <Lock className="w-3 h-3" />
-                      <span>Handling: <strong>Abha Patel</strong></span>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
+                  {/* Active Handler & Admin Actions */}
+                  <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
                     <button
                       onClick={handleTakeover}
-                      className="px-2.5 py-1 rounded-md text-[11px] font-bold bg-rose-50 text-rose-600 hover:bg-rose-100 border border-rose-200 transition-all flex items-center gap-1"
+                      className="px-2 sm:px-2.5 py-1 rounded-lg text-[10px] sm:text-[11px] font-bold bg-rose-50 text-rose-600 hover:bg-rose-100 border border-rose-200 transition-all flex items-center gap-1 cursor-pointer"
+                      title="Take Over"
                     >
                       <ShieldAlert className="w-3 h-3" />
-                      Take Over
+                      <span className="hidden sm:inline">Take Over</span>
                     </button>
 
                     <button
                       onClick={() => setIsTransferModalOpen(true)}
-                      className="px-2.5 py-1 rounded-md text-[11px] font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200 transition-all flex items-center gap-1"
+                      className="px-2 sm:px-2.5 py-1 rounded-lg text-[10px] sm:text-[11px] font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200 transition-all flex items-center gap-1 cursor-pointer"
+                      title="Transfer"
                     >
                       <ArrowRightLeft className="w-3 h-3" />
-                      Transfer
+                      <span className="hidden sm:inline">Transfer</span>
                     </button>
 
                     <button
                       onClick={fetchAuditLogs}
-                      className="p-1.5 rounded-md bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200 transition-colors"
+                      className="p-1.5 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200 transition-colors cursor-pointer"
                       title="Inspect Audit Log"
                     >
                       <History className="w-3.5 h-3.5" />
@@ -861,7 +830,7 @@ export default function ClientInboxPage() {
               </div>
 
               {/* Timeline Messages View */}
-              <div ref={scrollRef} className="flex-1 overflow-y-auto p-6 space-y-4">
+              <div ref={scrollRef} className="flex-1 overflow-y-auto p-3 sm:p-6 space-y-3 sm:space-y-4">
                 {isLoadingMessages ? (
                   <div className="space-y-4 py-4 animate-pulse">
                     {/* Incoming bubble skeleton */}
@@ -1016,7 +985,7 @@ export default function ClientInboxPage() {
                           </div>
                         )}
 
-                        <div className={`max-w-xl rounded-2xl p-4 text-xs shadow-sm ${
+                        <div className={`max-w-[88%] sm:max-w-xl rounded-2xl p-3 sm:p-4 text-xs shadow-sm ${
                           isIncoming 
                             ? isEmail ? 'bg-slate-50 text-slate-900 rounded-tl-none border border-slate-300' : 'bg-white text-slate-900 rounded-tl-none border border-slate-200'
                             : 'bg-emerald-600 text-white rounded-tr-none shadow-emerald-600/10'
@@ -1128,14 +1097,14 @@ export default function ClientInboxPage() {
               </div>
 
               {/* Composer Box (Public Reply vs Internal Note) */}
-              <div className="bg-white border-t border-slate-200 p-4 space-y-3">
+              <div className="bg-white border-t border-slate-200 p-3 sm:p-4 space-y-2.5 sm:space-y-3">
                 
                 {/* Note Toggle */}
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1.5 sm:gap-2">
                     <button
                       onClick={() => setIsInternalNote(false)}
-                      className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                      className={`px-2.5 sm:px-3 py-1 rounded-lg text-[11px] sm:text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
                         !isInternalNote 
                           ? 'bg-emerald-600 text-white shadow-xs' 
                           : 'text-slate-500 hover:text-slate-900'
@@ -1145,37 +1114,42 @@ export default function ClientInboxPage() {
                     </button>
                     <button
                       onClick={() => setIsInternalNote(true)}
-                      className={`px-3 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1 ${
+                      className={`px-2.5 sm:px-3 py-1 rounded-lg text-[11px] sm:text-xs font-bold transition-all flex items-center gap-1 whitespace-nowrap cursor-pointer ${
                         isInternalNote 
                           ? 'bg-amber-500 text-white shadow-xs' 
                           : 'text-slate-500 hover:text-slate-900'
                       }`}
                     >
-                      <StickyNote className="w-3.5 h-3.5" />
-                      Internal Private Note
+                      <StickyNote className="w-3.5 h-3.5 shrink-0" />
+                      <span>Internal Private Note</span>
                     </button>
                   </div>
                 </div>
 
-                {/* Text input area */}
-                <div className="flex items-end gap-2">
-                  <textarea
-                    rows={2}
-                    value={replyText}
-                    onChange={(e) => handleTyping(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' && !e.shiftKey) {
-                        e.preventDefault();
-                        handleSendMessage();
-                      }
-                    }}
-                    placeholder={isInternalNote ? "Add private internal note visible only to team..." : "Type reply..."}
-                    className="flex-1 bg-slate-100 border border-slate-200 rounded-xl p-3 text-xs text-slate-900 placeholder-slate-400 focus:ring-2 focus:ring-emerald-500 outline-none resize-none"
-                  />
+                {/* Text input area - Guaranteed responsive layout with fixed-size send button */}
+                <div className="flex items-center gap-2 w-full min-w-0">
+                  <div className="flex-1 min-w-0">
+                    <textarea
+                      rows={1}
+                      value={replyText}
+                      onChange={(e) => handleTyping(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                          e.preventDefault();
+                          handleSendMessage();
+                        }
+                      }}
+                      placeholder={isInternalNote ? "Add private internal note..." : "Type a message..."}
+                      className="w-full min-w-0 bg-slate-100 hover:bg-slate-200/60 focus:bg-white border border-slate-200 rounded-2xl px-3.5 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:ring-2 focus:ring-emerald-500 outline-none resize-none transition-all block"
+                      style={{ minHeight: '42px', maxHeight: '90px' }}
+                    />
+                  </div>
                   <button
+                    type="button"
                     onClick={handleSendMessage}
                     disabled={!replyText.trim() || isSending}
-                    className="p-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white shadow-md disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center"
+                    className="w-10 h-10 min-w-[40px] max-w-[40px] shrink-0 rounded-2xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white shadow-md disabled:opacity-40 disabled:hover:bg-emerald-600 disabled:cursor-not-allowed transition-all flex items-center justify-center cursor-pointer"
+                    title="Send"
                   >
                     {isSending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
                   </button>

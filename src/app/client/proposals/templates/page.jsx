@@ -137,7 +137,7 @@ const ProposalTemplatesPage = () => {
 
   return (
     <DashboardLayout role="CLIENT">
-      <div className="max-w-7xl mx-auto w-full p-4 sm:p-6 pb-20 space-y-6">
+      <div className="max-w-7xl mx-auto w-full p-3 sm:p-6 pb-20 space-y-4 sm:space-y-6">
         
         {/* Title bar */}
         <div className="flex items-center gap-3">

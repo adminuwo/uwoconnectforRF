@@ -205,25 +205,25 @@ const ProposalsPage = () => {
 
   return (
     <DashboardLayout role="CLIENT">
-      <div className="max-w-7xl mx-auto w-full p-4 sm:p-6 pb-20 space-y-6">
+      <div className="max-w-7xl mx-auto w-full p-3 sm:p-6 pb-20 space-y-4 sm:space-y-6">
         
         {/* Header & Actions */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
           <div>
-            <h1 className="text-xl font-black text-slate-900 tracking-tight">Business Proposals</h1>
-            <p className="text-xs text-slate-400 font-semibold uppercase tracking-wider mt-0.5">Scope of work, RFPs, and Pitches</p>
+            <h1 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight leading-tight">Business Proposals</h1>
+            <p className="text-[11px] sm:text-xs text-slate-400 font-semibold uppercase tracking-wider mt-0.5">Scope of work, RFPs, and Pitches</p>
           </div>
           
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
             <button
               onClick={() => router.push('/client/proposals/templates')}
-              className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-xs"
+              className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3 sm:px-3.5 py-2 sm:py-2.5 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-xs"
             >
               <span>Manage Templates</span>
             </button>
             <button
               onClick={() => router.push('/client/quotations/new?type=PROPOSAL')}
-              className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all shadow-sm cursor-pointer"
+              className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3.5 sm:px-4 py-2 sm:py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all shadow-sm cursor-pointer"
             >
               <Plus size={14} />
               <span>Create Proposal</span>
@@ -232,46 +232,46 @@ const ProposalsPage = () => {
         </div>
 
         {/* Analytics Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-          <div className="bg-white border border-slate-100 rounded-2xl p-5 shadow-xs flex items-center gap-4">
-            <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-655 shrink-0">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-5">
+          <div className="bg-white border border-slate-100 rounded-xl sm:rounded-2xl p-3.5 sm:p-5 shadow-xs flex items-center gap-3 sm:gap-4">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-655 shrink-0">
               <FileText size={18} />
             </div>
             <div>
               <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Total Pitches</p>
-              <p className="text-lg font-black text-slate-800 mt-0.5">{documents.length}</p>
+              <p className="text-base sm:text-lg font-black text-slate-800 mt-0.5">{documents.length}</p>
             </div>
           </div>
 
-          <div className="bg-white border border-slate-100 rounded-2xl p-5 shadow-xs flex items-center gap-4">
-            <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-650 flex items-center justify-center shrink-0">
+          <div className="bg-white border border-slate-100 rounded-xl sm:rounded-2xl p-3.5 sm:p-5 shadow-xs flex items-center gap-3 sm:gap-4">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-emerald-50 text-emerald-650 flex items-center justify-center shrink-0">
               <TrendingUp size={18} />
             </div>
             <div>
               <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Proposal Pipeline Value</p>
-              <p className="text-lg font-black text-slate-800 mt-0.5">${parseFloat(stats.total_value).toLocaleString('en-US', { minimumFractionDigits: 2 })}</p>
+              <p className="text-base sm:text-lg font-black text-slate-800 mt-0.5">${parseFloat(stats.total_value).toLocaleString('en-US', { minimumFractionDigits: 2 })}</p>
             </div>
           </div>
 
-          <div className="bg-white border border-slate-100 rounded-2xl p-5 shadow-xs flex items-center gap-4">
-            <div className="w-10 h-10 rounded-xl bg-violet-50 text-violet-650 flex items-center justify-center shrink-0">
+          <div className="bg-white border border-slate-100 rounded-xl sm:rounded-2xl p-3.5 sm:p-5 shadow-xs flex items-center gap-3 sm:gap-4">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-violet-50 text-violet-650 flex items-center justify-center shrink-0">
               <BarChart3 size={18} />
             </div>
             <div>
               <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Acceptance Rates</p>
-              <p className="text-lg font-black text-slate-800 mt-0.5">{stats.conversion_rate}%</p>
+              <p className="text-base sm:text-lg font-black text-slate-800 mt-0.5">{stats.conversion_rate}%</p>
             </div>
           </div>
         </div>
 
         {/* Filters */}
-        <div className="bg-white border border-slate-100 rounded-2xl p-4.5 shadow-xs">
-          <form onSubmit={handleSearchSubmit} className="flex flex-col sm:flex-row items-center gap-3">
+        <div className="bg-white border border-slate-100 rounded-xl sm:rounded-2xl p-3.5 sm:p-4.5 shadow-xs space-y-3">
+          <form onSubmit={handleSearchSubmit} className="flex flex-col sm:flex-row items-center gap-2.5 sm:gap-3">
             <div className="relative flex-1 w-full">
-              <Search size={14} className="absolute left-3.5 top-3 text-slate-400" />
+              <Search size={14} className="absolute left-3.5 top-2.5 sm:top-3 text-slate-400" />
               <input
                 type="text"
-                placeholder="Search proposals by customer, document number, or details..."
+                placeholder="Search proposals by customer or doc number..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="w-full pl-9 pr-4 py-2 bg-slate-50 text-slate-900 placeholder-slate-400 text-xs rounded-xl border border-slate-200/60 focus:outline-none focus:border-emerald-500"
@@ -301,7 +301,7 @@ const ProposalsPage = () => {
           </form>
 
           {showFilters && (
-            <div className="pt-3 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="pt-3 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <div>
                 <label className="block text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1.5">Proposal Status</label>
                 <select
@@ -335,14 +335,14 @@ const ProposalsPage = () => {
         </div>
 
         {/* Proposals List Card */}
-        <div className="bg-white border border-slate-100 rounded-2xl shadow-xs overflow-hidden">
+        <div className="bg-white border border-slate-100 rounded-xl sm:rounded-2xl shadow-xs overflow-hidden">
           {loading ? (
             <div className="p-12 text-center text-slate-400 flex flex-col items-center justify-center gap-3">
               <Loader2 className="animate-spin text-emerald-600" size={24} />
               <span className="text-xs font-semibold">Loading proposals...</span>
             </div>
           ) : documents.length === 0 ? (
-            <div className="p-16 text-center">
+            <div className="p-10 sm:p-16 text-center">
               <FileText size={40} className="mx-auto text-slate-300 mb-3" />
               <h3 className="text-sm font-bold text-slate-800">No Proposals Found</h3>
               <p className="text-xs text-slate-500 max-w-sm mx-auto mt-1 mb-5">
@@ -357,93 +357,175 @@ const ProposalsPage = () => {
               </button>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full border-collapse text-left text-xs font-medium">
-                <thead>
-                  <tr className="bg-slate-50 border-b border-slate-100 text-slate-500 font-bold">
-                    <th className="p-4">Proposal Number</th>
-                    <th className="p-4">Customer Details</th>
-                    <th className="p-4">Created Date</th>
-                    <th className="p-4 text-right">Value Amount</th>
-                    <th className="p-4 text-center">Status</th>
-                    <th className="p-4">Version</th>
-                    <th className="p-4 text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 text-slate-700">
-                  {documents.map((doc) => (
-                    <tr key={doc.id} className="hover:bg-slate-50/50 transition-colors">
-                      <td className="p-4 font-bold text-slate-900">{doc.document_number}</td>
-                      <td className="p-4 font-bold">{doc.customer_name}</td>
-                      <td className="p-4 text-slate-500">{doc.document_date}</td>
-                      <td className="p-4 text-right font-black text-slate-950">
+            <>
+              {/* Mobile Card List View (< md) */}
+              <div className="block md:hidden divide-y divide-slate-100">
+                {documents.map((doc) => (
+                  <div key={doc.id} className="p-4 space-y-3 hover:bg-slate-50/50 transition-colors">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="font-black text-slate-900 text-xs tracking-tight">{doc.document_number}</span>
+                      <span className={getStatusBadge(doc.status)}>{doc.status.toLowerCase()}</span>
+                    </div>
+
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="font-bold text-slate-800 truncate max-w-[160px]">{doc.customer_name}</span>
+                      <span className="font-black text-slate-900 text-sm">
                         {doc.currency_symbol}{parseFloat(doc.grand_total).toFixed(2)}
-                      </td>
-                      <td className="p-4 text-center">
-                        <span className={getStatusBadge(doc.status)}>{doc.status.toLowerCase()}</span>
-                      </td>
-                      <td className="p-4 text-center text-slate-400 font-bold">v{doc.version}</td>
-                      <td className="p-4">
-                        <div className="flex items-center justify-end gap-1.5">
-                          {/* Interactive Executive Preview */}
-                          <button
-                            onClick={() => setPreviewModalDoc(doc)}
-                            className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-500 hover:text-slate-900 cursor-pointer"
-                            title="Interactive Executive Preview"
-                          >
-                            <Eye size={13} />
-                          </button>
+                      </span>
+                    </div>
 
-                          {/* Edit Proposal */}
-                          <button
-                            onClick={() => router.push(`/client/quotations/new?edit_id=${doc.id}&type=PROPOSAL`)}
-                            className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-500 hover:text-slate-900 cursor-pointer"
-                            title="Edit Proposal"
-                          >
-                            <Edit2 size={13} />
-                          </button>
+                    <div className="flex items-center justify-between text-[11px] text-slate-400">
+                      <span>{doc.document_date}</span>
+                      <span className="font-bold text-slate-500">v{doc.version}</span>
+                    </div>
 
-                          <button
-                            onClick={() => handleDownloadPDF(doc.id)}
-                            className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-500 hover:text-slate-900 cursor-pointer"
-                            title="Download PDF Proposal"
-                          >
-                            <Download size={13} />
-                          </button>
+                    <div className="pt-2 border-t border-slate-100 flex items-center justify-between gap-1">
+                      <button
+                        onClick={() => setPreviewModalDoc(doc)}
+                        className="p-2 hover:bg-slate-100 rounded-lg text-slate-600 cursor-pointer flex items-center gap-1 text-[11px] font-bold"
+                        title="Preview"
+                      >
+                        <Eye size={14} />
+                        <span>Preview</span>
+                      </button>
 
-                          <button
-                            onClick={() => handleOpenSendModal(doc)}
-                            className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-500 hover:text-slate-900 cursor-pointer"
-                            title="Send Proposal"
-                          >
-                            <Send size={13} />
-                          </button>
+                      <div className="flex items-center gap-1">
+                        <button
+                          onClick={() => router.push(`/client/quotations/new?edit_id=${doc.id}&type=PROPOSAL`)}
+                          className="p-2 hover:bg-slate-100 rounded-lg text-slate-600 cursor-pointer"
+                          title="Edit Proposal"
+                        >
+                          <Edit2 size={14} />
+                        </button>
 
-                          {/* Action duplicates proposal */}
-                          <button
-                            onClick={() => handleDuplicate(doc.id)}
-                            disabled={actionLoading[doc.id] === 'duplicate'}
-                            className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-500 hover:text-slate-900 cursor-pointer disabled:opacity-50"
-                            title="Duplicate Proposal"
-                          >
-                            {actionLoading[doc.id] === 'duplicate' ? <Loader2 size={13} className="animate-spin" /> : <Plus size={13} />}
-                          </button>
+                        <button
+                          onClick={() => handleDownloadPDF(doc.id)}
+                          className="p-2 hover:bg-slate-100 rounded-lg text-slate-600 cursor-pointer"
+                          title="Download PDF"
+                        >
+                          <Download size={14} />
+                        </button>
 
-                          <button
-                            onClick={() => handleDelete(doc.id)}
-                            disabled={actionLoading[doc.id] === 'delete'}
-                            className="p-1.5 hover:bg-red-50 rounded-lg text-slate-405 hover:text-red-600 cursor-pointer disabled:opacity-50"
-                            title="Delete"
-                          >
-                            {actionLoading[doc.id] === 'delete' ? <Loader2 size={13} className="animate-spin" /> : <Trash2 size={13} />}
-                          </button>
-                        </div>
-                      </td>
+                        <button
+                          onClick={() => handleOpenSendModal(doc)}
+                          className="p-2 hover:bg-emerald-50 rounded-lg text-emerald-600 cursor-pointer"
+                          title="Send Proposal"
+                        >
+                          <Send size={14} />
+                        </button>
+
+                        <button
+                          onClick={() => handleDuplicate(doc.id)}
+                          disabled={actionLoading[doc.id] === 'duplicate'}
+                          className="p-2 hover:bg-slate-100 rounded-lg text-slate-600 cursor-pointer disabled:opacity-50"
+                          title="Duplicate"
+                        >
+                          {actionLoading[doc.id] === 'duplicate' ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />}
+                        </button>
+
+                        <button
+                          onClick={() => handleDelete(doc.id)}
+                          disabled={actionLoading[doc.id] === 'delete'}
+                          className="p-2 hover:bg-rose-50 rounded-lg text-rose-500 cursor-pointer disabled:opacity-50"
+                          title="Delete"
+                        >
+                          {actionLoading[doc.id] === 'delete' ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Desktop Table View (>= md) */}
+              <div className="hidden md:block overflow-x-auto">
+                <table className="w-full min-w-[700px] border-collapse text-left text-xs font-medium">
+                  <thead>
+                    <tr className="bg-slate-50 border-b border-slate-100 text-slate-500 font-bold">
+                      <th className="p-4">Proposal Number</th>
+                      <th className="p-4">Customer Details</th>
+                      <th className="p-4">Created Date</th>
+                      <th className="p-4 text-right">Value Amount</th>
+                      <th className="p-4 text-center">Status</th>
+                      <th className="p-4">Version</th>
+                      <th className="p-4 text-right">Actions</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 text-slate-700">
+                    {documents.map((doc) => (
+                      <tr key={doc.id} className="hover:bg-slate-50/50 transition-colors">
+                        <td className="p-4 font-bold text-slate-900">{doc.document_number}</td>
+                        <td className="p-4 font-bold">{doc.customer_name}</td>
+                        <td className="p-4 text-slate-500">{doc.document_date}</td>
+                        <td className="p-4 text-right font-black text-slate-950">
+                          {doc.currency_symbol}{parseFloat(doc.grand_total).toFixed(2)}
+                        </td>
+                        <td className="p-4 text-center">
+                          <span className={getStatusBadge(doc.status)}>{doc.status.toLowerCase()}</span>
+                        </td>
+                        <td className="p-4 text-center text-slate-400 font-bold">v{doc.version}</td>
+                        <td className="p-4">
+                          <div className="flex items-center justify-end gap-1.5">
+                            {/* Interactive Executive Preview */}
+                            <button
+                              onClick={() => setPreviewModalDoc(doc)}
+                              className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-500 hover:text-slate-900 cursor-pointer"
+                              title="Interactive Executive Preview"
+                            >
+                              <Eye size={13} />
+                            </button>
+
+                            {/* Edit Proposal */}
+                            <button
+                              onClick={() => router.push(`/client/quotations/new?edit_id=${doc.id}&type=PROPOSAL`)}
+                              className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-500 hover:text-slate-900 cursor-pointer"
+                              title="Edit Proposal"
+                            >
+                              <Edit2 size={13} />
+                            </button>
+
+                            <button
+                              onClick={() => handleDownloadPDF(doc.id)}
+                              className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-500 hover:text-slate-900 cursor-pointer"
+                              title="Download PDF Proposal"
+                            >
+                              <Download size={13} />
+                            </button>
+
+                            <button
+                              onClick={() => handleOpenSendModal(doc)}
+                              className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-500 hover:text-slate-900 cursor-pointer"
+                              title="Send Proposal"
+                            >
+                              <Send size={13} />
+                            </button>
+
+                            {/* Action duplicates proposal */}
+                            <button
+                              onClick={() => handleDuplicate(doc.id)}
+                              disabled={actionLoading[doc.id] === 'duplicate'}
+                              className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-500 hover:text-slate-900 cursor-pointer disabled:opacity-50"
+                              title="Duplicate Proposal"
+                            >
+                              {actionLoading[doc.id] === 'duplicate' ? <Loader2 size={13} className="animate-spin" /> : <Plus size={13} />}
+                            </button>
+
+                            <button
+                              onClick={() => handleDelete(doc.id)}
+                              disabled={actionLoading[doc.id] === 'delete'}
+                              className="p-1.5 hover:bg-red-50 rounded-lg text-slate-405 hover:text-red-600 cursor-pointer disabled:opacity-50"
+                              title="Delete"
+                            >
+                              {actionLoading[doc.id] === 'delete' ? <Loader2 size={13} className="animate-spin" /> : <Trash2 size={13} />}
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
           )}
         </div>
 

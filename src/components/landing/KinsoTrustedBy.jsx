@@ -38,20 +38,20 @@ export default function KinsoTrustedBy({ isDark }) {
   ];
 
   return (
-    <section className={`py-16 border-y transition-colors duration-300 ${
-      isDark ? 'bg-[#080B12] border-white/10' : 'bg-[#EBF7F1]/70 border-[#16A34A]/15'
+    <section className={`py-12 sm:py-16 border-y transition-colors duration-300 ${
+      isDark ? 'bg-[#080B12] border-white/10' : 'bg-[#EBF7F1]/70 border-[#00AB56]/15'
     }`}>
-      <div className="max-w-7xl mx-auto px-6 space-y-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 space-y-10 sm:space-y-14">
         {/* Company Logos Header */}
-        <div className="text-center space-y-6">
-          <p className="text-xs font-bold uppercase tracking-widest text-gray-400">
+        <div className="text-center space-y-5">
+          <p className="text-[11px] sm:text-xs font-bold uppercase tracking-widest text-gray-400">
             Trusted by Modern Businesses & Global Support Teams
           </p>
-          <div className="flex flex-wrap items-center justify-center gap-8 sm:gap-12 md:gap-16 opacity-60 grayscale hover:grayscale-0 transition-all duration-300">
+          <div className="grid grid-cols-3 sm:flex flex-wrap items-center justify-center gap-4 sm:gap-10 md:gap-14 opacity-60 grayscale hover:grayscale-0 transition-all duration-300">
             {logos.map((logo) => (
               <span
                 key={logo.name}
-                className={`text-lg sm:text-xl font-bold tracking-tighter ${
+                className={`text-sm sm:text-lg md:text-xl font-bold tracking-tighter text-center ${
                   isDark ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'
                 } transition-colors cursor-default`}
               >
@@ -62,7 +62,7 @@ export default function KinsoTrustedBy({ isDark }) {
         </div>
 
         {/* 4 Pillars Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 pt-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           {pillars.map((pillar, idx) => {
             const Icon = pillar.icon;
             return (
@@ -72,16 +72,16 @@ export default function KinsoTrustedBy({ isDark }) {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: idx * 0.1 }}
-                className={`p-6 rounded-2xl border transition-all duration-300 hover:-translate-y-1 ${
+                className={`p-5 sm:p-6 rounded-2xl border transition-all duration-300 hover:-translate-y-1 ${
                   isDark
                     ? 'bg-white/[0.02] border-white/5 hover:border-white/15 hover:bg-white/[0.04]'
-                    : 'bg-white border-gray-200/80 hover:border-gray-300 shadow-sm hover:shadow-md'
+                    : 'bg-white border-gray-200/80 hover:border-gray-300 shadow-xs hover:shadow-md'
                 }`}
               >
-                <div className="w-10 h-10 rounded-xl bg-[#16A34A]/10 text-[#16A34A] flex items-center justify-center mb-4">
+                <div className="w-10 h-10 rounded-xl bg-[#00AB56]/10 text-[#00AB56] flex items-center justify-center mb-3.5">
                   <Icon className="w-5 h-5" />
                 </div>
-                <h3 className={`text-base font-bold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                <h3 className={`text-sm sm:text-base font-bold mb-1.5 ${isDark ? 'text-white' : 'text-gray-900'}`}>
                   {pillar.title}
                 </h3>
                 <p className={`text-xs leading-relaxed ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>

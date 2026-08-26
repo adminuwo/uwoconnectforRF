@@ -10,8 +10,6 @@ import {
   Database,
   BellRing,
   BarChart2,
-  ArrowRight,
-  Sparkles,
   CheckCircle
 } from 'lucide-react';
 
@@ -71,25 +69,25 @@ export default function KinsoAIAutomation({ isDark }) {
   ];
 
   return (
-    <section id="automation" className="py-24 relative overflow-hidden">
-      <div className="max-w-7xl mx-auto px-6 space-y-16">
+    <section id="automation" className="py-14 sm:py-20 lg:py-24 relative overflow-hidden">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 space-y-10 sm:space-y-16">
         {/* Header */}
-        <div className="text-center max-w-3xl mx-auto space-y-4">
-          <span className="text-xs font-bold uppercase tracking-widest text-[#16A34A] px-3.5 py-1.5 rounded-full bg-[#16A34A]/10 border border-[#16A34A]/20">
+        <div className="text-center max-w-3xl mx-auto space-y-3 sm:space-y-4">
+          <span className="text-[11px] sm:text-xs font-bold uppercase tracking-widest text-[#00AB56] px-3.5 py-1.5 rounded-full bg-[#00AB56]/10 border border-[#00AB56]/20">
             Autonomous Workflows
           </span>
-          <h2 className={`text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight ${isDark ? 'text-white' : 'text-gray-900'}`}>
+          <h2 className={`text-2xl sm:text-4xl md:text-5xl font-extrabold tracking-tight ${isDark ? 'text-white' : 'text-gray-900'}`}>
             End-to-End AI Automation Pipeline
           </h2>
-          <p className={`text-base sm:text-lg ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+          <p className={`text-sm sm:text-base md:text-lg ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
             Watch how UWO Connect processes, routes, responds, and records every customer message in milliseconds.
           </p>
         </div>
 
         {/* Step Flow Navigation & Cards */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-start">
           {/* Left Column: Interactive Step Selector */}
-          <div className="lg:col-span-5 space-y-3">
+          <div className="lg:col-span-5 space-y-2 sm:space-y-3">
             {steps.map((item, idx) => {
               const Icon = item.icon;
               const isActive = activeStep === idx;
@@ -97,28 +95,28 @@ export default function KinsoAIAutomation({ isDark }) {
                 <div
                   key={item.step}
                   onClick={() => setActiveStep(idx)}
-                  className={`p-4 rounded-2xl border transition-all cursor-pointer flex items-center gap-4 ${
+                  className={`p-3 sm:p-4 rounded-xl sm:rounded-2xl border transition-all cursor-pointer flex items-center gap-3 sm:gap-4 ${
                     isActive
-                      ? 'bg-[#16A34A] text-white border-[#16A34A] shadow-lg shadow-[#16A34A]/20'
+                      ? 'bg-[#00AB56] text-white border-[#00AB56] shadow-lg shadow-[#00AB56]/20'
                       : isDark
                       ? 'bg-white/[0.02] border-white/5 text-gray-300 hover:bg-white/[0.05]'
-                      : 'bg-white border-gray-200 text-gray-800 hover:bg-gray-50'
+                      : 'bg-white border-gray-200 text-gray-800 hover:bg-gray-50 shadow-2xs'
                   }`}
                 >
                   <div
-                    className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold text-xs ${
-                      isActive ? 'bg-white/20 text-white' : 'bg-[#16A34A]/10 text-[#16A34A]'
+                    className={`w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center font-bold text-xs shrink-0 ${
+                      isActive ? 'bg-white/20 text-white' : 'bg-[#00AB56]/10 text-[#00AB56]'
                     }`}
                   >
                     {item.step}
                   </div>
-                  <div className="flex-1">
-                    <h3 className="text-sm font-bold leading-tight">{item.title}</h3>
-                    <p className={`text-xs ${isActive ? 'text-white/80' : 'text-gray-400'}`}>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-xs sm:text-sm font-bold leading-tight truncate">{item.title}</h3>
+                    <p className={`text-[11px] sm:text-xs truncate ${isActive ? 'text-white/80' : 'text-gray-400'}`}>
                       {item.subtitle}
                     </p>
                   </div>
-                  {isActive && <CheckCircle className="w-5 h-5 text-white shrink-0" />}
+                  {isActive && <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-white shrink-0" />}
                 </div>
               );
             })}
@@ -128,34 +126,34 @@ export default function KinsoAIAutomation({ isDark }) {
           <div className="lg:col-span-7">
             <motion.div
               key={activeStep}
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.4 }}
-              className={`p-8 rounded-3xl border shadow-xl relative overflow-hidden space-y-6 ${
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+              className={`p-5 sm:p-8 rounded-2xl sm:rounded-3xl border shadow-xl relative overflow-hidden space-y-4 sm:space-y-6 ${
                 isDark ? 'bg-[#0E131F] border-white/10 text-white' : 'bg-white border-gray-200 text-gray-900'
               }`}
             >
-              <div className="flex items-center justify-between border-b pb-4 border-gray-200 dark:border-white/10">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b pb-4 border-gray-200 dark:border-white/10">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-2xl bg-[#16A34A]/10 text-[#16A34A] flex items-center justify-center">
-                    {React.createElement(steps[activeStep].icon, { className: 'w-6 h-6' })}
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-[#00AB56]/10 text-[#00AB56] flex items-center justify-center shrink-0">
+                    {React.createElement(steps[activeStep].icon, { className: 'w-5 h-5 sm:w-6 sm:h-6' })}
                   </div>
                   <div>
-                    <span className="text-xs font-bold text-[#16A34A] uppercase tracking-wider block">
+                    <span className="text-[10px] sm:text-xs font-bold text-[#00AB56] uppercase tracking-wider block">
                       Pipeline Step {steps[activeStep].step} of 07
                     </span>
-                    <h3 className="text-xl font-bold">{steps[activeStep].title}</h3>
+                    <h3 className="text-base sm:text-xl font-bold">{steps[activeStep].title}</h3>
                   </div>
                 </div>
 
-                <span className="px-3 py-1 rounded-full text-xs font-bold bg-[#16A34A]/10 text-[#16A34A] border border-[#16A34A]/20">
+                <span className="self-start sm:self-auto px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-bold bg-[#00AB56]/10 text-[#00AB56] border border-[#00AB56]/20">
                   Status: Executed (12ms)
                 </span>
               </div>
 
-              <div className="space-y-4">
-                <p className="text-sm font-semibold text-gray-500">Live Execution Payload:</p>
-                <div className={`p-4 rounded-2xl border text-xs font-mono leading-relaxed ${
+              <div className="space-y-2.5 sm:space-y-4">
+                <p className="text-xs sm:text-sm font-semibold text-gray-500">Live Execution Payload:</p>
+                <div className={`p-3.5 sm:p-4 rounded-xl sm:rounded-2xl border text-xs font-mono leading-relaxed break-words ${
                   isDark ? 'bg-black/40 border-white/10 text-emerald-400' : 'bg-gray-900 text-emerald-400'
                 }`}>
                   {steps[activeStep].detail}
@@ -163,9 +161,9 @@ export default function KinsoAIAutomation({ isDark }) {
               </div>
 
               {/* Progress Line */}
-              <div className="pt-4 border-t border-gray-200 dark:border-white/10 flex items-center justify-between text-xs text-gray-400">
+              <div className="pt-3 sm:pt-4 border-t border-gray-200 dark:border-white/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1 text-[11px] sm:text-xs text-gray-400">
                 <span>Autonomous Workflow Engine v4.2</span>
-                <span className="text-[#16A34A] font-bold">100% Deterministic Execution</span>
+                <span className="text-[#00AB56] font-bold">100% Deterministic Execution</span>
               </div>
             </motion.div>
           </div>

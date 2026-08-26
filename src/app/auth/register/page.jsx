@@ -452,25 +452,34 @@ const RegisterPage = () => {
           </div>
 
           {/* Terms checkbox */}
-          <div className="flex items-start gap-2.5 px-1 text-xs text-slate-600 select-none pt-1">
+          <div className="flex items-center gap-2 px-1 pt-1 text-left">
             <input
               type="checkbox"
               id="terms"
               checked={termsAccepted}
               onChange={(e) => setTermsAccepted(e.target.checked)}
-              className="w-4 h-4 mt-0.5 rounded-md text-emerald-600 border-slate-300 focus:ring-emerald-500 cursor-pointer accent-emerald-600 shrink-0"
+              className="w-4 h-4 rounded text-emerald-600 border-slate-300 focus:ring-emerald-500 cursor-pointer accent-emerald-600 shrink-0"
             />
-            <label htmlFor="terms" className="leading-snug cursor-pointer">
+            <label htmlFor="terms" className="text-[11px] sm:text-xs text-slate-600 cursor-pointer select-none leading-normal">
               I agree to the{' '}
-              <button 
-                type="button" 
-                onClick={() => setShowTerms(true)} 
-                className="text-emerald-700 hover:text-emerald-800 font-bold underline cursor-pointer"
+              <span 
+                role="button"
+                tabIndex={0}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setShowTerms(true);
+                }} 
+                className="font-bold text-emerald-700 hover:text-emerald-800 underline cursor-pointer"
               >
                 Terms of Service
-              </button>{' '}
+              </span>{' '}
               and{' '}
-              <Link href="/privacy" className="text-emerald-700 hover:text-emerald-800 font-bold underline">
+              <Link 
+                href="/privacy" 
+                onClick={(e) => e.stopPropagation()}
+                className="font-bold text-emerald-700 hover:text-emerald-800 underline cursor-pointer"
+              >
                 Privacy Policy
               </Link>
             </label>

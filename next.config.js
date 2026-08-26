@@ -11,7 +11,7 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   experimental: {
-    optimizePackageImports: ['lucide-react', 'framer-motion'],
+    optimizePackageImports: ['lucide-react'],
   },
   async rewrites() {
     const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app';

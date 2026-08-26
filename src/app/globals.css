@@ -1,6 +1,5 @@
 @import "tailwindcss";
 @source "../**/*.{js,ts,jsx,tsx}";
-@source "../../src/**/*.{js,ts,jsx,tsx}";
 
 @theme {
   --color-bg-base: var(--background);
@@ -15,7 +14,7 @@
   --color-logo-blue: var(--logo-blue);
   --color-logo-green: var(--logo-green);
 
-  --font-sans: "Times New Roman", Times, serif;
+  --font-sans: var(--font-inter), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
 :root {
@@ -36,79 +35,123 @@
 
 @layer base {
   html,
-  body,
-  button,
-  input,
-  select,
-  textarea {
+  body {
     background-color: #F0FDF4;
     color: var(--foreground);
-    font-family: "Times New Roman", Times, serif !important;
-    overflow-x: hidden !important;
-    max-width: 100% !important;
+    font-family: var(--font-inter), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    overflow-x: hidden;
+    max-width: 100vw;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  img, video {
+    max-width: 100%;
+    height: auto;
   }
 }
 
+/* Premium Glass Cards in Dark Mode */
+.glass-card {
+  background: rgba(17, 24, 39, 0.6);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  transition: background 0.3s, border-color 0.3s, box-shadow 0.3s;
+}
 
+.glass-card-hover {
+  transition: all 0.3s ease;
+}
+.glass-card-hover:hover {
+  border-color: rgba(16, 185, 129, 0.3);
+  background: rgba(255, 255, 255, 0.05);
+  box-shadow: 0 8px 32px 0 rgba(16, 185, 129, 0.1);
+}
 
-@layer components {
+.glass-navbar {
+  background: rgba(3, 7, 18, 0.7);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  transition: background 0.3s, border-color 0.3s;
+}
 
-  /* Premium Glass Cards in Dark Mode */
-  .glass-card {
-    background: rgba(17, 24, 39, 0.6);
-    backdrop-filter: blur(16px) saturate(180%);
-    -webkit-backdrop-filter: blur(16px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-    transition: background 0.3s, border-color 0.3s, box-shadow 0.3s;
-  }
+.glow-green {
+  filter: drop-shadow(0 0 30px rgba(16, 185, 129, 0.2));
+}
 
-  .glass-card-hover {
-    @apply transition-all duration-300 hover:border-[#10B981]/30 hover:bg-white/5 hover:shadow-[0_8px_32px_0_rgba(16,185,129,0.1)];
-  }
+.text-gradient-primary {
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  background-image: linear-gradient(to right, #ffffff, #10B981);
+}
 
-  .glass-navbar {
-    background: rgba(3, 7, 18, 0.7);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
-    border-b: 1px solid rgba(255, 255, 255, 0.08);
-    transition: background 0.3s, border-color 0.3s;
-  }
+.text-gradient-glow {
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  background-image: linear-gradient(to right, #ffffff, #10B981, #ffffff);
+}
 
-  .glow-green {
-    filter: drop-shadow(0 0 30px rgba(16, 185, 129, 0.2));
-  }
+/* Grid Overlay Pattern for Dark Mode */
+.grid-pattern {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 50px 50px;
+  background-position: center center;
+}
 
-  .text-gradient-primary {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-white to-[#10B981];
-  }
+/* Glow buttons */
+.btn-accent {
+  padding: 16px 32px;
+  background: linear-gradient(to right, #10B981, #059669);
+  color: #ffffff;
+  border-radius: 16px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 11px;
+  box-shadow: 0 4px 20px rgba(16, 185, 129, 0.25);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
 
-  .text-gradient-glow {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-white via-[#10B981] to-white;
-  }
+.btn-secondary {
+  padding: 16px 32px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  border-radius: 16px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 11px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+}
 
-  /* Grid Overlay Pattern for Dark Mode */
-  .grid-pattern {
-    background-image:
-      linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-    background-size: 50px 50px;
-    background-position: center center;
-  }
-
-  /* Glow buttons */
-  .btn-accent {
-    @apply px-8 py-4 bg-gradient-to-r from-[#10B981] to-[#059669] text-white rounded-2xl font-bold uppercase tracking-wider text-[11px] shadow-[0_4px_20px_rgba(16,185,129,0.25)] transition-all duration-300 cursor-pointer;
-  }
-
-  .btn-secondary {
-    @apply px-8 py-4 bg-white/5 border border-white/10 text-white rounded-2xl font-bold uppercase tracking-wider text-[11px] transition-all duration-300 hover:bg-white/10 hover:border-white/20 cursor-pointer;
-  }
-
-  /* Input fields */
-  .input-dark {
-    @apply w-full px-6 py-4 bg-[#111318] border border-white/10 rounded-2xl outline-none focus:ring-2 focus:ring-[#10B981] focus:border-transparent transition-all duration-300 text-white placeholder:text-[#8E99A8] font-medium;
-  }
+/* Input fields */
+.input-dark {
+  width: 100%;
+  padding: 16px 24px;
+  background: #111318;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  outline: none;
+  transition: all 0.3s ease;
+  color: #ffffff;
+  font-weight: 500;
+}
+.input-dark:focus {
+  box-shadow: 0 0 0 2px #10B981;
+  border-color: transparent;
 }
 
 /* Custom Scrollbar */
@@ -206,106 +249,11 @@
   background-size: 200% 100%;
 }
 
-/* Global Font Scaling Overrides for Legibility */
-.text-\[8px\] {
-  font-size: 10px !important;
-}
-
-.text-\[9px\] {
-  font-size: 11px !important;
-}
-
-.text-\[10px\] {
-  font-size: 13px !important;
-}
-
-.text-\[11px\] {
-  font-size: 14px !important;
-}
-
-.text-xs {
-  font-size: 14px !important;
-}
-
-.text-sm {
-  font-size: 16px !important;
-}
-
-.text-base {
-  font-size: 18px !important;
-}
-
-.text-xl {
-  font-size: 22px !important;
-}
-
 /* Light Mode Overrides */
 .light .glass-card {
-  background: rgba(255, 255, 255, 0.7) !important;
-  border-color: rgba(16, 185, 129, 0.2) !important;
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.05) !important;
-}
-
-.light .text-\[\#8E99A8\],
-.light .text-slate-400,
-.light .text-slate-500,
-.light .text-gray-400 {
-  color: #374151 !important;
-}
-
-.light .bg-\[\#111827\]\/80,
-.light .bg-\[\#111827\]\/40,
-.light .bg-\[\#111318\],
-.light .bg-\[\#111318\]\/90,
-.light .bg-\[\#0B0D11\]\/50,
-.light .bg-\[\#0B0D11\],
-.light .bg-\[\#171A20\]\/60,
-.light .bg-\[\#171A20\]\/40,
-.light .bg-\[\#171A20\]\/30,
-.light .bg-\[\#171A20\],
-.light .bg-\[\#171B22\]\/90,
-.light .bg-\[\#171B22\]\/60,
-.light .bg-\[\#171B22\]\/50,
-.light .bg-\[\#171B22\],
-.light .bg-\[rgba\(17\,24\,39\,0\.6\)\],
-.light .bg-\[rgba\(17\,24\,39\,0\.4\)\] {
-  background-color: #E2F6F0 !important;
-}
-
-.light .border-white\/10,
-.light .border-white\/5,
-.light .border-white\/\[0\.08\],
-.light .border-\[\#101B2D\] {
-  border-color: rgba(16, 185, 129, 0.2) !important;
-}
-
-.light .bg-white\/5,
-.light .bg-white\/10,
-.light .bg-white\/\[0\.02\] {
-  background-color: rgba(16, 185, 129, 0.05) !important;
-}
-
-.light .text-white {
-  color: #000000 !important;
-}
-
-/* Ensure buttons keep their white text in light mode */
-.light .btn-accent,
-.light .bg-\[\#16A085\],
-.light .bg-gradient-to-r.from-\[\#10B981\] {
-  color: #ffffff !important;
-}
-
-.light .btn-accent .text-white,
-.light .bg-\[\#16A085\] .text-white,
-.light .bg-gradient-to-r.from-\[\#10B981\] .text-white {
-  color: #ffffff !important;
-}
-
-/* Force white text/icons inside header when text-white is used */
-.light header .text-white,
-.light header .text-white-force {
-  color: #ffffff !important;
+  background: rgba(255, 255, 255, 0.7);
+  border-color: rgba(16, 185, 129, 0.2);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.05);
 }
 
 /* ========== Dashboard Component Classes ========== */
