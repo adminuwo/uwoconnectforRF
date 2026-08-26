@@ -37,7 +37,7 @@ export default function TeamChatPage() {
       const res = await axios.get(`${API}/api/team/channels/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setChannels(res.data);
+      setChannels(Array.isArray(res.data) ? res.data : (res.data?.results || []));
       if (res.data.length > 0 && !activeChannelId) {
         setActiveChannelId(res.data[0].id);
       }
@@ -56,7 +56,7 @@ export default function TeamChatPage() {
       const res = await axios.get(`${API}/api/team/channel-messages/?channel_id=${activeChannelId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setMessages(res.data);
+      setMessages(Array.isArray(res.data) ? res.data : (res.data?.results || []));
     } catch (err) {
       console.error('Messages fetch failed', err);
     }

@@ -84,7 +84,7 @@ export default function TeamPage() {
       const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/team/projects/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setProjects(res.data || []);
+      setProjects(Array.isArray(res.data) ? res.data : (res.data?.results || []));
     } catch (err) {
       console.warn('Failed to fetch projects:', err);
     }
@@ -96,7 +96,7 @@ export default function TeamPage() {
       const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/team/tasks/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setTasks(res.data || []);
+      setTasks(Array.isArray(res.data) ? res.data : (res.data?.results || []));
     } catch (err) {
       console.warn('Failed to fetch tasks:', err);
     }
@@ -108,7 +108,7 @@ export default function TeamPage() {
       const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/team/reports/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setReports(res.data || []);
+      setReports(Array.isArray(res.data) ? res.data : (res.data?.results || []));
     } catch (err) {
       console.warn('Failed to fetch reports:', err);
     }

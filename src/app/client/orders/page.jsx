@@ -16,7 +16,7 @@ export default function OrdersPage() {
       const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/orders/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setOrders(res.data || []);
+      setOrders(Array.isArray(res.data) ? res.data : (res.data?.results || []));
     } catch (err) {
       console.error('Failed to fetch orders');
     } finally {

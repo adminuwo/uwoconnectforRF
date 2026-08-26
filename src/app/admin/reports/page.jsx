@@ -21,7 +21,7 @@ const AdminReportsPage = () => {
         const res = await axios.get(`${API_BASE_URL}/api/admin/all-reports/`, {
           headers: { Authorization: `Bearer ${token}` }
         });
-        setReports(res.data || []);
+        setReports(Array.isArray(res.data) ? res.data : (res.data?.results || []));
       } catch (err) {
         console.error('Failed to fetch platform reports', err);
       } finally {

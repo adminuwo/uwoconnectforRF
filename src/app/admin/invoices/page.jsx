@@ -21,7 +21,7 @@ const AdminInvoicesPage = () => {
         const res = await axios.get(`${API_BASE_URL}/api/admin/all-invoices/`, {
           headers: { Authorization: `Bearer ${token}` }
         });
-        setInvoices(res.data || []);
+        setInvoices(Array.isArray(res.data) ? res.data : (res.data?.results || []));
       } catch (err) {
         console.error('Failed to fetch platform invoices', err);
       } finally {

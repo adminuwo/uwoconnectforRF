@@ -25,7 +25,7 @@ const AdminSupportPage = () => {
       const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/support/messages/clients/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setClients(res.data);
+      setClients(Array.isArray(res.data) ? res.data : (res.data?.results || []));
       if (res.data.length > 0 && !selectedClientId && !silent) {
         setSelectedClientId(res.data[0].id);
       }
@@ -44,7 +44,7 @@ const AdminSupportPage = () => {
       const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/support/messages/?client_id=${selectedClientId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setMessages(res.data);
+      setMessages(Array.isArray(res.data) ? res.data : (res.data?.results || []));
     } catch (err) {
       console.warn('Failed to fetch support messages for client:', selectedClientId);
     } finally {

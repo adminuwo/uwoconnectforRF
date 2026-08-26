@@ -18,7 +18,7 @@ const AdminApprovalsPage = () => {
       const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/admin/users`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setUsers(response.data);
+      setUsers(Array.isArray(response.data) ? response.data : (response.data?.results || []));
     } catch (err) {
       console.error('Failed to fetch users:', err);
     } finally {

@@ -26,7 +26,7 @@ const AdminTeamPage = () => {
           headers: { Authorization: `Bearer ${token}` },
           params: { search, role: roleFilter }
         });
-        setTeam(res.data || []);
+        setTeam(Array.isArray(res.data) ? res.data : (res.data?.results || []));
       } catch (err) {
         console.error('Failed to fetch platform team members', err);
       } finally {

@@ -116,7 +116,7 @@ export default function CatalogPage() {
       const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/products/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setProducts(res.data || []);
+      setProducts(Array.isArray(res.data) ? res.data : (res.data?.results || []));
     } catch (err) {
       console.error('Failed to fetch products', err.response?.data || err.message);
     } finally {

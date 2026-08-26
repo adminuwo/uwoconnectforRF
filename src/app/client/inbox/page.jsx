@@ -159,7 +159,7 @@ export default function ClientInboxPage() {
       await fetchConversationsOnly();
 
       // Fetch team and stats in the background without blocking the UI
-      axios.get(`${apiUrl}/api/team/members/`, { headers }).then(res => setTeamMembers(res.data)).catch(()=>{});
+      axios.get(`${apiUrl}/api/team/members/`, { headers }).then(res => setTeamMembers(Array.isArray(res.data) ? res.data : (res.data?.results || []))).catch(()=>{});
       axios.get(`${apiUrl}/api/monitoring/stats/`, { headers }).then(res => { if(res.data) setStatsData(res.data); }).catch(()=>{});
 
     } catch (err) {
@@ -439,7 +439,7 @@ export default function ClientInboxPage() {
       const res = await axios.get(`${apiUrl}/api/conversations/${activeConvo.id}/audit_logs/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setAuditLogs(res.data || []);
+      setAuditLogs(Array.isArray(res.data) ? res.data : (res.data?.results || []));
     } catch (err) {
       setAuditLogs([
         { id: 1, actor_name: currentUser?.username || 'Abha', event_type: 'VIEWED', created_at: new Date().toISOString() },
@@ -456,7 +456,7 @@ export default function ClientInboxPage() {
       const res = await axios.get(`${apiUrl}/api/monitoring/analytics/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setAnalyticsData(res.data || []);
+      setAnalyticsData(Array.isArray(res.data) ? res.data : (res.data?.results || []));
     } catch (err) {
       setAnalyticsData([
         { user_id: '1', username: 'Abha Patel', department: 'Support', role: 'Support Lead', is_online: true, total_conversations: 14, replies_sent: 58, avg_response_time: '1m 20s', csat_score: '4.9 / 5.0', active_time: '6h 30m' },

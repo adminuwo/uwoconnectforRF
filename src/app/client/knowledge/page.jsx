@@ -22,7 +22,7 @@ const KnowledgeBasePage = () => {
       const res = await axios.get(`${API}/api/knowledge/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setDocuments(res.data);
+      setDocuments(Array.isArray(res.data) ? res.data : (res.data?.results || []));
     } catch (err) {
       console.error('Failed to fetch knowledge base documents', err.response?.data || err.message);
     } finally {

@@ -22,7 +22,7 @@ const AdminAutomationsPage = () => {
       const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/admin/automations`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setAutomations(response.data);
+      setAutomations(Array.isArray(response.data) ? response.data : (response.data?.results || []));
     } catch (err) {
       console.error('Failed to fetch global automations');
     } finally {

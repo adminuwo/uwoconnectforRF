@@ -19,7 +19,7 @@ export default function TeamChatWindow({ currentUser }) {
       const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/team/channels/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setChannels(res.data);
+      setChannels(Array.isArray(res.data) ? res.data : (res.data?.results || []));
       if (res.data.length > 0 && !activeChannelId) {
         setActiveChannelId(res.data[0].id);
       }
@@ -35,7 +35,7 @@ export default function TeamChatWindow({ currentUser }) {
       const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/team/channel-messages/?channel_id=${activeChannelId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setMessages(res.data);
+      setMessages(Array.isArray(res.data) ? res.data : (res.data?.results || []));
     } catch (err) {
       console.error('Failed to fetch chat messages:', err);
     }

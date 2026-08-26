@@ -36,7 +36,7 @@ const AdminAuditLogs = () => {
         headers: { Authorization: `Bearer ${token}` },
         params
       });
-      setLogs(response.data);
+      setLogs(Array.isArray(response.data) ? response.data : (response.data?.results || []));
     } catch (err) {
       console.error('Failed to fetch audit logs');
     } finally {

@@ -214,7 +214,7 @@ const ClientOverview = () => {
           `${API_BASE_URL}/api/contacts/?limit=1`,
           { headers }
         );
-        setContacts(contactsRes.data || []);
+        setContacts(Array.isArray(contactsRes.data) ? contactsRes.data : (contactsRes.data?.results || []));
       } catch (err) {
         console.warn("Contacts fetch notice:", err.message);
       }

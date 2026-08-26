@@ -80,7 +80,7 @@ export default function CreateCampaignModal({ isOpen, onClose, onCreated }) {
       const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/contacts/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setContacts(res.data || []);
+      setContacts(Array.isArray(res.data) ? res.data : (res.data?.results || []));
     } catch (err) {
       console.error("Failed to fetch contacts", err);
     }
@@ -92,7 +92,7 @@ export default function CreateCampaignModal({ isOpen, onClose, onCreated }) {
       const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/templates/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setTemplates(res.data || []);
+      setTemplates(Array.isArray(res.data) ? res.data : (res.data?.results || []));
       if (res.data && res.data.length > 0) {
         setTemplateId(res.data[0].id);
       }

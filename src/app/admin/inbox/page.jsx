@@ -29,7 +29,7 @@ const AdminInboxPage = () => {
           type: typeFilter
         }
       });
-      setMessages(res.data || []);
+      setMessages(Array.isArray(res.data) ? res.data : (res.data?.results || []));
     } catch (err) {
       console.error('Failed to fetch platform messages', err);
     } finally {

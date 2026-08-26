@@ -73,7 +73,7 @@ const QuotationsPage = () => {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (Array.isArray(res.data)) {
-        setSalespeople(res.data);
+        setSalespeople(Array.isArray(res.data) ? res.data : (res.data?.results || []));
       } else if (res.data.results) {
         setSalespeople(res.data.results);
       }

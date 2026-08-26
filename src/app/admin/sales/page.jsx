@@ -24,7 +24,7 @@ const AdminSalesPage = () => {
         const res = await axios.get(`${API_BASE_URL}/api/admin/all-sales/`, {
           headers: { Authorization: `Bearer ${token}` }
         });
-        setSales(res.data || []);
+        setSales(Array.isArray(res.data) ? res.data : (res.data?.results || []));
       } catch (err) {
         console.error('Failed to fetch platform sales', err);
       } finally {

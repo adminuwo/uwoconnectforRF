@@ -24,7 +24,7 @@ const AdminChannelsPage = () => {
         const res = await axios.get(`${API_BASE_URL}/api/admin/all-channels/`, {
           headers: { Authorization: `Bearer ${token}` }
         });
-        setChannels(res.data || []);
+        setChannels(Array.isArray(res.data) ? res.data : (res.data?.results || []));
       } catch (err) {
         console.error('Failed to fetch channels inventory', err);
       } finally {

@@ -21,7 +21,7 @@ const AdminProposalsPage = () => {
         const res = await axios.get(`${API_BASE_URL}/api/admin/all-proposals/`, {
           headers: { Authorization: `Bearer ${token}` }
         });
-        setProposals(res.data || []);
+        setProposals(Array.isArray(res.data) ? res.data : (res.data?.results || []));
       } catch (err) {
         console.error('Failed to fetch platform proposals', err);
       } finally {

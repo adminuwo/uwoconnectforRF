@@ -16,7 +16,7 @@ const AdminWorkflowsPage = () => {
         const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/admin/workflows`, {
           headers: { Authorization: `Bearer ${token}` }
         });
-        setWorkflows(res.data);
+        setWorkflows(Array.isArray(res.data) ? res.data : (res.data?.results || []));
       } catch (err) {
         console.error('Failed to fetch workflows');
       } finally {

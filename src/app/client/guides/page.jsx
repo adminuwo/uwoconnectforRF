@@ -30,7 +30,7 @@ const LearningCenterPage = () => {
     try {
       const res = await axios.get(`${API_URL}/api/guides/`, { headers });
       if (Array.isArray(res.data)) {
-        setGuides(res.data);
+        setGuides(Array.isArray(res.data) ? res.data : (res.data?.results || []));
       } else if (res.data.results) {
         setGuides(res.data.results);
       }

@@ -21,7 +21,7 @@ const AdminQuotationsPage = () => {
         const res = await axios.get(`${API_BASE_URL}/api/admin/all-quotations/`, {
           headers: { Authorization: `Bearer ${token}` }
         });
-        setQuotations(res.data || []);
+        setQuotations(Array.isArray(res.data) ? res.data : (res.data?.results || []));
       } catch (err) {
         console.error('Failed to fetch platform quotations', err);
       } finally {
