@@ -591,34 +591,31 @@ const ClientSettingsPage = () => {
           </div>
         </div>
 
-      </div>
-
         {/* Password Change Modal */}
-        
-          {isPasswordModalOpen && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
-              <div onClick={() => setIsPasswordModalOpen(false)} className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" />
-              <div className="relative bg-white w-full max-w-md rounded-[28px] sm:rounded-[32px] shadow-2xl p-6 sm:p-10 max-h-[90vh] overflow-y-auto border border-slate-200">
-                <div className="mb-8">
-                  <h2 className="text-xl font-bold text-slate-900 mb-2">Update Password</h2>
-                  <p className="text-sm text-slate-400 italic font-medium">Ensure your account is using a strong password.</p>
+        {isPasswordModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+            <div onClick={() => setIsPasswordModalOpen(false)} className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" />
+            <div className="relative bg-white w-full max-w-md rounded-[28px] sm:rounded-[32px] shadow-2xl p-6 sm:p-10 max-h-[90vh] overflow-y-auto border border-slate-200">
+              <div className="mb-8">
+                <h2 className="text-xl font-bold text-slate-900 mb-2">Update Password</h2>
+                <p className="text-sm text-slate-400 italic font-medium">Ensure your account is using a strong password.</p>
+              </div>
+              <div className="space-y-5">
+                <div>
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block ml-1">New Password</label>
+                  <input type="password" placeholder="••••••••" className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-4 outline-none focus:border-emerald-500 transition-all font-semibold text-sm text-slate-800" />
                 </div>
-                <div className="space-y-5">
-                  <div>
-                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block ml-1">New Password</label>
-                    <input type="password" placeholder="••••••••" className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-4 outline-none focus:border-emerald-500 transition-all font-semibold text-sm text-slate-800" />
-                  </div>
-                  <div>
-                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block ml-1">Confirm Password</label>
-                    <input type="password" placeholder="••••••••" className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-4 outline-none focus:border-emerald-500 transition-all font-semibold text-sm text-slate-800" />
-                  </div>
-                  <button className="w-full py-4 bg-emerald-600 text-white rounded-2xl font-bold text-xs hover:bg-emerald-700 transition-all shadow-xl shadow-slate-100 mt-4">
-                    Save New Password
-                  </button>
+                <div>
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block ml-1">Confirm Password</label>
+                  <input type="password" placeholder="••••••••" className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-4 outline-none focus:border-emerald-500 transition-all font-semibold text-sm text-slate-800" />
                 </div>
+                <button className="w-full py-4 bg-emerald-600 text-white rounded-2xl font-bold text-xs hover:bg-emerald-700 transition-all shadow-xl shadow-slate-100 mt-4">
+                  Save New Password
+                </button>
               </div>
             </div>
-          )}
+          </div>
+        )}
 
         {/* Payment Modal */}
         {selectedPlanModal && (
