@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import { usePathname } from 'next/navigation';
+import Link from 'next/link';
 import Sidebar from './Sidebar';
 import { MessageCircle, Building2, ChevronDown, Search } from 'lucide-react';
 import axios from 'axios';
@@ -29,7 +30,6 @@ const PAGE_TITLES = {
   '/admin/proposals': 'Platform Proposals',
   '/admin/invoices': 'Financial & Invoices Control',
   '/admin/reports': 'Work Reports & Operational Stream',
-  '/admin/approvals': 'Client & Member Approvals',
   '/admin/audit-logs': 'Platform Security Audit Trail',
   '/admin/settings': 'Global Platform Settings',
   '/admin/support': 'Super Admin Support Desk',
@@ -64,6 +64,7 @@ const DashboardLayout = ({ children, role: initialRole }) => {
   const [chatOpen, setChatOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [user, setUser] = useState(null);
+  const [profileLogo, setProfileLogo] = useState('');
   const [impersonationData, setImpersonationData] = useState(null);
   const [clients, setClients] = useState([]);
   const [switcherOpen, setSwitcherOpen] = useState(false);
@@ -80,6 +81,10 @@ const DashboardLayout = ({ children, role: initialRole }) => {
 
     const storedUser = localStorage.getItem('user');
     const token = localStorage.getItem('token');
+    const storedLogo = localStorage.getItem('client_company_logo');
+    if (storedLogo) {
+      setProfileLogo(storedLogo);
+    }
 
     if (!token || !storedUser) {
       window.location.href = '/auth/login';
@@ -88,12 +93,63 @@ const DashboardLayout = ({ children, role: initialRole }) => {
 
     if (storedUser) {
       try {
-        setUser(JSON.parse(storedUser));
+        const parsed = JSON.parse(storedUser);
+        setUser(parsed);
+        if (!storedLogo && (parsed?.company_logo_url || parsed?.client?.company_logo_url || parsed?.profile_picture_url)) {
+          const l = parsed.company_logo_url || parsed.client?.company_logo_url || parsed.profile_picture_url;
+          setProfileLogo(l);
+          localStorage.setItem('client_company_logo', l);
+        }
       } catch (e) {
         console.warn('Failed to parse user data');
         window.location.href = '/auth/login';
       }
     }
+
+    // Fetch latest profile to keep logo in sync
+    const fetchLatestProfile = async () => {
+      try {
+        const authToken = localStorage.getItem('token');
+        if (!authToken) return;
+        const res = await axios.get(`${API_BASE_URL}/api/profile`, {
+          headers: { Authorization: `Bearer ${authToken}` }
+        });
+        const cData = res.data?.client && typeof res.data.client === 'object' ? res.data.client : (typeof res.data === 'object' ? res.data : {});
+        const uData = res.data?.user && typeof res.data.user === 'object' ? res.data.user : {};
+        const logo = cData?.company_logo_url || uData?.profile_picture_url || res.data?.company_logo_url || '';
+        if (logo) {
+          setProfileLogo(logo);
+          localStorage.setItem('client_company_logo', logo);
+        } else {
+          setProfileLogo('');
+          localStorage.removeItem('client_company_logo');
+        }
+        if (uData?.name || uData?.first_name) {
+          setUser(prev => ({
+            ...(prev || {}),
+            ...uData,
+            name: uData.name || uData.first_name || prev?.name
+          }));
+        }
+      } catch (err) {
+        // Silently handle
+      }
+    };
+    fetchLatestProfile();
+
+    const handleProfileUpdate = (e) => {
+      if (e?.detail?.company_logo_url !== undefined) {
+        setProfileLogo(e.detail.company_logo_url || '');
+      } else {
+        const sLogo = localStorage.getItem('client_company_logo');
+        setProfileLogo(sLogo || '');
+      }
+      if (e?.detail?.name) {
+        setUser(prev => prev ? ({ ...prev, name: e.detail.name, first_name: e.detail.name }) : prev);
+      }
+    };
+    window.addEventListener('profileUpdated', handleProfileUpdate);
+    window.addEventListener('storage', handleProfileUpdate);
 
     const impRaw = localStorage.getItem('impersonation_session');
     if (impRaw) {
@@ -110,7 +166,11 @@ const DashboardLayout = ({ children, role: initialRole }) => {
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      window.removeEventListener('profileUpdated', handleProfileUpdate);
+      window.removeEventListener('storage', handleProfileUpdate);
+    };
   }, []);
 
   const handleExitImpersonation = () => {
@@ -279,15 +339,28 @@ const DashboardLayout = ({ children, role: initialRole }) => {
                   >
                     <MessageCircle size={18} />
                   </button>
-                  <div className="flex items-center gap-2 sm:gap-3 group cursor-pointer hover:bg-slate-50 p-1 sm:p-1.5 pr-2 sm:pr-4 rounded-full transition-all duration-300 border border-transparent hover:border-slate-100">
+                  <Link
+                    href={displayRole === 'ADMIN' ? '/admin/settings' : '/client/settings'}
+                    className="flex items-center gap-2 sm:gap-3 group cursor-pointer hover:bg-slate-50 p-1 sm:p-1.5 pr-2 sm:pr-4 rounded-full transition-all duration-300 border border-transparent hover:border-slate-100"
+                    title="Account Settings"
+                  >
                     <div className="text-right hidden sm:block">
                       <p className="text-xs font-black text-slate-900 leading-none mb-0.5 group-hover:text-[#059669] transition-all">{displayName}</p>
                       <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest leading-none">{displayRole}</p>
                     </div>
-                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-tr from-slate-100 to-slate-50 text-slate-600 flex items-center justify-center font-black text-sm border border-slate-200 shadow-xs group-hover:border-[#059669]/30 group-hover:text-[#059669] transition-all duration-300 relative overflow-hidden">
-                      <span className="relative z-10">{displayName[0]?.toUpperCase() || 'U'}</span>
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-tr from-slate-100 to-slate-50 text-slate-600 flex items-center justify-center font-black text-sm border border-slate-200 shadow-xs group-hover:border-[#059669]/30 group-hover:text-[#059669] transition-all duration-300 relative overflow-hidden shrink-0">
+                      {profileLogo ? (
+                        <img
+                          src={profileLogo}
+                          alt={displayName}
+                          className="w-full h-full object-contain p-0.5 rounded-full bg-white"
+                          onError={() => setProfileLogo('')}
+                        />
+                      ) : (
+                        <span className="relative z-10">{displayName[0]?.toUpperCase() || 'U'}</span>
+                      )}
                     </div>
-                  </div>
+                  </Link>
                 </>
               )}
             </div>

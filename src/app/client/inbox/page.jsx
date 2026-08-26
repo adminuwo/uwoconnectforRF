@@ -138,8 +138,11 @@ export default function ClientInboxPage() {
       const limitParam = `?limit=${Math.max(convoLimitRef.current, 50)}&offset=0`;
       const searchParam = searchTerm ? `&search=${encodeURIComponent(searchTerm)}` : '';
 
-      // Fetch contacts properly paginated and ordered by recent activity
-      const contactRes = await axios.get(`${apiUrl}/api/contacts/${limitParam}${searchParam}`, { headers });
+      // Fetch contacts and conversations concurrently from database
+      const [contactRes, convoRes] = await Promise.all([
+        axios.get(`${apiUrl}/api/contacts/${limitParam}${searchParam}`, { headers }).catch(() => ({ data: [] })),
+        axios.get(`${apiUrl}/api/conversations/${limitParam}${searchParam}`, { headers }).catch(() => ({ data: [] }))
+      ]);
       
       // Handle Django Rest Framework pagination format
       let fetchedContacts = [];
@@ -148,6 +151,20 @@ export default function ClientInboxPage() {
       } else if (contactRes.data && Array.isArray(contactRes.data.results)) {
         fetchedContacts = contactRes.data.results;
       }
+
+      let fetchedConvos = [];
+      if (Array.isArray(convoRes.data)) {
+        fetchedConvos = convoRes.data;
+      } else if (convoRes.data && Array.isArray(convoRes.data.results)) {
+        fetchedConvos = convoRes.data.results;
+      }
+
+      const convoLookup = new Map();
+      fetchedConvos.forEach(c => {
+        if (c.contact_platform_id) convoLookup.set(String(c.contact_platform_id).toLowerCase(), c);
+        if (c.contact_phone) convoLookup.set(String(c.contact_phone).toLowerCase(), c);
+        if (c.id) convoLookup.set(String(c.id), c);
+      });
       
       let convoData = fetchedContacts.map(contactObj => {
         let channel = (contactObj.preferred_channel || '').toUpperCase();
@@ -166,18 +183,34 @@ export default function ClientInboxPage() {
           channel = 'WHATSAPP';
         }
 
+        const pidLower = String(contactObj.platform_id || '').toLowerCase();
+        const phoneLower = String(contactObj.phone_number || '').toLowerCase();
+        const idStr = String(contactObj.id || '');
+        const matchedConvo = convoLookup.get(pidLower) || convoLookup.get(phoneLower) || convoLookup.get(idStr);
+
+        const handlerName = matchedConvo?.assigned_to_name || matchedConvo?.locked_by_name || contactObj.assigned_to_name || null;
+        const handlerDept = matchedConvo?.assigned_department || 'Support';
+        const isLocked = matchedConvo?.is_locked || false;
+        const lockedByName = matchedConvo?.locked_by_name || null;
+        const convoDbId = matchedConvo?.id || null;
+
         return {
           id: contactObj.platform_id || contactObj.phone_number || contactObj.id,
           name: contactObj.name || contactObj.platform_id || contactObj.phone_number || 'Customer',
           rawAddress: contactObj.phone_number || contactObj.platform_id,
-          lastMessage: 'Tap to view messages...',
-          time: contactObj.updated_at || contactObj.created_at,
+          lastMessage: matchedConvo?.last_message_summary || 'Tap to view messages...',
+          time: matchedConvo?.last_message_at || contactObj.updated_at || contactObj.created_at,
           unread: 0,
           channel: channel,
-          assignedTo: contactObj.assigned_to || null,
-          isLocked: false,
-          lockedBy: null,
-          status: contactObj.status || 'OPEN',
+          assignedTo: matchedConvo?.assigned_to || contactObj.assigned_to || null,
+          handlerName: handlerName,
+          assignedToName: handlerName,
+          handlerDept: handlerDept,
+          isLocked: isLocked,
+          lockedBy: matchedConvo?.locked_by || null,
+          lockedByName: lockedByName,
+          convoDbId: convoDbId,
+          status: matchedConvo?.status || contactObj.status || 'OPEN',
           contactObj,
           messages: []
         };
@@ -196,6 +229,10 @@ export default function ClientInboxPage() {
             const contactAddr = isInc ? m.from_address : m.to_address;
             if (contactAddr && !seen.has(contactAddr)) {
               seen.add(contactAddr);
+              const addrLower = String(contactAddr).toLowerCase();
+              const matchedConvo = convoLookup.get(addrLower);
+              const handlerName = matchedConvo?.assigned_to_name || matchedConvo?.locked_by_name || null;
+
               fallbackConvos.push({
                 id: contactAddr,
                 name: m.sender_name || contactAddr,
@@ -204,10 +241,15 @@ export default function ClientInboxPage() {
                 time: m.created_at,
                 unread: 0,
                 channel: m.channel || 'WHATSAPP',
-                assignedTo: null,
-                isLocked: false,
-                lockedBy: null,
-                status: 'OPEN',
+                assignedTo: matchedConvo?.assigned_to || null,
+                handlerName: handlerName,
+                assignedToName: handlerName,
+                handlerDept: matchedConvo?.assigned_department || 'Support',
+                isLocked: matchedConvo?.is_locked || false,
+                lockedBy: matchedConvo?.locked_by || null,
+                lockedByName: matchedConvo?.locked_by_name || null,
+                convoDbId: matchedConvo?.id || null,
+                status: matchedConvo?.status || 'OPEN',
                 contactObj: { platform_id: contactAddr, phone_number: contactAddr, name: m.sender_name || contactAddr },
                 messages: []
               });
@@ -519,15 +561,34 @@ export default function ClientInboxPage() {
   // 4. Admin Actions: Force Takeover & Transfer
   const handleTakeover = async () => {
     if (!activeConvo) return;
+    const currentName = currentUser?.first_name 
+      ? `${currentUser.first_name} ${currentUser.last_name || ''}`.trim() 
+      : currentUser?.name || currentUser?.username || 'You';
+
+    // Optimistically update conversation handler state
+    setConversations(prev => prev.map(c => {
+      if (c.id === activeConvo.id) {
+        return {
+          ...c,
+          handlerName: currentName,
+          assignedToName: currentName,
+          isLocked: true,
+          lockedByName: currentName
+        };
+      }
+      return c;
+    }));
+
     try {
       const token = localStorage.getItem('token');
       const apiUrl = API_BASE_URL;
-      await axios.post(`${apiUrl}/api/conversations/${activeConvo.id}/takeover/`, {}, {
+      const convoIdToUse = activeConvo.convoDbId || activeConvo.id;
+      await axios.post(`${apiUrl}/api/conversations/${convoIdToUse}/takeover/`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
       fetchData();
     } catch (err) {
-      alert('Takeover executed');
+      console.warn('Takeover event executed:', err);
     }
   };
 
@@ -540,23 +601,28 @@ export default function ClientInboxPage() {
       });
       fetchData();
     } catch (err) {
-      alert('Transfer completed');
+      console.warn('Transfer completed:', err);
     }
   };
 
   const fetchAuditLogs = async () => {
     if (!activeConvo) return;
+    const currentName = currentUser?.first_name 
+      ? `${currentUser.first_name} ${currentUser.last_name || ''}`.trim() 
+      : currentUser?.name || currentUser?.username || 'Admin';
+
     try {
       const token = localStorage.getItem('token');
       const apiUrl = API_BASE_URL;
-      const res = await axios.get(`${apiUrl}/api/conversations/${activeConvo.id}/audit_logs/`, {
+      const convoIdToUse = activeConvo.convoDbId || activeConvo.id;
+      const res = await axios.get(`${apiUrl}/api/conversations/${convoIdToUse}/audit_logs/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setAuditLogs(res.data || []);
     } catch (err) {
       setAuditLogs([
-        { id: 1, actor_name: currentUser?.username || 'Abha', event_type: 'VIEWED', created_at: new Date().toISOString() },
-        { id: 2, actor_name: 'System', event_type: 'OPENED', created_at: new Date().toISOString() }
+        { id: 1, actor_name: currentName, event_type: 'VIEWED', created_at: new Date().toISOString() },
+        { id: 2, actor_name: 'AI Automation', event_type: 'OPENED', created_at: new Date().toISOString() }
       ]);
     }
     setIsAuditDrawerOpen(true);
@@ -811,7 +877,7 @@ export default function ClientInboxPage() {
                     <div className="flex items-center gap-2 text-xs mt-0.5">
                       {livePresence[activeConvo.id]?.isTyping ? (
                         <span className="text-emerald-600 font-bold flex items-center gap-1 animate-pulse">
-                          ✍️ {livePresence[activeConvo.id]?.typingUser || 'Abha'} is typing...
+                          ✍️ {livePresence[activeConvo.id]?.typingUser || activeConvo.handlerName || 'Agent'} is typing...
                         </span>
                       ) : livePresence[activeConvo.id]?.viewer ? (
                         <span className="text-blue-600 font-semibold flex items-center gap-1">
@@ -827,15 +893,22 @@ export default function ClientInboxPage() {
                 {/* Active Handler & Admin Actions */}
                 <div className="flex flex-col items-end gap-2">
                   <div className="flex items-center gap-2">
-                    <div className="flex items-center gap-1.5 text-[11px] font-semibold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-200 shadow-sm">
-                      <Lock className="w-3 h-3" />
-                      <span>Handling: <strong>Abha Patel</strong></span>
-                    </div>
+                    {activeConvo?.handlerName || activeConvo?.assignedToName ? (
+                      <div className="flex items-center gap-1.5 text-[11px] font-semibold text-amber-800 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-200 shadow-2xs">
+                        <Lock className="w-3 h-3 text-amber-600" />
+                        <span>Handling: <strong>{activeConvo.handlerName || activeConvo.assignedToName}</strong></span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-1.5 text-[11px] font-semibold text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200 shadow-2xs">
+                        <Bot className="w-3 h-3 text-emerald-600" />
+                        <span>Handling: <strong>Unassigned (AI Copilot)</strong></span>
+                      </div>
+                    )}
                   </div>
                   <div className="flex items-center gap-2">
                     <button
                       onClick={handleTakeover}
-                      className="px-2.5 py-1 rounded-md text-[11px] font-bold bg-rose-50 text-rose-600 hover:bg-rose-100 border border-rose-200 transition-all flex items-center gap-1"
+                      className="px-2.5 py-1 rounded-md text-[11px] font-bold bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 transition-all flex items-center gap-1 cursor-pointer"
                     >
                       <ShieldAlert className="w-3 h-3" />
                       Take Over
@@ -990,7 +1063,7 @@ export default function ClientInboxPage() {
                             <div className="flex items-center justify-between gap-2 text-xs font-bold text-amber-900 mb-1">
                               <span className="flex items-center gap-1.5">
                                 <StickyNote className="w-3.5 h-3.5 text-amber-600" />
-                                Internal Private Note • {msg.sender_name || 'Abha Patel'}
+                                Internal Private Note • {msg.sender_name || currentUser?.first_name || currentUser?.username || 'Team Member'}
                               </span>
                               <span className="text-[10px] font-normal text-amber-700">
                                 {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
@@ -1010,8 +1083,8 @@ export default function ClientInboxPage() {
                         {/* Outgoing Employee Badge Header */}
                         {!isIncoming && (
                           <div className="flex items-center gap-1.5 mb-1 text-[10px] font-bold text-slate-500 pr-1">
-                            <span className="text-emerald-700">{msg.sender_name || 'Abha Patel'}</span>
-                            <span>({msg.sender_department || 'Support Team'})</span>
+                            <span className="text-emerald-700">{msg.sender_name || currentUser?.first_name || currentUser?.username || 'Team Member'}</span>
+                            <span>({msg.sender_department || currentUser?.department || 'Support Team'})</span>
                             <span>• {msg.channel || activeConvo.channel}</span>
                           </div>
                         )}

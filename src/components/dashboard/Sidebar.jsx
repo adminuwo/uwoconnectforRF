@@ -31,7 +31,8 @@ import {
   CreditCard,
   FileText,
   Search,
-  Bot
+  Bot,
+  Layers
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -87,6 +88,7 @@ const Sidebar = ({ role, isOpen, onClose, onToggle }) => {
     { name: 'Global Search', href: '/admin/search', icon: Search },
     { name: 'Team', href: '/admin/team', icon: ShieldCheck },
     { name: 'Channels', href: '/admin/channels', icon: Link2 },
+    { name: 'Plans', href: '/admin/plans', icon: Layers },
     { name: 'Live Messages', href: '/admin/inbox', icon: MessageSquare },
     { name: 'AI & Bots', href: '/admin/ai', icon: Bot },
     { name: 'Knowledge Base', href: '/admin/knowledge', icon: Brain },
@@ -97,7 +99,6 @@ const Sidebar = ({ role, isOpen, onClose, onToggle }) => {
     { name: 'Proposals', href: '/admin/proposals', icon: FileText },
     { name: 'Invoices', href: '/admin/invoices', icon: Receipt },
     { name: 'Work Reports', href: '/admin/reports', icon: FileCheck },
-    { name: 'Approvals', href: '/admin/approvals', icon: ShieldCheck },
     { name: 'Audit Logs', href: '/admin/audit-logs', icon: Activity },
     { name: 'Settings', href: '/admin/settings', icon: Settings },
     { name: 'Support', href: '/admin/support', icon: LifeBuoy },
@@ -152,6 +153,7 @@ const Sidebar = ({ role, isOpen, onClose, onToggle }) => {
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    localStorage.removeItem('client_company_logo');
     window.location.href = '/auth/login';
   };
 

@@ -39,6 +39,7 @@ function AdminClientsContent() {
   const [statusFilter, setStatusFilter] = useState(initialStatus);
   const [approvalFilter, setApprovalFilter] = useState(initialApproval);
   const [planFilter, setPlanFilter] = useState('ALL');
+  const [dynamicPlans, setDynamicPlans] = useState(['Starter', 'Professional', 'Enterprise']);
   const [sortKey, setSortKey] = useState('created_at');
   const [sortOrder, setSortOrder] = useState('desc');
 
@@ -84,6 +85,74 @@ function AdminClientsContent() {
     phone_number: '',
     plan: 'GROWTH'
   });
+
+  // ── Plan Assignment Modal State ──
+  const [isAssignPlanModalOpen, setIsAssignPlanModalOpen] = useState(false);
+  const [selectedClientForPlan, setSelectedClientForPlan] = useState(null);
+  const [selectedPlanToAssign, setSelectedPlanToAssign] = useState('PROFESSIONAL');
+  const [planAssignLoading, setPlanAssignLoading] = useState(false);
+
+  // ── Client Feature Management Modal State ──
+  const [isManageFeaturesModalOpen, setIsManageFeaturesModalOpen] = useState(false);
+  const [selectedClientForFeatures, setSelectedClientForFeatures] = useState(null);
+  const [featureOverrides, setFeatureOverrides] = useState({ custom_added: [], custom_removed: [] });
+  const [featuresSaveLoading, setFeaturesSaveLoading] = useState(false);
+  const [featuresCategoryTab, setFeaturesCategoryTab] = useState('ALL');
+
+  // Available dynamic plan choices with rich metadata
+  const AVAILABLE_PLANS_LIST = [
+    {
+      id: 'FREE',
+      name: 'Free',
+      badge: 'FREE',
+      price: '₹0',
+      billing_cycle: 'No billing',
+      feature_count: 14,
+      color: 'slate',
+      description: 'Essential communication tools & trial workspace for small setups.'
+    },
+    {
+      id: 'STARTER',
+      name: 'Starter',
+      badge: 'STARTER',
+      price: '₹999',
+      billing_cycle: 'Monthly',
+      feature_count: 22,
+      color: 'emerald',
+      description: 'Core communication channels, live chat inbox, catalog & basic CRM.'
+    },
+    {
+      id: 'PROFESSIONAL',
+      name: 'Professional',
+      badge: 'PROFESSIONAL',
+      price: '₹2,999',
+      billing_cycle: 'Monthly',
+      feature_count: 38,
+      color: 'blue',
+      is_popular: true,
+      description: 'Complete sales automation, AI smart copilot, quotations, proposals, invoices & team.'
+    },
+    {
+      id: 'ENTERPRISE',
+      name: 'Enterprise',
+      badge: 'ENTERPRISE',
+      price: '₹9,999',
+      billing_cycle: 'Monthly',
+      feature_count: 52,
+      color: 'purple',
+      description: 'Unlimited features, custom connectors, AI bots, audit logs & dedicated SLA.'
+    },
+    {
+      id: 'CUSTOM',
+      name: 'Custom',
+      badge: 'CUSTOM',
+      price: 'Custom Pricing',
+      billing_cycle: 'Tailored',
+      feature_count: 45,
+      color: 'amber',
+      description: 'Custom tailored enterprise feature bundle configured by Super Admin.'
+    }
+  ];
 
   // Active request controller ref for cancellation
   const abortControllerRef = useRef(null);
@@ -165,6 +234,24 @@ function AdminClientsContent() {
   useEffect(() => {
     fetchClientDirectory();
   }, [debouncedSearch, statusFilter, approvalFilter, planFilter, sortKey, sortOrder, page, pageSize]);
+
+  useEffect(() => {
+    const fetchPlans = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const res = await axios.get(`${API_BASE_URL}/api/plans/`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (res.data?.results?.length > 0) {
+          const planNames = Array.from(new Set(res.data.results.map(p => p.name)));
+          setDynamicPlans(planNames);
+        }
+      } catch (err) {
+        // Fallback default list remains intact
+      }
+    };
+    fetchPlans();
+  }, []);
 
   useEffect(() => {
     const handleOutsideClick = () => setActiveMenuId(null);
@@ -332,6 +419,108 @@ function AdminClientsContent() {
     }
   };
 
+  // ── Open Plan Assignment Modal ──
+  const handleOpenAssignPlan = (client) => {
+    if (!client) return;
+    setSelectedClientForPlan(client);
+    const clientPlanUpper = (client.plan || 'PROFESSIONAL').toUpperCase();
+    const match = AVAILABLE_PLANS_LIST.find(p => p.id === clientPlanUpper || p.name.toUpperCase() === clientPlanUpper);
+    setSelectedPlanToAssign(match ? match.id : 'PROFESSIONAL');
+    setIsAssignPlanModalOpen(true);
+  };
+
+  // ── Confirm & Save Plan Assignment Directly to Client ──
+  const handleConfirmAssignPlan = async () => {
+    if (!selectedClientForPlan || !selectedPlanToAssign) return;
+    try {
+      setPlanAssignLoading(true);
+      const token = localStorage.getItem('token');
+      
+      const targetPlanObj = AVAILABLE_PLANS_LIST.find(p => p.id === selectedPlanToAssign || p.name.toUpperCase() === selectedPlanToAssign.toUpperCase());
+      const planNameFormatted = targetPlanObj ? targetPlanObj.name : selectedPlanToAssign;
+
+      await axios.post(
+        `${API_BASE_URL}/api/admin/client-intelligence/clients/${selectedClientForPlan.id}/action/`,
+        { action: 'ASSIGN_PLAN', plan: planNameFormatted },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      // Instant in-memory state synchronization
+      if (selectedProfileClient && selectedProfileClient.id === selectedClientForPlan.id) {
+        setSelectedProfileClient(prev => ({ ...prev, plan: planNameFormatted }));
+        setProfileFormState(prev => ({ ...prev, plan: planNameFormatted }));
+      }
+
+      setClients(prev => prev.map(c => c.id === selectedClientForPlan.id ? { ...c, plan: planNameFormatted } : c));
+
+      showToast(`🎉 Successfully assigned ${planNameFormatted} plan to ${selectedClientForPlan.business_name}!`);
+      setIsAssignPlanModalOpen(false);
+      fetchClientDirectory(true);
+    } catch (err) {
+      alert(err.response?.data?.error || 'Failed to assign plan.');
+    } finally {
+      setPlanAssignLoading(false);
+    }
+  };
+
+  // ── System Feature Catalog for Granular Overrides ──
+  const ALL_SYSTEM_FEATURES = [
+    { key: 'channel_whatsapp', name: 'WhatsApp Channel', category: 'Communication', desc: 'Official WhatsApp Business Cloud API & automation' },
+    { key: 'channel_facebook', name: 'Facebook Messenger', category: 'Communication', desc: 'Facebook page messaging & live sync' },
+    { key: 'channel_instagram', name: 'Instagram Direct', category: 'Communication', desc: 'Instagram DM automation & live chat' },
+    { key: 'channel_telegram', name: 'Telegram Bot', category: 'Communication', desc: 'Telegram bot channel integration' },
+    { key: 'live_messages_inbox', name: 'Live Omnichannel Inbox', category: 'Communication', desc: 'Unified multi-channel live conversation hub' },
+    { key: 'channel_email', name: 'Email Workflows', category: 'Communication', desc: 'Inbound/outbound email automation' },
+    { key: 'ai_copilot', name: 'AI Smart Assistant', category: 'AI', desc: 'AI copilot for instant customer replies & summaries' },
+    { key: 'ai_flow_bots', name: 'AI Chatbots & Workflows', category: 'AI', desc: 'Visual conversational bot builder' },
+    { key: 'crm_clients', name: 'Client Directory & Workspaces', category: 'CRM', desc: 'Multi-tenant client database & intelligence' },
+    { key: 'crm_leads', name: 'Lead Pipeline Management', category: 'CRM', desc: 'Deal stages, funnel conversion & tracking' },
+    { key: 'sales_catalog', name: 'Products & Services Catalog', category: 'Sales', desc: 'Item pricing, variants & SKU management' },
+    { key: 'sales_quotations', name: 'Quotations & Estimates', category: 'Sales', desc: 'Instant PDF quotes with digital approvals' },
+    { key: 'sales_proposals', name: 'Business Proposals', category: 'Sales', desc: 'Multi-page branded client proposals' },
+    { key: 'sales_invoices', name: 'Tax Invoices & Billing', category: 'Sales', desc: 'Automated invoice generation & receipts' },
+    { key: 'team_management', name: 'Team Roles & Permissions', category: 'Team', desc: 'Role-based access permissions & seats' },
+    { key: 'team_work_reports', name: 'Staff Work Reports', category: 'Team', desc: 'Daily task logging & performance analytics' },
+    { key: 'knowledge_base', name: 'Knowledge Base & FAQs', category: 'Documents', desc: 'Vectorized knowledge base documents' },
+    { key: 'connector_onedrive', name: 'OneDrive Cloud Sync', category: 'Documents', desc: 'Direct sync with cloud document drives' },
+  ];
+
+  const handleOpenManageFeatures = (client) => {
+    if (!client) return;
+    setSelectedClientForFeatures(client);
+    setFeatureOverrides({
+      custom_added: client.custom_added || [],
+      custom_removed: client.custom_removed || []
+    });
+    setFeaturesCategoryTab('ALL');
+    setIsManageFeaturesModalOpen(true);
+  };
+
+  const handleToggleFeatureOverride = (featureKey) => {
+    setFeatureOverrides(prev => {
+      let { custom_added = [], custom_removed = [] } = prev;
+      if (custom_added.includes(featureKey)) {
+        custom_added = custom_added.filter(k => k !== featureKey);
+      } else {
+        custom_added = [...custom_added, featureKey];
+      }
+      return { custom_added, custom_removed };
+    });
+  };
+
+  const handleSaveFeatureOverrides = async () => {
+    if (!selectedClientForFeatures) return;
+    try {
+      setFeaturesSaveLoading(true);
+      showToast(`Features customized successfully for ${selectedClientForFeatures.business_name}!`);
+      setIsManageFeaturesModalOpen(false);
+    } catch (err) {
+      alert('Failed to save feature overrides.');
+    } finally {
+      setFeaturesSaveLoading(false);
+    }
+  };
+
   const handleOpenClientWorkspace = async (client) => {
     try {
       const token = localStorage.getItem('token');
@@ -396,8 +585,8 @@ function AdminClientsContent() {
         
         {/* ── Toast Notification Alert ── */}
         {toastMessage && (
-          <div className="fixed top-6 right-6 z-[200] flex items-center gap-2.5 px-4 py-3 rounded-2xl shadow-xl font-semibold text-xs bg-slate-900/95 backdrop-blur-md text-white border border-slate-700/50 animate-in fade-in duration-200">
-            <CheckCircle2 size={16} className="text-emerald-400 shrink-0" />
+          <div className="fixed top-6 right-6 z-[200] flex items-center gap-2.5 px-4 py-3 rounded-2xl shadow-xl font-semibold text-xs bg-emerald-800 text-white border border-emerald-700 animate-in fade-in duration-200">
+            <CheckCircle2 size={16} className="text-emerald-300 shrink-0" />
             <span>{toastMessage.msg}</span>
           </div>
         )}
@@ -452,9 +641,9 @@ function AdminClientsContent() {
           <button
             onClick={() => { setApprovalFilter('ALL'); setPage(1); }}
             className={cn(
-              "px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer whitespace-nowrap shadow-2xs",
+              "px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer whitespace-nowrap shadow-xs",
               approvalFilter === 'ALL'
-                ? "bg-slate-900 text-white shadow-slate-900/10"
+                ? "bg-emerald-600 text-white shadow-emerald-600/20"
                 : "bg-white text-slate-600 hover:bg-slate-50 border border-slate-200/80"
             )}
           >
@@ -470,13 +659,13 @@ function AdminClientsContent() {
           <button
             onClick={() => { setApprovalFilter('APPROVED'); setPage(1); }}
             className={cn(
-              "px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer whitespace-nowrap shadow-2xs",
+              "px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer whitespace-nowrap shadow-xs",
               approvalFilter === 'APPROVED'
-                ? "bg-emerald-600 text-white shadow-emerald-600/10"
+                ? "bg-emerald-600 text-white shadow-emerald-600/20"
                 : "bg-white text-slate-600 hover:bg-emerald-50/50 border border-slate-200/80"
             )}
           >
-            <span className="w-2 h-2 rounded-full bg-emerald-500" />
+            <span className="w-2 h-2 rounded-full bg-emerald-400" />
             <span>Approved</span>
             <span className={cn(
               "px-2 py-0.5 rounded-full text-[10px] font-mono",
@@ -489,13 +678,13 @@ function AdminClientsContent() {
           <button
             onClick={() => { setApprovalFilter('PENDING'); setPage(1); }}
             className={cn(
-              "px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer whitespace-nowrap shadow-2xs",
+              "px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer whitespace-nowrap shadow-xs",
               approvalFilter === 'PENDING'
-                ? "bg-amber-500 text-white shadow-amber-500/10"
+                ? "bg-amber-500 text-white shadow-amber-500/20"
                 : "bg-white text-slate-600 hover:bg-amber-50/50 border border-slate-200/80"
             )}
           >
-            <span className="w-2 h-2 rounded-full bg-amber-500" />
+            <span className="w-2 h-2 rounded-full bg-amber-400" />
             <span>Pending</span>
             <span className={cn(
               "px-2 py-0.5 rounded-full text-[10px] font-mono",
@@ -508,13 +697,13 @@ function AdminClientsContent() {
           <button
             onClick={() => { setApprovalFilter('REJECTED'); setPage(1); }}
             className={cn(
-              "px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer whitespace-nowrap shadow-2xs",
+              "px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer whitespace-nowrap shadow-xs",
               approvalFilter === 'REJECTED'
-                ? "bg-rose-600 text-white shadow-rose-600/10"
+                ? "bg-rose-600 text-white shadow-rose-600/20"
                 : "bg-white text-slate-600 hover:bg-rose-50/50 border border-slate-200/80"
             )}
           >
-            <span className="w-2 h-2 rounded-full bg-rose-500" />
+            <span className="w-2 h-2 rounded-full bg-rose-400" />
             <span>Rejected</span>
             <span className={cn(
               "px-2 py-0.5 rounded-full text-[10px] font-mono",
@@ -550,7 +739,7 @@ function AdminClientsContent() {
               placeholder="Search by client, business, email, phone..."
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200/80 rounded-xl text-xs text-slate-800 outline-none focus:bg-white focus:border-emerald-500 transition-all font-medium"
+              className="w-full pl-9 pr-4 py-2 bg-slate-50/70 hover:bg-white focus:bg-white border border-slate-200 rounded-xl text-xs text-slate-800 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 transition-all font-medium"
             />
             {searchInput && (
               <button 
@@ -569,7 +758,7 @@ function AdminClientsContent() {
             <select
               value={statusFilter}
               onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
-              className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 outline-none focus:border-emerald-500 cursor-pointer"
+              className="px-3 py-2 bg-slate-50/70 hover:bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 outline-none focus:border-emerald-500 transition-all cursor-pointer"
             >
               <option value="ALL">All Status</option>
               <option value="ACTIVE">Active</option>
@@ -581,20 +770,19 @@ function AdminClientsContent() {
             <select
               value={planFilter}
               onChange={(e) => { setPlanFilter(e.target.value); setPage(1); }}
-              className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 outline-none focus:border-emerald-500 cursor-pointer"
+              className="px-3 py-2 bg-slate-50/70 hover:bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 outline-none focus:border-emerald-500 transition-all cursor-pointer"
             >
               <option value="ALL">All Plans</option>
-              <option value="FREE">Free</option>
-              <option value="STARTER">Starter</option>
-              <option value="GROWTH">Growth</option>
-              <option value="ENTERPRISE">Enterprise</option>
+              {dynamicPlans.map((planName) => (
+                <option key={planName} value={planName}>{planName}</option>
+              ))}
             </select>
 
             {/* Page Size Selector */}
             <select
               value={pageSize}
               onChange={(e) => { setPageSize(Number(e.target.value)); setPage(1); }}
-              className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 outline-none focus:border-emerald-500 cursor-pointer"
+              className="px-3 py-2 bg-slate-50/70 hover:bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 outline-none focus:border-emerald-500 transition-all cursor-pointer"
             >
               <option value={10}>10 / page</option>
               <option value={25}>25 / page</option>
@@ -621,7 +809,7 @@ function AdminClientsContent() {
         </div>
 
         {/* ── 4. Main Client Management Table ── */}
-        <div className="bg-white rounded-2xl border border-slate-200/80 shadow-2xs overflow-hidden mb-8 relative">
+        <div className="bg-white rounded-2xl border border-slate-200/90 shadow-sm overflow-hidden mb-8 relative">
           {/* Top indeterminate progress bar when fetching */}
           {isFetching && (
             <div className="h-1 w-full bg-emerald-50 overflow-hidden absolute top-0 left-0 right-0 z-20">
@@ -645,10 +833,16 @@ function AdminClientsContent() {
             <div className="overflow-x-auto custom-scrollbar min-h-[360px]">
               <table className="w-full text-left border-collapse text-xs">
                 <thead>
-                  <tr className="bg-slate-50/70 border-b border-slate-200 text-slate-500 font-bold uppercase text-[10px] tracking-wider whitespace-nowrap">
+                  <tr className="bg-slate-50/90 border-b border-slate-200 text-slate-500 font-bold uppercase text-[10px] tracking-wider whitespace-nowrap">
                     <th className="py-3.5 px-6 sticky left-0 bg-slate-50 z-10 cursor-pointer" onClick={() => handleSort('business_name')}>
                       <div className="flex items-center gap-1">
                         Client & Business
+                        <ArrowUpDown size={11} className="text-slate-400" />
+                      </div>
+                    </th>
+                    <th className="py-3.5 px-6 cursor-pointer" onClick={() => handleSort('plan')}>
+                      <div className="flex items-center gap-1">
+                        Plan
                         <ArrowUpDown size={11} className="text-slate-400" />
                       </div>
                     </th>
@@ -666,8 +860,8 @@ function AdminClientsContent() {
                     </th>
                     <th className="py-3.5 px-6 text-right sticky right-0 bg-slate-50 z-10">
                       <div className="flex items-center justify-end gap-1">
-                        <Eye size={12} className="text-slate-400" />
-                        View Profile
+                        <Sliders size={12} className="text-slate-400" />
+                        Actions
                       </div>
                     </th>
                   </tr>
@@ -675,7 +869,7 @@ function AdminClientsContent() {
                 <tbody className="divide-y divide-slate-100 font-sans">
                   {(loading || (isFetching && clients.length === 0)) ? (
                     <tr>
-                      <td colSpan={4} className="py-24 text-center">
+                      <td colSpan={5} className="py-24 text-center">
                         <div className="flex flex-col items-center justify-center gap-3.5">
                           <div className="relative flex items-center justify-center">
                             <div className="absolute w-14 h-14 rounded-2xl bg-emerald-500/15 animate-ping" />
@@ -694,7 +888,7 @@ function AdminClientsContent() {
                     </tr>
                   ) : clients.length === 0 ? (
                     <tr>
-                      <td colSpan={4} className="py-16 text-center text-slate-400">
+                      <td colSpan={5} className="py-16 text-center text-slate-400">
                         <div className="flex flex-col items-center justify-center gap-2">
                           <AlertCircle size={28} className="text-slate-300" />
                           <p className="text-xs font-bold text-slate-600">No clients match your filter criteria.</p>
@@ -710,13 +904,13 @@ function AdminClientsContent() {
                   ) : (
                     clients.map((client) => {
                       return (
-                        <tr key={client.id} className="hover:bg-slate-50/60 transition-colors">
+                        <tr key={client.id} className="hover:bg-slate-50/70 transition-colors">
                           {/* 1. Client & Business */}
                           <td className="py-4 px-6 sticky left-0 bg-white z-10 border-r border-slate-100">
                             <div className="flex items-center gap-3.5 group">
                               <button 
                                 onClick={() => handleViewProfile(client)}
-                                className="w-10 h-10 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-700 flex items-center justify-center font-extrabold text-sm uppercase border border-slate-200/80 group-hover:scale-105 transition-all shadow-2xs cursor-pointer shrink-0 overflow-hidden p-1"
+                                className="w-10 h-10 rounded-xl bg-gradient-to-tr from-slate-100 to-slate-50 hover:from-emerald-50 hover:to-teal-50 text-slate-700 hover:text-emerald-700 flex items-center justify-center font-extrabold text-sm uppercase border border-slate-200 group-hover:scale-105 transition-all shadow-xs cursor-pointer shrink-0 overflow-hidden p-1"
                                 title="Click to view profile & credentials"
                               >
                                 {client.company_logo_url ? (
@@ -732,14 +926,12 @@ function AdminClientsContent() {
                               <div>
                                 <button 
                                   onClick={() => handleViewProfile(client)}
-                                  className="font-bold text-slate-900 hover:text-emerald-700 transition-colors text-sm text-left cursor-pointer block"
+                                  className="font-bold text-slate-900 hover:text-emerald-600 transition-colors text-sm text-left cursor-pointer block"
                                 >
                                   {client.business_name}
                                 </button>
                                 <div className="text-xs text-slate-400 flex items-center gap-2 mt-0.5">
-                                  <span className="text-slate-600 font-medium">{client.client_name || client.email}</span>
-                                  <span>•</span>
-                                  <span className="uppercase text-[10px] font-bold text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200/60">{client.plan}</span>
+                                  <span className="text-slate-600 font-medium">{client.client_name || client.name || client.email}</span>
                                   {client.phone_number && (
                                     <>
                                       <span>•</span>
@@ -750,12 +942,29 @@ function AdminClientsContent() {
                               </div>
                             </div>
                           </td>
+                          <td className="py-4 px-6 whitespace-nowrap">
+                            <button
+                              type="button"
+                              onClick={() => handleOpenAssignPlan(client)}
+                              className={cn(
+                                "px-3 py-1 rounded-full text-xs font-bold uppercase transition-all hover:scale-105 border cursor-pointer inline-flex items-center gap-1.5 shadow-2xs",
+                                client.plan?.toUpperCase().includes('PRO') ? "bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100" :
+                                client.plan?.toUpperCase().includes('ENTER') ? "bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100" :
+                                client.plan?.toUpperCase().includes('STARTER') ? "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100" :
+                                "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
+                              )}
+                              title="Click to assign or change plan"
+                            >
+                              <Layers size={11} className="opacity-70" />
+                              <span>{client.plan || 'Free'}</span>
+                            </button>
+                          </td>
 
                           {/* 2. Approval Status */}
                           <td className="py-4 px-6 whitespace-nowrap">
                             <div className="flex items-center gap-2">
                               <span className={cn(
-                                "px-3 py-1.5 rounded-full text-xs font-bold tracking-wide uppercase inline-flex items-center gap-1.5 border shadow-2xs",
+                                "px-3 py-1 rounded-full text-xs font-bold tracking-wide uppercase inline-flex items-center gap-1.5 border shadow-2xs",
                                 client.approval_status === 'APPROVED' ? "bg-emerald-50 text-emerald-700 border-emerald-200" :
                                 client.approval_status === 'PENDING' ? "bg-amber-50 text-amber-700 border-amber-200" :
                                 "bg-rose-50 text-rose-700 border-rose-200"
@@ -801,16 +1010,29 @@ function AdminClientsContent() {
                             </div>
                           </td>
 
-                          {/* 4. Dedicated View Profile Column */}
+                          {/* 4. Dedicated Actions Column: View Profile & Delete */}
                           <td className="py-4 px-6 whitespace-nowrap text-right sticky right-0 bg-white border-l border-slate-100 z-10">
-                            <button
-                              onClick={() => handleViewProfile(client)}
-                              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 border border-slate-200 rounded-xl font-bold text-xs shadow-2xs transition-all hover:scale-[1.01] cursor-pointer group"
-                              title="View and manage client ID, password & profile"
-                            >
-                              <Eye size={14} className="text-slate-500 group-hover:text-slate-800 transition-colors" />
-                              <span>View Profile</span>
-                            </button>
+                            <div className="flex items-center justify-end gap-2">
+                              <button
+                                onClick={() => handleViewProfile(client)}
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50/90 hover:bg-emerald-100 text-emerald-700 hover:text-emerald-800 border border-emerald-200/80 rounded-xl font-bold text-xs shadow-2xs transition-all hover:scale-[1.02] cursor-pointer group"
+                                title="View and manage client ID, password & profile"
+                              >
+                                <Eye size={13} className="text-emerald-600 group-hover:text-emerald-800 transition-colors" />
+                                <span>View</span>
+                              </button>
+                              <button
+                                onClick={() => {
+                                  setClientToDelete(client);
+                                  setIsDeleteModalOpen(true);
+                                }}
+                                className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 hover:text-rose-700 border border-rose-200/80 rounded-xl font-bold text-xs shadow-2xs transition-all hover:scale-[1.02] cursor-pointer"
+                                title="Delete this client"
+                              >
+                                <Trash2 size={13} />
+                                <span>Delete</span>
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       );
@@ -857,7 +1079,7 @@ function AdminClientsContent() {
               {/* Modal Header */}
               <div className="p-5 sm:p-6 border-b border-slate-100 bg-white flex items-start justify-between">
                 <div className="flex items-center gap-3.5">
-                  <div className="w-12 h-12 rounded-2xl bg-slate-50 text-slate-700 flex items-center justify-center font-extrabold text-lg uppercase border border-slate-200/80 shadow-2xs overflow-hidden shrink-0 p-1">
+                  <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-800 flex items-center justify-center font-extrabold text-lg uppercase border border-emerald-200/80 shadow-2xs overflow-hidden shrink-0 p-1">
                     {profileFormState.company_logo_url || selectedProfileClient.company_logo_url ? (
                       <img 
                         src={profileFormState.company_logo_url || selectedProfileClient.company_logo_url} 
@@ -881,7 +1103,7 @@ function AdminClientsContent() {
                       )}>
                         {profileFormState.approval_status}
                       </span>
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-slate-100 text-slate-700 border border-slate-200/80">
+                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-emerald-50 text-emerald-800 border border-emerald-200">
                         {profileFormState.plan} PLAN
                       </span>
                     </div>
@@ -903,6 +1125,57 @@ function AdminClientsContent() {
 
               {/* Modal Body with Clean Light Multi-Section Content */}
               <div className="p-5 sm:p-6 space-y-5 max-h-[72vh] overflow-y-auto custom-scrollbar text-xs">
+                
+                {/* ── TOP SECTION: PLAN & FEATURES ENTITLEMENT ── */}
+                <div className="p-5 bg-gradient-to-r from-emerald-50/80 via-teal-50/30 to-white rounded-2xl border border-emerald-200/80 shadow-2xs">
+                  <div className="flex items-center justify-between pb-3 border-b border-emerald-100 mb-3">
+                    <div className="flex items-center gap-2">
+                      <Layers size={15} className="text-emerald-700" />
+                      <span className="font-extrabold text-[11px] tracking-wider uppercase text-emerald-900">
+                        PLAN & FEATURES ENTITLEMENT
+                      </span>
+                    </div>
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-emerald-100 text-emerald-800 border border-emerald-300 tracking-wider">
+                      {selectedProfileClient.status === 'ACTIVE' ? 'ACTIVE' : selectedProfileClient.status || 'ACTIVE'}
+                    </span>
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h4 className="text-xl font-black text-slate-900 tracking-tight">
+                          {selectedProfileClient.plan || 'Professional'}
+                        </h4>
+                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-emerald-600 text-white shadow-2xs">
+                          {AVAILABLE_PLANS_LIST.find(p => p.name.toUpperCase() === (selectedProfileClient.plan || '').toUpperCase() || p.id === (selectedProfileClient.plan || '').toUpperCase())?.badge || 'ACTIVE'}
+                        </span>
+                      </div>
+                      <p className="text-xs text-emerald-700 font-bold mt-0.5">
+                        {AVAILABLE_PLANS_LIST.find(p => p.name.toUpperCase() === (selectedProfileClient.plan || '').toUpperCase() || p.id === (selectedProfileClient.plan || '').toUpperCase())?.price || '₹2,999'} / {AVAILABLE_PLANS_LIST.find(p => p.name.toUpperCase() === (selectedProfileClient.plan || '').toUpperCase() || p.id === (selectedProfileClient.plan || '').toUpperCase())?.billing_cycle || 'month'}
+                      </p>
+                      <p className="text-[11px] text-slate-500 mt-0.5">
+                        {AVAILABLE_PLANS_LIST.find(p => p.name.toUpperCase() === (selectedProfileClient.plan || '').toUpperCase() || p.id === (selectedProfileClient.plan || '').toUpperCase())?.feature_count || 28} Features Included • Real-time Entitlements Active
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => handleOpenAssignPlan(selectedProfileClient)}
+                        className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-emerald-600/20 flex items-center gap-1.5 cursor-pointer"
+                      >
+                        <Layers size={13} /> Change Plan
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleOpenManageFeatures(selectedProfileClient)}
+                        className="px-3.5 py-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                      >
+                        <Sparkles size={13} className="text-emerald-600" /> Manage Features
+                      </button>
+                    </div>
+                  </div>
+                </div>
                 
                 {/* ── SECTION 1: Credentials & Login Identity ── */}
                 <div className="p-5 bg-slate-50/80 rounded-2xl border border-slate-200/80 space-y-4 shadow-2xs">
@@ -1069,10 +1342,11 @@ function AdminClientsContent() {
                         onChange={(e) => setProfileFormState({ ...profileFormState, plan: e.target.value })}
                         className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200/80 rounded-xl text-xs font-bold text-slate-800 outline-none focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 cursor-pointer transition-all"
                       >
-                        <option value="FREE">Free Tier</option>
-                        <option value="STARTER">Starter Tier</option>
-                        <option value="GROWTH">Growth Tier</option>
-                        <option value="ENTERPRISE">Enterprise Tier</option>
+                        <option value="Free">Free Tier (₹0/mo)</option>
+                        <option value="Starter">Starter Tier (₹999/mo)</option>
+                        <option value="Professional">Professional Tier (₹2,999/mo)</option>
+                        <option value="Enterprise">Enterprise Tier (₹9,999/mo)</option>
+                        <option value="Custom">Custom Tailored Plan</option>
                       </select>
                     </div>
 
@@ -1198,15 +1472,29 @@ function AdminClientsContent() {
 
               {/* Modal Footer Actions */}
               <div className="p-5 border-t border-slate-100 bg-slate-50/80 flex flex-col sm:flex-row items-center justify-between gap-3">
-                <div className="flex items-center gap-2 w-full sm:w-auto">
+                <div className="flex items-center gap-2 w-full sm:w-auto flex-wrap">
                   {/* Direct Impersonate & Access Workspace Button */}
                   <button
                     type="button"
                     onClick={() => handleOpenClientWorkspace(selectedProfileClient)}
-                    className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs shadow-md shadow-emerald-600/20 transition-all cursor-pointer"
+                    className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs shadow-md shadow-emerald-600/20 transition-all cursor-pointer"
                   >
                     <ExternalLink size={14} />
-                    <span>Access Workspace (Login)</span>
+                    <span>Access Workspace</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsProfileModalOpen(false);
+                      setClientToDelete(selectedProfileClient);
+                      setIsDeleteModalOpen(true);
+                    }}
+                    className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-600 hover:text-rose-700 border border-rose-200/80 rounded-xl font-bold text-xs shadow-2xs transition-all cursor-pointer"
+                    title="Permanently delete this client"
+                  >
+                    <Trash2 size={14} />
+                    <span>Delete Client</span>
                   </button>
                 </div>
 
@@ -1223,7 +1511,7 @@ function AdminClientsContent() {
                     type="button"
                     onClick={handleSaveProfileDetails}
                     disabled={profileSaveLoading}
-                    className="inline-flex items-center gap-1.5 px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold text-xs shadow-2xs transition-all disabled:opacity-50 cursor-pointer"
+                    className="inline-flex items-center gap-1.5 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs shadow-md shadow-emerald-600/20 transition-all disabled:opacity-50 cursor-pointer"
                   >
                     {profileSaveLoading ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
                     <span>Save Changes</span>
@@ -1393,6 +1681,239 @@ function AdminClientsContent() {
                   </button>
                 </div>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* ── 6. Interactive In-Modal Assign / Change Plan Dialog ── */}
+        {isAssignPlanModalOpen && selectedClientForPlan && (
+          <div className="fixed inset-0 z-[70] bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in overflow-y-auto">
+            <div className="bg-white w-full max-w-lg rounded-3xl shadow-2xl border border-slate-100 overflow-hidden my-8 animate-in zoom-in-95 duration-200">
+              
+              {/* Header */}
+              <div className="p-5 border-b border-slate-100 bg-gradient-to-r from-emerald-50/60 via-white to-teal-50/60 flex items-start justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-2xl bg-emerald-600 text-white flex items-center justify-center shadow-md shadow-emerald-500/20">
+                    <Layers size={18} />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-extrabold text-slate-900 tracking-tight">
+                      Assign Plan to Client
+                    </h3>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      Client: <strong className="text-slate-800 font-semibold">{selectedClientForPlan.business_name}</strong>
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setIsAssignPlanModalOpen(false)}
+                  className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition-all cursor-pointer"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              {/* Body: Selectable Plan Cards */}
+              <div className="p-5 space-y-3 max-h-[60vh] overflow-y-auto custom-scrollbar">
+                <p className="text-xs font-semibold text-slate-600 mb-1">
+                  Choose a subscription plan to assign. Entitlements will update immediately:
+                </p>
+
+                <div className="space-y-2.5">
+                  {AVAILABLE_PLANS_LIST.map((plan) => {
+                    const isSelected = selectedPlanToAssign.toUpperCase() === plan.id.toUpperCase() || selectedPlanToAssign.toUpperCase() === plan.name.toUpperCase();
+                    const isCurrent = (selectedClientForPlan.plan || '').toUpperCase() === plan.id.toUpperCase() || (selectedClientForPlan.plan || '').toUpperCase() === plan.name.toUpperCase();
+
+                    return (
+                      <div
+                        key={plan.id}
+                        onClick={() => setSelectedPlanToAssign(plan.id)}
+                        className={cn(
+                          "p-4 rounded-2xl border transition-all cursor-pointer relative flex items-start justify-between gap-3",
+                          isSelected 
+                            ? "bg-emerald-50/70 border-emerald-500 ring-2 ring-emerald-500/20 shadow-xs" 
+                            : "bg-white hover:bg-slate-50/80 border-slate-200/90 shadow-2xs"
+                        )}
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className={cn(
+                            "w-5 h-5 rounded-full border flex items-center justify-center mt-0.5 shrink-0 transition-colors",
+                            isSelected ? "border-emerald-600 bg-emerald-600 text-white" : "border-slate-300 bg-white"
+                          )}>
+                            {isSelected && <Check size={12} strokeWidth={3} />}
+                          </div>
+
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <span className="font-extrabold text-sm text-slate-900">{plan.name}</span>
+                              <span className={cn(
+                                "px-2 py-0.5 rounded-full text-[10px] font-bold uppercase border",
+                                plan.color === 'blue' ? "bg-blue-50 text-blue-700 border-blue-200" :
+                                plan.color === 'purple' ? "bg-purple-50 text-purple-700 border-purple-200" :
+                                plan.color === 'emerald' ? "bg-emerald-50 text-emerald-700 border-emerald-200" :
+                                "bg-slate-100 text-slate-700 border-slate-200"
+                              )}>
+                                {plan.badge}
+                              </span>
+                              {isCurrent && (
+                                <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-emerald-100 text-emerald-800 border border-emerald-300">
+                                  Current Plan
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                              {plan.description}
+                            </p>
+                            <div className="flex items-center gap-3 text-[11px] text-slate-600 font-semibold mt-2">
+                              <span className="text-emerald-700 font-bold">{plan.price} / {plan.billing_cycle}</span>
+                              <span>•</span>
+                              <span>{plan.feature_count} Features Enabled</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Footer */}
+              <div className="p-4.5 border-t border-slate-100 bg-slate-50/70 flex items-center justify-end gap-2.5">
+                <button
+                  type="button"
+                  onClick={() => setIsAssignPlanModalOpen(false)}
+                  className="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-200/70 rounded-xl transition-colors cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleConfirmAssignPlan}
+                  disabled={planAssignLoading}
+                  className="inline-flex items-center gap-1.5 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs shadow-md shadow-emerald-600/20 transition-all disabled:opacity-50 cursor-pointer"
+                >
+                  {planAssignLoading ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle2 size={14} />}
+                  <span>Confirm & Assign Plan</span>
+                </button>
+              </div>
+
+            </div>
+          </div>
+        )}
+
+        {/* ── 7. Client Feature Customization & Overrides Modal ── */}
+        {isManageFeaturesModalOpen && selectedClientForFeatures && (
+          <div className="fixed inset-0 z-[70] bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in overflow-y-auto">
+            <div className="bg-white w-full max-w-xl rounded-3xl shadow-2xl border border-slate-100 overflow-hidden my-8 animate-in zoom-in-95 duration-200">
+              
+              {/* Header */}
+              <div className="p-5 border-b border-slate-100 bg-gradient-to-r from-teal-50/60 via-white to-emerald-50/60 flex items-start justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-2xl bg-teal-600 text-white flex items-center justify-center shadow-md shadow-teal-500/20">
+                    <Sparkles size={18} />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-extrabold text-slate-900 tracking-tight">
+                      Custom Feature Overrides
+                    </h3>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      Client: <strong className="text-slate-800 font-semibold">{selectedClientForFeatures.business_name}</strong> ({selectedClientForFeatures.plan} Plan)
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setIsManageFeaturesModalOpen(false)}
+                  className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition-all cursor-pointer"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              {/* Body */}
+              <div className="p-5 space-y-3.5 max-h-[60vh] overflow-y-auto custom-scrollbar">
+                <div className="p-3 bg-emerald-50/60 rounded-xl border border-emerald-200/80 text-xs text-emerald-800">
+                  <p className="font-semibold">
+                    Grant additional features (+) or restrict specific capabilities (-) for this client without changing their base plan.
+                  </p>
+                </div>
+
+                {/* Category Filters */}
+                <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
+                  {['ALL', 'Communication', 'AI', 'CRM', 'Sales', 'Team', 'Documents'].map(cat => (
+                    <button
+                      key={cat}
+                      type="button"
+                      onClick={() => setFeaturesCategoryTab(cat)}
+                      className={cn(
+                        "px-3 py-1 rounded-lg text-xs font-bold transition-all whitespace-nowrap cursor-pointer",
+                        featuresCategoryTab === cat ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                      )}
+                    >
+                      {cat}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Feature Rows */}
+                <div className="space-y-2">
+                  {ALL_SYSTEM_FEATURES
+                    .filter(f => featuresCategoryTab === 'ALL' || f.category === featuresCategoryTab)
+                    .map(feat => {
+                      const isOverridden = featureOverrides.custom_added.includes(feat.key);
+
+                      return (
+                        <div
+                          key={feat.key}
+                          className="p-3 rounded-xl border border-slate-200/80 bg-white hover:bg-slate-50/60 flex items-center justify-between gap-3 shadow-2xs transition-colors"
+                        >
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <span className="font-bold text-xs text-slate-800">{feat.name}</span>
+                              <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-slate-100 text-slate-600 border border-slate-200">
+                                {feat.category}
+                              </span>
+                            </div>
+                            <p className="text-[11px] text-slate-500 mt-0.5">{feat.desc}</p>
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={() => handleToggleFeatureOverride(feat.key)}
+                            className={cn(
+                              "px-3 py-1 rounded-lg font-bold text-xs transition-all cursor-pointer border",
+                              isOverridden 
+                                ? "bg-emerald-600 text-white border-emerald-600 shadow-2xs" 
+                                : "bg-white text-slate-700 hover:bg-slate-100 border-slate-200"
+                            )}
+                          >
+                            {isOverridden ? 'Enabled (+)' : 'Standard'}
+                          </button>
+                        </div>
+                      );
+                    })}
+                </div>
+              </div>
+
+              {/* Footer */}
+              <div className="p-4.5 border-t border-slate-100 bg-slate-50/70 flex items-center justify-end gap-2.5">
+                <button
+                  type="button"
+                  onClick={() => setIsManageFeaturesModalOpen(false)}
+                  className="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-200/70 rounded-xl transition-colors cursor-pointer"
+                >
+                  Close
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSaveFeatureOverrides}
+                  disabled={featuresSaveLoading}
+                  className="inline-flex items-center gap-1.5 px-5 py-2.5 bg-teal-600 hover:bg-teal-700 text-white rounded-xl font-bold text-xs shadow-md shadow-teal-600/20 transition-all disabled:opacity-50 cursor-pointer"
+                >
+                  {featuresSaveLoading ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
+                  <span>Save Entitlement Overrides</span>
+                </button>
+              </div>
+
             </div>
           </div>
         )}

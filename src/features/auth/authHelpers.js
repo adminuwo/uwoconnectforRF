@@ -29,6 +29,7 @@ export function storeUserSession(token, user) {
 export function clearUserSession() {
   localStorage.removeItem('token');
   localStorage.removeItem('user');
+  localStorage.removeItem('client_company_logo');
   localStorage.removeItem('aisa_tour_pending');
   localStorage.removeItem('aisa_tour_step');
 }
