@@ -14,11 +14,11 @@
   --color-logo-blue: var(--logo-blue);
   --color-logo-green: var(--logo-green);
 
-  --font-sans: var(--font-inter), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
 :root {
-  --background: #F0FDF4;
+  --background: #f8fafc;
   --foreground: #0F172A;
   --surface: #0B0D11;
   --card: rgba(0, 171, 86, 0.04);
@@ -47,6 +47,13 @@
   img, video {
     max-width: 100%;
     height: auto;
+  }
+
+  button,
+  input,
+  select,
+  textarea {
+    font-family: inherit;
   }
 }
 

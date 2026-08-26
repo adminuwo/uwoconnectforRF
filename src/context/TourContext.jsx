@@ -75,7 +75,6 @@ export const TourProvider = ({ children }) => {
         router.push(step.page);
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // ── Detect page change while tour is active ────────────────────────────────
@@ -131,7 +130,6 @@ export const TourProvider = ({ children }) => {
     } else {
       finishTour();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentStep, totalSteps, goToStep]);
 
   // ── prevStep ───────────────────────────────────────────────────────────────

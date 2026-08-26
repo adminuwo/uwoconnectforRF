@@ -1,32 +1,60 @@
 'use client';
 
 import React, { useState } from 'react';
-import { ShieldCheck, CreditCard, CheckCircle2, AlertCircle, Loader2, X, Lock, Zap } from 'lucide-react';
 import axios from 'axios';
+import { API_BASE_URL } from '@/config/apiConfig';
 import { initiateRazorpayCheckout } from '@/utils/razorpay';
+import {
+  X,
+  CheckCircle2,
+  Zap,
+  Loader2,
+  CreditCard,
+  AlertCircle,
+  Lock,
+  ShieldCheck
+} from 'lucide-react';
 
-const PLAN_DETAILS = {
+const DEFAULT_PLANS = {
+  FREE: {
+    name: 'Free Plan',
+    monthly: 0,
+    annual: 0,
+    features: ['WhatsApp Direct Connect', 'Basic Live Inbox', 'Standard CRM Contact Storage', 'Community Support']
+  },
   STARTER: {
     name: 'Starter Plan',
-    monthly: 3999,
-    annual: 3199,
-    features: ['5 User Licenses', '10,000 CRM Contacts', 'WhatsApp Meta API', 'Basic AI Chat Assistant']
+    monthly: 999,
+    annual: 799,
+    features: ['5 Team Seats', '10,000 CRM Contacts', 'WhatsApp & Facebook Messenger', 'Product Catalog & Orders', 'Standard Webhooks']
+  },
+  PROFESSIONAL: {
+    name: 'Professional Plan',
+    monthly: 2999,
+    annual: 2399,
+    features: ['15 Team Seats', '100,000 CRM Contacts', 'WhatsApp, FB, IG & Telegram', 'AI Smart Copilot & Bot Builder', 'Quotations, Proposals & Invoices']
   },
   GROWTH: {
-    name: 'Growth Plan',
-    monthly: 7999,
-    annual: 6399,
-    features: ['25 User Licenses', '100,000 CRM Contacts', '3 Custom AI Assistants', 'Unified Financial Ledger', 'Granular Roles']
+    name: 'Professional Plan',
+    monthly: 2999,
+    annual: 2399,
+    features: ['15 Team Seats', '100,000 CRM Contacts', 'WhatsApp, FB, IG & Telegram', 'AI Smart Copilot & Bot Builder', 'Quotations, Proposals & Invoices']
   },
   ENTERPRISE: {
     name: 'Enterprise Plan',
-    monthly: 23999,
-    annual: 19199,
-    features: ['Unlimited Licenses', 'Unlimited CRM Contacts', 'Dedicated Vector DB', 'Custom Webhooks', '99.99% SLA']
+    monthly: 9999,
+    annual: 7999,
+    features: ['Unlimited Team Seats', 'Unlimited CRM Contacts', 'All Channels & Connectors', 'Custom AI Bots & Workflows', 'Audit Logs & Dedicated SLA']
+  },
+  CUSTOM: {
+    name: 'Custom Tailored Plan',
+    monthly: 4999,
+    annual: 3999,
+    features: ['Tailored Feature Entitlements', 'Dedicated Cloud Sync', 'Custom Storage Limits', 'White-label Support']
   }
 };
 
-export default function PaymentModal({ isOpen, onClose, selectedPlan = 'GROWTH', billingCycle = 'MONTHLY', onSuccess }) {
+export default function PaymentModal({ isOpen, onClose, selectedPlan = 'PROFESSIONAL', planDetails = null, billingCycle = 'MONTHLY', onSuccess }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [mockSession, setMockSession] = useState(null);
@@ -35,7 +63,16 @@ export default function PaymentModal({ isOpen, onClose, selectedPlan = 'GROWTH',
 
   if (!isOpen) return null;
 
-  const planInfo = PLAN_DETAILS[selectedPlan.toUpperCase()] || PLAN_DETAILS.GROWTH;
+  const planKey = typeof selectedPlan === 'string' ? selectedPlan.toUpperCase() : 'PROFESSIONAL';
+  const defaultInfo = DEFAULT_PLANS[planKey] || DEFAULT_PLANS.PROFESSIONAL;
+
+  const planInfo = planDetails ? {
+    name: planDetails.name || defaultInfo.name,
+    monthly: Number(planDetails.price) || defaultInfo.monthly,
+    annual: Math.round((Number(planDetails.price) || defaultInfo.monthly) * 0.8),
+    features: planDetails.features || defaultInfo.features
+  } : defaultInfo;
+
   const isAnnual = billingCycle.toUpperCase() === 'ANNUAL';
   const pricePerMonth = isAnnual ? planInfo.annual : planInfo.monthly;
   const totalAmount = isAnnual ? planInfo.annual * 12 : planInfo.monthly;
@@ -52,10 +89,9 @@ export default function PaymentModal({ isOpen, onClose, selectedPlan = 'GROWTH',
         return;
       }
 
-      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app';
       const res = await axios.post(
-        `${API_URL}/api/payments/create-order`,
-        { plan: selectedPlan.toUpperCase(), billing_cycle: billingCycle.toUpperCase() },
+        `${API_BASE_URL}/api/payments/create-order`,
+        { plan: planInfo.name || selectedPlan, billing_cycle: billingCycle.toUpperCase() },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
@@ -113,10 +149,8 @@ export default function PaymentModal({ isOpen, onClose, selectedPlan = 'GROWTH',
       setVerifying(true);
       setError('');
       const token = localStorage.getItem('token');
-      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app';
-
       const res = await axios.post(
-        `${API_URL}/api/payments/verify-order`,
+        `${API_BASE_URL}/api/payments/verify-order`,
         {
           order_id,
           razorpay_order_id,
