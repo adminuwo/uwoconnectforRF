@@ -65,6 +65,7 @@ function AdminClientsContent() {
     business_name: '',
     phone_number: '',
     address: '',
+    company_logo_url: '',
     plan: 'GROWTH',
     status: 'ACTIVE',
     approval_status: 'APPROVED'
@@ -207,6 +208,7 @@ function AdminClientsContent() {
       business_name: client.business_name || '',
       phone_number: client.phone_number || '',
       address: client.address || '',
+      company_logo_url: client.company_logo_url || '',
       plan: client.plan || 'GROWTH',
       status: client.status || 'ACTIVE',
       approval_status: client.approval_status || 'APPROVED'
@@ -214,6 +216,30 @@ function AdminClientsContent() {
     setModalNewPassword('');
     setShowPasswordInModal(false);
     setIsProfileModalOpen(true);
+  };
+
+  // Upload or Change Logo from Admin Profile Modal
+  const handleAdminLogoUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
+    if (!allowedTypes.includes(file.type.toLowerCase())) {
+      showToast("Invalid image format. PNG, JPG, WEBP allowed.", "error");
+      return;
+    }
+    if (file.size > 3 * 1024 * 1024) {
+      showToast("Logo size exceeds 3MB.", "error");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (uploadEvent) => {
+      setProfileFormState(prev => ({
+        ...prev,
+        company_logo_url: uploadEvent.target.result
+      }));
+      showToast("Logo loaded! Click 'Save Changes' to apply.", "success");
+    };
+    reader.readAsDataURL(file);
   };
 
   // Generate strong random temporary password
@@ -662,10 +688,18 @@ function AdminClientsContent() {
                             <div className="flex items-center gap-3.5 group">
                               <button 
                                 onClick={() => handleViewProfile(client)}
-                                className="w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center font-extrabold text-sm uppercase border border-slate-200/80 group-hover:scale-105 transition-all shadow-2xs cursor-pointer"
+                                className="w-10 h-10 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-700 flex items-center justify-center font-extrabold text-sm uppercase border border-slate-200/80 group-hover:scale-105 transition-all shadow-2xs cursor-pointer shrink-0 overflow-hidden p-1"
                                 title="Click to view profile & credentials"
                               >
-                                {client.business_name?.charAt(0) || 'C'}
+                                {client.company_logo_url ? (
+                                  <img 
+                                    src={client.company_logo_url} 
+                                    alt={client.business_name} 
+                                    className="w-full h-full object-contain rounded-lg" 
+                                  />
+                                ) : (
+                                  <span>{client.business_name?.charAt(0) || 'C'}</span>
+                                )}
                               </button>
                               <div>
                                 <button 
@@ -795,8 +829,16 @@ function AdminClientsContent() {
               {/* Modal Header */}
               <div className="p-5 sm:p-6 border-b border-slate-100 bg-white flex items-start justify-between">
                 <div className="flex items-center gap-3.5">
-                  <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-700 flex items-center justify-center font-extrabold text-lg uppercase border border-emerald-200/80 shadow-2xs">
-                    {selectedProfileClient.business_name?.charAt(0) || 'C'}
+                  <div className="w-12 h-12 rounded-2xl bg-slate-50 text-slate-700 flex items-center justify-center font-extrabold text-lg uppercase border border-slate-200/80 shadow-2xs overflow-hidden shrink-0 p-1">
+                    {profileFormState.company_logo_url || selectedProfileClient.company_logo_url ? (
+                      <img 
+                        src={profileFormState.company_logo_url || selectedProfileClient.company_logo_url} 
+                        alt={selectedProfileClient.business_name} 
+                        className="w-full h-full object-contain rounded-xl" 
+                      />
+                    ) : (
+                      <span>{selectedProfileClient.business_name?.charAt(0) || 'C'}</span>
+                    )}
                   </div>
                   <div>
                     <div className="flex items-center gap-2 flex-wrap">
@@ -1044,6 +1086,41 @@ function AdminClientsContent() {
                         placeholder="City, Country"
                         className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200/80 rounded-xl text-xs font-semibold text-slate-800 outline-none focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 transition-all"
                       />
+                    </div>
+
+                    {/* Company Logo Management */}
+                    <div className="sm:col-span-2 pt-2 border-t border-slate-100">
+                      <label className="block font-bold text-slate-700 mb-1.5 text-[11px]">Company / Brand Logo</label>
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center overflow-hidden shrink-0 p-1">
+                          {profileFormState.company_logo_url ? (
+                            <img src={profileFormState.company_logo_url} alt="Logo" className="w-full h-full object-contain" />
+                          ) : (
+                            <span className="text-[10px] text-slate-400 font-bold uppercase">No Logo</span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <label className="px-3.5 py-2 bg-white border border-slate-200 hover:bg-slate-50 rounded-xl text-xs font-bold text-slate-700 cursor-pointer shadow-2xs transition-all">
+                            <span>{profileFormState.company_logo_url ? 'Change Logo' : 'Upload Logo'}</span>
+                            <input 
+                              type="file" 
+                              accept="image/png, image/jpeg, image/jpg, image/webp" 
+                              onChange={handleAdminLogoUpload} 
+                              className="hidden" 
+                            />
+                          </label>
+                          {profileFormState.company_logo_url && (
+                            <button
+                              type="button"
+                              onClick={() => setProfileFormState({ ...profileFormState, company_logo_url: '' })}
+                              className="px-3 py-2 text-xs text-rose-600 hover:bg-rose-50 rounded-xl font-bold transition-colors cursor-pointer"
+                            >
+                              Remove Logo
+                            </button>
+                          )}
+                          <span className="text-[10px] text-slate-400">PNG, JPG or WebP (Max 3MB)</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
