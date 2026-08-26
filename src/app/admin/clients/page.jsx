@@ -10,7 +10,8 @@ import {
   XCircle, Clock, RefreshCw, ChevronLeft, ChevronRight as ChevronRightIcon,
   Layers, Bot, Receipt, FileText, Share2, Key, EyeOff, Download,
   Filter, ArrowUpDown, UserPlus, FolderPlus, DollarSign, Brain, ShoppingBag,
-  Sliders, AlertCircle, Phone, Check, ArrowRight, RotateCcw
+  Sliders, AlertCircle, Phone, Check, ArrowRight, RotateCcw, Copy,
+  UserCheck, Shield, Sparkles, Building2, Lock, User, Briefcase
 } from 'lucide-react';
 import axios from 'axios';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
@@ -57,6 +58,24 @@ export default function AdminClients() {
   const [newPassword, setNewPassword] = useState('');
   const [actionLoading, setActionLoading] = useState({});
 
+  // ── Profile & Credentials Quick-View Modal States ──
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [selectedProfileClient, setSelectedProfileClient] = useState(null);
+  const [profileFormState, setProfileFormState] = useState({
+    business_name: '',
+    phone_number: '',
+    address: '',
+    plan: 'GROWTH',
+    status: 'ACTIVE',
+    approval_status: 'APPROVED'
+  });
+  const [modalNewPassword, setModalNewPassword] = useState('');
+  const [showPasswordInModal, setShowPasswordInModal] = useState(false);
+  const [passwordUpdateLoading, setPasswordUpdateLoading] = useState(false);
+  const [profileSaveLoading, setProfileSaveLoading] = useState(false);
+  const [copiedKey, setCopiedKey] = useState(null);
+  const [toastMessage, setToastMessage] = useState(null);
+
   // Client form
   const [clientFormData, setClientFormData] = useState({
     business_name: '',
@@ -67,6 +86,19 @@ export default function AdminClients() {
 
   // Active request controller ref for cancellation
   const abortControllerRef = useRef(null);
+
+  const showToast = (msg, type = 'success') => {
+    setToastMessage({ msg, type });
+    setTimeout(() => setToastMessage(null), 3500);
+  };
+
+  const handleCopy = (text, key) => {
+    if (!text || text === 'N/A' || text === '—') return;
+    navigator.clipboard.writeText(text);
+    setCopiedKey(key);
+    showToast(`Copied ${key}: ${text}`);
+    setTimeout(() => setCopiedKey(null), 2000);
+  };
 
   // 1. Debounce Search Input (350ms)
   useEffect(() => {
@@ -119,7 +151,6 @@ export default function AdminClients() {
       }
     } catch (err) {
       if (axios.isCancel(err) || err.name === 'CanceledError' || err.name === 'AbortError') {
-        // Request was cancelled, ignore
         return;
       }
       console.error('[AdminClients] Fetch error:', err);
@@ -154,17 +185,96 @@ export default function AdminClients() {
     try {
       setActionLoading(prev => ({ ...prev, [clientId]: true }));
       const token = localStorage.getItem('token');
-      await axios.post(
+      const res = await axios.post(
         `${API_BASE_URL}/api/admin/client-intelligence/clients/${clientId}/action/`,
         { action, ...extraPayload },
         { headers: { Authorization: `Bearer ${token}` } }
       );
+      showToast(res.data?.message || 'Action executed successfully.');
       fetchClientDirectory(true);
     } catch (err) {
       alert(err.response?.data?.error || 'Action failed');
     } finally {
       setActionLoading(prev => ({ ...prev, [clientId]: false }));
       setActiveMenuId(null);
+    }
+  };
+
+  // Open Client Profile & Credentials Modal
+  const handleViewProfile = (client) => {
+    setSelectedProfileClient(client);
+    setProfileFormState({
+      business_name: client.business_name || '',
+      phone_number: client.phone_number || '',
+      address: client.address || '',
+      plan: client.plan || 'GROWTH',
+      status: client.status || 'ACTIVE',
+      approval_status: client.approval_status || 'APPROVED'
+    });
+    setModalNewPassword('');
+    setShowPasswordInModal(false);
+    setIsProfileModalOpen(true);
+  };
+
+  // Generate strong random temporary password
+  const handleGenerateRandomPassword = () => {
+    const chars = 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789!@#$%&*';
+    let pass = '';
+    for (let i = 0; i < 10; i++) {
+      pass += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    setModalNewPassword(pass);
+    setShowPasswordInModal(true);
+  };
+
+  // Save new password from Profile modal
+  const handleUpdatePasswordInModal = async () => {
+    if (!selectedProfileClient || !modalNewPassword) return;
+    try {
+      setPasswordUpdateLoading(true);
+      const token = localStorage.getItem('token');
+      const res = await axios.post(
+        `${API_BASE_URL}/api/admin/client-intelligence/clients/${selectedProfileClient.id}/action/`,
+        { action: 'CHANGE_PASSWORD', new_password: modalNewPassword },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      showToast(res.data?.message || 'Password updated successfully!');
+      setModalNewPassword('');
+    } catch (err) {
+      alert(err.response?.data?.error || 'Failed to update password.');
+    } finally {
+      setPasswordUpdateLoading(false);
+    }
+  };
+
+  // Save profile edits from modal
+  const handleSaveProfileDetails = async () => {
+    if (!selectedProfileClient) return;
+    try {
+      setProfileSaveLoading(true);
+      const token = localStorage.getItem('token');
+      await axios.post(
+        `${API_BASE_URL}/api/admin/client-intelligence/clients/${selectedProfileClient.id}/action/`,
+        { action: 'EDIT_PROFILE', ...profileFormState },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      // If approval status changed, also sync approval status
+      if (profileFormState.approval_status !== selectedProfileClient.approval_status) {
+        await axios.post(
+          `${API_BASE_URL}/api/admin/client-intelligence/clients/${selectedProfileClient.id}/action/`,
+          { action: 'SET_APPROVAL_STATUS', approval_status: profileFormState.approval_status },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+      }
+
+      showToast('Client profile details updated successfully!');
+      setIsProfileModalOpen(false);
+      fetchClientDirectory(true);
+    } catch (err) {
+      alert(err.response?.data?.error || 'Failed to save profile details.');
+    } finally {
+      setProfileSaveLoading(false);
     }
   };
 
@@ -207,6 +317,7 @@ export default function AdminClients() {
       });
       setIsAddClientModalOpen(false);
       setClientFormData({ business_name: '', email: '', phone_number: '', plan: 'GROWTH' });
+      showToast('New client created successfully!');
       fetchClientDirectory(true);
     } catch (err) {
       alert(err.response?.data?.error || 'Failed to register client.');
@@ -229,6 +340,14 @@ export default function AdminClients() {
     <DashboardLayout role="ADMIN">
       <div className="max-w-full pb-24 px-4 sm:px-10 lg:px-12 font-sans" onClick={() => setActiveMenuId(null)}>
         
+        {/* ── Toast Notification Alert ── */}
+        {toastMessage && (
+          <div className="fixed top-6 right-6 z-[200] flex items-center gap-2.5 px-4 py-3 rounded-2xl shadow-xl font-semibold text-xs bg-slate-900/95 backdrop-blur-md text-white border border-slate-700/50 animate-in fade-in duration-200">
+            <CheckCircle2 size={16} className="text-emerald-400 shrink-0" />
+            <span>{toastMessage.msg}</span>
+          </div>
+        )}
+
         {/* ── 1. Page Header & Actions ── */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 my-8">
           <div>
@@ -246,7 +365,7 @@ export default function AdminClients() {
               )}
             </div>
             <p className="text-slate-500 text-xs sm:text-sm mt-1">
-              Review client registrations, approve or reject access requests, and manage active workspaces.
+              Review client registrations, approve or reject access requests, access client credentials, and manage active workspaces.
             </p>
           </div>
 
@@ -259,51 +378,48 @@ export default function AdminClients() {
             </button>
             <button
               onClick={() => setIsAddClientModalOpen(true)}
-              className="flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs shadow-2xs transition-all cursor-pointer"
+              className="flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs shadow-md shadow-emerald-600/20 transition-all cursor-pointer"
             >
               <Plus size={15} /> Add New Client
             </button>
             <button
               onClick={() => fetchClientDirectory(true)}
               disabled={isFetching}
-              className="p-2 bg-white hover:bg-slate-50 text-slate-600 rounded-xl border border-slate-200 shadow-2xs transition-all cursor-pointer"
-              title="Refresh"
+              className="p-2 bg-white hover:bg-slate-50 text-slate-600 border border-slate-200 rounded-xl transition-all cursor-pointer disabled:opacity-50"
+              title="Refresh directory"
             >
-              <RefreshCw size={15} className={cn(isFetching && "animate-spin text-emerald-600")} />
+              <RefreshCw size={15} className={isFetching ? "animate-spin text-emerald-600" : ""} />
             </button>
           </div>
         </div>
 
-        {/* ── 2. Sleek Status Tabs (Zero Clutter, Instant Filter) ── */}
+        {/* ── 2. Top Navigation Tabs: Approval Distribution ── */}
         <div className="flex items-center gap-2 mb-6 overflow-x-auto pb-1">
           <button
-            type="button"
             onClick={() => { setApprovalFilter('ALL'); setPage(1); }}
             className={cn(
-              "flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer border shadow-2xs whitespace-nowrap",
+              "px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer whitespace-nowrap shadow-2xs",
               approvalFilter === 'ALL'
-                ? "bg-slate-900 text-white border-slate-900"
-                : "bg-white text-slate-600 hover:text-slate-900 border-slate-200/80 hover:bg-slate-50"
+                ? "bg-slate-900 text-white shadow-slate-900/10"
+                : "bg-white text-slate-600 hover:bg-slate-50 border border-slate-200/80"
             )}
           >
-            <Users size={14} />
             <span>All Clients</span>
             <span className={cn(
               "px-2 py-0.5 rounded-full text-[10px] font-mono",
-              approvalFilter === 'ALL' ? "bg-white/20 text-white" : "bg-slate-100 text-slate-700"
+              approvalFilter === 'ALL' ? "bg-white/20 text-white" : "bg-slate-100 text-slate-600"
             )}>
-              {approvalStats.totalClients ?? totalCount}
+              {approvalStats.totalClients || totalCount}
             </span>
           </button>
 
           <button
-            type="button"
             onClick={() => { setApprovalFilter('APPROVED'); setPage(1); }}
             className={cn(
-              "flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer border shadow-2xs whitespace-nowrap",
+              "px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer whitespace-nowrap shadow-2xs",
               approvalFilter === 'APPROVED'
-                ? "bg-emerald-600 text-white border-emerald-600"
-                : "bg-white text-slate-600 hover:text-emerald-700 border-slate-200/80 hover:bg-emerald-50/50"
+                ? "bg-emerald-600 text-white shadow-emerald-600/10"
+                : "bg-white text-slate-600 hover:bg-emerald-50/50 border border-slate-200/80"
             )}
           >
             <span className="w-2 h-2 rounded-full bg-emerald-500" />
@@ -317,16 +433,15 @@ export default function AdminClients() {
           </button>
 
           <button
-            type="button"
             onClick={() => { setApprovalFilter('PENDING'); setPage(1); }}
             className={cn(
-              "flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer border shadow-2xs whitespace-nowrap",
+              "px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer whitespace-nowrap shadow-2xs",
               approvalFilter === 'PENDING'
-                ? "bg-amber-500 text-white border-amber-500"
-                : "bg-white text-slate-600 hover:text-amber-700 border-slate-200/80 hover:bg-amber-50/50"
+                ? "bg-amber-500 text-white shadow-amber-500/10"
+                : "bg-white text-slate-600 hover:bg-amber-50/50 border border-slate-200/80"
             )}
           >
-            <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping" />
+            <span className="w-2 h-2 rounded-full bg-amber-500" />
             <span>Pending</span>
             <span className={cn(
               "px-2 py-0.5 rounded-full text-[10px] font-mono",
@@ -337,13 +452,12 @@ export default function AdminClients() {
           </button>
 
           <button
-            type="button"
             onClick={() => { setApprovalFilter('REJECTED'); setPage(1); }}
             className={cn(
-              "flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer border shadow-2xs whitespace-nowrap",
+              "px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer whitespace-nowrap shadow-2xs",
               approvalFilter === 'REJECTED'
-                ? "bg-rose-600 text-white border-rose-600"
-                : "bg-white text-slate-600 hover:text-rose-700 border-slate-200/80 hover:bg-rose-50/50"
+                ? "bg-rose-600 text-white shadow-rose-600/10"
+                : "bg-white text-slate-600 hover:bg-rose-50/50 border border-slate-200/80"
             )}
           >
             <span className="w-2 h-2 rounded-full bg-rose-500" />
@@ -357,7 +471,7 @@ export default function AdminClients() {
           </button>
         </div>
 
-        {/* ── 3. Clean Search & Filter Bar (Zero Redundancy) ── */}
+        {/* ── 3. Clean Search & Filter Bar ── */}
         <div className="bg-white p-3.5 rounded-2xl border border-slate-200/80 shadow-2xs mb-6 flex flex-col md:flex-row items-center justify-between gap-3">
           {/* Search Input with Debounce */}
           <div className="relative w-full md:w-96">
@@ -370,13 +484,13 @@ export default function AdminClients() {
               className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200/80 rounded-xl text-xs text-slate-800 outline-none focus:bg-white focus:border-emerald-500 transition-all font-medium"
             />
             {searchInput && (
-              <button onClick={() => setSearchInput('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+              <button onClick={() => setSearchInput('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer">
                 <X size={13} />
               </button>
             )}
           </div>
 
-          {/* Filter Dropdowns (Only Unique Filters) */}
+          {/* Filter Dropdowns */}
           <div className="flex items-center gap-2.5 w-full md:w-auto overflow-x-auto pb-1 md:pb-0">
             {/* Status Filter */}
             <select
@@ -425,7 +539,7 @@ export default function AdminClients() {
                   setPlanFilter('ALL');
                   setPage(1);
                 }}
-                className="px-3 py-2 text-xs font-bold text-rose-600 hover:bg-rose-50 rounded-xl transition-all whitespace-nowrap"
+                className="px-3 py-2 text-xs font-bold text-rose-600 hover:bg-rose-50 rounded-xl transition-all whitespace-nowrap cursor-pointer"
               >
                 Reset
               </button>
@@ -433,9 +547,9 @@ export default function AdminClients() {
           </div>
         </div>
 
-        {/* ── 4. Main Enterprise Client Management Table ── */}
+        {/* ── 4. Main Client Management Table ── */}
         <div className="bg-white rounded-2xl border border-slate-200/80 shadow-2xs overflow-hidden mb-8 relative">
-          {/* Sleek top indeterminate progress bar when fetching */}
+          {/* Top indeterminate progress bar when fetching */}
           {isFetching && (
             <div className="h-1 w-full bg-emerald-50 overflow-hidden absolute top-0 left-0 right-0 z-20">
               <div className="h-full bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-600 animate-pulse" />
@@ -449,7 +563,7 @@ export default function AdminClients() {
               <p className="text-xs text-slate-400 mt-1">Check your network connection and credentials.</p>
               <button
                 onClick={() => fetchClientDirectory(true)}
-                className="mt-3 inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs shadow-2xs transition-all"
+                className="mt-3 inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs shadow-2xs transition-all cursor-pointer"
               >
                 <RotateCcw size={13} /> Retry
               </button>
@@ -477,14 +591,19 @@ export default function AdminClients() {
                         <ArrowUpDown size={11} className="text-slate-400" />
                       </div>
                     </th>
-                    <th className="py-3.5 px-6 text-right sticky right-0 bg-slate-50 z-10">Approval Decision & Actions</th>
+                    <th className="py-3.5 px-6 text-center">
+                      <div className="flex items-center justify-center gap-1">
+                        <Eye size={12} className="text-slate-400" />
+                        View Profile
+                      </div>
+                    </th>
+                    <th className="py-3.5 px-6 text-right sticky right-0 bg-slate-50 z-10">Approval Decision & Access</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 font-sans">
                   {(loading || (isFetching && clients.length === 0)) ? (
-                    // High-End Animated Loader State
                     <tr>
-                      <td colSpan={4} className="py-24 text-center">
+                      <td colSpan={5} className="py-24 text-center">
                         <div className="flex flex-col items-center justify-center gap-3.5">
                           <div className="relative flex items-center justify-center">
                             <div className="absolute w-14 h-14 rounded-2xl bg-emerald-500/15 animate-ping" />
@@ -495,7 +614,7 @@ export default function AdminClients() {
                           <div>
                             <p className="text-sm font-extrabold text-slate-800 tracking-tight">Loading Clients...</p>
                             <p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
-                              Fetching client approval statuses and workspace records
+                              Fetching client approval statuses, credentials and workspace records
                             </p>
                           </div>
                         </div>
@@ -503,7 +622,7 @@ export default function AdminClients() {
                     </tr>
                   ) : clients.length === 0 ? (
                     <tr>
-                      <td colSpan={4} className="py-16 text-center text-slate-400">
+                      <td colSpan={5} className="py-16 text-center text-slate-400">
                         <div className="flex flex-col items-center justify-center gap-2">
                           <AlertCircle size={28} className="text-slate-300" />
                           <p className="text-xs font-bold text-slate-600">No clients match your filter criteria.</p>
@@ -526,48 +645,82 @@ export default function AdminClients() {
                         <tr key={client.id} className="hover:bg-slate-50/60 transition-colors">
                           {/* 1. Client & Business */}
                           <td className="py-4 px-6 sticky left-0 bg-white z-10 border-r border-slate-100">
-                            <Link href={`/admin/clients/${client.id}`} className="flex items-center gap-3.5 group">
-                              <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center font-extrabold text-sm uppercase border border-emerald-100 group-hover:scale-105 transition-transform shadow-2xs">
+                            <div className="flex items-center gap-3.5 group">
+                              <button 
+                                onClick={() => handleViewProfile(client)}
+                                className="w-10 h-10 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 flex items-center justify-center font-extrabold text-sm uppercase border border-emerald-100 group-hover:scale-105 transition-all shadow-2xs cursor-pointer"
+                                title="Click to view full profile & credentials"
+                              >
                                 {client.business_name?.charAt(0) || 'C'}
-                              </div>
+                              </button>
                               <div>
-                                <div className="font-bold text-slate-900 group-hover:text-emerald-700 transition-colors text-sm">
-                                  {client.business_name}
-                                </div>
+                                <button 
+                                  onClick={() => handleViewProfile(client)}
+                                  className="font-bold text-slate-900 hover:text-emerald-700 transition-colors text-sm text-left cursor-pointer flex items-center gap-1.5"
+                                >
+                                  <span>{client.business_name}</span>
+                                  <span className="text-[10px] text-emerald-600 font-mono bg-emerald-50 px-1 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity">
+                                    ID: {client.id?.slice(-5)}
+                                  </span>
+                                </button>
                                 <div className="text-xs text-slate-400 flex items-center gap-2 mt-0.5">
-                                  <span>{client.client_name || client.email}</span>
+                                  <span className="text-slate-600 font-medium">{client.client_name || client.email}</span>
                                   <span>•</span>
                                   <span className="uppercase text-[10px] font-bold text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded">{client.plan}</span>
                                   {client.phone_number && (
                                     <>
                                       <span>•</span>
-                                      <span className="text-slate-500">{client.phone_number}</span>
+                                      <span className="text-slate-500 font-mono text-[11px]">{client.phone_number}</span>
                                     </>
                                   )}
                                 </div>
                               </div>
-                            </Link>
+                            </div>
                           </td>
 
                           {/* 2. Approval Status */}
                           <td className="py-4 px-6 whitespace-nowrap">
-                            <span className={cn(
-                              "px-3 py-1.5 rounded-full text-xs font-bold tracking-wide uppercase inline-flex items-center gap-1.5 border shadow-2xs",
-                              client.approval_status === 'APPROVED' ? "bg-emerald-50 text-emerald-700 border-emerald-200" :
-                              client.approval_status === 'PENDING' ? "bg-amber-50 text-amber-700 border-amber-200" :
-                              "bg-rose-50 text-rose-700 border-rose-200"
-                            )}>
+                            <div className="flex items-center gap-2">
                               <span className={cn(
-                                "w-2 h-2 rounded-full",
-                                client.approval_status === 'APPROVED' ? "bg-emerald-500" :
-                                client.approval_status === 'PENDING' ? "bg-amber-500 animate-pulse" :
-                                "bg-rose-500"
-                              )} />
-                              {client.approval_status || 'APPROVED'}
-                            </span>
+                                "px-3 py-1.5 rounded-full text-xs font-bold tracking-wide uppercase inline-flex items-center gap-1.5 border shadow-2xs",
+                                client.approval_status === 'APPROVED' ? "bg-emerald-50 text-emerald-700 border-emerald-200" :
+                                client.approval_status === 'PENDING' ? "bg-amber-50 text-amber-700 border-amber-200" :
+                                "bg-rose-50 text-rose-700 border-rose-200"
+                              )}>
+                                <span className={cn(
+                                  "w-2 h-2 rounded-full",
+                                  client.approval_status === 'APPROVED' ? "bg-emerald-500" :
+                                  client.approval_status === 'PENDING' ? "bg-amber-500 animate-pulse" :
+                                  "bg-rose-500"
+                                )} />
+                                {client.approval_status || 'APPROVED'}
+                              </span>
+
+                              {/* Quick 1-click toggles */}
+                              {client.approval_status === 'PENDING' && (
+                                <div className="flex items-center gap-1">
+                                  <button
+                                    onClick={() => handleClientAction(client.id, 'SET_APPROVAL_STATUS', { approval_status: 'APPROVED' })}
+                                    disabled={isRowActionLoading}
+                                    className="p-1 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors cursor-pointer"
+                                    title="Approve immediately"
+                                  >
+                                    <CheckCircle2 size={15} />
+                                  </button>
+                                  <button
+                                    onClick={() => handleClientAction(client.id, 'SET_APPROVAL_STATUS', { approval_status: 'REJECTED' })}
+                                    disabled={isRowActionLoading}
+                                    className="p-1 text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
+                                    title="Reject access"
+                                  >
+                                    <XCircle size={15} />
+                                  </button>
+                                </div>
+                              )}
+                            </div>
                           </td>
 
-                          {/* 3. Registered Date / Last Active */}
+                          {/* 3. Registered Date */}
                           <td className="py-4 px-6 whitespace-nowrap text-slate-600 text-xs font-medium">
                             <div className="flex items-center gap-1.5">
                               <Clock size={13} className="text-slate-400" />
@@ -575,29 +728,41 @@ export default function AdminClients() {
                             </div>
                           </td>
 
-                          {/* 4. Decision & Actions */}
+                          {/* 4. Dedicated View Profile Column */}
+                          <td className="py-4 px-6 whitespace-nowrap text-center">
+                            <button
+                              onClick={() => handleViewProfile(client)}
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200/80 rounded-xl font-bold text-xs shadow-2xs transition-all hover:scale-[1.02] cursor-pointer group"
+                              title="View and manage client ID, password & profile"
+                            >
+                              <Eye size={13} className="text-emerald-600 group-hover:text-emerald-700 transition-colors" />
+                              <span>View Profile</span>
+                            </button>
+                          </td>
+
+                          {/* 5. Decision & Actions / Access */}
                           <td className={cn(
                             "py-4 px-6 text-right sticky right-0 bg-white border-l border-slate-100",
                             isMenuOpen ? "z-30" : "z-10"
                           )}>
                             <div className="flex items-center justify-end gap-2" onClick={(e) => e.stopPropagation()}>
-                              {/* Direct 1-Click Approval Decision */}
+                              {/* 1-Click Direct Approval Decision */}
                               {client.approval_status === 'PENDING' ? (
-                                <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-1.5">
                                   <button
                                     onClick={() => handleClientAction(client.id, 'SET_APPROVAL_STATUS', { approval_status: 'APPROVED' })}
                                     disabled={isRowActionLoading}
-                                    className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs shadow-2xs transition-all disabled:opacity-50 cursor-pointer"
+                                    className="inline-flex items-center gap-1 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs shadow-2xs transition-all disabled:opacity-50 cursor-pointer"
                                   >
-                                    <CheckCircle2 size={14} />
+                                    <CheckCircle2 size={13} />
                                     <span>Approve</span>
                                   </button>
                                   <button
                                     onClick={() => handleClientAction(client.id, 'SET_APPROVAL_STATUS', { approval_status: 'REJECTED' })}
                                     disabled={isRowActionLoading}
-                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-xl font-bold text-xs transition-all disabled:opacity-50 cursor-pointer"
+                                    className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-xl font-bold text-xs transition-all disabled:opacity-50 cursor-pointer"
                                   >
-                                    <XCircle size={14} />
+                                    <XCircle size={13} />
                                     <span>Reject</span>
                                   </button>
                                 </div>
@@ -607,26 +772,36 @@ export default function AdminClients() {
                                   disabled={isRowActionLoading}
                                   className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-xl font-bold text-xs transition-all disabled:opacity-50 cursor-pointer"
                                 >
-                                  <CheckCircle2 size={14} />
+                                  <CheckCircle2 size={13} />
                                   <span>Re-Approve</span>
                                 </button>
                               ) : (
                                 <button
                                   onClick={() => handleClientAction(client.id, 'SET_APPROVAL_STATUS', { approval_status: 'REJECTED' })}
                                   disabled={isRowActionLoading}
-                                  className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-slate-50 hover:bg-rose-50 text-slate-500 hover:text-rose-700 border border-slate-200 hover:border-rose-200 rounded-xl font-semibold text-xs transition-all disabled:opacity-50 cursor-pointer"
+                                  className="inline-flex items-center gap-1 px-2 py-1.5 bg-slate-50 hover:bg-rose-50 text-slate-500 hover:text-rose-700 border border-slate-200 hover:border-rose-200 rounded-xl font-semibold text-xs transition-all disabled:opacity-50 cursor-pointer"
                                   title="Revoke access"
                                 >
-                                  <XCircle size={13} />
+                                  <XCircle size={12} />
                                   <span>Revoke</span>
                                 </button>
                               )}
+
+                              {/* Direct Access Workspace Button */}
+                              <button
+                                onClick={() => handleOpenClientWorkspace(client)}
+                                className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200/80 rounded-xl font-bold text-xs transition-all cursor-pointer"
+                                title="Login and access client workspace"
+                              >
+                                <ExternalLink size={12} />
+                                <span className="hidden xl:inline">Access</span>
+                              </button>
 
                               {/* Secondary Options Menu */}
                               <div className="relative inline-block text-left">
                                 <button
                                   onClick={() => setActiveMenuId(isMenuOpen ? null : client.id)}
-                                  className="p-2 hover:bg-slate-100 text-slate-500 rounded-xl transition-all cursor-pointer"
+                                  className="p-1.5 hover:bg-slate-100 text-slate-500 rounded-xl transition-all cursor-pointer"
                                   title="More options"
                                 >
                                   <MoreVertical size={15} />
@@ -639,19 +814,26 @@ export default function AdminClients() {
                                       ? "bottom-full mb-1.5 origin-bottom-right" 
                                       : "top-full mt-1.5 origin-top-right"
                                   )}>
+                                    <button
+                                      onClick={() => handleViewProfile(client)}
+                                      className="w-full flex items-center gap-2 px-3.5 py-2 hover:bg-emerald-50 text-emerald-800 font-semibold text-left cursor-pointer"
+                                    >
+                                      <Eye size={14} className="text-emerald-600" />
+                                      View Credentials & Info
+                                    </button>
                                     <Link
                                       href={`/admin/clients/${client.id}`}
                                       className="flex items-center gap-2 px-3.5 py-2 hover:bg-slate-50 text-slate-700 font-semibold"
                                     >
-                                      <Eye size={14} className="text-emerald-600" />
-                                      360° Profile
+                                      <Building2 size={14} className="text-slate-500" />
+                                      Full 360° Profile
                                     </Link>
                                     <button
                                       onClick={() => handleOpenClientWorkspace(client)}
-                                      className="w-full flex items-center gap-2 px-3.5 py-2 hover:bg-purple-50 text-purple-700 font-semibold"
+                                      className="w-full flex items-center gap-2 px-3.5 py-2 hover:bg-purple-50 text-purple-700 font-semibold cursor-pointer"
                                     >
                                       <ExternalLink size={14} />
-                                      Open Workspace
+                                      Access Workspace
                                     </button>
                                     <div className="my-1 border-t border-slate-100" />
                                     <button
@@ -660,7 +842,7 @@ export default function AdminClients() {
                                         setIsPasswordModalOpen(true);
                                         setActiveMenuId(null);
                                       }}
-                                      className="w-full flex items-center gap-2 px-3.5 py-2 hover:bg-slate-50 text-slate-700"
+                                      className="w-full flex items-center gap-2 px-3.5 py-2 hover:bg-amber-50 text-slate-700 cursor-pointer"
                                     >
                                       <Key size={14} className="text-amber-500" />
                                       Change Password
@@ -671,7 +853,7 @@ export default function AdminClients() {
                                         setIsDeleteModalOpen(true);
                                         setActiveMenuId(null);
                                       }}
-                                      className="w-full flex items-center gap-2 px-3.5 py-2 hover:bg-rose-50 text-rose-600 font-semibold"
+                                      className="w-full flex items-center gap-2 px-3.5 py-2 hover:bg-rose-50 text-rose-600 font-semibold cursor-pointer"
                                     >
                                       <Trash2 size={14} />
                                       Delete Client
@@ -718,13 +900,362 @@ export default function AdminClients() {
           </div>
         </div>
 
+        {/* ── 5. Comprehensive Client Profile & Credentials Quick-View Modal ── */}
+        {isProfileModalOpen && selectedProfileClient && (
+          <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in overflow-y-auto">
+            <div className="bg-white w-full max-w-2xl rounded-3xl shadow-2xl border border-slate-100 overflow-hidden my-8 animate-in zoom-in-95 duration-200">
+              
+              {/* Modal Header */}
+              <div className="p-6 border-b border-slate-100 bg-gradient-to-r from-slate-50 via-white to-emerald-50/40 flex items-start justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 rounded-2xl bg-emerald-600 text-white flex items-center justify-center font-extrabold text-xl shadow-lg shadow-emerald-600/20">
+                    {selectedProfileClient.business_name?.charAt(0) || 'C'}
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h2 className="text-lg font-extrabold text-slate-900">
+                        {selectedProfileClient.business_name}
+                      </h2>
+                      <span className={cn(
+                        "px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase border",
+                        profileFormState.approval_status === 'APPROVED' ? "bg-emerald-50 text-emerald-700 border-emerald-200" :
+                        profileFormState.approval_status === 'PENDING' ? "bg-amber-50 text-amber-700 border-amber-200" :
+                        "bg-rose-50 text-rose-700 border-rose-200"
+                      )}>
+                        {profileFormState.approval_status}
+                      </span>
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-slate-100 text-slate-700">
+                        {profileFormState.plan} PLAN
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-500 mt-1 flex items-center gap-2">
+                      <span>Owner: <strong className="text-slate-800">{selectedProfileClient.client_name || selectedProfileClient.email}</strong></span>
+                      <span>•</span>
+                      <span>Registered: <strong className="text-slate-800">{selectedProfileClient.created_date_formatted || 'Recently'}</strong></span>
+                    </p>
+                  </div>
+                </div>
+
+                <button 
+                  onClick={() => setIsProfileModalOpen(false)} 
+                  className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition-all cursor-pointer"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              {/* Modal Body with Multi-Section Content */}
+              <div className="p-6 space-y-6 max-h-[72vh] overflow-y-auto custom-scrollbar text-xs">
+                
+                {/* ── SECTION 1: Credentials & Login Identity ── */}
+                <div className="p-4.5 bg-slate-900 text-white rounded-2xl shadow-md space-y-4 border border-slate-800">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-emerald-400 font-bold text-xs uppercase tracking-wider">
+                      <Lock size={14} />
+                      <span>Account ID & Login Credentials</span>
+                    </div>
+                    <span className="text-[10px] text-slate-400 bg-slate-800 px-2 py-0.5 rounded-md font-mono">
+                      Django Auth Encrypted
+                    </span>
+                  </div>
+
+                  {/* ID & Username Grid */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 font-mono">
+                    {/* Client / Workspace ID */}
+                    <div className="p-3 bg-slate-800/80 rounded-xl border border-slate-700/60 flex items-center justify-between">
+                      <div>
+                        <div className="text-[10px] text-slate-400 uppercase tracking-wider">Client Workspace ID</div>
+                        <div className="text-xs font-bold text-emerald-300 truncate max-w-[180px]">{selectedProfileClient.id}</div>
+                      </div>
+                      <button
+                        onClick={() => handleCopy(selectedProfileClient.id, 'Client ID')}
+                        className="p-1.5 hover:bg-slate-700 text-slate-300 hover:text-white rounded-lg transition-colors cursor-pointer"
+                        title="Copy Client ID"
+                      >
+                        {copiedKey === 'Client ID' ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} />}
+                      </button>
+                    </div>
+
+                    {/* Primary User ID */}
+                    <div className="p-3 bg-slate-800/80 rounded-xl border border-slate-700/60 flex items-center justify-between">
+                      <div>
+                        <div className="text-[10px] text-slate-400 uppercase tracking-wider">Primary User ID</div>
+                        <div className="text-xs font-bold text-slate-200 truncate max-w-[180px]">
+                          {selectedProfileClient.user_id || selectedProfileClient.id}
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => handleCopy(selectedProfileClient.user_id || selectedProfileClient.id, 'User ID')}
+                        className="p-1.5 hover:bg-slate-700 text-slate-300 hover:text-white rounded-lg transition-colors cursor-pointer"
+                        title="Copy User ID"
+                      >
+                        {copiedKey === 'User ID' ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} />}
+                      </button>
+                    </div>
+
+                    {/* Login Username */}
+                    <div className="p-3 bg-slate-800/80 rounded-xl border border-slate-700/60 flex items-center justify-between">
+                      <div>
+                        <div className="text-[10px] text-slate-400 uppercase tracking-wider">Login Username</div>
+                        <div className="text-xs font-bold text-white truncate max-w-[180px]">
+                          {selectedProfileClient.username || selectedProfileClient.email}
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => handleCopy(selectedProfileClient.username || selectedProfileClient.email, 'Username')}
+                        className="p-1.5 hover:bg-slate-700 text-slate-300 hover:text-white rounded-lg transition-colors cursor-pointer"
+                        title="Copy Username"
+                      >
+                        {copiedKey === 'Username' ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} />}
+                      </button>
+                    </div>
+
+                    {/* Primary Registered Email */}
+                    <div className="p-3 bg-slate-800/80 rounded-xl border border-slate-700/60 flex items-center justify-between">
+                      <div>
+                        <div className="text-[10px] text-slate-400 uppercase tracking-wider">Registered Email</div>
+                        <div className="text-xs font-bold text-emerald-300 truncate max-w-[180px]">
+                          {selectedProfileClient.email || 'N/A'}
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => handleCopy(selectedProfileClient.email, 'Email')}
+                        className="p-1.5 hover:bg-slate-700 text-slate-300 hover:text-white rounded-lg transition-colors cursor-pointer"
+                        title="Copy Email"
+                      >
+                        {copiedKey === 'Email' ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} />}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Inline Password Override Section */}
+                  <div className="pt-2 border-t border-slate-800 flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                    <div className="relative flex-1">
+                      <Key size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                      <input
+                        type={showPasswordInModal ? "text" : "password"}
+                        placeholder="Type new password to override..."
+                        value={modalNewPassword}
+                        onChange={(e) => setModalNewPassword(e.target.value)}
+                        className="w-full pl-9 pr-9 py-2 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white placeholder:text-slate-500 outline-none focus:border-emerald-400 font-mono"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPasswordInModal(!showPasswordInModal)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 cursor-pointer"
+                      >
+                        {showPasswordInModal ? <EyeOff size={14} /> : <Eye size={14} />}
+                      </button>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={handleGenerateRandomPassword}
+                      className="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl text-xs font-semibold transition-all border border-slate-700 whitespace-nowrap cursor-pointer"
+                      title="Generate random 10-char password"
+                    >
+                      <Sparkles size={13} className="inline mr-1 text-amber-400" /> Generate
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={handleUpdatePasswordInModal}
+                      disabled={!modalNewPassword || passwordUpdateLoading}
+                      className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-emerald-600/20 whitespace-nowrap cursor-pointer"
+                    >
+                      {passwordUpdateLoading ? <Loader2 size={13} className="animate-spin" /> : 'Set Password'}
+                    </button>
+                  </div>
+                </div>
+
+                {/* ── SECTION 2: Profile & Business Details ── */}
+                <div className="p-5 bg-white rounded-2xl border border-slate-200/80 shadow-2xs space-y-4">
+                  <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+                    <h3 className="font-extrabold text-slate-900 text-sm flex items-center gap-2">
+                      <Building2 size={16} className="text-emerald-600" />
+                      Client Profile & Workspace Information
+                    </h3>
+                    <span className="text-[10px] text-slate-400 font-medium">Editable by Super Admin</span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {/* Business Name */}
+                    <div>
+                      <label className="block font-bold text-slate-700 mb-1 text-[11px]">Business / Company Name</label>
+                      <input
+                        type="text"
+                        value={profileFormState.business_name}
+                        onChange={(e) => setProfileFormState({ ...profileFormState, business_name: e.target.value })}
+                        className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 outline-none focus:bg-white focus:border-emerald-500"
+                      />
+                    </div>
+
+                    {/* Phone Number */}
+                    <div>
+                      <label className="block font-bold text-slate-700 mb-1 text-[11px]">WhatsApp / Phone Number</label>
+                      <input
+                        type="text"
+                        value={profileFormState.phone_number}
+                        onChange={(e) => setProfileFormState({ ...profileFormState, phone_number: e.target.value })}
+                        placeholder="+919876543210"
+                        className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 outline-none focus:bg-white focus:border-emerald-500 font-mono"
+                      />
+                    </div>
+
+                    {/* Subscription Plan */}
+                    <div>
+                      <label className="block font-bold text-slate-700 mb-1 text-[11px]">Subscription Plan</label>
+                      <select
+                        value={profileFormState.plan}
+                        onChange={(e) => setProfileFormState({ ...profileFormState, plan: e.target.value })}
+                        className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 outline-none focus:bg-white focus:border-emerald-500 cursor-pointer"
+                      >
+                        <option value="FREE">Free Tier</option>
+                        <option value="STARTER">Starter Tier</option>
+                        <option value="GROWTH">Growth Tier</option>
+                        <option value="ENTERPRISE">Enterprise Tier</option>
+                      </select>
+                    </div>
+
+                    {/* Account Status */}
+                    <div>
+                      <label className="block font-bold text-slate-700 mb-1 text-[11px]">Account Status</label>
+                      <select
+                        value={profileFormState.status}
+                        onChange={(e) => setProfileFormState({ ...profileFormState, status: e.target.value })}
+                        className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 outline-none focus:bg-white focus:border-emerald-500 cursor-pointer"
+                      >
+                        <option value="ACTIVE">Active</option>
+                        <option value="TRIAL">Trial Period</option>
+                        <option value="SUSPENDED">Suspended</option>
+                      </select>
+                    </div>
+
+                    {/* Approval Status */}
+                    <div>
+                      <label className="block font-bold text-slate-700 mb-1 text-[11px]">Registration Approval</label>
+                      <select
+                        value={profileFormState.approval_status}
+                        onChange={(e) => setProfileFormState({ ...profileFormState, approval_status: e.target.value })}
+                        className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 outline-none focus:bg-white focus:border-emerald-500 cursor-pointer"
+                      >
+                        <option value="APPROVED">Approved</option>
+                        <option value="PENDING">Pending Review</option>
+                        <option value="REJECTED">Rejected</option>
+                      </select>
+                    </div>
+
+                    {/* Office Address */}
+                    <div>
+                      <label className="block font-bold text-slate-700 mb-1 text-[11px]">Office Address</label>
+                      <input
+                        type="text"
+                        value={profileFormState.address}
+                        onChange={(e) => setProfileFormState({ ...profileFormState, address: e.target.value })}
+                        placeholder="City, Country"
+                        className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 outline-none focus:bg-white focus:border-emerald-500"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* ── SECTION 3: Workspace Telemetry & Channels ── */}
+                <div className="p-4.5 bg-slate-50/70 rounded-2xl border border-slate-200/70 space-y-3">
+                  <div className="text-xs font-bold text-slate-800 flex items-center justify-between">
+                    <span>Connected Social & Communication Channels</span>
+                    <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                      {selectedProfileClient.active_channels_count || 0} Active
+                    </span>
+                  </div>
+
+                  <div className="flex flex-wrap gap-2">
+                    {selectedProfileClient.active_channels_list && selectedProfileClient.active_channels_list.length > 0 ? (
+                      selectedProfileClient.active_channels_list.map((ch, idx) => (
+                        <span key={idx} className="px-3 py-1 bg-white border border-slate-200 rounded-lg font-bold text-xs text-slate-700 shadow-2xs">
+                          ✅ {ch}
+                        </span>
+                      ))
+                    ) : (
+                      <span className="text-slate-400 italic text-xs">No channels connected yet.</span>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-slate-200/60 text-center font-mono">
+                    <div className="bg-white p-2.5 rounded-xl border border-slate-200/70">
+                      <div className="text-[10px] text-slate-400">Team Size</div>
+                      <div className="text-sm font-bold text-slate-900">{selectedProfileClient.total_team_members || 1}</div>
+                    </div>
+                    <div className="bg-white p-2.5 rounded-xl border border-slate-200/70">
+                      <div className="text-[10px] text-slate-400">Projects</div>
+                      <div className="text-sm font-bold text-slate-900">{selectedProfileClient.total_projects || 0}</div>
+                    </div>
+                    <div className="bg-white p-2.5 rounded-xl border border-slate-200/70">
+                      <div className="text-[10px] text-slate-400">Messages</div>
+                      <div className="text-sm font-bold text-slate-900">{selectedProfileClient.bot_usage?.total_messages || 0}</div>
+                    </div>
+                    <div className="bg-white p-2.5 rounded-xl border border-slate-200/70">
+                      <div className="text-[10px] text-slate-400">Total Sales</div>
+                      <div className="text-sm font-bold text-emerald-700">₹{selectedProfileClient.sales?.total_revenue || 0}</div>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+              {/* Modal Footer Actions */}
+              <div className="p-5 border-t border-slate-100 bg-slate-50 flex flex-col sm:flex-row items-center justify-between gap-3">
+                <div className="flex items-center gap-2 w-full sm:w-auto">
+                  {/* Direct Impersonate & Access Workspace Button */}
+                  <button
+                    type="button"
+                    onClick={() => handleOpenClientWorkspace(selectedProfileClient)}
+                    className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-bold text-xs shadow-md shadow-purple-600/20 transition-all cursor-pointer"
+                  >
+                    <ExternalLink size={14} />
+                    <span>Access Workspace</span>
+                  </button>
+
+                  <Link
+                    href={`/admin/clients/${selectedProfileClient.id}`}
+                    className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3.5 py-2 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-xl font-bold text-xs shadow-2xs transition-all"
+                  >
+                    <Globe size={14} className="text-emerald-600" />
+                    <span>360° Profile</span>
+                  </Link>
+                </div>
+
+                <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+                  <button
+                    type="button"
+                    onClick={() => setIsProfileModalOpen(false)}
+                    className="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-200/70 rounded-xl transition-colors cursor-pointer"
+                  >
+                    Close
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleSaveProfileDetails}
+                    disabled={profileSaveLoading}
+                    className="inline-flex items-center gap-1.5 px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs shadow-md shadow-emerald-600/20 transition-all disabled:opacity-50 cursor-pointer"
+                  >
+                    {profileSaveLoading ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
+                    <span>Save Changes</span>
+                  </button>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        )}
+
         {/* ── Add Client Modal ── */}
         {isAddClientModalOpen && (
           <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in">
             <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl border border-slate-100 overflow-hidden">
               <div className="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
                 <h3 className="text-base font-bold text-slate-900">Register New Client</h3>
-                <button onClick={() => setIsAddClientModalOpen(false)} className="p-1 text-slate-400 hover:text-slate-600 rounded-lg">
+                <button onClick={() => setIsAddClientModalOpen(false)} className="p-1 text-slate-400 hover:text-slate-600 rounded-lg cursor-pointer">
                   <X size={18} />
                 </button>
               </div>
@@ -770,7 +1301,7 @@ export default function AdminClients() {
                   <select
                     value={clientFormData.plan}
                     onChange={(e) => setClientFormData({ ...clientFormData, plan: e.target.value })}
-                    className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-emerald-500"
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-emerald-500 cursor-pointer"
                   >
                     <option value="FREE">Free</option>
                     <option value="STARTER">Starter</option>
@@ -783,13 +1314,13 @@ export default function AdminClients() {
                   <button
                     type="button"
                     onClick={() => setIsAddClientModalOpen(false)}
-                    className="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl"
+                    className="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl cursor-pointer"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="px-5 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-2xs"
+                    className="px-5 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-2xs cursor-pointer"
                   >
                     Create Client
                   </button>
@@ -805,25 +1336,25 @@ export default function AdminClients() {
             <div className="bg-white w-full max-w-sm rounded-2xl shadow-2xl border border-slate-100 overflow-hidden">
               <div className="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
                 <h3 className="text-sm font-bold text-slate-900">Change Password</h3>
-                <button onClick={() => setIsPasswordModalOpen(false)} className="p-1 text-slate-400 hover:text-slate-600 rounded-lg">
+                <button onClick={() => setIsPasswordModalOpen(false)} className="p-1 text-slate-400 hover:text-slate-600 rounded-lg cursor-pointer">
                   <X size={16} />
                 </button>
               </div>
 
               <div className="p-5 space-y-3">
                 <p className="text-xs text-slate-500">
-                  Override password for <span className="font-bold text-slate-900">{clientForPassword.business_name}</span>.
+                  Override password for <span className="font-bold text-slate-900">{clientForPassword.business_name}</span> ({clientForPassword.email || clientForPassword.username}).
                 </p>
                 <input
                   type="password"
                   placeholder="New password"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-emerald-500"
+                  className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-emerald-500 font-mono"
                 />
 
                 <div className="flex items-center justify-end gap-2 pt-2">
-                  <button onClick={() => setIsPasswordModalOpen(false)} className="px-3 py-1.5 text-xs text-slate-600 hover:bg-slate-100 rounded-lg">
+                  <button onClick={() => setIsPasswordModalOpen(false)} className="px-3 py-1.5 text-xs text-slate-600 hover:bg-slate-100 rounded-lg cursor-pointer">
                     Cancel
                   </button>
                   <button
@@ -832,7 +1363,7 @@ export default function AdminClients() {
                       setIsPasswordModalOpen(false);
                     }}
                     disabled={!newPassword}
-                    className="px-4 py-1.5 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg disabled:opacity-50"
+                    className="px-4 py-1.5 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg disabled:opacity-50 cursor-pointer"
                   >
                     Save Password
                   </button>
@@ -850,7 +1381,7 @@ export default function AdminClients() {
                 <h3 className="text-sm font-bold text-rose-900 flex items-center gap-1.5">
                   <Trash2 size={16} className="text-rose-600" /> Confirm Deletion
                 </h3>
-                <button onClick={() => setIsDeleteModalOpen(false)} className="p-1 text-slate-400 hover:text-slate-600 rounded-lg">
+                <button onClick={() => setIsDeleteModalOpen(false)} className="p-1 text-slate-400 hover:text-slate-600 rounded-lg cursor-pointer">
                   <X size={16} />
                 </button>
               </div>
@@ -860,7 +1391,7 @@ export default function AdminClients() {
                   Are you sure you want to permanently delete <span className="font-bold text-slate-900">{clientToDelete.business_name}</span>? This action cannot be undone.
                 </p>
                 <div className="flex items-center justify-end gap-2 pt-2">
-                  <button onClick={() => setIsDeleteModalOpen(false)} className="px-3 py-1.5 text-xs text-slate-600 hover:bg-slate-100 rounded-lg">
+                  <button onClick={() => setIsDeleteModalOpen(false)} className="px-3 py-1.5 text-xs text-slate-600 hover:bg-slate-100 rounded-lg cursor-pointer">
                     Cancel
                   </button>
                   <button
@@ -868,7 +1399,7 @@ export default function AdminClients() {
                       await handleClientAction(clientToDelete.id, 'DELETE_CLIENT');
                       setIsDeleteModalOpen(false);
                     }}
-                    className="px-4 py-1.5 text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-lg"
+                    className="px-4 py-1.5 text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-lg cursor-pointer"
                   >
                     Confirm Delete
                   </button>
