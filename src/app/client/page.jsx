@@ -17,16 +17,23 @@ import { API_BASE_URL } from '@/config/apiConfig';
 
 const ClientOverview = () => {
   const router = useRouter();
+  const [mounted, setMounted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [userName, setUserName] = useState('User');
   const [contacts, setContacts] = useState([]);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        router.push('/auth/login');
-      }
+    setMounted(true);
+    const token = localStorage.getItem('token');
+    if (!token) {
+      router.push('/auth/login');
+    }
+    const userStr = localStorage.getItem('user');
+    if (userStr) {
+      try {
+        const u = JSON.parse(userStr);
+        setUserName(u.name || u.first_name || u.username || u.business_name || 'User');
+      } catch (e) {}
     }
   }, [router]);
 

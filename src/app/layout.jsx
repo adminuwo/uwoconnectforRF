@@ -1,4 +1,5 @@
 import { Inter } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 import { TourProvider } from "@/context/TourContext";
 import AxiosNetworkFixer from "@/components/AxiosNetworkFixer";
@@ -25,6 +26,14 @@ export default function RootLayout({ children }) {
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col overflow-x-hidden font-sans" suppressHydrationWarning>
+        {/* Unified Analytics Platform Auto-Tracker */}
+        <Script
+          id="unified-analytics-tracker"
+          strategy="afterInteractive"
+          src="https://admin.uwo24.com/api/web-stats/tracker.js"
+          data-site="uwoconnect"
+          data-endpoint="https://admin.uwo24.com/api/web-stats/collect"
+        />
         <AxiosNetworkFixer />
         <TourProvider>
           {children}

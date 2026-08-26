@@ -236,6 +236,7 @@ export default function ClientInboxPage() {
       setConversations([]);
     } finally {
       setIsLoadingMoreContacts(false);
+      setLoading(false);
     }
   };
 

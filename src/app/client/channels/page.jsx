@@ -107,6 +107,7 @@ const CopyButton = ({ text }) => {
 const ClientChannelsPage = () => {
   const router = useRouter();
   const [client, setClient] = useState(null);
+  const [razorpayConn, setRazorpayConn] = useState(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
@@ -264,7 +265,254 @@ const ClientChannelsPage = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  // Handlers for saved config
+  // OAuth & Meta Embedded Signup callback handler
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get('code');
+    const state = params.get('state');
+
+    // Instagram Business OAuth callback
+    if (code && state === 'instagram') {
+      window.history.replaceState({}, document.title, window.location.pathname);
+      (async () => {
+        setIgLoading(true);
+        try {
+          const token = localStorage.getItem('token');
+          await axios.post(
+            `${API_BASE_URL}/api/auth/instagram/oauth-callback`,
+            {
+              code,
+              redirect_uri: `${window.location.origin}/client/channels`
+            },
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+          await fetchClient();
+          setToast({ msg: '✅ Instagram account connected!', type: 'success' });
+          setTimeout(() => setToast(null), 4000);
+        } catch (err) {
+          const msg = err?.response?.data?.error || 'Failed to connect Instagram.';
+          setToast({ msg, type: 'error' });
+          setTimeout(() => setToast(null), 5000);
+        } finally {
+          setIgLoading(false);
+        }
+      })();
+    }
+    // Gmail callback
+    else if (params.get('gmail_connected') === 'true') {
+      fetchClient();
+      setToast({ msg: '✅ Gmail connected successfully!', type: 'success' });
+      setTimeout(() => setToast(null), 4000);
+      window.history.replaceState({}, document.title, window.location.pathname);
+    } else if (params.get('gmail_error')) {
+      setToast({ msg: `Gmail connection failed: ${params.get('gmail_error')}`, type: 'error' });
+      setTimeout(() => setToast(null), 5000);
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+    // OneDrive callback
+    else if (params.get('onedrive_connected') === 'true') {
+      fetchClient();
+      setToast({ msg: '✅ OneDrive connected successfully!', type: 'success' });
+      setTimeout(() => setToast(null), 4000);
+      window.history.replaceState({}, document.title, window.location.pathname);
+    } else if (params.get('onedrive_error')) {
+      setToast({ msg: `OneDrive connection failed: ${params.get('onedrive_error')}`, type: 'error' });
+      setTimeout(() => setToast(null), 5000);
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+    // Google Calendar callback
+    else if (params.get('google_calendar_connected') === 'true') {
+      fetchClient();
+      setToast({ msg: '✅ Google Calendar connected successfully!', type: 'success' });
+      setTimeout(() => setToast(null), 4000);
+      window.history.replaceState({}, document.title, window.location.pathname);
+    } else if (params.get('google_calendar_error')) {
+      setToast({ msg: `Google Calendar connection failed: ${params.get('google_calendar_error')}`, type: 'error' });
+      setTimeout(() => setToast(null), 5000);
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+    // Google Sheets callback
+    else if (params.get('google_sheets_connected') === 'true') {
+      fetchClient();
+      setToast({ msg: '✅ Google Sheets connected successfully!', type: 'success' });
+      setTimeout(() => setToast(null), 4000);
+      window.history.replaceState({}, document.title, window.location.pathname);
+    } else if (params.get('google_sheets_error')) {
+      setToast({ msg: `Google Sheets connection failed: ${params.get('google_sheets_error')}`, type: 'error' });
+      setTimeout(() => setToast(null), 5000);
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+    // Google Docs callback
+    else if (params.get('gdocs_connected') === 'true') {
+      fetchClient();
+      setToast({ msg: '✅ Google Docs connected successfully!', type: 'success' });
+      setTimeout(() => setToast(null), 4000);
+      window.history.replaceState({}, document.title, window.location.pathname);
+    } else if (params.get('gdocs_error')) {
+      const err = params.get('gdocs_error');
+      const msg = err === 'access_denied' ? 'Google Docs permission was cancelled.' : `Google Docs connection failed: ${err}`;
+      setToast({ msg, type: 'error' });
+      setTimeout(() => setToast(null), 5000);
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+    // Google Slides callback
+    else if (params.get('gslides_connected') === 'true') {
+      fetchClient();
+      setToast({ msg: '✅ Google Slides connected successfully!', type: 'success' });
+      setTimeout(() => setToast(null), 4000);
+      window.history.replaceState({}, document.title, window.location.pathname);
+    } else if (params.get('gslides_error')) {
+      const err = params.get('gslides_error');
+      const msg = err === 'access_denied' ? 'Google Slides permission was cancelled.' : `Google Slides connection failed: ${err}`;
+      setToast({ msg, type: 'error' });
+      setTimeout(() => setToast(null), 5000);
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+    // YouTube callback
+    else if (params.get('youtube_connected') === 'true') {
+      fetchClient();
+      setToast({ msg: '✅ YouTube channel connected successfully!', type: 'success' });
+      setTimeout(() => setToast(null), 4000);
+      window.history.replaceState({}, document.title, window.location.pathname);
+    } else if (params.get('youtube_error')) {
+      const err = params.get('youtube_error');
+      const msg = err === 'access_denied' ? 'YouTube permission was cancelled.' : `YouTube connection failed: ${err}`;
+      setToast({ msg, type: 'error' });
+      setTimeout(() => setToast(null), 5000);
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+    // Microsoft Outlook OAuth callback
+    else if (params.get('outlook_connected') === 'true') {
+      window.history.replaceState({}, document.title, window.location.pathname);
+      fetchClient();
+      setToast({ msg: '✅ Microsoft Outlook connected successfully!', type: 'success' });
+      setTimeout(() => setToast(null), 4000);
+    } else if (params.get('outlook_error')) {
+      window.history.replaceState({}, document.title, window.location.pathname);
+      const err = params.get('outlook_error');
+      const msg = err === 'access_denied' ? 'Outlook permission was cancelled.' : `Outlook connection failed: ${err}`;
+      setToast({ msg, type: 'error' });
+      setTimeout(() => setToast(null), 5000);
+    }
+
+    if (code) {
+      if (state === 'facebook') {
+        setToast({ msg: 'Connecting Facebook...', type: 'success' });
+        const connectFacebook = async () => {
+          try {
+            const token = localStorage.getItem('token');
+            await axios.post(`${API_BASE_URL}/api/auth/facebook/embedded-signup`,
+              { code: code },
+              { headers: { Authorization: `Bearer ${token}` } }
+            );
+            fetchClient();
+            setToast({ msg: 'Facebook connected successfully!', type: 'success' });
+            setTimeout(() => setToast(null), 3000);
+          } catch (err) {
+            console.error("Error connecting Facebook", err);
+            setToast({ msg: err.response?.data?.error || 'Failed to connect Facebook', type: 'error' });
+            setTimeout(() => setToast(null), 4000);
+          } finally {
+            window.history.replaceState({}, document.title, window.location.pathname);
+          }
+        };
+        connectFacebook();
+      } else if (state === 'instagram') {
+        setToast({ msg: 'Connecting Instagram...', type: 'success' });
+        const connectInstagram = async () => {
+          try {
+            const token = localStorage.getItem('token');
+            await axios.post(`${API_BASE_URL}/api/auth/instagram/embedded-signup`,
+              { code: code },
+              { headers: { Authorization: `Bearer ${token}` } }
+            );
+            fetchClient();
+            setToast({ msg: 'Instagram connected successfully!', type: 'success' });
+            setTimeout(() => setToast(null), 3000);
+          } catch (err) {
+            console.error("Error connecting Instagram", err);
+            setToast({ msg: err.response?.data?.error || 'Failed to connect Instagram', type: 'error' });
+            setTimeout(() => setToast(null), 4000);
+          } finally {
+            window.history.replaceState({}, document.title, window.location.pathname);
+          }
+        };
+        connectInstagram();
+      } else if (state === 'whatsapp') {
+        setToast({ msg: 'Connecting WhatsApp Business...', type: 'success' });
+        const connectWhatsApp = async () => {
+          try {
+            const token = localStorage.getItem('token');
+            const res = await axios.post(`${API_BASE_URL}/api/auth/whatsapp/embedded-signup`,
+              { code: code },
+              { headers: { Authorization: `Bearer ${token}` } }
+            );
+            if (res.data?.whatsapp_config) {
+              setClient(prev => ({
+                ...prev,
+                ...res.data.whatsapp_config,
+                whatsapp_enabled: true
+              }));
+            }
+            await fetchClient();
+            setToast({ msg: '✅ WhatsApp Business connected successfully!', type: 'success' });
+            setTimeout(() => setToast(null), 4000);
+          } catch (err) {
+            console.error("Error connecting WhatsApp", err);
+            setToast({ msg: err.response?.data?.error || 'Failed to connect WhatsApp', type: 'error' });
+            setTimeout(() => setToast(null), 4000);
+          } finally {
+            window.history.replaceState({}, document.title, window.location.pathname);
+          }
+        };
+        connectWhatsApp();
+      }
+    }
+
+    // Listen for Meta Embedded Signup postMessage events from popup
+    const handleMetaMessage = async (event) => {
+      if (
+        event.origin !== 'https://www.facebook.com' &&
+        event.origin !== 'https://web.facebook.com' &&
+        event.origin !== 'https://business.facebook.com'
+      ) {
+        return;
+      }
+      try {
+        const data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
+        if (data && (data.type === 'WA_EMBEDDED_SIGNUP' || data.event === 'FINISH' || data.event === 'FINISH_ALL')) {
+          console.log('Received Meta WA_EMBEDDED_SIGNUP event:', data);
+          const phone_number_id = data?.data?.phone_number_id || data?.phone_number_id;
+          const waba_id = data?.data?.waba_id || data?.waba_id;
+          
+          if (waba_id || phone_number_id) {
+            setToast({ msg: 'Saving WhatsApp configuration...', type: 'success' });
+            const token = localStorage.getItem('token');
+            await axios.put(`${API_BASE_URL}/api/profile`, {
+              whatsapp_waba_id: waba_id,
+              whatsapp_phone_number_id: phone_number_id,
+              whatsapp_enabled: true
+            }, {
+              headers: { Authorization: `Bearer ${token}` }
+            });
+            await fetchClient();
+            setToast({ msg: '✅ WhatsApp connected successfully!', type: 'success' });
+            setTimeout(() => setToast(null), 4000);
+          }
+        }
+      } catch (err) {
+        console.error('Error handling Meta message event', err);
+      }
+    };
+    window.addEventListener('message', handleMetaMessage);
+
+    return () => {
+      window.removeEventListener('message', handleMetaMessage);
+    };
+  }, []);
+
   const handleWhatsAppSaved = (updatedClient) => {
     setClient(updatedClient);
     setToast({ msg: 'WhatsApp configured', type: 'success' });
@@ -367,8 +615,18 @@ const ClientChannelsPage = () => {
 
   const handleWhatsAppConnect = () => {
     const origin = typeof window !== 'undefined' ? window.location.origin : 'https://uwoconnect.aisa24.com';
-    const redirectUri = encodeURIComponent(`${origin}/client/settings`);
-    window.location.href = `https://business.facebook.com/messaging/whatsapp/onboard/?app_id=991147863536661&config_id=1048515390903125&extras=%7B%22version%22%3A%22v4%22%2C%22sessionInfoVersion%22%3A%223%22%2C%22featureType%22%3A%22whatsapp_business_app_onboarding%22%7D&redirect_uri=${redirectUri}`;
+    const redirectUri = encodeURIComponent(`${origin}/client/channels?state=whatsapp`);
+    const appId = process.env.NEXT_PUBLIC_META_APP_ID || '991147863536661';
+    const url = `https://business.facebook.com/messaging/whatsapp/onboard/?app_id=${appId}&config_id=970003505994896&extras=%7B%22sessionInfoVersion%22%3A%223%22%2C%22version%22%3A%22v4%22%7D&redirect_uri=${redirectUri}`;
+
+    const width = 600;
+    const height = 750;
+    const left = (window.innerWidth - width) / 2 + window.screenX;
+    const top = (window.innerHeight - height) / 2 + window.screenY;
+    const popup = window.open(url, 'WhatsAppEmbeddedSignup', `width=${width},height=${height},top=${top},left=${left},status=no,resizable=yes,toolbar=no,menubar=no,scrollbars=yes`);
+    if (!popup || popup.closed || typeof popup.closed === 'undefined') {
+      window.location.href = url;
+    }
   };
 
   const handleFacebookConnect = () => {
