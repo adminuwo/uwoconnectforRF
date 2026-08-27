@@ -38,7 +38,9 @@ import {
   Inbox,
   FolderSync,
   HelpCircle,
-  Database
+  Database,
+  LayoutDashboard,
+  Video
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { API_BASE_URL } from '@/config/apiConfig';
@@ -79,10 +81,10 @@ const InstagramLogo = ({ size = 22 }) => (
   </svg>
 );
 
-const TelegramLogo = ({ size = 22 }) => (
+const YouTubeLogo = ({ size = 22 }) => (
   <svg width={size} height={size} viewBox="0 0 48 48" fill="none" className="shrink-0">
-    <circle cx="24" cy="24" r="24" fill="#2AABEE"/>
-    <path d="M11 23.5L34.5 14L29 34L22 28.5L18 31.5L18.5 26.5L30 18L17.5 24.5L11 23.5Z" fill="white" stroke="white" strokeWidth="1" strokeLinejoin="round"/>
+    <rect width="48" height="48" rx="12" fill="#FF0000" />
+    <path d="M33.2 24.1L19.5 16.2C19.2 16 18.8 16.2 18.8 16.6V32.4C18.8 32.8 19.2 33 19.5 32.8L33.2 24.9C33.5 24.7 33.5 24.3 33.2 24.1Z" fill="white"/>
   </svg>
 );
 
@@ -113,93 +115,94 @@ const OneDriveLogo = ({ size = 22 }) => (
   </svg>
 );
 
-// ── LOGO RESOLVER FOR EVERY FEATURE ──
+const GoogleMapsLogo = ({ size = 22 }) => (
+  <svg width={size} height={size} viewBox="0 0 48 48" fill="none" className="shrink-0">
+    <path d="M24 4C15.2 4 8 11.2 8 20C8 29.5 20.3 42.4 22.8 44.9C23.5 45.6 24.5 45.6 25.2 44.9C27.7 42.4 40 29.5 40 20C40 11.2 32.8 4 24 4Z" fill="#EA4335"/>
+    <path d="M24 12C19.6 12 16 15.6 16 20C16 24.4 19.6 28 24 28C28.4 28 32 24.4 32 20C32 15.6 28.4 12 24 12Z" fill="#34A853"/>
+    <circle cx="24" cy="20" r="5" fill="#4285F4"/>
+  </svg>
+);
+
+const GoogleDocsLogo = ({ size = 22 }) => (
+  <svg width={size} height={size} viewBox="0 0 48 48" fill="none" className="shrink-0">
+    <rect x="8" y="4" width="32" height="40" rx="4" fill="#4285F4" />
+    <path d="M30 4L40 14H32C30.9 14 30 13.1 30 12V4Z" fill="#A1C2FA"/>
+    <rect x="15" y="20" width="18" height="2.5" rx="1.25" fill="white" />
+    <rect x="15" y="26" width="18" height="2.5" rx="1.25" fill="white" />
+    <rect x="15" y="32" width="11" height="2.5" rx="1.25" fill="white" />
+  </svg>
+);
+
+const GoogleSheetsLogo = ({ size = 22 }) => (
+  <svg width={size} height={size} viewBox="0 0 48 48" fill="none" className="shrink-0">
+    <rect x="8" y="4" width="32" height="40" rx="4" fill="#0F9D58" />
+    <path d="M30 4L40 14H32C30.9 14 30 13.1 30 12V4Z" fill="#87CEAC"/>
+    <rect x="15" y="19" width="18" height="16" rx="1" fill="white"/>
+    <line x1="15" y1="24.5" x2="33" y2="24.5" stroke="#0F9D58" strokeWidth="1.5"/>
+    <line x1="15" y1="30" x2="33" y2="30" stroke="#0F9D58" strokeWidth="1.5"/>
+    <line x1="24" y1="19" x2="24" y2="35" stroke="#0F9D58" strokeWidth="1.5"/>
+  </svg>
+);
+
+const GoogleSlidesLogo = ({ size = 22 }) => (
+  <svg width={size} height={size} viewBox="0 0 48 48" fill="none" className="shrink-0">
+    <rect x="8" y="4" width="32" height="40" rx="4" fill="#F4B400" />
+    <path d="M30 4L40 14H32C30.9 14 30 13.1 30 12V4Z" fill="#FFE082"/>
+    <rect x="15" y="19" width="18" height="14" rx="1.5" fill="white" />
+    <rect x="17.5" y="21.5" width="13" height="9" rx="1" fill="#F4B400" />
+  </svg>
+);
+
+const GoogleNewsLogo = ({ size = 22 }) => (
+  <svg width={size} height={size} viewBox="0 0 48 48" fill="none" className="shrink-0">
+    <rect x="6" y="8" width="36" height="32" rx="6" fill="#4285F4" />
+    <rect x="12" y="15" width="12" height="12" rx="2" fill="white" />
+    <rect x="28" y="15" width="8" height="3" rx="1.5" fill="white" />
+    <rect x="28" y="20" width="8" height="3" rx="1.5" fill="#EA4335" />
+    <rect x="28" y="25" width="8" height="3" rx="1.5" fill="#34A853" />
+    <rect x="12" y="31" width="24" height="3" rx="1.5" fill="#FBBC04" />
+  </svg>
+);
+
+// ── LOGO RESOLVER FOR EVERY ENTITLEMENT ──
 const getFeatureBrandLogo = (key, size = 22) => {
   const k = key ? key.toLowerCase() : '';
 
-  // 1. Core Channels
+  // 1. Channels (WhatsApp, Instagram, Facebook, YouTube)
   if (k.includes('whatsapp')) return <WhatsAppLogo size={size} />;
-  if (k.includes('facebook') || k.includes('messenger')) return <FacebookLogo size={size} />;
   if (k.includes('instagram')) return <InstagramLogo size={size} />;
-  if (k.includes('telegram')) return <TelegramLogo size={size} />;
+  if (k.includes('facebook') || k.includes('messenger')) return <FacebookLogo size={size} />;
+  if (k.includes('youtube')) return <YouTubeLogo size={size} />;
+
+  // 2. Connectors (Gmail, Outlook, Google Maps, Google Docs, OneDrive, Google Sheets, Google Slides, Google News Feed)
   if (k.includes('gmail')) return <GmailLogo size={size} />;
   if (k.includes('outlook')) return <OutlookLogo size={size} />;
-  if (k.includes('onedrive')) return <OneDriveLogo size={size} />;
+  if (k.includes('map')) return <GoogleMapsLogo size={size} />;
+  if (k.includes('doc')) return <GoogleDocsLogo size={size} />;
+  if (k.includes('onedrive') || k.includes('one_drive')) return <OneDriveLogo size={size} />;
+  if (k.includes('sheet')) return <GoogleSheetsLogo size={size} />;
+  if (k.includes('slide')) return <GoogleSlidesLogo size={size} />;
+  if (k.includes('news')) return <GoogleNewsLogo size={size} />;
 
-  // 2. Communication
-  if (k.includes('inbox') || k.includes('live_messages')) {
-    return (
-      <div className="w-[22px] h-[22px] rounded-lg bg-gradient-to-tr from-emerald-600 to-teal-500 text-white flex items-center justify-center shadow-2xs shrink-0">
-        <MessageSquare size={13} />
-      </div>
-    );
-  }
-  if (k.includes('email')) {
-    return (
-      <div className="w-[22px] h-[22px] rounded-lg bg-gradient-to-tr from-rose-500 to-amber-500 text-white flex items-center justify-center shadow-2xs shrink-0">
-        <Mail size={13} />
-      </div>
-    );
-  }
-
-  // 3. AI & Automation
-  if (k.includes('ai_copilot') || k.includes('ai_assist') || k.includes('assistant')) {
-    return (
-      <div className="w-[22px] h-[22px] rounded-lg bg-gradient-to-tr from-violet-600 via-indigo-500 to-purple-600 text-white flex items-center justify-center shadow-2xs shrink-0">
-        <Sparkles size={13} />
-      </div>
-    );
-  }
-  if (k.includes('bot') || k.includes('flow')) {
-    return (
-      <div className="w-[22px] h-[22px] rounded-lg bg-gradient-to-tr from-blue-600 to-cyan-500 text-white flex items-center justify-center shadow-2xs shrink-0">
-        <Bot size={13} />
-      </div>
-    );
-  }
-  if (k.includes('auto') || k.includes('pilot')) {
-    return (
-      <div className="w-[22px] h-[22px] rounded-lg bg-gradient-to-tr from-amber-500 to-orange-600 text-white flex items-center justify-center shadow-2xs shrink-0">
-        <Zap size={13} />
-      </div>
-    );
-  }
-
-  // 4. CRM & Leads
-  if (k.includes('client') || k.includes('workspace')) {
+  // 3. Features (Team Dashboard, Quotation, Invoice, Proposal, Catalog, Payment, CRM, Auto Reply, Voice / Video Call)
+  if (k.includes('team') || k.includes('dashboard')) {
     return (
       <div className="w-[22px] h-[22px] rounded-lg bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center shadow-2xs shrink-0">
-        <Users size={13} />
-      </div>
-    );
-  }
-  if (k.includes('lead') || k.includes('pipeline')) {
-    return (
-      <div className="w-[22px] h-[22px] rounded-lg bg-gradient-to-tr from-amber-500 to-rose-500 text-white flex items-center justify-center shadow-2xs shrink-0">
-        <Target size={13} />
-      </div>
-    );
-  }
-  if (k.includes('search')) {
-    return (
-      <div className="w-[22px] h-[22px] rounded-lg bg-gradient-to-tr from-teal-500 to-emerald-600 text-white flex items-center justify-center shadow-2xs shrink-0">
-        <Search size={13} />
-      </div>
-    );
-  }
-
-  // 5. Sales & Finance
-  if (k.includes('product') || k.includes('catalog')) {
-    return (
-      <div className="w-[22px] h-[22px] rounded-lg bg-gradient-to-tr from-emerald-600 to-green-500 text-white flex items-center justify-center shadow-2xs shrink-0">
-        <ShoppingBag size={13} />
+        <LayoutDashboard size={13} />
       </div>
     );
   }
   if (k.includes('quote') || k.includes('quotation')) {
     return (
-      <div className="w-[22px] h-[22px] rounded-lg bg-gradient-to-tr from-amber-500 to-yellow-600 text-white flex items-center justify-center shadow-2xs shrink-0">
+      <div className="w-[22px] h-[22px] rounded-lg bg-gradient-to-tr from-amber-500 to-orange-500 text-white flex items-center justify-center shadow-2xs shrink-0">
         <FileCheck size={13} />
+      </div>
+    );
+  }
+  if (k.includes('invoice')) {
+    return (
+      <div className="w-[22px] h-[22px] rounded-lg bg-gradient-to-tr from-emerald-600 to-teal-600 text-white flex items-center justify-center shadow-2xs shrink-0">
+        <Receipt size={13} />
       </div>
     );
   }
@@ -210,54 +213,43 @@ const getFeatureBrandLogo = (key, size = 22) => {
       </div>
     );
   }
-  if (k.includes('invoice') || k.includes('billing')) {
+  if (k.includes('catalog') || k.includes('catelog')) {
     return (
-      <div className="w-[22px] h-[22px] rounded-lg bg-gradient-to-tr from-emerald-600 to-teal-600 text-white flex items-center justify-center shadow-2xs shrink-0">
-        <Receipt size={13} />
+      <div className="w-[22px] h-[22px] rounded-lg bg-gradient-to-tr from-teal-600 to-emerald-500 text-white flex items-center justify-center shadow-2xs shrink-0">
+        <ShoppingBag size={13} />
       </div>
     );
   }
-  if (k.includes('order') || k.includes('payment') || k.includes('sales')) {
+  if (k.includes('payment')) {
     return (
       <div className="w-[22px] h-[22px] rounded-lg bg-gradient-to-tr from-purple-600 to-pink-600 text-white flex items-center justify-center shadow-2xs shrink-0">
         <CreditCard size={13} />
       </div>
     );
   }
-
-  // 6. Team & Security
-  if (k.includes('team')) {
+  if (k.includes('crm')) {
     return (
-      <div className="w-[22px] h-[22px] rounded-lg bg-gradient-to-tr from-blue-700 to-sky-600 text-white flex items-center justify-center shadow-2xs shrink-0">
-        <ShieldCheck size={13} />
+      <div className="w-[22px] h-[22px] rounded-lg bg-gradient-to-tr from-cyan-600 to-blue-700 text-white flex items-center justify-center shadow-2xs shrink-0">
+        <Users size={13} />
       </div>
     );
   }
-  if (k.includes('report') || k.includes('work')) {
+  if (k.includes('auto') || k.includes('reply')) {
     return (
-      <div className="w-[22px] h-[22px] rounded-lg bg-gradient-to-tr from-teal-600 to-cyan-600 text-white flex items-center justify-center shadow-2xs shrink-0">
-        <Activity size={13} />
+      <div className="w-[22px] h-[22px] rounded-lg bg-gradient-to-tr from-violet-600 to-purple-600 text-white flex items-center justify-center shadow-2xs shrink-0">
+        <Bot size={13} />
       </div>
     );
   }
-  if (k.includes('audit') || k.includes('security')) {
+  if (k.includes('voice') || k.includes('video') || k.includes('call')) {
     return (
-      <div className="w-[22px] h-[22px] rounded-lg bg-gradient-to-tr from-rose-600 to-red-600 text-white flex items-center justify-center shadow-2xs shrink-0">
-        <Shield size={13} />
-      </div>
-    );
-  }
-
-  // 7. Knowledge & Documents
-  if (k.includes('knowledge') || k.includes('base') || k.includes('faq')) {
-    return (
-      <div className="w-[22px] h-[22px] rounded-lg bg-gradient-to-tr from-indigo-600 to-violet-600 text-white flex items-center justify-center shadow-2xs shrink-0">
-        <Brain size={13} />
+      <div className="w-[22px] h-[22px] rounded-lg bg-gradient-to-tr from-rose-500 to-red-600 text-white flex items-center justify-center shadow-2xs shrink-0">
+        <Video size={13} />
       </div>
     );
   }
 
-  // Default fallback
+  // Fallback
   return (
     <div className="w-[22px] h-[22px] rounded-lg bg-gradient-to-tr from-slate-600 to-slate-500 text-white flex items-center justify-center shadow-2xs shrink-0">
       <Zap size={13} />
@@ -265,41 +257,223 @@ const getFeatureBrandLogo = (key, size = 22) => {
   );
 };
 
-// ── DEFAULT CATALOG FEATURES ──
+// ── EXACT SYSTEM ENTITLEMENTS (CHANNELS, CONNECTORS, FEATURES) ──
 const DEFAULT_FEATURES = [
-  // Communication
-  { id: 'f-wa', key: 'channel_whatsapp', name: 'WhatsApp Channel', category: 'Communication', feature_type: 'Channel', description: 'Official WhatsApp Cloud API & web integration', is_active: true, plan_count: 3 },
-  { id: 'f-fb', key: 'channel_facebook', name: 'Facebook Messenger', category: 'Communication', feature_type: 'Channel', description: 'Facebook page messaging & live sync', is_active: true, plan_count: 3 },
-  { id: 'f-ig', key: 'channel_instagram', name: 'Instagram Direct', category: 'Communication', feature_type: 'Channel', description: 'Instagram DM automation & live chat', is_active: true, plan_count: 2 },
-  { id: 'f-tg', key: 'channel_telegram', name: 'Telegram Bot', category: 'Communication', feature_type: 'Channel', description: 'Telegram bot channel integration', is_active: true, plan_count: 2 },
-  { id: 'f-live-inbox', key: 'live_messages_inbox', name: 'Live Omnichannel Inbox', category: 'Communication', feature_type: 'Module', description: 'Unified multi-channel live conversation hub', is_active: true, plan_count: 3 },
-  { id: 'f-email', key: 'channel_email', name: 'Email Workflows', category: 'Communication', feature_type: 'Channel', description: 'Inbound/outbound email automation', is_active: true, plan_count: 2 },
+  // ── Channels (4) ──
+  {
+    id: 'f-wa',
+    key: 'channel_whatsapp',
+    name: 'WhatsApp',
+    category: 'Channels',
+    feature_type: 'Channel',
+    description: 'Official WhatsApp Cloud API & automated conversations',
+    is_active: true,
+    plan_count: 3
+  },
+  {
+    id: 'f-ig',
+    key: 'channel_instagram',
+    name: 'Instagram',
+    category: 'Channels',
+    feature_type: 'Channel',
+    description: 'Instagram Direct automation & real-time messaging',
+    is_active: true,
+    plan_count: 2
+  },
+  {
+    id: 'f-fb',
+    key: 'channel_facebook',
+    name: 'Facebook',
+    category: 'Channels',
+    feature_type: 'Channel',
+    description: 'Facebook Messenger & page conversation sync',
+    is_active: true,
+    plan_count: 3
+  },
+  {
+    id: 'f-yt',
+    key: 'channel_youtube',
+    name: 'YouTube',
+    category: 'Channels',
+    feature_type: 'Channel',
+    description: 'YouTube comments, audience replies & engagement',
+    is_active: true,
+    plan_count: 2
+  },
 
-  // AI & Automation
-  { id: 'f-ai-assist', key: 'ai_copilot', name: 'AI Smart Assistant', category: 'AI & Automation', feature_type: 'Module', description: 'AI copilot for replies & summaries', is_active: true, plan_count: 3 },
-  { id: 'f-ai-bots', key: 'ai_flow_bots', name: 'AI Chatbots & Workflows', category: 'AI & Automation', feature_type: 'Module', description: 'Visual conversational bot builder', is_active: true, plan_count: 2 },
-  { id: 'f-ai-auto', key: 'ai_auto_pilot', name: 'Advanced AI Auto-Pilot', category: 'AI & Automation', feature_type: 'Module', description: 'Autonomous agent decision engine', is_active: true, plan_count: 1 },
+  // ── Connectors (8) ──
+  {
+    id: 'f-gmail',
+    key: 'connector_gmail',
+    name: 'Gmail',
+    category: 'Connectors',
+    feature_type: 'Connector',
+    description: 'Google Gmail workspace integration & email sync',
+    is_active: true,
+    plan_count: 3
+  },
+  {
+    id: 'f-outlook',
+    key: 'connector_outlook',
+    name: 'Microsoft Outlook',
+    category: 'Connectors',
+    feature_type: 'Connector',
+    description: 'Microsoft Outlook email & enterprise calendar connector',
+    is_active: true,
+    plan_count: 2
+  },
+  {
+    id: 'f-gmap',
+    key: 'connector_google_maps',
+    name: 'Google Maps',
+    category: 'Connectors',
+    feature_type: 'Connector',
+    description: 'Google Maps location intelligence & business verification',
+    is_active: true,
+    plan_count: 2
+  },
+  {
+    id: 'f-gdoc',
+    key: 'connector_google_docs',
+    name: 'Google Docs',
+    category: 'Connectors',
+    feature_type: 'Connector',
+    description: 'Google Docs templates & automated client documents',
+    is_active: true,
+    plan_count: 3
+  },
+  {
+    id: 'f-onedrive',
+    key: 'connector_onedrive',
+    name: 'OneDrive',
+    category: 'Connectors',
+    feature_type: 'Connector',
+    description: 'Microsoft OneDrive cloud storage & file synchronization',
+    is_active: true,
+    plan_count: 2
+  },
+  {
+    id: 'f-gsheet',
+    key: 'connector_google_sheets',
+    name: 'Google Sheets',
+    category: 'Connectors',
+    feature_type: 'Connector',
+    description: 'Google Sheets automated spreadsheets & live data export',
+    is_active: true,
+    plan_count: 3
+  },
+  {
+    id: 'f-gslides',
+    key: 'connector_google_slides',
+    name: 'Google Slides',
+    category: 'Connectors',
+    feature_type: 'Connector',
+    description: 'Google Slides presentations & pitch deck creator',
+    is_active: true,
+    plan_count: 2
+  },
+  {
+    id: 'f-gnews',
+    key: 'connector_google_news',
+    name: 'Google News Feed',
+    category: 'Connectors',
+    feature_type: 'Connector',
+    description: 'Google News live feed monitoring & real-time alerts',
+    is_active: true,
+    plan_count: 1
+  },
 
-  // CRM & Leads
-  { id: 'f-clients', key: 'crm_clients', name: 'Client Directory & Workspaces', category: 'CRM', feature_type: 'Module', description: 'Multi-tenant client database & intelligence', is_active: true, plan_count: 3 },
-  { id: 'f-leads', key: 'crm_leads', name: 'Lead Pipeline Management', category: 'CRM', feature_type: 'Module', description: 'Deal stages, funnel conversion & tracking', is_active: true, plan_count: 2 },
-  { id: 'f-search', key: 'global_omnisearch', name: 'Global Omni-Search', category: 'CRM', feature_type: 'Module', description: 'Universal search across messages & files', is_active: true, plan_count: 3 },
-
-  // Sales & Finance
-  { id: 'f-products', key: 'sales_catalog', name: 'Products & Services Catalog', category: 'Sales', feature_type: 'Module', description: 'Item pricing, variants & SKU management', is_active: true, plan_count: 3 },
-  { id: 'f-quotes', key: 'sales_quotations', name: 'Quotations & Estimates', category: 'Sales', feature_type: 'Module', description: 'Instant PDF quotes with approvals', is_active: true, plan_count: 2 },
-  { id: 'f-proposals', key: 'sales_proposals', name: 'Business Proposals', category: 'Sales', feature_type: 'Module', description: 'Multi-page branded client proposals', is_active: true, plan_count: 2 },
-  { id: 'f-invoices', key: 'sales_invoices', name: 'Tax Invoices & Billing', category: 'Sales', feature_type: 'Module', description: 'Automated invoice generation & receipts', is_active: true, plan_count: 2 },
-  { id: 'f-sales-orders', key: 'sales_orders', name: 'Sales Orders & Checkout', category: 'Sales', feature_type: 'Module', description: 'Order lifecycle and webhook tracking', is_active: true, plan_count: 2 },
-
-  // Team & Collaboration
-  { id: 'f-team', key: 'team_management', name: 'Team Roles & Permissions', category: 'Team', feature_type: 'Module', description: 'Role-based access permissions & seats', is_active: true, plan_count: 3 },
-  { id: 'f-reports', key: 'team_work_reports', name: 'Staff Work Reports & Analytics', category: 'Team', feature_type: 'Module', description: 'Daily task logging & performance analytics', is_active: true, plan_count: 2 },
-  { id: 'f-audit', key: 'security_audit_logs', name: 'Enterprise Audit Logs', category: 'Team', feature_type: 'Module', description: 'Immutable activity tracking & compliance trail', is_active: true, plan_count: 1 },
-
-  // Knowledge & Documents
-  { id: 'f-kb', key: 'knowledge_base', name: 'Knowledge Base & FAQs', category: 'Documents', feature_type: 'Module', description: 'Vectorized knowledge base documents', is_active: true, plan_count: 2 },
-  { id: 'f-onedrive', key: 'connector_onedrive', name: 'OneDrive & Cloud Sync', category: 'Documents', feature_type: 'Connector', description: 'Direct sync with cloud document drives', is_active: true, plan_count: 1 },
+  // ── Features (9) ──
+  {
+    id: 'f-team-dash',
+    key: 'feature_team_dashboard',
+    name: 'Team Dashboard',
+    category: 'Features',
+    feature_type: 'Module',
+    description: 'Collaborative team workspace & performance dashboard',
+    is_active: true,
+    plan_count: 3
+  },
+  {
+    id: 'f-quotes',
+    key: 'feature_quotation',
+    name: 'Quotation',
+    category: 'Features',
+    feature_type: 'Module',
+    description: 'Instant sales quotations, estimates & digital approvals',
+    is_active: true,
+    plan_count: 3
+  },
+  {
+    id: 'f-invoice',
+    key: 'feature_invoice',
+    name: 'Invoice',
+    category: 'Features',
+    feature_type: 'Module',
+    description: 'Automated GST & tax invoicing with payment receipts',
+    is_active: true,
+    plan_count: 3
+  },
+  {
+    id: 'f-proposals',
+    key: 'feature_proposal',
+    name: 'Proposal',
+    category: 'Features',
+    feature_type: 'Module',
+    description: 'Multi-page branded client business proposals',
+    is_active: true,
+    plan_count: 2
+  },
+  {
+    id: 'f-catalog',
+    key: 'feature_catalog',
+    name: 'Catalog',
+    category: 'Features',
+    feature_type: 'Module',
+    description: 'Products & services catalog with pricing & SKUs',
+    is_active: true,
+    plan_count: 2
+  },
+  {
+    id: 'f-payment',
+    key: 'feature_payment',
+    name: 'Payment',
+    category: 'Features',
+    feature_type: 'Module',
+    description: 'Payment gateway integration, checkout links & transaction tracking',
+    is_active: true,
+    plan_count: 2
+  },
+  {
+    id: 'f-crm',
+    key: 'feature_crm',
+    name: 'CRM',
+    category: 'Features',
+    feature_type: 'Module',
+    description: 'Client directory, contact management & deal pipeline stages',
+    is_active: true,
+    plan_count: 3
+  },
+  {
+    id: 'f-autoreply',
+    key: 'feature_autoreply',
+    name: 'Auto Reply',
+    category: 'Features',
+    feature_type: 'Module',
+    description: 'Automated 24/7 instant replies & trigger bot flows',
+    is_active: true,
+    plan_count: 3
+  },
+  {
+    id: 'f-voice-video',
+    key: 'feature_voice_video_call',
+    name: 'Voice / Video Call',
+    category: 'Features',
+    feature_type: 'Module',
+    description: 'Integrated voice calling & video meeting capabilities',
+    is_active: true,
+    plan_count: 2
+  },
 ];
 
 // ── DEFAULT BENCHMARK PLANS ──
@@ -309,22 +483,25 @@ const INITIAL_PLANS = [
     name: 'Starter',
     badge: 'STARTER',
     status: 'ACTIVE',
-    description: 'Essential communication tools for solo entrepreneurs & small businesses.',
+    description: 'Essential channels, workspace connectors & sales invoicing for small businesses.',
     price: 999,
     billing_cycle: 'Monthly',
     currency: 'INR',
     feature_keys: [
       'channel_whatsapp',
+      'channel_instagram',
       'channel_facebook',
-      'live_messages_inbox',
-      'crm_clients',
-      'global_omnisearch',
-      'sales_catalog',
-      'team_management',
-      'ai_copilot'
+      'connector_gmail',
+      'connector_google_docs',
+      'connector_google_sheets',
+      'feature_team_dashboard',
+      'feature_quotation',
+      'feature_invoice',
+      'feature_crm',
+      'feature_autoreply'
     ],
     channel_count: 3,
-    connector_count: 1,
+    connector_count: 3,
     client_count: 8,
     is_popular: false
   },
@@ -333,32 +510,31 @@ const INITIAL_PLANS = [
     name: 'Professional',
     badge: 'PROFESSIONAL',
     status: 'ACTIVE',
-    description: 'Complete sales automation, AI bots, invoicing and team intelligence.',
+    description: 'Complete suite with full channels, cloud connectors, catalog, proposals & payment processing.',
     price: 2999,
     billing_cycle: 'Monthly',
     currency: 'INR',
     feature_keys: [
       'channel_whatsapp',
-      'channel_facebook',
       'channel_instagram',
-      'channel_telegram',
-      'channel_email',
-      'live_messages_inbox',
-      'ai_copilot',
-      'ai_flow_bots',
-      'crm_clients',
-      'crm_leads',
-      'global_omnisearch',
-      'sales_catalog',
-      'sales_quotations',
-      'sales_proposals',
-      'sales_invoices',
-      'sales_orders',
-      'team_management',
-      'team_work_reports',
-      'knowledge_base'
+      'channel_facebook',
+      'channel_youtube',
+      'connector_gmail',
+      'connector_outlook',
+      'connector_google_maps',
+      'connector_google_docs',
+      'connector_onedrive',
+      'connector_google_sheets',
+      'feature_team_dashboard',
+      'feature_quotation',
+      'feature_invoice',
+      'feature_proposal',
+      'feature_catalog',
+      'feature_payment',
+      'feature_crm',
+      'feature_autoreply'
     ],
-    channel_count: 5,
+    channel_count: 4,
     connector_count: 6,
     client_count: 14,
     is_popular: true
@@ -368,13 +544,13 @@ const INITIAL_PLANS = [
     name: 'Enterprise',
     badge: 'ENTERPRISE',
     status: 'ACTIVE',
-    description: 'Unlimited features, custom connectors, AI auto-pilot, audit logs and SLA.',
+    description: 'Unlimited access to all 4 communication channels, all 8 cloud connectors, and all 9 business modules.',
     price: 9999,
     billing_cycle: 'Monthly',
     currency: 'INR',
     feature_keys: DEFAULT_FEATURES.map(f => f.key),
-    channel_count: 9,
-    connector_count: 10,
+    channel_count: 4,
+    connector_count: 8,
     client_count: 5,
     is_popular: false
   }
@@ -382,9 +558,9 @@ const INITIAL_PLANS = [
 
 // ── SAMPLE CLIENT ASSIGNMENTS ──
 const INITIAL_CLIENTS = [
-  { id: 'c-1', business_name: 'Yugamc Business Hub', client_name: 'Yugam Admin', email: 'admin@yugamc.com', plan_id: 'plan-pro', plan_name: 'Professional', custom_added: ['ai_auto_pilot'], custom_removed: ['channel_telegram'], status: 'ACTIVE' },
+  { id: 'c-1', business_name: 'Yugamc Business Hub', client_name: 'Yugam Admin', email: 'admin@yugamc.com', plan_id: 'plan-pro', plan_name: 'Professional', custom_added: ['feature_voice_video_call'], custom_removed: [], status: 'ACTIVE' },
   { id: 'c-2', business_name: 'Unified Web Options Pvt Ltd', client_name: 'Rahul Sharma', email: 'rahul@uwo.in', plan_id: 'plan-enterprise', plan_name: 'Enterprise', custom_added: [], custom_removed: [], status: 'ACTIVE' },
-  { id: 'c-3', business_name: 'Apex Digital Workspace', client_name: 'Aman Verma', email: 'aman@apexdigital.com', plan_id: 'plan-starter', plan_name: 'Starter', custom_added: ['sales_invoices'], custom_removed: [], status: 'ACTIVE' },
+  { id: 'c-3', business_name: 'Apex Digital Workspace', client_name: 'Aman Verma', email: 'aman@apexdigital.com', plan_id: 'plan-starter', plan_name: 'Starter', custom_added: ['feature_payment'], custom_removed: [], status: 'ACTIVE' },
   { id: 'c-4', business_name: 'Matrix Cloud Solutions', client_name: 'Pooja Nair', email: 'pooja@matrixcloud.io', plan_id: 'plan-pro', plan_name: 'Professional', custom_added: [], custom_removed: [], status: 'ACTIVE' },
 ];
 
@@ -433,8 +609,8 @@ export default function AdminPlansPage() {
   const [featureForm, setFeatureForm] = useState({
     name: '',
     key: '',
-    category: 'Communication',
-    feature_type: 'Module',
+    category: 'Channels',
+    feature_type: 'Channel',
     description: '',
     is_active: true
   });
@@ -468,21 +644,24 @@ export default function AdminPlansPage() {
         setFeatures(featuresRes.value.data.results);
       }
       if (plansRes.status === 'fulfilled' && plansRes.value.data?.results?.length > 0) {
-        const mappedPlans = plansRes.value.data.results.map(p => ({
-          id: p.id,
-          name: p.name,
-          badge: p.name.toUpperCase(),
-          status: p.is_active ? 'ACTIVE' : 'INACTIVE',
-          description: p.description || 'Custom Enterprise Plan',
-          price: p.price || 0,
-          billing_cycle: p.billing_cycle || 'Monthly',
-          currency: p.currency || 'INR',
-          feature_keys: p.feature_keys || [],
-          channel_count: p.channel_count || 4,
-          connector_count: p.connector_count || 3,
-          client_count: p.client_count || 0,
-          is_popular: p.is_popular || false
-        }));
+        const mappedPlans = plansRes.value.data.results.map(p => {
+          const keys = p.feature_keys || p.metadata?.feature_keys || [];
+          return {
+            id: p.id,
+            name: p.name,
+            badge: p.name.toUpperCase(),
+            status: p.is_active ? 'ACTIVE' : 'INACTIVE',
+            description: p.description || 'Custom Enterprise Plan',
+            price: p.price || 0,
+            billing_cycle: p.billing_cycle || 'Monthly',
+            currency: p.currency || 'INR',
+            feature_keys: keys,
+            channel_count: keys.filter(k => k.startsWith('channel_')).length,
+            connector_count: keys.filter(k => k.startsWith('connector_')).length,
+            client_count: p.client_count || 0,
+            is_popular: p.is_popular || false
+          };
+        });
         setPlans(mappedPlans);
       }
       if (clientsRes.status === 'fulfilled' && (clientsRes.value.data?.clients || clientsRes.value.data?.results)) {
@@ -508,11 +687,19 @@ export default function AdminPlansPage() {
     }
   };
 
-  // ── Category Grouping ──
+  // ── Category Grouping & Lookup ──
+  const CATEGORY_ORDER = ['Channels', 'Connectors', 'Features'];
+
+  const featureCategoryMap = useMemo(() => {
+    const map = new Map();
+    features.forEach(f => map.set(f.key, f.category));
+    return map;
+  }, [features]);
+
   const categorizedFeatures = useMemo(() => {
     const map = {};
     features.forEach(f => {
-      const cat = f.category || 'General';
+      const cat = f.category || 'Features';
       if (!map[cat]) map[cat] = [];
       map[cat].push(f);
     });
@@ -520,7 +707,8 @@ export default function AdminPlansPage() {
   }, [features]);
 
   const uniqueCategories = useMemo(() => {
-    return Object.keys(categorizedFeatures);
+    const cats = Object.keys(categorizedFeatures);
+    return CATEGORY_ORDER.filter(c => cats.includes(c)).concat(cats.filter(c => !CATEGORY_ORDER.includes(c)));
   }, [categorizedFeatures]);
 
   // ── Summary Metrics ──
@@ -634,8 +822,8 @@ export default function AdminPlansPage() {
       billing_cycle: planForm.billing_cycle,
       currency: planForm.currency,
       feature_keys: planForm.selected_feature_keys,
-      channel_count: planForm.selected_feature_keys.filter(k => k.startsWith('channel_')).length || 2,
-      connector_count: planForm.selected_feature_keys.filter(k => k.startsWith('connector_')).length || 1,
+      channel_count: planForm.selected_feature_keys.filter(k => k.startsWith('channel_')).length,
+      connector_count: planForm.selected_feature_keys.filter(k => k.startsWith('connector_')).length,
       client_count: 0,
       is_popular: false
     };
@@ -675,8 +863,8 @@ export default function AdminPlansPage() {
       billing_cycle: planForm.billing_cycle,
       currency: planForm.currency,
       feature_keys: planForm.selected_feature_keys,
-      channel_count: planForm.selected_feature_keys.filter(k => k.startsWith('channel_')).length || 2,
-      connector_count: planForm.selected_feature_keys.filter(k => k.startsWith('connector_')).length || 1,
+      channel_count: planForm.selected_feature_keys.filter(k => k.startsWith('channel_')).length,
+      connector_count: planForm.selected_feature_keys.filter(k => k.startsWith('connector_')).length,
     };
 
     try {
@@ -723,8 +911,8 @@ export default function AdminPlansPage() {
     setFeatureForm({
       name: '',
       key: '',
-      category: 'Communication',
-      feature_type: 'Module',
+      category: 'Channels',
+      feature_type: 'Channel',
       description: '',
       is_active: true
     });
@@ -982,7 +1170,7 @@ export default function AdminPlansPage() {
             )}
           >
             <Zap size={14} />
-            <span>Features</span>
+            <span>Catalog</span>
             <span className={cn(
               "px-2 py-0.5 rounded-full text-[10px] font-mono",
               activeTab === 'features' ? "bg-white/20 text-white" : "bg-slate-100 text-slate-600"
@@ -1016,7 +1204,20 @@ export default function AdminPlansPage() {
           <div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {plans.map((plan) => {
-                const totalFeatCount = plan.feature_keys?.length || 0;
+                const keys = plan.feature_keys || [];
+                const dynamicChannelCount = keys.filter(k => {
+                  const cat = featureCategoryMap.get(k);
+                  return cat === 'Channels' || (!cat && k.startsWith('channel_'));
+                }).length;
+                const dynamicConnectorCount = keys.filter(k => {
+                  const cat = featureCategoryMap.get(k);
+                  return cat === 'Connectors' || (!cat && k.startsWith('connector_'));
+                }).length;
+                const dynamicFeatureCount = keys.filter(k => {
+                  const cat = featureCategoryMap.get(k);
+                  return cat === 'Features' || (!cat && (k.startsWith('feature_') || (!k.startsWith('channel_') && !k.startsWith('connector_'))));
+                }).length;
+                const totalFeatCount = keys.length;
                 return (
                   <div
                     key={plan.id}
@@ -1052,14 +1253,14 @@ export default function AdminPlansPage() {
 
                       {/* Mini Feature Logo Icons Preview */}
                       <div className="flex items-center gap-1.5 flex-wrap mb-4 bg-slate-50/70 p-2.5 rounded-2xl border border-slate-100">
-                        {(plan.feature_keys || []).slice(0, 8).map(fKey => (
+                        {keys.slice(0, 8).map(fKey => (
                           <div key={fKey} title={fKey} className="hover:scale-110 transition-transform">
                             {getFeatureBrandLogo(fKey, 18)}
                           </div>
                         ))}
-                        {(plan.feature_keys || []).length > 8 && (
+                        {keys.length > 8 && (
                           <span className="text-[10px] font-bold text-slate-500 ml-1">
-                            +{plan.feature_keys.length - 8} more
+                            +{keys.length - 8} more
                           </span>
                         )}
                       </div>
@@ -1082,19 +1283,19 @@ export default function AdminPlansPage() {
                           <span className="text-slate-500 flex items-center gap-1.5">
                             <Zap size={14} className="text-emerald-600" /> Features
                           </span>
-                          <span className="font-bold text-slate-900">{totalFeatCount} Features</span>
+                          <span className="font-bold text-slate-900">{dynamicFeatureCount} Features</span>
                         </div>
                         <div className="flex items-center justify-between">
                           <span className="text-slate-500 flex items-center gap-1.5">
                             <Link2 size={14} className="text-teal-600" /> Channels
                           </span>
-                          <span className="font-bold text-slate-900">{plan.channel_count || 3} Channels</span>
+                          <span className="font-bold text-slate-900">{dynamicChannelCount} Channels</span>
                         </div>
                         <div className="flex items-center justify-between">
                           <span className="text-slate-500 flex items-center gap-1.5">
                             <Share2 size={14} className="text-blue-600" /> Connectors
                           </span>
-                          <span className="font-bold text-slate-900">{plan.connector_count || 2} Connectors</span>
+                          <span className="font-bold text-slate-900">{dynamicConnectorCount} Connectors</span>
                         </div>
                         <div className="flex items-center justify-between pt-2 border-t border-slate-100">
                           <span className="text-slate-500 flex items-center gap-1.5">
@@ -1121,10 +1322,11 @@ export default function AdminPlansPage() {
           </div>
         )}
 
-        {/* ── 5. TAB 2: FEATURES CATALOG ── */}
+        {/* ── 5. TAB 2: FEATURES CATALOG (Grouped by Category) ── */}
         {activeTab === 'features' && (
           <div>
-            <div className="bg-white p-3.5 rounded-2xl border border-slate-200/80 shadow-2xs mb-4 flex flex-col md:flex-row items-center justify-between gap-3">
+            {/* Search & Add Feature Bar */}
+            <div className="bg-white p-3.5 rounded-2xl border border-slate-200/80 shadow-2xs mb-6 flex flex-col md:flex-row items-center justify-between gap-3">
               <div className="relative w-full md:w-80">
                 <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={15} />
                 <input
@@ -1137,17 +1339,6 @@ export default function AdminPlansPage() {
               </div>
 
               <div className="flex items-center gap-2.5 w-full md:w-auto">
-                <select
-                  value={featureCategoryFilter}
-                  onChange={(e) => setFeatureCategoryFilter(e.target.value)}
-                  className="px-3 py-2 bg-slate-50 hover:bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 outline-none focus:border-emerald-500 cursor-pointer"
-                >
-                  <option value="ALL">All Categories</option>
-                  {uniqueCategories.map(cat => (
-                    <option key={cat} value={cat}>{cat}</option>
-                  ))}
-                </select>
-
                 <button
                   onClick={handleOpenAddFeature}
                   className="flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs shadow-2xs transition-all cursor-pointer whitespace-nowrap"
@@ -1157,73 +1348,256 @@ export default function AdminPlansPage() {
               </div>
             </div>
 
-            <div className="bg-white rounded-2xl border border-slate-200/90 shadow-sm overflow-hidden">
-              <div className="overflow-x-auto custom-scrollbar">
-                <table className="w-full text-left border-collapse text-xs">
-                  <thead>
-                    <tr className="bg-slate-50/90 border-b border-slate-200 text-slate-500 font-bold uppercase text-[10px] tracking-wider whitespace-nowrap">
-                      <th className="py-3.5 px-6">Feature</th>
-                      <th className="py-3.5 px-6">Category</th>
-                      <th className="py-3.5 px-6">Type</th>
-                      <th className="py-3.5 px-6">Used In Plans</th>
-                      <th className="py-3.5 px-6">Status</th>
-                      <th className="py-3.5 px-6 text-right">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100 font-sans">
-                    {filteredFeaturesList.map((f) => (
-                      <tr key={f.id} className="hover:bg-slate-50/70 transition-colors">
-                        <td className="py-3.5 px-6 font-bold text-slate-900">
-                          <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center shrink-0">
-                              {getFeatureBrandLogo(f.key, 20)}
-                            </div>
-                            <div className="flex flex-col">
-                              <span>{f.name}</span>
-                              <span className="text-[10px] font-mono text-slate-400 font-normal">{f.key}</span>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="py-3.5 px-6">
-                          <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-slate-100 text-slate-700 border border-slate-200">
-                            {f.category}
-                          </span>
-                        </td>
-                        <td className="py-3.5 px-6">
-                          <span className={cn(
-                            "px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase border",
-                            f.feature_type === 'Channel' ? "bg-blue-50 text-blue-700 border-blue-200" :
-                            f.feature_type === 'Connector' ? "bg-purple-50 text-purple-700 border-purple-200" :
-                            "bg-teal-50 text-teal-700 border-teal-200"
-                          )}>
-                            {f.feature_type}
-                          </span>
-                        </td>
-                        <td className="py-3.5 px-6 text-slate-600 font-medium">
-                          {f.plan_count || plans.filter(p => p.feature_keys?.includes(f.key)).length} Plans
-                        </td>
-                        <td className="py-3.5 px-6">
-                          <span className={cn(
-                            "px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase inline-flex items-center gap-1.5 border",
-                            f.is_active ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-slate-100 text-slate-500 border-slate-200"
-                          )}>
-                            <span className={cn("w-1.5 h-1.5 rounded-full", f.is_active ? "bg-emerald-500" : "bg-slate-400")} />
-                            {f.is_active ? 'Active' : 'Inactive'}
-                          </span>
-                        </td>
-                        <td className="py-3.5 px-6 text-right">
-                          <button
-                            onClick={() => showToast(`Feature "${f.name}" info loaded`)}
-                            className="px-3 py-1 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-lg text-xs font-bold transition-all cursor-pointer"
-                          >
-                            Manage
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+            {/* ── Grouped Sections ── */}
+            <div className="space-y-6">
+              {/* ── CHANNELS SECTION ── */}
+              {(() => {
+                const channelItems = filteredFeaturesList.filter(f => f.category === 'Channels');
+                if (featureCategoryFilter !== 'ALL' && featureCategoryFilter !== 'Channels') return null;
+                if (channelItems.length === 0 && featureSearch) return null;
+                return (
+                  <div>
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center shadow-md shadow-blue-600/20">
+                        <MessageSquare size={17} />
+                      </div>
+                      <div className="flex items-center gap-2.5">
+                        <h3 className="text-sm font-extrabold text-slate-900 tracking-tight">Channels</h3>
+                        <span className="px-2.5 py-0.5 bg-blue-50 text-blue-700 text-[10px] font-bold rounded-full border border-blue-200">
+                          {channelItems.length} Channels
+                        </span>
+                      </div>
+                      <div className="flex-1 h-px bg-gradient-to-r from-blue-200 to-transparent ml-2" />
+                    </div>
+                    <div className="bg-white rounded-2xl border border-slate-200/90 shadow-sm overflow-hidden">
+                      <div className="overflow-x-auto custom-scrollbar">
+                        <table className="w-full text-left border-collapse text-xs">
+                          <thead>
+                            <tr className="bg-blue-50/50 border-b border-blue-100 text-slate-500 font-bold uppercase text-[10px] tracking-wider whitespace-nowrap">
+                              <th className="py-3 px-6">Channel</th>
+                              <th className="py-3 px-6">Type</th>
+                              <th className="py-3 px-6">Used In Plans</th>
+                              <th className="py-3 px-6">Status</th>
+                              <th className="py-3 px-6 text-right">Action</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-slate-100 font-sans">
+                            {channelItems.map((f) => (
+                              <tr key={f.id} className="hover:bg-blue-50/30 transition-colors">
+                                <td className="py-3.5 px-6 font-bold text-slate-900">
+                                  <div className="flex items-center gap-3">
+                                    <div className="w-8 h-8 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center shrink-0">
+                                      {getFeatureBrandLogo(f.key, 20)}
+                                    </div>
+                                    <div className="flex flex-col">
+                                      <span>{f.name}</span>
+                                      <span className="text-[10px] font-mono text-slate-400 font-normal">{f.key}</span>
+                                    </div>
+                                  </div>
+                                </td>
+                                <td className="py-3.5 px-6">
+                                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase border bg-blue-50 text-blue-700 border-blue-200">
+                                    Channel
+                                  </span>
+                                </td>
+                                <td className="py-3.5 px-6 text-slate-600 font-medium">
+                                  {f.plan_count || plans.filter(p => p.feature_keys?.includes(f.key)).length} Plans
+                                </td>
+                                <td className="py-3.5 px-6">
+                                  <span className={cn(
+                                    "px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase inline-flex items-center gap-1.5 border",
+                                    f.is_active ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-slate-100 text-slate-500 border-slate-200"
+                                  )}>
+                                    <span className={cn("w-1.5 h-1.5 rounded-full", f.is_active ? "bg-emerald-500" : "bg-slate-400")} />
+                                    {f.is_active ? 'Active' : 'Inactive'}
+                                  </span>
+                                </td>
+                                <td className="py-3.5 px-6 text-right">
+                                  <button
+                                    onClick={() => showToast(`Channel "${f.name}" info loaded`)}
+                                    className="px-3 py-1 bg-white hover:bg-blue-50 text-slate-700 hover:text-blue-700 border border-slate-200 hover:border-blue-200 rounded-lg text-xs font-bold transition-all cursor-pointer"
+                                  >
+                                    Manage
+                                  </button>
+                                </td>
+                              </tr>
+                            ))}
+                            {channelItems.length === 0 && (
+                              <tr><td colSpan={5} className="py-8 text-center text-xs text-slate-400 font-medium">No channels found</td></tr>
+                            )}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
+
+              {/* ── CONNECTORS SECTION ── */}
+              {(() => {
+                const connectorItems = filteredFeaturesList.filter(f => f.category === 'Connectors');
+                if (featureCategoryFilter !== 'ALL' && featureCategoryFilter !== 'Connectors') return null;
+                if (connectorItems.length === 0 && featureSearch) return null;
+                return (
+                  <div>
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-purple-500 to-violet-600 text-white flex items-center justify-center shadow-md shadow-purple-600/20">
+                        <Share2 size={17} />
+                      </div>
+                      <div className="flex items-center gap-2.5">
+                        <h3 className="text-sm font-extrabold text-slate-900 tracking-tight">Connectors</h3>
+                        <span className="px-2.5 py-0.5 bg-purple-50 text-purple-700 text-[10px] font-bold rounded-full border border-purple-200">
+                          {connectorItems.length} Connectors
+                        </span>
+                      </div>
+                      <div className="flex-1 h-px bg-gradient-to-r from-purple-200 to-transparent ml-2" />
+                    </div>
+                    <div className="bg-white rounded-2xl border border-slate-200/90 shadow-sm overflow-hidden">
+                      <div className="overflow-x-auto custom-scrollbar">
+                        <table className="w-full text-left border-collapse text-xs">
+                          <thead>
+                            <tr className="bg-purple-50/50 border-b border-purple-100 text-slate-500 font-bold uppercase text-[10px] tracking-wider whitespace-nowrap">
+                              <th className="py-3 px-6">Connector</th>
+                              <th className="py-3 px-6">Type</th>
+                              <th className="py-3 px-6">Used In Plans</th>
+                              <th className="py-3 px-6">Status</th>
+                              <th className="py-3 px-6 text-right">Action</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-slate-100 font-sans">
+                            {connectorItems.map((f) => (
+                              <tr key={f.id} className="hover:bg-purple-50/30 transition-colors">
+                                <td className="py-3.5 px-6 font-bold text-slate-900">
+                                  <div className="flex items-center gap-3">
+                                    <div className="w-8 h-8 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center shrink-0">
+                                      {getFeatureBrandLogo(f.key, 20)}
+                                    </div>
+                                    <div className="flex flex-col">
+                                      <span>{f.name}</span>
+                                      <span className="text-[10px] font-mono text-slate-400 font-normal">{f.key}</span>
+                                    </div>
+                                  </div>
+                                </td>
+                                <td className="py-3.5 px-6">
+                                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase border bg-purple-50 text-purple-700 border-purple-200">
+                                    Connector
+                                  </span>
+                                </td>
+                                <td className="py-3.5 px-6 text-slate-600 font-medium">
+                                  {f.plan_count || plans.filter(p => p.feature_keys?.includes(f.key)).length} Plans
+                                </td>
+                                <td className="py-3.5 px-6">
+                                  <span className={cn(
+                                    "px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase inline-flex items-center gap-1.5 border",
+                                    f.is_active ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-slate-100 text-slate-500 border-slate-200"
+                                  )}>
+                                    <span className={cn("w-1.5 h-1.5 rounded-full", f.is_active ? "bg-emerald-500" : "bg-slate-400")} />
+                                    {f.is_active ? 'Active' : 'Inactive'}
+                                  </span>
+                                </td>
+                                <td className="py-3.5 px-6 text-right">
+                                  <button
+                                    onClick={() => showToast(`Connector "${f.name}" info loaded`)}
+                                    className="px-3 py-1 bg-white hover:bg-purple-50 text-slate-700 hover:text-purple-700 border border-slate-200 hover:border-purple-200 rounded-lg text-xs font-bold transition-all cursor-pointer"
+                                  >
+                                    Manage
+                                  </button>
+                                </td>
+                              </tr>
+                            ))}
+                            {connectorItems.length === 0 && (
+                              <tr><td colSpan={5} className="py-8 text-center text-xs text-slate-400 font-medium">No connectors found</td></tr>
+                            )}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
+
+              {/* ── FEATURES / MODULES SECTION ── */}
+              {(() => {
+                const featureItems = filteredFeaturesList.filter(f => f.category === 'Features');
+                if (featureCategoryFilter !== 'ALL' && featureCategoryFilter !== 'Features') return null;
+                if (featureItems.length === 0 && featureSearch) return null;
+                return (
+                  <div>
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center shadow-md shadow-emerald-600/20">
+                        <Zap size={17} />
+                      </div>
+                      <div className="flex items-center gap-2.5">
+                        <h3 className="text-sm font-extrabold text-slate-900 tracking-tight">Features</h3>
+                        <span className="px-2.5 py-0.5 bg-emerald-50 text-emerald-700 text-[10px] font-bold rounded-full border border-emerald-200">
+                          {featureItems.length} Modules
+                        </span>
+                      </div>
+                      <div className="flex-1 h-px bg-gradient-to-r from-emerald-200 to-transparent ml-2" />
+                    </div>
+                    <div className="bg-white rounded-2xl border border-slate-200/90 shadow-sm overflow-hidden">
+                      <div className="overflow-x-auto custom-scrollbar">
+                        <table className="w-full text-left border-collapse text-xs">
+                          <thead>
+                            <tr className="bg-emerald-50/50 border-b border-emerald-100 text-slate-500 font-bold uppercase text-[10px] tracking-wider whitespace-nowrap">
+                              <th className="py-3 px-6">Feature</th>
+                              <th className="py-3 px-6">Type</th>
+                              <th className="py-3 px-6">Used In Plans</th>
+                              <th className="py-3 px-6">Status</th>
+                              <th className="py-3 px-6 text-right">Action</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-slate-100 font-sans">
+                            {featureItems.map((f) => (
+                              <tr key={f.id} className="hover:bg-emerald-50/30 transition-colors">
+                                <td className="py-3.5 px-6 font-bold text-slate-900">
+                                  <div className="flex items-center gap-3">
+                                    <div className="w-8 h-8 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center shrink-0">
+                                      {getFeatureBrandLogo(f.key, 20)}
+                                    </div>
+                                    <div className="flex flex-col">
+                                      <span>{f.name}</span>
+                                      <span className="text-[10px] font-mono text-slate-400 font-normal">{f.key}</span>
+                                    </div>
+                                  </div>
+                                </td>
+                                <td className="py-3.5 px-6">
+                                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase border bg-teal-50 text-teal-700 border-teal-200">
+                                    Module
+                                  </span>
+                                </td>
+                                <td className="py-3.5 px-6 text-slate-600 font-medium">
+                                  {f.plan_count || plans.filter(p => p.feature_keys?.includes(f.key)).length} Plans
+                                </td>
+                                <td className="py-3.5 px-6">
+                                  <span className={cn(
+                                    "px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase inline-flex items-center gap-1.5 border",
+                                    f.is_active ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-slate-100 text-slate-500 border-slate-200"
+                                  )}>
+                                    <span className={cn("w-1.5 h-1.5 rounded-full", f.is_active ? "bg-emerald-500" : "bg-slate-400")} />
+                                    {f.is_active ? 'Active' : 'Inactive'}
+                                  </span>
+                                </td>
+                                <td className="py-3.5 px-6 text-right">
+                                  <button
+                                    onClick={() => showToast(`Feature "${f.name}" info loaded`)}
+                                    className="px-3 py-1 bg-white hover:bg-emerald-50 text-slate-700 hover:text-emerald-700 border border-slate-200 hover:border-emerald-200 rounded-lg text-xs font-bold transition-all cursor-pointer"
+                                  >
+                                    Manage
+                                  </button>
+                                </td>
+                              </tr>
+                            ))}
+                            {featureItems.length === 0 && (
+                              <tr><td colSpan={5} className="py-8 text-center text-xs text-slate-400 font-medium">No features found</td></tr>
+                            )}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
           </div>
         )}
@@ -1655,13 +2029,9 @@ export default function AdminPlansPage() {
                       onChange={(e) => setFeatureForm({ ...featureForm, category: e.target.value })}
                       className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 outline-none focus:border-emerald-500 cursor-pointer"
                     >
-                      <option value="Communication">Communication</option>
-                      <option value="AI & Automation">AI & Automation</option>
-                      <option value="CRM">CRM</option>
-                      <option value="Sales">Sales</option>
-                      <option value="Team">Team</option>
-                      <option value="Documents">Documents</option>
-                      <option value="System">System</option>
+                      <option value="Channels">Channels</option>
+                      <option value="Connectors">Connectors</option>
+                      <option value="Features">Features</option>
                     </select>
                   </div>
 
@@ -1674,10 +2044,9 @@ export default function AdminPlansPage() {
                       onChange={(e) => setFeatureForm({ ...featureForm, feature_type: e.target.value })}
                       className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 outline-none focus:border-emerald-500 cursor-pointer"
                     >
-                      <option value="Module">Module</option>
                       <option value="Channel">Channel</option>
                       <option value="Connector">Connector</option>
-                      <option value="Limit">Limit</option>
+                      <option value="Module">Module</option>
                     </select>
                   </div>
                 </div>

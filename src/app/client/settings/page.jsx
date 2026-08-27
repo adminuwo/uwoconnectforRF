@@ -221,13 +221,13 @@ const ClientSettingsPage = () => {
             description: p.description || 'Custom feature tier',
             is_popular: p.is_popular || false,
             features: p.feature_keys?.length > 0
-              ? p.feature_keys.map(k => k.replace(/^channel_|^crm_|^sales_|^team_|^ai_/, '').replace(/_/g, ' ').toUpperCase())
+              ? p.feature_keys.map(k => k.replace(/^(channel_|connector_|feature_|crm_|sales_|team_|ai_)/, '').replace(/_/g, ' ').toUpperCase())
               : [
-                  'Official WhatsApp Meta API',
-                  'Live Omnichannel Inbox',
-                  'Client CRM & Intelligence',
-                  'Product Catalog & Invoicing',
-                  'AI Assistant & Flow Automation'
+                  'WHATSAPP CHANNEL',
+                  'GMAIL & OUTLOOK CONNECTORS',
+                  'CRM & CLIENT PIPELINE',
+                  'CATALOG & INVOICING',
+                  'TEAM DASHBOARD'
                 ]
           }));
         if (mapped.length > 0) {

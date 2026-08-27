@@ -465,24 +465,32 @@ function AdminClientsContent() {
 
   // ── System Feature Catalog for Granular Overrides ──
   const ALL_SYSTEM_FEATURES = [
-    { key: 'channel_whatsapp', name: 'WhatsApp Channel', category: 'Communication', desc: 'Official WhatsApp Business Cloud API & automation' },
-    { key: 'channel_facebook', name: 'Facebook Messenger', category: 'Communication', desc: 'Facebook page messaging & live sync' },
-    { key: 'channel_instagram', name: 'Instagram Direct', category: 'Communication', desc: 'Instagram DM automation & live chat' },
-    { key: 'channel_telegram', name: 'Telegram Bot', category: 'Communication', desc: 'Telegram bot channel integration' },
-    { key: 'live_messages_inbox', name: 'Live Omnichannel Inbox', category: 'Communication', desc: 'Unified multi-channel live conversation hub' },
-    { key: 'channel_email', name: 'Email Workflows', category: 'Communication', desc: 'Inbound/outbound email automation' },
-    { key: 'ai_copilot', name: 'AI Smart Assistant', category: 'AI', desc: 'AI copilot for instant customer replies & summaries' },
-    { key: 'ai_flow_bots', name: 'AI Chatbots & Workflows', category: 'AI', desc: 'Visual conversational bot builder' },
-    { key: 'crm_clients', name: 'Client Directory & Workspaces', category: 'CRM', desc: 'Multi-tenant client database & intelligence' },
-    { key: 'crm_leads', name: 'Lead Pipeline Management', category: 'CRM', desc: 'Deal stages, funnel conversion & tracking' },
-    { key: 'sales_catalog', name: 'Products & Services Catalog', category: 'Sales', desc: 'Item pricing, variants & SKU management' },
-    { key: 'sales_quotations', name: 'Quotations & Estimates', category: 'Sales', desc: 'Instant PDF quotes with digital approvals' },
-    { key: 'sales_proposals', name: 'Business Proposals', category: 'Sales', desc: 'Multi-page branded client proposals' },
-    { key: 'sales_invoices', name: 'Tax Invoices & Billing', category: 'Sales', desc: 'Automated invoice generation & receipts' },
-    { key: 'team_management', name: 'Team Roles & Permissions', category: 'Team', desc: 'Role-based access permissions & seats' },
-    { key: 'team_work_reports', name: 'Staff Work Reports', category: 'Team', desc: 'Daily task logging & performance analytics' },
-    { key: 'knowledge_base', name: 'Knowledge Base & FAQs', category: 'Documents', desc: 'Vectorized knowledge base documents' },
-    { key: 'connector_onedrive', name: 'OneDrive Cloud Sync', category: 'Documents', desc: 'Direct sync with cloud document drives' },
+    // Channels (4)
+    { key: 'channel_whatsapp', name: 'WhatsApp', category: 'Channels', desc: 'Official WhatsApp Cloud API & automated conversations' },
+    { key: 'channel_instagram', name: 'Instagram', category: 'Channels', desc: 'Instagram Direct automation & real-time messaging' },
+    { key: 'channel_facebook', name: 'Facebook', category: 'Channels', desc: 'Facebook Messenger & page conversation sync' },
+    { key: 'channel_youtube', name: 'YouTube', category: 'Channels', desc: 'YouTube comments, audience replies & engagement' },
+
+    // Connectors (8)
+    { key: 'connector_gmail', name: 'Gmail', category: 'Connectors', desc: 'Google Gmail workspace integration & email sync' },
+    { key: 'connector_outlook', name: 'Microsoft Outlook', category: 'Connectors', desc: 'Microsoft Outlook email & enterprise calendar connector' },
+    { key: 'connector_google_maps', name: 'Google Maps', category: 'Connectors', desc: 'Google Maps location intelligence & business verification' },
+    { key: 'connector_google_docs', name: 'Google Docs', category: 'Connectors', desc: 'Google Docs templates & automated client documents' },
+    { key: 'connector_onedrive', name: 'OneDrive', category: 'Connectors', desc: 'Microsoft OneDrive cloud storage & file synchronization' },
+    { key: 'connector_google_sheets', name: 'Google Sheets', category: 'Connectors', desc: 'Google Sheets automated spreadsheets & live data export' },
+    { key: 'connector_google_slides', name: 'Google Slides', category: 'Connectors', desc: 'Google Slides presentations & pitch deck creator' },
+    { key: 'connector_google_news', name: 'Google News Feed', category: 'Connectors', desc: 'Google News live feed monitoring & real-time alerts' },
+
+    // Features (9)
+    { key: 'feature_team_dashboard', name: 'Team Dashboard', category: 'Features', desc: 'Collaborative team workspace & performance dashboard' },
+    { key: 'feature_quotation', name: 'Quotation', category: 'Features', desc: 'Instant sales quotations, estimates & digital approvals' },
+    { key: 'feature_invoice', name: 'Invoice', category: 'Features', desc: 'Automated GST & tax invoicing with payment receipts' },
+    { key: 'feature_proposal', name: 'Proposal', category: 'Features', desc: 'Multi-page branded client business proposals' },
+    { key: 'feature_catalog', name: 'Catalog', category: 'Features', desc: 'Products & services catalog with pricing & SKUs' },
+    { key: 'feature_payment', name: 'Payment', category: 'Features', desc: 'Payment gateway integration, checkout links & transaction tracking' },
+    { key: 'feature_crm', name: 'CRM', category: 'Features', desc: 'Client directory, contact management & deal pipeline stages' },
+    { key: 'feature_autoreply', name: 'Auto Reply', category: 'Features', desc: 'Automated 24/7 instant replies & trigger bot flows' },
+    { key: 'feature_voice_video_call', name: 'Voice / Video Call', category: 'Features', desc: 'Integrated voice calling & video meeting capabilities' },
   ];
 
   const handleOpenManageFeatures = (client) => {
