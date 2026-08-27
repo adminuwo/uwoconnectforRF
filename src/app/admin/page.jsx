@@ -156,12 +156,12 @@ export default function SuperAdminOverview() {
 
   return (
     <DashboardLayout role="ADMIN">
-      <div className="max-w-full pb-20 px-4 sm:px-10 lg:px-12 font-sans">
+      <div className="max-w-full pb-20 px-3.5 sm:px-6 lg:px-10 font-sans w-full min-w-0">
         
         {/* ── Clean Header ── */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 my-8">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 my-6 sm:my-8">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight">
               Control Center
             </h1>
             <p className="text-slate-500 text-xs sm:text-sm mt-1">
@@ -169,17 +169,17 @@ export default function SuperAdminOverview() {
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
             <Link
               href="/admin/clients"
-              className="flex items-center gap-1.5 px-4 py-2.5 bg-[#059669] hover:bg-emerald-700 text-white rounded-xl font-bold text-xs shadow-2xs transition-all"
+              className="flex items-center gap-1.5 px-3.5 sm:px-4 py-2 sm:py-2.5 bg-[#059669] hover:bg-emerald-700 text-white rounded-xl font-bold text-xs shadow-2xs transition-all whitespace-nowrap"
             >
               <Users size={15} /> Clients Directory
             </Link>
             <button
               onClick={() => fetchData(true)}
               disabled={refreshing}
-              className="p-2.5 bg-white hover:bg-slate-50 text-slate-600 rounded-xl border border-slate-200 transition-all cursor-pointer shadow-2xs"
+              className="p-2 sm:p-2.5 bg-white hover:bg-slate-50 text-slate-600 rounded-xl border border-slate-200 transition-all cursor-pointer shadow-2xs shrink-0"
               title="Refresh"
             >
               <RefreshCw size={15} className={cn(refreshing && "animate-spin text-[#059669]")} />
@@ -188,9 +188,9 @@ export default function SuperAdminOverview() {
         </div>
 
         {/* ── 1. Admin Overview — Client Summary (Interactive & Clickable) ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 mb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-3.5 sm:gap-4 mb-6 sm:mb-8">
           {/* Total Clients Card */}
-          <div className="lg:col-span-4 bg-white p-5 rounded-2xl border border-slate-200/80 shadow-2xs flex flex-col justify-between">
+          <div className="lg:col-span-4 bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-2xs flex flex-col justify-between">
             <div className="flex items-center justify-between mb-3">
               <span className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
                 <Users size={14} className="text-emerald-600" />
@@ -206,7 +206,7 @@ export default function SuperAdminOverview() {
             
             <div className="flex items-baseline justify-between mb-4">
               <div>
-                <h3 className="text-3xl font-extrabold text-slate-900 tracking-tight">
+                <h3 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
                   {overviewData.totalClients}
                 </h3>
                 <p className="text-xs text-slate-500 mt-0.5">Total Registered Clients</p>
@@ -219,7 +219,7 @@ export default function SuperAdminOverview() {
               </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-2 pt-3 border-t border-slate-100 text-center">
+            <div className="grid grid-cols-3 gap-1.5 sm:gap-2 pt-3 border-t border-slate-100 text-center">
               <Link href="/admin/clients?status=ACTIVE" className="p-2 rounded-xl hover:bg-slate-50 transition-all">
                 <div className="text-xs font-bold text-slate-900">{overviewData.activeClients}</div>
                 <div className="text-[10px] text-slate-400 font-medium">Active</div>
@@ -236,7 +236,7 @@ export default function SuperAdminOverview() {
           </div>
 
           {/* Approval Status Distribution Card */}
-          <div className="lg:col-span-8 bg-white p-5 rounded-2xl border border-slate-200/80 shadow-2xs flex flex-col justify-between">
+          <div className="lg:col-span-8 bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-2xs flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between mb-3">
                 <span className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
@@ -269,72 +269,72 @@ export default function SuperAdminOverview() {
             </div>
 
             {/* Clickable Filter Tiles */}
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-3 gap-2 sm:gap-3">
               {/* Approved */}
               <Link
                 href="/admin/clients?approval=APPROVED"
-                className="p-3 rounded-xl bg-emerald-50/70 hover:bg-emerald-100/70 border border-emerald-200/60 transition-all flex items-center justify-between group"
+                className="p-2.5 sm:p-3 rounded-xl bg-emerald-50/70 hover:bg-emerald-100/70 border border-emerald-200/60 transition-all flex items-center justify-between group min-w-0"
               >
-                <div>
-                  <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-800">
-                    <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                    Approved
+                <div className="min-w-0">
+                  <div className="flex items-center gap-1.5 text-[10px] sm:text-xs font-bold text-emerald-800 truncate">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
+                    <span className="truncate">Approved</span>
                   </div>
-                  <div className="text-2xl font-extrabold text-emerald-950 mt-1">{approvalData.approved}</div>
+                  <div className="text-lg sm:text-2xl font-extrabold text-emerald-950 mt-0.5 sm:mt-1">{approvalData.approved}</div>
                 </div>
-                <ChevronRight size={16} className="text-emerald-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+                <ChevronRight size={15} className="text-emerald-500 opacity-0 group-hover:opacity-100 transition-opacity shrink-0 hidden sm:block" />
               </Link>
 
               {/* Pending */}
               <Link
                 href="/admin/clients?approval=PENDING"
-                className="p-3 rounded-xl bg-amber-50/70 hover:bg-amber-100/70 border border-amber-200/60 transition-all flex items-center justify-between group"
+                className="p-2.5 sm:p-3 rounded-xl bg-amber-50/70 hover:bg-amber-100/70 border border-amber-200/60 transition-all flex items-center justify-between group min-w-0"
               >
-                <div>
-                  <div className="flex items-center gap-1.5 text-xs font-bold text-amber-800">
-                    <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
-                    Pending Approval
+                <div className="min-w-0">
+                  <div className="flex items-center gap-1.5 text-[10px] sm:text-xs font-bold text-amber-800 truncate">
+                    <span className="w-2 h-2 rounded-full bg-amber-400 shrink-0 animate-ping" />
+                    <span className="truncate">Pending</span>
                   </div>
-                  <div className="text-2xl font-extrabold text-amber-950 mt-1">{approvalData.pending}</div>
+                  <div className="text-lg sm:text-2xl font-extrabold text-amber-950 mt-0.5 sm:mt-1">{approvalData.pending}</div>
                 </div>
-                <ChevronRight size={16} className="text-amber-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+                <ChevronRight size={15} className="text-amber-500 opacity-0 group-hover:opacity-100 transition-opacity shrink-0 hidden sm:block" />
               </Link>
 
               {/* Rejected */}
               <Link
                 href="/admin/clients?approval=REJECTED"
-                className="p-3 rounded-xl bg-rose-50/70 hover:bg-rose-100/70 border border-rose-200/60 transition-all flex items-center justify-between group"
+                className="p-2.5 sm:p-3 rounded-xl bg-rose-50/70 hover:bg-rose-100/70 border border-rose-200/60 transition-all flex items-center justify-between group min-w-0"
               >
-                <div>
-                  <div className="flex items-center gap-1.5 text-xs font-bold text-rose-800">
-                    <span className="w-2 h-2 rounded-full bg-rose-500" />
-                    Rejected
+                <div className="min-w-0">
+                  <div className="flex items-center gap-1.5 text-[10px] sm:text-xs font-bold text-rose-800 truncate">
+                    <span className="w-2 h-2 rounded-full bg-rose-500 shrink-0" />
+                    <span className="truncate">Rejected</span>
                   </div>
-                  <div className="text-2xl font-extrabold text-rose-950 mt-1">{approvalData.rejected}</div>
+                  <div className="text-lg sm:text-2xl font-extrabold text-rose-950 mt-0.5 sm:mt-1">{approvalData.rejected}</div>
                 </div>
-                <ChevronRight size={16} className="text-rose-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+                <ChevronRight size={15} className="text-rose-500 opacity-0 group-hover:opacity-100 transition-opacity shrink-0 hidden sm:block" />
               </Link>
             </div>
           </div>
         </div>
 
         {/* ── Main Clean KPI Grid ── */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-8">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 sm:gap-3 mb-6 sm:mb-8">
           {mainKpis.map((kpi, idx) => {
             const Icon = kpi.icon;
             return (
               <Link
                 key={idx}
                 href={kpi.href}
-                className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-2xs hover:border-slate-300 transition-all flex flex-col justify-between"
+                className="bg-white p-3.5 sm:p-4 rounded-2xl border border-slate-200/80 shadow-2xs hover:border-slate-300 transition-all flex flex-col justify-between min-w-0"
               >
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-[11px] font-semibold text-slate-400">{kpi.name}</span>
-                  <Icon size={15} className="text-slate-400" />
+                  <span className="text-[10px] sm:text-[11px] font-semibold text-slate-400 truncate pr-1">{kpi.name}</span>
+                  <Icon size={14} className="text-slate-400 shrink-0" />
                 </div>
                 <div>
-                  <h4 className="text-lg font-extrabold text-slate-900">{kpi.value}</h4>
-                  <p className="text-[10px] text-emerald-600 font-semibold mt-0.5">{kpi.sub}</p>
+                  <h4 className="text-base sm:text-lg font-extrabold text-slate-900 truncate">{kpi.value}</h4>
+                  <p className="text-[10px] text-emerald-600 font-semibold mt-0.5 truncate">{kpi.sub}</p>
                 </div>
               </Link>
             );
@@ -342,27 +342,27 @@ export default function SuperAdminOverview() {
         </div>
 
         {/* ── Clean Client Comparison Table ── */}
-        <div className="bg-white rounded-2xl border border-slate-200/80 shadow-2xs overflow-hidden mb-8">
+        <div className="bg-white rounded-2xl border border-slate-200/80 shadow-2xs overflow-hidden mb-6 sm:mb-8">
           <div className="p-4 sm:p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
               <h3 className="text-sm font-bold text-slate-900">Client Comparison</h3>
               <p className="text-xs text-slate-400">Benchmark clients across channels, messages, bot usage, and projects.</p>
             </div>
 
-            <div className="relative">
+            <div className="relative w-full sm:w-auto">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
               <input
                 type="text"
-                placeholder="Search..."
+                placeholder="Search clients..."
                 value={compSearch}
                 onChange={(e) => setCompSearch(e.target.value)}
-                className="pl-8 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 outline-none focus:bg-white focus:border-[#059669]"
+                className="w-full sm:w-64 pl-8 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 outline-none focus:bg-white focus:border-[#059669]"
               />
             </div>
           </div>
 
-          <div className="overflow-x-auto custom-scrollbar">
-            <table className="w-full text-left border-collapse text-xs">
+          <div className="overflow-x-auto custom-scrollbar w-full">
+            <table className="w-full text-left border-collapse text-xs min-w-[650px]">
               <thead>
                 <tr className="bg-slate-50/50 border-b border-slate-100 text-slate-400 font-bold uppercase text-[10px] tracking-wider whitespace-nowrap">
                   <th className="py-3 px-4 cursor-pointer" onClick={() => handleSort('company_name')}>Client</th>
@@ -411,22 +411,23 @@ export default function SuperAdminOverview() {
         </div>
 
         {/* ── Two Column Bottom Feeds ── */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
           {/* Live Platform Feed */}
-          <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-2xs">
+          <div className="bg-white rounded-2xl border border-slate-200/80 p-4 sm:p-5 shadow-2xs min-w-0">
             <h3 className="text-sm font-bold text-slate-900 mb-1">Live Platform Feed</h3>
             <p className="text-xs text-slate-400 mb-4">Real-time messaging, invoices, and audit actions.</p>
-            <div className="space-y-2">
+            <div className="space-y-2.5">
               {recentActivity.slice(0, 5).map((act) => (
-                <div key={act.id} className="p-3 bg-slate-50 rounded-xl flex items-center justify-between text-xs hover:bg-slate-100/50 transition-colors">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold text-slate-900">{act.client_name}</span>
-                      <span className="px-1.5 py-0.2 bg-slate-200 text-slate-600 rounded text-[9px] font-semibold">{act.type}</span>
+                <div key={act.id} className="p-3 bg-slate-50 rounded-xl flex items-center justify-between gap-2.5 text-xs hover:bg-slate-100/50 transition-colors min-w-0">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className="font-bold text-slate-900 truncate max-w-[160px] sm:max-w-none">{act.client_name}</span>
+                      <span className="px-1.5 py-0.5 bg-slate-200 text-slate-600 rounded text-[9px] font-semibold shrink-0">{act.type}</span>
                     </div>
-                    <p className="text-slate-500 text-[11px] mt-0.5">{act.title}</p>
+                    <p className="text-slate-500 text-[11px] mt-0.5 truncate">{act.title}</p>
                   </div>
-                  <span className="text-[10px] text-slate-400">
+                  <span className="text-[10px] text-slate-400 whitespace-nowrap shrink-0 flex items-center gap-1">
+                    <Clock size={11} className="shrink-0" />
                     {new Date(act.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </span>
                 </div>
@@ -437,34 +438,41 @@ export default function SuperAdminOverview() {
             </div>
           </div>
 
-          {/* Recent Logins Feed */}
-          <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-2xs">
+          {/* Recent Logins Feed (Mobile-Optimized Layout) */}
+          <div className="bg-white rounded-2xl border border-slate-200/80 p-4 sm:p-5 shadow-2xs min-w-0">
             <h3 className="text-sm font-bold text-slate-900 mb-1">Recent User Logins</h3>
             <p className="text-xs text-slate-400 mb-4">Track who logged in and when across client workspaces.</p>
-            <div className="space-y-2">
+            <div className="space-y-2.5">
               {recentLogins.slice(0, 5).map((log) => (
-                <div key={log.id} className="p-3 bg-slate-50 rounded-xl flex items-center justify-between text-xs hover:bg-slate-100/50 transition-colors">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-emerald-50 text-[#059669] flex items-center justify-center border border-emerald-100/30 shrink-0">
+                <div key={log.id} className="p-3 bg-slate-50 rounded-xl flex items-start sm:items-center justify-between gap-2.5 text-xs hover:bg-slate-100/50 transition-colors min-w-0">
+                  <div className="flex items-start sm:items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
+                    <div className="w-8 h-8 rounded-lg bg-emerald-50 text-[#059669] flex items-center justify-center border border-emerald-100/30 shrink-0 mt-0.5 sm:mt-0">
                       <User size={14} />
                     </div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-slate-900 truncate max-w-[150px] sm:max-w-none">{log.username}</span>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="font-bold text-slate-900 truncate max-w-[160px] sm:max-w-[220px]">{log.username}</span>
                         <span className={cn(
-                          "px-1.5 py-0.2 rounded text-[8px] font-black uppercase tracking-wider border",
+                          "px-1.5 py-0.2 rounded text-[8px] font-black uppercase tracking-wider border shrink-0",
                           log.action === 'LOGIN' ? "bg-emerald-50 text-emerald-600 border-emerald-100" : "bg-blue-50 text-blue-600 border-blue-100"
                         )}>
                           {log.action}
                         </span>
                       </div>
-                      <p className="text-slate-400 text-[10px] font-medium mt-0.5 italic flex items-center gap-1">
-                        Workspace: <span className="text-slate-600 font-bold not-italic">{log.client_name}</span> • IP: <span className="font-mono">{log.ip_address}</span>
-                      </p>
+                      <div className="text-slate-400 text-[10px] font-medium mt-1 flex items-center gap-1.5 flex-wrap">
+                        <span className="truncate max-w-[180px] sm:max-w-none">
+                          Workspace: <strong className="text-slate-700 font-bold">{log.client_name}</strong>
+                        </span>
+                        {log.ip_address && (
+                          <span className="text-slate-500 font-mono text-[9px] bg-slate-200/70 px-1.5 py-0.2 rounded shrink-0 truncate max-w-[150px] sm:max-w-none" title={log.ip_address}>
+                            IP: {log.ip_address}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
-                  <span className="text-[10px] text-slate-400 whitespace-nowrap flex items-center gap-1">
-                    <Clock size={11} />
+                  <span className="text-[10px] text-slate-400 whitespace-nowrap flex items-center gap-1 shrink-0 self-start sm:self-center mt-0.5 sm:mt-0">
+                    <Clock size={11} className="shrink-0" />
                     {new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </span>
                 </div>
