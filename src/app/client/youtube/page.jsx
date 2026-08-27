@@ -67,7 +67,7 @@ const YouTubeManager = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('uwo_token');
       if (!token) {
         router.push('/login');
         return;
@@ -117,7 +117,7 @@ const YouTubeManager = () => {
 
   const handleSaveSettings = async () => {
     setSavingSettings(true);
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('uwo_token');
     const headers = { Authorization: `Bearer ${token}` };
 
     try {
@@ -145,7 +145,7 @@ const YouTubeManager = () => {
 
   const saveKeywordRules = async (updatedRules) => {
     setSavingSettings(true);
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('uwo_token');
     const headers = { Authorization: `Bearer ${token}` };
 
     try {
@@ -199,7 +199,7 @@ const YouTubeManager = () => {
 
   const handleSaveDescription = async () => {
     setSavingDescription(true);
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('uwo_token');
     const headers = { Authorization: `Bearer ${token}` };
 
     try {
@@ -229,7 +229,7 @@ const YouTubeManager = () => {
     }
 
     setUploadingVideo(true);
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('uwo_token');
     const headers = { 
       Authorization: `Bearer ${token}`
     };
@@ -279,7 +279,7 @@ const YouTubeManager = () => {
     }
 
     setDeletingVideoId(videoId);
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('uwo_token');
     const headers = { Authorization: `Bearer ${token}` };
 
     try {
@@ -304,7 +304,7 @@ const YouTubeManager = () => {
 
   const handleCheckBroadcast = async () => {
     setCheckingBroadcast(true);
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('uwo_token');
     const headers = { Authorization: `Bearer ${token}` };
 
     try {
@@ -334,7 +334,7 @@ const YouTubeManager = () => {
     setSelectedVideo(video);
     setLoadingComments(true);
     setComments([]);
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('uwo_token');
     const headers = { Authorization: `Bearer ${token}` };
 
     try {
@@ -358,7 +358,7 @@ const YouTubeManager = () => {
     if (!text || !text.trim()) return;
 
     setSendingReply(prev => ({ ...prev, [commentId]: true }));
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('uwo_token');
     const headers = { Authorization: `Bearer ${token}` };
 
     try {
@@ -390,7 +390,7 @@ const YouTubeManager = () => {
 
   const handleAISuggestReply = async (commentId, commentText) => {
     setGeneratingAI(prev => ({ ...prev, [commentId]: true }));
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('uwo_token');
     const headers = { Authorization: `Bearer ${token}` };
 
     try {

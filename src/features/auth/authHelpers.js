@@ -4,7 +4,7 @@ import { auth } from '@/lib/firebase';
  * Get the current JWT token from localStorage.
  */
 export async function getFirebaseToken() {
-  return localStorage.getItem('token');
+  return localStorage.getItem('uwo_token') || localStorage.getItem('token');
 }
 
 /**
@@ -20,6 +20,7 @@ export async function getAuthHeaders() {
  */
 export function storeUserSession(token, user) {
   localStorage.setItem('token', token);
+  localStorage.setItem('uwo_token', token);
   localStorage.setItem('user', JSON.stringify(user));
 }
 
@@ -28,6 +29,7 @@ export function storeUserSession(token, user) {
  */
 export function clearUserSession() {
   localStorage.removeItem('token');
+  localStorage.removeItem('uwo_token');
   localStorage.removeItem('user');
   localStorage.removeItem('client_company_logo');
   localStorage.removeItem('aisa_tour_pending');

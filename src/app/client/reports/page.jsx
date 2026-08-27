@@ -33,7 +33,7 @@ export default function WorkReportsPage() {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('uwo_token');
       const [membersRes, reportsRes, tasksRes] = await Promise.all([
         axios.get(`${API_BASE_URL}/api/team/members/`, { headers: { Authorization: `Bearer ${token}` } }),
         axios.get(`${API_BASE_URL}/api/team/reports/`, { headers: { Authorization: `Bearer ${token}` } }),

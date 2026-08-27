@@ -144,7 +144,9 @@ export const UWOLoginModal = ({
         localStorage.setItem('uwo_access_token', loginData.access_token);
       }
       if (finalData.token || finalData.access_token) {
-        localStorage.setItem('token', finalData.token || finalData.access_token);
+        const t = finalData.token || finalData.access_token;
+        localStorage.setItem('token', t);
+        localStorage.setItem('uwo_token', t);
       }
       if (finalData.user) {
         localStorage.setItem('user', JSON.stringify(finalData.user));

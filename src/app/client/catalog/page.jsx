@@ -87,7 +87,7 @@ export default function CatalogPage() {
 
   const fetchRazorpayStatus = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('uwo_token');
       const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/razorpay/status`, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -112,7 +112,7 @@ export default function CatalogPage() {
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('uwo_token');
       const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/products/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -126,7 +126,7 @@ export default function CatalogPage() {
 
   const fetchAnalytics = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('uwo_token');
       const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/products/analytics/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -189,7 +189,7 @@ export default function CatalogPage() {
     }
     try {
       setIsSaving(true);
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('uwo_token');
       const payload = {
         ...formData,
         price: parseFloat(formData.price),
@@ -220,7 +220,7 @@ export default function CatalogPage() {
   const handleDelete = async (id) => {
     if (!confirm('Are you sure you want to delete this product?')) return;
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('uwo_token');
       await axios.delete(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/products/${id}/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -235,7 +235,7 @@ export default function CatalogPage() {
     if (products.length === 0) return alert('No products to delete.');
     if (!confirm(`Are you sure you want to delete ALL ${products.length} products? This action cannot be undone.`)) return;
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('uwo_token');
       const allIds = products.map(p => p.id);
       await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/products/bulk_action/`, {
         ids: allIds,
@@ -254,7 +254,7 @@ export default function CatalogPage() {
 
   const handleDuplicate = async (product) => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('uwo_token');
       const duplicateData = {
         ...product,
         name: `${product.name} (Copy)`,
@@ -272,7 +272,7 @@ export default function CatalogPage() {
 
   const trackProductClick = async (product, clickType = 'button') => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('uwo_token');
       await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/products/${product.id}/track_click/`, { type: clickType }, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -303,7 +303,7 @@ export default function CatalogPage() {
 
     try {
       setImporting(true);
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('uwo_token');
       const res = await axios.post(
         `${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/products/import_csv/`, 
         body, 
@@ -357,7 +357,7 @@ export default function CatalogPage() {
   const handleExecuteBulkAction = async () => {
     if (selectedProductIds.length === 0) return;
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('uwo_token');
       const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/products/bulk_action/`, {
         ids: selectedProductIds,
         action: bulkActionType,

@@ -1,4 +1,4 @@
-﻿export default function Loading() {
+export default function Loading() {
   return (
     <div className="flex bg-[#fcfdfe] min-h-screen">
       <div className="fixed left-0 top-0 h-screen w-64 bg-white border-r border-slate-100 hidden md:block" />

@@ -264,6 +264,20 @@
   background-size: 200% 100%;
 }
 
+/* Make all skeleton loading pulses much faster across the app */
+.animate-pulse {
+  animation: fast-pulse 0.75s cubic-bezier(0.4, 0, 0.6, 1) infinite !important;
+}
+
+@keyframes fast-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: .4;
+  }
+}
+
 /* Light Mode Overrides */
 .light .glass-card {
   background: rgba(255, 255, 255, 0.7);

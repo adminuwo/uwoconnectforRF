@@ -34,7 +34,7 @@ export default function TeamChatPage() {
   // Fetch channels
   const fetchChannels = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('uwo_token');
       const res = await axios.get(`${API}/api/team/channels/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -53,7 +53,7 @@ export default function TeamChatPage() {
   const fetchMessages = async () => {
     if (!activeChannelId) return;
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('uwo_token');
       const res = await axios.get(`${API}/api/team/channel-messages/?channel_id=${activeChannelId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -95,7 +95,7 @@ export default function TeamChatPage() {
     setMessages(prev => [...prev, optimistic]);
 
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('uwo_token');
       await axios.post(`${API}/api/team/channel-messages/`, {
         channel_id: activeChannelId,
         text,
@@ -111,7 +111,7 @@ export default function TeamChatPage() {
     e.preventDefault();
     if (!newChannelName.trim()) return;
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('uwo_token');
       const res = await axios.post(`${API}/api/team/channels/`, {
         name: newChannelName.trim(),
       }, { headers: { Authorization: `Bearer ${token}` } });

@@ -77,7 +77,7 @@ export default function TeamPage() {
 
   const fetchProfile = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('uwo_token');
       const res = await axios.get(`${API_BASE_URL}/api/profile`, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -92,7 +92,7 @@ export default function TeamPage() {
 
   const fetchMembers = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('uwo_token');
       const deletedIds = JSON.parse(localStorage.getItem('uwo_deleted_members') || '[]');
 
       const res = await axios.get(`${API_BASE_URL}/api/team/members/`, {
@@ -108,7 +108,7 @@ export default function TeamPage() {
 
   const fetchProjects = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('uwo_token');
       const res = await axios.get(`${API_BASE_URL}/api/team/projects/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -122,7 +122,7 @@ export default function TeamPage() {
 
   const fetchTasks = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('uwo_token');
       const res = await axios.get(`${API_BASE_URL}/api/team/tasks/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -136,7 +136,7 @@ export default function TeamPage() {
 
   const fetchReports = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('uwo_token');
       const res = await axios.get(`${API_BASE_URL}/api/team/reports/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -150,7 +150,7 @@ export default function TeamPage() {
 
   const fetchAttendance = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('uwo_token');
       const res = await axios.get(`${API_BASE_URL}/api/team/attendance/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -164,7 +164,7 @@ export default function TeamPage() {
 
   const fetchLeaves = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('uwo_token');
       const res = await axios.get(`${API_BASE_URL}/api/team/leaves/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -178,7 +178,7 @@ export default function TeamPage() {
 
   const fetchChannels = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('uwo_token');
       const res = await axios.get(`${API_BASE_URL}/api/team/channels/`, {
         headers: token ? { Authorization: `Bearer ${token}` } : {}
       });
@@ -193,7 +193,7 @@ export default function TeamPage() {
   const handleDeleteProject = async (id) => {
     if (!confirm('Are you sure you want to delete this project?')) return;
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('uwo_token');
       await axios.delete(`${API_BASE_URL}/api/team/projects/${id}/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -216,7 +216,7 @@ export default function TeamPage() {
     } catch (e) {}
 
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('uwo_token');
       if (token) {
         await axios.delete(`${API_BASE_URL}/api/team/members/${id}/`, {
           headers: { Authorization: `Bearer ${token}` }
@@ -233,7 +233,7 @@ export default function TeamPage() {
 
   const handleSuspendMember = async (id) => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('uwo_token');
       const target = members.find(m => m.id === id);
       const newStatus = target?.status === 'SUSPENDED' ? 'ACTIVE' : 'SUSPENDED';
       await axios.patch(`${API_BASE_URL}/api/team/members/${id}/`, { status: newStatus }, {

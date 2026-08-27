@@ -16,7 +16,7 @@ const ClientSupportPage = () => {
 
   const fetchMessages = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('uwo_token');
       if (!token) return;
       const res = await axios.get(`${API_BASE_URL}/api/support/messages/`, {
         headers: { Authorization: `Bearer ${token}` }
@@ -57,7 +57,7 @@ const ClientSupportPage = () => {
     setMessages(prev => [...prev, tempMessage]);
 
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('uwo_token');
       await axios.post(`${API_BASE_URL}/api/support/messages/`, {
         body: textToSend
       }, {

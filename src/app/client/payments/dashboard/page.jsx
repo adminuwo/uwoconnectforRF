@@ -14,7 +14,7 @@ import axios from 'axios';
 import { API_BASE_URL } from '@/config/apiConfig';
 
 const API = () => API_BASE_URL;
-const getToken = () => typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+const getToken = () => typeof window !== 'undefined' ? localStorage.getItem('uwo_token') : null;
 
 const formatCurrency = (amount, currency = 'INR') =>
   new Intl.NumberFormat('en-IN', { style: 'currency', currency }).format(amount);

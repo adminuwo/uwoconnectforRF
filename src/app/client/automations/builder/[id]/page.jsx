@@ -65,7 +65,7 @@ export default function BuilderPage() {
 
   const fetchWorkflow = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('uwo_token');
       const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/workflows/${workflowId}/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -143,7 +143,7 @@ export default function BuilderPage() {
     
     setSaving(true);
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('uwo_token');
       const flow = reactFlowInstance.toObject();
       
       const payload = {

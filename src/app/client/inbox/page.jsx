@@ -81,6 +81,7 @@ export default function ClientInboxPage() {
   const wsRef = useRef(null);
   const typingTimeoutRef = useRef(null);
   const selectedConvoIdRef = useRef(selectedConvoId);
+  const selectedRawAddressRef = useRef(null); // Stores the rawAddress (phone/platform_id) of selected convo
   const activeChannelFilterRef = useRef(activeChannelFilter);
   const convoLimitRef = useRef(10);
   const [convoLimit, setConvoLimit] = useState(10);
@@ -130,7 +131,7 @@ export default function ClientInboxPage() {
   const fetchConversationsOnly = async () => {
     try {
       if (convoLimitRef.current > 10) setIsLoadingMoreContacts(true);
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('uwo_token');
       if (!token) return;
       const headers = { Authorization: `Bearer ${token}` };
       const apiUrl = API_BASE_URL;
@@ -195,9 +196,9 @@ export default function ClientInboxPage() {
         const convoDbId = matchedConvo?.id || null;
 
         return {
-          id: contactObj.platform_id || contactObj.phone_number || contactObj.id,
+          id: contactObj.id,
           name: contactObj.name || contactObj.platform_id || contactObj.phone_number || 'Customer',
-          rawAddress: contactObj.phone_number || contactObj.platform_id,
+          rawAddress: contactObj.platform_id || contactObj.phone_number || contactObj.id,
           lastMessage: matchedConvo?.last_message_summary || 'Tap to view messages...',
           time: matchedConvo?.last_message_at || contactObj.updated_at || contactObj.created_at,
           unread: 0,
@@ -268,6 +269,7 @@ export default function ClientInboxPage() {
       const currentSelectedExists = convoData.some(c => c.id === selectedConvoIdRef.current);
       if (convoData.length > 0) {
         if (!selectedConvoIdRef.current || !currentSelectedExists) {
+          selectedRawAddressRef.current = convoData[0].rawAddress || convoData[0].id;
           setSelectedConvoId(convoData[0].id);
         }
       } else {
@@ -285,7 +287,7 @@ export default function ClientInboxPage() {
   // 1. Initial Data Fetching
   const fetchData = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('uwo_token');
       if (!token) return;
       
       const headers = { Authorization: `Bearer ${token}` };
@@ -317,7 +319,7 @@ export default function ClientInboxPage() {
       } else {
         setIsLoadingMessages(true);
       }
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('uwo_token');
       const apiUrl = API_BASE_URL;
       const res = await axios.get(`${apiUrl}/api/messages/?contact_id=${encodeURIComponent(contactId)}&limit=10&offset=${offset}`, {
         headers: { Authorization: `Bearer ${token}` }
@@ -351,7 +353,10 @@ export default function ClientInboxPage() {
   useEffect(() => {
     if (selectedConvoId) {
       setMessagesOffset(0);
-      fetchMessages(selectedConvoId, 0, false);
+      // Use the rawAddress (phone/platform_id) stored in ref for message fetching
+      // Backend filters messages by from_address/to_address which store the phone/platform ID
+      const addressToFetch = selectedRawAddressRef.current || selectedConvoId;
+      fetchMessages(addressToFetch, 0, false);
     }
   }, [selectedConvoId]);
 
@@ -398,7 +403,7 @@ export default function ClientInboxPage() {
 
   // 2. Real-Time WebSocket Connection & Event Handlers
   useEffect(() => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('uwo_token');
     if (!token) return;
 
     let wsUrl = API_BASE_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app';
@@ -413,9 +418,11 @@ export default function ClientInboxPage() {
         
         if (data.type === 'new_message') {
           const msg = data.message;
+          const currentRaw = selectedRawAddressRef.current;
+          const currentId = selectedConvoIdRef.current;
           const isForCurrentConvo = 
-            msg.from_address === selectedConvoIdRef.current || 
-            msg.to_address === selectedConvoIdRef.current;
+            (currentRaw && (msg.from_address === currentRaw || msg.to_address === currentRaw)) ||
+            (currentId && (msg.from_address === currentId || msg.to_address === currentId));
             
           if (isForCurrentConvo) {
             setMessages(prev => {
@@ -534,7 +541,7 @@ export default function ClientInboxPage() {
     setMessages(prev => [...prev, optimisticMsg]);
 
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('uwo_token');
       const apiUrl = API_BASE_URL;
 
       const res = await axios.post(`${apiUrl}/api/messages/`, {
@@ -580,7 +587,7 @@ export default function ClientInboxPage() {
     }));
 
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('uwo_token');
       const apiUrl = API_BASE_URL;
       const convoIdToUse = activeConvo.convoDbId || activeConvo.id;
       await axios.post(`${apiUrl}/api/conversations/${convoIdToUse}/takeover/`, {}, {
@@ -594,7 +601,7 @@ export default function ClientInboxPage() {
 
   const handleTransferSubmit = async (convoId, payload) => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('uwo_token');
       const apiUrl = API_BASE_URL;
       await axios.post(`${apiUrl}/api/conversations/${convoId}/transfer/`, payload, {
         headers: { Authorization: `Bearer ${token}` }
@@ -612,7 +619,7 @@ export default function ClientInboxPage() {
       : currentUser?.name || currentUser?.username || 'Admin';
 
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('uwo_token');
       const apiUrl = API_BASE_URL;
       const convoIdToUse = activeConvo.convoDbId || activeConvo.id;
       const res = await axios.get(`${apiUrl}/api/conversations/${convoIdToUse}/audit_logs/`, {
@@ -630,7 +637,7 @@ export default function ClientInboxPage() {
 
   const openAnalyticsModal = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('uwo_token');
       const apiUrl = API_BASE_URL;
       const res = await axios.get(`${apiUrl}/api/monitoring/analytics/`, {
         headers: { Authorization: `Bearer ${token}` }
@@ -738,6 +745,7 @@ export default function ClientInboxPage() {
                     <div
                       key={convo.id}
                       onClick={() => {
+                        selectedRawAddressRef.current = convo.rawAddress || convo.id;
                         setSelectedConvoId(convo.id);
                         setMobileShowChat(true);
                       }}
@@ -958,7 +966,7 @@ export default function ClientInboxPage() {
                           onClick={() => {
                             const nextOffset = messagesOffset + 10;
                             setMessagesOffset(nextOffset);
-                            fetchMessages(activeConvo.id, nextOffset, true);
+                            fetchMessages(activeConvo.rawAddress || activeConvo.id, nextOffset, true);
                           }}
                           className="px-4 py-1.5 bg-white border border-slate-200 rounded-full text-xs font-semibold text-slate-500 hover:text-emerald-600 hover:border-emerald-200 transition-colors shadow-sm disabled:opacity-70 flex items-center gap-2"
                         >

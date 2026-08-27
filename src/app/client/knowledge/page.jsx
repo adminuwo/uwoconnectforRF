@@ -25,7 +25,7 @@ const KnowledgeBasePage = () => {
 
   const fetchDocuments = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('uwo_token');
       const res = await axios.get(`${API}/api/knowledge/`, {
         headers: token ? { Authorization: `Bearer ${token}` } : {}
       });
@@ -52,7 +52,7 @@ const KnowledgeBasePage = () => {
     if (title) formData.append('title', title);
 
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('uwo_token');
       await axios.post(`${API}/api/knowledge/`, formData, {
         headers: { 
           Authorization: `Bearer ${token}`, 
@@ -73,7 +73,7 @@ const KnowledgeBasePage = () => {
   const handleDelete = async (id) => {
     if (!confirm('Are you sure you want to delete this document? The AI assistant will no longer have access to this information.')) return;
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('uwo_token');
       setDocuments(prev => prev.filter(d => String(d.id) !== String(id)));
       await axios.delete(`${API}/api/knowledge/${id}/`, {
         headers: { Authorization: `Bearer ${token}` }

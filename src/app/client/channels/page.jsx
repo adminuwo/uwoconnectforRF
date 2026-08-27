@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import {
   CheckCircle2,
   Loader2,
@@ -13,7 +14,20 @@ import {
   Lock,
   Clock,
   ExternalLink,
-  ChevronRight
+  ChevronRight,
+  Layers,
+  CreditCard,
+  Zap,
+  FileText,
+  FileSpreadsheet,
+  Award,
+  ShoppingBag,
+  Users,
+  PhoneCall,
+  MessageSquare,
+  MapPin,
+  Briefcase,
+  Bot
 } from 'lucide-react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import axios from 'axios';
@@ -82,6 +96,14 @@ const GmailBrandIcon = ({ size = 24, className = "" }) => (
   </svg>
 );
 
+const GoogleMapsBrandIcon = ({ size = 24, className = "" }) => (
+  <svg width={size} height={size} viewBox="0 0 48 48" fill="none" className={className}>
+    <path d="M24 4C15.2 4 8 11.2 8 20C8 32 24 44 24 44C24 44 40 32 40 20C40 11.2 32.8 4 24 4Z" fill="#EA4335"/>
+    <circle cx="24" cy="20" r="8" fill="#FFFFFF"/>
+    <circle cx="24" cy="20" r="5" fill="#4285F4"/>
+  </svg>
+);
+
 const CopyButton = ({ text }) => {
   const [copied, setCopied] = useState(false);
 
@@ -107,6 +129,7 @@ const CopyButton = ({ text }) => {
 const ClientChannelsPage = () => {
   const router = useRouter();
   const [client, setClient] = useState(null);
+  const [activePlans, setActivePlans] = useState([]);
   const [razorpayConn, setRazorpayConn] = useState(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -125,6 +148,7 @@ const ClientChannelsPage = () => {
   const [isZohoConfigModalOpen, setIsZohoConfigModalOpen] = useState(false);
   const [isYouTubeConfigModalOpen, setIsYouTubeConfigModalOpen] = useState(false);
   const [isOutlookConfigOpen, setIsOutlookConfigOpen] = useState(false);
+  const [isRazorpayConfigModalOpen, setIsRazorpayConfigModalOpen] = useState(false);
   const [isGuideOpen, setIsGuideOpen] = useState(false);
   const [comingSoonModalChannel, setComingSoonModalChannel] = useState(null);
 
@@ -153,15 +177,15 @@ const ClientChannelsPage = () => {
   const fetchClient = async (isManualRefresh = false) => {
     if (isManualRefresh) setRefreshing(true);
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('uwo_token');
       if (!token) {
         setLoading(false);
         setRefreshing(false);
         return;
       }
 
-      // Fetch client profile, global connectors status, and effective connectors concurrently
-      const [profileRes, globalRes, connRes] = await Promise.allSettled([
+      // Fetch client profile, global connectors status, effective connectors & active plans concurrently
+      const [profileRes, globalRes, connRes, plansRes] = await Promise.allSettled([
         axios.get(`${API_BASE_URL}/api/profile`, {
           headers: { Authorization: `Bearer ${token}` },
           timeout: 10000,
@@ -173,8 +197,17 @@ const ClientChannelsPage = () => {
         axios.get(`${API_BASE_URL}/api/connectors/effective/`, {
           headers: { Authorization: `Bearer ${token}` },
           timeout: 10000,
+        }),
+        axios.get(`${API_BASE_URL}/api/plans/`, {
+          headers: { Authorization: `Bearer ${token}` },
+          timeout: 10000,
         })
       ]);
+
+      if (plansRes.status === 'fulfilled' && plansRes.value?.data) {
+        const plansData = plansRes.value.data.results || (Array.isArray(plansRes.value.data) ? plansRes.value.data : []);
+        setActivePlans(plansData.filter(p => p.status === 'ACTIVE' || p.is_active !== false));
+      }
 
       let baseClient = {};
       if (profileRes.status === 'fulfilled' && profileRes.value?.data) {
@@ -279,7 +312,7 @@ const ClientChannelsPage = () => {
       (async () => {
         setIgLoading(true);
         try {
-          const token = localStorage.getItem('token');
+          const token = localStorage.getItem('uwo_token');
           await axios.post(
             `${API_BASE_URL}/api/auth/instagram/oauth-callback`,
             {
@@ -402,7 +435,7 @@ const ClientChannelsPage = () => {
         setToast({ msg: 'Connecting Facebook...', type: 'success' });
         const connectFacebook = async () => {
           try {
-            const token = localStorage.getItem('token');
+            const token = localStorage.getItem('uwo_token');
             await axios.post(`${API_BASE_URL}/api/auth/facebook/embedded-signup`,
               { code: code },
               { headers: { Authorization: `Bearer ${token}` } }
@@ -423,7 +456,7 @@ const ClientChannelsPage = () => {
         setToast({ msg: 'Connecting Instagram...', type: 'success' });
         const connectInstagram = async () => {
           try {
-            const token = localStorage.getItem('token');
+            const token = localStorage.getItem('uwo_token');
             await axios.post(`${API_BASE_URL}/api/auth/instagram/embedded-signup`,
               { code: code },
               { headers: { Authorization: `Bearer ${token}` } }
@@ -444,7 +477,7 @@ const ClientChannelsPage = () => {
         setToast({ msg: 'Connecting WhatsApp Business...', type: 'success' });
         const connectWhatsApp = async () => {
           try {
-            const token = localStorage.getItem('token');
+            const token = localStorage.getItem('uwo_token');
             const res = await axios.post(`${API_BASE_URL}/api/auth/whatsapp/embedded-signup`,
               { code: code },
               { headers: { Authorization: `Bearer ${token}` } }
@@ -489,7 +522,7 @@ const ClientChannelsPage = () => {
           
           if (waba_id || phone_number_id) {
             setToast({ msg: 'Saving WhatsApp configuration...', type: 'success' });
-            const token = localStorage.getItem('token');
+            const token = localStorage.getItem('uwo_token');
             await axios.put(`${API_BASE_URL}/api/profile`, {
               whatsapp_waba_id: waba_id,
               whatsapp_phone_number_id: phone_number_id,
@@ -580,13 +613,15 @@ const ClientChannelsPage = () => {
   const isGoogleDocsConnected = Boolean(client?.google_docs_enabled || client?.google_docs_config?.document_id || client?.google_docs_config?.default_doc_id || client?.google_docs_config?.access_token || client?.google_docs_config?.account_email);
   const isGoogleSlidesConnected = Boolean(client?.google_slides_enabled || client?.google_slides_config?.presentation_id || client?.google_slides_config?.default_presentation_id || client?.google_slides_config?.access_token || client?.google_slides_config?.account_email);
   const isGoogleNewsConnected = Boolean(client?.google_news_enabled || client?.google_news_config?.topic || client?.google_news_config?.query);
+  const isGoogleMapsConnected = Boolean(client?.google_maps_enabled || client?.google_maps_config?.api_key || client?.google_maps_config?.place_id);
   const isYouTubeConnected = Boolean(client?.youtube_enabled || client?.youtube_config?.channel_id || client?.youtube_config?.access_token || client?.youtube_config?.channel_title);
   const isZohoConnected = Boolean(client?.zoho_enabled || client?.zoho_config?.access_token || client?.zoho_config?.refresh_token);
+  const isRazorpayConnected = Boolean(client?.razorpay_enabled || client?.razorpay_config?.api_key || client?.razorpay_config?.key_id);
 
   // Connect actions
   const handleConnectGmail = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('uwo_token');
       const res = await axios.get(`${API_BASE_URL}/api/auth/gmail/connect`, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -601,7 +636,7 @@ const ClientChannelsPage = () => {
 
   const handleConnectGoogleCalendar = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('uwo_token');
       const res = await axios.get(`${API_BASE_URL}/api/auth/google-calendar/connect`, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -643,7 +678,7 @@ const ClientChannelsPage = () => {
         return;
       }
       try {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('uwo_token');
         const res = await axios.post(
           `${API_BASE_URL}/api/auth/facebook/embedded-signup`,
           { access_token: response.authResponse.accessToken },
@@ -750,10 +785,10 @@ const ClientChannelsPage = () => {
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-xs shadow-emerald-500/50 shrink-0" />
                   <h2 className="text-xs sm:text-sm font-extrabold uppercase tracking-wider text-slate-800">
-                    Active Messaging Channels
+                    Communication Channels
                   </h2>
                   <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0">
-                    3 Channels
+                    4 Channels
                   </span>
                 </div>
                 <span className="text-[11px] text-slate-400 font-medium hidden sm:inline">
@@ -765,7 +800,7 @@ const ClientChannelsPage = () => {
                 
                 {/* ── CARD 1: WHATSAPP BUSINESS ── */}
                 {(() => {
-                  const state = getChannelAccessState('whatsapp', client);
+                  const state = getChannelAccessState('whatsapp', client, activePlans);
                   const isComingSoon = state.status === 'COMING_SOON';
                   const isConn = state.status === 'CONNECTED' && !isComingSoon;
 
@@ -813,7 +848,7 @@ const ClientChannelsPage = () => {
                         </div>
 
                         <p className="text-xs text-slate-500 leading-relaxed mb-3 sm:mb-4">
-                          Official Meta Cloud API for customer conversations, broadcast marketing campaigns, and 24/7 AI smart auto-replies.
+                          Official Meta Cloud API. Connect your business phone number to send broadcast campaigns, auto-reply bots & live inbox support.
                         </p>
 
                         {/* Content Body */}
@@ -824,32 +859,31 @@ const ClientChannelsPage = () => {
                               <span>Launching Soon</span>
                             </div>
                             <p className="text-[10px] text-amber-800 leading-relaxed font-medium">
-                              This channel is being scheduled by the platform administrator and will go live shortly.
+                              {state.reason || 'This channel is deactivated by admin and will be enabled shortly.'}
                             </p>
                           </div>
                         ) : isConn ? (
                           <div className="space-y-2 py-2.5 sm:py-3 px-3 sm:px-3.5 rounded-xl sm:rounded-2xl bg-slate-50/80 border border-slate-100 text-xs mb-3 sm:mb-4">
                             <div className="flex justify-between items-center text-[11px]">
-                              <span className="text-slate-400 font-bold uppercase tracking-wider text-[9px]">Business</span>
-                              <span className="font-bold text-slate-800 truncate max-w-[150px]">{client?.business_name || 'Verified Account'}</span>
+                              <span className="text-slate-400 font-bold uppercase tracking-wider text-[9px]">Phone ID</span>
+                              <span className="font-mono font-semibold text-slate-700">{client?.whatsapp_phone_number_id ? `${client.whatsapp_phone_number_id.slice(0, 6)}...` : 'Connected'}</span>
                             </div>
                             <div className="flex justify-between items-center text-[11px]">
-                              <span className="text-slate-400 font-bold uppercase tracking-wider text-[9px]">Phone</span>
-                              <div className="flex items-center gap-1 font-bold text-slate-800">
-                                <span>{client?.phone_number || 'N/A'}</span>
-                                <CopyButton text={client?.phone_number} />
-                              </div>
+                              <span className="text-slate-400 font-bold uppercase tracking-wider text-[9px]">Status</span>
+                              <span className="font-bold text-emerald-600 flex items-center gap-1">
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> Live Ready
+                              </span>
                             </div>
                           </div>
                         ) : (
                           <div className="space-y-1.5 py-2.5 sm:py-3 px-3 sm:px-3.5 rounded-xl sm:rounded-2xl bg-emerald-50/40 border border-emerald-100/60 mb-3 sm:mb-4 text-[11px] font-medium text-slate-600">
                             <div className="flex items-center gap-2">
                               <CheckCircle2 size={13} className="text-emerald-600 shrink-0" />
-                              <span>Verified Cloud API (WABA)</span>
+                              <span>WhatsApp Cloud API Embedded Signup</span>
                             </div>
                             <div className="flex items-center gap-2">
                               <CheckCircle2 size={13} className="text-emerald-600 shrink-0" />
-                              <span>24/7 AI Smart Bot Auto-Replies</span>
+                              <span>Instant Phone Number Verification</span>
                             </div>
                           </div>
                         )}
@@ -874,13 +908,23 @@ const ClientChannelsPage = () => {
                             <span>Configure WhatsApp</span>
                           </button>
                         ) : (
-                          <button
-                            onClick={handleWhatsAppConnect}
-                            className="w-full py-2 sm:py-2.5 px-3 sm:px-4 bg-[#25D366] hover:bg-[#20bd5a] text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer shadow-md shadow-emerald-600/20"
-                          >
-                            <WhatsAppBrandIcon size={16} />
-                            <span>Connect WhatsApp</span>
-                          </button>
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={handleWhatsAppConnect}
+                              className="flex-1 py-2 sm:py-2.5 px-3 bg-[#25D366] hover:bg-[#20bd5a] text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer shadow-md shadow-emerald-600/20"
+                            >
+                              <WhatsAppBrandIcon size={16} />
+                              <span>Connect</span>
+                            </button>
+                            <Link
+                              href="/client/plans"
+                              title={`Included in ${state.requiredPlanName}`}
+                              className="flex-1 py-2 sm:py-2.5 px-2.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200/80 rounded-xl text-xs font-extrabold transition flex items-center justify-center gap-1 cursor-pointer shadow-2xs truncate"
+                            >
+                              <Layers size={13} className="text-emerald-600 shrink-0" />
+                              <span className="truncate">{state.requiredPlanName || 'Plan'}</span>
+                            </Link>
+                          </div>
                         )}
                       </div>
                     </div>
@@ -889,7 +933,7 @@ const ClientChannelsPage = () => {
 
                 {/* ── CARD 2: FACEBOOK MESSENGER ── */}
                 {(() => {
-                  const state = getChannelAccessState('facebook', client);
+                  const state = getChannelAccessState('facebook', client, activePlans);
                   const isComingSoon = state.status === 'COMING_SOON';
                   const isConn = state.status === 'CONNECTED' && !isComingSoon;
 
@@ -948,7 +992,7 @@ const ClientChannelsPage = () => {
                               <span>Launching Soon</span>
                             </div>
                             <p className="text-[10px] text-amber-800 leading-relaxed font-medium">
-                              This channel is currently deactivated by admin and will be enabled shortly.
+                              {state.reason || 'This channel is deactivated by admin and will be enabled shortly.'}
                             </p>
                           </div>
                         ) : isConn ? (
@@ -997,14 +1041,24 @@ const ClientChannelsPage = () => {
                             <span>Configure Facebook</span>
                           </button>
                         ) : (
-                          <button
-                            onClick={handleFacebookConnect}
-                            disabled={fbLoading}
-                            className="w-full py-2 sm:py-2.5 px-3 sm:px-4 bg-[#1877F2] hover:bg-[#166fe5] text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer shadow-md shadow-blue-600/20 disabled:opacity-50"
-                          >
-                            {fbLoading ? <Loader2 size={14} className="animate-spin" /> : <FacebookBrandIcon size={16} />}
-                            <span>Connect Facebook</span>
-                          </button>
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={handleFacebookConnect}
+                              disabled={fbLoading}
+                              className="flex-1 py-2 sm:py-2.5 px-3 bg-[#1877F2] hover:bg-[#166fe5] text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer shadow-md shadow-blue-600/20 disabled:opacity-50"
+                            >
+                              {fbLoading ? <Loader2 size={14} className="animate-spin" /> : <FacebookBrandIcon size={16} />}
+                              <span>Connect</span>
+                            </button>
+                            <Link
+                              href="/client/plans"
+                              title={`Included in ${state.requiredPlanName}`}
+                              className="flex-1 py-2 sm:py-2.5 px-2.5 bg-[#1877F2]/10 hover:bg-[#1877F2]/20 text-[#1877F2] border border-[#1877F2]/30 rounded-xl text-xs font-extrabold transition flex items-center justify-center gap-1 cursor-pointer shadow-2xs truncate"
+                            >
+                              <Layers size={13} className="text-[#1877F2] shrink-0" />
+                              <span className="truncate">{state.requiredPlanName || 'Plan'}</span>
+                            </Link>
+                          </div>
                         )}
                       </div>
                     </div>
@@ -1013,7 +1067,7 @@ const ClientChannelsPage = () => {
 
                 {/* ── CARD 3: INSTAGRAM DIRECT ── */}
                 {(() => {
-                  const state = getChannelAccessState('instagram', client);
+                  const state = getChannelAccessState('instagram', client, activePlans);
                   const isComingSoon = state.status === 'COMING_SOON';
                   const isConn = state.status === 'CONNECTED' && !isComingSoon;
 
@@ -1036,7 +1090,7 @@ const ClientChannelsPage = () => {
                                 Instagram Direct
                               </h3>
                               <span className="inline-block text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-pink-700 bg-pink-50 px-2 py-0.5 rounded-md border border-pink-200/60 mt-0.5">
-                                Meta Business API
+                                Business DMs
                               </span>
                             </div>
                           </div>
@@ -1061,7 +1115,7 @@ const ClientChannelsPage = () => {
                         </div>
 
                         <p className="text-xs text-slate-500 leading-relaxed mb-3 sm:mb-4">
-                          Automate customer Direct Messages (DMs), story mentions, and comment-to-DM interactions into qualified sales leads.
+                          Automate Instagram Direct Messages, story replies, and comment triggers for active customer engagement.
                         </p>
 
                         {/* Content Body */}
@@ -1072,19 +1126,19 @@ const ClientChannelsPage = () => {
                               <span>Launching Soon</span>
                             </div>
                             <p className="text-[10px] text-amber-800 leading-relaxed font-medium">
-                              This channel is currently deactivated by admin and will be enabled shortly.
+                              {state.reason || 'This channel is deactivated by admin and will be enabled shortly.'}
                             </p>
                           </div>
                         ) : isConn ? (
                           <div className="space-y-2 py-2.5 sm:py-3 px-3 sm:px-3.5 rounded-xl sm:rounded-2xl bg-slate-50/80 border border-slate-100 text-xs mb-3 sm:mb-4">
                             <div className="flex justify-between items-center text-[11px]">
-                              <span className="text-slate-400 font-bold uppercase tracking-wider text-[9px]">Account</span>
-                              <span className="font-bold text-slate-800 truncate max-w-[150px]">{client?.instagram_config?.username || client?.instagram_config?.page_name || 'Instagram Account'}</span>
+                              <span className="text-slate-400 font-bold uppercase tracking-wider text-[9px]">Account ID</span>
+                              <span className="font-mono font-semibold text-slate-700 truncate max-w-[140px]">@{client?.instagram_config?.username || 'instagram_biz'}</span>
                             </div>
                             <div className="flex justify-between items-center text-[11px]">
                               <span className="text-slate-400 font-bold uppercase tracking-wider text-[9px]">Status</span>
-                              <span className="font-bold text-emerald-600 flex items-center gap-1">
-                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> Active Sync
+                              <span className="font-bold text-pink-600 flex items-center gap-1">
+                                <span className="w-1.5 h-1.5 rounded-full bg-pink-500" /> Auto DM Active
                               </span>
                             </div>
                           </div>
@@ -1092,11 +1146,11 @@ const ClientChannelsPage = () => {
                           <div className="space-y-1.5 py-2.5 sm:py-3 px-3 sm:px-3.5 rounded-xl sm:rounded-2xl bg-pink-50/40 border border-pink-100/60 mb-3 sm:mb-4 text-[11px] font-medium text-slate-600">
                             <div className="flex items-center gap-2">
                               <CheckCircle2 size={13} className="text-pink-600 shrink-0" />
-                              <span>Direct Message (DM) Automation</span>
+                              <span>Instagram Business OAuth Connect</span>
                             </div>
                             <div className="flex items-center gap-2">
                               <CheckCircle2 size={13} className="text-pink-600 shrink-0" />
-                              <span>Story Mention & Comment Replies</span>
+                              <span>Comment-to-DM Auto Automation</span>
                             </div>
                           </div>
                         )}
@@ -1121,14 +1175,151 @@ const ClientChannelsPage = () => {
                             <span>Configure Instagram</span>
                           </button>
                         ) : (
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={handleInstagramConnect}
+                              disabled={igLoading}
+                              className="flex-1 py-2 sm:py-2.5 px-3 bg-gradient-to-r from-[#FF7A00] via-[#FF0069] to-[#D300C5] hover:opacity-95 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer shadow-md shadow-pink-600/20 disabled:opacity-50"
+                            >
+                              {igLoading ? <Loader2 size={14} className="animate-spin" /> : <InstagramBrandIcon size={16} />}
+                              <span>Connect</span>
+                            </button>
+                            <Link
+                              href="/client/plans"
+                              title={`Included in ${state.requiredPlanName}`}
+                              className="flex-1 py-2 sm:py-2.5 px-2.5 bg-pink-50 hover:bg-pink-100 text-pink-800 border border-pink-200/80 rounded-xl text-xs font-extrabold transition flex items-center justify-center gap-1 cursor-pointer shadow-2xs truncate"
+                            >
+                              <Layers size={13} className="text-pink-600 shrink-0" />
+                              <span className="truncate">{state.requiredPlanName || 'Plan'}</span>
+                            </Link>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })()}
+
+                {/* ── CARD 4: YOUTUBE CHANNEL ── */}
+                {(() => {
+                  const state = getChannelAccessState('youtube', client, activePlans);
+                  const isComingSoon = state.status === 'COMING_SOON';
+                  const isConn = state.status === 'CONNECTED' && !isComingSoon;
+
+                  return (
+                    <div className={cn(
+                      "bg-white rounded-2xl sm:rounded-3xl border p-4 sm:p-6 lg:p-7 flex flex-col justify-between transition-all duration-300 shadow-sm hover:shadow-md relative overflow-hidden group",
+                      isComingSoon 
+                        ? "border-amber-200/80 bg-amber-50/15" 
+                        : "border-slate-200/90 hover:border-red-300"
+                    )}>
+                      <div>
+                        {/* Top Header */}
+                        <div className="flex items-start justify-between gap-2.5 mb-3 sm:mb-4">
+                          <div className="flex items-center gap-2.5 sm:gap-3.5 min-w-0 flex-1">
+                            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center shrink-0 drop-shadow-sm">
+                              <YouTubeBrandIcon size={30} />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <h3 className="font-extrabold text-slate-900 text-sm sm:text-base leading-tight break-words">
+                                YouTube Channel
+                              </h3>
+                              <span className="inline-block text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-red-700 bg-red-50 px-2 py-0.5 rounded-md border border-red-200/60 mt-0.5">
+                                Video & Live
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="shrink-0">
+                            {isComingSoon ? (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[9px] sm:text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200 whitespace-nowrap">
+                                <Sparkles size={10} /> Soon
+                              </span>
+                            ) : isConn ? (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[9px] sm:text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 whitespace-nowrap">
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                <span>Connected</span>
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[9px] sm:text-[10px] font-bold bg-slate-50 text-slate-500 border border-slate-200 whitespace-nowrap">
+                                <span className="w-1.5 h-1.5 rounded-full bg-slate-300" />
+                                <span>Offline</span>
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        <p className="text-xs text-slate-500 leading-relaxed mb-3 sm:mb-4">
+                          Sync YouTube video comments, community audience questions, and automated replies.
+                        </p>
+
+                        {/* Content Body */}
+                        {isComingSoon ? (
+                          <div className="p-3 sm:p-3.5 rounded-xl sm:rounded-2xl bg-amber-50/70 border border-amber-200/60 text-amber-900 text-xs space-y-1 mb-3 sm:mb-4">
+                            <div className="font-bold flex items-center gap-1.5 text-amber-950 text-[11px]">
+                              <Clock size={12} className="text-amber-600 shrink-0" />
+                              <span>Launching Soon</span>
+                            </div>
+                            <p className="text-[10px] text-amber-800 leading-relaxed font-medium">
+                              {state.reason || 'This channel is deactivated by admin and will be enabled shortly.'}
+                            </p>
+                          </div>
+                        ) : isConn ? (
+                          <div className="space-y-2 py-2.5 sm:py-3 px-3 sm:px-3.5 rounded-xl sm:rounded-2xl bg-slate-50/80 border border-slate-100 text-xs mb-3 sm:mb-4">
+                            <div className="flex justify-between items-center text-[11px]">
+                              <span className="text-slate-400 font-bold uppercase tracking-wider text-[9px]">Channel Title</span>
+                              <span className="font-bold text-slate-800 truncate max-w-[150px]">{client?.youtube_config?.channel_title || 'YouTube Channel'}</span>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="space-y-1.5 py-2.5 sm:py-3 px-3 sm:px-3.5 rounded-xl sm:rounded-2xl bg-red-50/40 border border-red-100/60 mb-3 sm:mb-4 text-[11px] font-medium text-slate-600">
+                            <div className="flex items-center gap-2">
+                              <CheckCircle2 size={13} className="text-red-600 shrink-0" />
+                              <span>YouTube OAuth Connect</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <CheckCircle2 size={13} className="text-red-600 shrink-0" />
+                              <span>Comment & Live Chat Auto Moderation</span>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Action Button */}
+                      <div className="pt-1 sm:pt-2">
+                        {isComingSoon ? (
                           <button
-                            onClick={handleInstagramConnect}
-                            disabled={igLoading}
-                            className="w-full py-2 sm:py-2.5 px-3 sm:px-4 bg-gradient-to-r from-[#E1306C] via-[#C13584] to-[#833AB4] hover:opacity-95 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer shadow-md shadow-pink-600/20 disabled:opacity-50"
+                            onClick={() => openComingSoon({ name: 'YouTube Channel', key: 'youtube' })}
+                            className="w-full py-2 sm:py-2.5 px-3 sm:px-4 bg-amber-100 hover:bg-amber-200 text-amber-900 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 border border-amber-300 shadow-sm cursor-pointer"
                           >
-                            {igLoading ? <Loader2 size={14} className="animate-spin" /> : <InstagramBrandIcon size={16} />}
-                            <span>Connect Instagram</span>
+                            <Clock size={13} className="text-amber-700" />
+                            <span>Coming Soon</span>
                           </button>
+                        ) : isConn ? (
+                          <button
+                            onClick={() => setIsYouTubeConfigModalOpen(true)}
+                            className="w-full py-2 sm:py-2.5 px-3 sm:px-4 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer border border-slate-200 shadow-sm"
+                          >
+                            <Settings size={13} className="text-slate-600" />
+                            <span>Configure YouTube</span>
+                          </button>
+                        ) : (
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => setIsYouTubeConfigModalOpen(true)}
+                              className="flex-1 py-2 sm:py-2.5 px-3 bg-[#FF0000] hover:bg-[#cc0000] text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer shadow-md shadow-red-600/20"
+                            >
+                              <YouTubeBrandIcon size={16} />
+                              <span>Connect</span>
+                            </button>
+                            <Link
+                              href="/client/plans"
+                              title={`Included in ${state.requiredPlanName}`}
+                              className="flex-1 py-2 sm:py-2.5 px-2.5 bg-red-50 hover:bg-red-100 text-red-800 border border-red-200/80 rounded-xl text-xs font-extrabold transition flex items-center justify-center gap-1 cursor-pointer shadow-2xs truncate"
+                            >
+                              <Layers size={13} className="text-red-600 shrink-0" />
+                              <span className="truncate">{state.requiredPlanName || 'Plan'}</span>
+                            </Link>
+                          </div>
                         )}
                       </div>
                     </div>
@@ -1138,116 +1329,92 @@ const ClientChannelsPage = () => {
               </div>
             </div>
 
-            {/* ================= 2. ACTIVE CONNECTORS & BUSINESS TOOLS ================= */}
+            {/* ================= 2. CONNECTORS & BUSINESS INTEGRATIONS ================= */}
             {(() => {
               const allConnectorsList = [
                 {
                   key: 'gmail',
-                  name: 'Gmail / Google Workspace',
-                  desc: 'Sync customer emails, send automated replies, and route inbound support tickets.',
+                  name: 'Gmail Workspace',
+                  desc: 'Sync customer emails, send automated notifications, and trigger AI auto-replies.',
                   icon: <GmailBrandIcon size={28} />,
                   isConnected: isGmailConnected,
-                  connectedInfo: client?.gmail_config?.email || client?.gmail_config?.email_address || 'Gmail Active',
+                  connectedInfo: client?.gmail_config?.email || 'Connected Account',
                   onConnect: handleConnectGmail,
                   onConfigure: () => setIsOutlookConfigOpen(true),
-                  badge: 'Google Mail',
-                  btnColor: 'bg-[#EA4335] hover:bg-[#d9382b] text-white'
+                  badge: 'Email Sync',
+                  btnColor: 'bg-[#EA4335] hover:bg-[#d93025] text-white'
                 },
                 {
                   key: 'outlook',
                   name: 'Microsoft Outlook',
-                  desc: 'Office 365 Exchange sync for corporate emails, calendar bookings, and ticketing.',
+                  desc: 'Sync Office 365 Exchange email, calendar bookings, and corporate ticketing.',
                   icon: <OutlookIcon size={28} />,
                   isConnected: isOutlookConnected,
-                  connectedInfo: client?.outlook_config?.email || client?.outlook_config?.email_address || 'Outlook Active',
+                  connectedInfo: client?.outlook_config?.email || 'Connected Account',
                   onConnect: () => setIsOutlookConfigOpen(true),
                   onConfigure: () => setIsOutlookConfigOpen(true),
-                  badge: 'Office 365',
-                  btnColor: 'bg-[#0078D4] hover:bg-[#006abc] text-white'
+                  badge: 'Exchange Mail',
+                  btnColor: 'bg-[#0078D4] hover:bg-[#106EBE] text-white'
                 },
                 {
-                  key: 'onedrive',
-                  name: 'Microsoft OneDrive',
-                  desc: 'Enterprise cloud document storage for automatic PDF quotation & invoice backups.',
-                  icon: <OneDriveIcon size={28} />,
-                  isConnected: isOneDriveConnected,
-                  connectedInfo: client?.onedrive_config?.account_name || 'OneDrive Synced',
-                  onConnect: () => setIsOneDriveConfigModalOpen(true),
-                  onConfigure: () => setIsOneDriveConfigModalOpen(true),
-                  badge: 'Cloud Docs',
-                  btnColor: 'bg-[#0078D4] hover:bg-[#006abc] text-white'
-                },
-                {
-                  key: 'google_calendar',
-                  name: 'Google Calendar',
-                  desc: 'Automated appointment scheduling, customer consultation bookings, and reminders.',
-                  icon: <GoogleCalendarIcon size={28} />,
-                  isConnected: isGoogleCalendarConnected,
-                  connectedInfo: client?.google_calendar_config?.account_email || 'Calendar Synced',
-                  onConnect: handleConnectGoogleCalendar,
-                  onConfigure: () => setIsGoogleCalendarConfigModalOpen(true),
-                  badge: 'Scheduling',
-                  btnColor: 'bg-[#4285F4] hover:bg-[#3367d6] text-white'
-                },
-                {
-                  key: 'google_sheets',
-                  name: 'Google Sheets',
-                  desc: 'Export live leads, chat logs, and order history directly into Google Spreadsheets.',
-                  icon: <GoogleSheetsIcon size={28} />,
-                  isConnected: isGoogleSheetsConnected,
-                  connectedInfo: client?.google_sheets_config?.spreadsheet_id ? 'Spreadsheet Synced' : 'Sheets Connected',
-                  onConnect: () => setIsGoogleSheetsConfigModalOpen(true),
-                  onConfigure: () => setIsGoogleSheetsConfigModalOpen(true),
-                  badge: 'Spreadsheets',
-                  btnColor: 'bg-[#0F9D58] hover:bg-[#0b8043] text-white'
+                  key: 'google_maps',
+                  name: 'Google Maps',
+                  desc: 'Google Maps location intelligence, business verification, and geo-routing.',
+                  icon: <GoogleMapsBrandIcon size={28} />,
+                  isConnected: isGoogleMapsConnected,
+                  connectedInfo: client?.google_maps_config?.place_id || 'Maps Verification',
+                  onConnect: () => setToast({ msg: 'Google Maps Location Intelligence is active', type: 'info' }),
+                  onConfigure: () => setToast({ msg: 'Google Maps Location Intelligence is active', type: 'info' }),
+                  badge: 'Location AI',
+                  btnColor: 'bg-[#EA4335] hover:bg-[#d93025] text-white'
                 },
                 {
                   key: 'google_docs',
                   name: 'Google Docs',
-                  desc: 'Dynamic template document generation for proposals, agreements, and invoices.',
+                  desc: 'Auto-generate branded agreements, client proposals, and reports dynamically.',
                   icon: <GoogleDocsIcon size={28} />,
                   isConnected: isGoogleDocsConnected,
-                  connectedInfo: client?.google_docs_config?.document_id ? 'Template Synced' : 'Docs Connected',
+                  connectedInfo: client?.google_docs_config?.account_email || 'Docs Connected',
                   onConnect: () => setIsGoogleDocsConfigModalOpen(true),
                   onConfigure: () => setIsGoogleDocsConfigModalOpen(true),
                   badge: 'Documents',
                   btnColor: 'bg-[#4285F4] hover:bg-[#3367d6] text-white'
                 },
                 {
+                  key: 'onedrive',
+                  name: 'Microsoft OneDrive',
+                  desc: 'Cloud storage integration to sync PDF invoices, proposals, and client documents.',
+                  icon: <OneDriveIcon size={28} />,
+                  isConnected: isOneDriveConnected,
+                  connectedInfo: client?.onedrive_config?.account_name || 'Cloud Storage Active',
+                  onConnect: () => setIsOneDriveConfigModalOpen(true),
+                  onConfigure: () => setIsOneDriveConfigModalOpen(true),
+                  badge: 'Cloud Files',
+                  btnColor: 'bg-[#0078D4] hover:bg-[#106EBE] text-white'
+                },
+                {
+                  key: 'google_sheets',
+                  name: 'Google Sheets',
+                  desc: 'Auto-export incoming chat leads, sales orders, and customer records directly to Sheets.',
+                  icon: <GoogleSheetsIcon size={28} />,
+                  isConnected: isGoogleSheetsConnected,
+                  connectedInfo: client?.google_sheets_config?.account_email || 'Sheets Connected',
+                  onConnect: () => setIsGoogleSheetsConfigModalOpen(true),
+                  onConfigure: () => setIsGoogleSheetsConfigModalOpen(true),
+                  badge: 'Spreadsheets',
+                  btnColor: 'bg-[#0F9D58] hover:bg-[#0b8043] text-white'
+                },
+                {
                   key: 'google_slides',
                   name: 'Google Slides',
-                  desc: 'Automated presentation generation and sales deck pitch customization.',
+                  desc: 'Create customized client presentation decks and sales pitch slides dynamically.',
                   icon: <GoogleSlidesIcon size={28} />,
                   isConnected: isGoogleSlidesConnected,
-                  connectedInfo: client?.google_slides_config?.presentation_id ? 'Deck Synced' : 'Slides Connected',
+                  connectedInfo: client?.google_slides_config?.account_email || 'Slides Connected',
                   onConnect: () => setIsGoogleSlidesConfigModalOpen(true),
                   onConfigure: () => setIsGoogleSlidesConfigModalOpen(true),
                   badge: 'Pitch Decks',
-                  btnColor: 'bg-[#F4B400] hover:bg-[#e0a400] text-slate-900'
-                },
-                {
-                  key: 'zoho',
-                  name: 'Zoho CRM',
-                  desc: 'Bidirectional sync for customer leads, deal pipelines, and contact management.',
-                  icon: <ZohoIcon size={28} />,
-                  isConnected: isZohoConnected,
-                  connectedInfo: 'Synced with Zoho CRM',
-                  onConnect: () => setIsZohoConfigModalOpen(true),
-                  onConfigure: () => setIsZohoConfigModalOpen(true),
-                  badge: 'CRM Pipeline',
-                  btnColor: 'bg-[#E42528] hover:bg-[#c91d20] text-white'
-                },
-                {
-                  key: 'youtube',
-                  name: 'YouTube Channel',
-                  desc: 'Sync video comments, live stream chat moderation, and automated community replies.',
-                  icon: <YouTubeBrandIcon size={28} />,
-                  isConnected: isYouTubeConnected,
-                  connectedInfo: client?.youtube_config?.channel_title || 'Channel Connected',
-                  onConnect: () => setIsYouTubeConfigModalOpen(true),
-                  onConfigure: () => setIsYouTubeConfigModalOpen(true),
-                  badge: 'Video & Live',
-                  btnColor: 'bg-[#FF0000] hover:bg-[#cc0000] text-white'
+                  btnColor: 'bg-[#F4B400] hover:bg-[#e3a600] text-white'
                 },
                 {
                   key: 'google_news',
@@ -1263,32 +1430,129 @@ const ClientChannelsPage = () => {
                 }
               ];
 
-              const activeConnectors = allConnectorsList.filter(item => getChannelAccessState(item.key, client).status !== 'COMING_SOON');
-              const comingSoonConnectors = allConnectorsList.filter(item => getChannelAccessState(item.key, client).status === 'COMING_SOON');
+              const allFeaturesList = [
+                {
+                  key: 'team_dashboard',
+                  name: 'Team Dashboard',
+                  desc: 'Collaborative team workspace, role permissions, and agent activity tracking.',
+                  icon: <Users size={28} className="text-emerald-600" />,
+                  isConnected: true,
+                  href: '/client/team',
+                  badge: 'Workspace Module',
+                  btnColor: 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                },
+                {
+                  key: 'quotation',
+                  name: 'Quotation Engine',
+                  desc: 'Create instant sales quotes, cost estimates, and client digital approval links.',
+                  icon: <FileText size={28} className="text-amber-600" />,
+                  isConnected: true,
+                  href: '/client/quotations',
+                  badge: 'Sales Module',
+                  btnColor: 'bg-amber-600 hover:bg-amber-700 text-white'
+                },
+                {
+                  key: 'invoice',
+                  name: 'Invoice Generator',
+                  desc: 'Automated GST tax invoice generation, payment tracking, and receipt PDFs.',
+                  icon: <FileSpreadsheet size={28} className="text-blue-600" />,
+                  isConnected: true,
+                  href: '/client/invoices',
+                  badge: 'Finance Module',
+                  btnColor: 'bg-blue-600 hover:bg-blue-700 text-white'
+                },
+                {
+                  key: 'proposal',
+                  name: 'Proposal Builder',
+                  desc: 'Design professional business proposals, pitch decks, and agreement templates.',
+                  icon: <Award size={28} className="text-indigo-600" />,
+                  isConnected: true,
+                  href: '/client/proposals',
+                  badge: 'Proposal Module',
+                  btnColor: 'bg-indigo-600 hover:bg-indigo-700 text-white'
+                },
+                {
+                  key: 'catalog',
+                  name: 'E-Commerce Catalog',
+                  desc: 'Product catalog management, inventory items, and chat shopping carts.',
+                  icon: <ShoppingBag size={28} className="text-purple-600" />,
+                  isConnected: true,
+                  href: '/client/products',
+                  badge: 'Product Module',
+                  btnColor: 'bg-purple-600 hover:bg-purple-700 text-white'
+                },
+                {
+                  key: 'razorpay',
+                  name: 'Razorpay Gateway',
+                  desc: 'Accept online payments directly via automated invoices and chat links.',
+                  icon: <CreditCard size={28} className="text-[#02042B]" />,
+                  isConnected: isRazorpayConnected,
+                  connectedInfo: client?.razorpay_config?.merchant_name || 'Gateway Active',
+                  onConnect: () => setIsRazorpayConfigModalOpen(true),
+                  onConfigure: () => setIsRazorpayConfigModalOpen(true),
+                  badge: 'Payment Gateway',
+                  btnColor: 'bg-[#02042B] hover:bg-[#1a1c3d] text-white'
+                },
+                {
+                  key: 'zoho',
+                  name: 'Zoho CRM Pipeline',
+                  desc: 'Sync customer chats, lead deals, and contact records directly into Zoho CRM.',
+                  icon: <ZohoIcon size={28} />,
+                  isConnected: isZohoConnected,
+                  connectedInfo: client?.zoho_config?.email || 'CRM Active',
+                  onConnect: () => setIsZohoConfigModalOpen(true),
+                  onConfigure: () => setIsZohoConfigModalOpen(true),
+                  badge: 'CRM Integration',
+                  btnColor: 'bg-[#E42528] hover:bg-[#c91e21] text-white'
+                },
+                {
+                  key: 'autoreply',
+                  name: 'AI Auto Reply Engine',
+                  desc: 'Automate bot workflows, keyword triggers, and multi-step AI responder flows.',
+                  icon: <Zap size={28} className="text-orange-600" />,
+                  isConnected: true,
+                  href: '/client/automations',
+                  badge: 'Automation Bot',
+                  btnColor: 'bg-orange-600 hover:bg-orange-700 text-white'
+                },
+                {
+                  key: 'voice_video_call',
+                  name: 'Voice & Video Calling',
+                  desc: 'In-app WebRTC voice calls, video meetings, and agent consultation rooms.',
+                  icon: <PhoneCall size={28} className="text-teal-600" />,
+                  isConnected: true,
+                  href: '/client/calls',
+                  badge: 'Live Call Module',
+                  btnColor: 'bg-teal-600 hover:bg-teal-700 text-white'
+                }
+              ];
+
+              const activeConnectors = allConnectorsList.filter(item => getChannelAccessState(item.key, client, activePlans).status !== 'COMING_SOON');
+              const comingSoonConnectors = allConnectorsList.filter(item => getChannelAccessState(item.key, client, activePlans).status === 'COMING_SOON');
 
               return (
                 <>
-                  {/* Category 2: Active Connectors */}
+                  {/* Category 2: Active Connectors (8) */}
                   {activeConnectors.length > 0 && (
                     <div className="pt-6 sm:pt-8 border-t border-slate-200/80 space-y-4 sm:space-y-6">
                       <div className="flex flex-wrap items-center justify-between gap-2">
                         <div className="flex flex-wrap items-center gap-2">
                           <span className="w-2 h-2 rounded-full bg-blue-500 shadow-xs shadow-blue-500/50 shrink-0" />
                           <h2 className="text-xs sm:text-sm font-extrabold uppercase tracking-wider text-slate-800">
-                            Available Connectors & Business Tools
+                            Connectors
                           </h2>
                           <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-blue-50 text-blue-700 border border-blue-200 shrink-0">
-                            {activeConnectors.length} Available
+                            {activeConnectors.length} Connectors
                           </span>
                         </div>
                         <span className="text-xs text-slate-400 font-medium hidden md:inline">
-                          Productivity, Storage, CRM & Media Integrations
+                          Productivity, Storage, Mail & Data Connectors
                         </span>
                       </div>
 
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                         {activeConnectors.map((item) => {
-                          const state = getChannelAccessState(item.key, client);
+                          const state = getChannelAccessState(item.key, client, activePlans);
                           const isConn = item.isConnected;
 
                           return (
@@ -1297,7 +1561,6 @@ const ClientChannelsPage = () => {
                               className="bg-white rounded-2xl sm:rounded-3xl border border-slate-200/90 hover:border-slate-300 p-4 sm:p-6 lg:p-7 flex flex-col justify-between transition-all duration-300 shadow-sm hover:shadow-md relative group"
                             >
                               <div>
-                                {/* Header */}
                                 <div className="flex items-start justify-between gap-2.5 mb-3 sm:mb-4">
                                   <div className="flex items-center gap-2.5 sm:gap-3.5 min-w-0 flex-1">
                                     <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center bg-slate-50 border border-slate-100 shadow-xs shrink-0">
@@ -1340,7 +1603,6 @@ const ClientChannelsPage = () => {
                                 )}
                               </div>
 
-                              {/* Action Button */}
                               <div className="pt-1 sm:pt-2">
                                 {isConn ? (
                                   <button
@@ -1351,16 +1613,26 @@ const ClientChannelsPage = () => {
                                     <span>Configure</span>
                                   </button>
                                 ) : (
-                                  <button
-                                    onClick={item.onConnect}
-                                    className={cn(
-                                      "w-full py-2 sm:py-2.5 px-3 sm:px-4 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer shadow-sm",
-                                      item.btnColor
-                                    )}
-                                  >
-                                    <Plus size={14} />
-                                    <span>Connect</span>
-                                  </button>
+                                  <div className="flex items-center gap-2">
+                                    <button
+                                      onClick={item.onConnect}
+                                      className={cn(
+                                        "flex-1 py-2 sm:py-2.5 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer shadow-sm",
+                                        item.btnColor
+                                      )}
+                                    >
+                                      <Plus size={14} />
+                                      <span>Connect</span>
+                                    </button>
+                                    <Link
+                                      href="/client/plans"
+                                      title={`Included in ${state.requiredPlanName || 'Plan'}`}
+                                      className="flex-1 py-2 sm:py-2.5 px-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 rounded-xl text-xs font-extrabold transition flex items-center justify-center gap-1 cursor-pointer shadow-2xs truncate"
+                                    >
+                                      <Layers size={13} className="text-slate-600 shrink-0" />
+                                      <span className="truncate">{state.requiredPlanName || 'Plan'}</span>
+                                    </Link>
+                                  </div>
                                 )}
                               </div>
                             </div>
@@ -1369,6 +1641,111 @@ const ClientChannelsPage = () => {
                       </div>
                     </div>
                   )}
+
+                  {/* Category 3: Workspace Features & Modules (9) */}
+                  <div className="pt-6 sm:pt-8 border-t border-slate-200/80 space-y-4 sm:space-y-6">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-purple-500 shadow-xs shadow-purple-500/50 shrink-0" />
+                        <h2 className="text-xs sm:text-sm font-extrabold uppercase tracking-wider text-slate-800">
+                          Features & Modules
+                        </h2>
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-purple-50 text-purple-700 border border-purple-200 shrink-0">
+                          {allFeaturesList.length} Modules
+                        </span>
+                      </div>
+                      <span className="text-xs text-slate-400 font-medium hidden md:inline">
+                        Core Workspace Business Features & Automation Tools
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                      {allFeaturesList.map((item) => {
+                        const state = getChannelAccessState(item.key, client, activePlans);
+                        const isConn = item.isConnected;
+
+                        return (
+                          <div
+                            key={item.key}
+                            className="bg-white rounded-2xl sm:rounded-3xl border border-slate-200/90 hover:border-slate-300 p-4 sm:p-6 lg:p-7 flex flex-col justify-between transition-all duration-300 shadow-sm hover:shadow-md relative group"
+                          >
+                            <div>
+                              <div className="flex items-start justify-between gap-2.5 mb-3 sm:mb-4">
+                                <div className="flex items-center gap-2.5 sm:gap-3.5 min-w-0 flex-1">
+                                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center bg-slate-50 border border-slate-100 shadow-xs shrink-0">
+                                    {item.icon}
+                                  </div>
+                                  <div className="min-w-0 flex-1">
+                                    <h3 className="font-extrabold text-slate-900 text-sm sm:text-base leading-tight break-words">
+                                      {item.name}
+                                    </h3>
+                                    <span className="inline-block text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-purple-700 bg-purple-50 px-2 py-0.5 rounded-md mt-0.5 border border-purple-100">
+                                      {item.badge}
+                                    </span>
+                                  </div>
+                                </div>
+
+                                <div className="shrink-0">
+                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[9px] sm:text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 whitespace-nowrap">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                    <span>Active</span>
+                                  </span>
+                                </div>
+                              </div>
+
+                              <p className="text-xs text-slate-500 leading-relaxed mb-3 sm:mb-4">
+                                {item.desc}
+                              </p>
+                            </div>
+
+                            <div className="pt-1 sm:pt-2">
+                              {item.href ? (
+                                <Link
+                                  href={item.href}
+                                  className={cn(
+                                    "w-full py-2 sm:py-2.5 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer shadow-sm",
+                                    item.btnColor
+                                  )}
+                                >
+                                  <span>Open Module</span>
+                                  <ChevronRight size={14} />
+                                </Link>
+                              ) : isConn ? (
+                                <button
+                                  onClick={item.onConfigure}
+                                  className="w-full py-2 sm:py-2.5 px-3 sm:px-4 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer border border-slate-200 shadow-xs"
+                                >
+                                  <Settings size={13} className="text-slate-600" />
+                                  <span>Configure</span>
+                                </button>
+                              ) : (
+                                <div className="flex items-center gap-2">
+                                  <button
+                                    onClick={item.onConnect}
+                                    className={cn(
+                                      "flex-1 py-2 sm:py-2.5 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer shadow-sm",
+                                      item.btnColor
+                                    )}
+                                  >
+                                    <Plus size={14} />
+                                    <span>Connect</span>
+                                  </button>
+                                  <Link
+                                    href="/client/plans"
+                                    title={`Included in ${state.requiredPlanName || 'Plan'}`}
+                                    className="flex-1 py-2 sm:py-2.5 px-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 rounded-xl text-xs font-extrabold transition flex items-center justify-center gap-1 cursor-pointer shadow-2xs truncate"
+                                  >
+                                    <Layers size={13} className="text-slate-600 shrink-0" />
+                                    <span className="truncate">{state.requiredPlanName || 'Plan'}</span>
+                                  </Link>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
 
                   {/* Category 3: Dedicated Coming Soon Integrations */}
                   {comingSoonConnectors.length > 0 && (

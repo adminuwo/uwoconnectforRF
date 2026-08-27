@@ -25,7 +25,7 @@ export default function CRMPage() {
   const fetchContacts = async (query = '') => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('uwo_token');
       const searchParam = query ? `&search=${encodeURIComponent(query)}` : '';
       const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/contacts/?limit=100&offset=0${searchParam}`, {
         headers: { Authorization: `Bearer ${token}` }
@@ -66,7 +66,7 @@ export default function CRMPage() {
     formData.append('file', file);
 
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('uwo_token');
       const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/contacts/import_csv/`, formData, {
         headers: { 
           Authorization: `Bearer ${token}`,
@@ -88,7 +88,7 @@ export default function CRMPage() {
       // Optimistic UI update
       setContacts(prev => prev.map(c => c.id === contactId ? { ...c, stage: newStage } : c));
       
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('uwo_token');
       await axios.patch(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/contacts/${contactId}/`, { stage: newStage }, {
         headers: { Authorization: `Bearer ${token}` }
       });

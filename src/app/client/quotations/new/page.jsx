@@ -101,7 +101,7 @@ const NewQuotationPage = () => {
 
   const fetchClientProfile = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('uwo_token');
       const res = await axios.get(`${API_BASE_URL}/api/profile`, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -154,7 +154,7 @@ const NewQuotationPage = () => {
   }, []);
 
   const fetchDocumentForEdit = async (docId) => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('uwo_token');
     try {
       setLoading(true);
       const res = await axios.get(`${API_BASE_URL}/api/sales-documents/${docId}/`, {
@@ -238,7 +238,7 @@ const NewQuotationPage = () => {
   }, [items]);
 
   const fetchContacts = async () => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('uwo_token');
     const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app';
     try {
       const res = await axios.get(`${API_URL}/api/contacts/`, {
@@ -251,7 +251,7 @@ const NewQuotationPage = () => {
   };
 
   const fetchProducts = async () => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('uwo_token');
     const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app';
     try {
       // First try to fetch from catalog products
@@ -286,7 +286,7 @@ const NewQuotationPage = () => {
   };
 
   const fetchSalespeople = async () => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('uwo_token');
     const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app';
     try {
       const res = await axios.get(`${API_URL}/api/admin/users`, {
@@ -397,7 +397,7 @@ const NewQuotationPage = () => {
     }
 
     setLoading(true);
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('uwo_token');
     const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app';
 
     const payload = {

@@ -7,7 +7,7 @@ export const GLOBAL_ACTIVE_CHANNELS = ['whatsapp', 'facebook', 'instagram'];
 export const GLOBAL_ALL_CHANNELS = [
   'whatsapp', 'facebook', 'instagram', 'gmail', 'outlook', 'onedrive',
   'google_calendar', 'google_sheets', 'google_docs', 'google_slides',
-  'zoho', 'youtube', 'google_news'
+  'zoho', 'youtube', 'google_news', 'razorpay'
 ];
 
 export const CHANNEL_DEFINITIONS = [
@@ -147,6 +147,18 @@ export const CHANNEL_DEFINITIONS = [
     iconColor: 'text-orange-600 bg-orange-50 border-orange-100',
   },
   {
+    key: 'razorpay',
+    name: 'Razorpay Gateway',
+    shortName: 'Razorpay',
+    category: 'FINANCE',
+    tagline: 'Secure Online Payments',
+    description: 'Accept payments directly via invoices and chat links using Razorpay integration.',
+    isCore: false,
+    color: '#02042B',
+    badgeBg: 'bg-indigo-50 text-indigo-700 border-indigo-200',
+    iconColor: 'text-indigo-600 bg-indigo-50 border-indigo-100',
+  },
+  {
     key: 'youtube',
     name: 'YouTube Channel',
     shortName: 'YouTube',
@@ -169,18 +181,60 @@ export const CHANNEL_DEFINITIONS = [
     color: '#4285F4',
     badgeBg: 'bg-blue-50 text-blue-700 border-blue-200',
     iconColor: 'text-blue-600 bg-blue-50 border-blue-100',
+  },
+  {
+    key: 'google_maps',
+    name: 'Google Maps',
+    shortName: 'G-Maps',
+    category: 'LOCATION',
+    tagline: 'Location Intelligence',
+    description: 'Google Maps location intelligence, business verification, and geo-location routing.',
+    isCore: false,
+    color: '#EA4335',
+    badgeBg: 'bg-red-50 text-red-700 border-red-200',
+    iconColor: 'text-red-600 bg-red-50 border-red-100',
   }
 ];
 
 /**
+ * Map channel keys to system entitlement feature keys
+ */
+export const FEATURE_KEY_MAP = {
+  'whatsapp': 'channel_whatsapp',
+  'instagram': 'channel_instagram',
+  'facebook': 'channel_facebook',
+  'youtube': 'channel_youtube',
+  'gmail': 'connector_gmail',
+  'outlook': 'connector_outlook',
+  'onedrive': 'connector_onedrive',
+  'google_calendar': 'connector_google_calendar',
+  'google_sheets': 'connector_google_sheets',
+  'google_docs': 'connector_google_docs',
+  'google_slides': 'connector_google_slides',
+  'google_news': 'connector_google_news',
+  'google_maps': 'connector_google_maps',
+  'zoho': 'feature_crm',
+  'razorpay': 'feature_payment',
+  'team_dashboard': 'feature_team_dashboard',
+  'quotation': 'feature_quotation',
+  'invoice': 'feature_invoice',
+  'proposal': 'feature_proposal',
+  'catalog': 'feature_catalog',
+  'payment': 'feature_payment',
+  'crm': 'feature_crm',
+  'autoreply': 'feature_autoreply',
+  'voice_video_call': 'feature_voice_video_call',
+};
+
+/**
  * Determines exact user-side channel state:
- * - 'COMING_SOON': Channel is locked by default until Admin grants access for this workspace
- * - 'DISABLED_BY_ADMIN': Core channel was explicitly revoked by Admin
+ * - 'COMING_SOON': Channel is locked by default until Admin grants access OR admin creates plan containing it
  * - 'CONNECTED': Channel is enabled and client has connected credentials
  * - 'NOT_CONNECTED': Channel is enabled and ready to connect (+ Connect Now)
  */
-export function getChannelAccessState(channelKey, clientData) {
+export function getChannelAccessState(channelKey, clientData, activePlans = []) {
   const key = String(channelKey).toLowerCase().trim();
+  const featureKey = FEATURE_KEY_MAP[key] || `connector_${key}`;
 
   // 0. Level 1: Global Admin Master Check
   const gConnectors = clientData?.global_connectors;
@@ -190,7 +244,7 @@ export function getChannelAccessState(channelKey, clientData) {
     return {
       status: 'COMING_SOON',
       label: 'Coming Soon',
-      reason: 'This integration is coming soon and will be activated shortly by the administrator.',
+      reason: 'This integration is deactivated by the administrator.',
       canConnect: false,
       canConfigure: false,
       isDisabled: true,
@@ -202,7 +256,7 @@ export function getChannelAccessState(channelKey, clientData) {
     return {
       status: 'COMING_SOON',
       label: 'Coming Soon',
-      reason: 'This integration is coming soon and will be activated shortly by the administrator.',
+      reason: 'This integration is deactivated by the administrator.',
       canConnect: false,
       canConfigure: false,
       isDisabled: true,
@@ -219,12 +273,10 @@ export function getChannelAccessState(channelKey, clientData) {
   } else if (effConnectors && effConnectors[key] && effConnectors[key].client_enabled !== undefined) {
     isPermitted = Boolean(effConnectors[key].client_enabled);
   } else if (key === 'whatsapp') {
+    // Legacy support for whatsapp permission check if not in effConnectors
     isPermitted = clientData?.whatsapp_enabled !== false;
-  } else if (clientData && clientData[`${key}_enabled`] !== undefined) {
-    isPermitted = Boolean(clientData[`${key}_enabled`]);
   }
 
-  // If Admin has explicitly revoked permission for this workspace:
   if (!isPermitted) {
     return {
       status: 'COMING_SOON',
@@ -237,7 +289,54 @@ export function getChannelAccessState(channelKey, clientData) {
     };
   }
 
-  // 2. Live Connection Check
+  // 2. Level 3: Admin Plans Check
+  // If activePlans exist, check if ANY active admin plan contains this feature key
+  let containingPlans = [];
+  if (Array.isArray(activePlans) && activePlans.length > 0) {
+    containingPlans = activePlans.filter(p => {
+      if (!p || p.is_active === false) return false;
+      const keys = p.feature_keys || p.metadata?.feature_keys || [];
+      return keys.includes(featureKey) || keys.includes(key);
+    });
+
+    // If active from admin side, but admin hasn't added this connector to ANY active plan yet -> Coming Soon
+    if (containingPlans.length === 0) {
+      return {
+        status: 'COMING_SOON',
+        label: 'Coming Soon',
+        reason: 'Plan coming soon from Administrator for this connector.',
+        canConnect: false,
+        canConfigure: false,
+        isDisabled: true,
+        badgeColor: 'bg-amber-50 text-amber-700 border-amber-200'
+      };
+    }
+  }
+
+  // Check if included in Client's Current Plan
+  let isIncludedInPlan = true;
+  let requiredPlanName = containingPlans.length > 0 ? containingPlans[0].name : 'Professional Plan';
+
+  if (clientData) {
+    const clientPlanId = clientData.plan_id || clientData.plan?.id || '';
+    const clientPlanName = (clientData.plan_name || clientData.plan || '').toLowerCase();
+    const customAdded = clientData.custom_added || [];
+    const customRemoved = clientData.custom_removed || [];
+
+    if (customRemoved.includes(featureKey) || customRemoved.includes(key)) {
+      isIncludedInPlan = false;
+    } else if (customAdded.includes(featureKey) || customAdded.includes(key)) {
+      isIncludedInPlan = true;
+    } else if (clientPlanId && containingPlans.length > 0) {
+      const match = containingPlans.find(p => p.id === clientPlanId || p.name.toLowerCase() === clientPlanName);
+      if (!match) {
+        // Client's current plan does not include this connector, but another plan does
+        isIncludedInPlan = false;
+      }
+    }
+  }
+
+  // 3. Live Connection Check
   let isConnected = false;
   if (key === 'whatsapp') {
     isConnected = Boolean(
@@ -281,6 +380,8 @@ export function getChannelAccessState(channelKey, clientData) {
     isConnected = Boolean(clientData?.google_news_enabled || clientData?.google_news_config?.connected);
   } else if (key === 'youtube') {
     isConnected = Boolean(clientData?.youtube_enabled || clientData?.youtube_config?.channel_id);
+  } else if (key === 'razorpay') {
+    isConnected = Boolean(clientData?.razorpay_enabled || clientData?.razorpay_config?.api_key || clientData?.razorpay_config?.key_id);
   } else {
     isConnected = Boolean(clientData?.settings?.[`${key}_enabled`]);
   }
@@ -292,6 +393,8 @@ export function getChannelAccessState(channelKey, clientData) {
       canConnect: false,
       canConfigure: true,
       isDisabled: false,
+      isIncludedInPlan,
+      requiredPlanName,
       badgeColor: 'bg-emerald-50 text-emerald-700 border-emerald-200'
     };
   }
@@ -302,6 +405,9 @@ export function getChannelAccessState(channelKey, clientData) {
     canConnect: true,
     canConfigure: true,
     isDisabled: false,
+    isIncludedInPlan,
+    requiredPlanName,
     badgeColor: 'bg-blue-50 text-blue-700 border-blue-200'
   };
 }
+

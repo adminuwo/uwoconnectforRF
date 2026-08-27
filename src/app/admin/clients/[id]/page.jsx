@@ -244,6 +244,7 @@ export default function ClientAdminDetailDashboard({ params }) {
 
       if (res.data.access) {
         localStorage.setItem('token', res.data.access);
+        localStorage.setItem('uwo_token', res.data.access);
         localStorage.setItem('user', JSON.stringify(res.data.user));
         localStorage.setItem('impersonation_session', JSON.stringify({
           client_id: clientId,

@@ -24,7 +24,7 @@ const ClientOverview = () => {
 
   useEffect(() => {
     setMounted(true);
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('uwo_token');
     if (!token) {
       router.push('/auth/login');
     }
@@ -138,7 +138,7 @@ const ClientOverview = () => {
 
   const handleSendNewsAlert = async (article) => {
     setSendingNewsAlert(prev => ({ ...prev, [article.link]: true }));
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('uwo_token');
     const headers = { Authorization: `Bearer ${token}` };
 
     try {
@@ -183,7 +183,7 @@ const ClientOverview = () => {
     }
 
     const fetchDashboardData = async () => {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('uwo_token');
       if (!token) {
         setLoading(false);
         return;

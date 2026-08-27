@@ -49,7 +49,7 @@ export default function EnterpriseCallsPage() {
   // 1. Fetch Real Team Members from Team Directory (Single Source of Truth)
   const fetchRealContacts = async () => {
     try {
-      const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+      const token = typeof window !== 'undefined' ? localStorage.getItem('uwo_token') : null;
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
       const res = await fetch(`${API_BASE_URL}/api/team/members/`, { headers });
@@ -98,7 +98,7 @@ export default function EnterpriseCallsPage() {
   // 2. Fetch Call History
   const fetchRealCallHistory = async () => {
     try {
-      const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+      const token = typeof window !== 'undefined' ? localStorage.getItem('uwo_token') : null;
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
       const res = await fetch(`${API_BASE_URL}/api/webrtc/history/`, { headers });
@@ -181,7 +181,7 @@ export default function EnterpriseCallsPage() {
             }
           });
 
-          const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+          const token = typeof window !== 'undefined' ? localStorage.getItem('uwo_token') : null;
           await fetch(`${API_BASE_URL}/api/webrtc/call/signal/`, {
             method: 'POST',
             headers: {
@@ -209,7 +209,7 @@ export default function EnterpriseCallsPage() {
           try {
             const pending = JSON.parse(pendingStr);
             // Fetch the full session data from backend
-            const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+            const token = typeof window !== 'undefined' ? localStorage.getItem('uwo_token') : null;
             const res2 = await fetch(`${API_BASE_URL}/api/webrtc/call/active-check`, {
               headers: token ? { Authorization: `Bearer ${token}` } : {}
             });
@@ -233,7 +233,7 @@ export default function EnterpriseCallsPage() {
           } catch(e) {}
         }
 
-        const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+        const token = typeof window !== 'undefined' ? localStorage.getItem('uwo_token') : null;
         const res = await fetch(`${API_BASE_URL}/api/webrtc/call/active-check`, {
           headers: token ? { Authorization: `Bearer ${token}` } : {}
         });
@@ -264,7 +264,7 @@ export default function EnterpriseCallsPage() {
     }, 10000);
     
     // Connect WebSocket
-    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+    const token = typeof window !== 'undefined' ? localStorage.getItem('uwo_token') : null;
     if (token) {
       const backendUrlStr = process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app';
       const isSecureBackend = backendUrlStr.startsWith('https');
@@ -329,7 +329,7 @@ export default function EnterpriseCallsPage() {
   useEffect(() => {
     const pollCallStatus = async () => {
       try {
-        const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+        const token = typeof window !== 'undefined' ? localStorage.getItem('uwo_token') : null;
         const res = await fetch(`${API_BASE_URL}/api/webrtc/call/active-check`, {
           headers: token ? { Authorization: `Bearer ${token}` } : {}
         });
@@ -488,7 +488,7 @@ export default function EnterpriseCallsPage() {
         }
 
         // Always send answer via API as fallback (for HTTP Poller)
-        const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+        const token = typeof window !== 'undefined' ? localStorage.getItem('uwo_token') : null;
         if (offerData.sessionId) {
           fetch(`${API_BASE_URL}/api/webrtc/call/signal/`, {
             method: 'POST',
@@ -663,7 +663,7 @@ export default function EnterpriseCallsPage() {
 
       // Persist the call session in MongoDB so the receiver's HTTP Poller doesn't auto-reject it (AND as a fallback!)
       try {
-        const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+        const token = typeof window !== 'undefined' ? localStorage.getItem('uwo_token') : null;
         const res = await fetch(`${API_BASE_URL}/api/webrtc/call/initiate/`, {
           method: 'POST',
           headers: { 
@@ -752,7 +752,7 @@ export default function EnterpriseCallsPage() {
 
     // ALWAYS delete the session from MongoDB instantly so it doesn't block future calls
     if (activeCall && activeCall.sessionId) {
-      const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+      const token = typeof window !== 'undefined' ? localStorage.getItem('uwo_token') : null;
       fetch(`${API_BASE_URL}/api/webrtc/call/action/`, {
         method: 'POST',
         headers: { 

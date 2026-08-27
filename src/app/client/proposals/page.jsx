@@ -59,7 +59,7 @@ const ProposalsPage = () => {
 
   const fetchData = async () => {
     setLoading(true);
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('uwo_token');
     const headers = { Authorization: `Bearer ${token}` };
 
     try {
@@ -101,7 +101,7 @@ const ProposalsPage = () => {
   };
 
   const handleDownloadPDF = async (docId, docNum) => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('uwo_token');
     const API_URL = API_BASE_URL;
     const downloadUrl = `${API_URL}/api/sales-documents/${docId}/pdf/`;
     try {
@@ -126,7 +126,7 @@ const ProposalsPage = () => {
 
   const handleDuplicate = async (docId) => {
     setActionLoading(prev => ({ ...prev, [docId]: 'duplicate' }));
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('uwo_token');
     const API_URL = API_BASE_URL;
     try {
       await axios.post(`${API_URL}/api/sales-documents/${docId}/duplicate/`, {}, {
@@ -156,7 +156,7 @@ const ProposalsPage = () => {
       return;
     }
     setSendSending(true);
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('uwo_token');
     const API_URL = API_BASE_URL;
     
     try {
@@ -181,7 +181,7 @@ const ProposalsPage = () => {
   const handleDelete = async (docId) => {
     if (!confirm("Are you sure you want to delete this proposal?")) return;
     setActionLoading(prev => ({ ...prev, [docId]: 'delete' }));
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('uwo_token');
     const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app';
     try {
       await axios.delete(`${API_URL}/api/sales-documents/${docId}/`, {

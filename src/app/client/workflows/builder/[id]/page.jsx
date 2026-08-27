@@ -358,7 +358,7 @@ const WorkflowBuilderInner = () => {
           setNodes([{ id: 'start', type: 'trigger', position: {x:250, y:50}, data: { keyword: 'Any Keyword' } }]);
         }
       } else {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('uwo_token');
         const res = await axios.get(`${API_BASE_URL}/api/workflows/${id}/`, { headers: { Authorization: `Bearer ${token}` } });
         setWorkflow(res.data);
         setDeploymentChannels(res.data.channels || ['WHATSAPP']);
@@ -386,7 +386,7 @@ const WorkflowBuilderInner = () => {
   const handleSave = async () => {
     try {
       setIsSaving(true);
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('uwo_token');
       
       // Find the trigger node and extract its keyword(s)
       const triggerNode = nodes.find(n => n.type === 'trigger');

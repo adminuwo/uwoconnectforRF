@@ -50,7 +50,7 @@ export default function GoogleNewsPage() {
 
   const fetchNews = async (overrideCategory = activeCategory, overrideQuery = searchQuery) => {
     setLoading(true);
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('uwo_token');
     if (!token) {
       router.push('/login');
       return;
@@ -79,7 +79,7 @@ export default function GoogleNewsPage() {
 
   const fetchSettings = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('uwo_token');
       const res = await axios.get(`${apiUrl}/api/google-news/settings`, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -121,7 +121,7 @@ export default function GoogleNewsPage() {
     setAiOutput('');
 
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('uwo_token');
       const res = await axios.post(
         `${apiUrl}/api/google-news/summarize`,
         {
@@ -158,7 +158,7 @@ export default function GoogleNewsPage() {
       return;
     }
     setSendingNewsAlert(prev => ({ ...prev, [article.link]: true }));
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('uwo_token');
     const headers = { Authorization: `Bearer ${token}` };
 
     try {

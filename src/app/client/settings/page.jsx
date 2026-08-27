@@ -42,7 +42,7 @@ const ClientSettingsPage = () => {
   const fetchProfile = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('uwo_token');
       const res = await axios.get(`${API_BASE_URL}/api/profile`, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -141,7 +141,7 @@ const ClientSettingsPage = () => {
       window.dispatchEvent(new CustomEvent('profileUpdated', { detail: { company_logo_url: compressedLogoDataUrl } }));
 
       // Immediate auto-save to backend
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('uwo_token');
       const res = await axios.patch(`${API_BASE_URL}/api/profile`, {
         company_logo_url: compressedLogoDataUrl
       }, {
@@ -176,7 +176,7 @@ const ClientSettingsPage = () => {
       localStorage.removeItem('client_company_logo');
       window.dispatchEvent(new CustomEvent('profileUpdated', { detail: { company_logo_url: '' } }));
       
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('uwo_token');
       await axios.patch(`${API_BASE_URL}/api/profile`, {
         company_logo_url: ''
       }, {
@@ -193,7 +193,7 @@ const ClientSettingsPage = () => {
 
   const fetchPaymentHistory = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('uwo_token');
       const res = await axios.get(`${API_BASE_URL}/api/payments/history`, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -205,7 +205,7 @@ const ClientSettingsPage = () => {
 
   const fetchActivePlans = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('uwo_token');
       const res = await axios.get(`${API_BASE_URL}/api/plans/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -289,7 +289,7 @@ const ClientSettingsPage = () => {
   const handleUpdate = async () => {
     try {
       setIsSaving(true);
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('uwo_token');
 
       const payload = {
         name: editData.name,

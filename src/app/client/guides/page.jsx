@@ -23,7 +23,7 @@ const LearningCenterPage = () => {
 
   const fetchGuides = async () => {
     setLoading(true);
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('uwo_token');
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
     const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app';
 

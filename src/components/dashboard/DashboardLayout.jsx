@@ -5,7 +5,7 @@ import dynamic from 'next/dynamic';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import Sidebar from './Sidebar';
-import { MessageCircle, Building2, ChevronDown, Search, Menu } from 'lucide-react';
+import { MessageCircle, Building2, ChevronDown, Search, Menu, Crown } from 'lucide-react';
 import axios from 'axios';
 import { API_BASE_URL } from '@/config/apiConfig';
 
@@ -55,6 +55,7 @@ const PAGE_TITLES = {
   '/client/team': 'Team',
   '/client/reports': 'Work Reports',
   '/client/settings': 'Settings',
+  '/client/plans': 'Plans & Subscriptions',
   '/client/support': 'Support',
 };
 
@@ -204,6 +205,7 @@ const DashboardLayout = ({ children, role: initialRole }) => {
 
     if (backupToken && backupUser) {
       localStorage.setItem('token', backupToken);
+      localStorage.setItem('uwo_token', backupToken);
       localStorage.setItem('user', backupUser);
       localStorage.removeItem('admin_backup_token');
       localStorage.removeItem('admin_backup_user');
@@ -219,7 +221,7 @@ const DashboardLayout = ({ children, role: initialRole }) => {
     setSwitcherOpen(!switcherOpen);
     if (!switcherOpen && !clientsLoaded) {
       try {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('uwo_token') || localStorage.getItem('token');
         const res = await axios.get(`${API_BASE_URL}/api/admin/clients-directory/`, {
           headers: { Authorization: `Bearer ${token}` },
           params: { page_size: 100 }
@@ -234,7 +236,7 @@ const DashboardLayout = ({ children, role: initialRole }) => {
 
   const handleOpenClientWorkspace = async (client) => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('uwo_token') || localStorage.getItem('token');
       const currentUser = localStorage.getItem('user');
 
       localStorage.setItem('admin_backup_token', token);
@@ -248,6 +250,7 @@ const DashboardLayout = ({ children, role: initialRole }) => {
 
       if (res.data.access) {
         localStorage.setItem('token', res.data.access);
+        localStorage.setItem('uwo_token', res.data.access);
         localStorage.setItem('user', JSON.stringify(res.data.user));
         localStorage.setItem('impersonation_session', JSON.stringify({
           client_id: client.id,
@@ -364,6 +367,14 @@ const DashboardLayout = ({ children, role: initialRole }) => {
                       )}
                     </div>
                   )}
+
+                  <Link
+                    href={displayRole === 'ADMIN' ? '/admin/plans' : '/client/plans'}
+                    className="p-2 text-slate-500 hover:text-amber-500 bg-slate-50 hover:bg-amber-50 rounded-full transition-colors relative"
+                    title="Plans & Subscriptions"
+                  >
+                    <Crown size={18} />
+                  </Link>
 
                   <button
                     data-tour="header-team-chat"

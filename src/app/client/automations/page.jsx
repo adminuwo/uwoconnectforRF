@@ -69,7 +69,7 @@ const ClientAutomationsPage = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('uwo_token');
       
       const autoRes = await axios.get(`${API_BASE_URL}/api/automations/`, {
         headers: { Authorization: `Bearer ${token}` }
@@ -109,7 +109,7 @@ const ClientAutomationsPage = () => {
   const handleSaveGreeting = async (newEnabledState = null) => {
     setSavingKey('greeting');
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('uwo_token');
       const enabled = newEnabledState !== null ? newEnabledState : greetingData.enabled;
       
       const welcomeAutomation = automations.find(a => a.trigger_type === 'START_CHAT' && a.channels.includes(selectedChannel));
@@ -146,7 +146,7 @@ const ClientAutomationsPage = () => {
   const handleSaveAI = async (newEnabledState = null) => {
     setSavingKey('ai');
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('uwo_token');
       const enabled = newEnabledState !== null ? newEnabledState : aiData.enabled;
       await axios.patch(`${API_BASE_URL}/api/profile`, {
         ai_enabled: enabled,
@@ -169,7 +169,7 @@ const ClientAutomationsPage = () => {
     if (!newKeyword.keywords || !newKeyword.response) return;
     setSavingKey('create_kw');
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('uwo_token');
       await axios.post(`${API_BASE_URL}/api/automations/`, {
         name: newKeyword.keywords.split(',')[0].trim(),
         trigger_type: 'KEYWORD',
@@ -194,7 +194,7 @@ const ClientAutomationsPage = () => {
   // Toggle Keyword Reply
   const handleToggleKeyword = async (id, currentStatus) => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('uwo_token');
       await axios.patch(`${API_BASE_URL}/api/automations/${id}/`, {
         enabled: !currentStatus
       }, {
@@ -210,7 +210,7 @@ const ClientAutomationsPage = () => {
   // Delete Keyword Reply
   const handleDeleteKeyword = async (id) => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('uwo_token');
       await axios.delete(`${API_BASE_URL}/api/automations/${id}/`, {
         headers: { Authorization: `Bearer ${token}` }
       });

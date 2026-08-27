@@ -58,8 +58,10 @@ const TOUR_IDS = {
   'Team': 'sidebar-team',
   'Work Reports': 'sidebar-reports',
   'Settings': 'sidebar-settings',
+  'Plans': 'sidebar-plans',
   'Support': 'sidebar-support',
 };
+
 
 const YoutubeIcon = ({ size = 16, className }) => (
   <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="currentColor" className={className}>
@@ -130,6 +132,7 @@ const Sidebar = ({ role, isOpen, onClose, onToggle }) => {
     { name: 'Team', href: '/client/team', icon: ShieldCheck },
     { name: 'Work Reports', href: '/client/reports', icon: FileCheck },
     { name: 'Settings', href: '/client/settings', icon: Settings },
+    { name: 'Plans', href: '/client/plans', icon: Layers },
     { name: 'Support', href: '/client/support', icon: LifeBuoy },
   ];
 

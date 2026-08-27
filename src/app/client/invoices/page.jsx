@@ -64,7 +64,7 @@ export default function InvoicesPage() {
 
   const fetchInvoices = async () => {
     setLoading(true);
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('uwo_token');
     if (!token) {
       router.push('/login');
       return;
@@ -84,7 +84,7 @@ export default function InvoicesPage() {
   };
 
   const fetchSettings = async () => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('uwo_token');
     try {
       const res = await axios.get(`${API_BASE_URL}/api/invoices/settings/`, {
         headers: { Authorization: `Bearer ${token}` }
@@ -103,7 +103,7 @@ export default function InvoicesPage() {
   const handleSaveSettings = async (e) => {
     e.preventDefault();
     setSettingsLoading(true);
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('uwo_token');
     try {
       await axios.post(`${API_BASE_URL}/api/invoices/settings/`, settingsData, {
         headers: { Authorization: `Bearer ${token}` }
@@ -118,7 +118,7 @@ export default function InvoicesPage() {
   };
 
   const handleDownloadPDF = async (inv) => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('uwo_token');
     const downloadUrl = `${API_BASE_URL}/api/invoices/${inv.id}/download/`;
     try {
       const res = await axios.get(downloadUrl, {
@@ -141,7 +141,7 @@ export default function InvoicesPage() {
   };
 
   const handleRegenerate = async (inv) => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('uwo_token');
     try {
       const res = await axios.post(`${API_BASE_URL}/api/invoices/${inv.id}/regenerate/`, {}, {
         headers: { Authorization: `Bearer ${token}` }

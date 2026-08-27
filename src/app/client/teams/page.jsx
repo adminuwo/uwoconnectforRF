@@ -213,7 +213,7 @@ export default function TeamsPage() {
   const pcRef = useRef(null);
 
   const getHeaders = () => {
-    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+    const token = typeof window !== 'undefined' ? localStorage.getItem('uwo_token') : null;
     return token ? { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' };
   };
 

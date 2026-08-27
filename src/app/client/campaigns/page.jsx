@@ -26,7 +26,7 @@ export default function CampaignsPage() {
 
   const fetchCampaigns = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('uwo_token');
       const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/campaigns/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -42,7 +42,7 @@ export default function CampaignsPage() {
   const syncTemplates = async () => {
     setSyncing(true);
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('uwo_token');
       const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/templates/sync_from_meta/`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -73,7 +73,7 @@ export default function CampaignsPage() {
     const campaignId = typeof id === 'object' && id !== null ? (id.$oid || id._id || id.id) : id;
     
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('uwo_token');
       await axios.delete(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/campaigns/${campaignId}/`, {
         headers: { Authorization: `Bearer ${token}` }
       });

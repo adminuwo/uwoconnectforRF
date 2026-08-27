@@ -90,7 +90,7 @@ const ClientWorkflowsPage = () => {
   const fetchWorkflows = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('uwo_token');
       const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/workflows/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -152,7 +152,7 @@ const ClientWorkflowsPage = () => {
 
   const handleToggle = async (id, currentStatus) => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('uwo_token');
       await axios.patch(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/workflows/${id}/`, {
         enabled: !currentStatus
       }, {
@@ -166,7 +166,7 @@ const ClientWorkflowsPage = () => {
 
   const handleDuplicate = async (flow) => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('uwo_token');
       await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/workflows/`, {
         name: `${flow.name} (Copy)`,
         category: flow.category,
@@ -191,7 +191,7 @@ const ClientWorkflowsPage = () => {
   const handleDelete = async (id) => {
     if (!confirm('Are you sure you want to delete this workflow? This action is permanent.')) return;
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('uwo_token');
       await axios.delete(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/workflows/${id}/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
