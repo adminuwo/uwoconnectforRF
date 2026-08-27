@@ -55,6 +55,14 @@
   textarea {
     font-family: inherit;
   }
+
+  /* Disable browser native password reveal/clear buttons (Edge, IE, Chromium) */
+  input::-ms-reveal,
+  input::-ms-clear {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+  }
 }
 
 /* Premium Glass Cards in Dark Mode */
@@ -785,27 +793,14 @@
   /* Firefox */
 }
 
-/* ── Landing Page Mobile Responsive Overrides ── */
+/* ── Landing Page Mobile Responsive Overrides (Scoped) ── */
 @media (max-width: 1024px) {
-
-  /* Hero section & general sections adaptations */
-  section {
-    padding-top: 5rem !important;
-    padding-bottom: 4rem !important;
-    flex-direction: column !important;
-    gap: 2.5rem !important;
-    text-align: center !important;
-  }
-
-  /* Hero title line spacing and size scaling */
-  h1 {
-    font-size: 2.5rem !important;
-    line-height: 1.2 !important;
-  }
-
-  h2 {
-    font-size: 2rem !important;
-    line-height: 1.2 !important;
+  .landing-hero-section {
+    padding-top: 5rem;
+    padding-bottom: 4rem;
+    flex-direction: column;
+    gap: 2.5rem;
+    text-align: center;
   }
 
   /* 3D Dashboard Mockup flat rendering on mobile to prevent overflow */
@@ -813,7 +808,7 @@
     perspective: none !important;
   }
 
-  .perspective-1000>div {
+  .perspective-1000 > div {
     transform: none !important;
     max-width: 100% !important;
     border-radius: 20px !important;
@@ -826,35 +821,9 @@
 }
 
 @media (max-width: 768px) {
-
-  /* Padding clamp for extreme small mobile screens */
-  .max-w-7xl {
-    padding-left: 1.25rem !important;
-    padding-right: 1.25rem !important;
-  }
-
-  /* Flex items layout wrap */
-  .flex-wrap {
-    justify-content: center !important;
-  }
-
-  /* Pricing grids & Modules grid list wrap */
-  .grid {
-    grid-template-columns: 1fr !important;
-    gap: 1.5rem !important;
-  }
-
-  /* Header adjustments */
-  header h1 {
-    font-size: 1.25rem !important;
-  }
-
-  /* Buttons dynamic blocks */
-  .btn-accent,
-  .btn-secondary,
-  button {
-    width: 100% !important;
-    justify-content: center !important;
+  .landing-hero-section .max-w-7xl {
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
   }
 }
 

@@ -32,7 +32,8 @@ import {
   FileText,
   Search,
   Bot,
-  Layers
+  Layers,
+  X
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -158,149 +159,181 @@ const Sidebar = ({ role, isOpen, onClose, onToggle }) => {
   };
 
   return (
-    <aside
-      data-tour="sidebar-nav"
-      className={cn(
-        'relative h-full bg-white border-r border-slate-100 flex flex-col z-40 font-sans transition-all duration-300 ease-in-out shrink-0 overflow-hidden',
-        isOpen ? 'w-[220px]' : 'w-14'
+    <>
+      {/* ── Mobile Overlay Backdrop ── */}
+      {isOpen && (
+        <div
+          onClick={onClose}
+          className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-40 lg:hidden transition-opacity duration-300 animate-in fade-in"
+          aria-hidden="true"
+        />
       )}
-    >
-      {/* ── Brand Header ── */}
-      <div className={cn(
-        'flex items-center border-b border-slate-50 shrink-0 transition-all duration-300',
-        isOpen ? 'px-4 py-3 justify-between' : 'px-0 py-3 justify-center'
-      )}>
-        {isOpen && (
-          <div className="flex items-center gap-3 min-w-0">
-            <img
-              src="/download (3).gif"
-              alt="UwoConnect Logo"
-              className="w-8 h-8 rounded-xl object-contain shadow-md shrink-0"
-            />
-            <div className="min-w-0">
-              <h1 className="text-sm font-black text-slate-900 tracking-tight leading-none truncate">UwoConnect</h1>
-              <span className="text-[7px] font-black text-[#059669] uppercase tracking-[0.2em] mt-0.5 block">V1.0 {role}</span>
-            </div>
-          </div>
+
+      <aside
+        data-tour="sidebar-nav"
+        className={cn(
+          'bg-white border-r border-slate-100 flex flex-col font-sans transition-all duration-300 ease-in-out shrink-0 overflow-hidden',
+          // Mobile View: Slide-over drawer
+          'fixed inset-y-0 left-0 z-50 shadow-2xl lg:shadow-none h-full',
+          isOpen ? 'translate-x-0 w-[260px] sm:w-[270px]' : '-translate-x-full',
+          // Desktop View (lg >= 1024px): Regular docked sidebar
+          'lg:relative lg:translate-x-0 lg:z-30',
+          isOpen ? 'lg:w-[220px]' : 'lg:w-14'
         )}
-
-        {/* Toggle button — always visible */}
-        <button
-          onClick={handleToggle}
-          title={isOpen ? 'Collapse Sidebar' : 'Expand Sidebar'}
-          className={cn(
-            'flex items-center justify-center rounded-xl transition-all duration-200 cursor-pointer shrink-0',
-            'text-slate-400 hover:text-[#059669] hover:bg-emerald-50',
-            isOpen ? 'p-1.5' : 'w-9 h-9'
-          )}
-        >
-          {isOpen
-            ? <ChevronLeft size={18} strokeWidth={2.5} />
-            : <ChevronRight size={18} strokeWidth={2.5} />}
-        </button>
-      </div>
-
-      {/* ── Navigation ── */}
-      <nav className={cn(
-        'flex-1 min-h-0 py-3 space-y-0.5 overflow-y-auto custom-scrollbar',
-        isOpen ? 'px-2' : 'px-2'
-      )}>
-        {isOpen && (
-          <p className="px-3 text-[8px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 italic opacity-70">Menu</p>
-        )}
-
-        {links.map((link) => {
-          const isActive = pathname === link.href;
-          const Icon = link.icon;
-          const tourId = TOUR_IDS[link.name];
-          return (
-            <Link
-              key={link.href}
-              href={link.href}
-              data-tour={tourId}
-              title={!isOpen ? link.name : undefined}
-              className={cn(
-                'group flex items-center rounded-xl transition-all duration-300 relative overflow-hidden',
-                isOpen ? 'gap-2 px-2 py-2' : 'justify-center px-0 py-2',
-                isActive
-                  ? 'bg-gradient-to-r from-emerald-50/80 to-emerald-50/10 text-[#047857] shadow-[0_4px_12px_rgba(5,150,105,0.02)] border border-[#059669]/5'
-                  : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50 hover:shadow-sm hover:-translate-y-0.5'
-              )}
-            >
-              {/* Active left bar */}
-              {isActive && (
-                <div className="absolute left-0 w-1 h-5 bg-gradient-to-b from-[#16A34A] to-[#059669] rounded-r-full shadow-[0_0_10px_rgba(5,150,105,0.3)]" />
-              )}
-
-              <Icon
-                size={isOpen ? 16 : 18}
-                strokeWidth={isActive ? 2.5 : 2}
-                className={cn(
-                  'transition-all duration-300 shrink-0',
-                  isActive ? 'text-[#059669] scale-110 drop-shadow-md' : 'text-slate-400 group-hover:text-slate-600'
-                )}
+      >
+        {/* ── Brand Header ── */}
+        <div className={cn(
+          'flex items-center border-b border-slate-100/80 shrink-0 transition-all duration-300',
+          isOpen ? 'px-3.5 sm:px-4 py-3 justify-between gap-2' : 'px-0 py-3 justify-center'
+        )}>
+          {isOpen && (
+            <div className="flex items-center gap-2.5 min-w-0 flex-1">
+              <img
+                src="/download (3).gif"
+                alt="UwoConnect Logo"
+                className="w-8 h-8 rounded-xl object-contain shadow-xs shrink-0"
               />
-
-              {/* Label — only when expanded */}
-              {isOpen && (
-                <span className={cn(
-                  'text-[12px] tracking-tight font-bold z-10 relative truncate',
-                  isActive ? 'text-[#047857]' : 'text-slate-500'
-                )}>
-                  {link.name}
-                </span>
-              )}
-
-              {isActive && isOpen && (
-                <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-white/40 to-transparent pointer-events-none" />
-              )}
-            </Link>
-          );
-        })}
-      </nav>
-
-      {/* ── Footer ── */}
-      <div className={cn('shrink-0 border-t border-slate-50', isOpen ? 'p-4' : 'p-2')}>
-        <button
-          data-tour="sidebar-logout"
-          onClick={handleLogout}
-          title={!isOpen ? 'Logout' : undefined}
-          className={cn(
-            'flex items-center rounded-xl transition-all group font-bold',
-            'text-slate-400 hover:text-red-500 hover:bg-red-50',
-            isOpen ? 'w-full gap-2 px-2 py-2 mb-1' : 'w-full justify-center px-0 py-2'
+              <div className="min-w-0 flex-1">
+                <h1 className="text-sm font-black text-slate-900 tracking-tight leading-tight whitespace-nowrap">UwoConnect</h1>
+                <span className="text-[7.5px] font-black text-[#059669] uppercase tracking-[0.18em] block mt-0.5 whitespace-nowrap">V1.0 {role}</span>
+              </div>
+            </div>
           )}
-        >
-          <LogOut size={16} className="group-hover:-translate-x-1 transition-transform shrink-0" />
-          {isOpen && <span className="text-[10px] uppercase tracking-widest">Logout</span>}
-        </button>
 
-        {isOpen && (
-          <div className="px-3 py-2 flex flex-col gap-1">
-            <a
-              href="https://uwo24.com/privacy-policy"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-[8px] font-bold text-slate-400 uppercase tracking-widest hover:text-[#059669] transition-colors italic"
-            >
-              Privacy Policy
-            </a>
-            <Link
-              href="/terms"
-              className="text-[8px] font-bold text-slate-400 uppercase tracking-widest hover:text-[#059669] transition-colors italic"
-            >
-              Terms of Service
-            </Link>
-          </div>
-        )}
-      </div>
+          {/* Desktop Toggle button (hidden on mobile) */}
+          <button
+            onClick={handleToggle}
+            title={isOpen ? 'Collapse Sidebar' : 'Expand Sidebar'}
+            className={cn(
+              'hidden lg:flex items-center justify-center rounded-xl transition-all duration-200 cursor-pointer shrink-0',
+              'text-slate-400 hover:text-[#059669] hover:bg-emerald-50',
+              isOpen ? 'p-1.5' : 'w-9 h-9'
+            )}
+          >
+            {isOpen
+              ? <ChevronLeft size={18} strokeWidth={2.5} />
+              : <ChevronRight size={18} strokeWidth={2.5} />}
+          </button>
 
-      <style jsx>{`
-        .custom-scrollbar::-webkit-scrollbar { width: 3px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 20px; }
-      `}</style>
-    </aside>
+          {/* Mobile Close Button (visible only on mobile when drawer is open) */}
+          {isOpen && (
+            <button
+              onClick={onClose}
+              title="Close menu"
+              className="lg:hidden p-1.5 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer flex items-center justify-center shrink-0"
+            >
+              <X size={18} />
+            </button>
+          )}
+        </div>
+
+        {/* ── Navigation ── */}
+        <nav className={cn(
+          'flex-1 min-h-0 py-3 space-y-0.5 overflow-y-auto custom-scrollbar',
+          isOpen ? 'px-2' : 'px-2'
+        )}>
+          {isOpen && (
+            <p className="px-3 text-[8px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 italic opacity-70">Menu</p>
+          )}
+
+          {links.map((link) => {
+            const isActive = pathname === link.href;
+            const Icon = link.icon;
+            const tourId = TOUR_IDS[link.name];
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                data-tour={tourId}
+                onClick={() => {
+                  if (typeof window !== 'undefined' && window.innerWidth < 1024 && onClose) {
+                    onClose();
+                  }
+                }}
+                title={!isOpen ? link.name : undefined}
+                className={cn(
+                  'group flex items-center rounded-xl transition-all duration-300 relative overflow-hidden',
+                  isOpen ? 'gap-2 px-2 py-2' : 'justify-center px-0 py-2',
+                  isActive
+                    ? 'bg-gradient-to-r from-emerald-50/80 to-emerald-50/10 text-[#047857] shadow-[0_4px_12px_rgba(5,150,105,0.02)] border border-[#059669]/5'
+                    : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50 hover:shadow-sm hover:-translate-y-0.5'
+                )}
+              >
+                {/* Active left bar */}
+                {isActive && (
+                  <div className="absolute left-0 w-1 h-5 bg-gradient-to-b from-[#16A34A] to-[#059669] rounded-r-full shadow-[0_0_10px_rgba(5,150,105,0.3)]" />
+                )}
+
+                <Icon
+                  size={isOpen ? 16 : 18}
+                  strokeWidth={isActive ? 2.5 : 2}
+                  className={cn(
+                    'transition-all duration-300 shrink-0',
+                    isActive ? 'text-[#059669] scale-110 drop-shadow-md' : 'text-slate-400 group-hover:text-slate-600'
+                  )}
+                />
+
+                {/* Label — only when expanded */}
+                {isOpen && (
+                  <span className={cn(
+                    'text-[12px] tracking-tight font-bold z-10 relative truncate',
+                    isActive ? 'text-[#047857]' : 'text-slate-500'
+                  )}>
+                    {link.name}
+                  </span>
+                )}
+
+                {isActive && isOpen && (
+                  <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-white/40 to-transparent pointer-events-none" />
+                )}
+              </Link>
+            );
+          })}
+        </nav>
+
+        {/* ── Footer ── */}
+        <div className={cn('shrink-0 border-t border-slate-50', isOpen ? 'p-4' : 'p-2')}>
+          <button
+            data-tour="sidebar-logout"
+            onClick={handleLogout}
+            title={!isOpen ? 'Logout' : undefined}
+            className={cn(
+              'flex items-center rounded-xl transition-all group font-bold',
+              'text-slate-400 hover:text-red-500 hover:bg-red-50',
+              isOpen ? 'w-full gap-2 px-2 py-2 mb-1' : 'w-full justify-center px-0 py-2'
+            )}
+          >
+            <LogOut size={16} className="group-hover:-translate-x-1 transition-transform shrink-0" />
+            {isOpen && <span className="text-[10px] uppercase tracking-widest">Logout</span>}
+          </button>
+
+          {isOpen && (
+            <div className="px-3 py-2 flex flex-col gap-1">
+              <a
+                href="https://uwo24.com/privacy-policy"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[8px] font-bold text-slate-400 uppercase tracking-widest hover:text-[#059669] transition-colors italic"
+              >
+                Privacy Policy
+              </a>
+              <Link
+                href="/terms"
+                className="text-[8px] font-bold text-slate-400 uppercase tracking-widest hover:text-[#059669] transition-colors italic"
+              >
+                Terms of Service
+              </Link>
+            </div>
+          )}
+        </div>
+
+        <style jsx>{`
+          .custom-scrollbar::-webkit-scrollbar { width: 3px; }
+          .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+          .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 20px; }
+        `}</style>
+      </aside>
+    </>
   );
 };
 

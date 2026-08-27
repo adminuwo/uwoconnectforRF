@@ -223,44 +223,69 @@ const LoginPage = () => {
         {/* Email & Password Form */}
         <form onSubmit={handleEmailLogin} className="w-full space-y-3.5">
           {/* Email Field */}
-          <div className="space-y-1.5">
-            <label className="block text-xs font-bold text-slate-700 ml-1">
+          <div className="space-y-1.5 w-full" style={{ width: '100%' }}>
+            <label htmlFor="login-email" className="block text-xs font-bold text-slate-700 ml-1">
               Email Address
             </label>
-            <div className="relative">
-              <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <div className="relative w-full" style={{ position: 'relative', width: '100%', display: 'block' }}>
+              <Mail
+                className="w-4 h-4 text-slate-400 pointer-events-none"
+                style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', zIndex: 10 }}
+              />
               <input
+                id="login-email"
+                name="email"
                 type="email"
                 required
+                autoComplete="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="name@company.com"
-                className="w-full bg-slate-50/90 text-slate-900 placeholder:text-slate-400 outline-none rounded-2xl py-2.5 pl-10 pr-4 font-medium text-sm border border-slate-200/90 focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 transition-all shadow-2xs"
+                className="w-full block bg-slate-50/90 text-slate-900 placeholder:text-slate-400 outline-none rounded-2xl py-2.5 pl-10 pr-4 font-medium text-sm border border-slate-200/90 focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 transition-all shadow-xs cursor-text select-text"
+                style={{ width: '100%', display: 'block', boxSizing: 'border-box' }}
               />
             </div>
           </div>
 
           {/* Password Field */}
-          <div className="space-y-1.5">
-            <label className="block text-xs font-bold text-slate-700 ml-1">
+          <div className="space-y-1.5 w-full" style={{ width: '100%' }}>
+            <label htmlFor="login-password" className="block text-xs font-bold text-slate-700 ml-1">
               Password
             </label>
-            <div className="relative">
-              <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <div className="relative w-full" style={{ position: 'relative', width: '100%', display: 'block' }}>
+              <Lock
+                className="w-4 h-4 text-slate-400 pointer-events-none"
+                style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', zIndex: 10 }}
+              />
               <input
+                id="login-password"
+                name="password"
                 type={showPassword ? 'text' : 'password'}
                 required
+                autoComplete="current-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••••••"
-                className="w-full bg-slate-50/90 text-slate-900 placeholder:text-slate-400 outline-none rounded-2xl py-2.5 pl-10 pr-11 font-medium text-sm border border-slate-200/90 focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 transition-all shadow-2xs"
+                className="w-full block bg-slate-50/90 text-slate-900 placeholder:text-slate-400 outline-none rounded-2xl py-2.5 pl-10 pr-12 font-medium text-sm border border-slate-200/90 focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 transition-all shadow-xs cursor-text select-text"
+                style={{ width: '100%', display: 'block', boxSizing: 'border-box' }}
               />
               <button
                 type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 transition-colors p-1 rounded-lg focus:outline-none cursor-pointer"
+                tabIndex={-1}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setShowPassword((prev) => !prev);
+                }}
+                className="text-slate-400 hover:text-emerald-600 active:scale-95 transition-all p-1.5 rounded-xl focus:outline-none cursor-pointer flex items-center justify-center"
+                style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', zIndex: 20, width: 'auto', height: 'auto', maxWidth: '36px', minWidth: 'unset' }}
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
               >
-                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                {showPassword ? (
+                  <EyeOff className="w-4 h-4 text-emerald-600" />
+                ) : (
+                  <Eye className="w-4 h-4 text-slate-400 hover:text-emerald-600" />
+                )}
               </button>
             </div>
           </div>

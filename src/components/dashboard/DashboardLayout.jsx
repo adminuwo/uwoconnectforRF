@@ -5,7 +5,7 @@ import dynamic from 'next/dynamic';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import Sidebar from './Sidebar';
-import { MessageCircle, Building2, ChevronDown, Search } from 'lucide-react';
+import { MessageCircle, Building2, ChevronDown, Search, Menu } from 'lucide-react';
 import axios from 'axios';
 import { API_BASE_URL } from '@/config/apiConfig';
 
@@ -60,7 +60,7 @@ const PAGE_TITLES = {
 
 const DashboardLayout = ({ children, role: initialRole }) => {
   const pathname = usePathname();
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [user, setUser] = useState(null);
@@ -71,6 +71,31 @@ const DashboardLayout = ({ children, role: initialRole }) => {
   const [clientSearch, setClientSearch] = useState('');
   const [clientsLoaded, setClientsLoaded] = useState(false);
   const switcherRef = useRef(null);
+
+  // Responsive sidebar: open by default on desktop (>=1024px), closed on mobile (<1024px)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const isDesktop = window.innerWidth >= 1024;
+      setSidebarOpen(isDesktop);
+
+      const handleResize = () => {
+        if (window.innerWidth >= 1024) {
+          // On desktop keep open
+        } else {
+          setSidebarOpen(false);
+        }
+      };
+      window.addEventListener('resize', handleResize);
+      return () => window.removeEventListener('resize', handleResize);
+    }
+  }, []);
+
+  // Auto-close sidebar on mobile whenever page changes
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+      setSidebarOpen(false);
+    }
+  }, [pathname]);
 
   useEffect(() => {
     if (typeof window !== 'undefined' && 'scrollRestoration' in window.history) {
@@ -269,9 +294,18 @@ const DashboardLayout = ({ children, role: initialRole }) => {
         <main className="flex-1 dashboard-main h-full flex flex-col min-w-0 overflow-hidden">
           {/* Header */}
           <header className="h-14 sm:h-16 bg-white/80 backdrop-blur-xl border-b border-slate-100 px-3 sm:px-6 flex items-center justify-between sticky top-0 z-20 shrink-0 shadow-xs">
-            <div className="flex items-center gap-3">
-              <div className="w-1.5 h-6 bg-gradient-to-b from-[#16A34A] to-[#059669] rounded-full shadow-[0_0_10px_rgba(5,150,105,0.2)]" />
-              <h1 className="text-xs sm:text-sm md:text-base font-black text-slate-800 tracking-tight uppercase">
+            <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+              {/* Mobile Menu Button */}
+              <button
+                type="button"
+                onClick={() => setSidebarOpen(prev => !prev)}
+                className="lg:hidden p-2 -ml-1 text-slate-600 hover:text-[#059669] hover:bg-emerald-50 rounded-xl transition-all cursor-pointer flex items-center justify-center shrink-0"
+                aria-label="Toggle navigation menu"
+              >
+                <Menu size={20} />
+              </button>
+              <div className="w-1.5 h-6 bg-gradient-to-b from-[#16A34A] to-[#059669] rounded-full shadow-[0_0_10px_rgba(5,150,105,0.2)] hidden sm:block shrink-0" />
+              <h1 className="text-xs sm:text-sm md:text-base font-black text-slate-800 tracking-tight uppercase truncate max-w-[200px] sm:max-w-none">
                 {currentTitle}
               </h1>
             </div>
