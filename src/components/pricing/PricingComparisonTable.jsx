@@ -370,7 +370,7 @@ const SEEDED_FALLBACK_PLANS = [
 export default function PricingComparisonTable({ plansData, onSelectPlan, isAdminView = false, onManagePlan }) {
   const router = useRouter();
   const { subscribePlan, entitlements, openUpgradeModal } = useEntitlement();
-  const [billingPeriod, setBillingPeriod] = useState('YEARLY'); // MONTHLY | YEARLY
+  const [billingPeriod, setBillingPeriod] = useState('MONTHLY'); // MONTHLY | YEARLY
   const [plans, setPlans] = useState(SEEDED_FALLBACK_PLANS);
 
   // Per-plan selected channels array:
@@ -395,8 +395,8 @@ export default function PricingComparisonTable({ plansData, onSelectPlan, isAdmi
     if (Array.isArray(plansData) && plansData.length > 0) {
       const normalized = plansData.map(p => {
         const meta = p.metadata || {};
-        const monthlyPrice = p.monthly_price || meta.monthly_price || parseFloat(p.price) || 999;
-        const yearlyPrice = p.yearly_price || meta.yearly_price || Math.round(monthlyPrice * 12 * 0.8 * 100) / 100 || 9590.40;
+        const monthlyPrice = Number(p.monthly_price || p.price || meta.monthly_price || 999);
+        const yearlyPrice = Number(p.yearly_price || meta.yearly_price || Math.round(monthlyPrice * 12 * 0.8));
         const maxChannels = p.max_channels || meta.max_channels || (p.name.toLowerCase().includes('starter') ? 1 : (p.name.toLowerCase().includes('growth') ? 2 : 3));
 
         const slug = p.slug || p.name.toLowerCase();
