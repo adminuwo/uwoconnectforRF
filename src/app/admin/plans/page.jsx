@@ -417,8 +417,9 @@ export default function AdminPlansPage() {
   const [isManageClientFeaturesOpen, setIsManageClientFeaturesOpen] = useState(false);
   const [clientForFeatureManagement, setClientForFeatureManagement] = useState(null);
 
-  // Active Category Filter inside Plan Modal
+  // Active Category & Tab Filter inside Plan Modal
   const [modalActiveCategory, setModalActiveCategory] = useState('ALL');
+  const [modalEditorTab, setModalEditorTab] = useState('basic'); // 'basic' | 'what_you_get' | 'features' | 'limits' | 'costs' | 'entitlements'
 
   // ── Form States ──
   const [planForm, setPlanForm] = useState({
@@ -589,14 +590,27 @@ export default function AdminPlansPage() {
   // ── Open Create Plan Modal ──
   const handleOpenCreatePlan = () => {
     setModalActiveCategory('ALL');
+    setModalEditorTab('basic');
     setPlanForm({
       name: '',
       description: '',
       price: '',
+      yearly_price: '',
+      badge_text: '',
+      max_channels: '1',
       billing_cycle: 'Monthly',
       currency: 'INR',
       status: 'ACTIVE',
-      selected_feature_keys: DEFAULT_FEATURES.slice(0, 8).map(f => f.key)
+      selected_feature_keys: DEFAULT_FEATURES.slice(0, 8).map(f => f.key),
+      whatsapp_what_you_get: "WhatsApp Business API Automation\nShared Team Inbox for WhatsApp\nAutomated Keyword Replies\nContact & Lead Sync",
+      whatsapp_features: "WhatsApp Auto Replies\nShared Inbox\nKeyword Triggers\nContact Management",
+      whatsapp_marketing_cost: '₹0.970',
+      whatsapp_auth_cost: '₹0.129',
+      whatsapp_utility_cost: '₹0.160',
+      whatsapp_service_cost: 'FREE',
+      custom_fields_limit: '15',
+      custom_tags_limit: '15',
+      custom_events_limit: '5'
     });
     setIsCreatePlanModalOpen(true);
   };
@@ -605,8 +619,26 @@ export default function AdminPlansPage() {
   const handleOpenManagePlan = (plan) => {
     setEditingPlan(plan);
     setModalActiveCategory('ALL');
+    setModalEditorTab('basic');
     const mPrice = plan.monthly_price || plan.price || 999;
     const yPrice = plan.yearly_price || Math.round(mPrice * 12 * 0.8);
+
+    const waDetails = plan.channel_details?.whatsapp || {};
+    const waGet = waDetails.what_you_get || [
+      'WhatsApp Business API Automation',
+      'Shared Team Inbox for WhatsApp',
+      'Automated Keyword Replies',
+      'Contact & Lead Sync'
+    ];
+    const waFeat = waDetails.features || [
+      'WhatsApp Auto Replies',
+      'Shared Inbox',
+      'Keyword Triggers',
+      'Contact Management'
+    ];
+    const waCosts = waDetails.message_costs || [];
+    const waLimits = waDetails.limits || {};
+
     setPlanForm({
       name: plan.name,
       description: plan.description || '',
@@ -617,7 +649,18 @@ export default function AdminPlansPage() {
       billing_cycle: plan.billing_cycle || 'Monthly',
       currency: plan.currency || 'INR',
       status: plan.status || 'ACTIVE',
-      selected_feature_keys: plan.feature_keys || []
+      selected_feature_keys: plan.feature_keys || [],
+
+      // Matrix Drill-Down Fields
+      whatsapp_what_you_get: Array.isArray(waGet) ? waGet.join('\n') : waGet,
+      whatsapp_features: Array.isArray(waFeat) ? waFeat.join('\n') : waFeat,
+      whatsapp_marketing_cost: waCosts.find(c => c.type === 'Marketing')?.price || '₹0.970',
+      whatsapp_auth_cost: waCosts.find(c => c.type === 'Authentication')?.price || '₹0.129',
+      whatsapp_utility_cost: waCosts.find(c => c.type === 'Utility')?.price || '₹0.160',
+      whatsapp_service_cost: waCosts.find(c => c.type === 'Service')?.price || 'FREE',
+      custom_fields_limit: (waLimits.custom_fields?.value || 15).toString(),
+      custom_tags_limit: (waLimits.custom_tags?.value || 15).toString(),
+      custom_events_limit: (waLimits.events?.value || 5).toString()
     });
     setIsEditPlanModalOpen(true);
   };
@@ -633,6 +676,31 @@ export default function AdminPlansPage() {
     const mPrice = Number(planForm.price) || 0;
     const yPrice = Number(planForm.yearly_price) || Math.round(mPrice * 12 * 0.8);
     const mChannels = Number(planForm.max_channels) || 1;
+
+    const updatedWhatYouGet = (planForm.whatsapp_what_you_get || '').split('\n').map(s => s.trim()).filter(Boolean);
+    const updatedFeatures = (planForm.whatsapp_features || '').split('\n').map(s => s.trim()).filter(Boolean);
+
+    const channelDetailsObj = {
+      whatsapp: {
+        name: 'WhatsApp',
+        what_you_get: updatedWhatYouGet.length > 0 ? updatedWhatYouGet : ['WhatsApp Business API Automation'],
+        features: updatedFeatures.length > 0 ? updatedFeatures : ['WhatsApp Auto Replies'],
+        limits: {
+          messages: { value: 'unlimited', label: 'Messages', description: 'Based on your WhatsApp Number' },
+          contacts: { value: 'unlimited', label: 'Contacts' },
+          custom_fields: { value: planForm.custom_fields_limit || '15', label: 'Custom Fields' },
+          custom_tags: { value: planForm.custom_tags_limit || '15', label: 'Custom Tags' },
+          events: { value: planForm.custom_events_limit || '—', label: 'Custom Events' }
+        },
+        message_costs: [
+          { type: 'Marketing', price: planForm.whatsapp_marketing_cost || '₹0.970' },
+          { type: 'Authentication', price: planForm.whatsapp_auth_cost || '₹0.129' },
+          { type: 'Utility', price: planForm.whatsapp_utility_cost || '₹0.160' },
+          { type: 'Service', price: planForm.whatsapp_service_cost || 'FREE' }
+        ],
+        additional_benefits: ['No Markup Charges', 'Standard Support']
+      }
+    };
 
     const newPlanObj = {
       id: `plan-${Date.now()}`,
@@ -651,7 +719,8 @@ export default function AdminPlansPage() {
       channel_count: mChannels,
       connector_count: planForm.selected_feature_keys.filter(k => k.startsWith('connector_')).length || 1,
       client_count: 0,
-      is_popular: false
+      is_popular: false,
+      channel_details: channelDetailsObj
     };
 
     try {
@@ -667,7 +736,8 @@ export default function AdminPlansPage() {
         billing_cycle: newPlanObj.billing_cycle,
         currency: newPlanObj.currency,
         is_active: newPlanObj.status === 'ACTIVE',
-        feature_keys: newPlanObj.feature_keys
+        feature_keys: newPlanObj.feature_keys,
+        metadata: { channel_details: channelDetailsObj }
       }, { headers: { Authorization: `Bearer ${token}` } });
     } catch (err) {
       console.log('Saved to local pool:', err);
@@ -687,6 +757,34 @@ export default function AdminPlansPage() {
     const yPrice = Number(planForm.yearly_price) || Math.round(mPrice * 12 * 0.8);
     const mChannels = Number(planForm.max_channels) || 1;
 
+    const updatedWhatYouGet = (planForm.whatsapp_what_you_get || '').split('\n').map(s => s.trim()).filter(Boolean);
+    const updatedFeatures = (planForm.whatsapp_features || '').split('\n').map(s => s.trim()).filter(Boolean);
+
+    const existingWA = editingPlan.channel_details?.whatsapp || {};
+    const updatedChannelDetails = {
+      ...editingPlan.channel_details,
+      whatsapp: {
+        ...existingWA,
+        name: 'WhatsApp',
+        what_you_get: updatedWhatYouGet.length > 0 ? updatedWhatYouGet : (existingWA.what_you_get || []),
+        features: updatedFeatures.length > 0 ? updatedFeatures : (existingWA.features || []),
+        limits: {
+          messages: { value: 'unlimited', label: 'Messages', description: 'Based on your WhatsApp Number' },
+          contacts: { value: 'unlimited', label: 'Contacts' },
+          custom_fields: { value: planForm.custom_fields_limit || '15', label: 'Custom Fields' },
+          custom_tags: { value: planForm.custom_tags_limit || '15', label: 'Custom Tags' },
+          events: { value: planForm.custom_events_limit || '—', label: 'Custom Events' }
+        },
+        message_costs: [
+          { type: 'Marketing', price: planForm.whatsapp_marketing_cost || '₹0.970' },
+          { type: 'Authentication', price: planForm.whatsapp_auth_cost || '₹0.129' },
+          { type: 'Utility', price: planForm.whatsapp_utility_cost || '₹0.160' },
+          { type: 'Service', price: planForm.whatsapp_service_cost || 'FREE' }
+        ],
+        additional_benefits: existingWA.additional_benefits || ['No Markup Charges', 'Standard Support']
+      }
+    };
+
     const updatedPlanObj = {
       ...editingPlan,
       name: planForm.name.trim(),
@@ -703,6 +801,7 @@ export default function AdminPlansPage() {
       feature_keys: planForm.selected_feature_keys,
       channel_count: mChannels,
       connector_count: planForm.selected_feature_keys.filter(k => k.startsWith('connector_')).length || 1,
+      channel_details: updatedChannelDetails
     };
 
     try {
@@ -718,7 +817,8 @@ export default function AdminPlansPage() {
         billing_cycle: updatedPlanObj.billing_cycle,
         currency: updatedPlanObj.currency,
         is_active: updatedPlanObj.status === 'ACTIVE',
-        feature_keys: updatedPlanObj.feature_keys
+        feature_keys: updatedPlanObj.feature_keys,
+        metadata: { channel_details: updatedChannelDetails }
       }, { headers: { Authorization: `Bearer ${token}` } });
     } catch (err) {
       console.log('Updated in state pool:', err);
@@ -1274,266 +1374,487 @@ export default function AdminPlansPage() {
                 </button>
               </div>
 
+              {/* Modal Navigation Tabs */}
+              <div className="px-4 pt-3 border-b border-slate-200 bg-slate-50/50 flex items-center gap-1.5 overflow-x-auto no-scrollbar shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setModalEditorTab('basic')}
+                  className={cn(
+                    "px-3 py-1.5 text-xs font-extrabold rounded-t-xl transition-all cursor-pointer border-t border-x whitespace-nowrap",
+                    modalEditorTab === 'basic' ? "bg-white text-slate-900 border-slate-200 shadow-2xs" : "text-slate-500 hover:text-slate-900 border-transparent"
+                  )}
+                >
+                  ⚙️ Basic & Pricing
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setModalEditorTab('what_you_get')}
+                  className={cn(
+                    "px-3 py-1.5 text-xs font-extrabold rounded-t-xl transition-all cursor-pointer border-t border-x whitespace-nowrap",
+                    modalEditorTab === 'what_you_get' ? "bg-white text-slate-900 border-slate-200 shadow-2xs" : "text-slate-500 hover:text-slate-900 border-transparent"
+                  )}
+                >
+                  1️⃣ What You Get
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setModalEditorTab('features')}
+                  className={cn(
+                    "px-3 py-1.5 text-xs font-extrabold rounded-t-xl transition-all cursor-pointer border-t border-x whitespace-nowrap",
+                    modalEditorTab === 'features' ? "bg-white text-slate-900 border-slate-200 shadow-2xs" : "text-slate-500 hover:text-slate-900 border-transparent"
+                  )}
+                >
+                  2️⃣ Features
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setModalEditorTab('limits')}
+                  className={cn(
+                    "px-3 py-1.5 text-xs font-extrabold rounded-t-xl transition-all cursor-pointer border-t border-x whitespace-nowrap",
+                    modalEditorTab === 'limits' ? "bg-white text-slate-900 border-slate-200 shadow-2xs" : "text-slate-500 hover:text-slate-900 border-transparent"
+                  )}
+                >
+                  3️⃣ Limits & Quotas
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setModalEditorTab('costs')}
+                  className={cn(
+                    "px-3 py-1.5 text-xs font-extrabold rounded-t-xl transition-all cursor-pointer border-t border-x whitespace-nowrap",
+                    modalEditorTab === 'costs' ? "bg-white text-slate-900 border-slate-200 shadow-2xs" : "text-slate-500 hover:text-slate-900 border-transparent"
+                  )}
+                >
+                  4️⃣ Message Rates
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setModalEditorTab('entitlements')}
+                  className={cn(
+                    "px-3 py-1.5 text-xs font-extrabold rounded-t-xl transition-all cursor-pointer border-t border-x whitespace-nowrap",
+                    modalEditorTab === 'entitlements' ? "bg-white text-slate-900 border-slate-200 shadow-2xs" : "text-slate-500 hover:text-slate-900 border-transparent"
+                  )}
+                >
+                  ⚡ Modules Catalog
+                </button>
+              </div>
+
               {/* Modal Body */}
               <form onSubmit={isCreatePlanModalOpen ? handleCreatePlanSubmit : handleEditPlanSubmit} className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-6 space-y-4 sm:space-y-6">
                 
-                {/* 1. Plan Basic Info */}
-                <div className="bg-slate-50/80 p-3.5 sm:p-5 rounded-2xl border border-slate-200/80 space-y-3 sm:space-y-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
-                    <div>
-                      <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
-                        Plan Name *
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        placeholder="e.g. Starter, Growth, Advanced"
-                        value={planForm.name}
-                        onChange={(e) => setPlanForm({ ...planForm, name: e.target.value })}
-                        className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-900 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 transition-all"
-                      />
+                {/* TAB 1: BASIC INFO & PRICING */}
+                {modalEditorTab === 'basic' && (
+                  <div className="bg-slate-50/80 p-3.5 sm:p-5 rounded-2xl border border-slate-200/80 space-y-3 sm:space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+                      <div>
+                        <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
+                          Plan Name *
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          placeholder="e.g. Starter, Growth, Advanced"
+                          value={planForm.name}
+                          onChange={(e) => setPlanForm({ ...planForm, name: e.target.value })}
+                          className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-900 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 transition-all"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
+                          Monthly Price (₹/mo)
+                        </label>
+                        <div className="relative">
+                          <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">₹</span>
+                          <input
+                            type="number"
+                            placeholder="999"
+                            value={planForm.price}
+                            onChange={(e) => setPlanForm({ ...planForm, price: e.target.value })}
+                            className="w-full pl-8 pr-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-900 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 transition-all"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
+                          Yearly Price (₹/yr)
+                        </label>
+                        <div className="relative">
+                          <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">₹</span>
+                          <input
+                            type="number"
+                            placeholder="9590"
+                            value={planForm.yearly_price || ''}
+                            onChange={(e) => setPlanForm({ ...planForm, yearly_price: e.target.value })}
+                            className="w-full pl-8 pr-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-900 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 transition-all"
+                          />
+                        </div>
+                      </div>
                     </div>
 
-                    <div>
-                      <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
-                        Monthly Price (₹/mo)
-                      </label>
-                      <div className="relative">
-                        <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">₹</span>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                      <div>
+                        <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
+                          Badge Text (e.g. STARTER, MOST POPULAR)
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="e.g. STARTER, MOST POPULAR, POWER HOUSE"
+                          value={planForm.badge_text || ''}
+                          onChange={(e) => setPlanForm({ ...planForm, badge_text: e.target.value })}
+                          className="w-full px-3.5 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-900 outline-none focus:border-emerald-500 transition-all"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
+                          Max Channels Allowed
+                        </label>
                         <input
                           type="number"
-                          placeholder="999"
-                          value={planForm.price}
-                          onChange={(e) => setPlanForm({ ...planForm, price: e.target.value })}
-                          className="w-full pl-8 pr-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-900 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 transition-all"
+                          placeholder="1, 2, 3..."
+                          value={planForm.max_channels || ''}
+                          onChange={(e) => setPlanForm({ ...planForm, max_channels: e.target.value })}
+                          className="w-full px-3.5 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-900 outline-none focus:border-emerald-500 transition-all"
                         />
                       </div>
                     </div>
 
                     <div>
                       <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
-                        Yearly Price (₹/yr)
-                      </label>
-                      <div className="relative">
-                        <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">₹</span>
-                        <input
-                          type="number"
-                          placeholder="9590"
-                          value={planForm.yearly_price || ''}
-                          onChange={(e) => setPlanForm({ ...planForm, yearly_price: e.target.value })}
-                          className="w-full pl-8 pr-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-900 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 transition-all"
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                    <div>
-                      <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
-                        Badge Text (e.g. STARTER, MOST POPULAR)
+                        Description (Subtitle under Plan Name)
                       </label>
                       <input
                         type="text"
-                        placeholder="e.g. STARTER, MOST POPULAR, POWER HOUSE"
-                        value={planForm.badge_text || ''}
-                        onChange={(e) => setPlanForm({ ...planForm, badge_text: e.target.value })}
-                        className="w-full px-3.5 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-900 outline-none focus:border-emerald-500 transition-all"
+                        placeholder="Short summary of target clients and tier scope"
+                        value={planForm.description}
+                        onChange={(e) => setPlanForm({ ...planForm, description: e.target.value })}
+                        className="w-full px-3.5 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-900 outline-none focus:border-emerald-500 transition-all"
                       />
                     </div>
 
-                    <div>
-                      <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
-                        Max Channels Allowed
-                      </label>
-                      <input
-                        type="number"
-                        placeholder="1, 2, 3..."
-                        value={planForm.max_channels || ''}
-                        onChange={(e) => setPlanForm({ ...planForm, max_channels: e.target.value })}
-                        className="w-full px-3.5 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-900 outline-none focus:border-emerald-500 transition-all"
-                      />
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3">
+                      <div>
+                        <label className="block text-[11px] font-bold text-slate-600 mb-1">Billing Cycle</label>
+                        <select
+                          value={planForm.billing_cycle}
+                          onChange={(e) => setPlanForm({ ...planForm, billing_cycle: e.target.value })}
+                          className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-700 outline-none focus:border-emerald-500 cursor-pointer"
+                        >
+                          <option value="Monthly">Monthly</option>
+                          <option value="Yearly">Yearly</option>
+                          <option value="Quarterly">Quarterly</option>
+                          <option value="Custom">Custom</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-[11px] font-bold text-slate-600 mb-1">Currency</label>
+                        <select
+                          value={planForm.currency}
+                          onChange={(e) => setPlanForm({ ...planForm, currency: e.target.value })}
+                          className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-700 outline-none focus:border-emerald-500 cursor-pointer"
+                        >
+                          <option value="INR">INR (₹)</option>
+                          <option value="USD">USD ($)</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-[11px] font-bold text-slate-600 mb-1">Status</label>
+                        <select
+                          value={planForm.status}
+                          onChange={(e) => setPlanForm({ ...planForm, status: e.target.value })}
+                          className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-700 outline-none focus:border-emerald-500 cursor-pointer"
+                        >
+                          <option value="ACTIVE">Active ●</option>
+                          <option value="INACTIVE">Inactive ○</option>
+                        </select>
+                      </div>
                     </div>
                   </div>
+                )}
 
-                  <div>
-                    <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
-                      Description
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="Short summary of target clients and tier scope"
-                      value={planForm.description}
-                      onChange={(e) => setPlanForm({ ...planForm, description: e.target.value })}
-                      className="w-full px-3.5 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-900 outline-none focus:border-emerald-500 transition-all"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3">
+                {/* TAB 2: WHAT YOU GET */}
+                {modalEditorTab === 'what_you_get' && (
+                  <div className="bg-slate-50/80 p-3.5 sm:p-5 rounded-2xl border border-slate-200/80 space-y-3">
                     <div>
-                      <label className="block text-[11px] font-bold text-slate-600 mb-1">Billing Cycle</label>
-                      <select
-                        value={planForm.billing_cycle}
-                        onChange={(e) => setPlanForm({ ...planForm, billing_cycle: e.target.value })}
-                        className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-700 outline-none focus:border-emerald-500 cursor-pointer"
-                      >
-                        <option value="Monthly">Monthly</option>
-                        <option value="Yearly">Yearly</option>
-                        <option value="Quarterly">Quarterly</option>
-                        <option value="Custom">Custom</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="block text-[11px] font-bold text-slate-600 mb-1">Currency</label>
-                      <select
-                        value={planForm.currency}
-                        onChange={(e) => setPlanForm({ ...planForm, currency: e.target.value })}
-                        className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-700 outline-none focus:border-emerald-500 cursor-pointer"
-                      >
-                        <option value="INR">INR (₹)</option>
-                        <option value="USD">USD ($)</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="block text-[11px] font-bold text-slate-600 mb-1">Status</label>
-                      <select
-                        value={planForm.status}
-                        onChange={(e) => setPlanForm({ ...planForm, status: e.target.value })}
-                        className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-700 outline-none focus:border-emerald-500 cursor-pointer"
-                      >
-                        <option value="ACTIVE">Active ●</option>
-                        <option value="INACTIVE">Inactive ○</option>
-                      </select>
-                    </div>
-                  </div>
-                </div>
-
-                {/* 2. Feature Entitlements Section (With Logos!) */}
-                <div>
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
-                    <div>
-                      <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
-                        <Zap size={14} className="text-emerald-600" /> FEATURE ENTITLEMENTS
+                      <h4 className="text-xs font-black text-slate-900 uppercase tracking-wide mb-1">
+                        1. WHAT YOU GET (Channel Capabilities)
                       </h4>
-                      <p className="text-[11px] text-slate-400 font-medium mt-0.5">
-                        {planForm.selected_feature_keys.length} of {features.length} features enabled in this plan
+                      <p className="text-[11px] text-slate-500 mb-2 font-medium">
+                        Enter each bullet point on a new line. These will be displayed under Section 1 ("WHAT YOU GET") in the comparison matrix for clients.
                       </p>
+                      <textarea
+                        rows={7}
+                        placeholder={"WhatsApp Business API Automation\nShared Team Inbox for WhatsApp\nAutomated Keyword Replies\nContact & Lead Sync"}
+                        value={planForm.whatsapp_what_you_get}
+                        onChange={(e) => setPlanForm({ ...planForm, whatsapp_what_you_get: e.target.value })}
+                        className="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-900 outline-none focus:border-emerald-500 leading-relaxed transition-all"
+                      />
                     </div>
+                  </div>
+                )}
 
-                    {/* Category Filter Pills */}
-                    <div className="flex items-center gap-1 overflow-x-auto pb-1 max-w-full no-scrollbar flex-nowrap">
-                      <button
-                        type="button"
-                        onClick={() => setModalActiveCategory('ALL')}
-                        className={cn(
-                          "px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all whitespace-nowrap cursor-pointer shrink-0",
-                          modalActiveCategory === 'ALL' ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                        )}
-                      >
-                        All
-                      </button>
-                      {uniqueCategories.map(cat => (
+                {/* TAB 3: FEATURES */}
+                {modalEditorTab === 'features' && (
+                  <div className="bg-slate-50/80 p-3.5 sm:p-5 rounded-2xl border border-slate-200/80 space-y-3">
+                    <div>
+                      <h4 className="text-xs font-black text-slate-900 uppercase tracking-wide mb-1">
+                        2. FEATURES & AUTOMATION
+                      </h4>
+                      <p className="text-[11px] text-slate-500 mb-2 font-medium">
+                        Enter each feature point on a new line. These will appear under Section 2 ("FEATURES") in the comparison matrix.
+                      </p>
+                      <textarea
+                        rows={7}
+                        placeholder={"WhatsApp Auto Replies\nShared Inbox\nKeyword Triggers\nContact Management"}
+                        value={planForm.whatsapp_features}
+                        onChange={(e) => setPlanForm({ ...planForm, whatsapp_features: e.target.value })}
+                        className="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-900 outline-none focus:border-emerald-500 leading-relaxed transition-all"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* TAB 4: LIMITS & QUOTAS */}
+                {modalEditorTab === 'limits' && (
+                  <div className="bg-slate-50/80 p-3.5 sm:p-5 rounded-2xl border border-slate-200/80 space-y-4">
+                    <h4 className="text-xs font-black text-slate-900 uppercase tracking-wide mb-1">
+                      3. LIMITS & QUOTAS
+                    </h4>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      <div>
+                        <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
+                          Custom Fields Limit
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="e.g. 15, 25, 30"
+                          value={planForm.custom_fields_limit}
+                          onChange={(e) => setPlanForm({ ...planForm, custom_fields_limit: e.target.value })}
+                          className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-900 outline-none focus:border-emerald-500 transition-all"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
+                          Custom Tags Limit
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="e.g. 15, 30, 45"
+                          value={planForm.custom_tags_limit}
+                          onChange={(e) => setPlanForm({ ...planForm, custom_tags_limit: e.target.value })}
+                          className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-900 outline-none focus:border-emerald-500 transition-all"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
+                          Custom Events Limit
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="e.g. —, 5, 7"
+                          value={planForm.custom_events_limit}
+                          onChange={(e) => setPlanForm({ ...planForm, custom_events_limit: e.target.value })}
+                          className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-900 outline-none focus:border-emerald-500 transition-all"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* TAB 5: MESSAGE COSTS */}
+                {modalEditorTab === 'costs' && (
+                  <div className="bg-slate-50/80 p-3.5 sm:p-5 rounded-2xl border border-slate-200/80 space-y-4">
+                    <h4 className="text-xs font-black text-slate-900 uppercase tracking-wide mb-1">
+                      4. MESSAGE COST & RATES (PER TEMPLATE)
+                    </h4>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                      <div>
+                        <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
+                          Marketing Template Rate
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="e.g. ₹0.970"
+                          value={planForm.whatsapp_marketing_cost}
+                          onChange={(e) => setPlanForm({ ...planForm, whatsapp_marketing_cost: e.target.value })}
+                          className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-900 outline-none focus:border-emerald-500 transition-all"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
+                          Authentication Rate
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="e.g. ₹0.129"
+                          value={planForm.whatsapp_auth_cost}
+                          onChange={(e) => setPlanForm({ ...planForm, whatsapp_auth_cost: e.target.value })}
+                          className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-900 outline-none focus:border-emerald-500 transition-all"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
+                          Utility Template Rate
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="e.g. ₹0.160"
+                          value={planForm.whatsapp_utility_cost}
+                          onChange={(e) => setPlanForm({ ...planForm, whatsapp_utility_cost: e.target.value })}
+                          className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-900 outline-none focus:border-emerald-500 transition-all"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
+                          Service Session Rate
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="e.g. FREE"
+                          value={planForm.whatsapp_service_cost}
+                          onChange={(e) => setPlanForm({ ...planForm, whatsapp_service_cost: e.target.value })}
+                          className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-900 outline-none focus:border-emerald-500 transition-all"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* TAB 6: MODULE ENTITLEMENTS */}
+                {modalEditorTab === 'entitlements' && (
+                  <div>
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+                      <div>
+                        <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
+                          <Zap size={14} className="text-emerald-600" /> FEATURE ENTITLEMENTS
+                        </h4>
+                        <p className="text-[11px] text-slate-400 font-medium mt-0.5">
+                          {planForm.selected_feature_keys.length} of {features.length} features enabled in this plan
+                        </p>
+                      </div>
+
+                      {/* Category Filter Pills */}
+                      <div className="flex items-center gap-1 overflow-x-auto pb-1 max-w-full no-scrollbar flex-nowrap">
                         <button
-                          key={cat}
                           type="button"
-                          onClick={() => setModalActiveCategory(cat)}
+                          onClick={() => setModalActiveCategory('ALL')}
                           className={cn(
                             "px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all whitespace-nowrap cursor-pointer shrink-0",
-                            modalActiveCategory === cat ? "bg-emerald-600 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                            modalActiveCategory === 'ALL' ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                           )}
                         >
-                          {cat}
+                          All
                         </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Feature Category Blocks */}
-                  <div className="space-y-4">
-                    {uniqueCategories
-                      .filter(cat => modalActiveCategory === 'ALL' || modalActiveCategory === cat)
-                      .map((category) => {
-                        const categoryFeatures = categorizedFeatures[category] || [];
-                        const selectedCount = categoryFeatures.filter(f => planForm.selected_feature_keys.includes(f.key)).length;
-                        const allCatSelected = categoryFeatures.length > 0 && selectedCount === categoryFeatures.length;
-
-                        return (
-                          <div
-                            key={category}
-                            className="border border-slate-200 rounded-2xl overflow-hidden bg-white shadow-2xs"
+                        {uniqueCategories.map(cat => (
+                          <button
+                            key={cat}
+                            type="button"
+                            onClick={() => setModalActiveCategory(cat)}
+                            className={cn(
+                              "px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all whitespace-nowrap cursor-pointer shrink-0",
+                              modalActiveCategory === cat ? "bg-emerald-600 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                            )}
                           >
-                            {/* Category Header */}
-                            <div className="flex items-center justify-between px-3.5 sm:px-4 py-2.5 bg-slate-50 border-b border-slate-100">
-                              <div className="flex items-center gap-2">
-                                <span className="text-xs font-black text-slate-800 uppercase tracking-wide">
-                                  {category}
-                                </span>
-                                <span className="text-[10px] font-mono text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full font-bold border border-emerald-100">
-                                  {selectedCount} / {categoryFeatures.length}
-                                </span>
+                            {cat}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Feature Category Blocks */}
+                    <div className="space-y-4">
+                      {uniqueCategories
+                        .filter(cat => modalActiveCategory === 'ALL' || modalActiveCategory === cat)
+                        .map((category) => {
+                          const categoryFeatures = categorizedFeatures[category] || [];
+                          const selectedCount = categoryFeatures.filter(f => planForm.selected_feature_keys.includes(f.key)).length;
+                          const allCatSelected = categoryFeatures.length > 0 && selectedCount === categoryFeatures.length;
+
+                          return (
+                            <div
+                              key={category}
+                              className="border border-slate-200 rounded-2xl overflow-hidden bg-white shadow-2xs"
+                            >
+                              {/* Category Header */}
+                              <div className="flex items-center justify-between px-3.5 sm:px-4 py-2.5 bg-slate-50 border-b border-slate-100">
+                                <div className="flex items-center gap-2">
+                                  <span className="text-xs font-black text-slate-800 uppercase tracking-wide">
+                                    {category}
+                                  </span>
+                                  <span className="text-[10px] font-mono text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full font-bold border border-emerald-100">
+                                    {selectedCount} / {categoryFeatures.length}
+                                  </span>
+                                </div>
+
+                                <button
+                                  type="button"
+                                  onClick={() => toggleSelectAllCategory(category)}
+                                  className="text-[11px] font-bold text-emerald-600 hover:text-emerald-700 hover:underline cursor-pointer"
+                                >
+                                  {allCatSelected ? 'Deselect All' : 'Select All'}
+                                </button>
                               </div>
 
-                              <button
-                                type="button"
-                                onClick={() => toggleSelectAllCategory(category)}
-                                className="text-[11px] font-bold text-emerald-600 hover:text-emerald-700 hover:underline cursor-pointer"
-                              >
-                                {allCatSelected ? 'Deselect All' : 'Select All'}
-                              </button>
-                            </div>
-
-                            {/* Feature Grid List with Logos */}
-                            <div className="p-2.5 sm:p-3 grid grid-cols-1 sm:grid-cols-2 gap-2 bg-white">
-                              {categoryFeatures.map((feat) => {
-                                const isChecked = planForm.selected_feature_keys.includes(feat.key);
-                                return (
-                                  <div
-                                    key={feat.key}
-                                    onClick={() => toggleSingleFeatureInForm(feat.key)}
-                                    className={cn(
-                                      "flex items-center justify-between p-2.5 sm:p-3 rounded-2xl border transition-all cursor-pointer select-none group min-w-0",
-                                      isChecked 
-                                        ? "bg-emerald-50/50 border-emerald-300 ring-1 ring-emerald-400/20 shadow-2xs" 
-                                        : "bg-white border-slate-200/90 hover:bg-slate-50"
-                                    )}
-                                  >
-                                    <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
-                                      {/* Brand Logo / Icon */}
-                                      <div className="w-8 h-8 rounded-xl bg-white border border-slate-200/80 shadow-2xs flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform p-0.5">
-                                        {getFeatureBrandLogo(feat.key, 20)}
-                                      </div>
-
-                                      <div className="min-w-0">
-                                        <p className={cn("text-xs font-extrabold truncate leading-tight", isChecked ? "text-slate-900" : "text-slate-600")}>
-                                          {feat.name}
-                                        </p>
-                                        <p className="text-[10px] text-slate-400 truncate mt-0.5">{feat.description}</p>
-                                      </div>
-                                    </div>
-
-                                    <div className="flex items-center gap-2 shrink-0 ml-2">
-                                      <span className="text-[9px] font-mono text-slate-400 uppercase font-semibold hidden sm:inline">
-                                        {feat.feature_type}
-                                      </span>
-                                      <div className={cn(
-                                        "w-5 h-5 rounded-lg border flex items-center justify-center transition-all",
+                              {/* Feature Grid List with Logos */}
+                              <div className="p-2.5 sm:p-3 grid grid-cols-1 sm:grid-cols-2 gap-2 bg-white">
+                                {categoryFeatures.map((feat) => {
+                                  const isChecked = planForm.selected_feature_keys.includes(feat.key);
+                                  return (
+                                    <div
+                                      key={feat.key}
+                                      onClick={() => toggleSingleFeatureInForm(feat.key)}
+                                      className={cn(
+                                        "flex items-center justify-between p-2.5 sm:p-3 rounded-2xl border transition-all cursor-pointer select-none group min-w-0",
                                         isChecked 
-                                          ? "bg-emerald-600 border-emerald-600 text-white shadow-xs" 
-                                          : "border-slate-300 bg-white"
-                                      )}>
-                                        {isChecked && <CheckCircle2 size={13} className="text-white" />}
+                                          ? "bg-emerald-50/50 border-emerald-300 ring-1 ring-emerald-400/20 shadow-2xs" 
+                                          : "bg-white border-slate-200/90 hover:bg-slate-50"
+                                      )}
+                                    >
+                                      <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+                                        {/* Brand Logo / Icon */}
+                                        <div className="w-8 h-8 rounded-xl bg-white border border-slate-200/80 shadow-2xs flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform p-0.5">
+                                          {getFeatureBrandLogo(feat.key, 20)}
+                                        </div>
+
+                                        <div className="min-w-0">
+                                          <p className={cn("text-xs font-extrabold truncate leading-tight", isChecked ? "text-slate-900" : "text-slate-600")}>
+                                            {feat.name}
+                                          </p>
+                                          <p className="text-[10px] text-slate-400 truncate mt-0.5">{feat.description}</p>
+                                        </div>
+                                      </div>
+
+                                      <div className="flex items-center gap-2 shrink-0 ml-2">
+                                        <span className="text-[9px] font-mono text-slate-400 uppercase font-semibold hidden sm:inline">
+                                          {feat.feature_type}
+                                        </span>
+                                        <div className={cn(
+                                          "w-5 h-5 rounded-lg border flex items-center justify-center transition-all",
+                                          isChecked 
+                                            ? "bg-emerald-600 border-emerald-600 text-white shadow-xs" 
+                                            : "border-slate-300 bg-white"
+                                        )}>
+                                          {isChecked && <CheckCircle2 size={13} className="text-white" />}
+                                        </div>
                                       </div>
                                     </div>
-                                  </div>
-                                );
-                              })}
+                                  );
+                                })}
+                              </div>
                             </div>
-                          </div>
-                        );
-                      })}
+                          );
+                        })}
+                    </div>
                   </div>
-                </div>
+                )}
 
                 {/* Modal Footer Actions */}
                 <div className="pt-3 sm:pt-4 border-t border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sticky bottom-0 bg-white pb-2">
