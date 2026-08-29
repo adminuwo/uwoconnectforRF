@@ -39,7 +39,12 @@ import {
   Inbox,
   FolderSync,
   HelpCircle,
-  Database
+  Database,
+  Calendar,
+  Video,
+  MapPin,
+  HardDrive,
+  Presentation
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { API_BASE_URL } from '@/config/apiConfig';
@@ -118,7 +123,7 @@ const OneDriveLogo = ({ size = 22 }) => (
 const getFeatureBrandLogo = (key, size = 22) => {
   const k = key ? key.toLowerCase() : '';
 
-  // 1. Core Channels
+  // 1. Core Channels & Connectors
   if (k.includes('whatsapp')) return <WhatsAppLogo size={size} />;
   if (k.includes('facebook') || k.includes('messenger')) return <FacebookLogo size={size} />;
   if (k.includes('instagram')) return <InstagramLogo size={size} />;
@@ -126,6 +131,48 @@ const getFeatureBrandLogo = (key, size = 22) => {
   if (k.includes('gmail')) return <GmailLogo size={size} />;
   if (k.includes('outlook')) return <OutlookLogo size={size} />;
   if (k.includes('onedrive')) return <OneDriveLogo size={size} />;
+  if (k.includes('gslides') || k.includes('slides')) {
+    return (
+      <div className="w-[22px] h-[22px] rounded-lg bg-gradient-to-tr from-amber-500 to-yellow-500 text-white flex items-center justify-center shadow-2xs shrink-0">
+        <Presentation size={13} />
+      </div>
+    );
+  }
+  if (k.includes('gdocs') || k.includes('docs')) {
+    return (
+      <div className="w-[22px] h-[22px] rounded-lg bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center shadow-2xs shrink-0">
+        <FileText size={13} />
+      </div>
+    );
+  }
+  if (k.includes('gcal') || k.includes('calendar')) {
+    return (
+      <div className="w-[22px] h-[22px] rounded-lg bg-gradient-to-tr from-blue-500 to-sky-500 text-white flex items-center justify-center shadow-2xs shrink-0">
+        <Calendar size={13} />
+      </div>
+    );
+  }
+  if (k.includes('gmeet') || k.includes('meet')) {
+    return (
+      <div className="w-[22px] h-[22px] rounded-lg bg-gradient-to-tr from-emerald-500 to-teal-600 text-white flex items-center justify-center shadow-2xs shrink-0">
+        <Video size={13} />
+      </div>
+    );
+  }
+  if (k.includes('gdrive') || k.includes('drive')) {
+    return (
+      <div className="w-[22px] h-[22px] rounded-lg bg-gradient-to-tr from-emerald-600 to-green-600 text-white flex items-center justify-center shadow-2xs shrink-0">
+        <HardDrive size={13} />
+      </div>
+    );
+  }
+  if (k.includes('gmaps') || k.includes('maps')) {
+    return (
+      <div className="w-[22px] h-[22px] rounded-lg bg-gradient-to-tr from-rose-500 to-red-600 text-white flex items-center justify-center shadow-2xs shrink-0">
+        <MapPin size={13} />
+      </div>
+    );
+  }
 
   // 2. Communication
   if (k.includes('inbox') || k.includes('live_messages')) {
@@ -270,19 +317,25 @@ const getFeatureBrandLogo = (key, size = 22) => {
 const DEFAULT_FEATURES = [
   // 1. CHANNELS (Exactly 4: WhatsApp, Instagram, Facebook, YouTube)
   { id: 'f-wa', key: 'channel_whatsapp', name: 'WhatsApp Channel', category: 'Communication', feature_type: 'Channel', description: 'Official WhatsApp Cloud API & web integration', is_active: true, plan_count: 3 },
-  { id: 'f-ig', key: 'channel_instagram', name: 'Instagram Direct', category: 'Communication', feature_type: 'Channel', description: 'Instagram DM automation & live chat', is_active: true, plan_count: 2 },
   { id: 'f-fb', key: 'channel_facebook', name: 'Facebook Messenger', category: 'Communication', feature_type: 'Channel', description: 'Facebook page messaging & live sync', is_active: true, plan_count: 3 },
+  { id: 'f-ig', key: 'channel_instagram', name: 'Instagram Direct', category: 'Communication', feature_type: 'Channel', description: 'Instagram DM automation & live chat', is_active: true, plan_count: 2 },
   { id: 'f-yt', key: 'channel_youtube', name: 'YouTube Channel', category: 'Communication', feature_type: 'Channel', description: 'YouTube comments & live chat automation', is_active: true, plan_count: 2 },
 
-  // 2. CONNECTORS (Gmail, Google News, Shopify, WooCommerce, Razorpay, HubSpot, Sheets, OneDrive)
-  { id: 'f-gmail', key: 'conn_gmail', name: 'Gmail & Email Connector', category: 'Connectors', feature_type: 'Connector', description: 'Inbound/outbound email sync & triggers', is_active: true, plan_count: 2 },
-  { id: 'f-gnews', key: 'conn_google_news', name: 'Google News Connector', category: 'Connectors', feature_type: 'Connector', description: 'Real-time news alerts & brand tracking', is_active: true, plan_count: 2 },
+  // 2. CONNECTORS (Gmail, Outlook, Google Slides, Google Docs, Google Calendar, Google Meet, OneDrive, Google Drive, Google Maps, Shopify, WooCommerce, Razorpay, HubSpot, Sheets)
+  { id: 'f-gmail', key: 'conn_gmail', name: 'Gmail & Email Connector', category: 'Connectors', feature_type: 'Connector', description: 'Inbound/outbound email sync & triggers', is_active: true, plan_count: 3 },
+  { id: 'f-outlook', key: 'conn_outlook', name: 'Outlook & Office 365 Connector', category: 'Connectors', feature_type: 'Connector', description: 'Microsoft email, contacts & calendar sync', is_active: true, plan_count: 2 },
+  { id: 'f-gslides', key: 'conn_gslides', name: 'Google Slides Presentation Connector', category: 'Connectors', feature_type: 'Connector', description: 'Auto-generate proposal & pitch decks', is_active: true, plan_count: 2 },
+  { id: 'f-gdocs', key: 'conn_gdocs', name: 'Google Docs Document Connector', category: 'Connectors', feature_type: 'Connector', description: 'Contract & invoice template auto-filling', is_active: true, plan_count: 2 },
+  { id: 'f-gcal', key: 'conn_gcal', name: 'Google Calendar Scheduling Connector', category: 'Connectors', feature_type: 'Connector', description: 'Real-time appointment & meeting booking', is_active: true, plan_count: 2 },
+  { id: 'f-gmeet', key: 'conn_gmeet', name: 'Google Meet Video Calls Connector', category: 'Connectors', feature_type: 'Connector', description: 'Instant video meeting link generation', is_active: true, plan_count: 2 },
+  { id: 'f-onedrive', key: 'conn_onedrive', name: 'OneDrive Cloud Storage Connector', category: 'Connectors', feature_type: 'Connector', description: 'Direct file attachment & cloud drive sync', is_active: true, plan_count: 2 },
+  { id: 'f-gdrive', key: 'conn_gdrive', name: 'Google Drive Storage Connector', category: 'Connectors', feature_type: 'Connector', description: 'Google Drive media & document backup', is_active: true, plan_count: 2 },
+  { id: 'f-gmaps', key: 'conn_gmaps', name: 'Google Maps Location Connector', category: 'Connectors', feature_type: 'Connector', description: 'Store locator, ETA & address geocoding', is_active: true, plan_count: 2 },
+  { id: 'f-gsheets', key: 'conn_google_sheets', name: 'Google Sheets Lead Connector', category: 'Connectors', feature_type: 'Connector', description: 'Auto export incoming leads to spreadsheets', is_active: true, plan_count: 2 },
   { id: 'f-shopify', key: 'conn_shopify', name: 'Shopify Connector', category: 'Connectors', feature_type: 'Connector', description: 'E-commerce order & abandoned cart sync', is_active: true, plan_count: 2 },
   { id: 'f-woo', key: 'conn_woocommerce', name: 'WooCommerce Connector', category: 'Connectors', feature_type: 'Connector', description: 'WordPress store products & order webhook', is_active: true, plan_count: 2 },
   { id: 'f-razorpay', key: 'conn_razorpay', name: 'Razorpay Gateway Connector', category: 'Connectors', feature_type: 'Connector', description: 'Payment links, subscriptions & checkout sync', is_active: true, plan_count: 3 },
   { id: 'f-hubspot', key: 'conn_hubspot', name: 'HubSpot CRM Connector', category: 'Connectors', feature_type: 'Connector', description: 'Contact & deal stage bidirectional sync', is_active: true, plan_count: 1 },
-  { id: 'f-gsheets', key: 'conn_google_sheets', name: 'Google Sheets Lead Connector', category: 'Connectors', feature_type: 'Connector', description: 'Auto export incoming leads to spreadsheets', is_active: true, plan_count: 2 },
-  { id: 'f-onedrive', key: 'conn_onedrive', name: 'OneDrive & Cloud Sync', category: 'Connectors', feature_type: 'Connector', description: 'Direct sync with cloud document drives', is_active: true, plan_count: 1 },
 
   // 3. FEATURES & MODULES
   { id: 'f-live-inbox', key: 'live_messages_inbox', name: 'Live Omnichannel Inbox', category: 'Communication', feature_type: 'Module', description: 'Unified multi-channel live conversation hub', is_active: true, plan_count: 3 },
@@ -1137,18 +1190,18 @@ export default function AdminPlansPage() {
           </div>
         </div>
 
-        {/* ── 3. Plan Tabs Navigation (Smooth Horizontal Swipe on Mobile) ── */}
+        {/* ── 3. Plan Tabs Navigation (Exact 3 Options: Plans, Catalog, Client Assignments) ── */}
         <div className="flex items-center gap-2 mb-6 border-b border-slate-200/80 pb-3 overflow-x-auto no-scrollbar scrollbar-none flex-nowrap w-full">
           <button
-            onClick={() => { setActiveTab('plans'); setFeatureTypeFilter('ALL'); }}
+            onClick={() => setActiveTab('plans')}
             className={cn(
-              "px-3.5 sm:px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shadow-xs shrink-0 whitespace-nowrap",
+              "px-4 sm:px-5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shadow-xs shrink-0 whitespace-nowrap",
               activeTab === 'plans'
                 ? "bg-emerald-600 text-white shadow-emerald-600/20"
                 : "bg-white text-slate-600 hover:bg-slate-50 border border-slate-200/80"
             )}
           >
-            <Layers size={14} />
+            <Layers size={15} />
             <span>Plans</span>
             <span className={cn(
               "px-2 py-0.5 rounded-full text-[10px] font-mono",
@@ -1159,55 +1212,19 @@ export default function AdminPlansPage() {
           </button>
 
           <button
-            onClick={() => { setActiveTab('features'); setFeatureTypeFilter('Channel'); }}
+            onClick={() => { setActiveTab('catalog'); if (featureTypeFilter === 'ALL') setFeatureTypeFilter('Channel'); }}
             className={cn(
-              "px-3.5 sm:px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shadow-xs shrink-0 whitespace-nowrap",
-              activeTab === 'features' && featureTypeFilter === 'Channel'
-                ? "bg-blue-600 text-white shadow-blue-600/20"
-                : "bg-white text-slate-600 hover:bg-slate-50 border border-slate-200/80"
-            )}
-          >
-            <span>📢 Channels</span>
-            <span className={cn(
-              "px-2 py-0.5 rounded-full text-[10px] font-mono",
-              activeTab === 'features' && featureTypeFilter === 'Channel' ? "bg-white/20 text-white" : "bg-blue-50 text-blue-700"
-            )}>
-              {channelCount}
-            </span>
-          </button>
-
-          <button
-            onClick={() => { setActiveTab('features'); setFeatureTypeFilter('Connector'); }}
-            className={cn(
-              "px-3.5 sm:px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shadow-xs shrink-0 whitespace-nowrap",
-              activeTab === 'features' && featureTypeFilter === 'Connector'
-                ? "bg-purple-600 text-white shadow-purple-600/20"
-                : "bg-white text-slate-600 hover:bg-slate-50 border border-slate-200/80"
-            )}
-          >
-            <span>🔌 Connectors</span>
-            <span className={cn(
-              "px-2 py-0.5 rounded-full text-[10px] font-mono",
-              activeTab === 'features' && featureTypeFilter === 'Connector' ? "bg-white/20 text-white" : "bg-purple-50 text-purple-700"
-            )}>
-              {connectorCount}
-            </span>
-          </button>
-
-          <button
-            onClick={() => { setActiveTab('features'); setFeatureTypeFilter('Module'); }}
-            className={cn(
-              "px-3.5 sm:px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shadow-xs shrink-0 whitespace-nowrap",
-              activeTab === 'features' && (featureTypeFilter === 'Module' || featureTypeFilter === 'ALL')
+              "px-4 sm:px-5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shadow-xs shrink-0 whitespace-nowrap",
+              activeTab === 'catalog'
                 ? "bg-emerald-600 text-white shadow-emerald-600/20"
                 : "bg-white text-slate-600 hover:bg-slate-50 border border-slate-200/80"
             )}
           >
-            <Zap size={14} />
-            <span>Features & Modules</span>
+            <Zap size={15} />
+            <span>Catalog</span>
             <span className={cn(
               "px-2 py-0.5 rounded-full text-[10px] font-mono",
-              activeTab === 'features' && (featureTypeFilter === 'Module' || featureTypeFilter === 'ALL') ? "bg-white/20 text-white" : "bg-slate-100 text-slate-600"
+              activeTab === 'catalog' ? "bg-white/20 text-white" : "bg-slate-100 text-slate-600"
             )}>
               {features.length}
             </span>
@@ -1216,13 +1233,13 @@ export default function AdminPlansPage() {
           <button
             onClick={() => setActiveTab('assignments')}
             className={cn(
-              "px-3.5 sm:px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shadow-xs shrink-0 whitespace-nowrap",
+              "px-4 sm:px-5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shadow-xs shrink-0 whitespace-nowrap",
               activeTab === 'assignments'
                 ? "bg-emerald-600 text-white shadow-emerald-600/20"
                 : "bg-white text-slate-600 hover:bg-slate-50 border border-slate-200/80"
             )}
           >
-            <Users size={14} />
+            <Users size={15} />
             <span>Client Assignments</span>
             <span className={cn(
               "px-2 py-0.5 rounded-full text-[10px] font-mono",
@@ -1244,8 +1261,8 @@ export default function AdminPlansPage() {
           </div>
         )}
 
-        {/* ── 5. TAB 2: FEATURES CATALOG ── */}
-        {activeTab === 'features' && (
+        {/* ── 5. TAB 2: CATALOG (CHANNELS, CONNECTORS, FEATURES) ── */}
+        {activeTab === 'catalog' && (
           <div>
             {/* Quick Type Filter Pills */}
             <div className="flex items-center gap-2 mb-3.5 overflow-x-auto no-scrollbar pb-1">
