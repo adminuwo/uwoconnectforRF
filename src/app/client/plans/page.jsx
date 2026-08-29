@@ -641,7 +641,7 @@ export default function ClientPlansPage() {
 
   return (
     <DashboardLayout role="CLIENT">
-      <div className="max-w-7xl mx-auto pb-24 px-4 sm:px-8 lg:px-10" style={{ fontFamily: "'Times New Roman', Times, serif" }}>
+      <div className="max-w-7xl mx-auto pb-24 px-3 sm:px-6 lg:px-8">
         
         {/* Toast */}
         {toast && (
@@ -652,7 +652,7 @@ export default function ClientPlansPage() {
         )}
 
         {/* Page Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 my-6 p-6 rounded-3xl bg-white text-slate-900 shadow-sm border border-slate-200">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 my-4 sm:my-6 p-4 sm:p-6 rounded-3xl bg-white text-slate-900 shadow-sm border border-slate-200">
           <div>
             <div className="flex items-center gap-3">
               <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900">

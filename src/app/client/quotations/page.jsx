@@ -67,18 +67,20 @@ const QuotationsPage = () => {
   }, [page, statusFilter, salespersonFilter, currencyFilter]);
 
   const fetchSalespeople = async () => {
-    const token = localStorage.getItem('uwo_token');
+    const token = localStorage.getItem('uwo_token') || localStorage.getItem('token');
+    if (!token) return;
     try {
-      const res = await axios.get(`${API_BASE_URL}/api/admin/users`, {
+      const res = await axios.get(`${API_BASE_URL}/api/team/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (Array.isArray(res.data)) {
-        setSalespeople(Array.isArray(res.data) ? res.data : (res.data?.results || []));
-      } else if (res.data.results) {
+        setSalespeople(res.data);
+      } else if (res.data?.results) {
         setSalespeople(res.data.results);
       }
     } catch (err) {
-      console.warn("Could not load users for filter selection", err);
+      // Graceful fallback if team endpoint is not accessible
+      setSalespeople([]);
     }
   };
 
@@ -250,18 +252,18 @@ const QuotationsPage = () => {
 
   return (
     <DashboardLayout role="CLIENT">
-      <div className="max-w-7xl mx-auto w-full p-4 sm:p-6 pb-20 space-y-6">
+      <div className="max-w-7xl mx-auto w-full p-3 sm:p-6 pb-20 space-y-4 sm:space-y-6">
         
         {/* Header Action Bar */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
           <div>
-            <h1 className="text-xl font-black text-slate-900 tracking-tight">Quotations Management</h1>
-            <p className="text-xs text-slate-400 font-semibold uppercase tracking-wider mt-0.5">Sales Proposals & Estimates</p>
+            <h1 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight">Quotations Management</h1>
+            <p className="text-[11px] text-slate-400 font-semibold uppercase tracking-wider mt-0.5">Sales Proposals & Estimates</p>
           </div>
           
           <button
             onClick={() => router.push('/client/quotations/new')}
-            className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all shadow-sm shadow-emerald-600/10 cursor-pointer"
+            className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all shadow-sm shadow-emerald-600/10 cursor-pointer w-full sm:w-auto"
           >
             <Plus size={14} />
             <span>Create Quotation</span>
@@ -269,44 +271,44 @@ const QuotationsPage = () => {
         </div>
 
         {/* Analytics Overview Metrics Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          <div className="bg-white border border-slate-100 rounded-2xl p-5 shadow-xs flex items-center gap-4">
-            <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-600 shrink-0">
-              <FileCheck size={18} />
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
+          <div className="bg-white border border-slate-100 rounded-2xl p-3.5 sm:p-5 shadow-xs flex items-center gap-3 sm:gap-4">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-600 shrink-0">
+              <FileCheck size={16} />
             </div>
-            <div>
-              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Total Quotations</p>
-              <p className="text-lg font-black text-slate-800 mt-0.5">{stats.total_count}</p>
-            </div>
-          </div>
-
-          <div className="bg-white border border-slate-100 rounded-2xl p-5 shadow-xs flex items-center gap-4">
-            <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
-              <DollarSign size={18} />
-            </div>
-            <div>
-              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Pipeline Value</p>
-              <p className="text-lg font-black text-slate-800 mt-0.5">${parseFloat(stats.total_value).toLocaleString('en-US', { minimumFractionDigits: 2 })}</p>
+            <div className="min-w-0 flex-1">
+              <p className="text-[9px] sm:text-[10px] text-slate-400 font-bold uppercase tracking-wider truncate">Total Quotes</p>
+              <p className="text-base sm:text-lg font-black text-slate-800 mt-0.5">{stats.total_count}</p>
             </div>
           </div>
 
-          <div className="bg-white border border-slate-100 rounded-2xl p-5 shadow-xs flex items-center gap-4">
-            <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
-              <TrendingUp size={18} />
+          <div className="bg-white border border-slate-100 rounded-2xl p-3.5 sm:p-5 shadow-xs flex items-center gap-3 sm:gap-4">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+              <DollarSign size={16} />
             </div>
-            <div>
-              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Accepted Value</p>
-              <p className="text-lg font-black text-slate-800 mt-0.5">${parseFloat(stats.accepted_value).toLocaleString('en-US', { minimumFractionDigits: 2 })}</p>
+            <div className="min-w-0 flex-1">
+              <p className="text-[9px] sm:text-[10px] text-slate-400 font-bold uppercase tracking-wider truncate">Pipeline</p>
+              <p className="text-base sm:text-lg font-black text-slate-800 mt-0.5 truncate">${parseFloat(stats.total_value).toLocaleString('en-US', { minimumFractionDigits: 2 })}</p>
             </div>
           </div>
 
-          <div className="bg-white border border-slate-100 rounded-2xl p-5 shadow-xs flex items-center gap-4">
-            <div className="w-10 h-10 rounded-xl bg-violet-50 text-violet-600 flex items-center justify-center shrink-0">
-              <BarChart3 size={18} />
+          <div className="bg-white border border-slate-100 rounded-2xl p-3.5 sm:p-5 shadow-xs flex items-center gap-3 sm:gap-4">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+              <TrendingUp size={16} />
             </div>
-            <div>
-              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Conversion Rate</p>
-              <p className="text-lg font-black text-slate-800 mt-0.5">{stats.conversion_rate}%</p>
+            <div className="min-w-0 flex-1">
+              <p className="text-[9px] sm:text-[10px] text-slate-400 font-bold uppercase tracking-wider truncate">Accepted</p>
+              <p className="text-base sm:text-lg font-black text-slate-800 mt-0.5 truncate">${parseFloat(stats.accepted_value).toLocaleString('en-US', { minimumFractionDigits: 2 })}</p>
+            </div>
+          </div>
+
+          <div className="bg-white border border-slate-100 rounded-2xl p-3.5 sm:p-5 shadow-xs flex items-center gap-3 sm:gap-4">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-violet-50 text-violet-600 flex items-center justify-center shrink-0">
+              <BarChart3 size={16} />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-[9px] sm:text-[10px] text-slate-400 font-bold uppercase tracking-wider truncate">Conversion</p>
+              <p className="text-base sm:text-lg font-black text-slate-800 mt-0.5">{stats.conversion_rate}%</p>
             </div>
           </div>
         </div>
@@ -421,112 +423,224 @@ const QuotationsPage = () => {
               </button>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full border-collapse text-left text-xs font-medium">
-                <thead>
-                  <tr className="bg-slate-50 border-b border-slate-100 text-slate-500 font-bold">
-                    <th className="p-4">Quotation Number</th>
-                    <th className="p-4">Customer Details</th>
-                    <th className="p-4">Created Date</th>
-                    <th className="p-4">Valid Until</th>
-                    <th className="p-4 text-right">Grand Total</th>
-                    <th className="p-4 text-center">Status</th>
-                    <th className="p-4">Salesperson</th>
-                    <th className="p-4 text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 text-slate-700">
-                  {documents.map((doc) => (
-                    <tr key={doc.id} className="hover:bg-slate-50/50 transition-colors">
-                      <td className="p-4 font-bold text-slate-900">{doc.document_number}</td>
-                      <td className="p-4">
-                        <span className="block font-bold text-slate-850">{doc.customer_name}</span>
-                        {doc.customer_company && (
-                          <span className="block text-[10px] text-slate-400 mt-0.5">{doc.customer_company}</span>
-                        )}
-                      </td>
-                      <td className="p-4 text-slate-500">{doc.document_date}</td>
-                      <td className="p-4 text-slate-500">{doc.valid_until || 'N/A'}</td>
-                      <td className="p-4 text-right font-black text-slate-950">
-                        {doc.currency_symbol}{parseFloat(doc.grand_total).toFixed(2)}
-                      </td>
-                      <td className="p-4 text-center">
-                        <span className={getStatusBadge(doc.status)}>{doc.status.toLowerCase()}</span>
-                      </td>
-                      <td className="p-4 text-slate-500 font-semibold">{doc.salesperson_name || 'System'}</td>
-                      <td className="p-4">
-                        <div className="flex items-center justify-end gap-1.5">
-                          {/* Interactive Preview Modal */}
-                          <button
-                            onClick={() => setPreviewModalDoc(doc)}
-                            className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-500 hover:text-slate-900 cursor-pointer"
-                            title="Interactive Executive Preview"
-                          >
-                            <Eye size={13} />
-                          </button>
-
-                          {/* Edit Quotation */}
-                          <button
-                            onClick={() => router.push(`/client/quotations/new?edit_id=${doc.id}&type=QUOTATION`)}
-                            className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-500 hover:text-slate-900 cursor-pointer"
-                            title="Edit Quotation"
-                          >
-                            <Edit2 size={13} />
-                          </button>
-
-                          <button
-                            onClick={() => handleDownloadPDF(doc.id, doc.document_number)}
-                            className="p-1.5 hover:bg-slate-150 hover:bg-slate-100 rounded-lg text-slate-500 hover:text-slate-900 cursor-pointer"
-                            title="Download PDF Invoice"
-                          >
-                            <Download size={13} />
-                          </button>
-
-                          <button
-                            onClick={() => handleOpenSendModal(doc)}
-                            className="p-1.5 hover:bg-slate-150 hover:bg-slate-100 rounded-lg text-slate-500 hover:text-slate-900 cursor-pointer"
-                            title="Send Document"
-                          >
-                            <Send size={13} />
-                          </button>
-
-                          {/* Action duplicates quote */}
-                          <button
-                            onClick={() => handleDuplicate(doc.id)}
-                            disabled={actionLoading[doc.id] === 'duplicate'}
-                            className="p-1.5 hover:bg-slate-150 hover:bg-slate-100 rounded-lg text-slate-500 hover:text-slate-900 cursor-pointer disabled:opacity-50"
-                            title="Duplicate Quote"
-                          >
-                            {actionLoading[doc.id] === 'duplicate' ? <Loader2 size={13} className="animate-spin" /> : <Copy size={13} />}
-                          </button>
-
-                          {/* Convert to Invoice (only for ACCEPTED quotes) */}
-                          {(doc.status === 'ACCEPTED') && (
-                            <button
-                              onClick={() => handleConvertInvoice(doc.id)}
-                              disabled={actionLoading[doc.id] === 'convert'}
-                              className="p-1.5 hover:bg-emerald-50 rounded-lg text-emerald-600 hover:text-emerald-700 cursor-pointer disabled:opacity-50"
-                              title="Convert to Invoice"
-                            >
-                              {actionLoading[doc.id] === 'convert' ? <Loader2 size={13} className="animate-spin" /> : <ArrowRight size={13} />}
-                            </button>
-                          )}
-
-                          <button
-                            onClick={() => handleDelete(doc.id)}
-                            disabled={actionLoading[doc.id] === 'delete'}
-                            className="p-1.5 hover:bg-red-50 rounded-lg text-slate-400 hover:text-red-600 cursor-pointer disabled:opacity-50"
-                            title="Delete"
-                          >
-                            {actionLoading[doc.id] === 'delete' ? <Loader2 size={13} className="animate-spin" /> : <Trash2 size={13} />}
-                          </button>
+            <>
+              {/* ═══════════════════════════════════════════════════════════════════ */}
+              {/* MOBILE CARDS VIEW (< md)                                            */}
+              {/* ═══════════════════════════════════════════════════════════════════ */}
+              <div className="block md:hidden divide-y divide-slate-100">
+                {documents.map((doc) => (
+                  <div key={doc.id} className="p-3.5 space-y-3 hover:bg-slate-50/50 transition-colors">
+                    {/* Top Row: Number, Status, Total */}
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <span className="font-mono font-bold text-xs text-slate-900 block">{doc.document_number}</span>
+                        <div className="mt-1">
+                          <span className={getStatusBadge(doc.status)}>{doc.status.toLowerCase()}</span>
                         </div>
-                      </td>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-sm font-black text-slate-950 block">
+                          {doc.currency_symbol}{parseFloat(doc.grand_total).toFixed(2)}
+                        </span>
+                        <span className="text-[10px] text-slate-400 font-semibold">{doc.salesperson_name || 'System'}</span>
+                      </div>
+                    </div>
+
+                    {/* Middle Row: Customer Details & Dates */}
+                    <div className="bg-slate-50 p-2.5 rounded-xl text-xs space-y-1">
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-slate-800 truncate">{doc.customer_name}</span>
+                        {doc.customer_company && (
+                          <span className="text-[10px] text-slate-400 truncate max-w-[120px]">{doc.customer_company}</span>
+                        )}
+                      </div>
+                      <div className="flex items-center justify-between text-[10px] text-slate-400 font-medium pt-1 border-t border-slate-200/60">
+                        <span>📅 Created: {doc.document_date}</span>
+                        <span>Valid: {doc.valid_until || 'N/A'}</span>
+                      </div>
+                    </div>
+
+                    {/* Bottom Row: Actions Toolbar */}
+                    <div className="flex items-center justify-between pt-1">
+                      <div className="flex items-center gap-1">
+                        <button
+                          onClick={() => setPreviewModalDoc(doc)}
+                          className="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold flex items-center gap-1 cursor-pointer"
+                        >
+                          <Eye size={12} />
+                          <span>Preview</span>
+                        </button>
+
+                        <button
+                          onClick={() => router.push(`/client/quotations/new?edit_id=${doc.id}&type=QUOTATION`)}
+                          className="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg cursor-pointer"
+                          title="Edit"
+                        >
+                          <Edit2 size={13} />
+                        </button>
+
+                        <button
+                          onClick={() => handleDownloadPDF(doc.id, doc.document_number)}
+                          className="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg cursor-pointer"
+                          title="Download PDF"
+                        >
+                          <Download size={13} />
+                        </button>
+
+                        <button
+                          onClick={() => handleOpenSendModal(doc)}
+                          className="p-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-lg cursor-pointer"
+                          title="Send"
+                        >
+                          <Send size={13} />
+                        </button>
+                      </div>
+
+                      <div className="flex items-center gap-1">
+                        <button
+                          onClick={() => handleDuplicate(doc.id)}
+                          disabled={actionLoading[doc.id] === 'duplicate'}
+                          className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg cursor-pointer"
+                          title="Duplicate"
+                        >
+                          {actionLoading[doc.id] === 'duplicate' ? <Loader2 size={13} className="animate-spin" /> : <Copy size={13} />}
+                        </button>
+
+                        {doc.status === 'ACCEPTED' && (
+                          <button
+                            onClick={() => handleConvertInvoice(doc.id)}
+                            disabled={actionLoading[doc.id] === 'convert'}
+                            className="p-1.5 bg-emerald-50 text-emerald-700 rounded-lg cursor-pointer"
+                            title="Convert to Invoice"
+                          >
+                            {actionLoading[doc.id] === 'convert' ? <Loader2 size={13} className="animate-spin" /> : <ArrowRight size={13} />}
+                          </button>
+                        )}
+
+                        <button
+                          onClick={() => handleDelete(doc.id)}
+                          disabled={actionLoading[doc.id] === 'delete'}
+                          className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg cursor-pointer"
+                          title="Delete"
+                        >
+                          {actionLoading[doc.id] === 'delete' ? <Loader2 size={13} className="animate-spin" /> : <Trash2 size={13} />}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* ═══════════════════════════════════════════════════════════════════ */}
+              {/* DESKTOP TABLE VIEW (>= md)                                          */}
+              {/* ═══════════════════════════════════════════════════════════════════ */}
+              <div className="hidden md:block overflow-x-auto">
+                <table className="w-full border-collapse text-left text-xs font-medium">
+                  <thead>
+                    <tr className="bg-slate-50 border-b border-slate-100 text-slate-500 font-bold">
+                      <th className="p-4">Quotation Number</th>
+                      <th className="p-4">Customer Details</th>
+                      <th className="p-4">Created Date</th>
+                      <th className="p-4">Valid Until</th>
+                      <th className="p-4 text-right">Grand Total</th>
+                      <th className="p-4 text-center">Status</th>
+                      <th className="p-4">Salesperson</th>
+                      <th className="p-4 text-right">Actions</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 text-slate-700">
+                    {documents.map((doc) => (
+                      <tr key={doc.id} className="hover:bg-slate-50/50 transition-colors">
+                        <td className="p-4 font-bold text-slate-900">{doc.document_number}</td>
+                        <td className="p-4">
+                          <span className="block font-bold text-slate-850">{doc.customer_name}</span>
+                          {doc.customer_company && (
+                            <span className="block text-[10px] text-slate-400 mt-0.5">{doc.customer_company}</span>
+                          )}
+                        </td>
+                        <td className="p-4 text-slate-500">{doc.document_date}</td>
+                        <td className="p-4 text-slate-500">{doc.valid_until || 'N/A'}</td>
+                        <td className="p-4 text-right font-black text-slate-950">
+                          {doc.currency_symbol}{parseFloat(doc.grand_total).toFixed(2)}
+                        </td>
+                        <td className="p-4 text-center">
+                          <span className={getStatusBadge(doc.status)}>{doc.status.toLowerCase()}</span>
+                        </td>
+                        <td className="p-4 text-slate-500 font-semibold">{doc.salesperson_name || 'System'}</td>
+                        <td className="p-4">
+                          <div className="flex items-center justify-end gap-1.5">
+                            {/* Interactive Preview Modal */}
+                            <button
+                              onClick={() => setPreviewModalDoc(doc)}
+                              className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-500 hover:text-slate-900 cursor-pointer"
+                              title="Interactive Executive Preview"
+                            >
+                              <Eye size={13} />
+                            </button>
+
+                            {/* Edit Quotation */}
+                            <button
+                              onClick={() => router.push(`/client/quotations/new?edit_id=${doc.id}&type=QUOTATION`)}
+                              className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-500 hover:text-slate-900 cursor-pointer"
+                              title="Edit Quotation"
+                            >
+                              <Edit2 size={13} />
+                            </button>
+
+                            <button
+                              onClick={() => handleDownloadPDF(doc.id, doc.document_number)}
+                              className="p-1.5 hover:bg-slate-150 hover:bg-slate-100 rounded-lg text-slate-500 hover:text-slate-900 cursor-pointer"
+                              title="Download PDF Invoice"
+                            >
+                              <Download size={13} />
+                            </button>
+
+                            <button
+                              onClick={() => handleOpenSendModal(doc)}
+                              className="p-1.5 hover:bg-slate-150 hover:bg-slate-100 rounded-lg text-slate-500 hover:text-slate-900 cursor-pointer"
+                              title="Send Document"
+                            >
+                              <Send size={13} />
+                            </button>
+
+                            {/* Action duplicates quote */}
+                            <button
+                              onClick={() => handleDuplicate(doc.id)}
+                              disabled={actionLoading[doc.id] === 'duplicate'}
+                              className="p-1.5 hover:bg-slate-150 hover:bg-slate-100 rounded-lg text-slate-500 hover:text-slate-900 cursor-pointer disabled:opacity-50"
+                              title="Duplicate Quote"
+                            >
+                              {actionLoading[doc.id] === 'duplicate' ? <Loader2 size={13} className="animate-spin" /> : <Copy size={13} />}
+                            </button>
+
+                            {/* Convert to Invoice (only for ACCEPTED quotes) */}
+                            {(doc.status === 'ACCEPTED') && (
+                              <button
+                                onClick={() => handleConvertInvoice(doc.id)}
+                                disabled={actionLoading[doc.id] === 'convert'}
+                                className="p-1.5 hover:bg-emerald-50 rounded-lg text-emerald-600 hover:text-emerald-700 cursor-pointer disabled:opacity-50"
+                                title="Convert to Invoice"
+                              >
+                                {actionLoading[doc.id] === 'convert' ? <Loader2 size={13} className="animate-spin" /> : <ArrowRight size={13} />}
+                              </button>
+                            )}
+
+                            <button
+                              onClick={() => handleDelete(doc.id)}
+                              disabled={actionLoading[doc.id] === 'delete'}
+                              className="p-1.5 hover:bg-red-50 rounded-lg text-slate-400 hover:text-red-600 cursor-pointer disabled:opacity-50"
+                              title="Delete"
+                            >
+                              {actionLoading[doc.id] === 'delete' ? <Loader2 size={13} className="animate-spin" /> : <Trash2 size={13} />}
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
           )}
           
           {/* Pagination bar */}

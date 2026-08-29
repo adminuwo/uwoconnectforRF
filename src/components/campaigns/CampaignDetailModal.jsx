@@ -53,19 +53,19 @@ export default function CampaignDetailModal({ isOpen, campaign, onClose, onRefre
   };
 
   return (
-    <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-6">
-      <div className="bg-white rounded-3xl w-full max-w-4xl shadow-xl overflow-hidden flex flex-col border border-slate-200/80 max-h-[88vh]">
+    <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-2 sm:p-6">
+      <div className="bg-white rounded-3xl w-full max-w-4xl shadow-2xl overflow-hidden flex flex-col border border-slate-200/80 max-h-[90vh]">
         
         {/* Simple Header */}
-        <div className="px-6 py-5 bg-white border-b border-slate-100 flex items-center justify-between shrink-0">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-emerald-50 text-[#00AB56] flex items-center justify-center font-bold">
-              <BarChart3 size={20} />
+        <div className="px-4 sm:px-6 py-3.5 sm:py-5 bg-white border-b border-slate-100 flex items-center justify-between gap-3 shrink-0">
+          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-emerald-50 text-[#00AB56] flex items-center justify-center font-bold shrink-0">
+              <BarChart3 size={19} />
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h2 className="text-base font-extrabold text-slate-900">{campaign.name}</h2>
-                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase ${
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                <h2 className="text-sm sm:text-base font-extrabold text-slate-900 truncate">{campaign.name}</h2>
+                <span className={`text-[9px] sm:text-[10px] font-bold px-2 py-0.5 rounded-full uppercase shrink-0 ${
                   campaign.status === 'COMPLETED' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
                   campaign.status === 'SENDING' ? 'bg-blue-50 text-blue-700 border border-blue-200 animate-pulse' :
                   'bg-rose-50 text-rose-700 border border-rose-200'
@@ -73,39 +73,40 @@ export default function CampaignDetailModal({ isOpen, campaign, onClose, onRefre
                   {campaign.status}
                 </span>
               </div>
-              <p className="text-xs text-slate-400 font-medium">Created on {new Date(campaign.created_at).toLocaleDateString()}</p>
+              <p className="text-[11px] text-slate-400 font-medium truncate">Created on {new Date(campaign.created_at).toLocaleDateString()}</p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             {failedCount > 0 && (
               <button
                 onClick={handleRetryAll}
                 disabled={retrying}
-                className="px-4 py-2 bg-[#00AB56] hover:bg-[#009249] text-white rounded-xl font-bold text-xs shadow-xs flex items-center gap-1.5 transition-all cursor-pointer"
+                className="px-3 sm:px-4 py-2 bg-[#00AB56] hover:bg-[#009249] text-white rounded-xl font-bold text-xs shadow-xs flex items-center gap-1.5 transition-all cursor-pointer"
               >
                 <RotateCcw size={13} className={retrying ? "animate-spin" : ""} />
-                {retrying ? 'Retrying...' : 'Retry Failed'}
+                <span className="hidden sm:inline">{retrying ? 'Retrying...' : 'Retry Failed'}</span>
+                <span className="sm:hidden">Retry</span>
               </button>
             )}
-            <button onClick={onClose} className="p-2 text-slate-400 hover:text-slate-600 rounded-xl hover:bg-slate-100 transition-all">
+            <button onClick={onClose} className="p-1.5 sm:p-2 text-slate-400 hover:text-slate-600 rounded-xl hover:bg-slate-100 transition-all cursor-pointer">
               <X size={18} />
             </button>
           </div>
         </div>
 
         {/* Clean Progress Banner */}
-        <div className="p-6 bg-slate-50 border-b border-slate-100 shrink-0">
+        <div className="p-4 sm:p-6 bg-slate-50 border-b border-slate-100 shrink-0">
           <div className="flex items-center justify-between text-xs font-bold text-slate-700 mb-2">
             <span>Overall Delivery Progress</span>
             <span className="text-[#00AB56]">{progressPercent}% ({sentCount + failedCount}/{total})</span>
           </div>
 
-          <div className="w-full bg-slate-200/80 h-2.5 rounded-full overflow-hidden mb-4">
+          <div className="w-full bg-slate-200/80 h-2.5 rounded-full overflow-hidden mb-3 sm:mb-4">
             <div className="h-full bg-[#00AB56] rounded-full transition-all duration-500" style={{ width: `${progressPercent}%` }} />
           </div>
 
-          <div className="grid grid-cols-4 gap-3 text-center">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 text-center">
             <div className="bg-white p-3 rounded-2xl border border-slate-200/60">
               <span className="text-[10px] text-slate-400 font-bold uppercase block">Sent</span>
               <span className="text-base font-extrabold text-slate-900">{campaign.total_sent || 0}</span>

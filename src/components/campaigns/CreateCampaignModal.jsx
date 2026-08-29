@@ -183,28 +183,28 @@ export default function CreateCampaignModal({ isOpen, onClose, onCreated }) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-6">
-      <div className="bg-white rounded-3xl w-full max-w-xl shadow-xl overflow-hidden flex flex-col border border-slate-200/80">
+    <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-2 sm:p-4">
+      <div className="bg-white rounded-3xl w-full max-w-xl shadow-2xl overflow-hidden flex flex-col border border-slate-200/80 max-h-[92vh]">
         
         {/* Header */}
-        <div className="px-6 py-4 bg-white border-b border-slate-100 flex items-center justify-between shrink-0">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-emerald-50 text-[#00AB56] flex items-center justify-center font-bold">
-              <Megaphone size={18} />
+        <div className="px-4 sm:px-6 py-3.5 sm:py-4 bg-white border-b border-slate-100 flex items-center justify-between shrink-0">
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-emerald-50 text-[#00AB56] flex items-center justify-center font-bold shrink-0">
+              <Megaphone size={17} />
             </div>
             <div>
-              <h2 className="text-base font-extrabold text-slate-900">New Broadcast Campaign</h2>
-              <p className="text-xs text-slate-400 font-medium">Step {step} of 3</p>
+              <h2 className="text-sm sm:text-base font-extrabold text-slate-900">New Broadcast Campaign</h2>
+              <p className="text-[11px] text-slate-400 font-medium">Step {step} of 3</p>
             </div>
           </div>
 
-          <button onClick={onClose} className="p-2 text-slate-400 hover:text-slate-600 rounded-xl hover:bg-slate-100 transition-all">
+          <button onClick={onClose} className="p-1.5 sm:p-2 text-slate-400 hover:text-slate-600 rounded-xl hover:bg-slate-100 transition-all cursor-pointer">
             <X size={18} />
           </button>
         </div>
 
         {/* Form Body */}
-        <div className="p-6 space-y-5 bg-white overflow-y-auto max-h-[70vh]">
+        <div className="p-4 sm:p-6 space-y-4 sm:space-y-5 bg-white overflow-y-auto max-h-[72vh]">
 
           {/* STEP 1: Details & Audience */}
           {step === 1 && (

@@ -592,6 +592,36 @@ export default function ClientInboxPage() {
     }
   };
 
+  const handleResumeBot = async () => {
+    if (!activeConvo) return;
+
+    // Optimistically unassign and set bot active
+    setConversations(prev => prev.map(c => {
+      if (c.id === activeConvo.id) {
+        return {
+          ...c,
+          handlerName: null,
+          assignedToName: null,
+          isLocked: false,
+          lockedByName: null
+        };
+      }
+      return c;
+    }));
+
+    try {
+      const token = localStorage.getItem('uwo_token') || localStorage.getItem('token');
+      const apiUrl = API_BASE_URL;
+      const convoIdToUse = activeConvo.convoDbId || activeConvo.id;
+      await axios.post(`${apiUrl}/api/conversations/${convoIdToUse}/resume_bot/`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      fetchData();
+    } catch (err) {
+      console.warn('Resume bot event error:', err);
+    }
+  };
+
   const handleTransferSubmit = async (convoId, payload) => {
     try {
       const token = localStorage.getItem('uwo_token');
@@ -654,7 +684,7 @@ export default function ClientInboxPage() {
 
   return (
     <DashboardLayout>
-      <div className="flex flex-col h-[calc(100vh-4rem)] bg-slate-50 text-slate-900 overflow-hidden">
+      <div className="flex flex-col h-[calc(100dvh-3.5rem)] md:h-[calc(100vh-4rem)] bg-slate-50 text-slate-900 overflow-hidden">
         
 
 
@@ -834,58 +864,62 @@ export default function ClientInboxPage() {
           {/* RIGHT MAIN WINDOW: LIVE CHAT & ADMIN MONITORING PANEL                    */}
           {/* ----------------------------------------------------------------------- */}
           {activeConvo ? (
-            <div className={`flex-1 flex flex-col bg-emerald-50/20 ${
+            <div className={`flex-1 flex flex-col h-full overflow-hidden bg-emerald-50/20 ${
               mobileShowChat ? 'flex' : 'hidden md:flex'
             }`}>
               
               {/* Live Chat Header & Control Bar */}
-              <div className="bg-white border-b border-slate-200 p-2.5 sm:p-4 shadow-2xs space-y-2">
+              <div className="bg-white border-b border-slate-200 p-2.5 sm:p-3.5 shadow-2xs shrink-0">
+                {/* Row 1: Back + User Info + Actions */}
                 <div className="flex items-center justify-between gap-2">
-                  
-                  {/* Customer Details & Live Indicator */}
-                  <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                  {/* Customer Avatar & Name */}
+                  <div className="flex items-center gap-2 sm:gap-2.5 min-w-0 flex-1">
                     <button 
                       onClick={() => setMobileShowChat(false)}
-                      className="md:hidden p-1.5 rounded-lg text-slate-500 hover:bg-slate-100 shrink-0 cursor-pointer"
+                      className="md:hidden p-1.5 -ml-1 rounded-lg text-slate-600 hover:bg-slate-100 shrink-0 cursor-pointer"
                       title="Back to conversations"
                     >
                       <ArrowLeft className="w-5 h-5" />
                     </button>
 
-                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-emerald-600 text-white flex items-center justify-center font-black text-xs sm:text-sm shadow-sm shrink-0">
+                    <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-emerald-600 text-white flex items-center justify-center font-black text-xs sm:text-sm shadow-sm shrink-0">
                       {activeConvo.name.charAt(0).toUpperCase()}
                     </div>
 
                     <div className="min-w-0 flex-1">
-                      <h3 className="text-xs sm:text-sm font-bold text-slate-900 flex items-center gap-1.5 truncate flex-wrap">
-                        <span className="truncate">{activeConvo.name}</span>
-                        {activeConvo.rawAddress && (
-                          <span className={`text-xs font-mono font-bold px-2 py-0.5 rounded-md border shadow-2xs shrink-0 ${
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-xs sm:text-sm font-bold text-slate-900 truncate">{activeConvo.name}</span>
+                        {/* On desktop show badges inline */}
+                        <div className="hidden sm:flex items-center gap-1.5 shrink-0">
+                          {activeConvo.rawAddress && (
+                            <span className={`text-[11px] font-mono font-bold px-2 py-0.5 rounded-md border shadow-2xs ${
+                              activeConvo.channel === 'FACEBOOK'
+                                ? 'text-blue-800 bg-blue-50 border-blue-200'
+                                : activeConvo.channel === 'INSTAGRAM'
+                                ? 'text-pink-800 bg-pink-50 border-pink-200'
+                                : activeConvo.channel === 'GMAIL'
+                                ? 'text-rose-800 bg-rose-50 border-rose-200'
+                                : 'text-emerald-800 bg-emerald-50 border-emerald-200'
+                            }`}>
+                              {activeConvo.channel === 'FACEBOOK' ? '👤 PSID: ' : activeConvo.channel === 'INSTAGRAM' ? '📸 IG: ' : activeConvo.channel === 'GMAIL' ? '✉️ ' : '📱 '}
+                              {activeConvo.rawAddress}
+                            </span>
+                          )}
+                          <span className={`text-[9px] font-extrabold px-2 py-0.5 rounded-full shadow-2xs ${
                             activeConvo.channel === 'FACEBOOK'
-                              ? 'text-blue-800 bg-blue-50 border-blue-200'
+                              ? 'bg-blue-600 text-white'
                               : activeConvo.channel === 'INSTAGRAM'
-                              ? 'text-pink-800 bg-pink-50 border-pink-200'
+                              ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white'
                               : activeConvo.channel === 'GMAIL'
-                              ? 'text-rose-800 bg-rose-50 border-rose-200'
-                              : 'text-emerald-800 bg-emerald-50 border-emerald-200'
+                              ? 'bg-rose-500 text-white'
+                              : 'bg-emerald-600 text-white'
                           }`}>
-                            {activeConvo.channel === 'FACEBOOK' ? '👤 PSID: ' : activeConvo.channel === 'INSTAGRAM' ? '📸 IG: ' : activeConvo.channel === 'GMAIL' ? '✉️ ' : '📱 '}
-                            {activeConvo.rawAddress}
+                            {activeConvo.channel}
                           </span>
-                        )}
-                        <span className={`text-[8px] sm:text-[10px] font-extrabold px-2 py-0.5 rounded-full shadow-2xs shrink-0 ${
-                          activeConvo.channel === 'FACEBOOK'
-                            ? 'bg-blue-600 text-white'
-                            : activeConvo.channel === 'INSTAGRAM'
-                            ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white'
-                            : activeConvo.channel === 'GMAIL'
-                            ? 'bg-rose-500 text-white'
-                            : 'bg-emerald-600 text-white'
-                        }`}>
-                          {activeConvo.channel}
-                        </span>
-                      </h3>
-                      <div className="flex items-center gap-1.5 text-[10px] sm:text-xs text-slate-500 mt-0.5 truncate">
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-1.5 text-[10px] sm:text-xs text-slate-500 truncate">
                         {livePresence[activeConvo.id]?.isTyping ? (
                           <span className="text-emerald-600 font-bold flex items-center gap-1 animate-pulse truncate">
                             ✍️ {livePresence[activeConvo.id]?.typingUser || activeConvo.handlerName || 'Agent'} is typing...
@@ -901,50 +935,103 @@ export default function ClientInboxPage() {
                     </div>
                   </div>
 
-                  {/* Active Handler & Admin Actions */}
-                  <div className="flex flex-col sm:flex-row items-end sm:items-center gap-1.5 sm:gap-2 shrink-0">
-                    <div className="hidden lg:flex items-center gap-1.5">
-                      {activeConvo?.handlerName || activeConvo?.assignedToName ? (
-                        <div className="flex items-center gap-1.5 text-[10px] sm:text-[11px] font-semibold text-amber-800 bg-amber-50 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full border border-amber-200 shadow-2xs">
-                          <Lock className="w-3 h-3 text-amber-600 shrink-0" />
-                          <span className="truncate">Handling: <strong>{activeConvo.handlerName || activeConvo.assignedToName}</strong></span>
-                        </div>
-                      ) : (
-                        <div className="flex items-center gap-1.5 text-[10px] sm:text-[11px] font-semibold text-emerald-800 bg-emerald-50 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full border border-emerald-200 shadow-2xs">
-                          <Bot className="w-3 h-3 text-emerald-600 shrink-0" />
-                          <span className="truncate">Handling: <strong>Unassigned (AI Copilot)</strong></span>
-                        </div>
-                      )}
-                    </div>
+                  {/* Action Buttons Toolbar */}
+                  <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
+                    <button
+                      onClick={handleResumeBot}
+                      className="px-2 sm:px-2.5 py-1 rounded-lg text-[10px] sm:text-[11px] font-bold bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-300 transition-all flex items-center gap-1 cursor-pointer shadow-2xs shrink-0"
+                      title="Resume AI Bot & Workflow for this conversation"
+                    >
+                      <Bot className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                      <span className="hidden xs:inline sm:inline">Resume Bot</span>
+                    </button>
 
-                    <div className="flex items-center gap-1 sm:gap-1.5">
-                      <button
-                        onClick={handleTakeover}
-                        className="px-2 sm:px-2.5 py-1 rounded-lg text-[10px] sm:text-[11px] font-bold bg-rose-50 text-rose-600 hover:bg-rose-100 border border-rose-200 transition-all flex items-center gap-1 cursor-pointer"
-                        title="Take Over"
-                      >
-                        <ShieldAlert className="w-3 h-3" />
-                        <span className="hidden sm:inline">Take Over</span>
-                      </button>
+                    <button
+                      onClick={handleTakeover}
+                      className="px-2 sm:px-2.5 py-1 rounded-lg text-[10px] sm:text-[11px] font-bold bg-rose-50 text-rose-600 hover:bg-rose-100 border border-rose-200 transition-all flex items-center gap-1 cursor-pointer shrink-0"
+                      title="Take Over"
+                    >
+                      <ShieldAlert className="w-3 h-3 shrink-0" />
+                      <span className="hidden sm:inline">Take Over</span>
+                    </button>
 
-                      <button
-                        onClick={() => setIsTransferModalOpen(true)}
-                        className="px-2 sm:px-2.5 py-1 rounded-lg text-[10px] sm:text-[11px] font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200 transition-all flex items-center gap-1 cursor-pointer"
-                        title="Transfer"
-                      >
-                        <ArrowRightLeft className="w-3 h-3" />
-                        <span className="hidden sm:inline">Transfer</span>
-                      </button>
+                    <button
+                      onClick={() => setIsTransferModalOpen(true)}
+                      className="px-2 sm:px-2.5 py-1 rounded-lg text-[10px] sm:text-[11px] font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200 transition-all flex items-center gap-1 cursor-pointer shrink-0"
+                      title="Transfer"
+                    >
+                      <ArrowRightLeft className="w-3 h-3 shrink-0" />
+                      <span className="hidden sm:inline">Transfer</span>
+                    </button>
 
-                      <button
-                        onClick={fetchAuditLogs}
-                        className="p-1.5 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200 transition-colors cursor-pointer"
-                        title="Inspect Audit Log"
-                      >
-                        <History className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
+                    <button
+                      onClick={fetchAuditLogs}
+                      className="p-1 sm:p-1.5 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200 transition-colors cursor-pointer shrink-0"
+                      title="Inspect Audit Log"
+                    >
+                      <History className="w-3.5 h-3.5" />
+                    </button>
                   </div>
+                </div>
+
+                {/* Row 2: Sub-badges & Handler pill on Mobile */}
+                <div className="flex sm:hidden items-center justify-between gap-1.5 pt-1.5 border-t border-slate-100 mt-1.5">
+                  <div className="flex items-center gap-1 min-w-0 flex-1 overflow-x-auto scrollbar-none py-0.5">
+                    {activeConvo.rawAddress && (
+                      <span className={`text-[10px] font-mono font-bold px-1.5 py-0.5 rounded border shadow-2xs truncate max-w-[140px] ${
+                        activeConvo.channel === 'FACEBOOK'
+                          ? 'text-blue-800 bg-blue-50 border-blue-200'
+                          : activeConvo.channel === 'INSTAGRAM'
+                          ? 'text-pink-800 bg-pink-50 border-pink-200'
+                          : activeConvo.channel === 'GMAIL'
+                          ? 'text-rose-800 bg-rose-50 border-rose-200'
+                          : 'text-emerald-800 bg-emerald-50 border-emerald-200'
+                      }`}>
+                        {activeConvo.channel === 'FACEBOOK' ? '👤 ' : activeConvo.channel === 'INSTAGRAM' ? '📸 ' : activeConvo.channel === 'GMAIL' ? '✉️ ' : '📱 '}
+                        {activeConvo.rawAddress}
+                      </span>
+                    )}
+                    <span className={`text-[8px] font-extrabold px-1.5 py-0.5 rounded-full shadow-2xs shrink-0 ${
+                      activeConvo.channel === 'FACEBOOK'
+                        ? 'bg-blue-600 text-white'
+                        : activeConvo.channel === 'INSTAGRAM'
+                        ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white'
+                        : activeConvo.channel === 'GMAIL'
+                        ? 'bg-rose-500 text-white'
+                        : 'bg-emerald-600 text-white'
+                    }`}>
+                      {activeConvo.channel}
+                    </span>
+                  </div>
+
+                  <div className="shrink-0">
+                    {activeConvo?.handlerName || activeConvo?.assignedToName ? (
+                      <div className="flex items-center gap-1 text-[10px] font-semibold text-amber-800 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
+                        <Lock className="w-2.5 h-2.5 text-amber-600 shrink-0" />
+                        <span className="truncate max-w-[100px]">{activeConvo.handlerName || activeConvo.assignedToName}</span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-1 text-[10px] font-semibold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                        <Bot className="w-2.5 h-2.5 text-emerald-600 shrink-0" />
+                        <span>AI Bot</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Desktop Handler Pill */}
+                <div className="hidden sm:flex lg:hidden items-center gap-1.5 pt-1 border-t border-slate-100">
+                  {activeConvo?.handlerName || activeConvo?.assignedToName ? (
+                    <div className="flex items-center gap-1.5 text-[11px] font-semibold text-amber-800 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200 shadow-2xs">
+                      <Lock className="w-3 h-3 text-amber-600 shrink-0" />
+                      <span>Handling: <strong>{activeConvo.handlerName || activeConvo.assignedToName}</strong></span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-1.5 text-[11px] font-semibold text-emerald-800 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200 shadow-2xs">
+                      <Bot className="w-3 h-3 text-emerald-600 shrink-0" />
+                      <span>Handling: <strong>Unassigned (AI Copilot)</strong></span>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -1216,30 +1303,30 @@ export default function ClientInboxPage() {
               </div>
 
               {/* Composer Box (Public Reply vs Internal Note) */}
-              <div className="bg-white border-t border-slate-200 p-3 sm:p-4 space-y-2.5 sm:space-y-3">
+              <div className="bg-white border-t border-slate-200 p-2.5 sm:p-4 space-y-2 sm:space-y-3 shrink-0">
                 
                 {/* Note Toggle */}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-1.5 sm:gap-2">
                     <button
                       onClick={() => setIsInternalNote(false)}
-                      className={`px-2.5 sm:px-3 py-1 rounded-lg text-[11px] sm:text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
+                      className={`px-2.5 sm:px-3 py-1 rounded-lg text-[10px] sm:text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
                         !isInternalNote 
                           ? 'bg-emerald-600 text-white shadow-xs' 
-                          : 'text-slate-500 hover:text-slate-900'
+                          : 'text-slate-500 hover:text-slate-900 bg-slate-100'
                       }`}
                     >
                       Public Reply
                     </button>
                     <button
                       onClick={() => setIsInternalNote(true)}
-                      className={`px-2.5 sm:px-3 py-1 rounded-lg text-[11px] sm:text-xs font-bold transition-all flex items-center gap-1 whitespace-nowrap cursor-pointer ${
+                      className={`px-2.5 sm:px-3 py-1 rounded-lg text-[10px] sm:text-xs font-bold transition-all flex items-center gap-1 whitespace-nowrap cursor-pointer ${
                         isInternalNote 
                           ? 'bg-amber-500 text-white shadow-xs' 
-                          : 'text-slate-500 hover:text-slate-900'
+                          : 'text-slate-500 hover:text-slate-900 bg-slate-100'
                       }`}
                     >
-                      <StickyNote className="w-3.5 h-3.5 shrink-0" />
+                      <StickyNote className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" />
                       <span>Internal Private Note</span>
                     </button>
                   </div>
@@ -1259,15 +1346,15 @@ export default function ClientInboxPage() {
                         }
                       }}
                       placeholder={isInternalNote ? "Add private internal note..." : "Type a message..."}
-                      className="w-full min-w-0 bg-slate-100 hover:bg-slate-200/60 focus:bg-white border border-slate-200 rounded-2xl px-3.5 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:ring-2 focus:ring-emerald-500 outline-none resize-none transition-all block"
-                      style={{ minHeight: '42px', maxHeight: '90px' }}
+                      className="w-full min-w-0 bg-slate-100 hover:bg-slate-200/60 focus:bg-white border border-slate-200 rounded-xl sm:rounded-2xl px-3 py-2 sm:px-3.5 sm:py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:ring-2 focus:ring-emerald-500 outline-none resize-none transition-all block"
+                      style={{ minHeight: '38px', maxHeight: '80px' }}
                     />
                   </div>
                   <button
                     type="button"
                     onClick={handleSendMessage}
                     disabled={!replyText.trim() || isSending}
-                    className="w-10 h-10 min-w-[40px] max-w-[40px] shrink-0 rounded-2xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white shadow-md disabled:opacity-40 disabled:hover:bg-emerald-600 disabled:cursor-not-allowed transition-all flex items-center justify-center cursor-pointer"
+                    className="w-9 h-9 sm:w-10 sm:h-10 min-w-[36px] sm:min-w-[40px] shrink-0 rounded-xl sm:rounded-2xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white shadow-md disabled:opacity-40 disabled:hover:bg-emerald-600 disabled:cursor-not-allowed transition-all flex items-center justify-center cursor-pointer"
                     title="Send"
                   >
                     {isSending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}

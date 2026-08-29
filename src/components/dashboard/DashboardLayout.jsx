@@ -15,7 +15,7 @@ const GlobalIncomingCallListener = dynamic(() => import('./GlobalIncomingCallLis
 
 const PAGE_TITLES = {
   '/client': 'Dashboard',
-  '/admin': 'Super Admin Control Center',
+  '/admin': 'Control Center',
   '/admin/clients': 'Client Management Directory',
   '/admin/search': 'Global Platform Search',
   '/admin/team': 'Team & Projects',
@@ -158,7 +158,7 @@ const DashboardLayout = ({ children, role: initialRole }) => {
     }
   }
 
-  const isPageLocked = initialRole !== 'ADMIN' && reqPlanName && (isDynamicRemoved || (!isDynamicAvailable && activePlanRank < reqPlanRank));
+  const isPageLocked = mounted && initialRole !== 'ADMIN' && reqPlanName && (isDynamicRemoved || (!isDynamicAvailable && activePlanRank < reqPlanRank));
   const [profileLogo, setProfileLogo] = useState('');
   const [impersonationData, setImpersonationData] = useState(null);
   const [clients, setClients] = useState([]);

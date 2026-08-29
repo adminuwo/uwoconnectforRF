@@ -269,18 +269,18 @@ export default function SuperAdminOverview() {
             </div>
 
             {/* Clickable Filter Tiles */}
-            <div className="grid grid-cols-3 gap-2 sm:gap-3">
+            <div className="grid grid-cols-3 gap-1.5 sm:gap-3">
               {/* Approved */}
               <Link
                 href="/admin/clients?approval=APPROVED"
-                className="p-2.5 sm:p-3 rounded-xl bg-emerald-50/70 hover:bg-emerald-100/70 border border-emerald-200/60 transition-all flex items-center justify-between group min-w-0"
+                className="p-2 sm:p-3 rounded-xl bg-emerald-50/70 hover:bg-emerald-100/70 border border-emerald-200/60 transition-all flex items-center justify-between group min-w-0"
               >
                 <div className="min-w-0">
-                  <div className="flex items-center gap-1.5 text-[10px] sm:text-xs font-bold text-emerald-800 truncate">
-                    <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
+                  <div className="flex items-center gap-1 sm:gap-1.5 text-[9px] sm:text-xs font-bold text-emerald-800 truncate">
+                    <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-emerald-500 shrink-0" />
                     <span className="truncate">Approved</span>
                   </div>
-                  <div className="text-lg sm:text-2xl font-extrabold text-emerald-950 mt-0.5 sm:mt-1">{approvalData.approved}</div>
+                  <div className="text-base sm:text-2xl font-extrabold text-emerald-950 mt-0.5 sm:mt-1">{approvalData.approved}</div>
                 </div>
                 <ChevronRight size={15} className="text-emerald-500 opacity-0 group-hover:opacity-100 transition-opacity shrink-0 hidden sm:block" />
               </Link>
@@ -288,14 +288,14 @@ export default function SuperAdminOverview() {
               {/* Pending */}
               <Link
                 href="/admin/clients?approval=PENDING"
-                className="p-2.5 sm:p-3 rounded-xl bg-amber-50/70 hover:bg-amber-100/70 border border-amber-200/60 transition-all flex items-center justify-between group min-w-0"
+                className="p-2 sm:p-3 rounded-xl bg-amber-50/70 hover:bg-amber-100/70 border border-amber-200/60 transition-all flex items-center justify-between group min-w-0"
               >
                 <div className="min-w-0">
-                  <div className="flex items-center gap-1.5 text-[10px] sm:text-xs font-bold text-amber-800 truncate">
-                    <span className="w-2 h-2 rounded-full bg-amber-400 shrink-0 animate-ping" />
+                  <div className="flex items-center gap-1 sm:gap-1.5 text-[9px] sm:text-xs font-bold text-amber-800 truncate">
+                    <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-amber-400 shrink-0 animate-ping" />
                     <span className="truncate">Pending</span>
                   </div>
-                  <div className="text-lg sm:text-2xl font-extrabold text-amber-950 mt-0.5 sm:mt-1">{approvalData.pending}</div>
+                  <div className="text-base sm:text-2xl font-extrabold text-amber-950 mt-0.5 sm:mt-1">{approvalData.pending}</div>
                 </div>
                 <ChevronRight size={15} className="text-amber-500 opacity-0 group-hover:opacity-100 transition-opacity shrink-0 hidden sm:block" />
               </Link>
@@ -303,14 +303,14 @@ export default function SuperAdminOverview() {
               {/* Rejected */}
               <Link
                 href="/admin/clients?approval=REJECTED"
-                className="p-2.5 sm:p-3 rounded-xl bg-rose-50/70 hover:bg-rose-100/70 border border-rose-200/60 transition-all flex items-center justify-between group min-w-0"
+                className="p-2 sm:p-3 rounded-xl bg-rose-50/70 hover:bg-rose-100/70 border border-rose-200/60 transition-all flex items-center justify-between group min-w-0"
               >
                 <div className="min-w-0">
-                  <div className="flex items-center gap-1.5 text-[10px] sm:text-xs font-bold text-rose-800 truncate">
-                    <span className="w-2 h-2 rounded-full bg-rose-500 shrink-0" />
+                  <div className="flex items-center gap-1 sm:gap-1.5 text-[9px] sm:text-xs font-bold text-rose-800 truncate">
+                    <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-rose-500 shrink-0" />
                     <span className="truncate">Rejected</span>
                   </div>
-                  <div className="text-lg sm:text-2xl font-extrabold text-rose-950 mt-0.5 sm:mt-1">{approvalData.rejected}</div>
+                  <div className="text-base sm:text-2xl font-extrabold text-rose-950 mt-0.5 sm:mt-1">{approvalData.rejected}</div>
                 </div>
                 <ChevronRight size={15} className="text-rose-500 opacity-0 group-hover:opacity-100 transition-opacity shrink-0 hidden sm:block" />
               </Link>
@@ -361,7 +361,68 @@ export default function SuperAdminOverview() {
             </div>
           </div>
 
-          <div className="overflow-x-auto custom-scrollbar w-full">
+          {/* ═══════════════════════════════════════════════════════════════════ */}
+          {/* MOBILE CLIENT COMPARISON CARDS (< md)                               */}
+          {/* ═══════════════════════════════════════════════════════════════════ */}
+          <div className="block md:hidden divide-y divide-slate-100">
+            {sortedClients.length === 0 ? (
+              <div className="p-8 text-center text-xs text-slate-400 font-medium">No clients match search</div>
+            ) : (
+              sortedClients.map((client) => (
+                <div
+                  key={client.id}
+                  onClick={() => router.push(`/admin/clients/${client.id}`)}
+                  className="p-4 space-y-3 hover:bg-slate-50/80 transition-colors cursor-pointer"
+                >
+                  {/* Top: Name, Plan, Link */}
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <h4 className="font-bold text-slate-900 text-sm">{client.company_name}</h4>
+                      <span className="inline-block px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 text-[10px] font-bold mt-0.5 uppercase">
+                        {client.plan || 'Free'}
+                      </span>
+                    </div>
+                    <span className="text-xs font-bold text-[#059669] hover:underline flex items-center gap-0.5 shrink-0">
+                      Details <ChevronRight size={14} />
+                    </span>
+                  </div>
+
+                  {/* Metrics 2x3 mini grid */}
+                  <div className="grid grid-cols-3 gap-1.5 bg-slate-50 p-2.5 rounded-xl text-center">
+                    <div className="p-1">
+                      <span className="text-[9px] font-bold text-slate-400 uppercase block">Channels</span>
+                      <span className="text-xs font-black text-slate-800">{client.channels}</span>
+                    </div>
+                    <div className="p-1">
+                      <span className="text-[9px] font-bold text-slate-400 uppercase block">Messages</span>
+                      <span className="text-xs font-black text-slate-800">{client.messages.toLocaleString()}</span>
+                    </div>
+                    <div className="p-1">
+                      <span className="text-[9px] font-bold text-slate-400 uppercase block">Bot %</span>
+                      <span className="text-xs font-black text-purple-700">{client.bot_usage_pct}%</span>
+                    </div>
+                    <div className="p-1">
+                      <span className="text-[9px] font-bold text-slate-400 uppercase block">Emails</span>
+                      <span className="text-xs font-black text-slate-800">{client.emails}</span>
+                    </div>
+                    <div className="p-1">
+                      <span className="text-[9px] font-bold text-slate-400 uppercase block">Invoiced</span>
+                      <span className="text-xs font-black text-slate-800">₹{client.total_invoiced.toLocaleString()}</span>
+                    </div>
+                    <div className="p-1">
+                      <span className="text-[9px] font-bold text-slate-400 uppercase block">Projects</span>
+                      <span className="text-xs font-black text-slate-800">{client.projects}</span>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+
+          {/* ═══════════════════════════════════════════════════════════════════ */}
+          {/* DESKTOP CLIENT COMPARISON TABLE (>= md)                             */}
+          {/* ═══════════════════════════════════════════════════════════════════ */}
+          <div className="hidden md:block overflow-x-auto custom-scrollbar w-full">
             <table className="w-full text-left border-collapse text-xs min-w-[650px]">
               <thead>
                 <tr className="bg-slate-50/50 border-b border-slate-100 text-slate-400 font-bold uppercase text-[10px] tracking-wider whitespace-nowrap">

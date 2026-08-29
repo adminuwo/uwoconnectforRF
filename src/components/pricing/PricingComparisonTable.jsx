@@ -390,6 +390,7 @@ export default function PricingComparisonTable({ plansData, onSelectPlan, isAdmi
   });
 
   const [capacityNotice, setCapacityNotice] = useState(null);
+  const [mobileActivePlanSlug, setMobileActivePlanSlug] = useState('growth');
 
   const filter3CorePlans = (planList) => {
     if (!Array.isArray(planList) || planList.length === 0) return SEEDED_FALLBACK_PLANS;
@@ -595,25 +596,25 @@ export default function PricingComparisonTable({ plansData, onSelectPlan, isAdmi
       )}
 
       {/* UWO CONNECT HERO HEADER (PURE WHITE + GREEN) */}
-      <div className="flex flex-col items-center justify-center space-y-4 text-center max-w-3xl mx-auto pt-4">
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-extrabold tracking-wide">
-          <Sparkles size={14} className="text-emerald-600" />
-          <span>OFFICIAL WORKSPACE SUBSCRIPTION PLANS</span>
+      <div className="flex flex-col items-center justify-center space-y-3 sm:space-y-4 text-center max-w-3xl mx-auto pt-2 sm:pt-4 px-2">
+        <div className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-3.5 py-1 sm:py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-[10px] sm:text-xs font-extrabold tracking-wide max-w-full">
+          <Sparkles size={13} className="text-emerald-600 shrink-0" />
+          <span className="truncate">OFFICIAL WORKSPACE PLANS</span>
         </div>
 
-        <h2 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
-          Find the right plan for your business needs
+        <h2 className="text-2xl sm:text-4xl font-black text-slate-900 tracking-tight">
+          Find the right plan for your business
         </h2>
-        <p className="text-slate-500 text-sm font-medium leading-relaxed max-w-xl">
+        <p className="text-slate-500 text-xs sm:text-sm font-medium leading-relaxed max-w-xl">
           Scale customer support, marketing broadcasts, and AI sales agents across WhatsApp, Facebook, and Instagram.
         </p>
 
         {/* MONTHLY | YEARLY BILLING TOGGLE (UWO GREEN HIGHLIGHT) */}
-        <div className="inline-flex items-center p-1.5 bg-slate-100 rounded-2xl border border-slate-200 shadow-inner mt-2">
+        <div className="inline-flex items-center p-1 sm:p-1.5 bg-slate-100 rounded-2xl border border-slate-200 shadow-inner mt-2 max-w-full">
           <button
             onClick={() => setBillingPeriod('MONTHLY')}
             className={cn(
-              "px-5 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold transition-all cursor-pointer",
+              "px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-extrabold transition-all cursor-pointer",
               billingPeriod === 'MONTHLY'
                 ? "bg-white text-slate-900 shadow-sm border border-slate-200"
                 : "text-slate-600 hover:text-slate-900"
@@ -625,22 +626,309 @@ export default function PricingComparisonTable({ plansData, onSelectPlan, isAdmi
           <button
             onClick={() => setBillingPeriod('YEARLY')}
             className={cn(
-              "px-5 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold transition-all flex items-center gap-2 cursor-pointer",
+              "px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-extrabold transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer",
               billingPeriod === 'YEARLY'
                 ? "bg-[#059669] text-white shadow-md shadow-emerald-700/20"
                 : "text-slate-600 hover:text-slate-900"
             )}
           >
             <span>Yearly Billing</span>
-            <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-200 text-emerald-950 uppercase tracking-wider flex items-center gap-1">
-              <Flame size={10} className="fill-emerald-950" /> SAVE 15%
+            <span className="px-1.5 sm:px-2 py-0.5 rounded-full text-[9px] sm:text-[10px] font-black bg-emerald-200 text-emerald-950 uppercase tracking-wider flex items-center gap-0.5 sm:gap-1">
+              <Flame size={10} className="fill-emerald-950 shrink-0" /> -15%
             </span>
           </button>
         </div>
       </div>
 
-      {/* PRICING COMPARISON TABLE CONTAINER */}
-      <div className="overflow-x-auto rounded-3xl border border-slate-200 bg-white shadow-sm">
+      {/* ═══════════════════════════════════════════════════════════════════════ */}
+      {/* MOBILE-ONLY DEDICATED PLAN CARDS VIEW (< lg)                          */}
+      {/* ═══════════════════════════════════════════════════════════════════════ */}
+      <div className="block lg:hidden space-y-4">
+        {/* Mobile Plan Selector Tabs */}
+        <div className="grid grid-cols-3 gap-1.5 p-1 bg-slate-100 rounded-2xl border border-slate-200">
+          {plans.map((p) => {
+            const isSelected = (mobileActivePlanSlug === p.slug) || (!mobileActivePlanSlug && p.slug === 'growth');
+            const isGrowth = p.name.toLowerCase().includes('growth');
+            return (
+              <button
+                key={p.id}
+                type="button"
+                onClick={() => setMobileActivePlanSlug(p.slug)}
+                className={cn(
+                  "py-2 px-1 text-center rounded-xl text-xs font-black transition-all cursor-pointer flex flex-col items-center justify-center gap-0.5",
+                  isSelected
+                    ? (isGrowth ? "bg-[#059669] text-white shadow-sm" : "bg-white text-slate-900 shadow-sm border border-slate-200")
+                    : "text-slate-600 hover:text-slate-900"
+                )}
+              >
+                <span>{p.name}</span>
+                {isGrowth && (
+                  <span className={cn(
+                    "text-[8px] font-extrabold uppercase px-1 rounded",
+                    isSelected ? "bg-emerald-800 text-emerald-100" : "bg-emerald-100 text-emerald-800"
+                  )}>
+                    Popular
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Selected Plan Details Card */}
+        {(() => {
+          const plan = plans.find(p => p.slug === mobileActivePlanSlug) || plans.find(p => p.slug === 'growth') || plans[0];
+          if (!plan) return null;
+
+          const planSlug = plan.slug;
+          const hasAuthToken = typeof window !== 'undefined' && Boolean(localStorage.getItem('token') || localStorage.getItem('uwo_token') || localStorage.getItem('access'));
+          const isCurrent = hasAuthToken && (entitlements?.plan?.slug === planSlug);
+          const isGrowth = plan.name.toLowerCase().includes('growth');
+          
+          const displayPrice = billingPeriod === 'YEARLY'
+            ? plan.yearly_price
+            : plan.monthly_price;
+          const periodLabel = billingPeriod === 'YEARLY' ? '/yr' : '/mo';
+
+          const curSelected = selectedChannels[planSlug] || ['whatsapp'];
+          const curViewTab = activeViewChannel[planSlug] || 'whatsapp';
+          const chDetails = plan.channel_details?.[curViewTab] || {};
+          const whatYouGet = chDetails.what_you_get || [];
+          const featuresList = chDetails.features || [];
+          const limitsObj = chDetails.limits || {};
+          const costs = chDetails.message_costs || [];
+          const benefits = chDetails.additional_benefits || [];
+
+          return (
+            <div className={cn(
+              "rounded-3xl border bg-white shadow-sm p-4 sm:p-5 space-y-4 transition-all",
+              isGrowth ? "border-emerald-300 ring-2 ring-emerald-500/20" : "border-slate-200"
+            )}>
+              {/* Header Info */}
+              <div className="flex items-start justify-between gap-2">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-xl font-black text-slate-900">{plan.name}</h3>
+                    {plan.badge_text && (
+                      <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-emerald-100 text-emerald-800 border border-emerald-300">
+                        {plan.badge_text}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs text-slate-500 mt-1 font-medium leading-relaxed">{plan.description}</p>
+                </div>
+              </div>
+
+              {/* Price */}
+              <div className="space-y-1 bg-slate-50 p-3.5 rounded-2xl border border-slate-100">
+                <div className="flex items-baseline gap-1">
+                  <span className="text-3xl font-black text-slate-900">
+                    {plan.currency || '₹'}{displayPrice.toLocaleString('en-IN')}
+                  </span>
+                  <span className="text-xs text-slate-500 font-bold">{periodLabel}</span>
+                  <span className="text-[10px] text-slate-400 font-medium ml-1">{plan.tax_info}</span>
+                </div>
+                {billingPeriod === 'YEARLY' && (
+                  <div className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200 inline-block">
+                    Billed Yearly (≈ ₹{Math.round(plan.yearly_price / 12).toLocaleString('en-IN')}/mo)
+                  </div>
+                )}
+              </div>
+
+              {/* Admin Actions */}
+              {isAdminView && (
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => onManagePlan && onManagePlan(plan, 'monthly')}
+                    className="flex-1 py-2 px-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1 cursor-pointer border border-emerald-200"
+                  >
+                    <SlidersHorizontal size={12} />
+                    <span>Edit Monthly</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onManagePlan && onManagePlan(plan, 'yearly')}
+                    className="flex-1 py-2 px-2 bg-teal-50 hover:bg-teal-100 text-teal-700 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1 cursor-pointer border border-teal-200"
+                  >
+                    <SlidersHorizontal size={12} />
+                    <span>Edit Yearly</span>
+                  </button>
+                </div>
+              )}
+
+              {/* CTA Button */}
+              <button
+                onClick={() => handleSubscribeClick(plan)}
+                className={cn(
+                  "w-full py-3 px-4 rounded-xl text-xs font-extrabold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md",
+                  isGrowth
+                    ? "bg-[#059669] hover:bg-[#047857] text-white shadow-emerald-700/20"
+                    : (planSlug === 'advanced'
+                      ? "bg-teal-700 hover:bg-teal-800 text-white shadow-teal-700/20"
+                      : "bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-600/20")
+                )}
+              >
+                <span>{isCurrent ? "Current Active Plan" : ((plan.cta_text && plan.cta_text !== 'Start Free Trial') ? plan.cta_text : "Get Started")}</span>
+                <ChevronRight size={15} />
+              </button>
+
+              {/* Channel Selector Area */}
+              <div className="pt-3 border-t border-slate-200/80 space-y-2">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="font-extrabold text-slate-700">
+                    {plan.max_channels === 1 && "Choose any 1 channel"}
+                    {plan.max_channels === 2 && "Choose any 2 channels"}
+                    {plan.max_channels >= 3 && "All 3 channels included"}
+                  </span>
+                  <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded">
+                    {curSelected.length}/{plan.max_channels}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 gap-1.5">
+                  {['whatsapp', 'facebook', 'instagram'].map((chKey) => {
+                    const isSelected = curSelected.includes(chKey);
+                    const isViewTabActive = curViewTab === chKey;
+
+                    return (
+                      <div
+                        key={chKey}
+                        onClick={() => handleToggleChannelPill(plan, chKey)}
+                        className={cn(
+                          "w-full px-3 py-2 rounded-xl text-xs font-extrabold transition-all flex items-center justify-between cursor-pointer bg-white border",
+                          isSelected
+                            ? "border-2 border-[#059669] text-slate-900 shadow-2xs"
+                            : (isViewTabActive
+                              ? "border border-emerald-400 bg-emerald-50/30 text-slate-900"
+                              : "border-slate-200 text-slate-700 hover:border-emerald-300 hover:bg-emerald-50/40")
+                        )}
+                      >
+                        <div className="flex items-center gap-2">
+                          {renderChannelLogo(chKey)}
+                          <span className="text-slate-900">{renderChannelName(chKey)}</span>
+                        </div>
+
+                        {isSelected ? (
+                          <span className="w-5 h-5 rounded-full bg-emerald-100 text-[#059669] flex items-center justify-center font-black text-xs shrink-0">
+                            ✓
+                          </span>
+                        ) : (
+                          <span className="text-[10px] text-slate-400 font-medium">Tap to Select</span>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Active Channel Breakdown Accordion / Details */}
+              <div className="pt-3 border-t border-slate-200 space-y-3">
+                <div className="flex items-center justify-between bg-emerald-50/60 p-2.5 rounded-xl border border-emerald-200">
+                  <div className="flex items-center gap-2">
+                    {renderChannelLogo(curViewTab)}
+                    <span className="font-extrabold text-xs text-slate-900 uppercase">
+                      {renderChannelName(curViewTab)} Details
+                    </span>
+                  </div>
+                  <span className={cn(
+                    "text-[9px] font-black px-2 py-0.5 rounded uppercase tracking-wider",
+                    curSelected.includes(curViewTab) ? "bg-emerald-200 text-emerald-900" : "bg-amber-100 text-amber-900"
+                  )}>
+                    {curSelected.includes(curViewTab) ? "Included" : "Preview"}
+                  </span>
+                </div>
+
+                {/* 1. What You Get */}
+                {whatYouGet.length > 0 && (
+                  <div className="space-y-1.5">
+                    <p className="text-[11px] font-black uppercase text-slate-700 tracking-wider">1. What You Get</p>
+                    <ul className="space-y-1.5 text-xs text-slate-700 bg-slate-50 p-3 rounded-xl border border-slate-100">
+                      {whatYouGet.map((item, idx) => (
+                        <li key={idx} className="flex items-start gap-2">
+                          <Check size={13} className="text-emerald-600 shrink-0 font-extrabold mt-0.5" />
+                          <span className="font-medium text-xs">{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* 2. Features */}
+                {featuresList.length > 0 && (
+                  <div className="space-y-1.5">
+                    <p className="text-[11px] font-black uppercase text-slate-700 tracking-wider">2. Included Features</p>
+                    <ul className="space-y-1.5 text-xs text-slate-700 bg-slate-50 p-3 rounded-xl border border-slate-100">
+                      {featuresList.map((item, idx) => (
+                        <li key={idx} className="flex items-start gap-2">
+                          <Check size={13} className="text-emerald-600 shrink-0 font-extrabold mt-0.5" />
+                          <span className="font-medium text-xs">{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* 3. Limits & Quotas */}
+                {Object.keys(limitsObj).length > 0 && (
+                  <div className="space-y-1.5">
+                    <p className="text-[11px] font-black uppercase text-slate-700 tracking-wider">3. Limits & Quotas</p>
+                    <div className="grid grid-cols-2 gap-1.5 text-xs">
+                      {Object.entries(limitsObj).map(([k, lim]) => {
+                        const val = lim.value || 'unlimited';
+                        const isUnl = String(val).toLowerCase() === 'unlimited';
+                        return (
+                          <div key={k} className="p-2.5 rounded-xl bg-slate-50 border border-slate-100 space-y-0.5">
+                            <p className="font-bold text-slate-900 text-xs">{isUnl ? 'Unlimited' : val}</p>
+                            <p className="text-[10px] text-slate-500 font-medium">{lim.label || k}</p>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* 4. Message Costs */}
+                {costs.length > 0 && (
+                  <div className="space-y-1.5">
+                    <p className="text-[11px] font-black uppercase text-slate-700 tracking-wider">4. Message Costs</p>
+                    <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 space-y-1.5">
+                      {costs.map((c, idx) => (
+                        <div key={idx} className="flex justify-between items-center text-xs py-0.5 border-b border-slate-100 last:border-b-0">
+                          <span className="text-slate-600 font-medium">{c.type}</span>
+                          <span className={cn("font-black", c.price === 'FREE' ? "text-emerald-700" : "text-slate-900")}>
+                            {c.price}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* 5. Additional Benefits */}
+                {benefits.length > 0 && (
+                  <div className="space-y-1.5">
+                    <p className="text-[11px] font-black uppercase text-slate-700 tracking-wider">5. Additional Benefits</p>
+                    <ul className="space-y-1 text-xs text-slate-700 bg-slate-50 p-3 rounded-xl border border-slate-100">
+                      {benefits.map((b, idx) => (
+                        <li key={idx} className="flex items-center gap-2 font-semibold">
+                          <Check size={13} className="text-emerald-600 shrink-0 font-extrabold" />
+                          <span className="text-xs">{typeof b === 'string' ? b : b.title}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        })()}
+      </div>
+
+      {/* ═══════════════════════════════════════════════════════════════════════ */}
+      {/* DESKTOP COMPARISON TABLE CONTAINER (>= lg)                             */}
+      {/* ═══════════════════════════════════════════════════════════════════════ */}
+      <div className="hidden lg:block overflow-x-auto rounded-3xl border border-slate-200 bg-white shadow-sm">
         <table className="w-full min-w-[880px] border-collapse text-left">
 
           {/* TABLE HEADER: PLAN CARDS & CHANNEL SELECTORS */}
