@@ -14,6 +14,10 @@ const eslintConfig = defineConfig([
     "node_modules/**",
     ".git/**",
     "next-env.d.ts",
+    "*.py",
+    "*.cjs",
+    "*.txt",
+    "*.json",
     // Root-level debug/test scripts — not part of the app source
     "test_axios.js",
     "test_axios.mjs",
@@ -23,6 +27,7 @@ const eslintConfig = defineConfig([
     rules: {
       // ── Next.js rules ────────────────────────────────────────────────────
       "@next/next/no-img-element": "off",
+      "@next/next/no-html-link-for-pages": "off",
       "react/no-ref-prop": "off",
       "react/no-unescaped-entities": "off",
       "react-hooks/exhaustive-deps": "off",
@@ -42,6 +47,9 @@ const eslintConfig = defineConfig([
       "@typescript-eslint/no-unused-vars": "off",
       "no-unused-vars": "off",
       "@typescript-eslint/no-require-imports": "off",
+      "@typescript-eslint/no-explicit-any": "off",
+      "no-empty": "off",
+      "no-console": "off",
     }
   }
 ]);

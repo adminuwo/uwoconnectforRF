@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { 
@@ -543,11 +542,11 @@ export default function EFVUnifiedLanding() {
           <footer className="mt-24 pt-8 border-t border-white/[0.08] flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-500">
             <div>© 2026 Uwo Connect Platform (Aisa Technologies). All rights reserved.</div>
             <div className="flex flex-wrap gap-6">
-              <a href="/about" className="hover:text-white transition-colors">About Us</a>
-              <a href="/contact" className="hover:text-white transition-colors">Contact Us</a>
-              <a href="/privacy" className="hover:text-white transition-colors">Privacy Policy</a>
-              <a href="/terms" className="hover:text-white transition-colors">Terms of Service</a>
-              <a href="/refund-policy" className="hover:text-white transition-colors text-[#10B981]">Cancellation & Refund Policy</a>
+              <Link href="/about" className="hover:text-white transition-colors">About Us</Link>
+              <Link href="/contact" className="hover:text-white transition-colors">Contact Us</Link>
+              <Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
+              <Link href="/terms" className="hover:text-white transition-colors">Terms of Service</Link>
+              <Link href="/refund-policy" className="hover:text-white transition-colors text-[#10B981]">Cancellation & Refund Policy</Link>
             </div>
           </footer>
         </div>
