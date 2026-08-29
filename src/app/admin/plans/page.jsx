@@ -455,16 +455,6 @@ const DEFAULT_FEATURES = [
     plan_count: 3
   },
   {
-    id: 'f-autoreply',
-    key: 'feature_autoreply',
-    name: 'Auto Reply',
-    category: 'Features',
-    feature_type: 'Module',
-    description: 'Automated 24/7 instant replies & trigger bot flows',
-    is_active: true,
-    plan_count: 3
-  },
-  {
     id: 'f-voice-video',
     key: 'feature_voice_video_call',
     name: 'Voice / Video Call',
@@ -479,12 +469,12 @@ const DEFAULT_FEATURES = [
 // ── DEFAULT BENCHMARK PLANS ──
 const INITIAL_PLANS = [
   {
-    id: 'plan-starter',
+    id: 'starter',
     name: 'Starter',
     badge: 'STARTER',
     status: 'ACTIVE',
     description: 'Essential channels, workspace connectors & sales invoicing for small businesses.',
-    price: 999,
+    price: 499,
     billing_cycle: 'Monthly',
     currency: 'INR',
     feature_keys: [
@@ -500,25 +490,24 @@ const INITIAL_PLANS = [
       'feature_crm',
       'feature_autoreply'
     ],
-    channel_count: 3,
+    channel_count: 1,
     connector_count: 3,
     client_count: 8,
     is_popular: false
   },
   {
-    id: 'plan-pro',
-    name: 'Professional',
-    badge: 'PROFESSIONAL',
+    id: 'growth',
+    name: 'Growth',
+    badge: 'GROWTH',
     status: 'ACTIVE',
-    description: 'Complete suite with full channels, cloud connectors, catalog, proposals & payment processing.',
-    price: 2999,
+    description: 'Workflows, proposals, invoices, broadcasts, catalog, payments & 2 simultaneous channels.',
+    price: 1599,
     billing_cycle: 'Monthly',
     currency: 'INR',
     feature_keys: [
       'channel_whatsapp',
       'channel_instagram',
       'channel_facebook',
-      'channel_youtube',
       'connector_gmail',
       'connector_outlook',
       'connector_google_maps',
@@ -534,22 +523,22 @@ const INITIAL_PLANS = [
       'feature_crm',
       'feature_autoreply'
     ],
-    channel_count: 4,
+    channel_count: 2,
     connector_count: 6,
     client_count: 14,
     is_popular: true
   },
   {
-    id: 'plan-enterprise',
-    name: 'Enterprise',
-    badge: 'ENTERPRISE',
+    id: 'advanced',
+    name: 'Advanced',
+    badge: 'ADVANCED',
     status: 'ACTIVE',
-    description: 'Unlimited access to all 4 communication channels, all 8 cloud connectors, and all 9 business modules.',
-    price: 9999,
+    description: 'Full power automation across all 3 channels, all connectors, AI agents, webhooks & dedicated SLA.',
+    price: 2499,
     billing_cycle: 'Monthly',
     currency: 'INR',
     feature_keys: DEFAULT_FEATURES.map(f => f.key),
-    channel_count: 4,
+    channel_count: 3,
     connector_count: 8,
     client_count: 5,
     is_popular: false
@@ -558,10 +547,10 @@ const INITIAL_PLANS = [
 
 // ── SAMPLE CLIENT ASSIGNMENTS ──
 const INITIAL_CLIENTS = [
-  { id: 'c-1', business_name: 'Yugamc Business Hub', client_name: 'Yugam Admin', email: 'admin@yugamc.com', plan_id: 'plan-pro', plan_name: 'Professional', custom_added: ['feature_voice_video_call'], custom_removed: [], status: 'ACTIVE' },
-  { id: 'c-2', business_name: 'Unified Web Options Pvt Ltd', client_name: 'Rahul Sharma', email: 'rahul@uwo.in', plan_id: 'plan-enterprise', plan_name: 'Enterprise', custom_added: [], custom_removed: [], status: 'ACTIVE' },
-  { id: 'c-3', business_name: 'Apex Digital Workspace', client_name: 'Aman Verma', email: 'aman@apexdigital.com', plan_id: 'plan-starter', plan_name: 'Starter', custom_added: ['feature_payment'], custom_removed: [], status: 'ACTIVE' },
-  { id: 'c-4', business_name: 'Matrix Cloud Solutions', client_name: 'Pooja Nair', email: 'pooja@matrixcloud.io', plan_id: 'plan-pro', plan_name: 'Professional', custom_added: [], custom_removed: [], status: 'ACTIVE' },
+  { id: 'c-1', business_name: 'Yugamc Business Hub', client_name: 'Yugam Admin', email: 'admin@yugamc.com', plan_id: 'growth', plan_name: 'Growth', custom_added: ['feature_voice_video_call'], custom_removed: [], status: 'ACTIVE' },
+  { id: 'c-2', business_name: 'Unified Web Options Pvt Ltd', client_name: 'Rahul Sharma', email: 'rahul@uwo.in', plan_id: 'advanced', plan_name: 'Advanced', custom_added: [], custom_removed: [], status: 'ACTIVE' },
+  { id: 'c-3', business_name: 'Apex Digital Workspace', client_name: 'Aman Verma', email: 'aman@apexdigital.com', plan_id: 'starter', plan_name: 'Starter', custom_added: ['feature_payment'], custom_removed: [], status: 'ACTIVE' },
+  { id: 'c-4', business_name: 'Matrix Cloud Solutions', client_name: 'Pooja Nair', email: 'pooja@matrixcloud.io', plan_id: 'growth', plan_name: 'Growth', custom_added: [], custom_removed: [], status: 'ACTIVE' },
 ];
 
 export default function AdminPlansPage() {
@@ -592,8 +581,9 @@ export default function AdminPlansPage() {
   const [isManageClientFeaturesOpen, setIsManageClientFeaturesOpen] = useState(false);
   const [clientForFeatureManagement, setClientForFeatureManagement] = useState(null);
 
-  // Active Category Filter inside Plan Modal
+  // Active Category Filter & Tab inside Plan Modal
   const [modalActiveCategory, setModalActiveCategory] = useState('ALL');
+  const [modalEditorTab, setModalEditorTab] = useState('basic');
 
   // ── Form States ──
   const [planForm, setPlanForm] = useState({
@@ -776,13 +766,52 @@ export default function AdminPlansPage() {
   // ── Open Create Plan Modal ──
   const handleOpenCreatePlan = () => {
     setModalActiveCategory('ALL');
+    setModalEditorTab('basic');
     setPlanForm({
       name: '',
       description: '',
-      price: '',
+      price: '999',
+      monthly_price: '999',
+      quarterly_price: '2699',
+      yearly_price: '9599',
       billing_cycle: 'Monthly',
       currency: 'INR',
+      tax_info: '(+taxes)',
+      cta_text: 'Start Free Trial',
+      cta_action: 'checkout',
+      badge_text: '',
+      accent_color: '#059669',
+      is_recommended: false,
+      agent_role_type: 'Unlimited agents (All Roles)',
       status: 'ACTIVE',
+      display_order: plans.length + 1,
+      channels: ['WhatsApp', 'Instagram'],
+      limits: {
+        messages: 'Unlimited Messages (Based on your WhatsApp Number)',
+        contacts: 'Unlimited Contacts',
+        custom_fields: '25 Custom Fields',
+        custom_tags: '30 Custom Tags',
+        events: '5 Custom Events'
+      },
+      feature_groups: [
+        {
+          category: 'Choose your plan',
+          sub_header: '',
+          features: [
+            { name: 'FAQ automations & linear chatbot flows', enabled: true },
+            { name: 'Advanced campaigns', enabled: true },
+            { name: 'Catalogs', enabled: true },
+            { name: 'Native payments', enabled: true },
+            { name: 'Public APIs', enabled: true }
+          ]
+        }
+      ],
+      message_costs: [
+        { type: 'Marketing', price: '₹0.958' },
+        { type: 'Authentication', price: '₹0.128' },
+        { type: 'Utility', price: '₹0.150' },
+        { type: 'Service', price: 'FREE' }
+      ],
       selected_feature_keys: DEFAULT_FEATURES.slice(0, 8).map(f => f.key)
     });
     setIsCreatePlanModalOpen(true);
@@ -792,13 +821,52 @@ export default function AdminPlansPage() {
   const handleOpenManagePlan = (plan) => {
     setEditingPlan(plan);
     setModalActiveCategory('ALL');
+    setModalEditorTab('basic');
     setPlanForm({
-      name: plan.name,
+      name: plan.name || '',
       description: plan.description || '',
-      price: plan.price.toString(),
+      price: (plan.monthly_price || plan.price || 0).toString(),
+      monthly_price: (plan.monthly_price || plan.price || 0).toString(),
+      quarterly_price: (plan.quarterly_price || 0).toString(),
+      yearly_price: (plan.yearly_price || 0).toString(),
       billing_cycle: plan.billing_cycle || 'Monthly',
       currency: plan.currency || 'INR',
+      tax_info: plan.tax_info || '(+taxes)',
+      cta_text: plan.cta_text || 'Start Free Trial',
+      cta_action: plan.cta_action || 'checkout',
+      badge_text: plan.badge_text || plan.badge || '',
+      accent_color: plan.accent_color || '#059669',
+      is_recommended: Boolean(plan.is_recommended || plan.is_popular),
+      agent_role_type: plan.agent_role_type || 'Unlimited agents (All Roles)',
       status: plan.status || 'ACTIVE',
+      display_order: plan.display_order || 0,
+      channels: plan.channels || ['WhatsApp', 'Instagram'],
+      limits: plan.limits || {
+        messages: 'Unlimited Messages (Based on your WhatsApp Number)',
+        contacts: 'Unlimited Contacts',
+        custom_fields: '25 Custom Fields',
+        custom_tags: '30 Custom Tags',
+        events: '5 Custom Events'
+      },
+      feature_groups: plan.feature_groups || [
+        {
+          category: 'Choose your plan',
+          sub_header: '',
+          features: [
+            { name: 'FAQ automations & linear chatbot flows', enabled: true },
+            { name: 'Advanced campaigns', enabled: true },
+            { name: 'Catalogs', enabled: true },
+            { name: 'Native payments', enabled: true },
+            { name: 'Public APIs', enabled: true }
+          ]
+        }
+      ],
+      message_costs: plan.message_costs || [
+        { type: 'Marketing', price: '₹0.958' },
+        { type: 'Authentication', price: '₹0.128' },
+        { type: 'Utility', price: '₹0.150' },
+        { type: 'Service', price: 'FREE' }
+      ],
       selected_feature_keys: plan.feature_keys || []
     });
     setIsEditPlanModalOpen(true);
@@ -815,17 +883,31 @@ export default function AdminPlansPage() {
     const newPlanObj = {
       id: `plan-${Date.now()}`,
       name: planForm.name.trim(),
-      badge: planForm.name.toUpperCase().trim(),
+      badge: planForm.badge_text || planForm.name.toUpperCase().trim(),
       status: planForm.status,
-      description: planForm.description || 'Custom Enterprise Plan',
-      price: Number(planForm.price) || 0,
+      description: planForm.description || '',
+      price: Number(planForm.monthly_price || planForm.price) || 0,
+      monthly_price: Number(planForm.monthly_price || planForm.price) || 0,
+      quarterly_price: Number(planForm.quarterly_price) || 0,
+      yearly_price: Number(planForm.yearly_price) || 0,
       billing_cycle: planForm.billing_cycle,
       currency: planForm.currency,
+      tax_info: planForm.tax_info,
+      cta_text: planForm.cta_text,
+      cta_action: planForm.cta_action,
+      accent_color: planForm.accent_color,
+      is_recommended: planForm.is_recommended,
+      agent_role_type: planForm.agent_role_type,
+      display_order: Number(planForm.display_order) || 0,
+      channels: planForm.channels,
+      limits: planForm.limits,
+      feature_groups: planForm.feature_groups,
+      message_costs: planForm.message_costs,
       feature_keys: planForm.selected_feature_keys,
-      channel_count: planForm.selected_feature_keys.filter(k => k.startsWith('channel_')).length,
-      connector_count: planForm.selected_feature_keys.filter(k => k.startsWith('connector_')).length,
+      channel_count: planForm.channels.length,
+      connector_count: 4,
       client_count: 0,
-      is_popular: false
+      is_popular: planForm.is_recommended
     };
 
     try {
@@ -836,8 +918,28 @@ export default function AdminPlansPage() {
         price: newPlanObj.price,
         billing_cycle: newPlanObj.billing_cycle,
         currency: newPlanObj.currency,
-        is_active: newPlanObj.status === 'ACTIVE',
-        feature_keys: newPlanObj.feature_keys
+        status: newPlanObj.status,
+        display_order: newPlanObj.display_order,
+        feature_keys: newPlanObj.feature_keys,
+        monthly_price: newPlanObj.monthly_price,
+        quarterly_price: newPlanObj.quarterly_price,
+        yearly_price: newPlanObj.yearly_price,
+        tax_info: newPlanObj.tax_info,
+        cta_text: newPlanObj.cta_text,
+        cta_action: newPlanObj.cta_action,
+        badge_text: newPlanObj.badge,
+        accent_color: newPlanObj.accent_color,
+        is_recommended: newPlanObj.is_recommended,
+        agent_role_type: newPlanObj.agent_role_type,
+        channels: newPlanObj.channels,
+        max_channels: newPlanObj.max_channels || (newPlanObj.name.toLowerCase().includes('starter') ? 1 : (newPlanObj.name.toLowerCase().includes('growth') ? 2 : 3)),
+        allowed_channels: ['whatsapp', 'facebook', 'instagram'],
+        allowed_connectors: newPlanObj.feature_keys.filter(k => k.startsWith('connector_')),
+        allowed_features: newPlanObj.feature_keys.filter(k => k.startsWith('feature_')),
+        additional_benefits: newPlanObj.additional_benefits || [],
+        limits: newPlanObj.limits,
+        feature_groups: newPlanObj.feature_groups,
+        message_costs: newPlanObj.message_costs
       }, { headers: { Authorization: `Bearer ${token}` } });
     } catch (err) {
       console.log('Saved to local pool:', err);
@@ -856,15 +958,30 @@ export default function AdminPlansPage() {
     const updatedPlanObj = {
       ...editingPlan,
       name: planForm.name.trim(),
-      badge: planForm.name.toUpperCase().trim(),
+      badge: planForm.badge_text || planForm.name.toUpperCase().trim(),
       status: planForm.status,
       description: planForm.description,
-      price: Number(planForm.price) || 0,
+      price: Number(planForm.monthly_price || planForm.price) || 0,
+      monthly_price: Number(planForm.monthly_price || planForm.price) || 0,
+      quarterly_price: Number(planForm.quarterly_price) || 0,
+      yearly_price: Number(planForm.yearly_price) || 0,
       billing_cycle: planForm.billing_cycle,
       currency: planForm.currency,
+      tax_info: planForm.tax_info,
+      cta_text: planForm.cta_text,
+      cta_action: planForm.cta_action,
+      accent_color: planForm.accent_color,
+      is_recommended: planForm.is_recommended,
+      agent_role_type: planForm.agent_role_type,
+      display_order: Number(planForm.display_order) || 0,
+      channels: planForm.channels,
+      limits: planForm.limits,
+      feature_groups: planForm.feature_groups,
+      message_costs: planForm.message_costs,
       feature_keys: planForm.selected_feature_keys,
-      channel_count: planForm.selected_feature_keys.filter(k => k.startsWith('channel_')).length,
-      connector_count: planForm.selected_feature_keys.filter(k => k.startsWith('connector_')).length,
+      channel_count: planForm.channels.length,
+      connector_count: 4,
+      is_popular: planForm.is_recommended
     };
 
     try {
@@ -875,8 +992,28 @@ export default function AdminPlansPage() {
         price: updatedPlanObj.price,
         billing_cycle: updatedPlanObj.billing_cycle,
         currency: updatedPlanObj.currency,
-        is_active: updatedPlanObj.status === 'ACTIVE',
-        feature_keys: updatedPlanObj.feature_keys
+        status: updatedPlanObj.status,
+        display_order: updatedPlanObj.display_order,
+        feature_keys: updatedPlanObj.feature_keys,
+        monthly_price: updatedPlanObj.monthly_price,
+        quarterly_price: updatedPlanObj.quarterly_price,
+        yearly_price: updatedPlanObj.yearly_price,
+        tax_info: updatedPlanObj.tax_info,
+        cta_text: updatedPlanObj.cta_text,
+        cta_action: updatedPlanObj.cta_action,
+        badge_text: updatedPlanObj.badge,
+        accent_color: updatedPlanObj.accent_color,
+        is_recommended: updatedPlanObj.is_recommended,
+        agent_role_type: updatedPlanObj.agent_role_type,
+        channels: updatedPlanObj.channels,
+        max_channels: updatedPlanObj.max_channels || (updatedPlanObj.name.toLowerCase().includes('starter') ? 1 : (updatedPlanObj.name.toLowerCase().includes('growth') ? 2 : 3)),
+        allowed_channels: ['whatsapp', 'facebook', 'instagram'],
+        allowed_connectors: updatedPlanObj.feature_keys.filter(k => k.startsWith('connector_')),
+        allowed_features: updatedPlanObj.feature_keys.filter(k => k.startsWith('feature_')),
+        additional_benefits: updatedPlanObj.additional_benefits || [],
+        limits: updatedPlanObj.limits,
+        feature_groups: updatedPlanObj.feature_groups,
+        message_costs: updatedPlanObj.message_costs
       }, { headers: { Authorization: `Bearer ${token}` } });
     } catch (err) {
       console.log('Updated in state pool:', err);
@@ -1685,31 +1822,32 @@ export default function AdminPlansPage() {
                         </tr>
                       );
                     })}
-                  </tbody>
-                </table>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
-        )}
+            )}
 
-        {/* ════════════════════════════════════════════════════════════════
-            7. CENTERED MODAL: CREATE / EDIT PLAN (With Authentic Logos!)
+            {/* ════════════════════════════════════════════════════════════════
+            7. CENTERED MODAL: CREATE / EDIT PLAN (Multi-Tab Admin Editor)
            ════════════════════════════════════════════════════════════════ */}
         {(isCreatePlanModalOpen || isEditPlanModalOpen) && (
           <div className="fixed inset-0 z-[260] flex items-center justify-center p-4 sm:p-6 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150">
             <div className="relative w-full max-w-3xl bg-white rounded-3xl shadow-2xl border border-slate-200 flex flex-col max-h-[90vh] overflow-hidden animate-in zoom-in-95 duration-150">
               
               {/* Modal Header */}
-              <div className="px-6 py-5 border-b border-slate-200 flex items-center justify-between bg-slate-50/80">
+              <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50/80">
                 <div>
                   <h2 className="text-lg font-black text-slate-900 tracking-tight">
                     {isCreatePlanModalOpen ? 'CREATE NEW PLAN' : `EDIT PLAN: ${editingPlan?.name.toUpperCase()}`}
                   </h2>
                   <p className="text-xs text-slate-500 font-medium mt-0.5">
-                    {isCreatePlanModalOpen ? 'Configure plan attributes & select included feature entitlements' : 'Modify plan pricing and toggle feature access'}
+                    Configure pricing, channels, features, limits, message costs, and additional benefits for this plan.
                   </p>
                 </div>
                 <button
+                  type="button"
                   onClick={() => { setIsCreatePlanModalOpen(false); setIsEditPlanModalOpen(false); }}
                   className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition-all cursor-pointer"
                 >
@@ -1717,232 +1855,625 @@ export default function AdminPlansPage() {
                 </button>
               </div>
 
+              {/* Modal Tab Navigation */}
+              <div className="flex items-center gap-1 px-6 pt-3 pb-2 border-b border-slate-200/80 bg-slate-50/40 overflow-x-auto text-xs font-bold">
+                {[
+                  { id: 'basic', label: 'Basic Info' },
+                  { id: 'pricing', label: 'Pricing & CTA' },
+                  { id: 'channels', label: 'Channels & Role' },
+                  { id: 'limits', label: 'Limits & Quotas' },
+                  { id: 'features', label: 'Features & Groups' },
+                  { id: 'costs', label: 'Message Costs' },
+                  { id: 'benefits', label: 'Additional Benefits' }
+                ].map(tab => (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => setModalEditorTab(tab.id)}
+                    className={cn(
+                      "px-3.5 py-1.5 rounded-xl transition-all whitespace-nowrap cursor-pointer",
+                      modalEditorTab === tab.id
+                        ? "bg-emerald-600 text-white shadow-2xs"
+                        : "text-slate-600 hover:bg-slate-200/70"
+                    )}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+
               {/* Modal Body */}
-              <form onSubmit={isCreatePlanModalOpen ? handleCreatePlanSubmit : handleEditPlanSubmit} className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-6">
+              <form onSubmit={isCreatePlanModalOpen ? handleCreatePlanSubmit : handleEditPlanSubmit} className="flex flex-col flex-1 min-h-0 overflow-hidden">
                 
-                {/* 1. Plan Basic Info */}
-                <div className="bg-slate-50/80 p-5 rounded-2xl border border-slate-200/80 space-y-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* Scrollable Tab Content Container */}
+                <div className="flex-1 overflow-y-auto p-6 space-y-6">
+                
+                {/* TAB 1: BASIC INFO */}
+                {modalEditorTab === 'basic' && (
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
+                          Plan Name *
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          placeholder="e.g. Starter, Growth, Advanced, Enterprise"
+                          value={planForm.name}
+                          onChange={(e) => setPlanForm({ ...planForm, name: e.target.value })}
+                          className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-900 outline-none focus:border-emerald-500 transition-all"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
+                          Badge / Tag Label
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="e.g. Recommended, Popular Choice"
+                          value={planForm.badge_text}
+                          onChange={(e) => setPlanForm({ ...planForm, badge_text: e.target.value })}
+                          className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-900 outline-none focus:border-emerald-500 transition-all"
+                        />
+                      </div>
+                    </div>
+
                     <div>
                       <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
-                        Plan Name *
+                        Short Description
                       </label>
                       <input
                         type="text"
-                        required
-                        placeholder="e.g. Professional, Growth, Agency Pro"
-                        value={planForm.name}
-                        onChange={(e) => setPlanForm({ ...planForm, name: e.target.value })}
-                        className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-900 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 transition-all"
+                        placeholder="Short summary of target audience or plan value"
+                        value={planForm.description}
+                        onChange={(e) => setPlanForm({ ...planForm, description: e.target.value })}
+                        className="w-full px-3.5 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-900 outline-none focus:border-emerald-500 transition-all"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      <div>
+                        <label className="block text-[11px] font-bold text-slate-600 mb-1">Accent Color</label>
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="color"
+                            value={planForm.accent_color || '#059669'}
+                            onChange={(e) => setPlanForm({ ...planForm, accent_color: e.target.value })}
+                            className="w-8 h-8 rounded-lg cursor-pointer border border-slate-200 p-0"
+                          />
+                          <input
+                            type="text"
+                            value={planForm.accent_color}
+                            onChange={(e) => setPlanForm({ ...planForm, accent_color: e.target.value })}
+                            className="w-full px-3 py-1.5 border border-slate-200 rounded-xl text-xs font-mono"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-[11px] font-bold text-slate-600 mb-1">Display Order</label>
+                        <input
+                          type="number"
+                          value={planForm.display_order}
+                          onChange={(e) => setPlanForm({ ...planForm, display_order: e.target.value })}
+                          className="w-full px-3 py-1.5 border border-slate-200 rounded-xl text-xs font-bold"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-[11px] font-bold text-slate-600 mb-1">Status</label>
+                        <select
+                          value={planForm.status}
+                          onChange={(e) => setPlanForm({ ...planForm, status: e.target.value })}
+                          className="w-full px-3 py-1.5 border border-slate-200 rounded-xl text-xs font-bold"
+                        >
+                          <option value="ACTIVE">Active ●</option>
+                          <option value="INACTIVE">Inactive ○</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 pt-2">
+                      <input
+                        type="checkbox"
+                        id="recCheck"
+                        checked={Boolean(planForm.is_recommended)}
+                        onChange={(e) => setPlanForm({ ...planForm, is_recommended: e.target.checked })}
+                        className="w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500 cursor-pointer"
+                      />
+                      <label htmlFor="recCheck" className="text-xs font-bold text-slate-800 cursor-pointer">
+                        Mark as "Recommended" Plan (Highlights column & adds badge)
+                      </label>
+                    </div>
+                  </div>
+                )}
+
+                {/* TAB 2: PRICING & CTA */}
+                {modalEditorTab === 'pricing' && (
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      <div>
+                        <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
+                          Monthly Price (₹)
+                        </label>
+                        <input
+                          type="number"
+                          placeholder="e.g. 999"
+                          value={planForm.monthly_price}
+                          onChange={(e) => setPlanForm({ ...planForm, monthly_price: e.target.value, price: e.target.value })}
+                          className="w-full px-3.5 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-900"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
+                          Quarterly Price (₹)
+                        </label>
+                        <input
+                          type="number"
+                          placeholder="e.g. 2699"
+                          value={planForm.quarterly_price}
+                          onChange={(e) => setPlanForm({ ...planForm, quarterly_price: e.target.value })}
+                          className="w-full px-3.5 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-900"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
+                          Yearly Price (₹)
+                        </label>
+                        <input
+                          type="number"
+                          placeholder="e.g. 9599"
+                          value={planForm.yearly_price}
+                          onChange={(e) => setPlanForm({ ...planForm, yearly_price: e.target.value })}
+                          className="w-full px-3.5 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-900"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
+                          Currency
+                        </label>
+                        <select
+                          value={planForm.currency}
+                          onChange={(e) => setPlanForm({ ...planForm, currency: e.target.value })}
+                          className="w-full px-3.5 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold"
+                        >
+                          <option value="INR">INR (₹)</option>
+                          <option value="USD">USD ($)</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
+                          Tax Info Label
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="e.g. (+taxes), Inclusive of all taxes"
+                          value={planForm.tax_info}
+                          onChange={(e) => setPlanForm({ ...planForm, tax_info: e.target.value })}
+                          className="w-full px-3.5 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
+                          CTA Button Text
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="e.g. Start Free Trial, Get In Touch"
+                          value={planForm.cta_text}
+                          onChange={(e) => setPlanForm({ ...planForm, cta_text: e.target.value })}
+                          className="w-full px-3.5 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
+                          CTA Action
+                        </label>
+                        <select
+                          value={planForm.cta_action}
+                          onChange={(e) => setPlanForm({ ...planForm, cta_action: e.target.value })}
+                          className="w-full px-3.5 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold"
+                        >
+                          <option value="checkout">Checkout / Payment Modal</option>
+                          <option value="contact">Contact / Inquiry</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* TAB 3: CHANNELS & ROLE */}
+                {modalEditorTab === 'channels' && (
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
+                        Agent Role Type Description
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="e.g. Unlimited agents (Owner Roles) or Unlimited agents (All Roles)"
+                        value={planForm.agent_role_type}
+                        onChange={(e) => setPlanForm({ ...planForm, agent_role_type: e.target.value })}
+                        className="w-full px-3.5 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
-                        Price (₹)
+                      <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-2">
+                        Included Communication Channels
                       </label>
-                      <div className="relative">
-                        <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">₹</span>
-                        <input
-                          type="number"
-                          placeholder="2999"
-                          value={planForm.price}
-                          onChange={(e) => setPlanForm({ ...planForm, price: e.target.value })}
-                          className="w-full pl-8 pr-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-900 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 transition-all"
-                        />
+                      <div className="flex flex-wrap gap-2">
+                        {['WhatsApp', 'Instagram', 'Facebook'].map(ch => {
+                          const isSelected = planForm.channels.includes(ch);
+                          return (
+                            <button
+                              key={ch}
+                              type="button"
+                              onClick={() => {
+                                const next = isSelected
+                                  ? planForm.channels.filter(c => c !== ch)
+                                  : [...planForm.channels, ch];
+                                setPlanForm({ ...planForm, channels: next });
+                              }}
+                              className={cn(
+                                "px-3 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer",
+                                isSelected
+                                  ? "bg-emerald-600 text-white border-emerald-600 shadow-2xs"
+                                  : "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100"
+                              )}
+                            >
+                              {isSelected ? `✓ ${ch}` : `+ ${ch}`}
+                            </button>
+                          );
+                        })}
                       </div>
                     </div>
                   </div>
+                )}
 
-                  <div>
-                    <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
-                      Description
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="Short summary of target clients and tier scope"
-                      value={planForm.description}
-                      onChange={(e) => setPlanForm({ ...planForm, description: e.target.value })}
-                      className="w-full px-3.5 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-900 outline-none focus:border-emerald-500 transition-all"
-                    />
+                {/* TAB 4: LIMITS */}
+                {modalEditorTab === 'limits' && (
+                  <div className="space-y-4">
+                    <p className="text-xs text-slate-500 font-medium">
+                      Configure dynamic values, unit labels, and optional sub-descriptions for plan limits.
+                    </p>
+
+                    {[
+                      { key: 'messages', label: 'Message Quota', defaultLabel: 'Messages', defaultDesc: 'Based on your WhatsApp Number' },
+                      { key: 'contacts', label: 'Contact Storage', defaultLabel: 'Contacts', defaultDesc: '' },
+                      { key: 'custom_fields', label: 'Custom Fields', defaultLabel: 'Custom Fields', defaultDesc: '' },
+                      { key: 'custom_tags', label: 'Custom Tags', defaultLabel: 'Custom Tags', defaultDesc: '' },
+                      { key: 'events', label: 'Custom Events', defaultLabel: 'Custom Events', defaultDesc: '' }
+                    ].map((item) => {
+                      const cur = planForm.limits?.[item.key] || {};
+                      const val = typeof cur === 'object' ? (cur.value !== undefined ? cur.value : 'unlimited') : (String(cur).toLowerCase().includes('unlimited') ? 'unlimited' : cur);
+                      const desc = typeof cur === 'object' ? (cur.description || '') : (item.key === 'messages' ? item.defaultDesc : '');
+
+                      return (
+                        <div key={item.key} className="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
+                          <span className="text-xs font-black text-slate-800 uppercase tracking-wider block">
+                            {item.label}
+                          </span>
+                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            <div>
+                              <label className="block text-[10px] font-bold text-slate-500 mb-1">Value Type / Number</label>
+                              <input
+                                type="text"
+                                placeholder="unlimited OR 15, 25, 30..."
+                                value={val}
+                                onChange={(e) => {
+                                  const updated = {
+                                    ...planForm.limits,
+                                    [item.key]: {
+                                      value: e.target.value,
+                                      label: item.defaultLabel,
+                                      description: desc
+                                    }
+                                  };
+                                  setPlanForm({ ...planForm, limits: updated });
+                                }}
+                                className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-900"
+                              />
+                            </div>
+
+                            <div className="sm:col-span-2">
+                              <label className="block text-[10px] font-bold text-slate-500 mb-1">Subtext Description (Optional)</label>
+                              <input
+                                type="text"
+                                placeholder="e.g. Based on your WhatsApp Number"
+                                value={desc}
+                                onChange={(e) => {
+                                  const updated = {
+                                    ...planForm.limits,
+                                    [item.key]: {
+                                      value: val,
+                                      label: item.defaultLabel,
+                                      description: e.target.value
+                                    }
+                                  };
+                                  setPlanForm({ ...planForm, limits: updated });
+                                }}
+                                className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-700"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
+                )}
 
-                  <div className="grid grid-cols-3 gap-3">
-                    <div>
-                      <label className="block text-[11px] font-bold text-slate-600 mb-1">Billing Cycle</label>
-                      <select
-                        value={planForm.billing_cycle}
-                        onChange={(e) => setPlanForm({ ...planForm, billing_cycle: e.target.value })}
-                        className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-700 outline-none focus:border-emerald-500 cursor-pointer"
-                      >
-                        <option value="Monthly">Monthly</option>
-                        <option value="Yearly">Yearly</option>
-                        <option value="Quarterly">Quarterly</option>
-                        <option value="Custom">Custom</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="block text-[11px] font-bold text-slate-600 mb-1">Currency</label>
-                      <select
-                        value={planForm.currency}
-                        onChange={(e) => setPlanForm({ ...planForm, currency: e.target.value })}
-                        className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-700 outline-none focus:border-emerald-500 cursor-pointer"
-                      >
-                        <option value="INR">INR (₹)</option>
-                        <option value="USD">USD ($)</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="block text-[11px] font-bold text-slate-600 mb-1">Status</label>
-                      <select
-                        value={planForm.status}
-                        onChange={(e) => setPlanForm({ ...planForm, status: e.target.value })}
-                        className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-700 outline-none focus:border-emerald-500 cursor-pointer"
-                      >
-                        <option value="ACTIVE">Active ●</option>
-                        <option value="INACTIVE">Inactive ○</option>
-                      </select>
-                    </div>
-                  </div>
-                </div>
-
-                {/* 2. Feature Entitlements Section (With Logos!) */}
-                <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <div>
-                      <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
-                        <Zap size={14} className="text-emerald-600" /> FEATURE ENTITLEMENTS
+                {/* TAB 5: FEATURES & GROUPS */}
+                {modalEditorTab === 'features' && (
+                  <div className="space-y-6">
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider">
+                        Dynamic Feature Groups & Comparison Items
                       </h4>
-                      <p className="text-[11px] text-slate-400 font-medium mt-0.5">
-                        {planForm.selected_feature_keys.length} of {features.length} features enabled in this plan
-                      </p>
-                    </div>
-
-                    {/* Category Filter Pills */}
-                    <div className="flex items-center gap-1 overflow-x-auto pb-1 max-w-sm">
                       <button
                         type="button"
-                        onClick={() => setModalActiveCategory('ALL')}
-                        className={cn(
-                          "px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all whitespace-nowrap cursor-pointer",
-                          modalActiveCategory === 'ALL' ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                        )}
+                        onClick={() => {
+                          const groups = [...(planForm.feature_groups || [])];
+                          groups.push({
+                            category: 'Choose your plan',
+                            sub_header: '',
+                            features: [{ name: 'New Custom Feature', description: '', enabled: true }]
+                          });
+                          setPlanForm({ ...planForm, feature_groups: groups });
+                        }}
+                        className="px-3 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-lg text-xs font-bold cursor-pointer"
                       >
-                        All
+                        + Add Feature Group
                       </button>
-                      {uniqueCategories.map(cat => (
+                    </div>
+
+                    {(planForm.feature_groups || []).map((grp, gIdx) => (
+                      <div key={gIdx} className="p-4 bg-slate-50/90 rounded-2xl border border-slate-200/90 space-y-3">
+                        <div className="flex items-center justify-between gap-3">
+                          <input
+                            type="text"
+                            value={grp.category}
+                            onChange={(e) => {
+                              const groups = [...planForm.feature_groups];
+                              groups[gIdx].category = e.target.value;
+                              setPlanForm({ ...planForm, feature_groups: groups });
+                            }}
+                            className="font-bold text-xs bg-white border border-slate-200 rounded-xl px-3 py-1 text-slate-900"
+                            placeholder="Category Name"
+                          />
+                          <input
+                            type="text"
+                            value={grp.sub_header || ''}
+                            onChange={(e) => {
+                              const groups = [...planForm.feature_groups];
+                              groups[gIdx].sub_header = e.target.value;
+                              setPlanForm({ ...planForm, feature_groups: groups });
+                            }}
+                            className="font-medium text-xs bg-white border border-slate-200 rounded-xl px-3 py-1 text-slate-600 flex-1"
+                            placeholder="Optional Sub-header (e.g. Everything in Starter, Plus)"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const groups = planForm.feature_groups.filter((_, idx) => idx !== gIdx);
+                              setPlanForm({ ...planForm, feature_groups: groups });
+                            }}
+                            className="text-rose-600 text-xs font-bold hover:underline cursor-pointer"
+                          >
+                            Remove Group
+                          </button>
+                        </div>
+
+                        <div className="space-y-2">
+                          {(grp.features || []).map((feat, fIdx) => (
+                            <div key={fIdx} className="flex flex-col sm:flex-row items-start sm:items-center gap-2 bg-white p-2.5 rounded-xl border border-slate-200 text-xs">
+                              <input
+                                type="checkbox"
+                                checked={feat.enabled !== false}
+                                onChange={(e) => {
+                                  const groups = [...planForm.feature_groups];
+                                  groups[gIdx].features[fIdx].enabled = e.target.checked;
+                                  setPlanForm({ ...planForm, feature_groups: groups });
+                                }}
+                                className="w-4 h-4 text-emerald-600 rounded cursor-pointer mt-1 sm:mt-0"
+                              />
+                              <input
+                                type="text"
+                                value={feat.name}
+                                onChange={(e) => {
+                                  const groups = [...planForm.feature_groups];
+                                  groups[gIdx].features[fIdx].name = e.target.value;
+                                  setPlanForm({ ...planForm, feature_groups: groups });
+                                }}
+                                className="font-bold text-slate-800 border border-slate-200 rounded-lg px-2 py-1 text-xs w-full sm:w-1/3"
+                                placeholder="Feature Name"
+                              />
+                              <input
+                                type="text"
+                                value={feat.description || ''}
+                                onChange={(e) => {
+                                  const groups = [...planForm.feature_groups];
+                                  groups[gIdx].features[fIdx].description = e.target.value;
+                                  setPlanForm({ ...planForm, feature_groups: groups });
+                                }}
+                                className="font-medium text-slate-600 border border-slate-200 rounded-lg px-2 py-1 text-xs flex-1 w-full"
+                                placeholder="Short Description (Optional)"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const groups = [...planForm.feature_groups];
+                                  groups[gIdx].features = groups[gIdx].features.filter((_, i) => i !== fIdx);
+                                  setPlanForm({ ...planForm, feature_groups: groups });
+                                }}
+                                className="text-slate-400 hover:text-rose-600 p-1 self-end sm:self-center"
+                              >
+                                <X size={14} />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+
                         <button
-                          key={cat}
                           type="button"
-                          onClick={() => setModalActiveCategory(cat)}
-                          className={cn(
-                            "px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all whitespace-nowrap cursor-pointer",
-                            modalActiveCategory === cat ? "bg-emerald-600 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                          )}
+                          onClick={() => {
+                            const groups = [...planForm.feature_groups];
+                            groups[gIdx].features.push({ name: 'New Feature Item', description: '', enabled: true });
+                            setPlanForm({ ...planForm, feature_groups: groups });
+                          }}
+                          className="text-xs font-bold text-emerald-600 hover:underline cursor-pointer"
                         >
-                          {cat}
+                          + Add Feature Item
                         </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* TAB 6: MESSAGE COSTS */}
+                {modalEditorTab === 'costs' && (
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider">
+                        Template Message Costs Breakdown
+                      </h4>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const costs = [...(planForm.message_costs || [])];
+                          costs.push({ type: 'Marketing', price: '₹0.958' });
+                          setPlanForm({ ...planForm, message_costs: costs });
+                        }}
+                        className="px-3 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-lg text-xs font-bold cursor-pointer"
+                      >
+                        + Add Cost Item
+                      </button>
+                    </div>
+
+                    <div className="space-y-2">
+                      {(planForm.message_costs || []).map((cItem, cIdx) => (
+                        <div key={cIdx} className="flex items-center gap-3 bg-slate-50 p-3 rounded-xl border border-slate-200">
+                          <input
+                            type="text"
+                            value={cItem.type}
+                            onChange={(e) => {
+                              const costs = [...planForm.message_costs];
+                              costs[cIdx].type = e.target.value;
+                              setPlanForm({ ...planForm, message_costs: costs });
+                            }}
+                            className="flex-1 bg-white px-3 py-1.5 border border-slate-200 rounded-xl text-xs font-bold text-slate-900"
+                            placeholder="Cost Item (e.g. Marketing, Utility, Service)"
+                          />
+                          <input
+                            type="text"
+                            value={cItem.price}
+                            onChange={(e) => {
+                              const costs = [...planForm.message_costs];
+                              costs[cIdx].price = e.target.value;
+                              setPlanForm({ ...planForm, message_costs: costs });
+                            }}
+                            className="w-32 bg-white px-3 py-1.5 border border-slate-200 rounded-xl text-xs font-bold text-slate-900"
+                            placeholder="Price (e.g. ₹0.958, FREE)"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const costs = planForm.message_costs.filter((_, i) => i !== cIdx);
+                              setPlanForm({ ...planForm, message_costs: costs });
+                            }}
+                            className="text-slate-400 hover:text-rose-600"
+                          >
+                            <X size={16} />
+                          </button>
+                        </div>
                       ))}
                     </div>
                   </div>
+                )}
 
-                  {/* Feature Category Blocks */}
+                {/* TAB 7: ADDITIONAL BENEFITS */}
+                {modalEditorTab === 'benefits' && (
                   <div className="space-y-4">
-                    {uniqueCategories
-                      .filter(cat => modalActiveCategory === 'ALL' || modalActiveCategory === cat)
-                      .map((category) => {
-                        const categoryFeatures = categorizedFeatures[category] || [];
-                        const selectedCount = categoryFeatures.filter(f => planForm.selected_feature_keys.includes(f.key)).length;
-                        const allCatSelected = categoryFeatures.length > 0 && selectedCount === categoryFeatures.length;
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider">
+                        Plan-Specific Perks & Additional Benefits
+                      </h4>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const benefits = [...(planForm.additional_benefits || [])];
+                          benefits.push({ title: 'No Markup Charges', description: 'Direct Meta API messaging rates' });
+                          setPlanForm({ ...planForm, additional_benefits: benefits });
+                        }}
+                        className="px-3 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-lg text-xs font-bold cursor-pointer"
+                      >
+                        + Add Benefit Perk
+                      </button>
+                    </div>
 
-                        return (
-                          <div
-                            key={category}
-                            className="border border-slate-200 rounded-2xl overflow-hidden bg-white shadow-2xs"
+                    <div className="space-y-2">
+                      {(planForm.additional_benefits || []).map((bItem, bIdx) => (
+                        <div key={bIdx} className="flex flex-col sm:flex-row items-center gap-3 bg-slate-50 p-3 rounded-xl border border-slate-200">
+                          <input
+                            type="text"
+                            value={bItem.title}
+                            onChange={(e) => {
+                              const benefits = [...(planForm.additional_benefits || [])];
+                              benefits[bIdx].title = e.target.value;
+                              setPlanForm({ ...planForm, additional_benefits: benefits });
+                            }}
+                            className="w-full sm:w-1/3 bg-white px-3 py-1.5 border border-slate-200 rounded-xl text-xs font-bold text-slate-900"
+                            placeholder="Benefit Title (e.g. Dedicated Account Manager)"
+                          />
+                          <input
+                            type="text"
+                            value={bItem.description || ''}
+                            onChange={(e) => {
+                              const benefits = [...(planForm.additional_benefits || [])];
+                              benefits[bIdx].description = e.target.value;
+                              setPlanForm({ ...planForm, additional_benefits: benefits });
+                            }}
+                            className="flex-1 w-full bg-white px-3 py-1.5 border border-slate-200 rounded-xl text-xs font-medium text-slate-700"
+                            placeholder="Short Subtext (Optional)"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const benefits = planForm.additional_benefits.filter((_, i) => i !== bIdx);
+                              setPlanForm({ ...planForm, additional_benefits: benefits });
+                            }}
+                            className="text-slate-400 hover:text-rose-600 p-1 self-end sm:self-center"
                           >
-                            {/* Category Header */}
-                            <div className="flex items-center justify-between px-4 py-2.5 bg-slate-50 border-b border-slate-100">
-                              <div className="flex items-center gap-2">
-                                <span className="text-xs font-black text-slate-800 uppercase tracking-wide">
-                                  {category}
-                                </span>
-                                <span className="text-[10px] font-mono text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full font-bold border border-emerald-100">
-                                  {selectedCount} / {categoryFeatures.length}
-                                </span>
-                              </div>
-
-                              <button
-                                type="button"
-                                onClick={() => toggleSelectAllCategory(category)}
-                                className="text-[11px] font-bold text-emerald-600 hover:text-emerald-700 hover:underline cursor-pointer"
-                              >
-                                {allCatSelected ? 'Deselect All' : 'Select All'}
-                              </button>
-                            </div>
-
-                            {/* Feature Grid List with Logos */}
-                            <div className="p-3 grid grid-cols-1 sm:grid-cols-2 gap-2 bg-white">
-                              {categoryFeatures.map((feat) => {
-                                const isChecked = planForm.selected_feature_keys.includes(feat.key);
-                                return (
-                                  <div
-                                    key={feat.key}
-                                    onClick={() => toggleSingleFeatureInForm(feat.key)}
-                                    className={cn(
-                                      "flex items-center justify-between p-3 rounded-2xl border transition-all cursor-pointer select-none group",
-                                      isChecked 
-                                        ? "bg-emerald-50/50 border-emerald-300 ring-1 ring-emerald-400/20 shadow-2xs" 
-                                        : "bg-white border-slate-200/90 hover:bg-slate-50"
-                                    )}
-                                  >
-                                    <div className="flex items-center gap-3 min-w-0">
-                                      {/* Brand Logo / Icon */}
-                                      <div className="w-8 h-8 rounded-xl bg-white border border-slate-200/80 shadow-2xs flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform p-0.5">
-                                        {getFeatureBrandLogo(feat.key, 22)}
-                                      </div>
-
-                                      <div className="min-w-0">
-                                        <p className={cn("text-xs font-extrabold truncate leading-tight", isChecked ? "text-slate-900" : "text-slate-600")}>
-                                          {feat.name}
-                                        </p>
-                                        <p className="text-[10px] text-slate-400 truncate mt-0.5">{feat.description}</p>
-                                      </div>
-                                    </div>
-
-                                    <div className="flex items-center gap-2 shrink-0 ml-2">
-                                      <span className="text-[9px] font-mono text-slate-400 uppercase font-semibold">
-                                        {feat.feature_type}
-                                      </span>
-                                      <div className={cn(
-                                        "w-5 h-5 rounded-lg border flex items-center justify-center transition-all",
-                                        isChecked 
-                                          ? "bg-emerald-600 border-emerald-600 text-white shadow-xs" 
-                                          : "border-slate-300 bg-white"
-                                      )}>
-                                        {isChecked && <CheckCircle2 size={13} className="text-white" />}
-                                      </div>
-                                    </div>
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          </div>
-                        );
-                      })}
+                            <X size={16} />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
                   </div>
+                )}
                 </div>
 
-                {/* Modal Footer Actions */}
-                <div className="pt-4 border-t border-slate-200 flex items-center justify-between gap-3 sticky bottom-0 bg-white pb-2">
+                {/* Modal Footer Actions (Fixed Bottom Bar) */}
+                <div className="px-6 py-4 border-t border-slate-200 flex items-center justify-between gap-3 bg-slate-50/80 shrink-0">
                   {isEditPlanModalOpen && editingPlan ? (
                     <button
                       type="button"
                       onClick={() => handleDeletePlan(editingPlan.id, editingPlan.name)}
-                      className="px-4 py-2 text-rose-600 hover:bg-rose-50 border border-rose-200 rounded-xl text-xs font-bold transition-all cursor-pointer"
+                      className="px-4 py-2 text-rose-600 hover:bg-rose-50 border border-rose-200 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1"
                     >
-                      <Trash2 size={14} className="inline mr-1" /> Delete Plan
+                      <Trash2 size={14} /> Delete Plan
                     </button>
                   ) : <div />}
 
@@ -1950,15 +2481,14 @@ export default function AdminPlansPage() {
                     <button
                       type="button"
                       onClick={() => { setIsCreatePlanModalOpen(false); setIsEditPlanModalOpen(false); }}
-                      className="px-4 py-2 text-slate-600 hover:bg-slate-100 border border-slate-200 rounded-xl text-xs font-bold transition-all cursor-pointer"
+                      className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all cursor-pointer"
                     >
                       Cancel
                     </button>
                     <button
                       type="submit"
-                      className="px-6 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-md shadow-emerald-600/20 transition-all cursor-pointer flex items-center gap-1.5"
+                      className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-xs transition-all cursor-pointer"
                     >
-                      <CheckCircle2 size={15} />
                       {isCreatePlanModalOpen ? 'Create Plan' : 'Save Changes'}
                     </button>
                   </div>

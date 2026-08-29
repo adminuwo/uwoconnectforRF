@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Loader2, ShieldCheck, ArrowRight, Lock, Mail, User } from 'lucide-react';
+import { X, Loader2, ShieldCheck, ArrowRight, Lock, Mail, User, AlertCircle } from 'lucide-react';
 import { API_URL, getUnifiedApiBaseUrl } from '@/config/apiConfig';
 
 export const UWOLoginModal = ({
@@ -14,8 +14,8 @@ export const UWOLoginModal = ({
 }) => {
   const [isRegisterMode, setIsRegisterMode] = useState(false);
   const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('abha@uwo24.com');
+  const [password, setPassword] = useState('admin123');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
@@ -31,8 +31,42 @@ export const UWOLoginModal = ({
     try {
       const unifiedApiBase = getUnifiedApiBaseUrl();
 
+      // 1. Try local UWOConnect Backend authentication first
+      try {
+        const localRes = await fetch(`${API_URL}/api/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password }),
+        });
+
+        const localData = await localRes.json();
+        if (localRes.ok && (localData.token || localData.access_token)) {
+          const authToken = localData.token || localData.access_token;
+          localStorage.setItem('token', authToken);
+          localStorage.setItem('uwo_token', authToken);
+          if (localData.user) {
+            localStorage.setItem('user', JSON.stringify(localData.user));
+          }
+
+          setSuccessMsg('Signed in successfully!');
+          setTimeout(() => {
+            if (onSuccess) onSuccess(localData);
+            onClose();
+            const role = localData.user?.role;
+            window.location.href = role === 'ADMIN' ? '/admin' : '/client';
+          }, 400);
+          return;
+        } else if (localRes.status === 400 || localRes.status === 401) {
+          setError(localData.message || localData.detail || 'Invalid email or password. Please check your credentials.');
+          setLoading(false);
+          return;
+        }
+      } catch (localErr) {
+        console.warn('[UWO Login] Local backend auth skipped, trying unified SSO base...', localErr);
+      }
+
+      // 2. Fallback to Central UWO SSO if local auth is unreached
       if (isRegisterMode) {
-        // 1. Register new central UWO account
         const regRes = await fetch(`${unifiedApiBase}/auth/register`, {
           method: 'POST',
           headers: {
@@ -50,10 +84,7 @@ export const UWOLoginModal = ({
           } else if (Array.isArray(regData.detail)) {
             errorText = regData.detail.map((d) => d.msg || d.detail || JSON.stringify(d)).join(', ');
           } else if (regData.detail) {
-            errorText =
-              typeof regData.detail === 'object'
-                ? JSON.stringify(regData.detail)
-                : String(regData.detail);
+            errorText = typeof regData.detail === 'object' ? JSON.stringify(regData.detail) : String(regData.detail);
           } else if (regData.message) {
             errorText = String(regData.message);
           }
@@ -65,13 +96,14 @@ export const UWOLoginModal = ({
               setError('');
             }, 1800);
           }
-          throw new Error(errorText);
+          setError(errorText);
+          setLoading(false);
+          return;
         }
 
         setSuccessMsg('Account created successfully! Signing in...');
       }
 
-      // 2. Authenticate & Obtain Central UWO Tokens
       const loginRes = await fetch(`${unifiedApiBase}/auth/login`, {
         method: 'POST',
         headers: {
@@ -84,18 +116,17 @@ export const UWOLoginModal = ({
       const loginData = await loginRes.json();
 
       if (!loginRes.ok) {
-        let loginErr = 'Authentication failed';
+        let loginErr = 'Invalid email or password';
         if (typeof loginData.detail === 'string') {
           loginErr = loginData.detail;
         } else if (Array.isArray(loginData.detail)) {
           loginErr = loginData.detail.map((d) => d.msg || d.detail).join(', ');
         } else if (loginData.detail) {
-          loginErr =
-            typeof loginData.detail === 'object'
-              ? JSON.stringify(loginData.detail)
-              : String(loginData.detail);
+          loginErr = typeof loginData.detail === 'object' ? JSON.stringify(loginData.detail) : String(loginData.detail);
         }
-        throw new Error(loginErr);
+        setError(loginErr);
+        setLoading(false);
+        return;
       }
 
       // Fetch user profile from /auth/me
@@ -111,35 +142,7 @@ export const UWOLoginModal = ({
         console.warn('Failed to fetch /auth/me:', meErr);
       }
 
-      // 3. Create persistent session in UWOConnect Backend
       let finalData = { ...loginData, user: uwoUser };
-      try {
-        const uwoBackendRes = await fetch(`${API_URL}/auth/uwo-login`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            email: uwoUser.email || email,
-            name: uwoUser.name || name || email.split('@')[0],
-            uwo_token: loginData.access_token,
-          }),
-        });
-
-        if (uwoBackendRes.ok) {
-          const uwoBackendData = await uwoBackendRes.json();
-          finalData = {
-            access_token: uwoBackendData.token,
-            token: uwoBackendData.token,
-            uwo_token: loginData.access_token,
-            user: uwoBackendData.user,
-          };
-        } else {
-          console.warn('[UWO SSO] UWOConnect Backend returned status:', uwoBackendRes.status);
-        }
-      } catch (ssoErr) {
-        console.warn('[UWO SSO] UWOConnect Backend Session provision fallback:', ssoErr);
-      }
-
-      // Store tokens and identity
       if (loginData.access_token) {
         localStorage.setItem('uwo_access_token', loginData.access_token);
       }
@@ -152,13 +155,14 @@ export const UWOLoginModal = ({
         localStorage.setItem('user', JSON.stringify(finalData.user));
       }
 
-      setSuccessMsg('Signed in with Unified Account!');
+      setSuccessMsg('Signed in successfully!');
       setTimeout(() => {
         if (onSuccess) onSuccess(finalData);
         onClose();
+        window.location.href = finalData.user?.role === 'ADMIN' ? '/admin' : '/client';
       }, 500);
     } catch (err) {
-      console.error('[UWO SSO Error]', err);
+      console.error('[UWO Login Error]', err);
       setError(err.message || 'Authentication failed. Please check your credentials.');
     } finally {
       setLoading(false);
@@ -199,9 +203,9 @@ export const UWOLoginModal = ({
               </div>
               <div>
                 <h3 className="text-xl font-bold tracking-tight text-white flex items-center gap-2">
-                  Unified Single Sign-On
+                  {isRegisterMode ? 'Create UWO Connect Account' : 'Sign In to UWO Connect'}
                 </h3>
-                <p className="text-xs text-emerald-300/70">Unified Web Options Network</p>
+                <p className="text-xs text-emerald-300/70">Unified Communication & Business Automation</p>
               </div>
             </div>
             <button
@@ -218,9 +222,10 @@ export const UWOLoginModal = ({
               <motion.div
                 initial={{ opacity: 0, y: -8 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="p-3.5 rounded-xl bg-red-500/15 border border-red-500/30 text-red-200 text-xs font-medium"
+                className="p-3.5 rounded-xl bg-red-500/20 border border-red-500/40 text-red-200 text-xs font-semibold flex items-center gap-2"
               >
-                {error}
+                <AlertCircle className="w-4 h-4 text-red-400 shrink-0" />
+                <span>{error}</span>
               </motion.div>
             )}
 
@@ -228,9 +233,10 @@ export const UWOLoginModal = ({
               <motion.div
                 initial={{ opacity: 0, y: -8 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="p-3.5 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-200 text-xs font-medium"
+                className="p-3.5 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-200 text-xs font-semibold flex items-center gap-2"
               >
-                {successMsg}
+                <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
+                <span>{successMsg}</span>
               </motion.div>
             )}
 
@@ -246,7 +252,7 @@ export const UWOLoginModal = ({
                     required
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    placeholder="Jane Doe"
+                    placeholder="John Doe"
                     className="w-full pl-10 pr-4 py-2.5 bg-black/30 border border-white/10 rounded-xl text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-emerald-500/60 focus:ring-1 focus:ring-emerald-500/60 transition-all"
                   />
                 </div>
@@ -296,7 +302,7 @@ export const UWOLoginModal = ({
                 <Loader2 className="w-5 h-5 animate-spin" />
               ) : (
                 <>
-                  <span>{isRegisterMode ? 'Create Central Account' : 'Sign In with UWO'}</span>
+                  <span>{isRegisterMode ? 'Create UWO Connect Account' : 'Sign In to Workspace'}</span>
                   <ArrowRight className="w-4 h-4" />
                 </>
               )}
@@ -305,7 +311,7 @@ export const UWOLoginModal = ({
 
           {/* Footer toggle */}
           <div className="mt-6 pt-4 border-t border-white/10 flex items-center justify-between text-xs text-zinc-400 relative z-10">
-            <span>{isRegisterMode ? 'Already have a UWO account?' : "Don't have an account?"}</span>
+            <span>{isRegisterMode ? 'Already have an account?' : "Don't have an account?"}</span>
             <button
               type="button"
               onClick={() => {
@@ -315,7 +321,7 @@ export const UWOLoginModal = ({
               }}
               className="text-emerald-400 font-semibold hover:text-emerald-300 transition-colors cursor-pointer"
             >
-              {isRegisterMode ? 'Sign In Instead' : 'Create UWO ID'}
+              {isRegisterMode ? 'Sign In Instead' : 'Create Account'}
             </button>
           </div>
         </motion.div>

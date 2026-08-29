@@ -89,7 +89,7 @@ function AdminClientsContent() {
   // ── Plan Assignment Modal State ──
   const [isAssignPlanModalOpen, setIsAssignPlanModalOpen] = useState(false);
   const [selectedClientForPlan, setSelectedClientForPlan] = useState(null);
-  const [selectedPlanToAssign, setSelectedPlanToAssign] = useState('PROFESSIONAL');
+  const [selectedPlanToAssign, setSelectedPlanToAssign] = useState('GROWTH');
   const [planAssignLoading, setPlanAssignLoading] = useState(false);
 
   // ── Client Feature Management Modal State ──
@@ -102,55 +102,35 @@ function AdminClientsContent() {
   // Available dynamic plan choices with rich metadata
   const AVAILABLE_PLANS_LIST = [
     {
-      id: 'FREE',
-      name: 'Free',
-      badge: 'FREE',
-      price: '₹0',
-      billing_cycle: 'No billing',
-      feature_count: 14,
-      color: 'slate',
-      description: 'Essential communication tools & trial workspace for small setups.'
-    },
-    {
       id: 'STARTER',
       name: 'Starter',
       badge: 'STARTER',
-      price: '₹999',
+      price: '₹499',
       billing_cycle: 'Monthly',
-      feature_count: 22,
+      feature_count: 10,
       color: 'emerald',
-      description: 'Core communication channels, live chat inbox, catalog & basic CRM.'
+      description: 'Core communication channels, live chat inbox, basic CRM & 1 chosen channel.'
     },
     {
-      id: 'PROFESSIONAL',
-      name: 'Professional',
-      badge: 'PROFESSIONAL',
-      price: '₹2,999',
+      id: 'GROWTH',
+      name: 'Growth',
+      badge: 'GROWTH',
+      price: '₹1,599',
       billing_cycle: 'Monthly',
-      feature_count: 38,
+      feature_count: 18,
       color: 'blue',
       is_popular: true,
-      description: 'Complete sales automation, AI smart copilot, quotations, proposals, invoices & team.'
+      description: 'Workflows, proposals, invoices, broadcasts, catalog, payments & 2 simultaneous channels.'
     },
     {
-      id: 'ENTERPRISE',
-      name: 'Enterprise',
-      badge: 'ENTERPRISE',
-      price: '₹9,999',
+      id: 'ADVANCED',
+      name: 'Advanced',
+      badge: 'ADVANCED',
+      price: '₹2,499',
       billing_cycle: 'Monthly',
-      feature_count: 52,
+      feature_count: 25,
       color: 'purple',
-      description: 'Unlimited features, custom connectors, AI bots, audit logs & dedicated SLA.'
-    },
-    {
-      id: 'CUSTOM',
-      name: 'Custom',
-      badge: 'CUSTOM',
-      price: 'Custom Pricing',
-      billing_cycle: 'Tailored',
-      feature_count: 45,
-      color: 'amber',
-      description: 'Custom tailored enterprise feature bundle configured by Super Admin.'
+      description: 'Full power automation across all 3 channels, AI agents, webhooks, voice/video calls & dedicated SLA.'
     }
   ];
 
@@ -423,9 +403,9 @@ function AdminClientsContent() {
   const handleOpenAssignPlan = (client) => {
     if (!client) return;
     setSelectedClientForPlan(client);
-    const clientPlanUpper = (client.plan || 'PROFESSIONAL').toUpperCase();
+    const clientPlanUpper = (client.plan || 'GROWTH').toUpperCase();
     const match = AVAILABLE_PLANS_LIST.find(p => p.id === clientPlanUpper || p.name.toUpperCase() === clientPlanUpper);
-    setSelectedPlanToAssign(match ? match.id : 'PROFESSIONAL');
+    setSelectedPlanToAssign(match ? match.id : 'GROWTH');
     setIsAssignPlanModalOpen(true);
   };
 
@@ -520,10 +500,28 @@ function AdminClientsContent() {
     if (!selectedClientForFeatures) return;
     try {
       setFeaturesSaveLoading(true);
+      const token = localStorage.getItem('token');
+
+      await axios.post(
+        `${API_BASE_URL}/api/admin/client-intelligence/clients/${selectedClientForFeatures.id}/action/`,
+        {
+          action: 'CUSTOMIZE_FEATURES',
+          custom_added: featureOverrides.custom_added,
+          custom_removed: featureOverrides.custom_removed
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      setClients(prev => prev.map(c => c.id === selectedClientForFeatures.id ? {
+        ...c,
+        custom_added: featureOverrides.custom_added,
+        custom_removed: featureOverrides.custom_removed
+      } : c));
+
       showToast(`Features customized successfully for ${selectedClientForFeatures.business_name}!`);
       setIsManageFeaturesModalOpen(false);
     } catch (err) {
-      alert('Failed to save feature overrides.');
+      alert(err.response?.data?.error || 'Failed to save feature overrides.');
     } finally {
       setFeaturesSaveLoading(false);
     }

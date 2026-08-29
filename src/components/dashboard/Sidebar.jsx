@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
@@ -33,9 +33,11 @@ import {
   Search,
   Bot,
   Layers,
-  X
+  X,
+  Lock
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useEntitlement } from '@/context/EntitlementContext';
 
 // Tour ID → sidebar link name mapping
 const TOUR_IDS = {
@@ -62,6 +64,7 @@ const TOUR_IDS = {
   'Support': 'sidebar-support',
 };
 
+const PLAN_RANKS = { starter: 1, growth: 2, advanced: 3 };
 
 const YoutubeIcon = ({ size = 16, className }) => (
   <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="currentColor" className={className}>
@@ -76,6 +79,20 @@ const TeamsIcon = ({ size = 16, className }) => (
   </svg>
 );
 
+const getPlanRank = (planObj, rawUserPlan = '') => {
+  const str = (
+    planObj?.slug || 
+    planObj?.name || 
+    planObj?.id || 
+    rawUserPlan || 
+    ''
+  ).toLowerCase();
+
+  if (str.includes('advanced') || str.includes('enterprise') || str.includes('power')) return 3;
+  if (str.includes('growth') || str.includes('pro')) return 2;
+  return 1;
+};
+
 /**
  * Sidebar
  * isOpen = true  → full expanded sidebar (icons + labels, 220 px)
@@ -84,6 +101,58 @@ const TeamsIcon = ({ size = 16, className }) => (
 const Sidebar = ({ role, isOpen, onClose, onToggle }) => {
   const handleToggle = onToggle || onClose;
   const pathname = usePathname();
+  const { entitlements, openUpgradeModal } = useEntitlement();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const userObj = mounted && typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('user') || '{}') : {};
+  const rawUserPlan = userObj?.client?.plan || userObj?.plan || '';
+  const activePlanRank = getPlanRank(entitlements?.plan, rawUserPlan);
+
+  const isFeatureUnlocked = (link) => {
+    if (role === 'ADMIN') return true;
+    if (!mounted) return false;
+
+    // 1. Check explicit Admin REMOVE lock override
+    if (link.featureKey && entitlements) {
+      const customRemoved = entitlements?.custom_removed || [];
+      if (customRemoved.some(k => k.toLowerCase() === link.featureKey.toLowerCase())) {
+        return false;
+      }
+    }
+
+    // 2. Check explicit Admin ADD unlock override
+    if (link.featureKey && entitlements) {
+      const customAdded = entitlements?.custom_added || [];
+      if (customAdded.some(k => k.toLowerCase() === link.featureKey.toLowerCase())) {
+        return true;
+      }
+    }
+
+    // 3. Check evaluated status from backend (accounts for plan config + overrides)
+    if (link.featureKey && entitlements) {
+      const featStatus = entitlements?.features?.[link.featureKey]?.status || 
+                         entitlements?.connectors?.[link.featureKey]?.status ||
+                         entitlements?.channels?.[link.featureKey]?.status;
+      if (featStatus === 'UPGRADE_REQUIRED' || featStatus === 'LOCKED') {
+        return false;
+      }
+      if (featStatus === 'AVAILABLE' || featStatus === 'CONNECTED') {
+        return true;
+      }
+    }
+
+    // 4. Fallback to base plan rank check
+    const reqPlan = (link.requiredPlan || 'Starter').toLowerCase();
+    let reqRank = 1;
+    if (reqPlan.includes('advanced') || reqPlan.includes('enterprise')) reqRank = 3;
+    else if (reqPlan.includes('growth') || reqPlan.includes('pro')) reqRank = 2;
+
+    return activePlanRank >= reqRank;
+  };
 
   const adminLinks = [
     { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
@@ -107,33 +176,32 @@ const Sidebar = ({ role, isOpen, onClose, onToggle }) => {
     { name: 'Support', href: '/admin/support', icon: LifeBuoy },
   ];
 
-
   const clientLinks = [
-    { name: 'Dashboard', href: '/client', icon: LayoutDashboard },
-    { name: 'Learning Center', href: '/client/guides', icon: BookOpen },
-    { name: 'Channels', href: '/client/channels', icon: Link2 },
-    { name: 'Outlook', href: '/client/email', icon: Mail },
-    { name: 'Gmail', href: '/client/gmail', icon: Mail },
-    { name: 'Voice & Video Calls', href: '/client/calls', icon: PhoneCall },
-    { name: 'YouTube', href: '/client/youtube', icon: YoutubeIcon },
-    { name: 'Google News', href: '/client/google-news', icon: Newspaper },
-    { name: 'Auto Replies', href: '/client/automations', icon: Zap },
-    { name: 'Workflows', href: '/client/workflows', icon: GitBranch },
-    { name: 'Leads (CRM)', href: '/client/crm', icon: Users },
-    { name: 'Quotations', href: '/client/quotations', icon: FileCheck },
-    { name: 'Proposals', href: '/client/proposals', icon: FileText },
-    { name: 'Invoices', href: '/client/invoices', icon: Receipt },
-    { name: 'Messages', href: '/client/inbox', icon: MessageSquare },
-    { name: 'Broadcasts', href: '/client/campaigns', icon: Megaphone },
-    { name: 'Knowledge Base', href: '/client/knowledge', icon: Brain },
-    { name: 'Catalog', href: '/client/catalog', icon: ShoppingBag },
-    { name: 'Payments', href: '/client/payments', icon: CreditCard },
-    { name: 'Orders', href: '/client/orders', icon: Receipt },
-    { name: 'Team', href: '/client/team', icon: ShieldCheck },
-    { name: 'Work Reports', href: '/client/reports', icon: FileCheck },
-    { name: 'Settings', href: '/client/settings', icon: Settings },
-    { name: 'Plans', href: '/client/plans', icon: Layers },
-    { name: 'Support', href: '/client/support', icon: LifeBuoy },
+    { name: 'Dashboard', href: '/client', icon: LayoutDashboard, requiredPlan: 'Starter' },
+    { name: 'Learning Center', href: '/client/guides', icon: BookOpen, requiredPlan: 'Starter' },
+    { name: 'Channels', href: '/client/channels', icon: Link2, requiredPlan: 'Starter' },
+    { name: 'Outlook', href: '/client/email', icon: Mail, requiredPlan: 'Growth', featureKey: 'connector_outlook' },
+    { name: 'Gmail', href: '/client/gmail', icon: Mail, requiredPlan: 'Growth', featureKey: 'connector_gmail' },
+    { name: 'Voice & Video Calls', href: '/client/calls', icon: PhoneCall, requiredPlan: 'Advanced', featureKey: 'feature_voice_video_call' },
+    { name: 'YouTube', href: '/client/youtube', icon: YoutubeIcon, requiredPlan: 'Growth', featureKey: 'channel_youtube' },
+    { name: 'Google News', href: '/client/google-news', icon: Newspaper, requiredPlan: 'Advanced', featureKey: 'connector_google_news' },
+    { name: 'Auto Replies', href: '/client/automations', icon: Zap, requiredPlan: 'Starter', featureKey: 'feature_autoreply' },
+    { name: 'Workflows', href: '/client/workflows', icon: GitBranch, requiredPlan: 'Growth', featureKey: 'feature_workflow' },
+    { name: 'Leads (CRM)', href: '/client/crm', icon: Users, requiredPlan: 'Starter', featureKey: 'feature_crm' },
+    { name: 'Quotations', href: '/client/quotations', icon: FileCheck, requiredPlan: 'Starter', featureKey: 'feature_quotation' },
+    { name: 'Proposals', href: '/client/proposals', icon: FileText, requiredPlan: 'Growth', featureKey: 'feature_proposal' },
+    { name: 'Invoices', href: '/client/invoices', icon: Receipt, requiredPlan: 'Growth', featureKey: 'feature_invoice' },
+    { name: 'Messages', href: '/client/inbox', icon: MessageSquare, requiredPlan: 'Starter' },
+    { name: 'Broadcasts', href: '/client/campaigns', icon: Megaphone, requiredPlan: 'Growth', featureKey: 'feature_broadcast' },
+    { name: 'Knowledge Base', href: '/client/knowledge', icon: Brain, requiredPlan: 'Advanced', featureKey: 'feature_knowledge_base' },
+    { name: 'Catalog', href: '/client/catalog', icon: ShoppingBag, requiredPlan: 'Growth', featureKey: 'feature_catalog' },
+    { name: 'Payments', href: '/client/payments', icon: CreditCard, requiredPlan: 'Growth', featureKey: 'feature_payment' },
+    { name: 'Orders', href: '/client/orders', icon: Receipt, requiredPlan: 'Growth', featureKey: 'feature_order' },
+    { name: 'Team', href: '/client/team', icon: ShieldCheck, requiredPlan: 'Advanced', featureKey: 'feature_team_dashboard' },
+    { name: 'Work Reports', href: '/client/reports', icon: FileCheck, requiredPlan: 'Advanced', featureKey: 'feature_reports' },
+    { name: 'Settings', href: '/client/settings', icon: Settings, requiredPlan: 'Starter' },
+    { name: 'Plans', href: '/client/plans', icon: Layers, requiredPlan: 'Starter' },
+    { name: 'Support', href: '/client/support', icon: LifeBuoy, requiredPlan: 'Starter' },
   ];
 
   const agentLinks = [
@@ -243,6 +311,41 @@ const Sidebar = ({ role, isOpen, onClose, onToggle }) => {
             const isActive = pathname === link.href;
             const Icon = link.icon;
             const tourId = TOUR_IDS[link.name];
+
+            const isLocked = !isFeatureUnlocked(link);
+
+            if (isLocked) {
+              return (
+                <div
+                  key={link.href}
+                  data-tour={tourId}
+                  onClick={() => {
+                    openUpgradeModal({
+                      itemName: link.name,
+                      itemType: 'feature',
+                      requiredPlan: link.requiredPlan
+                    });
+                  }}
+                  title={`${link.name} (Requires ${link.requiredPlan} Plan)`}
+                  className={cn(
+                    'group flex items-center rounded-xl transition-all duration-200 relative overflow-hidden cursor-pointer',
+                    isOpen ? 'gap-2 px-2 py-2' : 'justify-center px-0 py-2',
+                    'text-slate-400 hover:bg-emerald-50/50 hover:text-slate-700'
+                  )}
+                >
+                  <Icon size={isOpen ? 16 : 18} className="text-slate-400 shrink-0 opacity-60" />
+                  {isOpen && (
+                    <div className="flex-1 flex items-center justify-between min-w-0">
+                      <span className="text-[12px] tracking-tight font-bold text-slate-400 truncate">
+                        {link.name}
+                      </span>
+                      <Lock size={12} className="text-amber-500 shrink-0 ml-1" />
+                    </div>
+                  )}
+                </div>
+              );
+            }
+
             return (
               <Link
                 key={link.href}

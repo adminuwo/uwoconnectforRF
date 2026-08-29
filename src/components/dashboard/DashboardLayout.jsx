@@ -59,12 +59,106 @@ const PAGE_TITLES = {
   '/client/support': 'Support',
 };
 
+import UpgradeModal from '@/components/common/UpgradeModal';
+import { useEntitlement } from '@/context/EntitlementContext';
+import { Lock, Zap } from 'lucide-react';
+
+const PLAN_RANKS = { starter: 1, growth: 2, advanced: 3 };
+
+const FEATURE_REQUIRED_PLAN = {
+  '/client/workflows': 'Growth',
+  '/client/proposals': 'Growth',
+  '/client/invoices': 'Growth',
+  '/client/campaigns': 'Growth',
+  '/client/catalog': 'Growth',
+  '/client/payments': 'Growth',
+  '/client/orders': 'Growth',
+  '/client/email': 'Growth',
+  '/client/gmail': 'Growth',
+  '/client/youtube': 'Growth',
+  '/client/google-news': 'Advanced',
+  '/client/calls': 'Advanced',
+  '/client/knowledge': 'Advanced',
+  '/client/team': 'Advanced',
+  '/client/reports': 'Advanced',
+};
+
+const ROUTE_FEATURE_KEYS = {
+  '/client/workflows': 'feature_workflow',
+  '/client/proposals': 'feature_proposal',
+  '/client/invoices': 'feature_invoice',
+  '/client/campaigns': 'feature_broadcast',
+  '/client/catalog': 'feature_catalog',
+  '/client/payments': 'feature_payment',
+  '/client/orders': 'feature_order',
+  '/client/email': 'connector_outlook',
+  '/client/gmail': 'connector_gmail',
+  '/client/youtube': 'channel_youtube',
+  '/client/google-news': 'connector_google_news',
+  '/client/calls': 'feature_voice_video_call',
+  '/client/knowledge': 'feature_knowledge_base',
+  '/client/team': 'feature_team_dashboard',
+  '/client/reports': 'feature_reports',
+};
+
+const getPlanRank = (planObj, rawUserPlan = '') => {
+  const str = (
+    planObj?.slug || 
+    planObj?.name || 
+    planObj?.id || 
+    rawUserPlan || 
+    ''
+  ).toLowerCase();
+
+  if (str.includes('advanced') || str.includes('enterprise') || str.includes('power')) return 3;
+  if (str.includes('growth') || str.includes('pro')) return 2;
+  return 1;
+};
+
 const DashboardLayout = ({ children, role: initialRole }) => {
   const pathname = usePathname();
+  const { entitlements } = useEntitlement();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [user, setUser] = useState(null);
+
+  const userObj = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('user') || '{}') : {};
+  const rawUserPlan = userObj?.client?.plan || userObj?.plan || '';
+  const activePlanRank = getPlanRank(entitlements?.plan, rawUserPlan);
+
+  const reqPlanName = FEATURE_REQUIRED_PLAN[pathname];
+  let reqPlanRank = 1;
+  if (reqPlanName) {
+    const low = reqPlanName.toLowerCase();
+    if (low.includes('advanced') || low.includes('enterprise')) reqPlanRank = 3;
+    else if (low.includes('growth') || low.includes('pro')) reqPlanRank = 2;
+  }
+
+  const routeFeatKey = ROUTE_FEATURE_KEYS[pathname];
+  let isDynamicRemoved = false;
+  let isDynamicAvailable = false;
+  if (routeFeatKey && entitlements) {
+    const customRemoved = entitlements?.custom_removed || [];
+    if (customRemoved.some(k => k.toLowerCase() === routeFeatKey.toLowerCase())) {
+      isDynamicRemoved = true;
+    }
+
+    const featStatus = entitlements?.features?.[routeFeatKey]?.status || entitlements?.connectors?.[routeFeatKey]?.status;
+    if (featStatus === 'UPGRADE_REQUIRED' || featStatus === 'LOCKED') {
+      isDynamicRemoved = true;
+    }
+    if (featStatus === 'AVAILABLE' || featStatus === 'CONNECTED') {
+      isDynamicAvailable = true;
+    }
+
+    const customAdded = entitlements?.custom_added || [];
+    if (customAdded.some(k => k.toLowerCase() === routeFeatKey.toLowerCase())) {
+      isDynamicAvailable = true;
+    }
+  }
+
+  const isPageLocked = initialRole !== 'ADMIN' && reqPlanName && (isDynamicRemoved || (!isDynamicAvailable && activePlanRank < reqPlanRank));
   const [profileLogo, setProfileLogo] = useState('');
   const [impersonationData, setImpersonationData] = useState(null);
   const [clients, setClients] = useState([]);
@@ -137,7 +231,7 @@ const DashboardLayout = ({ children, role: initialRole }) => {
       try {
         const authToken = localStorage.getItem('token');
         if (!authToken) return;
-        const res = await axios.get(`${API_BASE_URL}/api/profile`, {
+        const res = await axios.get(`${API_BASE_URL}/api/profile/`, {
           headers: { Authorization: `Bearer ${authToken}` }
         });
         const cData = res.data?.client && typeof res.data.client === 'object' ? res.data.client : (typeof res.data === 'object' ? res.data : {});
@@ -417,7 +511,30 @@ const DashboardLayout = ({ children, role: initialRole }) => {
             <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-[#059669]/5 rounded-full blur-[120px] pointer-events-none" />
             <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-[#16A34A]/5 rounded-full blur-[120px] pointer-events-none" />
             <div className="relative flex-1 flex flex-col min-h-0">
-              {children}
+              {isPageLocked ? (
+                <div className="flex flex-col items-center justify-center p-8 sm:p-12 text-center max-w-md mx-auto my-auto bg-white rounded-3xl border border-slate-200 shadow-xl space-y-4">
+                  <div className="w-16 h-16 rounded-2xl bg-amber-50 text-amber-600 border border-amber-200 flex items-center justify-center">
+                    <Lock size={32} />
+                  </div>
+                  <span className="px-3 py-1 rounded-full bg-amber-100 text-amber-800 font-extrabold text-[11px] uppercase tracking-wider">
+                    Plan Upgrade Required
+                  </span>
+                  <h2 className="text-2xl font-black text-slate-900 tracking-tight">
+                    {currentTitle} is Locked
+                  </h2>
+                  <p className="text-xs text-slate-500 font-medium leading-relaxed">
+                    This feature is available on the <strong className="text-slate-800">{reqPlanName} Plan</strong> or higher. Your workspace is currently on the <strong className="text-[#059669]">{entitlements?.plan?.name || 'Starter'} Plan</strong>.
+                  </p>
+                  <Link
+                    href="/client/plans"
+                    className="w-full py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow-md transition-all flex items-center justify-center gap-1.5"
+                  >
+                    <Zap size={15} /> Upgrade to {reqPlanName} Plan
+                  </Link>
+                </div>
+              ) : (
+                children
+              )}
             </div>
           </div>
         </main>
@@ -429,6 +546,7 @@ const DashboardLayout = ({ children, role: initialRole }) => {
           <ProductTour />
           <TeamChatDrawer isOpen={chatOpen} onClose={() => setChatOpen(false)} />
           <GlobalIncomingCallListener />
+          <UpgradeModal />
         </>
       )}
     </div>

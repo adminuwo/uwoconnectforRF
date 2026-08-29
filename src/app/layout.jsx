@@ -2,6 +2,8 @@ import { Inter } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import { TourProvider } from "@/context/TourContext";
+import { EntitlementProvider } from "@/context/EntitlementContext";
+import UpgradeModal from "@/components/common/UpgradeModal";
 import AxiosNetworkFixer from "@/components/AxiosNetworkFixer";
 
 const inter = Inter({
@@ -35,9 +37,12 @@ export default function RootLayout({ children }) {
           data-endpoint="https://admin.uwo24.com/api/web-stats/collect"
         />
         <AxiosNetworkFixer />
-        <TourProvider>
-          {children}
-        </TourProvider>
+        <EntitlementProvider>
+          <TourProvider>
+            {children}
+            <UpgradeModal />
+          </TourProvider>
+        </EntitlementProvider>
       </body>
     </html>
   );
