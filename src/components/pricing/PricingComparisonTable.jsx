@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
-import { Check, Minus, Info, Sparkles, ShieldCheck, Zap, Layers, HelpCircle, ChevronRight, Lock, Flame, Star, AlertCircle, ArrowUpRight } from 'lucide-react';
+import { Check, Minus, Info, Sparkles, ShieldCheck, Zap, Layers, HelpCircle, ChevronRight, Lock, Flame, Star, AlertCircle, ArrowUpRight, SlidersHorizontal } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { API_BASE_URL } from '@/config/apiConfig';
 import { useEntitlement } from '@/context/EntitlementContext';
@@ -367,7 +367,7 @@ const SEEDED_FALLBACK_PLANS = [
   }
 ];
 
-export default function PricingComparisonTable({ plansData, onSelectPlan }) {
+export default function PricingComparisonTable({ plansData, onSelectPlan, isAdminView = false, onManagePlan }) {
   const router = useRouter();
   const { subscribePlan, entitlements, openUpgradeModal } = useEntitlement();
   const [billingPeriod, setBillingPeriod] = useState('YEARLY'); // MONTHLY | YEARLY
@@ -672,6 +672,16 @@ export default function PricingComparisonTable({ plansData, onSelectPlan }) {
                       </div>
 
                       {/* Subscribe CTA Button */}
+                      {isAdminView && (
+                        <button
+                          type="button"
+                          onClick={() => onManagePlan && onManagePlan(plan)}
+                          className="w-full mb-2.5 py-2.5 px-4 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-extrabold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md"
+                        >
+                          <SlidersHorizontal size={14} />
+                          <span>Manage & Edit Plan</span>
+                        </button>
+                      )}
                       <button
                         onClick={() => handleSubscribeClick(plan)}
                         className={cn(

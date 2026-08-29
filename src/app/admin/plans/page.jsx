@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
+import PricingComparisonTable from '@/components/pricing/PricingComparisonTable';
 import axios from 'axios';
 import {
   Layers,
@@ -1011,113 +1012,13 @@ export default function AdminPlansPage() {
           </button>
         </div>
 
-        {/* ── 4. TAB 1: PLANS (Clean Responsive Card Grid) ── */}
+        {/* ── 4. TAB 1: PLANS (Interkart Pricing Comparison View) ── */}
         {activeTab === 'plans' && (
           <div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-              {plans.map((plan) => {
-                const totalFeatCount = plan.feature_keys?.length || 0;
-                return (
-                  <div
-                    key={plan.id}
-                    className="bg-white rounded-3xl border border-slate-200/90 shadow-sm hover:shadow-lg transition-all p-4 sm:p-6 flex flex-col justify-between relative group w-full min-w-0"
-                  >
-                    <div>
-                      {/* Top Header: Badge & Status */}
-                      <div className="flex items-start justify-between gap-2 mb-3">
-                        <div className="flex items-center gap-1.5 flex-wrap min-w-0">
-                          <h3 className="text-base font-black text-slate-900 tracking-tight">
-                            {plan.name.toUpperCase()}
-                          </h3>
-                          {plan.is_popular && (
-                            <span className="px-2 py-0.5 bg-amber-50 text-amber-700 text-[10px] font-bold rounded-full border border-amber-200 shrink-0">
-                              Popular
-                            </span>
-                          )}
-                        </div>
-                        <span className={cn(
-                          "px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase border tracking-wider shrink-0 whitespace-nowrap",
-                          plan.status === 'ACTIVE' 
-                            ? "bg-emerald-50 text-emerald-700 border-emerald-200" 
-                            : "bg-rose-50 text-rose-700 border-rose-200"
-                        )}>
-                          {plan.status}
-                        </span>
-                      </div>
-
-                      {/* Description */}
-                      <p className="text-xs text-slate-500 leading-relaxed min-h-[32px] line-clamp-2 mb-4 font-normal">
-                        {plan.description}
-                      </p>
-
-                      {/* Mini Feature Logo Icons Preview */}
-                      <div className="flex items-center gap-1.5 flex-wrap mb-4 bg-slate-50/70 p-2 sm:p-2.5 rounded-2xl border border-slate-100">
-                        {(plan.feature_keys || []).slice(0, 8).map(fKey => (
-                          <div key={fKey} title={fKey} className="hover:scale-110 transition-transform">
-                            {getFeatureBrandLogo(fKey, 18)}
-                          </div>
-                        ))}
-                        {(plan.feature_keys || []).length > 8 && (
-                          <span className="text-[10px] font-bold text-slate-500 ml-1">
-                            +{plan.feature_keys.length - 8} more
-                          </span>
-                        )}
-                      </div>
-
-                      {/* Price Section */}
-                      <div className="mb-5 pb-4 border-b border-slate-100">
-                        <div className="flex items-baseline gap-1">
-                          <span className="text-2xl font-black text-slate-900">
-                            {plan.currency === 'INR' ? '₹' : '$'}{plan.price ? plan.price.toLocaleString() : '0'}
-                          </span>
-                          <span className="text-xs font-semibold text-slate-400">
-                            / {plan.billing_cycle?.toLowerCase() || 'month'}
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Feature & Channel Metrics List */}
-                      <div className="space-y-2.5 sm:space-y-3 mb-6 text-xs text-slate-700 font-medium">
-                        <div className="flex items-center justify-between gap-2">
-                          <span className="text-slate-500 flex items-center gap-1.5 shrink-0">
-                            <Zap size={14} className="text-emerald-600 shrink-0" /> Features
-                          </span>
-                          <span className="font-bold text-slate-900 text-right whitespace-nowrap">{totalFeatCount} Features</span>
-                        </div>
-                        <div className="flex items-center justify-between gap-2">
-                          <span className="text-slate-500 flex items-center gap-1.5 shrink-0">
-                            <Link2 size={14} className="text-teal-600 shrink-0" /> Channels
-                          </span>
-                          <span className="font-bold text-slate-900 text-right whitespace-nowrap">{plan.channel_count || 3} Channels</span>
-                        </div>
-                        <div className="flex items-center justify-between gap-2">
-                          <span className="text-slate-500 flex items-center gap-1.5 shrink-0">
-                            <Share2 size={14} className="text-blue-600 shrink-0" /> Connectors
-                          </span>
-                          <span className="font-bold text-slate-900 text-right whitespace-nowrap">{plan.connector_count || 2} Connectors</span>
-                        </div>
-                        <div className="flex items-center justify-between gap-2 pt-2 border-t border-slate-100">
-                          <span className="text-slate-500 flex items-center gap-1.5 shrink-0">
-                            <Users size={14} className="text-slate-400 shrink-0" /> Assigned Clients
-                          </span>
-                          <span className="font-extrabold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-100 text-[11px] shrink-0 whitespace-nowrap">
-                            {plan.client_count || 0} Clients
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Action Button */}
-                    <button
-                      onClick={() => handleOpenManagePlan(plan)}
-                      className="w-full py-2.5 px-4 bg-slate-50 hover:bg-emerald-50 text-slate-700 hover:text-emerald-700 border border-slate-200 hover:border-emerald-200 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer shadow-2xs"
-                    >
-                      <SlidersHorizontal size={14} /> Manage Plan
-                    </button>
-                  </div>
-                );
-              })}
-            </div>
+            <PricingComparisonTable 
+              isAdminView={true}
+              onManagePlan={(plan) => handleOpenManagePlan(plan)}
+            />
           </div>
         )}
 
