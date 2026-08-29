@@ -83,8 +83,13 @@ export default function ClientInboxPage() {
   const selectedConvoIdRef = useRef(selectedConvoId);
   const selectedRawAddressRef = useRef(null); // Stores the rawAddress (phone/platform_id) of selected convo
   const activeChannelFilterRef = useRef(activeChannelFilter);
-  const convoLimitRef = useRef(10);
-  const [convoLimit, setConvoLimit] = useState(10);
+  const [convoOffset, setConvoOffset] = useState(0);
+  const [hasMoreConvos, setHasMoreConvos] = useState(true);
+  const [isLoadingMoreContacts, setIsLoadingMoreContacts] = useState(false);
+  const [messagesOffset, setMessagesOffset] = useState(0);
+  const [hasMoreMessages, setHasMoreMessages] = useState(true);
+  const [isLoadingMessages, setIsLoadingMessages] = useState(false);
+  const [isLoadingMoreMessages, setIsLoadingMoreMessages] = useState(false);
 
   const scrollTabs = (direction) => {
     if (channelTabsRef.current) {
@@ -99,189 +104,119 @@ export default function ClientInboxPage() {
     selectedConvoIdRef.current = selectedConvoId;
   }, [selectedConvoId]);
 
-  const isMounted = useRef(false);
-
-  useEffect(() => {
-    if (!isMounted.current) return;
-    activeChannelFilterRef.current = activeChannelFilter;
-    if (convoLimit !== 10) {
-      setConvoLimit(10);
-      convoLimitRef.current = 10;
-    } else {
-      fetchConversationsOnly();
-    }
-  }, [activeChannelFilter]);
-
-  useEffect(() => {
-    if (!isMounted.current) return;
-    convoLimitRef.current = convoLimit;
-    fetchConversationsOnly();
-  }, [convoLimit]);
-
-  useEffect(() => {
-    isMounted.current = true;
-    fetchData();
-  }, []);
-
-  const [messagesOffset, setMessagesOffset] = useState(0);
-  const [isLoadingMessages, setIsLoadingMessages] = useState(false);
-  const [isLoadingMoreMessages, setIsLoadingMoreMessages] = useState(false);
-  const [isLoadingMoreContacts, setIsLoadingMoreContacts] = useState(false);
-
-  const fetchConversationsOnly = async () => {
+  // Fast direct channel conversations fetcher
+  const fetchConversations = async (channel = 'ALL', offset = 0, append = false) => {
     try {
-      if (convoLimitRef.current > 10) setIsLoadingMoreContacts(true);
+      if (append) {
+        setIsLoadingMoreContacts(true);
+      } else {
+        if (offset === 0) setLoading(true);
+      }
+
       const token = localStorage.getItem('uwo_token');
-      if (!token) return;
+      if (!token) {
+        setLoading(false);
+        return;
+      }
       const headers = { Authorization: `Bearer ${token}` };
       const apiUrl = API_BASE_URL;
-      
-      const limitParam = `?limit=${Math.max(convoLimitRef.current, 50)}&offset=0`;
+      const limit = 15;
+
+      const channelParam = (channel && channel !== 'ALL') ? `&channel=${encodeURIComponent(channel)}` : '';
       const searchParam = searchTerm ? `&search=${encodeURIComponent(searchTerm)}` : '';
 
-      // Fetch contacts and conversations concurrently from database
-      const [contactRes, convoRes] = await Promise.all([
-        axios.get(`${apiUrl}/api/contacts/${limitParam}${searchParam}`, { headers }).catch(() => ({ data: [] })),
-        axios.get(`${apiUrl}/api/conversations/${limitParam}${searchParam}`, { headers }).catch(() => ({ data: [] }))
-      ]);
-      
-      // Handle Django Rest Framework pagination format
-      let fetchedContacts = [];
-      if (Array.isArray(contactRes.data)) {
-        fetchedContacts = contactRes.data;
-      } else if (contactRes.data && Array.isArray(contactRes.data.results)) {
-        fetchedContacts = contactRes.data.results;
-      }
+      // 1. Fetch conversations ordered by -last_message_at
+      const convoRes = await axios.get(
+        `${apiUrl}/api/conversations/?limit=${limit}&offset=${offset}${channelParam}${searchParam}`,
+        { headers }
+      ).catch(() => ({ data: [] }));
 
-      let fetchedConvos = [];
-      if (Array.isArray(convoRes.data)) {
-        fetchedConvos = convoRes.data;
-      } else if (convoRes.data && Array.isArray(convoRes.data.results)) {
-        fetchedConvos = convoRes.data.results;
-      }
+      let rawConvos = Array.isArray(convoRes.data) ? convoRes.data : (convoRes.data?.results || []);
 
-      const convoLookup = new Map();
-      fetchedConvos.forEach(c => {
-        if (c.contact_platform_id) convoLookup.set(String(c.contact_platform_id).toLowerCase(), c);
-        if (c.contact_phone) convoLookup.set(String(c.contact_phone).toLowerCase(), c);
-        if (c.id) convoLookup.set(String(c.id), c);
-      });
-      
-      let convoData = fetchedContacts.map(contactObj => {
-        let channel = (contactObj.preferred_channel || '').toUpperCase();
-        const nameUpper = (contactObj.name || '').toUpperCase();
-        const pid = (contactObj.platform_id || '').toLowerCase();
+      // If conversations table is empty for this client on initial load, fallback to contacts
+      if (rawConvos.length === 0 && offset === 0) {
+        const contactRes = await axios.get(
+          `${apiUrl}/api/contacts/?limit=${limit}&offset=0${searchParam}`,
+          { headers }
+        ).catch(() => ({ data: [] }));
+        const rawContacts = Array.isArray(contactRes.data) ? contactRes.data : (contactRes.data?.results || []);
         
-        if (nameUpper.includes('INSTAGRAM') || pid.startsWith('ig') || pid.includes('instagram')) {
-          channel = 'INSTAGRAM';
-        } else if (nameUpper.includes('FACEBOOK') || pid.startsWith('fb') || pid.includes('facebook')) {
-          channel = 'FACEBOOK';
-        } else if (pid.includes('@') || (contactObj.email && contactObj.email.includes('@'))) {
-          channel = 'GMAIL';
-        } else if (pid.includes('tg') || pid.includes('telegram')) {
-          channel = 'TELEGRAM';
-        } else if (!channel) {
-          channel = 'WHATSAPP';
-        }
+        rawConvos = rawContacts.map(ct => ({
+          id: ct.id,
+          contact_name: ct.name || ct.phone_number || ct.platform_id || 'Customer',
+          contact_platform_id: ct.platform_id || ct.phone_number || ct.id,
+          contact_phone: ct.phone_number,
+          channel: (ct.preferred_channel || 'WHATSAPP').toUpperCase(),
+          last_message_summary: 'Tap to view messages...',
+          last_message_at: ct.updated_at || ct.created_at,
+          unread_count_admin: 0,
+          status: ct.stage || 'OPEN'
+        }));
+      }
 
-        const pidLower = String(contactObj.platform_id || '').toLowerCase();
-        const phoneLower = String(contactObj.phone_number || '').toLowerCase();
-        const idStr = String(contactObj.id || '');
-        const matchedConvo = convoLookup.get(pidLower) || convoLookup.get(phoneLower) || convoLookup.get(idStr);
+      setHasMoreConvos(rawConvos.length >= limit);
 
-        const handlerName = matchedConvo?.assigned_to_name || matchedConvo?.locked_by_name || contactObj.assigned_to_name || null;
-        const handlerDept = matchedConvo?.assigned_department || 'Support';
-        const isLocked = matchedConvo?.is_locked || false;
-        const lockedByName = matchedConvo?.locked_by_name || null;
-        const convoDbId = matchedConvo?.id || null;
-
+      const formatted = rawConvos.map(c => {
+        const rawAddr = c.contact_platform_id || c.contact_phone || c.id;
         return {
-          id: contactObj.id,
-          name: contactObj.name || contactObj.platform_id || contactObj.phone_number || 'Customer',
-          rawAddress: contactObj.platform_id || contactObj.phone_number || contactObj.id,
-          lastMessage: matchedConvo?.last_message_summary || 'Tap to view messages...',
-          time: matchedConvo?.last_message_at || contactObj.updated_at || contactObj.created_at,
-          unread: 0,
-          channel: channel,
-          assignedTo: matchedConvo?.assigned_to || contactObj.assigned_to || null,
-          handlerName: handlerName,
-          assignedToName: handlerName,
-          handlerDept: handlerDept,
-          isLocked: isLocked,
-          lockedBy: matchedConvo?.locked_by || null,
-          lockedByName: lockedByName,
-          convoDbId: convoDbId,
-          status: matchedConvo?.status || contactObj.status || 'OPEN',
-          contactObj,
+          id: c.id || rawAddr,
+          name: c.contact_name || c.contact_platform_id || c.contact_phone || 'Customer',
+          rawAddress: rawAddr,
+          lastMessage: c.last_message_summary || 'Recent conversation',
+          time: c.last_message_at || c.updated_at || c.created_at || new Date().toISOString(),
+          unread: c.unread_count_admin || c.unread_count_employee || 0,
+          channel: (c.channel || 'WHATSAPP').toUpperCase(),
+          assignedTo: c.assigned_to || null,
+          handlerName: c.assigned_to_name || c.locked_by_name || null,
+          assignedToName: c.assigned_to_name || c.locked_by_name || null,
+          handlerDept: c.assigned_department || 'Support',
+          isLocked: c.is_locked || false,
+          lockedBy: c.locked_by || null,
+          lockedByName: c.locked_by_name || null,
+          convoDbId: c.id || null,
+          status: c.status || 'OPEN',
+          contactObj: { platform_id: c.contact_platform_id, phone_number: c.contact_phone, name: c.contact_name },
           messages: []
         };
       });
 
-      // Fallback: If no contacts found in Contact collection, parse unique conversations from live Messages
-      if (convoData.length === 0) {
-        try {
-          const msgChannelParam = activeChannelFilterRef.current !== 'ALL' ? `&channel=${activeChannelFilterRef.current}` : '';
-          const msgRes = await axios.get(`${apiUrl}/api/messages/?limit=50${msgChannelParam}`, { headers });
-          const rawMsgs = msgRes.data || [];
-          const seen = new Set();
-          const fallbackConvos = [];
-          for (const m of rawMsgs) {
-            const isInc = m.message_type === 'INCOMING';
-            const contactAddr = isInc ? m.from_address : m.to_address;
-            if (contactAddr && !seen.has(contactAddr)) {
-              seen.add(contactAddr);
-              const addrLower = String(contactAddr).toLowerCase();
-              const matchedConvo = convoLookup.get(addrLower);
-              const handlerName = matchedConvo?.assigned_to_name || matchedConvo?.locked_by_name || null;
-
-              fallbackConvos.push({
-                id: contactAddr,
-                name: m.sender_name || contactAddr,
-                rawAddress: contactAddr,
-                lastMessage: m.body || 'Recent message',
-                time: m.created_at,
-                unread: 0,
-                channel: m.channel || 'WHATSAPP',
-                assignedTo: matchedConvo?.assigned_to || null,
-                handlerName: handlerName,
-                assignedToName: handlerName,
-                handlerDept: matchedConvo?.assigned_department || 'Support',
-                isLocked: matchedConvo?.is_locked || false,
-                lockedBy: matchedConvo?.locked_by || null,
-                lockedByName: matchedConvo?.locked_by_name || null,
-                convoDbId: matchedConvo?.id || null,
-                status: matchedConvo?.status || 'OPEN',
-                contactObj: { platform_id: contactAddr, phone_number: contactAddr, name: m.sender_name || contactAddr },
-                messages: []
-              });
-            }
-          }
-          if (fallbackConvos.length > 0) {
-            convoData = fallbackConvos;
-          }
-        } catch (mErr) {
-          console.warn('Fallback messages error:', mErr);
-        }
-      }
-      
-      setConversations(convoData);
-      
-      const currentSelectedExists = convoData.some(c => c.id === selectedConvoIdRef.current);
-      if (convoData.length > 0) {
-        if (!selectedConvoIdRef.current || !currentSelectedExists) {
-          selectedRawAddressRef.current = convoData[0].rawAddress || convoData[0].id;
-          setSelectedConvoId(convoData[0].id);
-        }
+      if (append) {
+        setConversations(prev => {
+          const existingIds = new Set(prev.map(item => String(item.id)));
+          const newItems = formatted.filter(item => !existingIds.has(String(item.id)));
+          return [...prev, ...newItems];
+        });
       } else {
-        setSelectedConvoId(null);
+        setConversations(formatted);
+        if (formatted.length > 0) {
+          const currentExists = formatted.some(item => item.id === selectedConvoIdRef.current);
+          if (!selectedConvoIdRef.current || !currentExists) {
+            selectedRawAddressRef.current = formatted[0].rawAddress || formatted[0].id;
+            setSelectedConvoId(formatted[0].id);
+          }
+        } else {
+          setSelectedConvoId(null);
+        }
       }
     } catch (err) {
       console.warn('Failed to fetch conversations:', err);
-      setConversations([]);
     } finally {
       setIsLoadingMoreContacts(false);
       setLoading(false);
     }
+  };
+
+  const handleChannelTabClick = (channelId) => {
+    setActiveChannelFilter(channelId);
+    activeChannelFilterRef.current = channelId;
+    setConvoOffset(0);
+    fetchConversations(channelId, 0, false);
+  };
+
+  const handleLoadMoreContacts = () => {
+    const nextOffset = convoOffset + 15;
+    setConvoOffset(nextOffset);
+    fetchConversations(activeChannelFilter, nextOffset, true);
   };
 
   // 1. Initial Data Fetching
@@ -293,14 +228,14 @@ export default function ClientInboxPage() {
       const headers = { Authorization: `Bearer ${token}` };
       const apiUrl = API_BASE_URL;
 
-      // Fetch profile concurrently
-      const profileRes = await axios.get(`${apiUrl}/api/profile`, { headers }).catch(() => ({ data: { username: 'Admin', role: 'ADMIN' } }));
+      // Fetch profile & conversations concurrently
+      axios.get(`${apiUrl}/api/profile`, { headers })
+        .then(res => setCurrentUser(res.data))
+        .catch(() => setCurrentUser({ username: 'Admin', role: 'ADMIN' }));
 
-      setCurrentUser(profileRes.data);
-      
-      await fetchConversationsOnly();
+      await fetchConversations(activeChannelFilterRef.current || 'ALL', 0, false);
 
-      // Fetch team and stats in the background without blocking the UI
+      // Background loading of team and stats
       axios.get(`${apiUrl}/api/team/members/`, { headers }).then(res => setTeamMembers(Array.isArray(res.data) ? res.data : (res.data?.results || []))).catch(()=>{});
       axios.get(`${apiUrl}/api/monitoring/stats/`, { headers }).then(res => { if(res.data) setStatsData(res.data); }).catch(()=>{});
 
@@ -310,6 +245,10 @@ export default function ClientInboxPage() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   const fetchMessages = async (contactId, offset = 0, append = false) => {
     if (!contactId) return;
@@ -324,8 +263,14 @@ export default function ClientInboxPage() {
       const res = await axios.get(`${apiUrl}/api/messages/?contact_id=${encodeURIComponent(contactId)}&limit=50&offset=${offset}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      // Messages come ordered by -id from backend. Reverse to show oldest first in chat thread.
-      const fetchedMessages = (res.data || []).reverse();
+      const rawList = Array.isArray(res.data) ? res.data : (res.data?.results || []);
+      const fetchedMessages = [...rawList].reverse();
+      
+      if (rawList.length < 50) {
+        setHasMoreMessages(false);
+      } else {
+        setHasMoreMessages(true);
+      }
       
       if (append) {
         setMessages(prev => {
@@ -356,26 +301,15 @@ export default function ClientInboxPage() {
     }
   };
 
-  // Removed duplicated fetchData useEffect here
-
   useEffect(() => {
     if (selectedConvoId) {
       setMessagesOffset(0);
-      // Use the rawAddress (phone/platform_id) stored in ref for message fetching
-      // Backend filters messages by from_address/to_address which store the phone/platform ID
       const addressToFetch = selectedRawAddressRef.current || selectedConvoId;
       fetchMessages(addressToFetch, 0, false);
     }
   }, [selectedConvoId]);
 
-  // Normalize contact string (e.g. phone numbers or handles)
-  const normalizeContactId = (rawId) => {
-    if (!rawId) return 'Unknown';
-    const digits = rawId.replace(/[^0-9]/g, '');
-    return digits || rawId;
-  };
-
-  // Instant reactive client-side & backend filtered conversations
+  // Instant reactive client-side filtered conversations
   const convoList = useMemo(() => {
     let list = conversations;
     if (activeChannelFilter && activeChannelFilter !== 'ALL') {
@@ -426,6 +360,7 @@ export default function ClientInboxPage() {
         
         if (data.type === 'new_message') {
           const msg = data.message;
+          const contactAddr = msg.message_type === 'INCOMING' ? msg.from_address : msg.to_address;
           const currentRaw = selectedRawAddressRef.current;
           const currentId = selectedConvoIdRef.current;
           const isForCurrentConvo = 
@@ -438,7 +373,39 @@ export default function ClientInboxPage() {
               return [...prev, msg];
             });
           }
-          fetchData(); // Refresh sidebar conversations list
+
+          // Real-time Auto-Bump: Move or add this contact to index 0 (top of the list) with newest message!
+          setConversations(prev => {
+            const addrLower = String(contactAddr || '').toLowerCase();
+            const existingIdx = prev.findIndex(c => 
+              String(c.rawAddress || '').toLowerCase() === addrLower || 
+              String(c.id || '').toLowerCase() === addrLower
+            );
+
+            if (existingIdx !== -1) {
+              const updatedItem = {
+                ...prev[existingIdx],
+                lastMessage: msg.body || prev[existingIdx].lastMessage,
+                time: msg.created_at || new Date().toISOString()
+              };
+              const remaining = prev.filter((_, idx) => idx !== existingIdx);
+              return [updatedItem, ...remaining];
+            } else {
+              const newItem = {
+                id: contactAddr,
+                name: msg.sender_name || contactAddr,
+                rawAddress: contactAddr,
+                lastMessage: msg.body || 'New message',
+                time: msg.created_at || new Date().toISOString(),
+                unread: 1,
+                channel: (msg.channel || 'WHATSAPP').toUpperCase(),
+                status: 'OPEN',
+                contactObj: { platform_id: contactAddr, phone_number: contactAddr, name: msg.sender_name || contactAddr },
+                messages: []
+              };
+              return [newItem, ...prev];
+            }
+          });
         }
 
         // Live Presence / Viewing / Typing Broadcasting
@@ -569,18 +536,20 @@ export default function ClientInboxPage() {
           }
           return replaced;
         });
-        setConversations(prev => prev.map(c => {
-          if (c.id === activeConvo.id) {
-            return {
-              ...c,
+        setConversations(prev => {
+          const activeIdx = prev.findIndex(c => c.id === activeConvo.id);
+          if (activeIdx !== -1) {
+            const updatedItem = {
+              ...prev[activeIdx],
               lastMessage: res.data.body || textToSend,
               time: new Date().toISOString()
             };
+            const remaining = prev.filter((_, idx) => idx !== activeIdx);
+            return [updatedItem, ...remaining];
           }
-          return c;
-        }));
+          return prev;
+        });
       }
-      fetchData();
     } catch (err) {
       console.warn('Failed to send message:', err);
       alert('Failed to send message: ' + (err.response?.data?.detail || err.message));
@@ -726,7 +695,7 @@ export default function ClientInboxPage() {
                     <button
                       key={tab.id}
                       type="button"
-                      onClick={() => setActiveChannelFilter(tab.id)}
+                      onClick={() => handleChannelTabClick(tab.id)}
                       className={cn(
                         "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all whitespace-nowrap cursor-pointer shrink-0 border",
                         isActive 
@@ -834,15 +803,15 @@ export default function ClientInboxPage() {
                   No conversations match filters.
                 </div>
               )}
-              {convoList.length > 0 && convoList.length >= convoLimit && (
-                <div className="p-4 flex justify-center border-t border-slate-100">
+              {conversations.length > 0 && hasMoreConvos && (
+                <div className="p-3 flex justify-center border-t border-slate-100">
                   <button 
                     disabled={isLoadingMoreContacts}
-                    onClick={() => setConvoLimit(prev => prev + 10)}
-                    className="text-[11px] font-bold text-emerald-600 hover:text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-4 py-2 rounded-lg transition-colors w-full disabled:opacity-70 flex justify-center items-center gap-2"
+                    onClick={handleLoadMoreContacts}
+                    className="text-xs font-bold text-emerald-700 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100 px-4 py-2.5 rounded-xl transition-all w-full disabled:opacity-70 flex justify-center items-center gap-2 cursor-pointer shadow-2xs"
                   >
                     {isLoadingMoreContacts ? (
-                      <>Loading... <div className="w-3 h-3 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" /></>
+                      <>Loading more contacts... <div className="w-3.5 h-3.5 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin" /></>
                     ) : (
                       "Load More Contacts"
                     )}
@@ -993,16 +962,16 @@ export default function ClientInboxPage() {
                   </div>
                 ) : (
                   <>
-                    {activeConvo.messages && activeConvo.messages.length >= 10 && (
+                    {activeConvo.messages && activeConvo.messages.length >= 50 && hasMoreMessages && (
                       <div className="flex justify-center mb-4">
                         <button
                           disabled={isLoadingMoreMessages}
                           onClick={() => {
-                            const nextOffset = messagesOffset + 10;
+                            const nextOffset = messagesOffset + 50;
                             setMessagesOffset(nextOffset);
                             fetchMessages(activeConvo.rawAddress || activeConvo.id, nextOffset, true);
                           }}
-                          className="px-4 py-1.5 bg-white border border-slate-200 rounded-full text-xs font-semibold text-slate-500 hover:text-emerald-600 hover:border-emerald-200 transition-colors shadow-sm disabled:opacity-70 flex items-center gap-2"
+                          className="px-4 py-1.5 bg-white border border-slate-200 rounded-full text-xs font-semibold text-slate-500 hover:text-emerald-600 hover:border-emerald-200 transition-colors shadow-sm disabled:opacity-70 flex items-center gap-2 cursor-pointer"
                         >
                           {isLoadingMoreMessages ? (
                             <>Loading... <div className="w-3 h-3 border-2 border-slate-400 border-t-transparent rounded-full animate-spin" /></>
