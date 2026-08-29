@@ -1175,12 +1175,12 @@ export default function AdminPlansPage() {
 
   return (
     <DashboardLayout role="ADMIN">
-      <div className="max-w-7xl mx-auto pb-24 px-4 sm:px-8 lg:px-10 font-sans">
+      <div className="max-w-7xl mx-auto pb-24 px-3 sm:px-6 lg:px-8 font-sans w-full min-w-0">
         
         {/* ── Toast Notification ── */}
         {toastMessage && (
           <div className={cn(
-            "fixed top-6 right-6 z-[350] flex items-center gap-2.5 px-4 py-3 rounded-2xl shadow-2xl font-semibold text-xs border animate-in fade-in slide-in-from-top-3 duration-200",
+            "fixed top-4 sm:top-6 right-4 sm:right-6 z-[350] flex items-center gap-2.5 px-4 py-3 rounded-2xl shadow-2xl font-semibold text-xs border animate-in fade-in slide-in-from-top-3 duration-200 max-w-[90vw]",
             toastMessage.type === 'error' 
               ? "bg-rose-900 text-white border-rose-700" 
               : "bg-emerald-900 text-white border-emerald-700"
@@ -1190,22 +1190,22 @@ export default function AdminPlansPage() {
             ) : (
               <CheckCircle2 size={16} className="text-emerald-300 shrink-0" />
             )}
-            <span>{toastMessage.msg}</span>
+            <span className="truncate">{toastMessage.msg}</span>
           </div>
         )}
 
         {/* ── 1. Page Header & Actions ── */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 my-8">
-          <div>
-            <div className="flex items-center gap-2.5">
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 my-6 sm:my-8">
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight">
                 PLAN MANAGEMENT
               </h1>
-              <span className="px-2.5 py-0.5 bg-emerald-50 text-emerald-700 text-xs font-bold rounded-full border border-emerald-200">
+              <span className="px-2.5 py-0.5 bg-emerald-50 text-emerald-700 text-xs font-bold rounded-full border border-emerald-200 shrink-0">
                 {summaryMetrics.activePlans} Active Plans
               </span>
               {loading && (
-                <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+                <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200 shrink-0">
                   <Loader2 size={11} className="animate-spin text-emerald-600" /> Syncing...
                 </span>
               )}
@@ -1215,18 +1215,18 @@ export default function AdminPlansPage() {
             </p>
           </div>
 
-          <div className="flex items-center gap-2.5 flex-wrap">
+          <div className="flex items-center gap-2 flex-wrap w-full sm:w-auto">
             <button
               onClick={fetchBackendData}
               disabled={loading}
-              className="p-2.5 bg-white hover:bg-slate-50 text-slate-600 border border-slate-200 rounded-xl transition-all cursor-pointer shadow-2xs"
+              className="p-2.5 bg-white hover:bg-slate-50 text-slate-600 border border-slate-200 rounded-xl transition-all cursor-pointer shadow-2xs shrink-0"
               title="Refresh plans & catalog"
             >
               <RefreshCw size={15} className={loading ? "animate-spin text-emerald-600" : ""} />
             </button>
             <button
               onClick={handleOpenCreatePlan}
-              className="flex items-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs shadow-md shadow-emerald-600/20 transition-all cursor-pointer"
+              className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 sm:px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs shadow-md shadow-emerald-600/20 transition-all cursor-pointer whitespace-nowrap"
             >
               <Plus size={16} /> Create Plan
             </button>
@@ -1234,54 +1234,54 @@ export default function AdminPlansPage() {
         </div>
 
         {/* ── 2. Summary Metric Cards ── */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/90 shadow-2xs flex items-center justify-between">
-            <div>
-              <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">TOTAL PLANS</p>
-              <h3 className="text-2xl font-black text-slate-900 mt-1">{summaryMetrics.totalPlans}</h3>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4 mb-6 sm:mb-8">
+          <div className="bg-white p-3.5 sm:p-5 rounded-2xl border border-slate-200/90 shadow-2xs flex items-center justify-between min-w-0">
+            <div className="min-w-0">
+              <p className="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider truncate">TOTAL PLANS</p>
+              <h3 className="text-xl sm:text-2xl font-black text-slate-900 mt-0.5 sm:mt-1">{summaryMetrics.totalPlans}</h3>
             </div>
-            <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100 shrink-0">
-              <Layers size={20} />
-            </div>
-          </div>
-
-          <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/90 shadow-2xs flex items-center justify-between">
-            <div>
-              <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">ACTIVE PLANS</p>
-              <h3 className="text-2xl font-black text-emerald-600 mt-1">{summaryMetrics.activePlans}</h3>
-            </div>
-            <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100 shrink-0">
-              <CheckCircle2 size={20} />
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100 shrink-0 ml-2">
+              <Layers size={18} className="sm:w-5 sm:h-5" />
             </div>
           </div>
 
-          <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/90 shadow-2xs flex items-center justify-between">
-            <div>
-              <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">TOTAL FEATURES</p>
-              <h3 className="text-2xl font-black text-slate-900 mt-1">{summaryMetrics.totalFeatures}</h3>
+          <div className="bg-white p-3.5 sm:p-5 rounded-2xl border border-slate-200/90 shadow-2xs flex items-center justify-between min-w-0">
+            <div className="min-w-0">
+              <p className="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider truncate">ACTIVE PLANS</p>
+              <h3 className="text-xl sm:text-2xl font-black text-emerald-600 mt-0.5 sm:mt-1">{summaryMetrics.activePlans}</h3>
             </div>
-            <div className="w-10 h-10 rounded-xl bg-slate-50 text-slate-700 flex items-center justify-center border border-slate-200 shrink-0">
-              <Zap size={20} />
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100 shrink-0 ml-2">
+              <CheckCircle2 size={18} className="sm:w-5 sm:h-5" />
             </div>
           </div>
 
-          <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/90 shadow-2xs flex items-center justify-between">
-            <div>
-              <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">CLIENTS ASSIGNED</p>
-              <h3 className="text-2xl font-black text-slate-900 mt-1">{summaryMetrics.clientsAssigned}</h3>
+          <div className="bg-white p-3.5 sm:p-5 rounded-2xl border border-slate-200/90 shadow-2xs flex items-center justify-between min-w-0">
+            <div className="min-w-0">
+              <p className="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider truncate">TOTAL FEATURES</p>
+              <h3 className="text-xl sm:text-2xl font-black text-slate-900 mt-0.5 sm:mt-1">{summaryMetrics.totalFeatures}</h3>
             </div>
-            <div className="w-10 h-10 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center border border-teal-100 shrink-0">
-              <Users size={20} />
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-slate-50 text-slate-700 flex items-center justify-center border border-slate-200 shrink-0 ml-2">
+              <Zap size={18} className="sm:w-5 sm:h-5" />
+            </div>
+          </div>
+
+          <div className="bg-white p-3.5 sm:p-5 rounded-2xl border border-slate-200/90 shadow-2xs flex items-center justify-between min-w-0">
+            <div className="min-w-0">
+              <p className="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider truncate">CLIENTS ASSIGNED</p>
+              <h3 className="text-xl sm:text-2xl font-black text-slate-900 mt-0.5 sm:mt-1">{summaryMetrics.clientsAssigned}</h3>
+            </div>
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center border border-teal-100 shrink-0 ml-2">
+              <Users size={18} className="sm:w-5 sm:h-5" />
             </div>
           </div>
         </div>
 
-        {/* ── 3. Plan Tabs Navigation ── */}
-        <div className="flex items-center gap-2 mb-6 border-b border-slate-200/80 pb-3">
+        {/* ── 3. Plan Tabs Navigation (Smooth Horizontal Swipe on Mobile) ── */}
+        <div className="flex items-center gap-2 mb-6 border-b border-slate-200/80 pb-3 overflow-x-auto no-scrollbar scrollbar-none flex-nowrap w-full">
           <button
             onClick={() => setActiveTab('plans')}
             className={cn(
-              "px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shadow-xs",
+              "px-3.5 sm:px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shadow-xs shrink-0 whitespace-nowrap",
               activeTab === 'plans'
                 ? "bg-emerald-600 text-white shadow-emerald-600/20"
                 : "bg-white text-slate-600 hover:bg-slate-50 border border-slate-200/80"
@@ -1300,7 +1300,7 @@ export default function AdminPlansPage() {
           <button
             onClick={() => setActiveTab('features')}
             className={cn(
-              "px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shadow-xs",
+              "px-3.5 sm:px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shadow-xs shrink-0 whitespace-nowrap",
               activeTab === 'features'
                 ? "bg-emerald-600 text-white shadow-emerald-600/20"
                 : "bg-white text-slate-600 hover:bg-slate-50 border border-slate-200/80"
@@ -1319,7 +1319,7 @@ export default function AdminPlansPage() {
           <button
             onClick={() => setActiveTab('assignments')}
             className={cn(
-              "px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shadow-xs",
+              "px-3.5 sm:px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shadow-xs shrink-0 whitespace-nowrap",
               activeTab === 'assignments'
                 ? "bg-emerald-600 text-white shadow-emerald-600/20"
                 : "bg-white text-slate-600 hover:bg-slate-50 border border-slate-200/80"
@@ -1336,10 +1336,10 @@ export default function AdminPlansPage() {
           </button>
         </div>
 
-        {/* ── 4. TAB 1: PLANS (3-Column Clean Card Layout) ── */}
+        {/* ── 4. TAB 1: PLANS (Clean Responsive Card Grid) ── */}
         {activeTab === 'plans' && (
           <div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {plans.map((plan) => {
                 const keys = plan.feature_keys || [];
                 const dynamicChannelCount = keys.filter(k => {
@@ -1358,23 +1358,23 @@ export default function AdminPlansPage() {
                 return (
                   <div
                     key={plan.id}
-                    className="bg-white rounded-3xl border border-slate-200/90 shadow-sm hover:shadow-lg transition-all p-6 flex flex-col justify-between relative group"
+                    className="bg-white rounded-3xl border border-slate-200/90 shadow-sm hover:shadow-lg transition-all p-4 sm:p-6 flex flex-col justify-between relative group w-full min-w-0"
                   >
                     <div>
                       {/* Top Header: Badge & Status */}
-                      <div className="flex items-center justify-between gap-2 mb-3">
-                        <div className="flex items-center gap-2">
+                      <div className="flex items-start justify-between gap-2 mb-3">
+                        <div className="flex items-center gap-1.5 flex-wrap min-w-0">
                           <h3 className="text-base font-black text-slate-900 tracking-tight">
                             {plan.name.toUpperCase()}
                           </h3>
                           {plan.is_popular && (
-                            <span className="px-2 py-0.5 bg-amber-50 text-amber-700 text-[10px] font-bold rounded-full border border-amber-200">
+                            <span className="px-2 py-0.5 bg-amber-50 text-amber-700 text-[10px] font-bold rounded-full border border-amber-200 shrink-0">
                               Popular
                             </span>
                           )}
                         </div>
                         <span className={cn(
-                          "px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase border tracking-wider",
+                          "px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase border tracking-wider shrink-0 whitespace-nowrap",
                           plan.status === 'ACTIVE' 
                             ? "bg-emerald-50 text-emerald-700 border-emerald-200" 
                             : "bg-rose-50 text-rose-700 border-rose-200"
@@ -1389,8 +1389,13 @@ export default function AdminPlansPage() {
                       </p>
 
                       {/* Mini Feature Logo Icons Preview */}
+<<<<<<< HEAD
                       <div className="flex items-center gap-1.5 flex-wrap mb-4 bg-slate-50/70 p-2.5 rounded-2xl border border-slate-100">
                         {keys.slice(0, 8).map(fKey => (
+=======
+                      <div className="flex items-center gap-1.5 flex-wrap mb-4 bg-slate-50/70 p-2 sm:p-2.5 rounded-2xl border border-slate-100">
+                        {(plan.feature_keys || []).slice(0, 8).map(fKey => (
+>>>>>>> 94b54952226b3ad19859c01b320d1521b6d8d97a
                           <div key={fKey} title={fKey} className="hover:scale-110 transition-transform">
                             {getFeatureBrandLogo(fKey, 18)}
                           </div>
@@ -1415,30 +1420,42 @@ export default function AdminPlansPage() {
                       </div>
 
                       {/* Feature & Channel Metrics List */}
-                      <div className="space-y-3 mb-6 text-xs text-slate-700 font-medium">
-                        <div className="flex items-center justify-between">
-                          <span className="text-slate-500 flex items-center gap-1.5">
-                            <Zap size={14} className="text-emerald-600" /> Features
+                      <div className="space-y-2.5 sm:space-y-3 mb-6 text-xs text-slate-700 font-medium">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="text-slate-500 flex items-center gap-1.5 shrink-0">
+                            <Zap size={14} className="text-emerald-600 shrink-0" /> Features
                           </span>
+<<<<<<< HEAD
                           <span className="font-bold text-slate-900">{dynamicFeatureCount} Features</span>
+=======
+                          <span className="font-bold text-slate-900 text-right whitespace-nowrap">{totalFeatCount} Features</span>
+>>>>>>> 94b54952226b3ad19859c01b320d1521b6d8d97a
                         </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-slate-500 flex items-center gap-1.5">
-                            <Link2 size={14} className="text-teal-600" /> Channels
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="text-slate-500 flex items-center gap-1.5 shrink-0">
+                            <Link2 size={14} className="text-teal-600 shrink-0" /> Channels
                           </span>
+<<<<<<< HEAD
                           <span className="font-bold text-slate-900">{dynamicChannelCount} Channels</span>
+=======
+                          <span className="font-bold text-slate-900 text-right whitespace-nowrap">{plan.channel_count || 3} Channels</span>
+>>>>>>> 94b54952226b3ad19859c01b320d1521b6d8d97a
                         </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-slate-500 flex items-center gap-1.5">
-                            <Share2 size={14} className="text-blue-600" /> Connectors
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="text-slate-500 flex items-center gap-1.5 shrink-0">
+                            <Share2 size={14} className="text-blue-600 shrink-0" /> Connectors
                           </span>
+<<<<<<< HEAD
                           <span className="font-bold text-slate-900">{dynamicConnectorCount} Connectors</span>
+=======
+                          <span className="font-bold text-slate-900 text-right whitespace-nowrap">{plan.connector_count || 2} Connectors</span>
+>>>>>>> 94b54952226b3ad19859c01b320d1521b6d8d97a
                         </div>
-                        <div className="flex items-center justify-between pt-2 border-t border-slate-100">
-                          <span className="text-slate-500 flex items-center gap-1.5">
-                            <Users size={14} className="text-slate-400" /> Assigned Clients
+                        <div className="flex items-center justify-between gap-2 pt-2 border-t border-slate-100">
+                          <span className="text-slate-500 flex items-center gap-1.5 shrink-0">
+                            <Users size={14} className="text-slate-400 shrink-0" /> Assigned Clients
                           </span>
-                          <span className="font-extrabold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-100 text-[11px]">
+                          <span className="font-extrabold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-100 text-[11px] shrink-0 whitespace-nowrap">
                             {plan.client_count || 0} Clients
                           </span>
                         </div>
@@ -1462,9 +1479,14 @@ export default function AdminPlansPage() {
         {/* ── 5. TAB 2: FEATURES CATALOG (Grouped by Category) ── */}
         {activeTab === 'features' && (
           <div>
+<<<<<<< HEAD
             {/* Search & Add Feature Bar */}
             <div className="bg-white p-3.5 rounded-2xl border border-slate-200/80 shadow-2xs mb-6 flex flex-col md:flex-row items-center justify-between gap-3">
               <div className="relative w-full md:w-80">
+=======
+            <div className="bg-white p-3 sm:p-3.5 rounded-2xl border border-slate-200/80 shadow-2xs mb-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 sm:gap-3">
+              <div className="relative w-full sm:w-80">
+>>>>>>> 94b54952226b3ad19859c01b320d1521b6d8d97a
                 <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={15} />
                 <input
                   type="text"
@@ -1475,16 +1497,32 @@ export default function AdminPlansPage() {
                 />
               </div>
 
+<<<<<<< HEAD
               <div className="flex items-center gap-2.5 w-full md:w-auto">
+=======
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                <select
+                  value={featureCategoryFilter}
+                  onChange={(e) => setFeatureCategoryFilter(e.target.value)}
+                  className="flex-1 sm:flex-none px-3 py-2 bg-slate-50 hover:bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 outline-none focus:border-emerald-500 cursor-pointer"
+                >
+                  <option value="ALL">All Categories</option>
+                  {uniqueCategories.map(cat => (
+                    <option key={cat} value={cat}>{cat}</option>
+                  ))}
+                </select>
+
+>>>>>>> 94b54952226b3ad19859c01b320d1521b6d8d97a
                 <button
                   onClick={handleOpenAddFeature}
-                  className="flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs shadow-2xs transition-all cursor-pointer whitespace-nowrap"
+                  className="flex items-center justify-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs shadow-2xs transition-all cursor-pointer whitespace-nowrap shrink-0"
                 >
                   <Plus size={14} /> Add Feature
                 </button>
               </div>
             </div>
 
+<<<<<<< HEAD
             {/* ── Grouped Sections ── */}
             <div className="space-y-6">
               {/* ── CHANNELS SECTION ── */}
@@ -1735,6 +1773,75 @@ export default function AdminPlansPage() {
                   </div>
                 );
               })()}
+=======
+            <div className="bg-white rounded-2xl border border-slate-200/90 shadow-sm overflow-hidden w-full">
+              <div className="overflow-x-auto custom-scrollbar w-full">
+                <table className="w-full text-left border-collapse text-xs min-w-[620px]">
+                  <thead>
+                    <tr className="bg-slate-50/90 border-b border-slate-200 text-slate-500 font-bold uppercase text-[10px] tracking-wider whitespace-nowrap">
+                      <th className="py-3.5 px-4 sm:px-6">Feature</th>
+                      <th className="py-3.5 px-4 sm:px-6">Category</th>
+                      <th className="py-3.5 px-4 sm:px-6">Type</th>
+                      <th className="py-3.5 px-4 sm:px-6">Used In Plans</th>
+                      <th className="py-3.5 px-4 sm:px-6">Status</th>
+                      <th className="py-3.5 px-4 sm:px-6 text-right">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 font-sans">
+                    {filteredFeaturesList.map((f) => (
+                      <tr key={f.id} className="hover:bg-slate-50/70 transition-colors">
+                        <td className="py-3.5 px-4 sm:px-6 font-bold text-slate-900">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center shrink-0">
+                              {getFeatureBrandLogo(f.key, 20)}
+                            </div>
+                            <div className="flex flex-col min-w-0">
+                              <span className="truncate">{f.name}</span>
+                              <span className="text-[10px] font-mono text-slate-400 font-normal truncate">{f.key}</span>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="py-3.5 px-4 sm:px-6 whitespace-nowrap">
+                          <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-slate-100 text-slate-700 border border-slate-200">
+                            {f.category}
+                          </span>
+                        </td>
+                        <td className="py-3.5 px-4 sm:px-6 whitespace-nowrap">
+                          <span className={cn(
+                            "px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase border",
+                            f.feature_type === 'Channel' ? "bg-blue-50 text-blue-700 border-blue-200" :
+                            f.feature_type === 'Connector' ? "bg-purple-50 text-purple-700 border-purple-200" :
+                            "bg-teal-50 text-teal-700 border-teal-200"
+                          )}>
+                            {f.feature_type}
+                          </span>
+                        </td>
+                        <td className="py-3.5 px-4 sm:px-6 text-slate-600 font-medium whitespace-nowrap">
+                          {f.plan_count || plans.filter(p => p.feature_keys?.includes(f.key)).length} Plans
+                        </td>
+                        <td className="py-3.5 px-4 sm:px-6 whitespace-nowrap">
+                          <span className={cn(
+                            "px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase inline-flex items-center gap-1.5 border",
+                            f.is_active ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-slate-100 text-slate-500 border-slate-200"
+                          )}>
+                            <span className={cn("w-1.5 h-1.5 rounded-full", f.is_active ? "bg-emerald-500" : "bg-slate-400")} />
+                            {f.is_active ? 'Active' : 'Inactive'}
+                          </span>
+                        </td>
+                        <td className="py-3.5 px-4 sm:px-6 text-right whitespace-nowrap">
+                          <button
+                            onClick={() => showToast(`Feature "${f.name}" info loaded`)}
+                            className="px-3 py-1 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-lg text-xs font-bold transition-all cursor-pointer"
+                          >
+                            Manage
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+>>>>>>> 94b54952226b3ad19859c01b320d1521b6d8d97a
             </div>
           </div>
         )}
@@ -1742,8 +1849,8 @@ export default function AdminPlansPage() {
         {/* ── 6. TAB 3: CLIENT ASSIGNMENTS ── */}
         {activeTab === 'assignments' && (
           <div>
-            <div className="bg-white p-3.5 rounded-2xl border border-slate-200/80 shadow-2xs mb-4 flex flex-col md:flex-row items-center justify-between gap-3">
-              <div className="relative w-full md:w-80">
+            <div className="bg-white p-3 sm:p-3.5 rounded-2xl border border-slate-200/80 shadow-2xs mb-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 sm:gap-3">
+              <div className="relative w-full sm:w-80">
                 <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={15} />
                 <input
                   type="text"
@@ -1755,16 +1862,16 @@ export default function AdminPlansPage() {
               </div>
             </div>
 
-            <div className="bg-white rounded-2xl border border-slate-200/90 shadow-sm overflow-hidden">
-              <div className="overflow-x-auto custom-scrollbar">
-                <table className="w-full text-left border-collapse text-xs">
+            <div className="bg-white rounded-2xl border border-slate-200/90 shadow-sm overflow-hidden w-full">
+              <div className="overflow-x-auto custom-scrollbar w-full">
+                <table className="w-full text-left border-collapse text-xs min-w-[700px]">
                   <thead>
                     <tr className="bg-slate-50/90 border-b border-slate-200 text-slate-500 font-bold uppercase text-[10px] tracking-wider whitespace-nowrap">
-                      <th className="py-3.5 px-6">Client & Business</th>
-                      <th className="py-3.5 px-6">Assigned Plan</th>
-                      <th className="py-3.5 px-6">Plan Price</th>
-                      <th className="py-3.5 px-6">Custom Overrides</th>
-                      <th className="py-3.5 px-6 text-right">Actions</th>
+                      <th className="py-3.5 px-4 sm:px-6">Client & Business</th>
+                      <th className="py-3.5 px-4 sm:px-6">Assigned Plan</th>
+                      <th className="py-3.5 px-4 sm:px-6">Plan Price</th>
+                      <th className="py-3.5 px-4 sm:px-6">Custom Overrides</th>
+                      <th className="py-3.5 px-4 sm:px-6 text-right">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 font-sans">
@@ -1774,21 +1881,21 @@ export default function AdminPlansPage() {
 
                       return (
                         <tr key={client.id} className="hover:bg-slate-50/70 transition-colors">
-                          <td className="py-4 px-6 font-bold text-slate-900">
-                            <div className="flex flex-col">
-                              <span>{client.business_name}</span>
-                              <span className="text-[11px] text-slate-400 font-normal">{client.email}</span>
+                          <td className="py-4 px-4 sm:px-6 font-bold text-slate-900">
+                            <div className="flex flex-col min-w-0">
+                              <span className="truncate">{client.business_name}</span>
+                              <span className="text-[11px] text-slate-400 font-normal truncate">{client.email}</span>
                             </div>
                           </td>
-                          <td className="py-4 px-6">
+                          <td className="py-4 px-4 sm:px-6 whitespace-nowrap">
                             <span className="px-3 py-1 rounded-full text-xs font-extrabold uppercase bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-2xs">
                               {client.plan_name || clientPlan?.name || 'Starter'}
                             </span>
                           </td>
-                          <td className="py-4 px-6 font-semibold text-slate-700">
+                          <td className="py-4 px-4 sm:px-6 font-semibold text-slate-700 whitespace-nowrap">
                             ₹{clientPlan?.price ? clientPlan.price.toLocaleString() : '999'} / mo
                           </td>
-                          <td className="py-4 px-6">
+                          <td className="py-4 px-4 sm:px-6 whitespace-nowrap">
                             <div className="flex items-center gap-1.5">
                               <span className="text-xs font-bold text-slate-700">{totalFeats} Total</span>
                               {client.custom_added?.length > 0 && (
@@ -1803,17 +1910,17 @@ export default function AdminPlansPage() {
                               )}
                             </div>
                           </td>
-                          <td className="py-4 px-6 text-right">
-                            <div className="flex items-center justify-end gap-2">
+                          <td className="py-4 px-4 sm:px-6 text-right whitespace-nowrap">
+                            <div className="flex items-center justify-end gap-1.5 sm:gap-2">
                               <button
                                 onClick={() => handleOpenChangeClientPlan(client)}
-                                className="px-3 py-1.5 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-2xs"
+                                className="px-2.5 sm:px-3 py-1.5 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-2xs"
                               >
                                 Change Plan
                               </button>
                               <button
                                 onClick={() => handleOpenClientFeatureManagement(client)}
-                                className="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-2xs"
+                                className="px-2.5 sm:px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-2xs"
                               >
                                 Manage Features
                               </button>
@@ -1833,10 +1940,11 @@ export default function AdminPlansPage() {
             7. CENTERED MODAL: CREATE / EDIT PLAN (Multi-Tab Admin Editor)
            ════════════════════════════════════════════════════════════════ */}
         {(isCreatePlanModalOpen || isEditPlanModalOpen) && (
-          <div className="fixed inset-0 z-[260] flex items-center justify-center p-4 sm:p-6 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150">
-            <div className="relative w-full max-w-3xl bg-white rounded-3xl shadow-2xl border border-slate-200 flex flex-col max-h-[90vh] overflow-hidden animate-in zoom-in-95 duration-150">
+          <div className="fixed inset-0 z-[260] flex items-center justify-center p-2.5 sm:p-4 md:p-6 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150">
+            <div className="relative w-full max-w-3xl bg-white rounded-2xl sm:rounded-3xl shadow-2xl border border-slate-200 flex flex-col max-h-[92vh] sm:max-h-[90vh] overflow-hidden animate-in zoom-in-95 duration-150">
               
               {/* Modal Header */}
+<<<<<<< HEAD
               <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50/80">
                 <div>
                   <h2 className="text-lg font-black text-slate-900 tracking-tight">
@@ -1844,12 +1952,21 @@ export default function AdminPlansPage() {
                   </h2>
                   <p className="text-xs text-slate-500 font-medium mt-0.5">
                     Configure pricing, channels, features, limits, message costs, and additional benefits for this plan.
+=======
+              <div className="px-4 py-3.5 sm:px-6 sm:py-5 border-b border-slate-200 flex items-center justify-between bg-slate-50/80">
+                <div className="min-w-0 pr-2">
+                  <h2 className="text-base sm:text-lg font-black text-slate-900 tracking-tight truncate">
+                    {isCreatePlanModalOpen ? 'CREATE NEW PLAN' : `EDIT PLAN: ${editingPlan?.name.toUpperCase()}`}
+                  </h2>
+                  <p className="text-[11px] sm:text-xs text-slate-500 font-medium mt-0.5 truncate">
+                    {isCreatePlanModalOpen ? 'Configure plan attributes & select feature entitlements' : 'Modify plan pricing and toggle feature access'}
+>>>>>>> 94b54952226b3ad19859c01b320d1521b6d8d97a
                   </p>
                 </div>
                 <button
                   type="button"
                   onClick={() => { setIsCreatePlanModalOpen(false); setIsEditPlanModalOpen(false); }}
-                  className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition-all cursor-pointer"
+                  className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition-all cursor-pointer shrink-0"
                 >
                   <X size={18} />
                 </button>
@@ -1883,6 +2000,7 @@ export default function AdminPlansPage() {
               </div>
 
               {/* Modal Body */}
+<<<<<<< HEAD
               <form onSubmit={isCreatePlanModalOpen ? handleCreatePlanSubmit : handleEditPlanSubmit} className="flex flex-col flex-1 min-h-0 overflow-hidden">
                 
                 {/* Scrollable Tab Content Container */}
@@ -1920,6 +2038,13 @@ export default function AdminPlansPage() {
                       </div>
                     </div>
 
+=======
+              <form onSubmit={isCreatePlanModalOpen ? handleCreatePlanSubmit : handleEditPlanSubmit} className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-6 space-y-4 sm:space-y-6">
+                
+                {/* 1. Plan Basic Info */}
+                <div className="bg-slate-50/80 p-3.5 sm:p-5 rounded-2xl border border-slate-200/80 space-y-3 sm:space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+>>>>>>> 94b54952226b3ad19859c01b320d1521b6d8d97a
                     <div>
                       <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
                         Short Description
@@ -2215,6 +2340,7 @@ export default function AdminPlansPage() {
                   </div>
                 )}
 
+<<<<<<< HEAD
                 {/* TAB 5: FEATURES & GROUPS */}
                 {modalEditorTab === 'features' && (
                   <div className="space-y-6">
@@ -2234,6 +2360,70 @@ export default function AdminPlansPage() {
                           setPlanForm({ ...planForm, feature_groups: groups });
                         }}
                         className="px-3 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-lg text-xs font-bold cursor-pointer"
+=======
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3">
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-600 mb-1">Billing Cycle</label>
+                      <select
+                        value={planForm.billing_cycle}
+                        onChange={(e) => setPlanForm({ ...planForm, billing_cycle: e.target.value })}
+                        className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-700 outline-none focus:border-emerald-500 cursor-pointer"
+                      >
+                        <option value="Monthly">Monthly</option>
+                        <option value="Yearly">Yearly</option>
+                        <option value="Quarterly">Quarterly</option>
+                        <option value="Custom">Custom</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-600 mb-1">Currency</label>
+                      <select
+                        value={planForm.currency}
+                        onChange={(e) => setPlanForm({ ...planForm, currency: e.target.value })}
+                        className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-700 outline-none focus:border-emerald-500 cursor-pointer"
+                      >
+                        <option value="INR">INR (₹)</option>
+                        <option value="USD">USD ($)</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-600 mb-1">Status</label>
+                      <select
+                        value={planForm.status}
+                        onChange={(e) => setPlanForm({ ...planForm, status: e.target.value })}
+                        className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-700 outline-none focus:border-emerald-500 cursor-pointer"
+                      >
+                        <option value="ACTIVE">Active ●</option>
+                        <option value="INACTIVE">Inactive ○</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 2. Feature Entitlements Section (With Logos!) */}
+                <div>
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+                    <div>
+                      <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
+                        <Zap size={14} className="text-emerald-600" /> FEATURE ENTITLEMENTS
+                      </h4>
+                      <p className="text-[11px] text-slate-400 font-medium mt-0.5">
+                        {planForm.selected_feature_keys.length} of {features.length} features enabled in this plan
+                      </p>
+                    </div>
+
+                    {/* Category Filter Pills */}
+                    <div className="flex items-center gap-1 overflow-x-auto pb-1 max-w-full no-scrollbar flex-nowrap">
+                      <button
+                        type="button"
+                        onClick={() => setModalActiveCategory('ALL')}
+                        className={cn(
+                          "px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all whitespace-nowrap cursor-pointer shrink-0",
+                          modalActiveCategory === 'ALL' ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                        )}
+>>>>>>> 94b54952226b3ad19859c01b320d1521b6d8d97a
                       >
                         + Add Feature Group
                       </button>
@@ -2328,12 +2518,20 @@ export default function AdminPlansPage() {
 
                         <button
                           type="button"
+<<<<<<< HEAD
                           onClick={() => {
                             const groups = [...planForm.feature_groups];
                             groups[gIdx].features.push({ name: 'New Feature Item', description: '', enabled: true });
                             setPlanForm({ ...planForm, feature_groups: groups });
                           }}
                           className="text-xs font-bold text-emerald-600 hover:underline cursor-pointer"
+=======
+                          onClick={() => setModalActiveCategory(cat)}
+                          className={cn(
+                            "px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all whitespace-nowrap cursor-pointer shrink-0",
+                            modalActiveCategory === cat ? "bg-emerald-600 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                          )}
+>>>>>>> 94b54952226b3ad19859c01b320d1521b6d8d97a
                         >
                           + Add Feature Item
                         </button>
@@ -2456,38 +2654,127 @@ export default function AdminPlansPage() {
                             }}
                             className="text-slate-400 hover:text-rose-600 p-1 self-end sm:self-center"
                           >
+<<<<<<< HEAD
                             <X size={16} />
                           </button>
                         </div>
                       ))}
                     </div>
+=======
+                            {/* Category Header */}
+                            <div className="flex items-center justify-between px-3.5 sm:px-4 py-2.5 bg-slate-50 border-b border-slate-100">
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs font-black text-slate-800 uppercase tracking-wide">
+                                  {category}
+                                </span>
+                                <span className="text-[10px] font-mono text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full font-bold border border-emerald-100">
+                                  {selectedCount} / {categoryFeatures.length}
+                                </span>
+                              </div>
+
+                              <button
+                                type="button"
+                                onClick={() => toggleSelectAllCategory(category)}
+                                className="text-[11px] font-bold text-emerald-600 hover:text-emerald-700 hover:underline cursor-pointer"
+                              >
+                                {allCatSelected ? 'Deselect All' : 'Select All'}
+                              </button>
+                            </div>
+
+                            {/* Feature Grid List with Logos */}
+                            <div className="p-2.5 sm:p-3 grid grid-cols-1 sm:grid-cols-2 gap-2 bg-white">
+                              {categoryFeatures.map((feat) => {
+                                const isChecked = planForm.selected_feature_keys.includes(feat.key);
+                                return (
+                                  <div
+                                    key={feat.key}
+                                    onClick={() => toggleSingleFeatureInForm(feat.key)}
+                                    className={cn(
+                                      "flex items-center justify-between p-2.5 sm:p-3 rounded-2xl border transition-all cursor-pointer select-none group min-w-0",
+                                      isChecked 
+                                        ? "bg-emerald-50/50 border-emerald-300 ring-1 ring-emerald-400/20 shadow-2xs" 
+                                        : "bg-white border-slate-200/90 hover:bg-slate-50"
+                                    )}
+                                  >
+                                    <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+                                      {/* Brand Logo / Icon */}
+                                      <div className="w-8 h-8 rounded-xl bg-white border border-slate-200/80 shadow-2xs flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform p-0.5">
+                                        {getFeatureBrandLogo(feat.key, 20)}
+                                      </div>
+
+                                      <div className="min-w-0">
+                                        <p className={cn("text-xs font-extrabold truncate leading-tight", isChecked ? "text-slate-900" : "text-slate-600")}>
+                                          {feat.name}
+                                        </p>
+                                        <p className="text-[10px] text-slate-400 truncate mt-0.5">{feat.description}</p>
+                                      </div>
+                                    </div>
+
+                                    <div className="flex items-center gap-2 shrink-0 ml-2">
+                                      <span className="text-[9px] font-mono text-slate-400 uppercase font-semibold hidden sm:inline">
+                                        {feat.feature_type}
+                                      </span>
+                                      <div className={cn(
+                                        "w-5 h-5 rounded-lg border flex items-center justify-center transition-all",
+                                        isChecked 
+                                          ? "bg-emerald-600 border-emerald-600 text-white shadow-xs" 
+                                          : "border-slate-300 bg-white"
+                                      )}>
+                                        {isChecked && <CheckCircle2 size={13} className="text-white" />}
+                                      </div>
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        );
+                      })}
+>>>>>>> 94b54952226b3ad19859c01b320d1521b6d8d97a
                   </div>
                 )}
                 </div>
 
+<<<<<<< HEAD
                 {/* Modal Footer Actions (Fixed Bottom Bar) */}
                 <div className="px-6 py-4 border-t border-slate-200 flex items-center justify-between gap-3 bg-slate-50/80 shrink-0">
+=======
+                {/* Modal Footer Actions */}
+                <div className="pt-3 sm:pt-4 border-t border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sticky bottom-0 bg-white pb-2">
+>>>>>>> 94b54952226b3ad19859c01b320d1521b6d8d97a
                   {isEditPlanModalOpen && editingPlan ? (
                     <button
                       type="button"
                       onClick={() => handleDeletePlan(editingPlan.id, editingPlan.name)}
+<<<<<<< HEAD
                       className="px-4 py-2 text-rose-600 hover:bg-rose-50 border border-rose-200 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1"
+=======
+                      className="px-4 py-2 text-rose-600 hover:bg-rose-50 border border-rose-200 rounded-xl text-xs font-bold transition-all cursor-pointer w-full sm:w-auto"
+>>>>>>> 94b54952226b3ad19859c01b320d1521b6d8d97a
                     >
                       <Trash2 size={14} /> Delete Plan
                     </button>
                   ) : <div />}
 
-                  <div className="flex items-center gap-2.5">
+                  <div className="flex items-center gap-2 w-full sm:w-auto">
                     <button
                       type="button"
                       onClick={() => { setIsCreatePlanModalOpen(false); setIsEditPlanModalOpen(false); }}
+<<<<<<< HEAD
                       className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all cursor-pointer"
+=======
+                      className="flex-1 sm:flex-none px-4 py-2 text-slate-600 hover:bg-slate-100 border border-slate-200 rounded-xl text-xs font-bold transition-all cursor-pointer text-center"
+>>>>>>> 94b54952226b3ad19859c01b320d1521b6d8d97a
                     >
                       Cancel
                     </button>
                     <button
                       type="submit"
+<<<<<<< HEAD
                       className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-xs transition-all cursor-pointer"
+=======
+                      className="flex-1 sm:flex-none px-6 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-md shadow-emerald-600/20 transition-all cursor-pointer flex items-center justify-center gap-1.5"
+>>>>>>> 94b54952226b3ad19859c01b320d1521b6d8d97a
                     >
                       {isCreatePlanModalOpen ? 'Create Plan' : 'Save Changes'}
                     </button>
@@ -2503,25 +2790,25 @@ export default function AdminPlansPage() {
             8. CENTERED MODAL: ADD FEATURE
            ════════════════════════════════════════════════════════════════ */}
         {isAddFeatureModalOpen && (
-          <div className="fixed inset-0 z-[260] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150">
-            <div className="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl border border-slate-200 flex flex-col overflow-hidden animate-in zoom-in-95 duration-150">
+          <div className="fixed inset-0 z-[260] flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150">
+            <div className="relative w-full max-w-lg bg-white rounded-2xl sm:rounded-3xl shadow-2xl border border-slate-200 flex flex-col overflow-hidden animate-in zoom-in-95 duration-150">
               
-              <div className="px-6 py-5 border-b border-slate-200 flex items-center justify-between bg-slate-50/80">
-                <div>
-                  <h2 className="text-base font-black text-slate-900 tracking-tight">ADD FEATURE TO CATALOG</h2>
-                  <p className="text-xs text-slate-500 font-medium mt-0.5">
+              <div className="px-4 py-3.5 sm:px-6 sm:py-5 border-b border-slate-200 flex items-center justify-between bg-slate-50/80">
+                <div className="min-w-0 pr-2">
+                  <h2 className="text-sm sm:text-base font-black text-slate-900 tracking-tight truncate">ADD FEATURE TO CATALOG</h2>
+                  <p className="text-[11px] sm:text-xs text-slate-500 font-medium mt-0.5 truncate">
                     Register a new modular entitlement into UWO Connect
                   </p>
                 </div>
                 <button
                   onClick={() => setIsAddFeatureModalOpen(false)}
-                  className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition-all cursor-pointer"
+                  className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition-all cursor-pointer shrink-0"
                 >
                   <X size={18} />
                 </button>
               </div>
 
-              <form onSubmit={handleAddFeatureSubmit} className="p-6 space-y-4">
+              <form onSubmit={handleAddFeatureSubmit} className="p-4 sm:p-6 space-y-3.5 sm:space-y-4">
                 <div>
                   <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
                     Feature Name *
@@ -2549,7 +2836,7 @@ export default function AdminPlansPage() {
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
                       Category
@@ -2594,7 +2881,7 @@ export default function AdminPlansPage() {
                   />
                 </div>
 
-                <div className="pt-4 border-t border-slate-200 flex items-center justify-end gap-2.5">
+                <div className="pt-3 sm:pt-4 border-t border-slate-200 flex items-center justify-end gap-2">
                   <button
                     type="button"
                     onClick={() => setIsAddFeatureModalOpen(false)}
@@ -2618,24 +2905,24 @@ export default function AdminPlansPage() {
             9. CENTERED MODAL: CHANGE CLIENT PLAN
            ════════════════════════════════════════════════════════════════ */}
         {isChangePlanModalOpen && selectedClientForPlanChange && (
-          <div className="fixed inset-0 z-[260] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150">
-            <div className="bg-white rounded-3xl border border-slate-200 max-w-lg w-full shadow-2xl p-6 relative animate-in zoom-in-95 duration-150">
+          <div className="fixed inset-0 z-[260] flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150">
+            <div className="bg-white rounded-2xl sm:rounded-3xl border border-slate-200 max-w-lg w-full shadow-2xl p-4 sm:p-6 relative animate-in zoom-in-95 duration-150">
               <div className="flex items-center justify-between mb-4">
-                <div>
-                  <h3 className="text-base font-black text-slate-900">CHANGE CLIENT PLAN</h3>
-                  <p className="text-xs text-slate-400">
+                <div className="min-w-0 pr-2">
+                  <h3 className="text-base font-black text-slate-900 truncate">CHANGE CLIENT PLAN</h3>
+                  <p className="text-xs text-slate-400 truncate">
                     Client: <strong className="text-slate-700">{selectedClientForPlanChange.business_name}</strong>
                   </p>
                 </div>
                 <button
                   onClick={() => setIsChangePlanModalOpen(false)}
-                  className="p-1 text-slate-400 hover:text-slate-600 rounded-lg cursor-pointer"
+                  className="p-1 text-slate-400 hover:text-slate-600 rounded-lg cursor-pointer shrink-0"
                 >
                   <X size={18} />
                 </button>
               </div>
 
-              <div className="space-y-2.5 my-5">
+              <div className="space-y-2.5 my-4 sm:my-5 max-h-[60vh] overflow-y-auto custom-scrollbar pr-1">
                 {plans.map((plan) => {
                   const isSelected = tempSelectedPlanId === plan.id;
                   return (
@@ -2643,25 +2930,25 @@ export default function AdminPlansPage() {
                       key={plan.id}
                       onClick={() => setTempSelectedPlanId(plan.id)}
                       className={cn(
-                        "flex items-center justify-between p-4 rounded-2xl border transition-all cursor-pointer",
+                        "flex items-center justify-between p-3.5 sm:p-4 rounded-2xl border transition-all cursor-pointer min-w-0",
                         isSelected 
                           ? "border-emerald-600 bg-emerald-50/70 ring-2 ring-emerald-600/10 shadow-xs" 
                           : "border-slate-200 bg-white hover:bg-slate-50"
                       )}
                     >
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
                         <div className={cn(
-                          "w-4 h-4 rounded-full border flex items-center justify-center",
+                          "w-4 h-4 rounded-full border flex items-center justify-center shrink-0",
                           isSelected ? "border-emerald-600 bg-emerald-600" : "border-slate-300"
                         )}>
                           {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
                         </div>
-                        <div>
-                          <p className="text-xs font-black text-slate-900">{plan.name}</p>
-                          <p className="text-[11px] text-slate-500 font-normal">{plan.feature_keys?.length || 0} Features Included</p>
+                        <div className="min-w-0">
+                          <p className="text-xs font-black text-slate-900 truncate">{plan.name}</p>
+                          <p className="text-[11px] text-slate-500 font-normal truncate">{plan.feature_keys?.length || 0} Features Included</p>
                         </div>
                       </div>
-                      <span className="text-xs font-black text-slate-900">
+                      <span className="text-xs font-black text-slate-900 shrink-0 ml-2 whitespace-nowrap">
                         ₹{plan.price.toLocaleString()} / mo
                       </span>
                     </label>
@@ -2669,7 +2956,7 @@ export default function AdminPlansPage() {
                 })}
               </div>
 
-              <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100">
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
                 <button
                   onClick={() => setIsChangePlanModalOpen(false)}
                   className="px-4 py-2 text-slate-600 hover:bg-slate-100 border border-slate-200 rounded-xl text-xs font-bold transition-all cursor-pointer"
@@ -2691,28 +2978,28 @@ export default function AdminPlansPage() {
             10. CENTERED MODAL: CLIENT FEATURE MANAGEMENT (With Logos!)
            ════════════════════════════════════════════════════════════════ */}
         {isManageClientFeaturesOpen && clientForFeatureManagement && (
-          <div className="fixed inset-0 z-[260] flex items-center justify-center p-4 sm:p-6 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150">
-            <div className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl border border-slate-200 flex flex-col max-h-[85vh] overflow-hidden animate-in zoom-in-95 duration-150">
+          <div className="fixed inset-0 z-[260] flex items-center justify-center p-2.5 sm:p-4 md:p-6 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150">
+            <div className="relative w-full max-w-2xl bg-white rounded-2xl sm:rounded-3xl shadow-2xl border border-slate-200 flex flex-col max-h-[92vh] sm:max-h-[85vh] overflow-hidden animate-in zoom-in-95 duration-150">
               
-              <div className="px-6 py-5 border-b border-slate-200 flex items-center justify-between bg-slate-50/80">
-                <div>
-                  <h2 className="text-base font-black text-slate-900 tracking-tight">CLIENT FEATURE ACCESS</h2>
-                  <p className="text-xs text-slate-500 font-medium mt-0.5">
+              <div className="px-4 py-3.5 sm:px-6 sm:py-5 border-b border-slate-200 flex items-center justify-between bg-slate-50/80">
+                <div className="min-w-0 pr-2">
+                  <h2 className="text-sm sm:text-base font-black text-slate-900 tracking-tight truncate">CLIENT FEATURE ACCESS</h2>
+                  <p className="text-[11px] sm:text-xs text-slate-500 font-medium mt-0.5 truncate">
                     {clientForFeatureManagement.business_name} (Plan: <strong>{clientForFeatureManagement.plan_name}</strong>)
                   </p>
                 </div>
                 <button
                   onClick={() => setIsManageClientFeaturesOpen(false)}
-                  className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition-all cursor-pointer"
+                  className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition-all cursor-pointer shrink-0"
                 >
                   <X size={18} />
                 </button>
               </div>
 
-              <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-4">
-                <div className="bg-emerald-50/70 border border-emerald-200/80 p-3.5 rounded-2xl text-xs text-emerald-900">
+              <div className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-6 space-y-3.5 sm:space-y-4">
+                <div className="bg-emerald-50/70 border border-emerald-200/80 p-3 sm:p-3.5 rounded-2xl text-xs text-emerald-900">
                   <p className="font-bold flex items-center gap-1.5">
-                    <Sparkles size={15} className="text-emerald-600" /> Custom Feature Override Control
+                    <Sparkles size={15} className="text-emerald-600 shrink-0" /> Custom Feature Override Control
                   </p>
                   <p className="text-[11px] text-emerald-700 mt-1">
                     Toggle individual features ON/OFF for this specific client workspace.
@@ -2731,32 +3018,32 @@ export default function AdminPlansPage() {
                     return (
                       <div
                         key={feat.key}
-                        className="flex items-center justify-between p-3.5 rounded-2xl border border-slate-200 bg-white hover:bg-slate-50 transition-all"
+                        className="flex items-center justify-between p-3 sm:p-3.5 rounded-2xl border border-slate-200 bg-white hover:bg-slate-50 transition-all min-w-0 gap-2"
                       >
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
                           <div className="w-8 h-8 rounded-xl bg-slate-50 border border-slate-200/80 flex items-center justify-center shrink-0 p-0.5">
-                            {getFeatureBrandLogo(feat.key, 22)}
+                            {getFeatureBrandLogo(feat.key, 20)}
                           </div>
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <p className="text-xs font-bold text-slate-900">{feat.name}</p>
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                              <p className="text-xs font-bold text-slate-900 truncate">{feat.name}</p>
                               {isInBasePlan && (
-                                <span className="px-1.5 py-0.5 bg-slate-100 text-slate-600 text-[9px] font-bold rounded">
+                                <span className="px-1.5 py-0.5 bg-slate-100 text-slate-600 text-[9px] font-bold rounded shrink-0">
                                   Base Plan
                                 </span>
                               )}
                               {isCustomAdded && (
-                                <span className="px-1.5 py-0.5 bg-emerald-100 text-emerald-800 text-[9px] font-bold rounded">
+                                <span className="px-1.5 py-0.5 bg-emerald-100 text-emerald-800 text-[9px] font-bold rounded shrink-0">
                                   Custom Granted
                                 </span>
                               )}
                               {isCustomRemoved && (
-                                <span className="px-1.5 py-0.5 bg-rose-100 text-rose-800 text-[9px] font-bold rounded">
+                                <span className="px-1.5 py-0.5 bg-rose-100 text-rose-800 text-[9px] font-bold rounded shrink-0">
                                   Revoked
                                 </span>
                               )}
                             </div>
-                            <p className="text-[10px] text-slate-400 font-mono mt-0.5">{feat.category} • {feat.feature_type}</p>
+                            <p className="text-[10px] text-slate-400 font-mono mt-0.5 truncate">{feat.category} • {feat.feature_type}</p>
                           </div>
                         </div>
 
@@ -2764,7 +3051,7 @@ export default function AdminPlansPage() {
                           type="button"
                           onClick={() => toggleClientCustomFeature(feat.key, isEffectiveActive)}
                           className={cn(
-                            "w-11 h-6 flex items-center rounded-full p-1 transition-colors cursor-pointer",
+                            "w-11 h-6 flex items-center rounded-full p-1 transition-colors cursor-pointer shrink-0 ml-2",
                             isEffectiveActive ? "bg-emerald-600 justify-end" : "bg-slate-300 justify-start"
                           )}
                         >
@@ -2776,7 +3063,7 @@ export default function AdminPlansPage() {
                 </div>
               </div>
 
-              <div className="px-6 py-4 border-t border-slate-200 flex items-center justify-end bg-white">
+              <div className="px-4 py-3 sm:px-6 sm:py-4 border-t border-slate-200 flex items-center justify-end bg-white">
                 <button
                   onClick={() => {
                     setIsManageClientFeaturesOpen(false);
