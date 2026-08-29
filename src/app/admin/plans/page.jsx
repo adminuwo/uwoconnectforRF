@@ -364,7 +364,8 @@ const INITIAL_PLANS = [
     badge: 'STARTER',
     status: 'ACTIVE',
     description: 'Essential communication tools for solo entrepreneurs & small businesses.',
-    price: 999,
+    price: 499,
+    yearly_price: 4999,
     billing_cycle: 'Monthly',
     currency: 'INR',
     feature_keys: [
@@ -384,11 +385,12 @@ const INITIAL_PLANS = [
   },
   {
     id: 'plan-pro',
-    name: 'Professional',
-    badge: 'PROFESSIONAL',
+    name: 'Growth',
+    badge: 'GROWTH',
     status: 'ACTIVE',
     description: 'Complete sales automation, AI bots, invoicing and team intelligence.',
-    price: 2999,
+    price: 1599,
+    yearly_price: 15999,
     billing_cycle: 'Monthly',
     currency: 'INR',
     feature_keys: [
@@ -419,11 +421,12 @@ const INITIAL_PLANS = [
   },
   {
     id: 'plan-enterprise',
-    name: 'Enterprise',
-    badge: 'ENTERPRISE',
+    name: 'Advanced',
+    badge: 'ADVANCED',
     status: 'ACTIVE',
     description: 'Unlimited features, custom connectors, AI auto-pilot, audit logs and SLA.',
-    price: 9999,
+    price: 2499,
+    yearly_price: 24999,
     billing_cycle: 'Monthly',
     currency: 'INR',
     feature_keys: DEFAULT_FEATURES.map(f => f.key),
@@ -500,15 +503,48 @@ export default function AdminPlansPage() {
   }, [features]);
 
   // ── Form States ──
+  const createDefaultCycleConfig = (defaultPrice, defaultChannels = '1') => ({
+    price: defaultPrice,
+    max_channels: defaultChannels,
+    selected_feature_keys: DEFAULT_FEATURES.slice(0, 8).map(f => f.key),
+    whatsapp_what_you_get: "WhatsApp Business API Automation\nShared Team Inbox for WhatsApp\nAutomated Keyword Replies\nContact & Lead Sync",
+    whatsapp_features: "WhatsApp Auto Replies\nShared Inbox\nKeyword Triggers\nContact Management",
+    whatsapp_marketing_cost: '₹0.970',
+    whatsapp_auth_cost: '₹0.129',
+    whatsapp_utility_cost: '₹0.160',
+    whatsapp_service_cost: 'FREE',
+    custom_fields_limit: '15',
+    custom_tags_limit: '15',
+    custom_events_limit: '5'
+  });
+
+  // ── Form States ──
   const [planForm, setPlanForm] = useState({
     name: '',
     description: '',
-    price: '',
-    billing_cycle: 'Monthly',
+    badge_text: '',
     currency: 'INR',
     status: 'ACTIVE',
-    selected_feature_keys: []
+    activeCycle: 'monthly',
+    monthlyConfig: createDefaultCycleConfig('999', '1'),
+    yearlyConfig: createDefaultCycleConfig('9590', '1')
   });
+
+  const updateActiveConfigField = (field, value) => {
+    const cycle = planForm.activeCycle || 'monthly';
+    const configKey = cycle === 'yearly' ? 'yearlyConfig' : 'monthlyConfig';
+    setPlanForm(prev => ({
+      ...prev,
+      [configKey]: {
+        ...(prev[configKey] || {}),
+        [field]: value
+      }
+    }));
+  };
+
+  const getActiveConfig = () => {
+    return (planForm.activeCycle === 'yearly' ? planForm.yearlyConfig : planForm.monthlyConfig) || {};
+  };
 
   const [featureForm, setFeatureForm] = useState({
     name: '',
@@ -548,21 +584,60 @@ export default function AdminPlansPage() {
         setFeatures(featuresRes.value.data.results);
       }
       if (plansRes.status === 'fulfilled' && plansRes.value.data?.results?.length > 0) {
-        const mappedPlans = plansRes.value.data.results.map(p => ({
-          id: p.id,
-          name: p.name,
-          badge: p.name.toUpperCase(),
-          status: p.is_active ? 'ACTIVE' : 'INACTIVE',
-          description: p.description || 'Custom Enterprise Plan',
-          price: p.price || 0,
-          billing_cycle: p.billing_cycle || 'Monthly',
-          currency: p.currency || 'INR',
-          feature_keys: p.feature_keys || [],
-          channel_count: p.channel_count || 4,
-          connector_count: p.connector_count || 3,
-          client_count: p.client_count || 0,
-          is_popular: p.is_popular || false
-        }));
+        const mappedPlans = plansRes.value.data.results.map(p => {
+          const meta = p.metadata || {};
+          const legacyWA = p.channel_details?.whatsapp || {};
+
+          const extractConfigFromPlan = (cycleName, defaultPrice) => {
+            const saved = meta[`${cycleName}Config`] || meta[`${cycleName}_config`] || p[`${cycleName}Config`];
+            if (saved) return saved;
+
+            const mP = p.monthly_price || p.price || 999;
+            const yP = p.yearly_price || Math.round(mP * 12 * 0.85);
+            const price = cycleName === 'monthly' ? mP : yP;
+
+            return {
+              price: price.toString(),
+              max_channels: (p.max_channels || 1).toString(),
+              selected_feature_keys: p.feature_keys || [],
+              custom_fields_limit: (legacyWA.limits?.custom_fields?.value || 15).toString(),
+              custom_tags_limit: (legacyWA.limits?.custom_tags?.value || 15).toString(),
+              custom_events_limit: (legacyWA.limits?.events?.value || 5).toString(),
+              whatsapp_what_you_get: Array.isArray(legacyWA.what_you_get) ? legacyWA.what_you_get.join('\n') : "WhatsApp Business API Automation\nShared Team Inbox for WhatsApp\nAutomated Keyword Replies\nContact & Lead Sync",
+              whatsapp_features: Array.isArray(legacyWA.features) ? legacyWA.features.join('\n') : "WhatsApp Auto Replies\nShared Inbox\nKeyword Triggers\nContact Management",
+              whatsapp_marketing_cost: legacyWA.message_costs?.find(c => c.type === 'Marketing')?.price || '₹0.970',
+              whatsapp_auth_cost: legacyWA.message_costs?.find(c => c.type === 'Authentication')?.price || '₹0.129',
+              whatsapp_utility_cost: legacyWA.message_costs?.find(c => c.type === 'Utility')?.price || '₹0.160',
+              whatsapp_service_cost: legacyWA.message_costs?.find(c => c.type === 'Service')?.price || 'FREE'
+            };
+          };
+
+          const mConfig = extractConfigFromPlan('monthly', 999);
+          const yConfig = extractConfigFromPlan('yearly', 9590);
+
+          return {
+            id: p.id,
+            name: p.name,
+            badge: p.name.toUpperCase(),
+            badge_text: p.badge_text || p.name.toUpperCase(),
+            status: p.is_active ? 'ACTIVE' : 'INACTIVE',
+            description: p.description || 'Custom Enterprise Plan',
+            price: Number(mConfig.price) || p.price || 0,
+            monthly_price: Number(mConfig.price) || p.price || 0,
+            yearly_price: Number(yConfig.price) || Math.round((p.price || 999) * 12 * 0.85),
+            billing_cycle: p.billing_cycle || 'Monthly',
+            currency: p.currency || 'INR',
+            feature_keys: p.feature_keys || [],
+            monthlyConfig: mConfig,
+            yearlyConfig: yConfig,
+            channel_count: p.channel_count || 4,
+            connector_count: p.connector_count || 3,
+            client_count: p.client_count || 0,
+            is_popular: p.is_popular || false,
+            channel_details: p.channel_details || {},
+            metadata: meta
+          };
+        });
         setPlans(mappedPlans);
       }
       if (clientsRes.status === 'fulfilled' && (clientsRes.value.data?.clients || clientsRes.value.data?.results)) {
@@ -634,10 +709,13 @@ export default function AdminPlansPage() {
     });
   }, [clients, assignmentSearch]);
 
-  // ── Select All within a Category in Form ──
+  // ── Select All within a Category in Form (Independent per Cycle) ──
   const toggleSelectAllCategory = (cat) => {
     const catFeatKeys = (categorizedFeatures[cat] || []).map(f => f.key);
-    const currentSelected = new Set(planForm.selected_feature_keys);
+    const cycle = planForm.activeCycle || 'monthly';
+    const configKey = cycle === 'yearly' ? 'yearlyConfig' : 'monthlyConfig';
+    const currentConfig = planForm[configKey] || {};
+    const currentSelected = new Set(currentConfig.selected_feature_keys || []);
     const allSelected = catFeatKeys.every(k => currentSelected.has(k));
 
     if (allSelected) {
@@ -648,12 +726,18 @@ export default function AdminPlansPage() {
 
     setPlanForm(prev => ({
       ...prev,
-      selected_feature_keys: Array.from(currentSelected)
+      [configKey]: {
+        ...prev[configKey],
+        selected_feature_keys: Array.from(currentSelected)
+      }
     }));
   };
 
   const toggleSingleFeatureInForm = (featKey) => {
-    const currentSelected = new Set(planForm.selected_feature_keys);
+    const cycle = planForm.activeCycle || 'monthly';
+    const configKey = cycle === 'yearly' ? 'yearlyConfig' : 'monthlyConfig';
+    const currentConfig = planForm[configKey] || {};
+    const currentSelected = new Set(currentConfig.selected_feature_keys || []);
     if (currentSelected.has(featKey)) {
       currentSelected.delete(featKey);
     } else {
@@ -661,7 +745,10 @@ export default function AdminPlansPage() {
     }
     setPlanForm(prev => ({
       ...prev,
-      selected_feature_keys: Array.from(currentSelected)
+      [configKey]: {
+        ...prev[configKey],
+        selected_feature_keys: Array.from(currentSelected)
+      }
     }));
   };
 
@@ -672,74 +759,76 @@ export default function AdminPlansPage() {
     setPlanForm({
       name: '',
       description: '',
-      price: '',
-      yearly_price: '',
       badge_text: '',
-      max_channels: '1',
-      billing_cycle: 'Monthly',
       currency: 'INR',
       status: 'ACTIVE',
-      selected_feature_keys: DEFAULT_FEATURES.slice(0, 8).map(f => f.key),
-      whatsapp_what_you_get: "WhatsApp Business API Automation\nShared Team Inbox for WhatsApp\nAutomated Keyword Replies\nContact & Lead Sync",
-      whatsapp_features: "WhatsApp Auto Replies\nShared Inbox\nKeyword Triggers\nContact Management",
-      whatsapp_marketing_cost: '₹0.970',
-      whatsapp_auth_cost: '₹0.129',
-      whatsapp_utility_cost: '₹0.160',
-      whatsapp_service_cost: 'FREE',
-      custom_fields_limit: '15',
-      custom_tags_limit: '15',
-      custom_events_limit: '5'
+      activeCycle: 'monthly',
+      monthlyConfig: createDefaultCycleConfig('999', '1'),
+      yearlyConfig: createDefaultCycleConfig('9590', '1')
     });
     setIsCreatePlanModalOpen(true);
   };
 
   // ── Open Edit / Manage Plan Modal ──
-  const handleOpenManagePlan = (plan) => {
+  const handleOpenManagePlan = (plan, targetCycle = 'monthly') => {
     setEditingPlan(plan);
     setModalActiveCategory('ALL');
     setModalEditorTab('basic');
-    const mPrice = plan.monthly_price || plan.price || 999;
-    const yPrice = plan.yearly_price || Math.round(mPrice * 12 * 0.85);
 
-    const waDetails = plan.channel_details?.whatsapp || {};
-    const waGet = waDetails.what_you_get || [
-      'WhatsApp Business API Automation',
-      'Shared Team Inbox for WhatsApp',
-      'Automated Keyword Replies',
-      'Contact & Lead Sync'
-    ];
-    const waFeat = waDetails.features || [
-      'WhatsApp Auto Replies',
-      'Shared Inbox',
-      'Keyword Triggers',
-      'Contact Management'
-    ];
-    const waCosts = waDetails.message_costs || [];
-    const waLimits = waDetails.limits || {};
+    const meta = plan.metadata || {};
+    const legacyWA = plan.channel_details?.whatsapp || {};
+
+    const extractConfig = (cycleName, defaultPrice) => {
+      const savedConfig = meta[`${cycleName}Config`] || meta[`${cycleName}_config`] || plan[`${cycleName}Config`];
+      if (savedConfig) {
+        return {
+          price: (savedConfig.price || defaultPrice).toString(),
+          max_channels: (savedConfig.max_channels || plan.max_channels || 1).toString(),
+          selected_feature_keys: savedConfig.selected_feature_keys || plan.feature_keys || [],
+          custom_fields_limit: (savedConfig.custom_fields_limit || legacyWA.limits?.custom_fields?.value || 15).toString(),
+          custom_tags_limit: (savedConfig.custom_tags_limit || legacyWA.limits?.custom_tags?.value || 15).toString(),
+          custom_events_limit: (savedConfig.custom_events_limit || legacyWA.limits?.events?.value || 5).toString(),
+          whatsapp_what_you_get: savedConfig.whatsapp_what_you_get || (Array.isArray(legacyWA.what_you_get) ? legacyWA.what_you_get.join('\n') : "WhatsApp Business API Automation\nShared Team Inbox for WhatsApp\nAutomated Keyword Replies\nContact & Lead Sync"),
+          whatsapp_features: savedConfig.whatsapp_features || (Array.isArray(legacyWA.features) ? legacyWA.features.join('\n') : "WhatsApp Auto Replies\nShared Inbox\nKeyword Triggers\nContact Management"),
+          whatsapp_marketing_cost: savedConfig.whatsapp_marketing_cost || legacyWA.message_costs?.find(c => c.type === 'Marketing')?.price || '₹0.970',
+          whatsapp_auth_cost: savedConfig.whatsapp_auth_cost || legacyWA.message_costs?.find(c => c.type === 'Authentication')?.price || '₹0.129',
+          whatsapp_utility_cost: savedConfig.whatsapp_utility_cost || legacyWA.message_costs?.find(c => c.type === 'Utility')?.price || '₹0.160',
+          whatsapp_service_cost: savedConfig.whatsapp_service_cost || legacyWA.message_costs?.find(c => c.type === 'Service')?.price || 'FREE'
+        };
+      }
+
+      // Legacy fallback
+      const mP = plan.monthly_price || plan.price || 999;
+      const yP = plan.yearly_price || Math.round(mP * 12 * 0.85);
+      const price = cycleName === 'monthly' ? mP : yP;
+
+      return {
+        price: price.toString(),
+        max_channels: (plan.max_channels || (plan.name?.toLowerCase().includes('starter') ? 1 : plan.name?.toLowerCase().includes('growth') ? 2 : 3)).toString(),
+        selected_feature_keys: plan.feature_keys || [],
+        custom_fields_limit: (legacyWA.limits?.custom_fields?.value || 15).toString(),
+        custom_tags_limit: (legacyWA.limits?.custom_tags?.value || 15).toString(),
+        custom_events_limit: (legacyWA.limits?.events?.value || 5).toString(),
+        whatsapp_what_you_get: Array.isArray(legacyWA.what_you_get) ? legacyWA.what_you_get.join('\n') : "WhatsApp Business API Automation\nShared Team Inbox for WhatsApp\nAutomated Keyword Replies\nContact & Lead Sync",
+        whatsapp_features: Array.isArray(legacyWA.features) ? legacyWA.features.join('\n') : "WhatsApp Auto Replies\nShared Inbox\nKeyword Triggers\nContact Management",
+        whatsapp_marketing_cost: legacyWA.message_costs?.find(c => c.type === 'Marketing')?.price || '₹0.970',
+        whatsapp_auth_cost: legacyWA.message_costs?.find(c => c.type === 'Authentication')?.price || '₹0.129',
+        whatsapp_utility_cost: legacyWA.message_costs?.find(c => c.type === 'Utility')?.price || '₹0.160',
+        whatsapp_service_cost: legacyWA.message_costs?.find(c => c.type === 'Service')?.price || 'FREE'
+      };
+    };
 
     setPlanForm({
       name: plan.name,
       description: plan.description || '',
-      price: mPrice.toString(),
-      yearly_price: yPrice.toString(),
       badge_text: plan.badge_text || plan.badge || '',
-      max_channels: (plan.max_channels || (plan.name.toLowerCase().includes('starter') ? 1 : plan.name.toLowerCase().includes('growth') ? 2 : 3)).toString(),
-      billing_cycle: plan.billing_cycle || 'Monthly',
       currency: plan.currency || 'INR',
       status: plan.status || 'ACTIVE',
-      selected_feature_keys: plan.feature_keys || [],
-
-      // Matrix Drill-Down Fields
-      whatsapp_what_you_get: Array.isArray(waGet) ? waGet.join('\n') : waGet,
-      whatsapp_features: Array.isArray(waFeat) ? waFeat.join('\n') : waFeat,
-      whatsapp_marketing_cost: waCosts.find(c => c.type === 'Marketing')?.price || '₹0.970',
-      whatsapp_auth_cost: waCosts.find(c => c.type === 'Authentication')?.price || '₹0.129',
-      whatsapp_utility_cost: waCosts.find(c => c.type === 'Utility')?.price || '₹0.160',
-      whatsapp_service_cost: waCosts.find(c => c.type === 'Service')?.price || 'FREE',
-      custom_fields_limit: (waLimits.custom_fields?.value || 15).toString(),
-      custom_tags_limit: (waLimits.custom_tags?.value || 15).toString(),
-      custom_events_limit: (waLimits.events?.value || 5).toString()
+      activeCycle: targetCycle,
+      monthlyConfig: extractConfig('monthly', 999),
+      yearlyConfig: extractConfig('yearly', 9590)
     });
+
     setIsEditPlanModalOpen(true);
   };
 
@@ -751,33 +840,35 @@ export default function AdminPlansPage() {
       return;
     }
 
-    const mPrice = Number(planForm.price) || 0;
-    const yPrice = Number(planForm.yearly_price) || Math.round(mPrice * 12 * 0.8);
-    const mChannels = Number(planForm.max_channels) || 1;
+    const mConfig = planForm.monthlyConfig;
+    const yConfig = planForm.yearlyConfig;
+    const mPrice = Number(mConfig.price) || 0;
+    const yPrice = Number(yConfig.price) || 0;
 
-    const updatedWhatYouGet = (planForm.whatsapp_what_you_get || '').split('\n').map(s => s.trim()).filter(Boolean);
-    const updatedFeatures = (planForm.whatsapp_features || '').split('\n').map(s => s.trim()).filter(Boolean);
-
-    const channelDetailsObj = {
-      whatsapp: {
-        name: 'WhatsApp',
-        what_you_get: updatedWhatYouGet.length > 0 ? updatedWhatYouGet : ['WhatsApp Business API Automation'],
-        features: updatedFeatures.length > 0 ? updatedFeatures : ['WhatsApp Auto Replies'],
-        limits: {
-          messages: { value: 'unlimited', label: 'Messages', description: 'Based on your WhatsApp Number' },
-          contacts: { value: 'unlimited', label: 'Contacts' },
-          custom_fields: { value: planForm.custom_fields_limit || '15', label: 'Custom Fields' },
-          custom_tags: { value: planForm.custom_tags_limit || '15', label: 'Custom Tags' },
-          events: { value: planForm.custom_events_limit || '—', label: 'Custom Events' }
-        },
-        message_costs: [
-          { type: 'Marketing', price: planForm.whatsapp_marketing_cost || '₹0.970' },
-          { type: 'Authentication', price: planForm.whatsapp_auth_cost || '₹0.129' },
-          { type: 'Utility', price: planForm.whatsapp_utility_cost || '₹0.160' },
-          { type: 'Service', price: planForm.whatsapp_service_cost || 'FREE' }
-        ],
-        additional_benefits: ['No Markup Charges', 'Standard Support']
-      }
+    const buildChannelDetailsForCycle = (config) => {
+      const updatedWhatYouGet = (config.whatsapp_what_you_get || '').split('\n').map(s => s.trim()).filter(Boolean);
+      const updatedFeatures = (config.whatsapp_features || '').split('\n').map(s => s.trim()).filter(Boolean);
+      return {
+        whatsapp: {
+          name: 'WhatsApp',
+          what_you_get: updatedWhatYouGet.length > 0 ? updatedWhatYouGet : ['WhatsApp Business API Automation'],
+          features: updatedFeatures.length > 0 ? updatedFeatures : ['WhatsApp Auto Replies'],
+          limits: {
+            messages: { value: 'unlimited', label: 'Messages', description: 'Based on your WhatsApp Number' },
+            contacts: { value: 'unlimited', label: 'Contacts' },
+            custom_fields: { value: config.custom_fields_limit || '15', label: 'Custom Fields' },
+            custom_tags: { value: config.custom_tags_limit || '15', label: 'Custom Tags' },
+            events: { value: config.custom_events_limit || '—', label: 'Custom Events' }
+          },
+          message_costs: [
+            { type: 'Marketing', price: config.whatsapp_marketing_cost || '₹0.970' },
+            { type: 'Authentication', price: config.whatsapp_auth_cost || '₹0.129' },
+            { type: 'Utility', price: config.whatsapp_utility_cost || '₹0.160' },
+            { type: 'Service', price: config.whatsapp_service_cost || 'FREE' }
+          ],
+          additional_benefits: ['No Markup Charges', 'Standard Support']
+        }
+      };
     };
 
     const newPlanObj = {
@@ -790,15 +881,16 @@ export default function AdminPlansPage() {
       price: mPrice,
       monthly_price: mPrice,
       yearly_price: yPrice,
-      max_channels: mChannels,
-      billing_cycle: planForm.billing_cycle,
+      max_channels: Number(mConfig.max_channels) || 1,
       currency: planForm.currency,
-      feature_keys: planForm.selected_feature_keys,
-      channel_count: mChannels,
-      connector_count: planForm.selected_feature_keys.filter(k => k.startsWith('connector_')).length || 1,
+      feature_keys: mConfig.selected_feature_keys,
+      monthlyConfig: mConfig,
+      yearlyConfig: yConfig,
+      channel_count: Number(mConfig.max_channels) || 1,
+      connector_count: mConfig.selected_feature_keys.filter(k => k.startsWith('connector_')).length || 1,
       client_count: 0,
       is_popular: false,
-      channel_details: channelDetailsObj
+      channel_details: buildChannelDetailsForCycle(mConfig)
     };
 
     try {
@@ -811,11 +903,16 @@ export default function AdminPlansPage() {
         yearly_price: newPlanObj.yearly_price,
         badge_text: newPlanObj.badge_text,
         max_channels: newPlanObj.max_channels,
-        billing_cycle: newPlanObj.billing_cycle,
         currency: newPlanObj.currency,
         is_active: newPlanObj.status === 'ACTIVE',
         feature_keys: newPlanObj.feature_keys,
-        metadata: { channel_details: channelDetailsObj }
+        monthlyConfig: mConfig,
+        yearlyConfig: yConfig,
+        metadata: {
+          monthlyConfig: mConfig,
+          yearlyConfig: yConfig,
+          channel_details: buildChannelDetailsForCycle(mConfig)
+        }
       }, { headers: { Authorization: `Bearer ${token}` } });
     } catch (err) {
       console.log('Saved to local pool:', err);
@@ -823,7 +920,7 @@ export default function AdminPlansPage() {
 
     setPlans(prev => [newPlanObj, ...prev]);
     setIsCreatePlanModalOpen(false);
-    showToast(`Plan "${newPlanObj.name}" created successfully!`);
+    showToast(`Plan "${newPlanObj.name}" created with independent Monthly & Yearly configurations!`);
   };
 
   // ── Submit Edit Plan ──
@@ -831,36 +928,35 @@ export default function AdminPlansPage() {
     e.preventDefault();
     if (!editingPlan) return;
 
-    const mPrice = Number(planForm.price) || 0;
-    const yPrice = Number(planForm.yearly_price) || Math.round(mPrice * 12 * 0.85);
-    const mChannels = Number(planForm.max_channels) || 1;
+    const mConfig = planForm.monthlyConfig;
+    const yConfig = planForm.yearlyConfig;
+    const mPrice = Number(mConfig.price) || 0;
+    const yPrice = Number(yConfig.price) || 0;
 
-    const updatedWhatYouGet = (planForm.whatsapp_what_you_get || '').split('\n').map(s => s.trim()).filter(Boolean);
-    const updatedFeatures = (planForm.whatsapp_features || '').split('\n').map(s => s.trim()).filter(Boolean);
-
-    const existingWA = editingPlan.channel_details?.whatsapp || {};
-    const updatedChannelDetails = {
-      ...editingPlan.channel_details,
-      whatsapp: {
-        ...existingWA,
-        name: 'WhatsApp',
-        what_you_get: updatedWhatYouGet.length > 0 ? updatedWhatYouGet : (existingWA.what_you_get || []),
-        features: updatedFeatures.length > 0 ? updatedFeatures : (existingWA.features || []),
-        limits: {
-          messages: { value: 'unlimited', label: 'Messages', description: 'Based on your WhatsApp Number' },
-          contacts: { value: 'unlimited', label: 'Contacts' },
-          custom_fields: { value: planForm.custom_fields_limit || '15', label: 'Custom Fields' },
-          custom_tags: { value: planForm.custom_tags_limit || '15', label: 'Custom Tags' },
-          events: { value: planForm.custom_events_limit || '—', label: 'Custom Events' }
-        },
-        message_costs: [
-          { type: 'Marketing', price: planForm.whatsapp_marketing_cost || '₹0.970' },
-          { type: 'Authentication', price: planForm.whatsapp_auth_cost || '₹0.129' },
-          { type: 'Utility', price: planForm.whatsapp_utility_cost || '₹0.160' },
-          { type: 'Service', price: planForm.whatsapp_service_cost || 'FREE' }
-        ],
-        additional_benefits: existingWA.additional_benefits || ['No Markup Charges', 'Standard Support']
-      }
+    const buildChannelDetailsForCycle = (config) => {
+      const updatedWhatYouGet = (config.whatsapp_what_you_get || '').split('\n').map(s => s.trim()).filter(Boolean);
+      const updatedFeatures = (config.whatsapp_features || '').split('\n').map(s => s.trim()).filter(Boolean);
+      return {
+        whatsapp: {
+          name: 'WhatsApp',
+          what_you_get: updatedWhatYouGet.length > 0 ? updatedWhatYouGet : ['WhatsApp Business API Automation'],
+          features: updatedFeatures.length > 0 ? updatedFeatures : ['WhatsApp Auto Replies'],
+          limits: {
+            messages: { value: 'unlimited', label: 'Messages', description: 'Based on your WhatsApp Number' },
+            contacts: { value: 'unlimited', label: 'Contacts' },
+            custom_fields: { value: config.custom_fields_limit || '15', label: 'Custom Fields' },
+            custom_tags: { value: config.custom_tags_limit || '15', label: 'Custom Tags' },
+            events: { value: config.custom_events_limit || '—', label: 'Custom Events' }
+          },
+          message_costs: [
+            { type: 'Marketing', price: config.whatsapp_marketing_cost || '₹0.970' },
+            { type: 'Authentication', price: config.whatsapp_auth_cost || '₹0.129' },
+            { type: 'Utility', price: config.whatsapp_utility_cost || '₹0.160' },
+            { type: 'Service', price: config.whatsapp_service_cost || 'FREE' }
+          ],
+          additional_benefits: ['No Markup Charges', 'Standard Support']
+        }
+      };
     };
 
     const updatedPlanObj = {
@@ -873,41 +969,45 @@ export default function AdminPlansPage() {
       price: mPrice,
       monthly_price: mPrice,
       yearly_price: yPrice,
-      max_channels: mChannels,
-      billing_cycle: planForm.billing_cycle,
+      max_channels: Number(mConfig.max_channels) || 1,
       currency: planForm.currency,
-      feature_keys: planForm.selected_feature_keys,
-      channel_count: mChannels,
-      connector_count: planForm.selected_feature_keys.filter(k => k.startsWith('connector_')).length || 1,
-      channel_details: updatedChannelDetails,
+      feature_keys: mConfig.selected_feature_keys,
+      monthlyConfig: mConfig,
+      yearlyConfig: yConfig,
+      channel_count: Number(mConfig.max_channels) || 1,
+      connector_count: mConfig.selected_feature_keys.filter(k => k.startsWith('connector_')).length || 1,
+      channel_details: buildChannelDetailsForCycle(mConfig),
       metadata: {
         ...(editingPlan.metadata || {}),
+        monthlyConfig: mConfig,
+        yearlyConfig: yConfig,
         monthly_price: mPrice,
         yearly_price: yPrice,
-        channel_details: updatedChannelDetails
+        channel_details: buildChannelDetailsForCycle(mConfig)
       }
     };
 
     try {
       const token = localStorage.getItem('token');
-      await axios.put(`${API_BASE_URL}/api/plans/${editingPlan.id}/`, {
-        name: updatedPlanObj.name,
-        description: updatedPlanObj.description,
-        price: updatedPlanObj.price,
-        monthly_price: updatedPlanObj.monthly_price,
-        yearly_price: updatedPlanObj.yearly_price,
-        badge_text: updatedPlanObj.badge_text,
-        max_channels: updatedPlanObj.max_channels,
-        billing_cycle: updatedPlanObj.billing_cycle,
-        currency: updatedPlanObj.currency,
-        is_active: updatedPlanObj.status === 'ACTIVE',
-        feature_keys: updatedPlanObj.feature_keys,
-        metadata: {
+      await Promise.allSettled([
+        axios.put(`${API_BASE_URL}/api/plans/${editingPlan.id}/monthly/`, { monthlyConfig: mConfig }, { headers: { Authorization: `Bearer ${token}` } }),
+        axios.put(`${API_BASE_URL}/api/plans/${editingPlan.id}/yearly/`, { yearlyConfig: yConfig }, { headers: { Authorization: `Bearer ${token}` } }),
+        axios.put(`${API_BASE_URL}/api/plans/${editingPlan.id}/`, {
+          name: updatedPlanObj.name,
+          description: updatedPlanObj.description,
+          price: updatedPlanObj.price,
           monthly_price: mPrice,
           yearly_price: yPrice,
-          channel_details: updatedChannelDetails
-        }
-      }, { headers: { Authorization: `Bearer ${token}` } });
+          badge_text: updatedPlanObj.badge_text,
+          max_channels: updatedPlanObj.max_channels,
+          currency: updatedPlanObj.currency,
+          is_active: updatedPlanObj.status === 'ACTIVE',
+          feature_keys: updatedPlanObj.feature_keys,
+          monthlyConfig: mConfig,
+          yearlyConfig: yConfig,
+          metadata: updatedPlanObj.metadata
+        }, { headers: { Authorization: `Bearer ${token}` } })
+      ]);
     } catch (err) {
       console.log('Updated in state pool:', err);
     }
@@ -915,7 +1015,7 @@ export default function AdminPlansPage() {
     setPlans(prev => prev.map(p => p.id === editingPlan.id ? updatedPlanObj : p));
     setIsEditPlanModalOpen(false);
     setEditingPlan(null);
-    showToast(`Plan "${updatedPlanObj.name}" updated successfully!`);
+    showToast(`Plan "${updatedPlanObj.name}" updated with independent Monthly & Yearly configurations!`);
   };
 
   // ── Delete Plan ──
@@ -1596,10 +1696,58 @@ export default function AdminPlansPage() {
               {/* Modal Body */}
               <form onSubmit={isCreatePlanModalOpen ? handleCreatePlanSubmit : handleEditPlanSubmit} className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-6 space-y-4 sm:space-y-6">
                 
+                {/* ── Cycle Switcher Bar ── */}
+                <div className="bg-slate-100 p-1.5 rounded-2xl flex items-center gap-1.5 border border-slate-200 shadow-inner">
+                  <button
+                    type="button"
+                    onClick={() => setPlanForm(prev => ({ ...prev, activeCycle: 'monthly' }))}
+                    className={cn(
+                      "flex-1 py-2 px-3 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2 cursor-pointer",
+                      planForm.activeCycle === 'monthly'
+                        ? "bg-emerald-600 text-white shadow-md shadow-emerald-600/20"
+                        : "bg-white text-slate-600 hover:text-slate-900 border border-slate-200/80"
+                    )}
+                  >
+                    <Calendar size={14} />
+                    <span>🗓️ Monthly Billing Config</span>
+                    <span className={cn(
+                      "text-[10px] px-2 py-0.5 rounded-full font-mono font-bold",
+                      planForm.activeCycle === 'monthly' ? "bg-white/20 text-white" : "bg-slate-100 text-slate-700"
+                    )}>
+                      ₹{planForm.monthlyConfig?.price || 0}/mo
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPlanForm(prev => ({ ...prev, activeCycle: 'yearly' }))}
+                    className={cn(
+                      "flex-1 py-2 px-3 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2 cursor-pointer",
+                      planForm.activeCycle === 'yearly'
+                        ? "bg-emerald-600 text-white shadow-md shadow-emerald-600/20"
+                        : "bg-white text-slate-600 hover:text-slate-900 border border-slate-200/80"
+                    )}
+                  >
+                    <Calendar size={14} />
+                    <span>📅 Yearly Billing Config</span>
+                    <span className={cn(
+                      "text-[10px] px-2 py-0.5 rounded-full font-mono font-bold",
+                      planForm.activeCycle === 'yearly' ? "bg-white/20 text-white" : "bg-slate-100 text-slate-700"
+                    )}>
+                      ₹{planForm.yearlyConfig?.price || 0}/yr
+                    </span>
+                  </button>
+                </div>
+
+                {/* Active Cycle Indicator Banner */}
+                <div className="flex items-center justify-between px-3.5 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-[11px] font-extrabold">
+                  <span>Currently editing: <strong className="uppercase underline decoration-emerald-500">{planForm.activeCycle} BILLING CYCLE</strong></span>
+                  <span className="text-[10px] font-semibold text-emerald-700">Changes apply independently to this billing cycle only</span>
+                </div>
+
                 {/* TAB 1: BASIC INFO & PRICING */}
                 {modalEditorTab === 'basic' && (
                   <div className="bg-slate-50/80 p-3.5 sm:p-5 rounded-2xl border border-slate-200/80 space-y-3 sm:space-y-4">
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                       <div>
                         <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
                           Plan Name *
@@ -1616,7 +1764,7 @@ export default function AdminPlansPage() {
 
                       <div>
                         <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
-                          Monthly Price (₹ / Month) *
+                          {planForm.activeCycle === 'yearly' ? 'Yearly Price (₹ / Year) *' : 'Monthly Price (₹ / Month) *'}
                         </label>
                         <div className="relative">
                           <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">₹</span>
@@ -1624,32 +1772,8 @@ export default function AdminPlansPage() {
                             type="number"
                             required
                             placeholder="999"
-                            value={planForm.price}
-                            onChange={(e) => {
-                              const val = e.target.value;
-                              setPlanForm(prev => ({
-                                ...prev,
-                                price: val,
-                                yearly_price: (Number(val) * 12 * 0.85).toFixed(0)
-                              }));
-                            }}
-                            className="w-full pl-8 pr-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-900 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 transition-all"
-                          />
-                        </div>
-                      </div>
-
-                      <div>
-                        <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
-                          Yearly Price (₹ / Year) *
-                        </label>
-                        <div className="relative">
-                          <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">₹</span>
-                          <input
-                            type="number"
-                            required
-                            placeholder="9590"
-                            value={planForm.yearly_price || ''}
-                            onChange={(e) => setPlanForm({ ...planForm, yearly_price: e.target.value })}
+                            value={getActiveConfig().price || ''}
+                            onChange={(e) => updateActiveConfigField('price', e.target.value)}
                             className="w-full pl-8 pr-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-900 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 transition-all"
                           />
                         </div>
@@ -1672,13 +1796,13 @@ export default function AdminPlansPage() {
 
                       <div>
                         <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
-                          Max Channels Allowed
+                          Max Channels Allowed ({planForm.activeCycle.toUpperCase()})
                         </label>
                         <input
                           type="number"
                           placeholder="1, 2, 3..."
-                          value={planForm.max_channels || ''}
-                          onChange={(e) => setPlanForm({ ...planForm, max_channels: e.target.value })}
+                          value={getActiveConfig().max_channels || '1'}
+                          onChange={(e) => updateActiveConfigField('max_channels', e.target.value)}
                           className="w-full px-3.5 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-900 outline-none focus:border-emerald-500 transition-all"
                         />
                       </div>
@@ -1697,21 +1821,7 @@ export default function AdminPlansPage() {
                       />
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3">
-                      <div>
-                        <label className="block text-[11px] font-bold text-slate-600 mb-1">Billing Cycle</label>
-                        <select
-                          value={planForm.billing_cycle}
-                          onChange={(e) => setPlanForm({ ...planForm, billing_cycle: e.target.value })}
-                          className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-700 outline-none focus:border-emerald-500 cursor-pointer"
-                        >
-                          <option value="Monthly">Monthly</option>
-                          <option value="Yearly">Yearly</option>
-                          <option value="Quarterly">Quarterly</option>
-                          <option value="Custom">Custom</option>
-                        </select>
-                      </div>
-
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
                       <div>
                         <label className="block text-[11px] font-bold text-slate-600 mb-1">Currency</label>
                         <select
@@ -1744,16 +1854,16 @@ export default function AdminPlansPage() {
                   <div className="bg-slate-50/80 p-3.5 sm:p-5 rounded-2xl border border-slate-200/80 space-y-3">
                     <div>
                       <h4 className="text-xs font-black text-slate-900 uppercase tracking-wide mb-1">
-                        1. WHAT YOU GET (Channel Capabilities)
+                        1. WHAT YOU GET ({planForm.activeCycle.toUpperCase()} CHANNEL CAPABILITIES)
                       </h4>
                       <p className="text-[11px] text-slate-500 mb-2 font-medium">
-                        Enter each bullet point on a new line. These will be displayed under Section 1 ("WHAT YOU GET") in the comparison matrix for clients.
+                        Enter each bullet point on a new line for the <strong className="text-emerald-700 uppercase">{planForm.activeCycle}</strong> subscription matrix.
                       </p>
                       <textarea
                         rows={7}
                         placeholder={"WhatsApp Business API Automation\nShared Team Inbox for WhatsApp\nAutomated Keyword Replies\nContact & Lead Sync"}
-                        value={planForm.whatsapp_what_you_get}
-                        onChange={(e) => setPlanForm({ ...planForm, whatsapp_what_you_get: e.target.value })}
+                        value={getActiveConfig().whatsapp_what_you_get || ''}
+                        onChange={(e) => updateActiveConfigField('whatsapp_what_you_get', e.target.value)}
                         className="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-900 outline-none focus:border-emerald-500 leading-relaxed transition-all"
                       />
                     </div>
@@ -1765,16 +1875,16 @@ export default function AdminPlansPage() {
                   <div className="bg-slate-50/80 p-3.5 sm:p-5 rounded-2xl border border-slate-200/80 space-y-3">
                     <div>
                       <h4 className="text-xs font-black text-slate-900 uppercase tracking-wide mb-1">
-                        2. FEATURES & AUTOMATION
+                        2. FEATURES & AUTOMATION ({planForm.activeCycle.toUpperCase()})
                       </h4>
                       <p className="text-[11px] text-slate-500 mb-2 font-medium">
-                        Enter each feature point on a new line. These will appear under Section 2 ("FEATURES") in the comparison matrix.
+                        Enter each feature point on a new line for the <strong className="text-emerald-700 uppercase">{planForm.activeCycle}</strong> comparison matrix.
                       </p>
                       <textarea
                         rows={7}
                         placeholder={"WhatsApp Auto Replies\nShared Inbox\nKeyword Triggers\nContact Management"}
-                        value={planForm.whatsapp_features}
-                        onChange={(e) => setPlanForm({ ...planForm, whatsapp_features: e.target.value })}
+                        value={getActiveConfig().whatsapp_features || ''}
+                        onChange={(e) => updateActiveConfigField('whatsapp_features', e.target.value)}
                         className="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-900 outline-none focus:border-emerald-500 leading-relaxed transition-all"
                       />
                     </div>
@@ -1785,7 +1895,7 @@ export default function AdminPlansPage() {
                 {modalEditorTab === 'limits' && (
                   <div className="bg-slate-50/80 p-3.5 sm:p-5 rounded-2xl border border-slate-200/80 space-y-4">
                     <h4 className="text-xs font-black text-slate-900 uppercase tracking-wide mb-1">
-                      3. LIMITS & QUOTAS
+                      3. LIMITS & QUOTAS ({planForm.activeCycle.toUpperCase()})
                     </h4>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                       <div>
@@ -1795,8 +1905,8 @@ export default function AdminPlansPage() {
                         <input
                           type="text"
                           placeholder="e.g. 15, 25, 30"
-                          value={planForm.custom_fields_limit}
-                          onChange={(e) => setPlanForm({ ...planForm, custom_fields_limit: e.target.value })}
+                          value={getActiveConfig().custom_fields_limit || '15'}
+                          onChange={(e) => updateActiveConfigField('custom_fields_limit', e.target.value)}
                           className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-900 outline-none focus:border-emerald-500 transition-all"
                         />
                       </div>
@@ -1808,8 +1918,8 @@ export default function AdminPlansPage() {
                         <input
                           type="text"
                           placeholder="e.g. 15, 30, 45"
-                          value={planForm.custom_tags_limit}
-                          onChange={(e) => setPlanForm({ ...planForm, custom_tags_limit: e.target.value })}
+                          value={getActiveConfig().custom_tags_limit || '15'}
+                          onChange={(e) => updateActiveConfigField('custom_tags_limit', e.target.value)}
                           className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-900 outline-none focus:border-emerald-500 transition-all"
                         />
                       </div>
@@ -1821,8 +1931,8 @@ export default function AdminPlansPage() {
                         <input
                           type="text"
                           placeholder="e.g. —, 5, 7"
-                          value={planForm.custom_events_limit}
-                          onChange={(e) => setPlanForm({ ...planForm, custom_events_limit: e.target.value })}
+                          value={getActiveConfig().custom_events_limit || '5'}
+                          onChange={(e) => updateActiveConfigField('custom_events_limit', e.target.value)}
                           className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-900 outline-none focus:border-emerald-500 transition-all"
                         />
                       </div>
@@ -1834,7 +1944,7 @@ export default function AdminPlansPage() {
                 {modalEditorTab === 'costs' && (
                   <div className="bg-slate-50/80 p-3.5 sm:p-5 rounded-2xl border border-slate-200/80 space-y-4">
                     <h4 className="text-xs font-black text-slate-900 uppercase tracking-wide mb-1">
-                      4. MESSAGE COST & RATES (PER TEMPLATE)
+                      4. MESSAGE COST & RATES ({planForm.activeCycle.toUpperCase()})
                     </h4>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                       <div>
@@ -1844,8 +1954,8 @@ export default function AdminPlansPage() {
                         <input
                           type="text"
                           placeholder="e.g. ₹0.970"
-                          value={planForm.whatsapp_marketing_cost}
-                          onChange={(e) => setPlanForm({ ...planForm, whatsapp_marketing_cost: e.target.value })}
+                          value={getActiveConfig().whatsapp_marketing_cost || '₹0.970'}
+                          onChange={(e) => updateActiveConfigField('whatsapp_marketing_cost', e.target.value)}
                           className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-900 outline-none focus:border-emerald-500 transition-all"
                         />
                       </div>
@@ -1857,8 +1967,8 @@ export default function AdminPlansPage() {
                         <input
                           type="text"
                           placeholder="e.g. ₹0.129"
-                          value={planForm.whatsapp_auth_cost}
-                          onChange={(e) => setPlanForm({ ...planForm, whatsapp_auth_cost: e.target.value })}
+                          value={getActiveConfig().whatsapp_auth_cost || '₹0.129'}
+                          onChange={(e) => updateActiveConfigField('whatsapp_auth_cost', e.target.value)}
                           className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-900 outline-none focus:border-emerald-500 transition-all"
                         />
                       </div>
@@ -1870,8 +1980,8 @@ export default function AdminPlansPage() {
                         <input
                           type="text"
                           placeholder="e.g. ₹0.160"
-                          value={planForm.whatsapp_utility_cost}
-                          onChange={(e) => setPlanForm({ ...planForm, whatsapp_utility_cost: e.target.value })}
+                          value={getActiveConfig().whatsapp_utility_cost || '₹0.160'}
+                          onChange={(e) => updateActiveConfigField('whatsapp_utility_cost', e.target.value)}
                           className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-900 outline-none focus:border-emerald-500 transition-all"
                         />
                       </div>
@@ -1883,8 +1993,8 @@ export default function AdminPlansPage() {
                         <input
                           type="text"
                           placeholder="e.g. FREE"
-                          value={planForm.whatsapp_service_cost}
-                          onChange={(e) => setPlanForm({ ...planForm, whatsapp_service_cost: e.target.value })}
+                          value={getActiveConfig().whatsapp_service_cost || 'FREE'}
+                          onChange={(e) => updateActiveConfigField('whatsapp_service_cost', e.target.value)}
                           className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-900 outline-none focus:border-emerald-500 transition-all"
                         />
                       </div>
@@ -1898,10 +2008,10 @@ export default function AdminPlansPage() {
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
                       <div>
                         <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
-                          <Zap size={14} className="text-emerald-600" /> FEATURE ENTITLEMENTS
+                          <Zap size={14} className="text-emerald-600" /> FEATURE ENTITLEMENTS ({planForm.activeCycle.toUpperCase()})
                         </h4>
                         <p className="text-[11px] text-slate-400 font-medium mt-0.5">
-                          {planForm.selected_feature_keys.length} of {features.length} features enabled in this plan
+                          {(getActiveConfig().selected_feature_keys || []).length} of {features.length} features enabled in this {planForm.activeCycle} configuration
                         </p>
                       </div>
 
@@ -1939,7 +2049,8 @@ export default function AdminPlansPage() {
                         .filter(cat => modalActiveCategory === 'ALL' || modalActiveCategory === cat)
                         .map((category) => {
                           const categoryFeatures = categorizedFeatures[category] || [];
-                          const selectedCount = categoryFeatures.filter(f => planForm.selected_feature_keys.includes(f.key)).length;
+                          const activeKeys = getActiveConfig().selected_feature_keys || [];
+                          const selectedCount = categoryFeatures.filter(f => activeKeys.includes(f.key)).length;
                           const allCatSelected = categoryFeatures.length > 0 && selectedCount === categoryFeatures.length;
 
                           return (
@@ -1970,7 +2081,7 @@ export default function AdminPlansPage() {
                               {/* Feature Grid List with Logos */}
                               <div className="p-2.5 sm:p-3 grid grid-cols-1 sm:grid-cols-2 gap-2 bg-white">
                                 {categoryFeatures.map((feat) => {
-                                  const isChecked = planForm.selected_feature_keys.includes(feat.key);
+                                  const isChecked = activeKeys.includes(feat.key);
                                   return (
                                     <div
                                       key={feat.key}

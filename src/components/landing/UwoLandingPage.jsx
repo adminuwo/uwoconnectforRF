@@ -13,6 +13,7 @@ import { cn } from '@/lib/utils';
 import AutomationNetwork from './AutomationNetwork';
 import HeroWorkflowAnimation from './HeroWorkflowAnimation';
 import UWOLoginModal from '@/components/UWOLoginModal';
+import PricingComparisonTable from '@/components/pricing/PricingComparisonTable';
 
 // ── AUTHENTIC SVG BRAND LOGOS ──
 const WhatsAppLogo = ({ size = 22 }) => (
@@ -138,7 +139,7 @@ export default function UwoLandingPage() {
             <a href="#connectors" className="hover:text-emerald-600 transition-colors">Connectors</a>
             <a href="#features" className="hover:text-emerald-600 transition-colors">Features</a>
             <a href="#how-it-works" className="hover:text-emerald-600 transition-colors">How It Works</a>
-            <Link href="/client/plans" className="hover:text-emerald-600 transition-colors">Pricing</Link>
+            <a href="#pricing" className="hover:text-emerald-600 transition-colors">Pricing</a>
           </nav>
 
           {/* Auth CTAs */}
@@ -678,6 +679,26 @@ export default function UwoLandingPage() {
             </div>
           ))}
         </div>
+      </section>
+
+      {/* ════════════════════════════════════════════════════════════════ */}
+      {/* 11.5 PRICING & SUBSCRIPTION PLANS */}
+      {/* ════════════════════════════════════════════════════════════════ */}
+      <section id="pricing" className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto text-center border-t border-slate-200/80">
+        <div className="mb-10">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 text-emerald-800 text-xs font-black uppercase tracking-wider mb-3">
+            <Zap size={14} className="text-emerald-600" />
+            <span>TRANSPARENT PRICING & PLANS</span>
+          </div>
+          <h2 className="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight">
+            Flexible Plans Built for Growth
+          </h2>
+          <p className="text-sm text-slate-500 max-w-2xl mx-auto mt-2 font-medium">
+            Choose monthly or yearly billing. All plans include core channels, workspace connectors & sales automation.
+          </p>
+        </div>
+
+        <PricingComparisonTable onSelectPlan={() => router.push('/auth/login')} />
       </section>
 
       {/* ════════════════════════════════════════════════════════════════ */}

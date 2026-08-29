@@ -49,7 +49,7 @@ const SEEDED_FALLBACK_PLANS = [
     slug: 'starter',
     description: 'Perfect for small teams starting automation on 1 chosen channel',
     monthly_price: 499,
-    yearly_price: 999,
+    yearly_price: 4999,
     yearly_discount_percent: 83.0,
     currency: '₹',
     tax_info: '(+taxes)',
@@ -57,7 +57,7 @@ const SEEDED_FALLBACK_PLANS = [
     allowed_channels: ['whatsapp', 'facebook', 'instagram'],
     badge_text: '',
     is_recommended: false,
-    cta_text: 'Start Free Trial',
+    cta_text: 'Get Started',
     channel_details: {
       whatsapp: {
         name: 'WhatsApp',
@@ -151,7 +151,7 @@ const SEEDED_FALLBACK_PLANS = [
     slug: 'growth',
     description: 'Empower growing brands with 2 simultaneous channels & catalog sales',
     monthly_price: 1599,
-    yearly_price: 2799,
+    yearly_price: 15999,
     yearly_discount_percent: 85.0,
     currency: '₹',
     tax_info: '(+taxes)',
@@ -159,7 +159,7 @@ const SEEDED_FALLBACK_PLANS = [
     allowed_channels: ['whatsapp', 'facebook', 'instagram'],
     badge_text: 'Most Popular',
     is_recommended: true,
-    cta_text: 'Start Free Trial',
+    cta_text: 'Get Started',
     channel_details: {
       whatsapp: {
         name: 'WhatsApp',
@@ -253,7 +253,7 @@ const SEEDED_FALLBACK_PLANS = [
     slug: 'advanced',
     description: 'Full power automation across all 3 channels with webhooks & AI agents',
     monthly_price: 2499,
-    yearly_price: 25489,
+    yearly_price: 24999,
     yearly_discount_percent: 15.0,
     currency: '₹',
     tax_info: '(+taxes)',
@@ -261,7 +261,7 @@ const SEEDED_FALLBACK_PLANS = [
     allowed_channels: ['whatsapp', 'facebook', 'instagram'],
     badge_text: 'Power House',
     is_recommended: false,
-    cta_text: 'Start Free Trial',
+    cta_text: 'Get Started',
     channel_details: {
       whatsapp: {
         name: 'WhatsApp',
@@ -391,11 +391,36 @@ export default function PricingComparisonTable({ plansData, onSelectPlan, isAdmi
 
   const [capacityNotice, setCapacityNotice] = useState(null);
 
+  const filter3CorePlans = (planList) => {
+    if (!Array.isArray(planList) || planList.length === 0) return SEEDED_FALLBACK_PLANS;
+    const activeOnly = planList.filter(p => p.status !== 'INACTIVE' && p.is_active !== false);
+
+    const targetTiers = ['starter', 'growth', 'advanced'];
+    const result = [];
+    const seen = new Set();
+
+    targetTiers.forEach(tier => {
+      const match = activeOnly.find(p => {
+        const s = (p.slug || p.name || '').toLowerCase();
+        if (tier === 'starter') return s.includes('starter');
+        if (tier === 'growth') return s.includes('growth') || s.includes('pro');
+        if (tier === 'advanced') return s.includes('advanced') || s.includes('enterprise');
+        return false;
+      });
+      if (match && !seen.has(match.slug || match.id)) {
+        seen.add(match.slug || match.id);
+        result.push(match);
+      }
+    });
+
+    return result.length > 0 ? result : activeOnly.slice(0, 3);
+  };
+
   useEffect(() => {
     if (Array.isArray(plansData) && plansData.length > 0) {
       const normalized = plansData.map(p => {
         const meta = p.metadata || {};
-        const monthlyPrice = Number(p.monthly_price || p.price || meta.monthly_price || 999);
+        const monthlyPrice = Number(p.monthly_price || p.price || meta.monthly_price || 499);
         const yearlyPrice = Number(p.yearly_price || meta.yearly_price || Math.round(monthlyPrice * 12 * 0.85));
         const maxChannels = p.max_channels || meta.max_channels || (p.name.toLowerCase().includes('starter') ? 1 : (p.name.toLowerCase().includes('growth') ? 2 : 3));
 
@@ -417,11 +442,11 @@ export default function PricingComparisonTable({ plansData, onSelectPlan, isAdmi
           allowed_channels: meta.allowed_channels || ['whatsapp', 'facebook', 'instagram'],
           badge_text: p.badge_text || p.badge || meta.badge_text || (p.name.toLowerCase().includes('growth') ? 'Most Popular' : ''),
           is_recommended: p.is_default || meta.is_recommended || p.name.toLowerCase().includes('growth'),
-          cta_text: meta.cta_text || 'Start Free Trial',
+          cta_text: (meta.cta_text && meta.cta_text !== 'Start Free Trial') ? meta.cta_text : 'Get Started',
           channel_details: p.channel_details || meta.channel_details || fallbackObj.channel_details
         };
       });
-      setPlans(normalized);
+      setPlans(filter3CorePlans(normalized));
       return;
     }
 
@@ -431,8 +456,8 @@ export default function PricingComparisonTable({ plansData, onSelectPlan, isAdmi
         if (Array.isArray(res.data) && res.data.length > 0) {
           const normalized = res.data.map(p => {
             const meta = p.metadata || {};
-            const monthlyPrice = p.monthly_price || meta.monthly_price || parseFloat(p.price) || 999;
-            const yearlyPrice = p.yearly_price || meta.yearly_price || Math.round(monthlyPrice * 12 * 0.85 * 100) / 100 || 10189.80;
+            const monthlyPrice = p.monthly_price || meta.monthly_price || parseFloat(p.price) || 499;
+            const yearlyPrice = p.yearly_price || meta.yearly_price || (monthlyPrice * 10);
             const maxChannels = p.max_channels || meta.max_channels || (p.name.toLowerCase().includes('starter') ? 1 : (p.name.toLowerCase().includes('growth') ? 2 : 3));
 
             const slug = p.slug || p.name.toLowerCase();
@@ -446,19 +471,19 @@ export default function PricingComparisonTable({ plansData, onSelectPlan, isAdmi
               description: p.description || meta.description || fallbackObj.description,
               monthly_price: monthlyPrice,
               yearly_price: yearlyPrice,
-              yearly_discount_percent: meta.yearly_discount_percent || 20.0,
+              yearly_discount_percent: meta.yearly_discount_percent || 15.0,
               currency: p.currency || '₹',
               tax_info: meta.tax_info || '(+taxes)',
               max_channels: maxChannels,
               allowed_channels: meta.allowed_channels || ['whatsapp', 'facebook', 'instagram'],
               badge_text: p.badge_text || p.badge || meta.badge_text || (p.name.toLowerCase().includes('growth') ? 'Most Popular' : ''),
               is_recommended: p.is_default || meta.is_recommended || p.name.toLowerCase().includes('growth'),
-              cta_text: meta.cta_text || 'Start Free Trial',
+              cta_text: (meta.cta_text && meta.cta_text !== 'Start Free Trial') ? meta.cta_text : 'Get Started',
               channel_details: p.channel_details || meta.channel_details || fallbackObj.channel_details
             };
           });
 
-          setPlans(normalized);
+          setPlans(filter3CorePlans(normalized));
         }
       } catch (err) {
         console.warn("Using fallback pricing plans:", err);
@@ -637,7 +662,8 @@ export default function PricingComparisonTable({ plansData, onSelectPlan, isAdmi
 
               {plans.map((plan) => {
                 const planSlug = plan.slug;
-                const isCurrent = entitlements?.plan?.slug === planSlug;
+                const hasAuthToken = typeof window !== 'undefined' && Boolean(localStorage.getItem('token') || localStorage.getItem('uwo_token') || localStorage.getItem('access'));
+                const isCurrent = hasAuthToken && (entitlements?.plan?.slug === planSlug);
                 const isGrowth = plan.name.toLowerCase().includes('growth');
                 
                 const displayPrice = billingPeriod === 'YEARLY'
@@ -675,14 +701,26 @@ export default function PricingComparisonTable({ plansData, onSelectPlan, isAdmi
                       </div>
 
                       {isAdminView && (
-                        <button
-                          type="button"
-                          onClick={() => onManagePlan && onManagePlan(plan)}
-                          className="w-full py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md shadow-emerald-600/20 border border-emerald-500"
-                        >
-                          <SlidersHorizontal size={14} />
-                          <span>⚙️ Manage & Edit Plan</span>
-                        </button>
+                        <div className="flex items-center gap-1.5 w-full">
+                          <button
+                            type="button"
+                            onClick={() => onManagePlan && onManagePlan(plan, 'monthly')}
+                            className="flex-1 py-2 px-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-xl text-[11px] font-black transition-all flex items-center justify-center gap-1 cursor-pointer border border-emerald-200"
+                            title="Edit Monthly Configuration"
+                          >
+                            <SlidersHorizontal size={12} />
+                            <span>Edit Monthly</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => onManagePlan && onManagePlan(plan, 'yearly')}
+                            className="flex-1 py-2 px-2 bg-teal-50 hover:bg-teal-100 text-teal-700 rounded-xl text-[11px] font-black transition-all flex items-center justify-center gap-1 cursor-pointer border border-teal-200"
+                            title="Edit Yearly Configuration"
+                          >
+                            <SlidersHorizontal size={12} />
+                            <span>Edit Yearly</span>
+                          </button>
+                        </div>
                       )}
 
                       <div className="space-y-1">
@@ -701,17 +739,7 @@ export default function PricingComparisonTable({ plansData, onSelectPlan, isAdmi
                         )}
                       </div>
 
-                      {/* Subscribe CTA Button */}
-                      {isAdminView && (
-                        <button
-                          type="button"
-                          onClick={() => onManagePlan && onManagePlan(plan)}
-                          className="w-full mb-2.5 py-2.5 px-4 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-extrabold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md"
-                        >
-                          <SlidersHorizontal size={14} />
-                          <span>Manage & Edit Plan</span>
-                        </button>
-                      )}
+
                       <button
                         onClick={() => handleSubscribeClick(plan)}
                         className={cn(
@@ -723,7 +751,7 @@ export default function PricingComparisonTable({ plansData, onSelectPlan, isAdmi
                               : "bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-600/20")
                         )}
                       >
-                        <span>{isCurrent ? "Current Active Plan" : plan.cta_text}</span>
+                        <span>{isCurrent ? "Current Active Plan" : ((plan.cta_text && plan.cta_text !== 'Start Free Trial') ? plan.cta_text : "Get Started")}</span>
                         <ChevronRight size={15} />
                       </button>
 
