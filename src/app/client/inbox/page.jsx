@@ -766,8 +766,17 @@ export default function ClientInboxPage() {
                               )}
                             </h4>
                             {convo.rawAddress && (
-                              <span className="inline-block text-[10px] font-mono text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200/80 font-bold mt-0.5 truncate max-w-full">
-                                📱 {convo.rawAddress}
+                              <span className={`inline-block text-[10px] font-mono font-bold px-1.5 py-0.5 rounded border mt-0.5 truncate max-w-full ${
+                                convo.channel === 'FACEBOOK'
+                                  ? 'text-blue-700 bg-blue-50 border-blue-200'
+                                  : convo.channel === 'INSTAGRAM'
+                                  ? 'text-pink-700 bg-pink-50 border-pink-200'
+                                  : convo.channel === 'GMAIL'
+                                  ? 'text-rose-700 bg-rose-50 border-rose-200'
+                                  : 'text-emerald-700 bg-emerald-50 border-emerald-200/80'
+                              }`}>
+                                {convo.channel === 'FACEBOOK' ? '👤 PSID: ' : convo.channel === 'INSTAGRAM' ? '📸 ' : convo.channel === 'GMAIL' ? '✉️ ' : '📱 '}
+                                {convo.rawAddress}
                               </span>
                             )}
                             <p className="text-[11px] text-slate-500 truncate mt-0.5">
@@ -851,11 +860,28 @@ export default function ClientInboxPage() {
                       <h3 className="text-xs sm:text-sm font-bold text-slate-900 flex items-center gap-1.5 truncate flex-wrap">
                         <span className="truncate">{activeConvo.name}</span>
                         {activeConvo.rawAddress && (
-                          <span className="text-xs font-mono font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200 shadow-2xs shrink-0">
-                            📱 {activeConvo.rawAddress}
+                          <span className={`text-xs font-mono font-bold px-2 py-0.5 rounded-md border shadow-2xs shrink-0 ${
+                            activeConvo.channel === 'FACEBOOK'
+                              ? 'text-blue-800 bg-blue-50 border-blue-200'
+                              : activeConvo.channel === 'INSTAGRAM'
+                              ? 'text-pink-800 bg-pink-50 border-pink-200'
+                              : activeConvo.channel === 'GMAIL'
+                              ? 'text-rose-800 bg-rose-50 border-rose-200'
+                              : 'text-emerald-800 bg-emerald-50 border-emerald-200'
+                          }`}>
+                            {activeConvo.channel === 'FACEBOOK' ? '👤 PSID: ' : activeConvo.channel === 'INSTAGRAM' ? '📸 IG: ' : activeConvo.channel === 'GMAIL' ? '✉️ ' : '📱 '}
+                            {activeConvo.rawAddress}
                           </span>
                         )}
-                        <span className="text-[8px] sm:text-[10px] font-extrabold px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 shrink-0">
+                        <span className={`text-[8px] sm:text-[10px] font-extrabold px-2 py-0.5 rounded-full shadow-2xs shrink-0 ${
+                          activeConvo.channel === 'FACEBOOK'
+                            ? 'bg-blue-600 text-white'
+                            : activeConvo.channel === 'INSTAGRAM'
+                            ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white'
+                            : activeConvo.channel === 'GMAIL'
+                            ? 'bg-rose-500 text-white'
+                            : 'bg-emerald-600 text-white'
+                        }`}>
                           {activeConvo.channel}
                         </span>
                       </h3>

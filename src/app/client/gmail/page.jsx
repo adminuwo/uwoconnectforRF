@@ -62,9 +62,14 @@ const CopyButton = ({ text }) => {
 };
 
 const ClientEmailPage = () => {
+  const [mounted, setMounted] = useState(false);
   const [client, setClient] = useState(null);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Active View Mode ('inbox' or 'settings' or 'analytics')
   const [activeView, setActiveView] = useState('inbox');
@@ -240,8 +245,8 @@ const ClientEmailPage = () => {
   const handleSyncNow = async () => {
     setIsSyncing(true);
     try {
-      await fetchEmails(false, false, activeFolder, selectedProvider);
-      setToast({ msg: '✅ Email sync completed successfully!' });
+      await fetchEmails(false, true, activeFolder, selectedProvider);
+      setToast({ msg: '✅ Gmail sync completed with Google Workspace!' });
       setTimeout(() => setToast(null), 3500);
     } catch (err) {
       console.warn('Sync notice:', err.message);
@@ -411,8 +416,18 @@ const ClientEmailPage = () => {
     setAutoReplyBody(prev => prev + ` ${tag}`);
   };
 
+  if (!mounted) {
+    return (
+      <DashboardLayout role="CLIENT">
+        <div className="flex flex-col h-[calc(100vh-64px)] w-full items-center justify-center bg-[#f8fafb]">
+          <div className="w-8 h-8 border-3 border-[#00AB56] border-t-transparent rounded-full animate-spin" />
+        </div>
+      </DashboardLayout>
+    );
+  }
+
   return (
-    <DashboardLayout role="client">
+    <DashboardLayout role="CLIENT">
       <div className="flex flex-col h-[calc(100vh-64px)] w-full overflow-hidden bg-[#f8fafb] border-t border-slate-200">
 
         {/* ── TOP BAR ──────────────────────────────────────────────────────── */}
