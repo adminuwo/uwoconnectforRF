@@ -392,15 +392,48 @@ export default function PricingComparisonTable({ plansData, onSelectPlan, isAdmi
   const [capacityNotice, setCapacityNotice] = useState(null);
 
   useEffect(() => {
+    if (Array.isArray(plansData) && plansData.length > 0) {
+      const normalized = plansData.map(p => {
+        const meta = p.metadata || {};
+        const monthlyPrice = p.monthly_price || meta.monthly_price || parseFloat(p.price) || 999;
+        const yearlyPrice = p.yearly_price || meta.yearly_price || Math.round(monthlyPrice * 12 * 0.8 * 100) / 100 || 9590.40;
+        const maxChannels = p.max_channels || meta.max_channels || (p.name.toLowerCase().includes('starter') ? 1 : (p.name.toLowerCase().includes('growth') ? 2 : 3));
+
+        const slug = p.slug || p.name.toLowerCase();
+        const fallbackObj = SEEDED_FALLBACK_PLANS.find(f => f.slug === slug) || SEEDED_FALLBACK_PLANS[0];
+
+        return {
+          ...p,
+          id: p.id || slug,
+          name: p.name,
+          slug: slug,
+          description: p.description || meta.description || fallbackObj.description,
+          monthly_price: monthlyPrice,
+          yearly_price: yearlyPrice,
+          yearly_discount_percent: meta.yearly_discount_percent || 20.0,
+          currency: p.currency || '₹',
+          tax_info: meta.tax_info || '(+taxes)',
+          max_channels: maxChannels,
+          allowed_channels: meta.allowed_channels || ['whatsapp', 'facebook', 'instagram'],
+          badge_text: p.badge_text || p.badge || meta.badge_text || (p.name.toLowerCase().includes('growth') ? 'Most Popular' : ''),
+          is_recommended: p.is_default || meta.is_recommended || p.name.toLowerCase().includes('growth'),
+          cta_text: meta.cta_text || 'Start Free Trial',
+          channel_details: p.channel_details || meta.channel_details || fallbackObj.channel_details
+        };
+      });
+      setPlans(normalized);
+      return;
+    }
+
     async function loadPublicPlans() {
       try {
         const res = await axios.get(`${API_BASE_URL}/api/plans/public/`);
         if (Array.isArray(res.data) && res.data.length > 0) {
           const normalized = res.data.map(p => {
             const meta = p.metadata || {};
-            const monthlyPrice = meta.monthly_price || parseFloat(p.price) || 999;
-            const yearlyPrice = meta.yearly_price || Math.round(monthlyPrice * 12 * 0.8 * 100) / 100 || 9590.40;
-            const maxChannels = meta.max_channels || (p.name.toLowerCase().includes('starter') ? 1 : (p.name.toLowerCase().includes('growth') ? 2 : 3));
+            const monthlyPrice = p.monthly_price || meta.monthly_price || parseFloat(p.price) || 999;
+            const yearlyPrice = p.yearly_price || meta.yearly_price || Math.round(monthlyPrice * 12 * 0.8 * 100) / 100 || 9590.40;
+            const maxChannels = p.max_channels || meta.max_channels || (p.name.toLowerCase().includes('starter') ? 1 : (p.name.toLowerCase().includes('growth') ? 2 : 3));
 
             const slug = p.slug || p.name.toLowerCase();
             const fallbackObj = SEEDED_FALLBACK_PLANS.find(f => f.slug === slug) || SEEDED_FALLBACK_PLANS[0];
@@ -418,35 +451,21 @@ export default function PricingComparisonTable({ plansData, onSelectPlan, isAdmi
               tax_info: meta.tax_info || '(+taxes)',
               max_channels: maxChannels,
               allowed_channels: meta.allowed_channels || ['whatsapp', 'facebook', 'instagram'],
-              badge_text: p.badge_text || meta.badge_text || (p.name.toLowerCase().includes('growth') ? 'Most Popular' : ''),
+              badge_text: p.badge_text || p.badge || meta.badge_text || (p.name.toLowerCase().includes('growth') ? 'Most Popular' : ''),
               is_recommended: p.is_default || meta.is_recommended || p.name.toLowerCase().includes('growth'),
               cta_text: meta.cta_text || 'Start Free Trial',
-              channel_details: meta.channel_details || fallbackObj.channel_details
+              channel_details: p.channel_details || meta.channel_details || fallbackObj.channel_details
             };
           });
-          // Filter down to exactly 3 distinct canonical plans: Starter, Growth/Pro, Enterprise
-          const unique3 = [];
-          const seenCategories = new Set();
-          normalized.forEach(p => {
-            const lowName = (p.name || '').toLowerCase();
-            let catKey = 'starter';
-            if (lowName.includes('growth') || lowName.includes('pro')) catKey = 'growth';
-            else if (lowName.includes('enterprise') || lowName.includes('advanced') || lowName.includes('full')) catKey = 'enterprise';
-            
-            if (!seenCategories.has(catKey) && unique3.length < 3) {
-              seenCategories.add(catKey);
-              unique3.push(p);
-            }
-          });
 
-          setPlans(unique3.length === 3 ? unique3 : normalized.slice(0, 3));
+          setPlans(normalized);
         }
       } catch (err) {
         console.warn("Using fallback pricing plans:", err);
       }
     }
     loadPublicPlans();
-  }, []);
+  }, [plansData]);
 
   // Handle clicking a channel pill for a specific plan column
   const handleToggleChannelPill = (plan, channelKey) => {
