@@ -268,39 +268,39 @@ const getFeatureBrandLogo = (key, size = 22) => {
 
 // ── DEFAULT CATALOG FEATURES ──
 const DEFAULT_FEATURES = [
-  // Communication
+  // 1. CHANNELS (Exactly 4: WhatsApp, Instagram, Facebook, YouTube)
   { id: 'f-wa', key: 'channel_whatsapp', name: 'WhatsApp Channel', category: 'Communication', feature_type: 'Channel', description: 'Official WhatsApp Cloud API & web integration', is_active: true, plan_count: 3 },
-  { id: 'f-fb', key: 'channel_facebook', name: 'Facebook Messenger', category: 'Communication', feature_type: 'Channel', description: 'Facebook page messaging & live sync', is_active: true, plan_count: 3 },
   { id: 'f-ig', key: 'channel_instagram', name: 'Instagram Direct', category: 'Communication', feature_type: 'Channel', description: 'Instagram DM automation & live chat', is_active: true, plan_count: 2 },
-  { id: 'f-tg', key: 'channel_telegram', name: 'Telegram Bot', category: 'Communication', feature_type: 'Channel', description: 'Telegram bot channel integration', is_active: true, plan_count: 2 },
-  { id: 'f-live-inbox', key: 'live_messages_inbox', name: 'Live Omnichannel Inbox', category: 'Communication', feature_type: 'Module', description: 'Unified multi-channel live conversation hub', is_active: true, plan_count: 3 },
-  { id: 'f-email', key: 'channel_email', name: 'Email Workflows', category: 'Communication', feature_type: 'Channel', description: 'Inbound/outbound email automation', is_active: true, plan_count: 2 },
+  { id: 'f-fb', key: 'channel_facebook', name: 'Facebook Messenger', category: 'Communication', feature_type: 'Channel', description: 'Facebook page messaging & live sync', is_active: true, plan_count: 3 },
+  { id: 'f-yt', key: 'channel_youtube', name: 'YouTube Channel', category: 'Communication', feature_type: 'Channel', description: 'YouTube comments & live chat automation', is_active: true, plan_count: 2 },
 
-  // AI & Automation
+  // 2. CONNECTORS (Gmail, Google News, Shopify, WooCommerce, Razorpay, HubSpot, Sheets, OneDrive)
+  { id: 'f-gmail', key: 'conn_gmail', name: 'Gmail & Email Connector', category: 'Connectors', feature_type: 'Connector', description: 'Inbound/outbound email sync & triggers', is_active: true, plan_count: 2 },
+  { id: 'f-gnews', key: 'conn_google_news', name: 'Google News Connector', category: 'Connectors', feature_type: 'Connector', description: 'Real-time news alerts & brand tracking', is_active: true, plan_count: 2 },
+  { id: 'f-shopify', key: 'conn_shopify', name: 'Shopify Connector', category: 'Connectors', feature_type: 'Connector', description: 'E-commerce order & abandoned cart sync', is_active: true, plan_count: 2 },
+  { id: 'f-woo', key: 'conn_woocommerce', name: 'WooCommerce Connector', category: 'Connectors', feature_type: 'Connector', description: 'WordPress store products & order webhook', is_active: true, plan_count: 2 },
+  { id: 'f-razorpay', key: 'conn_razorpay', name: 'Razorpay Gateway Connector', category: 'Connectors', feature_type: 'Connector', description: 'Payment links, subscriptions & checkout sync', is_active: true, plan_count: 3 },
+  { id: 'f-hubspot', key: 'conn_hubspot', name: 'HubSpot CRM Connector', category: 'Connectors', feature_type: 'Connector', description: 'Contact & deal stage bidirectional sync', is_active: true, plan_count: 1 },
+  { id: 'f-gsheets', key: 'conn_google_sheets', name: 'Google Sheets Lead Connector', category: 'Connectors', feature_type: 'Connector', description: 'Auto export incoming leads to spreadsheets', is_active: true, plan_count: 2 },
+  { id: 'f-onedrive', key: 'conn_onedrive', name: 'OneDrive & Cloud Sync', category: 'Connectors', feature_type: 'Connector', description: 'Direct sync with cloud document drives', is_active: true, plan_count: 1 },
+
+  // 3. FEATURES & MODULES
+  { id: 'f-live-inbox', key: 'live_messages_inbox', name: 'Live Omnichannel Inbox', category: 'Communication', feature_type: 'Module', description: 'Unified multi-channel live conversation hub', is_active: true, plan_count: 3 },
   { id: 'f-ai-assist', key: 'ai_copilot', name: 'AI Smart Assistant', category: 'AI & Automation', feature_type: 'Module', description: 'AI copilot for replies & summaries', is_active: true, plan_count: 3 },
   { id: 'f-ai-bots', key: 'ai_flow_bots', name: 'AI Chatbots & Workflows', category: 'AI & Automation', feature_type: 'Module', description: 'Visual conversational bot builder', is_active: true, plan_count: 2 },
   { id: 'f-ai-auto', key: 'ai_auto_pilot', name: 'Advanced AI Auto-Pilot', category: 'AI & Automation', feature_type: 'Module', description: 'Autonomous agent decision engine', is_active: true, plan_count: 1 },
-
-  // CRM & Leads
   { id: 'f-clients', key: 'crm_clients', name: 'Client Directory & Workspaces', category: 'CRM', feature_type: 'Module', description: 'Multi-tenant client database & intelligence', is_active: true, plan_count: 3 },
   { id: 'f-leads', key: 'crm_leads', name: 'Lead Pipeline Management', category: 'CRM', feature_type: 'Module', description: 'Deal stages, funnel conversion & tracking', is_active: true, plan_count: 2 },
   { id: 'f-search', key: 'global_omnisearch', name: 'Global Omni-Search', category: 'CRM', feature_type: 'Module', description: 'Universal search across messages & files', is_active: true, plan_count: 3 },
-
-  // Sales & Finance
   { id: 'f-products', key: 'sales_catalog', name: 'Products & Services Catalog', category: 'Sales', feature_type: 'Module', description: 'Item pricing, variants & SKU management', is_active: true, plan_count: 3 },
   { id: 'f-quotes', key: 'sales_quotations', name: 'Quotations & Estimates', category: 'Sales', feature_type: 'Module', description: 'Instant PDF quotes with approvals', is_active: true, plan_count: 2 },
   { id: 'f-proposals', key: 'sales_proposals', name: 'Business Proposals', category: 'Sales', feature_type: 'Module', description: 'Multi-page branded client proposals', is_active: true, plan_count: 2 },
   { id: 'f-invoices', key: 'sales_invoices', name: 'Tax Invoices & Billing', category: 'Sales', feature_type: 'Module', description: 'Automated invoice generation & receipts', is_active: true, plan_count: 2 },
   { id: 'f-sales-orders', key: 'sales_orders', name: 'Sales Orders & Checkout', category: 'Sales', feature_type: 'Module', description: 'Order lifecycle and webhook tracking', is_active: true, plan_count: 2 },
-
-  // Team & Collaboration
   { id: 'f-team', key: 'team_management', name: 'Team Roles & Permissions', category: 'Team', feature_type: 'Module', description: 'Role-based access permissions & seats', is_active: true, plan_count: 3 },
   { id: 'f-reports', key: 'team_work_reports', name: 'Staff Work Reports & Analytics', category: 'Team', feature_type: 'Module', description: 'Daily task logging & performance analytics', is_active: true, plan_count: 2 },
   { id: 'f-audit', key: 'security_audit_logs', name: 'Enterprise Audit Logs', category: 'Team', feature_type: 'Module', description: 'Immutable activity tracking & compliance trail', is_active: true, plan_count: 1 },
-
-  // Knowledge & Documents
   { id: 'f-kb', key: 'knowledge_base', name: 'Knowledge Base & FAQs', category: 'Documents', feature_type: 'Module', description: 'Vectorized knowledge base documents', is_active: true, plan_count: 2 },
-  { id: 'f-onedrive', key: 'connector_onedrive', name: 'OneDrive & Cloud Sync', category: 'Documents', feature_type: 'Connector', description: 'Direct sync with cloud document drives', is_active: true, plan_count: 1 },
 ];
 
 // ── DEFAULT BENCHMARK PLANS ──
@@ -874,6 +874,27 @@ export default function AdminPlansPage() {
   };
 
   // ── Open Add Feature Modal ──
+  // ── Toggle Feature Active / Inactive Status ──
+  const handleToggleFeatureActiveStatus = (feat) => {
+    const newStatus = !feat.is_active;
+    setFeatures(prev => prev.map(f => f.id === feat.id ? { ...f, is_active: newStatus } : f));
+
+    // Persist inactive keys to localStorage for client sync
+    const updatedFeatures = features.map(f => f.id === feat.id ? { ...f, is_active: newStatus } : f);
+    const inactiveKeys = updatedFeatures.filter(f => !f.is_active).map(f => f.key);
+
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('inactive_platform_features', JSON.stringify(inactiveKeys));
+    }
+
+    showToast(
+      newStatus 
+        ? `"${feat.name}" is now ACTIVE!` 
+        : `"${feat.name}" is DEACTIVATED! Clients will see "COMING SOON".`,
+      newStatus ? 'success' : 'warning'
+    );
+  };
+
   const handleOpenAddFeature = () => {
     setFeatureForm({
       name: '',
@@ -1335,13 +1356,19 @@ export default function AdminPlansPage() {
                           {f.plan_count || plans.filter(p => p.feature_keys?.includes(f.key)).length} Plans
                         </td>
                         <td className="py-3.5 px-4 sm:px-6 whitespace-nowrap">
-                          <span className={cn(
-                            "px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase inline-flex items-center gap-1.5 border",
-                            f.is_active ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-slate-100 text-slate-500 border-slate-200"
-                          )}>
-                            <span className={cn("w-1.5 h-1.5 rounded-full", f.is_active ? "bg-emerald-500" : "bg-slate-400")} />
-                            {f.is_active ? 'Active' : 'Inactive'}
-                          </span>
+                          <button
+                            onClick={() => handleToggleFeatureActiveStatus(f)}
+                            className={cn(
+                              "px-3 py-1 rounded-full text-[10px] font-extrabold uppercase inline-flex items-center gap-1.5 border transition-all cursor-pointer shadow-2xs hover:scale-105",
+                              f.is_active 
+                                ? "bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border-emerald-300" 
+                                : "bg-amber-50 hover:bg-amber-100 text-amber-800 border-amber-300"
+                            )}
+                            title="Click to toggle Active / Inactive (Coming Soon)"
+                          >
+                            <span className={cn("w-2 h-2 rounded-full", f.is_active ? "bg-emerald-500 animate-pulse" : "bg-amber-500")} />
+                            {f.is_active ? 'ACTIVE' : 'DEACTIVE (COMING SOON)'}
+                          </button>
                         </td>
                         <td className="py-3.5 px-4 sm:px-6 text-right whitespace-nowrap">
                           <button
