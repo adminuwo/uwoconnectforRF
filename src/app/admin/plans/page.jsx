@@ -605,10 +605,15 @@ export default function AdminPlansPage() {
   const handleOpenManagePlan = (plan) => {
     setEditingPlan(plan);
     setModalActiveCategory('ALL');
+    const mPrice = plan.monthly_price || plan.price || 999;
+    const yPrice = plan.yearly_price || Math.round(mPrice * 12 * 0.8);
     setPlanForm({
       name: plan.name,
       description: plan.description || '',
-      price: plan.price.toString(),
+      price: mPrice.toString(),
+      yearly_price: yPrice.toString(),
+      badge_text: plan.badge_text || plan.badge || '',
+      max_channels: (plan.max_channels || (plan.name.toLowerCase().includes('starter') ? 1 : plan.name.toLowerCase().includes('growth') ? 2 : 3)).toString(),
       billing_cycle: plan.billing_cycle || 'Monthly',
       currency: plan.currency || 'INR',
       status: plan.status || 'ACTIVE',
@@ -625,17 +630,25 @@ export default function AdminPlansPage() {
       return;
     }
 
+    const mPrice = Number(planForm.price) || 0;
+    const yPrice = Number(planForm.yearly_price) || Math.round(mPrice * 12 * 0.8);
+    const mChannels = Number(planForm.max_channels) || 1;
+
     const newPlanObj = {
       id: `plan-${Date.now()}`,
       name: planForm.name.trim(),
-      badge: planForm.name.toUpperCase().trim(),
+      badge_text: planForm.badge_text.trim(),
+      badge: planForm.badge_text.trim() || planForm.name.toUpperCase().trim(),
       status: planForm.status,
       description: planForm.description || 'Custom Enterprise Plan',
-      price: Number(planForm.price) || 0,
+      price: mPrice,
+      monthly_price: mPrice,
+      yearly_price: yPrice,
+      max_channels: mChannels,
       billing_cycle: planForm.billing_cycle,
       currency: planForm.currency,
       feature_keys: planForm.selected_feature_keys,
-      channel_count: planForm.selected_feature_keys.filter(k => k.startsWith('channel_')).length || 2,
+      channel_count: mChannels,
       connector_count: planForm.selected_feature_keys.filter(k => k.startsWith('connector_')).length || 1,
       client_count: 0,
       is_popular: false
@@ -647,6 +660,10 @@ export default function AdminPlansPage() {
         name: newPlanObj.name,
         description: newPlanObj.description,
         price: newPlanObj.price,
+        monthly_price: newPlanObj.monthly_price,
+        yearly_price: newPlanObj.yearly_price,
+        badge_text: newPlanObj.badge_text,
+        max_channels: newPlanObj.max_channels,
         billing_cycle: newPlanObj.billing_cycle,
         currency: newPlanObj.currency,
         is_active: newPlanObj.status === 'ACTIVE',
@@ -666,17 +683,25 @@ export default function AdminPlansPage() {
     e.preventDefault();
     if (!editingPlan) return;
 
+    const mPrice = Number(planForm.price) || 0;
+    const yPrice = Number(planForm.yearly_price) || Math.round(mPrice * 12 * 0.8);
+    const mChannels = Number(planForm.max_channels) || 1;
+
     const updatedPlanObj = {
       ...editingPlan,
       name: planForm.name.trim(),
-      badge: planForm.name.toUpperCase().trim(),
+      badge_text: planForm.badge_text.trim(),
+      badge: planForm.badge_text.trim() || planForm.name.toUpperCase().trim(),
       status: planForm.status,
       description: planForm.description,
-      price: Number(planForm.price) || 0,
+      price: mPrice,
+      monthly_price: mPrice,
+      yearly_price: yPrice,
+      max_channels: mChannels,
       billing_cycle: planForm.billing_cycle,
       currency: planForm.currency,
       feature_keys: planForm.selected_feature_keys,
-      channel_count: planForm.selected_feature_keys.filter(k => k.startsWith('channel_')).length || 2,
+      channel_count: mChannels,
       connector_count: planForm.selected_feature_keys.filter(k => k.startsWith('connector_')).length || 1,
     };
 
@@ -686,6 +711,10 @@ export default function AdminPlansPage() {
         name: updatedPlanObj.name,
         description: updatedPlanObj.description,
         price: updatedPlanObj.price,
+        monthly_price: updatedPlanObj.monthly_price,
+        yearly_price: updatedPlanObj.yearly_price,
+        badge_text: updatedPlanObj.badge_text,
+        max_channels: updatedPlanObj.max_channels,
         billing_cycle: updatedPlanObj.billing_cycle,
         currency: updatedPlanObj.currency,
         is_active: updatedPlanObj.status === 'ACTIVE',
@@ -1016,6 +1045,7 @@ export default function AdminPlansPage() {
         {activeTab === 'plans' && (
           <div>
             <PricingComparisonTable 
+              plansData={plans}
               isAdminView={true}
               onManagePlan={(plan) => handleOpenManagePlan(plan)}
             />
@@ -1249,7 +1279,7 @@ export default function AdminPlansPage() {
                 
                 {/* 1. Plan Basic Info */}
                 <div className="bg-slate-50/80 p-3.5 sm:p-5 rounded-2xl border border-slate-200/80 space-y-3 sm:space-y-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
                     <div>
                       <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
                         Plan Name *
@@ -1257,7 +1287,7 @@ export default function AdminPlansPage() {
                       <input
                         type="text"
                         required
-                        placeholder="e.g. Professional, Growth, Agency Pro"
+                        placeholder="e.g. Starter, Growth, Advanced"
                         value={planForm.name}
                         onChange={(e) => setPlanForm({ ...planForm, name: e.target.value })}
                         className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-900 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 transition-all"
@@ -1266,18 +1296,62 @@ export default function AdminPlansPage() {
 
                     <div>
                       <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
-                        Price (₹)
+                        Monthly Price (₹/mo)
                       </label>
                       <div className="relative">
                         <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">₹</span>
                         <input
                           type="number"
-                          placeholder="2999"
+                          placeholder="999"
                           value={planForm.price}
                           onChange={(e) => setPlanForm({ ...planForm, price: e.target.value })}
                           className="w-full pl-8 pr-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-900 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 transition-all"
                         />
                       </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
+                        Yearly Price (₹/yr)
+                      </label>
+                      <div className="relative">
+                        <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">₹</span>
+                        <input
+                          type="number"
+                          placeholder="9590"
+                          value={planForm.yearly_price || ''}
+                          onChange={(e) => setPlanForm({ ...planForm, yearly_price: e.target.value })}
+                          className="w-full pl-8 pr-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-900 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 transition-all"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                    <div>
+                      <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
+                        Badge Text (e.g. STARTER, MOST POPULAR)
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="e.g. STARTER, MOST POPULAR, POWER HOUSE"
+                        value={planForm.badge_text || ''}
+                        onChange={(e) => setPlanForm({ ...planForm, badge_text: e.target.value })}
+                        className="w-full px-3.5 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-900 outline-none focus:border-emerald-500 transition-all"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
+                        Max Channels Allowed
+                      </label>
+                      <input
+                        type="number"
+                        placeholder="1, 2, 3..."
+                        value={planForm.max_channels || ''}
+                        onChange={(e) => setPlanForm({ ...planForm, max_channels: e.target.value })}
+                        className="w-full px-3.5 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-900 outline-none focus:border-emerald-500 transition-all"
+                      />
                     </div>
                   </div>
 
