@@ -386,7 +386,7 @@ const INITIAL_CLIENTS = [
   { id: 'c-1', business_name: 'Yugamc Business Hub', client_name: 'Yugam Admin', email: 'admin@yugamc.com', plan_id: 'plan-pro', plan_name: 'Professional', custom_added: ['ai_auto_pilot'], custom_removed: ['channel_telegram'], status: 'ACTIVE' },
   { id: 'c-2', business_name: 'Unified Web Options Pvt Ltd', client_name: 'Rahul Sharma', email: 'rahul@uwo.in', plan_id: 'plan-enterprise', plan_name: 'Enterprise', custom_added: [], custom_removed: [], status: 'ACTIVE' },
   { id: 'c-3', business_name: 'Apex Digital Workspace', client_name: 'Aman Verma', email: 'aman@apexdigital.com', plan_id: 'plan-starter', plan_name: 'Starter', custom_added: ['sales_invoices'], custom_removed: [], status: 'ACTIVE' },
-  { id: 'c-4', business_name: 'Matrix Cloud Solutions', client_name: 'Pooja Nair', email: 'pooja@matrixcloud.io', plan_id: 'plan-pro', plan_name: 'Professional', custom_added: [], custom_removed: [], status: 'ACTIVE' },
+{ id: 'c-4', business_name: 'Matrix Cloud Solutions', client_name: 'Pooja Nair', email: 'pooja@matrixcloud.io', plan_id: 'plan-pro', plan_name: 'Professional', custom_added: [], custom_removed: [], status: 'ACTIVE' },
 ];
 
 export default function AdminPlansPage() {
@@ -401,6 +401,7 @@ export default function AdminPlansPage() {
   // Search & Filters
   const [featureSearch, setFeatureSearch] = useState('');
   const [featureCategoryFilter, setFeatureCategoryFilter] = useState('ALL');
+  const [featureTypeFilter, setFeatureTypeFilter] = useState('ALL'); // 'ALL' | 'Channel' | 'Connector' | 'Module'
   const [assignmentSearch, setAssignmentSearch] = useState('');
 
   // ── Centered Modal States ──
@@ -420,6 +421,30 @@ export default function AdminPlansPage() {
   // Active Category & Tab Filter inside Plan Modal
   const [modalActiveCategory, setModalActiveCategory] = useState('ALL');
   const [modalEditorTab, setModalEditorTab] = useState('basic'); // 'basic' | 'what_you_get' | 'features' | 'limits' | 'costs' | 'entitlements'
+
+  // ── Feature Type Counts ──
+  const channelCount = useMemo(() => {
+    return features.filter(f => {
+      const typeStr = (f.feature_type || f.type || '').toLowerCase();
+      return typeStr.includes('channel') || f.key.startsWith('channel_');
+    }).length;
+  }, [features]);
+
+  const connectorCount = useMemo(() => {
+    return features.filter(f => {
+      const typeStr = (f.feature_type || f.type || '').toLowerCase();
+      return typeStr.includes('connector') || f.key.startsWith('conn_') || f.key.includes('shopify') || f.key.includes('woocommerce') || f.key.includes('hubspot') || f.key.includes('razorpay');
+    }).length;
+  }, [features]);
+
+  const moduleCount = useMemo(() => {
+    return features.filter(f => {
+      const typeStr = (f.feature_type || f.type || '').toLowerCase();
+      const isChan = typeStr.includes('channel') || f.key.startsWith('channel_');
+      const isConn = typeStr.includes('connector') || f.key.startsWith('conn_') || f.key.includes('shopify') || f.key.includes('woocommerce') || f.key.includes('hubspot') || f.key.includes('razorpay');
+      return !isChan && !isConn;
+    }).length;
+  }, [features]);
 
   // ── Form States ──
   const [planForm, setPlanForm] = useState({
@@ -1084,7 +1109,7 @@ export default function AdminPlansPage() {
         {/* ── 3. Plan Tabs Navigation (Smooth Horizontal Swipe on Mobile) ── */}
         <div className="flex items-center gap-2 mb-6 border-b border-slate-200/80 pb-3 overflow-x-auto no-scrollbar scrollbar-none flex-nowrap w-full">
           <button
-            onClick={() => setActiveTab('plans')}
+            onClick={() => { setActiveTab('plans'); setFeatureTypeFilter('ALL'); }}
             className={cn(
               "px-3.5 sm:px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shadow-xs shrink-0 whitespace-nowrap",
               activeTab === 'plans'
@@ -1103,19 +1128,55 @@ export default function AdminPlansPage() {
           </button>
 
           <button
-            onClick={() => setActiveTab('features')}
+            onClick={() => { setActiveTab('features'); setFeatureTypeFilter('Channel'); }}
             className={cn(
               "px-3.5 sm:px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shadow-xs shrink-0 whitespace-nowrap",
-              activeTab === 'features'
+              activeTab === 'features' && featureTypeFilter === 'Channel'
+                ? "bg-blue-600 text-white shadow-blue-600/20"
+                : "bg-white text-slate-600 hover:bg-slate-50 border border-slate-200/80"
+            )}
+          >
+            <span>📢 Channels</span>
+            <span className={cn(
+              "px-2 py-0.5 rounded-full text-[10px] font-mono",
+              activeTab === 'features' && featureTypeFilter === 'Channel' ? "bg-white/20 text-white" : "bg-blue-50 text-blue-700"
+            )}>
+              {channelCount}
+            </span>
+          </button>
+
+          <button
+            onClick={() => { setActiveTab('features'); setFeatureTypeFilter('Connector'); }}
+            className={cn(
+              "px-3.5 sm:px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shadow-xs shrink-0 whitespace-nowrap",
+              activeTab === 'features' && featureTypeFilter === 'Connector'
+                ? "bg-purple-600 text-white shadow-purple-600/20"
+                : "bg-white text-slate-600 hover:bg-slate-50 border border-slate-200/80"
+            )}
+          >
+            <span>🔌 Connectors</span>
+            <span className={cn(
+              "px-2 py-0.5 rounded-full text-[10px] font-mono",
+              activeTab === 'features' && featureTypeFilter === 'Connector' ? "bg-white/20 text-white" : "bg-purple-50 text-purple-700"
+            )}>
+              {connectorCount}
+            </span>
+          </button>
+
+          <button
+            onClick={() => { setActiveTab('features'); setFeatureTypeFilter('Module'); }}
+            className={cn(
+              "px-3.5 sm:px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shadow-xs shrink-0 whitespace-nowrap",
+              activeTab === 'features' && (featureTypeFilter === 'Module' || featureTypeFilter === 'ALL')
                 ? "bg-emerald-600 text-white shadow-emerald-600/20"
                 : "bg-white text-slate-600 hover:bg-slate-50 border border-slate-200/80"
             )}
           >
             <Zap size={14} />
-            <span>Features</span>
+            <span>Features & Modules</span>
             <span className={cn(
               "px-2 py-0.5 rounded-full text-[10px] font-mono",
-              activeTab === 'features' ? "bg-white/20 text-white" : "bg-slate-100 text-slate-600"
+              activeTab === 'features' && (featureTypeFilter === 'Module' || featureTypeFilter === 'ALL') ? "bg-white/20 text-white" : "bg-slate-100 text-slate-600"
             )}>
               {features.length}
             </span>
@@ -1155,6 +1216,46 @@ export default function AdminPlansPage() {
         {/* ── 5. TAB 2: FEATURES CATALOG ── */}
         {activeTab === 'features' && (
           <div>
+            {/* Quick Type Filter Pills */}
+            <div className="flex items-center gap-2 mb-3.5 overflow-x-auto no-scrollbar pb-1">
+              <button
+                onClick={() => setFeatureTypeFilter('ALL')}
+                className={cn(
+                  "px-3 py-1.5 rounded-xl text-xs font-extrabold transition-all cursor-pointer flex items-center gap-1.5 shrink-0 whitespace-nowrap",
+                  featureTypeFilter === 'ALL' ? "bg-slate-900 text-white shadow-xs" : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"
+                )}
+              >
+                ✨ All Items ({features.length})
+              </button>
+              <button
+                onClick={() => setFeatureTypeFilter('Channel')}
+                className={cn(
+                  "px-3 py-1.5 rounded-xl text-xs font-extrabold transition-all cursor-pointer flex items-center gap-1.5 shrink-0 whitespace-nowrap",
+                  featureTypeFilter === 'Channel' ? "bg-blue-600 text-white shadow-xs" : "bg-blue-50 text-blue-700 border border-blue-200/80 hover:bg-blue-100"
+                )}
+              >
+                📢 Channels ({channelCount})
+              </button>
+              <button
+                onClick={() => setFeatureTypeFilter('Connector')}
+                className={cn(
+                  "px-3 py-1.5 rounded-xl text-xs font-extrabold transition-all cursor-pointer flex items-center gap-1.5 shrink-0 whitespace-nowrap",
+                  featureTypeFilter === 'Connector' ? "bg-purple-600 text-white shadow-xs" : "bg-purple-50 text-purple-700 border border-purple-200/80 hover:bg-purple-100"
+                )}
+              >
+                🔌 Connectors ({connectorCount})
+              </button>
+              <button
+                onClick={() => setFeatureTypeFilter('Module')}
+                className={cn(
+                  "px-3 py-1.5 rounded-xl text-xs font-extrabold transition-all cursor-pointer flex items-center gap-1.5 shrink-0 whitespace-nowrap",
+                  featureTypeFilter === 'Module' ? "bg-emerald-600 text-white shadow-xs" : "bg-emerald-50 text-emerald-700 border border-emerald-200/80 hover:bg-emerald-100"
+                )}
+              >
+                ⚡ Features & Modules ({moduleCount})
+              </button>
+            </div>
+
             <div className="bg-white p-3 sm:p-3.5 rounded-2xl border border-slate-200/80 shadow-2xs mb-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 sm:gap-3">
               <div className="relative w-full sm:w-80">
                 <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={15} />
