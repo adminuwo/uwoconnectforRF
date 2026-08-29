@@ -329,13 +329,21 @@ export default function ClientInboxPage() {
       
       if (append) {
         setMessages(prev => {
-          // Prevent duplicates
           const existingIds = new Set(prev.map(m => m.id));
-          const newUnique = fetchedMessages.filter(m => !existingIds.has(m.id));
-          return [...newUnique, ...prev]; // Prepend older messages
+          const newUnique = fetchedMessages.filter(m => m.id && !existingIds.has(m.id));
+          return [...newUnique, ...prev];
         });
       } else {
-        setMessages(fetchedMessages);
+        const seen = new Set();
+        const uniqueMsgs = [];
+        for (const m of fetchedMessages) {
+          const mId = m.id || m._id;
+          if (!mId || !seen.has(mId)) {
+            if (mId) seen.add(mId);
+            uniqueMsgs.push(m);
+          }
+        }
+        setMessages(uniqueMsgs);
       }
     } catch (err) {
       console.warn('Messages fetch error:', err);
@@ -1060,7 +1068,7 @@ export default function ClientInboxPage() {
 
                     if (isInternal) {
                       return (
-                        <div key={msg.id || index} className="my-3 flex justify-center">
+                        <div key={`${msg.id || 'msg'}_${index}`} className="my-3 flex justify-center">
                           <div className="max-w-md bg-amber-50 border border-amber-200 rounded-xl p-3 shadow-xs">
                             <div className="flex items-center justify-between gap-2 text-xs font-bold text-amber-900 mb-1">
                               <span className="flex items-center gap-1.5">
@@ -1079,7 +1087,7 @@ export default function ClientInboxPage() {
 
                     return (
                       <div
-                        key={msg.id || index}
+                        key={`${msg.id || 'msg'}_${index}`}
                         className={`flex flex-col ${isIncoming ? 'items-start' : 'items-end'}`}
                       >
                         {/* Outgoing Employee Badge Header */}
