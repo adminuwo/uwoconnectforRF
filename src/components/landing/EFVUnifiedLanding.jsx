@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { 
@@ -555,6 +556,3 @@ export default function EFVUnifiedLanding() {
     </div>
   );
 }
-
-
-

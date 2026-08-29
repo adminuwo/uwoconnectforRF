@@ -9,6 +9,7 @@ import {
   CheckCheck, Eye, ChevronRight, Trash2
 } from 'lucide-react';
 import axios from 'axios';
+import { API_BASE_URL } from '@/config/apiConfig';
 
 export default function CampaignsPage() {
   const [campaigns, setCampaigns] = useState([]);
@@ -26,8 +27,8 @@ export default function CampaignsPage() {
 
   const fetchCampaigns = async () => {
     try {
-      const token = localStorage.getItem('uwo_token');
-      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/campaigns/`, {
+      const token = localStorage.getItem('uwo_token') || localStorage.getItem('token');
+      const res = await axios.get(`${API_BASE_URL}/api/campaigns/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const campaignsData = Array.isArray(res.data) ? res.data : (res.data?.results || []);
@@ -42,8 +43,8 @@ export default function CampaignsPage() {
   const syncTemplates = async () => {
     setSyncing(true);
     try {
-      const token = localStorage.getItem('uwo_token');
-      const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/templates/sync_from_meta/`, {}, {
+      const token = localStorage.getItem('uwo_token') || localStorage.getItem('token');
+      const res = await axios.post(`${API_BASE_URL}/api/templates/sync_from_meta/`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
       alert(res.data.message || "Templates synced successfully!");
@@ -73,8 +74,8 @@ export default function CampaignsPage() {
     const campaignId = typeof id === 'object' && id !== null ? (id.$oid || id._id || id.id) : id;
     
     try {
-      const token = localStorage.getItem('uwo_token');
-      await axios.delete(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/campaigns/${campaignId}/`, {
+      const token = localStorage.getItem('uwo_token') || localStorage.getItem('token');
+      await axios.delete(`${API_BASE_URL}/api/campaigns/${campaignId}/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setCampaigns(prev => prev.filter(c => {

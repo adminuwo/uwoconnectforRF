@@ -41,7 +41,7 @@ export const getUnifiedApiBaseUrl = () => {
 export const UNIFIED_API_BASE_URL = getUnifiedApiBaseUrl();
 
 export const API_BASE_URL = getApiBaseUrl();
-export const API_URL = `${API_BASE_URL}/api`;
+export const API_URL = API_BASE_URL;
 
 
 export const PUBLIC_APP_URL = (function () {

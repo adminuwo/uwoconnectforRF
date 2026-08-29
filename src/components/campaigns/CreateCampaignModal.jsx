@@ -6,6 +6,7 @@ import {
   Users, Send, Bot, CheckCircle2, Calendar
 } from 'lucide-react';
 import axios from 'axios';
+import { API_BASE_URL } from '@/config/apiConfig';
 
 const STAGES = [
   { id: 'ALL', label: 'All Contacts' },
@@ -76,8 +77,8 @@ export default function CreateCampaignModal({ isOpen, onClose, onCreated }) {
 
   const fetchContacts = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/contacts/`, {
+      const token = localStorage.getItem('uwo_token') || localStorage.getItem('token');
+      const res = await axios.get(`${API_BASE_URL}/api/contacts/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setContacts(Array.isArray(res.data) ? res.data : (res.data?.results || []));
@@ -88,13 +89,14 @@ export default function CreateCampaignModal({ isOpen, onClose, onCreated }) {
 
   const fetchTemplates = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/templates/`, {
+      const token = localStorage.getItem('uwo_token') || localStorage.getItem('token');
+      const res = await axios.get(`${API_BASE_URL}/api/templates/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setTemplates(Array.isArray(res.data) ? res.data : (res.data?.results || []));
-      if (res.data && res.data.length > 0) {
-        setTemplateId(res.data[0].id);
+      const data = Array.isArray(res.data) ? res.data : (res.data?.results || []);
+      setTemplates(data);
+      if (data && data.length > 0) {
+        setTemplateId(data[0].id);
       }
     } catch (err) {
       console.error("Failed to fetch templates", err);
@@ -104,8 +106,8 @@ export default function CreateCampaignModal({ isOpen, onClose, onCreated }) {
   const handleAIGenerate = async () => {
     setAiLoading(true);
     try {
-      const token = localStorage.getItem('token');
-      const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/campaigns/ai_generate/`, {
+      const token = localStorage.getItem('uwo_token') || localStorage.getItem('token');
+      const res = await axios.post(`${API_BASE_URL}/api/campaigns/ai_generate/`, {
         prompt: messageBody || name || "Create a high converting promotion message",
         action_type: 'improve',
         tone: "professional"
@@ -143,7 +145,7 @@ export default function CreateCampaignModal({ isOpen, onClose, onCreated }) {
 
     setLoading(true);
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('uwo_token') || localStorage.getItem('token');
 
       let scheduled_at = null;
       if (isScheduled && scheduleDate && scheduleTime) {
@@ -163,7 +165,7 @@ export default function CreateCampaignModal({ isOpen, onClose, onCreated }) {
         followup_template_id: isFollowUpEnabled ? followupTemplateId : null,
       };
 
-      await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/campaigns/`, payload, {
+      await axios.post(`${API_BASE_URL}/api/campaigns/`, payload, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
