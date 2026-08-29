@@ -108,7 +108,7 @@ export default function UwoLandingPage() {
   }, []);
 
   const handleStartFree = () => {
-    setIsLoginModalOpen(true);
+    router.push('/auth/login');
   };
 
   return (
@@ -144,13 +144,13 @@ export default function UwoLandingPage() {
           {/* Auth CTAs */}
           <div className="flex items-center gap-3">
             <button
-              onClick={() => setIsLoginModalOpen(true)}
+              onClick={() => router.push('/auth/login')}
               className="px-4 py-2 text-xs font-extrabold text-slate-700 hover:text-emerald-600 transition-colors cursor-pointer"
             >
               Log In
             </button>
             <button
-              onClick={handleStartFree}
+              onClick={() => router.push('/auth/login')}
               className="px-5 py-2.5 rounded-xl bg-[#059669] hover:bg-[#047857] text-white text-xs font-extrabold shadow-md shadow-emerald-700/20 transition-all flex items-center gap-1.5 cursor-pointer"
             >
               <span>Get Started</span>
