@@ -396,7 +396,7 @@ export default function PricingComparisonTable({ plansData, onSelectPlan, isAdmi
       const normalized = plansData.map(p => {
         const meta = p.metadata || {};
         const monthlyPrice = Number(p.monthly_price || p.price || meta.monthly_price || 999);
-        const yearlyPrice = Number(p.yearly_price || meta.yearly_price || Math.round(monthlyPrice * 12 * 0.8));
+        const yearlyPrice = Number(p.yearly_price || meta.yearly_price || Math.round(monthlyPrice * 12 * 0.85));
         const maxChannels = p.max_channels || meta.max_channels || (p.name.toLowerCase().includes('starter') ? 1 : (p.name.toLowerCase().includes('growth') ? 2 : 3));
 
         const slug = p.slug || p.name.toLowerCase();
@@ -410,7 +410,7 @@ export default function PricingComparisonTable({ plansData, onSelectPlan, isAdmi
           description: p.description || meta.description || fallbackObj.description,
           monthly_price: monthlyPrice,
           yearly_price: yearlyPrice,
-          yearly_discount_percent: meta.yearly_discount_percent || 20.0,
+          yearly_discount_percent: meta.yearly_discount_percent || 15.0,
           currency: p.currency || '₹',
           tax_info: meta.tax_info || '(+taxes)',
           max_channels: maxChannels,
@@ -432,7 +432,7 @@ export default function PricingComparisonTable({ plansData, onSelectPlan, isAdmi
           const normalized = res.data.map(p => {
             const meta = p.metadata || {};
             const monthlyPrice = p.monthly_price || meta.monthly_price || parseFloat(p.price) || 999;
-            const yearlyPrice = p.yearly_price || meta.yearly_price || Math.round(monthlyPrice * 12 * 0.8 * 100) / 100 || 9590.40;
+            const yearlyPrice = p.yearly_price || meta.yearly_price || Math.round(monthlyPrice * 12 * 0.85 * 100) / 100 || 10189.80;
             const maxChannels = p.max_channels || meta.max_channels || (p.name.toLowerCase().includes('starter') ? 1 : (p.name.toLowerCase().includes('growth') ? 2 : 3));
 
             const slug = p.slug || p.name.toLowerCase();
@@ -608,7 +608,7 @@ export default function PricingComparisonTable({ plansData, onSelectPlan, isAdmi
           >
             <span>Yearly Billing</span>
             <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-200 text-emerald-950 uppercase tracking-wider flex items-center gap-1">
-              <Flame size={10} className="fill-emerald-950" /> SAVE 20%
+              <Flame size={10} className="fill-emerald-950" /> SAVE 15%
             </span>
           </button>
         </div>

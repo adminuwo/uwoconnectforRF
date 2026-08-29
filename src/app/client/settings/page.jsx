@@ -792,7 +792,7 @@ const ClientSettingsPage = () => {
                 )} onClick={() => setBillingCycle('ANNUAL')}>
                   Annual Billing
                   <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-emerald-100 text-emerald-800 border border-emerald-300">
-                    Save 20%
+                    Save 15%
                   </span>
                 </span>
               </div>
@@ -803,7 +803,7 @@ const ClientSettingsPage = () => {
                   const isCurrent = (client?.plan || '').toUpperCase() === plan.id.toUpperCase() || (client?.plan || '').toUpperCase() === plan.name.toUpperCase();
                   const monthlyPrice = Number(plan.price) || 0;
                   const displayPrice = billingCycle === 'ANNUAL' 
-                    ? Math.round(monthlyPrice * 0.8) 
+                    ? Math.round(monthlyPrice * 0.85) 
                     : monthlyPrice;
 
                   return (

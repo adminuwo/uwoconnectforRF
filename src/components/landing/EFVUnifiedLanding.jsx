@@ -451,7 +451,7 @@ export default function EFVUnifiedLanding() {
                   className={`w-5 h-5 rounded-full shadow-md transition-all duration-200 ${annual ? 'bg-[#10B981] ml-auto' : 'bg-slate-400'}`}
                 />
               </button>
-              <span className={`text-[11px] font-bold uppercase tracking-wider ${annual ? 'text-[#10B981]' : 'text-slate-500'}`}>Yearly (Save 20%)</span>
+              <span className={`text-[11px] font-bold uppercase tracking-wider ${annual ? 'text-[#10B981]' : 'text-slate-500'}`}>Yearly (Save 15%)</span>
             </div>
           </div>
 

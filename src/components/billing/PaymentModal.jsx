@@ -69,7 +69,7 @@ export default function PaymentModal({ isOpen, onClose, selectedPlan = 'PROFESSI
   const planInfo = planDetails ? {
     name: planDetails.name || defaultInfo.name,
     monthly: Number(planDetails.price) || defaultInfo.monthly,
-    annual: Math.round((Number(planDetails.price) || defaultInfo.monthly) * 0.8),
+    annual: Math.round((Number(planDetails.price) || defaultInfo.monthly) * 0.85),
     features: planDetails.features || defaultInfo.features
   } : defaultInfo;
 

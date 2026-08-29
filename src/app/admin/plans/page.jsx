@@ -646,7 +646,7 @@ export default function AdminPlansPage() {
     setModalActiveCategory('ALL');
     setModalEditorTab('basic');
     const mPrice = plan.monthly_price || plan.price || 999;
-    const yPrice = plan.yearly_price || Math.round(mPrice * 12 * 0.8);
+    const yPrice = plan.yearly_price || Math.round(mPrice * 12 * 0.85);
 
     const waDetails = plan.channel_details?.whatsapp || {};
     const waGet = waDetails.what_you_get || [
@@ -779,7 +779,7 @@ export default function AdminPlansPage() {
     if (!editingPlan) return;
 
     const mPrice = Number(planForm.price) || 0;
-    const yPrice = Number(planForm.yearly_price) || Math.round(mPrice * 12 * 0.8);
+    const yPrice = Number(planForm.yearly_price) || Math.round(mPrice * 12 * 0.85);
     const mChannels = Number(planForm.max_channels) || 1;
 
     const updatedWhatYouGet = (planForm.whatsapp_what_you_get || '').split('\n').map(s => s.trim()).filter(Boolean);
@@ -1613,7 +1613,7 @@ export default function AdminPlansPage() {
                               setPlanForm(prev => ({
                                 ...prev,
                                 price: val,
-                                yearly_price: (Number(val) * 12 * 0.8).toFixed(0)
+                                yearly_price: (Number(val) * 12 * 0.85).toFixed(0)
                               }));
                             }}
                             className="w-full pl-8 pr-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-900 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 transition-all"
