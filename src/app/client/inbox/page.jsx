@@ -321,10 +321,10 @@ export default function ClientInboxPage() {
       }
       const token = localStorage.getItem('uwo_token');
       const apiUrl = API_BASE_URL;
-      const res = await axios.get(`${apiUrl}/api/messages/?contact_id=${encodeURIComponent(contactId)}&limit=10&offset=${offset}`, {
+      const res = await axios.get(`${apiUrl}/api/messages/?contact_id=${encodeURIComponent(contactId)}&limit=50&offset=${offset}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      // Messages come ordered by -created_at from backend. Reverse to show oldest first in chat.
+      // Messages come ordered by -id from backend. Reverse to show oldest first in chat thread.
       const fetchedMessages = (res.data || []).reverse();
       
       if (append) {
@@ -554,7 +554,23 @@ export default function ClientInboxPage() {
       });
 
       if (res.data) {
-        setMessages(prev => prev.map(m => m.id === optimisticMsg.id ? res.data : m));
+        setMessages(prev => {
+          const replaced = prev.map(m => m.id === optimisticMsg.id ? res.data : m);
+          if (!replaced.some(m => m.id === res.data.id)) {
+            replaced.push(res.data);
+          }
+          return replaced;
+        });
+        setConversations(prev => prev.map(c => {
+          if (c.id === activeConvo.id) {
+            return {
+              ...c,
+              lastMessage: res.data.body || textToSend,
+              time: new Date().toISOString()
+            };
+          }
+          return c;
+        }));
       }
       fetchData();
     } catch (err) {
