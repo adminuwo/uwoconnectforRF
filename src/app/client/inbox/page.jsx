@@ -796,6 +796,11 @@ export default function ClientInboxPage() {
                                 <Lock className="w-3 h-3 text-amber-500 shrink-0" title="Locked by team handler" />
                               )}
                             </h4>
+                            {convo.rawAddress && (
+                              <span className="inline-block text-[10px] font-mono text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200/80 font-bold mt-0.5 truncate max-w-full">
+                                📱 {convo.rawAddress}
+                              </span>
+                            )}
                             <p className="text-[11px] text-slate-500 truncate mt-0.5">
                               {liveState?.isTyping ? (
                                 <span className="text-emerald-600 font-bold animate-pulse">
@@ -839,7 +844,7 @@ export default function ClientInboxPage() {
                     {isLoadingMoreContacts ? (
                       <>Loading... <div className="w-3 h-3 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" /></>
                     ) : (
-                      "Load More Chats"
+                      "Load More Contacts"
                     )}
                   </button>
                 </div>
@@ -874,8 +879,13 @@ export default function ClientInboxPage() {
                     </div>
 
                     <div className="min-w-0 flex-1">
-                      <h3 className="text-xs sm:text-sm font-bold text-slate-900 flex items-center gap-1.5 truncate">
+                      <h3 className="text-xs sm:text-sm font-bold text-slate-900 flex items-center gap-1.5 truncate flex-wrap">
                         <span className="truncate">{activeConvo.name}</span>
+                        {activeConvo.rawAddress && (
+                          <span className="text-xs font-mono font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200 shadow-2xs shrink-0">
+                            📱 {activeConvo.rawAddress}
+                          </span>
+                        )}
                         <span className="text-[8px] sm:text-[10px] font-extrabold px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 shrink-0">
                           {activeConvo.channel}
                         </span>
