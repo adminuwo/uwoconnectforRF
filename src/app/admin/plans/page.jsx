@@ -826,7 +826,13 @@ export default function AdminPlansPage() {
       feature_keys: planForm.selected_feature_keys,
       channel_count: mChannels,
       connector_count: planForm.selected_feature_keys.filter(k => k.startsWith('connector_')).length || 1,
-      channel_details: updatedChannelDetails
+      channel_details: updatedChannelDetails,
+      metadata: {
+        ...(editingPlan.metadata || {}),
+        monthly_price: mPrice,
+        yearly_price: yPrice,
+        channel_details: updatedChannelDetails
+      }
     };
 
     try {
@@ -843,7 +849,11 @@ export default function AdminPlansPage() {
         currency: updatedPlanObj.currency,
         is_active: updatedPlanObj.status === 'ACTIVE',
         feature_keys: updatedPlanObj.feature_keys,
-        metadata: { channel_details: updatedChannelDetails }
+        metadata: {
+          monthly_price: mPrice,
+          yearly_price: yPrice,
+          channel_details: updatedChannelDetails
+        }
       }, { headers: { Authorization: `Bearer ${token}` } });
     } catch (err) {
       console.log('Updated in state pool:', err);
@@ -1572,7 +1582,7 @@ export default function AdminPlansPage() {
                 {/* TAB 1: BASIC INFO & PRICING */}
                 {modalEditorTab === 'basic' && (
                   <div className="bg-slate-50/80 p-3.5 sm:p-5 rounded-2xl border border-slate-200/80 space-y-3 sm:space-y-4">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
                       <div>
                         <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
                           Plan Name *
@@ -1589,23 +1599,40 @@ export default function AdminPlansPage() {
 
                       <div>
                         <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
-                          {planForm.billing_cycle === 'Yearly' ? 'Plan Price (₹ / Year)' : 'Plan Price (₹ / Month) *'}
+                          Monthly Price (₹ / Month) *
                         </label>
                         <div className="relative">
                           <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">₹</span>
                           <input
                             type="number"
                             required
-                            placeholder={planForm.billing_cycle === 'Yearly' ? '999' : '499'}
+                            placeholder="999"
                             value={planForm.price}
                             onChange={(e) => {
                               const val = e.target.value;
                               setPlanForm(prev => ({
                                 ...prev,
                                 price: val,
-                                yearly_price: prev.billing_cycle === 'Yearly' ? val : (Number(val) * 12 * 0.8).toFixed(0)
+                                yearly_price: (Number(val) * 12 * 0.8).toFixed(0)
                               }));
                             }}
+                            className="w-full pl-8 pr-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-900 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 transition-all"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
+                          Yearly Price (₹ / Year) *
+                        </label>
+                        <div className="relative">
+                          <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">₹</span>
+                          <input
+                            type="number"
+                            required
+                            placeholder="9590"
+                            value={planForm.yearly_price || ''}
+                            onChange={(e) => setPlanForm({ ...planForm, yearly_price: e.target.value })}
                             className="w-full pl-8 pr-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-900 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 transition-all"
                           />
                         </div>
