@@ -655,6 +655,17 @@ export default function PricingComparisonTable({ plansData, onSelectPlan, isAdmi
                         </p>
                       </div>
 
+                      {isAdminView && (
+                        <button
+                          type="button"
+                          onClick={() => onManagePlan && onManagePlan(plan)}
+                          className="w-full py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md shadow-emerald-600/20 border border-emerald-500"
+                        >
+                          <SlidersHorizontal size={14} />
+                          <span>⚙️ Manage & Edit Plan</span>
+                        </button>
+                      )}
+
                       <div className="space-y-1">
                         <div className="flex items-baseline gap-1">
                           <span className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
