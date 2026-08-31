@@ -48,6 +48,7 @@ import GoogleSlidesConfigModal, { GoogleSlidesIcon } from '@/components/channels
 import GoogleNewsConfigModal, { GoogleNewsIcon } from '@/components/channels/GoogleNewsConfigModal';
 import OutlookConfigModal, { OutlookIcon } from '@/components/channels/OutlookConfigModal';
 import YouTubeConfigModal, { YouTubeBrandIcon } from '@/components/channels/YouTubeConfigModal';
+import GmailConfigModal from '@/components/channels/GmailConfigModal';
 import LearningCenterModal from '@/components/guides/LearningCenterModal';
 
 // ═════════════════════════════════════════════════════════════════════════════════
@@ -148,6 +149,7 @@ const ClientChannelsPage = () => {
   const [isZohoConfigModalOpen, setIsZohoConfigModalOpen] = useState(false);
   const [isYouTubeConfigModalOpen, setIsYouTubeConfigModalOpen] = useState(false);
   const [isOutlookConfigOpen, setIsOutlookConfigOpen] = useState(false);
+  const [isGmailConfigModalOpen, setIsGmailConfigModalOpen] = useState(false);
   const [isRazorpayConfigModalOpen, setIsRazorpayConfigModalOpen] = useState(false);
   const [isGuideOpen, setIsGuideOpen] = useState(false);
   const [comingSoonModalChannel, setComingSoonModalChannel] = useState(null);
@@ -164,8 +166,10 @@ const ClientChannelsPage = () => {
 
     if (typeof window !== 'undefined') {
       const search = window.location.search;
-      if (search.includes('channel=outlook') || search.includes('channel=gmail') || search.includes('channel=email')) {
+      if (search.includes('channel=outlook')) {
         setIsOutlookConfigOpen(true);
+      } else if (search.includes('channel=gmail')) {
+        handleConnectGmail();
       }
     }
 
@@ -621,17 +625,19 @@ const ClientChannelsPage = () => {
   // Connect actions
   const handleConnectGmail = async () => {
     try {
-      const token = localStorage.getItem('uwo_token');
+      const token = localStorage.getItem('token') || localStorage.getItem('uwo_token');
       const res = await axios.get(`${API_BASE_URL}/api/auth/gmail/connect`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      if (res.data.url) {
+      if (res.data?.url) {
         window.location.href = res.data.url;
+        return;
       }
     } catch (err) {
       console.warn("Error connecting Gmail", err);
-      setIsOutlookConfigOpen(true);
     }
+    const token = localStorage.getItem('token') || localStorage.getItem('uwo_token');
+    window.location.href = `${API_BASE_URL}/api/auth/gmail/connect${token ? `?token=${token}` : ''}`;
   };
 
   const handleConnectGoogleCalendar = async () => {
@@ -1339,8 +1345,8 @@ const ClientChannelsPage = () => {
                   icon: <GmailBrandIcon size={28} />,
                   isConnected: isGmailConnected,
                   connectedInfo: client?.gmail_config?.email || 'Connected Account',
-                  onConnect: handleConnectGmail,
-                  onConfigure: () => setIsOutlookConfigOpen(true),
+                  onConnect: () => isGmailConnected ? setIsGmailConfigModalOpen(true) : handleConnectGmail(),
+                  onConfigure: () => setIsGmailConfigModalOpen(true),
                   badge: 'Email Sync',
                   btnColor: 'bg-[#EA4335] hover:bg-[#d93025] text-white'
                 },
@@ -1960,6 +1966,16 @@ const ClientChannelsPage = () => {
                 window.history.replaceState({}, '', window.location.pathname);
               }
             }}
+            client={client}
+            onSaved={() => fetchClient(true)}
+          />
+        )}
+
+        {/* Gmail Configuration Modal */}
+        {isGmailConfigModalOpen && (
+          <GmailConfigModal
+            isOpen={isGmailConfigModalOpen}
+            onClose={() => setIsGmailConfigModalOpen(false)}
             client={client}
             onSaved={() => fetchClient(true)}
           />

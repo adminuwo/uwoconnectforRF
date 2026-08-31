@@ -119,6 +119,7 @@ const NETWORK_NODES = [
 ];
 
 export default function AutomationNetwork() {
+  const [isExpanded, setIsExpanded] = useState(false);
   const [hoveredNode, setHoveredNode] = useState(null);
 
   const channels = NETWORK_NODES.filter(n => n.group === 'channels');
@@ -133,8 +134,8 @@ export default function AutomationNetwork() {
     <div className="w-full relative py-6">
 
       {/* FLOATING HOVER TOOLTIP */}
-      {activeInfo && (
-        <div className="absolute top-2 left-1/2 -translate-x-1/2 z-30 px-4 py-2.5 rounded-2xl bg-white/95 border border-emerald-300 shadow-xl backdrop-blur-md flex items-center gap-3 animate-in fade-in zoom-in-95 duration-150 max-w-sm text-left">
+      {activeInfo && isExpanded && (
+        <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-30 px-4 py-2.5 rounded-2xl bg-white/95 border border-emerald-300 shadow-xl backdrop-blur-md flex items-center gap-3 animate-in fade-in zoom-in-95 duration-150 max-w-sm text-left">
           <div className="p-2 rounded-xl bg-emerald-50 border border-emerald-200 shrink-0">
             {activeInfo.icon}
           </div>
@@ -151,19 +152,17 @@ export default function AutomationNetwork() {
       )}
 
       {/* DESKTOP INTEGRATION MESH GRID */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8 items-center relative z-10 max-w-6xl mx-auto px-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8 items-center relative z-10 max-w-6xl mx-auto px-4 min-h-[380px]">
 
-        {/* LAYER 1: CHANNELS & CONNECTORS */}
-        <div className="space-y-4">
-          <div className="flex items-center gap-2 mb-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping" />
-            <span className="text-xs font-black uppercase tracking-wider text-emerald-700">
-              LAYER 1: CHANNELS & CONNECTORS
-            </span>
-          </div>
-
+        {/* LAYER 1: CHANNELS & CONNECTORS (LEFT COLUMN) */}
+        <div className={cn(
+          "space-y-4 transition-all duration-700 ease-out transform",
+          isExpanded 
+            ? "opacity-100 translate-x-0 scale-100 pointer-events-auto" 
+            : "opacity-0 -translate-x-12 scale-95 pointer-events-none hidden lg:block"
+        )}>
           <div className="grid grid-cols-2 gap-3">
-            {channels.map((node) => {
+            {channels.map((node, idx) => {
               const isHovered = hoveredNode === node.id;
               const isDimmed = hoveredNode && !isHovered;
 
@@ -172,8 +171,10 @@ export default function AutomationNetwork() {
                   key={node.id}
                   onMouseEnter={() => setHoveredNode(node.id)}
                   onMouseLeave={() => setHoveredNode(null)}
+                  style={{ transitionDelay: `${isExpanded ? idx * 90 : 0}ms` }}
                   className={cn(
-                    "p-3.5 rounded-2xl bg-white border transition-all duration-300 flex items-center gap-3 cursor-pointer shadow-sm",
+                    "p-3.5 rounded-2xl bg-white border transition-all duration-500 flex items-center gap-3 cursor-pointer shadow-sm transform",
+                    isExpanded ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0",
                     isHovered ? "border-emerald-500 shadow-md ring-2 ring-emerald-500/20 scale-105" : "border-slate-200 hover:border-emerald-300",
                     isDimmed && "opacity-40"
                   )}
@@ -189,7 +190,7 @@ export default function AutomationNetwork() {
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-2 gap-2.5 pt-2">
-            {connectors.map((node) => {
+            {connectors.map((node, idx) => {
               const isHovered = hoveredNode === node.id;
               const isDimmed = hoveredNode && !isHovered;
 
@@ -198,8 +199,10 @@ export default function AutomationNetwork() {
                   key={node.id}
                   onMouseEnter={() => setHoveredNode(node.id)}
                   onMouseLeave={() => setHoveredNode(null)}
+                  style={{ transitionDelay: `${isExpanded ? (channels.length + idx) * 70 : 0}ms` }}
                   className={cn(
-                    "p-2.5 rounded-xl bg-white border transition-all duration-300 flex items-center gap-2.5 cursor-pointer shadow-2xs",
+                    "p-2.5 rounded-xl bg-white border transition-all duration-500 flex items-center gap-2.5 cursor-pointer shadow-2xs transform",
+                    isExpanded ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0",
                     isHovered ? "border-emerald-500 shadow-sm ring-2 ring-emerald-500/20 scale-105" : "border-slate-200 hover:border-emerald-300",
                     isDimmed && "opacity-40"
                   )}
@@ -212,35 +215,52 @@ export default function AutomationNetwork() {
           </div>
         </div>
 
-        {/* CENTER CORE: UWO CONNECT AUTOMATION ENGINE */}
-        <div className="flex flex-col items-center justify-center p-8 rounded-3xl bg-gradient-to-b from-emerald-500/10 via-white to-emerald-50 border-2 border-emerald-500/40 shadow-2xl relative group">
-          <div className="w-20 h-20 rounded-3xl bg-[#059669] text-white flex items-center justify-center shadow-xl shadow-emerald-600/30 mb-4 animate-bounce-slow">
+        {/* CENTER CORE: UWO CONNECT AUTOMATION ENGINE (INITIAL CENTER CARD) */}
+        <div 
+          onClick={() => setIsExpanded(!isExpanded)}
+          className={cn(
+            "flex flex-col items-center justify-center p-8 sm:p-10 rounded-3xl bg-gradient-to-b from-emerald-500/10 via-white to-emerald-50/90 border-2 transition-all duration-500 relative group cursor-pointer shadow-2xl hover:shadow-emerald-600/30 transform hover:scale-[1.02] active:scale-98 select-none overflow-hidden",
+            isExpanded ? "border-emerald-500" : "border-emerald-500/60 ring-4 ring-emerald-500/10"
+          )}
+        >
+          {/* Badge inside Center Card */}
+          <div className="mb-4">
+            <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-[#059669] hover:bg-[#047857] text-white text-xs font-extrabold shadow-md shadow-emerald-700/25 transition-all">
+              <Sparkles size={14} className="text-yellow-300 animate-pulse" />
+              <span>Click for more info</span>
+            </span>
+          </div>
+
+          <div className="w-20 h-20 rounded-3xl bg-[#059669] text-white flex items-center justify-center shadow-xl shadow-emerald-600/30 mb-4 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
             <Zap size={38} className="fill-white" />
           </div>
 
-          <div className="text-center space-y-1">
+          <div className="text-center space-y-1.5 px-2">
             <span className="px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-black uppercase tracking-widest border border-emerald-200">
               UNIFIED ENGINE
             </span>
             <h3 className="text-2xl font-black text-slate-900 tracking-tight">UWO Connect</h3>
-            <p className="text-xs text-slate-500 font-medium">Auto-syncing channels, tools & workflows</p>
+            <p className="text-xs text-slate-600 font-medium max-w-[240px] leading-relaxed">
+              Auto-syncing channels, tools & workflows
+            </p>
           </div>
 
           {/* Animated Glowing Pulse Ring */}
-          <div className="absolute inset-0 rounded-3xl border-2 border-emerald-500/20 pointer-events-none animate-pulse" />
+          <div className={cn(
+            "absolute inset-0 rounded-3xl border-2 pointer-events-none transition-colors duration-500",
+            isExpanded ? "border-emerald-500/20 animate-pulse" : "border-emerald-500/40 animate-ping"
+          )} />
         </div>
 
-        {/* LAYER 2: AUTOMATION MODULES */}
-        <div className="space-y-4">
-          <div className="flex items-center gap-2 mb-2 justify-start lg:justify-end">
-            <span className="text-xs font-black uppercase tracking-wider text-emerald-700">
-              LAYER 2: AUTOMATION MODULES
-            </span>
-            <Sparkles size={14} className="text-emerald-600" />
-          </div>
-
+        {/* LAYER 2: AUTOMATION MODULES (RIGHT COLUMN) */}
+        <div className={cn(
+          "space-y-4 transition-all duration-700 ease-out transform",
+          isExpanded 
+            ? "opacity-100 translate-x-0 scale-100 pointer-events-auto" 
+            : "opacity-0 translate-x-12 scale-95 pointer-events-none hidden lg:block"
+        )}>
           <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-1 gap-2.5">
-            {modules.map((node) => {
+            {modules.map((node, idx) => {
               const isHovered = hoveredNode === node.id;
               const isDimmed = hoveredNode && !isHovered;
 
@@ -249,8 +269,10 @@ export default function AutomationNetwork() {
                   key={node.id}
                   onMouseEnter={() => setHoveredNode(node.id)}
                   onMouseLeave={() => setHoveredNode(null)}
+                  style={{ transitionDelay: `${isExpanded ? idx * 75 : 0}ms` }}
                   className={cn(
-                    "p-3 rounded-xl bg-white border transition-all duration-300 flex items-center justify-between cursor-pointer shadow-2xs",
+                    "p-3 rounded-xl bg-white border transition-all duration-500 flex items-center justify-between cursor-pointer shadow-2xs transform",
+                    isExpanded ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0",
                     isHovered ? "border-emerald-500 shadow-md ring-2 ring-emerald-500/20 scale-105" : "border-slate-200 hover:border-emerald-300",
                     isDimmed && "opacity-40"
                   )}

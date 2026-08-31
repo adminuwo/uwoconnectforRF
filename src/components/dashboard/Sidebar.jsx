@@ -116,32 +116,44 @@ const Sidebar = ({ role, isOpen, onClose, onToggle }) => {
     if (role === 'ADMIN') return true;
     if (!mounted) return false;
 
+    const baseKey = (link.featureKey || link.name || '').toLowerCase().trim();
+    const cleanKey = baseKey.replace(/^feature_/, '').replace(/^connector_/, '').replace(/\s+/g, '_');
+    const keyVariants = [
+      baseKey,
+      cleanKey,
+      `feature_${cleanKey}`,
+      `connector_${cleanKey}`,
+      link.name?.toLowerCase().replace(/\s+/g, '_')
+    ].filter(Boolean);
+
     // 1. Check explicit Admin REMOVE lock override
-    if (link.featureKey && entitlements) {
-      const customRemoved = entitlements?.custom_removed || [];
-      if (customRemoved.some(k => k.toLowerCase() === link.featureKey.toLowerCase())) {
+    if (entitlements) {
+      const customRemoved = (entitlements?.custom_removed || []).map(k => String(k).toLowerCase());
+      if (keyVariants.some(v => customRemoved.includes(v))) {
         return false;
       }
     }
 
     // 2. Check explicit Admin ADD unlock override
-    if (link.featureKey && entitlements) {
-      const customAdded = entitlements?.custom_added || [];
-      if (customAdded.some(k => k.toLowerCase() === link.featureKey.toLowerCase())) {
+    if (entitlements) {
+      const customAdded = (entitlements?.custom_added || []).map(k => String(k).toLowerCase());
+      if (keyVariants.some(v => customAdded.includes(v))) {
         return true;
       }
     }
 
     // 3. Check evaluated status from backend (accounts for plan config + overrides)
-    if (link.featureKey && entitlements) {
-      const featStatus = entitlements?.features?.[link.featureKey]?.status || 
-                         entitlements?.connectors?.[link.featureKey]?.status ||
-                         entitlements?.channels?.[link.featureKey]?.status;
-      if (featStatus === 'UPGRADE_REQUIRED' || featStatus === 'LOCKED') {
-        return false;
-      }
-      if (featStatus === 'AVAILABLE' || featStatus === 'CONNECTED') {
-        return true;
+    if (entitlements) {
+      for (const variant of keyVariants) {
+        const featStatus = entitlements?.features?.[variant]?.status || 
+                           entitlements?.connectors?.[variant]?.status ||
+                           entitlements?.channels?.[variant]?.status;
+        if (featStatus === 'UPGRADE_REQUIRED' || featStatus === 'LOCKED') {
+          return false;
+        }
+        if (featStatus === 'AVAILABLE' || featStatus === 'CONNECTED' || featStatus === 'ENABLED') {
+          return true;
+        }
       }
     }
 
@@ -180,25 +192,25 @@ const Sidebar = ({ role, isOpen, onClose, onToggle }) => {
     { name: 'Dashboard', href: '/client', icon: LayoutDashboard, requiredPlan: 'Starter' },
     { name: 'Learning Center', href: '/client/guides', icon: BookOpen, requiredPlan: 'Starter' },
     { name: 'Channels', href: '/client/channels', icon: Link2, requiredPlan: 'Starter' },
-    { name: 'Outlook', href: '/client/email', icon: Mail, requiredPlan: 'Growth', featureKey: 'connector_outlook' },
-    { name: 'Gmail', href: '/client/gmail', icon: Mail, requiredPlan: 'Growth', featureKey: 'connector_gmail' },
-    { name: 'Voice & Video Calls', href: '/client/calls', icon: PhoneCall, requiredPlan: 'Advanced', featureKey: 'feature_voice_video_call' },
-    { name: 'YouTube', href: '/client/youtube', icon: YoutubeIcon, requiredPlan: 'Growth', featureKey: 'channel_youtube' },
-    { name: 'Google News', href: '/client/google-news', icon: Newspaper, requiredPlan: 'Advanced', featureKey: 'connector_google_news' },
+    { name: 'Outlook', href: '/client/email', icon: Mail, requiredPlan: 'Starter', featureKey: 'connector_outlook' },
+    { name: 'Gmail', href: '/client/gmail', icon: Mail, requiredPlan: 'Starter', featureKey: 'connector_gmail' },
+    { name: 'Voice & Video Calls', href: '/client/calls', icon: PhoneCall, requiredPlan: 'Starter', featureKey: 'feature_voice_video_call' },
+    { name: 'YouTube', href: '/client/youtube', icon: YoutubeIcon, requiredPlan: 'Starter', featureKey: 'channel_youtube' },
+    { name: 'Google News', href: '/client/google-news', icon: Newspaper, requiredPlan: 'Starter', featureKey: 'connector_google_news' },
     { name: 'Auto Replies', href: '/client/automations', icon: Zap, requiredPlan: 'Starter', featureKey: 'feature_autoreply' },
-    { name: 'Workflows', href: '/client/workflows', icon: GitBranch, requiredPlan: 'Growth', featureKey: 'feature_workflow' },
+    { name: 'Workflows', href: '/client/workflows', icon: GitBranch, requiredPlan: 'Starter', featureKey: 'feature_workflow' },
     { name: 'Leads (CRM)', href: '/client/crm', icon: Users, requiredPlan: 'Starter', featureKey: 'feature_crm' },
     { name: 'Quotations', href: '/client/quotations', icon: FileCheck, requiredPlan: 'Starter', featureKey: 'feature_quotation' },
-    { name: 'Proposals', href: '/client/proposals', icon: FileText, requiredPlan: 'Growth', featureKey: 'feature_proposal' },
-    { name: 'Invoices', href: '/client/invoices', icon: Receipt, requiredPlan: 'Growth', featureKey: 'feature_invoice' },
+    { name: 'Proposals', href: '/client/proposals', icon: FileText, requiredPlan: 'Starter', featureKey: 'feature_proposal' },
+    { name: 'Invoices', href: '/client/invoices', icon: Receipt, requiredPlan: 'Starter', featureKey: 'feature_invoice' },
     { name: 'Messages', href: '/client/inbox', icon: MessageSquare, requiredPlan: 'Starter' },
-    { name: 'Broadcasts', href: '/client/campaigns', icon: Megaphone, requiredPlan: 'Growth', featureKey: 'feature_broadcast' },
-    { name: 'Knowledge Base', href: '/client/knowledge', icon: Brain, requiredPlan: 'Advanced', featureKey: 'feature_knowledge_base' },
-    { name: 'Catalog', href: '/client/catalog', icon: ShoppingBag, requiredPlan: 'Growth', featureKey: 'feature_catalog' },
-    { name: 'Payments', href: '/client/payments', icon: CreditCard, requiredPlan: 'Growth', featureKey: 'feature_payment' },
-    { name: 'Orders', href: '/client/orders', icon: Receipt, requiredPlan: 'Growth', featureKey: 'feature_order' },
-    { name: 'Team', href: '/client/team', icon: ShieldCheck, requiredPlan: 'Advanced', featureKey: 'feature_team_dashboard' },
-    { name: 'Work Reports', href: '/client/reports', icon: FileCheck, requiredPlan: 'Advanced', featureKey: 'feature_reports' },
+    { name: 'Broadcasts', href: '/client/campaigns', icon: Megaphone, requiredPlan: 'Starter', featureKey: 'feature_broadcast' },
+    { name: 'Knowledge Base', href: '/client/knowledge', icon: Brain, requiredPlan: 'Starter', featureKey: 'feature_knowledge_base' },
+    { name: 'Catalog', href: '/client/catalog', icon: ShoppingBag, requiredPlan: 'Starter', featureKey: 'feature_catalog' },
+    { name: 'Payments', href: '/client/payments', icon: CreditCard, requiredPlan: 'Starter', featureKey: 'feature_payment' },
+    { name: 'Orders', href: '/client/orders', icon: Receipt, requiredPlan: 'Starter', featureKey: 'feature_order' },
+    { name: 'Team', href: '/client/team', icon: ShieldCheck, requiredPlan: 'Starter', featureKey: 'feature_team_dashboard' },
+    { name: 'Work Reports', href: '/client/reports', icon: FileCheck, requiredPlan: 'Starter', featureKey: 'feature_reports' },
     { name: 'Settings', href: '/client/settings', icon: Settings, requiredPlan: 'Starter' },
     { name: 'Plans', href: '/client/plans', icon: Layers, requiredPlan: 'Starter' },
     { name: 'Support', href: '/client/support', icon: LifeBuoy, requiredPlan: 'Starter' },

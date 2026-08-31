@@ -25,19 +25,10 @@ const FacebookLogo = ({ size = 16, className = "" }) => (
 
 const InstagramLogo = ({ size = 16, className = "" }) => (
   <svg width={size} height={size} viewBox="0 0 48 48" fill="none" className={cn("shrink-0", className)}>
-    <defs>
-      <linearGradient id="igGradPricingTable" x1="0%" y1="100%" x2="100%" y2="0%">
-        <stop offset="0%" stopColor="#FFD600" />
-        <stop offset="25%" stopColor="#FF7A00" />
-        <stop offset="50%" stopColor="#FF0069" />
-        <stop offset="75%" stopColor="#D300C5" />
-        <stop offset="100%" stopColor="#7638FA" />
-      </linearGradient>
-    </defs>
-    <rect width="48" height="48" rx="12" fill="url(#igGradPricingTable)"/>
-    <rect x="11" y="11" width="26" height="26" rx="7" stroke="white" strokeWidth="3" fill="none"/>
-    <circle cx="24" cy="24" r="6" stroke="white" strokeWidth="3" fill="none"/>
-    <circle cx="31.5" cy="16.5" r="1.75" fill="white"/>
+    <circle cx="24" cy="24" r="24" fill="#E1306C" />
+    <rect x="13" y="13" width="22" height="22" rx="6" stroke="white" strokeWidth="2.5" fill="none"/>
+    <circle cx="24" cy="24" r="5" stroke="white" strokeWidth="2.5" fill="none"/>
+    <circle cx="30" cy="18" r="1.5" fill="white"/>
   </svg>
 );
 
@@ -555,17 +546,50 @@ export default function PricingComparisonTable({ plansData, onSelectPlan, isAdmi
   };
 
   const renderChannelLogo = (chKey) => {
-    if (chKey === 'whatsapp') return <WhatsAppLogo size={15} />;
-    if (chKey === 'facebook') return <FacebookLogo size={15} />;
-    if (chKey === 'instagram') return <InstagramLogo size={15} />;
+    const k = (chKey || '').toString().toLowerCase();
+    if (k.includes('whatsapp')) return <WhatsAppLogo size={15} />;
+    if (k.includes('facebook')) return <FacebookLogo size={15} />;
+    if (k.includes('instagram')) return <InstagramLogo size={15} />;
     return null;
   };
 
   const renderChannelName = (chKey) => {
-    if (chKey === 'whatsapp') return 'WhatsApp';
-    if (chKey === 'facebook') return 'Facebook';
-    if (chKey === 'instagram') return 'Instagram';
+    const k = (chKey || '').toString().toLowerCase();
+    if (k.includes('whatsapp')) return 'WhatsApp';
+    if (k.includes('facebook')) return 'Facebook';
+    if (k.includes('instagram')) return 'Instagram';
     return chKey;
+  };
+
+  const getChannelDetails = (planObj, chKey) => {
+    if (!planObj) return {};
+    const keyToFind = (chKey || 'whatsapp').toString().toLowerCase();
+
+    const chMap = planObj.channel_details;
+    if (chMap && typeof chMap === 'object') {
+      for (const k of Object.keys(chMap)) {
+        if (k.toLowerCase() === keyToFind && chMap[k] && typeof chMap[k] === 'object' && Object.keys(chMap[k]).length > 0) {
+          return chMap[k];
+        }
+      }
+    }
+
+    const planSlug = (planObj.slug || planObj.name || planObj.id || '').toString().toLowerCase();
+    const fallbackPlan = SEEDED_FALLBACK_PLANS.find(
+      p => (p.slug || '').toLowerCase() === planSlug ||
+           (p.name || '').toLowerCase() === planSlug ||
+           (p.id || '').toLowerCase() === planSlug
+    );
+
+    if (fallbackPlan && fallbackPlan.channel_details) {
+      for (const k of Object.keys(fallbackPlan.channel_details)) {
+        if (k.toLowerCase() === keyToFind) {
+          return fallbackPlan.channel_details[k];
+        }
+      }
+    }
+
+    return {};
   };
 
   return (
@@ -692,7 +716,7 @@ export default function PricingComparisonTable({ plansData, onSelectPlan, isAdmi
 
           const curSelected = selectedChannels[planSlug] || ['whatsapp'];
           const curViewTab = activeViewChannel[planSlug] || 'whatsapp';
-          const chDetails = plan.channel_details?.[curViewTab] || {};
+          const chDetails = getChannelDetails(plan, curViewTab);
           const whatYouGet = chDetails.what_you_get || [];
           const featuresList = chDetails.features || [];
           const limitsObj = chDetails.limits || {};
@@ -1153,7 +1177,7 @@ export default function PricingComparisonTable({ plansData, onSelectPlan, isAdmi
               {plans.map((plan) => {
                 const planSlug = plan.slug;
                 const viewCh = activeViewChannel[planSlug] || 'whatsapp';
-                const chDetails = plan.channel_details?.[viewCh] || {};
+                const chDetails = getChannelDetails(plan, viewCh);
                 const whatYouGet = chDetails.what_you_get || [];
 
                 return (
@@ -1182,7 +1206,7 @@ export default function PricingComparisonTable({ plansData, onSelectPlan, isAdmi
               {plans.map((plan) => {
                 const planSlug = plan.slug;
                 const viewCh = activeViewChannel[planSlug] || 'whatsapp';
-                const chDetails = plan.channel_details?.[viewCh] || {};
+                const chDetails = getChannelDetails(plan, viewCh);
                 const featuresList = chDetails.features || [];
 
                 return (
@@ -1211,7 +1235,7 @@ export default function PricingComparisonTable({ plansData, onSelectPlan, isAdmi
               {plans.map((plan) => {
                 const planSlug = plan.slug;
                 const viewCh = activeViewChannel[planSlug] || 'whatsapp';
-                const chDetails = plan.channel_details?.[viewCh] || {};
+                const chDetails = getChannelDetails(plan, viewCh);
                 const limitsObj = chDetails.limits || {};
 
                 return (
@@ -1249,7 +1273,7 @@ export default function PricingComparisonTable({ plansData, onSelectPlan, isAdmi
               {plans.map((plan) => {
                 const planSlug = plan.slug;
                 const viewCh = activeViewChannel[planSlug] || 'whatsapp';
-                const chDetails = plan.channel_details?.[viewCh] || {};
+                const chDetails = getChannelDetails(plan, viewCh);
                 const costs = chDetails.message_costs || [];
 
                 return (
@@ -1283,7 +1307,7 @@ export default function PricingComparisonTable({ plansData, onSelectPlan, isAdmi
               {plans.map((plan) => {
                 const planSlug = plan.slug;
                 const viewCh = activeViewChannel[planSlug] || 'whatsapp';
-                const chDetails = plan.channel_details?.[viewCh] || {};
+                const chDetails = getChannelDetails(plan, viewCh);
                 const benefits = chDetails.additional_benefits || [];
 
                 return (
