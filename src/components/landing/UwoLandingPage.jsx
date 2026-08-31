@@ -208,13 +208,19 @@ export default function UwoLandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between">
           
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="w-10 h-10 rounded-2xl bg-[#059669] text-white flex items-center justify-center shadow-lg shadow-emerald-700/20 group-hover:scale-105 group-hover:rotate-6 transition-all duration-300">
-              <Zap size={22} className="fill-white" />
-            </div>
-            <div className="flex flex-col">
-              <span className="text-xl font-black tracking-tight text-slate-900 leading-none group-hover:text-emerald-700 transition-colors">UWO Connect</span>
-              <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-600 mt-0.5">Automated SaaS Platform</span>
+          <Link href="/" className="flex items-center gap-3 group cursor-pointer">
+            <img
+              src="/download (3).gif"
+              alt="UWO Connect Logo"
+              className="w-10 h-10 rounded-2xl object-contain shadow-md shadow-emerald-600/30 group-hover:scale-105 transition-transform duration-300 shrink-0"
+            />
+            <div className="flex flex-col text-left">
+              <span className="text-xl font-black tracking-tight text-slate-900 leading-none group-hover:text-[#059669] transition-colors mb-1">
+                UWO Connect
+              </span>
+              <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#059669] block leading-none">
+                AUTOMATED SAAS PLATFORM
+              </span>
             </div>
           </Link>
 
@@ -356,18 +362,25 @@ export default function UwoLandingPage() {
       {/* ════════════════════════════════════════════════════════════════ */}
       {/* 4. ONE PLATFORM, THREE LAYERS */}
       {/* ════════════════════════════════════════════════════════════════ */}
-      <section id="platform" className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-        <div className="text-center space-y-3 mb-12">
-          <h2 
-            className="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight italic font-serif"
-            style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
-          >
-            Everything Your Business Needs. Connected in One Place.
-          </h2>
-          <p className="text-sm sm:text-base text-slate-500 font-medium max-w-xl mx-auto">
-            UWO Connect brings communication, productivity tools, and business automation together.
-          </p>
-        </div>
+      <section id="platform" className="relative py-24 px-6 sm:px-10 lg:px-12 max-w-7xl mx-auto my-14 bg-gradient-to-br from-emerald-50/60 via-white to-slate-50/70 rounded-[2.5rem] border border-slate-200/90 shadow-xl overflow-hidden">
+        
+        {/* Ambient Subtle Glow & Pattern */}
+        <div className="absolute -top-32 -left-32 w-80 h-80 bg-emerald-500/10 rounded-full blur-[100px] pointer-events-none" />
+        <div className="absolute -bottom-32 -right-32 w-80 h-80 bg-teal-500/10 rounded-full blur-[100px] pointer-events-none" />
+        <div className="absolute inset-0 bg-[radial-gradient(#059669_1px,transparent_1px)] [background-size:28px_28px] opacity-10 pointer-events-none" />
+
+        <div className="relative z-10">
+          <div className="text-center space-y-3 mb-12">
+            <h2 
+              className="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight italic font-serif"
+              style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
+            >
+              Everything Your Business Needs. Connected in One Place.
+            </h2>
+            <p className="text-sm sm:text-base text-slate-500 font-medium max-w-xl mx-auto">
+              UWO Connect brings communication, productivity tools, and business automation together.
+            </p>
+          </div>
 
         {/* 3 Interactive Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -469,6 +482,7 @@ export default function UwoLandingPage() {
           </ScrollReveal>
 
         </div>
+        </div>
       </section>
 
       {/* ════════════════════════════════════════════════════════════════ */}
@@ -567,42 +581,50 @@ export default function UwoLandingPage() {
       {/* ════════════════════════════════════════════════════════════════ */}
       {/* 6. CONNECTORS SECTION */}
       {/* ════════════════════════════════════════════════════════════════ */}
-      <section id="connectors" className="py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-        <div className="text-center space-y-4 mb-16">
-          <h2 
-            className="text-4xl sm:text-5xl lg:text-6xl font-bold text-slate-900 tracking-tight italic font-serif leading-tight"
-            style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
-          >
-            Connect the Tools Your Business Already Uses
-          </h2>
-          <p className="text-base sm:text-lg text-slate-500 font-medium max-w-2xl mx-auto leading-relaxed">
-            Bring your emails, documents, spreadsheets, maps, and business data into the same workflow.
-          </p>
-        </div>
+      <section id="connectors" className="relative py-24 px-6 sm:px-10 lg:px-12 max-w-7xl mx-auto my-14 bg-gradient-to-br from-slate-50/90 via-white to-teal-50/60 rounded-[2.5rem] border border-slate-200/90 shadow-xl overflow-hidden">
+        
+        {/* Ambient Glows */}
+        <div className="absolute -top-32 -right-32 w-80 h-80 bg-teal-500/10 rounded-full blur-[100px] pointer-events-none" />
+        <div className="absolute -bottom-32 -left-32 w-80 h-80 bg-emerald-500/10 rounded-full blur-[100px] pointer-events-none" />
+        <div className="absolute inset-0 bg-[radial-gradient(#0d9488_1px,transparent_1px)] [background-size:28px_28px] opacity-10 pointer-events-none" />
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-7">
-          {[
-            { logo: <GmailLogo size={34} />, name: 'Gmail', desc: 'Email communication' },
-            { logo: <OutlookLogo size={34} />, name: 'Microsoft Outlook', desc: 'Business email' },
-            { logo: <Layers size={30} className="text-emerald-600" />, name: 'Google Maps', desc: 'Location intelligence' },
-            { logo: <GoogleDocsLogo size={34} />, name: 'Google Docs', desc: 'Documents & workflows' },
-            { logo: <Share2 size={30} className="text-blue-500" />, name: 'OneDrive', desc: 'Cloud files' },
-            { logo: <GoogleSheetsLogo size={34} />, name: 'Google Sheets', desc: 'Business data & records' },
-            { logo: <FileText size={30} className="text-amber-500" />, name: 'Google Slides', desc: 'Presentations' },
-            { logo: <MessageSquare size={30} className="text-cyan-600" />, name: 'Google News Feed', desc: 'News & information' },
-          ].map((item, idx) => (
-            <ScrollReveal key={idx} delay={idx * 80}>
-              <div className="p-6 sm:p-7 rounded-3xl bg-white border border-slate-200/90 flex items-center gap-4.5 shadow-sm hover:border-emerald-500 hover:shadow-xl hover:shadow-emerald-500/10 hover:-translate-y-1.5 transition-all duration-300 group cursor-pointer h-full">
-                <div className="w-14 h-14 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center shrink-0 group-hover:scale-110 group-hover:rotate-3 group-hover:bg-emerald-50 group-hover:border-emerald-200 transition-all duration-300">
-                  {item.logo}
+        <div className="relative z-10">
+          <div className="text-center space-y-4 mb-16">
+            <h2 
+              className="text-4xl sm:text-5xl lg:text-6xl font-bold text-slate-900 tracking-tight italic font-serif leading-tight"
+              style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
+            >
+              Connect the Tools Your Business Already Uses
+            </h2>
+            <p className="text-base sm:text-lg text-slate-500 font-medium max-w-2xl mx-auto leading-relaxed">
+              Bring your emails, documents, spreadsheets, maps, and business data into the same workflow.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-7">
+            {[
+              { logo: <GmailLogo size={34} />, name: 'Gmail', desc: 'Email communication' },
+              { logo: <OutlookLogo size={34} />, name: 'Microsoft Outlook', desc: 'Business email' },
+              { logo: <Layers size={30} className="text-emerald-600" />, name: 'Google Maps', desc: 'Location intelligence' },
+              { logo: <GoogleDocsLogo size={34} />, name: 'Google Docs', desc: 'Documents & workflows' },
+              { logo: <Share2 size={30} className="text-blue-500" />, name: 'OneDrive', desc: 'Cloud files' },
+              { logo: <GoogleSheetsLogo size={34} />, name: 'Google Sheets', desc: 'Business data & records' },
+              { logo: <FileText size={30} className="text-amber-500" />, name: 'Google Slides', desc: 'Presentations' },
+              { logo: <MessageSquare size={30} className="text-cyan-600" />, name: 'Google News Feed', desc: 'News & information' },
+            ].map((item, idx) => (
+              <ScrollReveal key={idx} delay={idx * 80}>
+                <div className="p-6 sm:p-7 rounded-3xl bg-white border border-slate-200/90 flex items-center gap-4.5 shadow-sm hover:border-emerald-500 hover:shadow-xl hover:shadow-emerald-500/10 hover:-translate-y-1.5 transition-all duration-300 group cursor-pointer h-full">
+                  <div className="w-14 h-14 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center shrink-0 group-hover:scale-110 group-hover:rotate-3 group-hover:bg-emerald-50 group-hover:border-emerald-200 transition-all duration-300">
+                    {item.logo}
+                  </div>
+                  <div className="text-left overflow-hidden">
+                    <h5 className="text-sm sm:text-base font-black text-slate-900 group-hover:text-emerald-700 transition-colors truncate">{item.name}</h5>
+                    <p className="text-xs text-slate-500 font-medium mt-0.5 truncate">{item.desc}</p>
+                  </div>
                 </div>
-                <div className="text-left overflow-hidden">
-                  <h5 className="text-sm sm:text-base font-black text-slate-900 group-hover:text-emerald-700 transition-colors truncate">{item.name}</h5>
-                  <p className="text-xs text-slate-500 font-medium mt-0.5 truncate">{item.desc}</p>
-                </div>
-              </div>
-            </ScrollReveal>
-          ))}
+              </ScrollReveal>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -665,22 +687,29 @@ export default function UwoLandingPage() {
       </section>
 
       {/* 8. HOW UWO CONNECT WORKS - CONNECTED PIPELINE */}
-      <section id="how-it-works" className="py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-        <div className="text-center space-y-4 mb-16">
-          <UwoBrandHeader align="center" />
-          <h2 
-            className="text-4xl sm:text-5xl lg:text-6xl font-bold text-slate-900 tracking-tight italic font-serif leading-tight"
-            style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
-          >
-            How UWO Connect Works
-          </h2>
-          <p className="text-base sm:text-lg text-slate-500 font-medium max-w-xl mx-auto">
-            3 simple steps to transform manual customer tasks into automated revenue pipelines.
-          </p>
-        </div>
+      <section id="how-it-works" className="relative py-24 px-6 sm:px-10 lg:px-12 max-w-7xl mx-auto my-14 bg-gradient-to-br from-emerald-50/50 via-white to-indigo-50/40 rounded-[2.5rem] border border-slate-200/90 shadow-xl overflow-hidden">
+        
+        {/* Ambient Subtle Glow & Pattern */}
+        <div className="absolute -top-32 -left-32 w-80 h-80 bg-emerald-500/10 rounded-full blur-[100px] pointer-events-none" />
+        <div className="absolute -bottom-32 -right-32 w-80 h-80 bg-indigo-500/10 rounded-full blur-[100px] pointer-events-none" />
+        <div className="absolute inset-0 bg-[radial-gradient(#059669_1px,transparent_1px)] [background-size:28px_28px] opacity-10 pointer-events-none" />
 
-        {/* Connected Pipeline Steps Container */}
-        <div className="relative">
+        <div className="relative z-10">
+          <div className="text-center space-y-4 mb-16">
+            <UwoBrandHeader align="center" />
+            <h2 
+              className="text-4xl sm:text-5xl lg:text-6xl font-bold text-slate-900 tracking-tight italic font-serif leading-tight"
+              style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
+            >
+              How UWO Connect Works
+            </h2>
+            <p className="text-base sm:text-lg text-slate-500 font-medium max-w-xl mx-auto">
+              3 simple steps to transform manual customer tasks into automated revenue pipelines.
+            </p>
+          </div>
+
+          {/* Connected Pipeline Steps Container */}
+          <div className="relative">
           {/* Connecting Glow Line (Desktop) */}
           <div className="hidden md:block absolute top-1/2 left-[15%] right-[15%] h-1 bg-gradient-to-r from-emerald-400 via-emerald-600 to-indigo-600 -translate-y-1/2 z-0 rounded-full opacity-60 animate-pulse" />
 
@@ -757,6 +786,7 @@ export default function UwoLandingPage() {
             </ScrollReveal>
 
           </div>
+        </div>
         </div>
       </section>
 
@@ -1011,40 +1041,48 @@ export default function UwoLandingPage() {
       {/* ════════════════════════════════════════════════════════════════ */}
       {/* 10. UNIFIED WORKSPACE SECTION (CHAOS VS CONNECTED) */}
       {/* ════════════════════════════════════════════════════════════════ */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-        <div className="text-center space-y-3 mb-12">
-          <h2 
-            className="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight italic font-serif"
-            style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
-          >
-            Stop Switching Between Tools
-          </h2>
-        </div>
+      <section className="relative py-24 px-6 sm:px-10 lg:px-12 max-w-7xl mx-auto my-14 bg-gradient-to-br from-slate-50 via-white to-emerald-50/40 rounded-[2.5rem] border border-slate-200/90 shadow-xl overflow-hidden">
+        
+        {/* Ambient Subtle Glow & Pattern */}
+        <div className="absolute -top-32 -right-32 w-80 h-80 bg-rose-500/10 rounded-full blur-[100px] pointer-events-none" />
+        <div className="absolute -bottom-32 -left-32 w-80 h-80 bg-emerald-500/10 rounded-full blur-[100px] pointer-events-none" />
+        <div className="absolute inset-0 bg-[radial-gradient(#059669_1px,transparent_1px)] [background-size:28px_28px] opacity-10 pointer-events-none" />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          
-          {/* WITHOUT UWO CONNECT */}
-          <div className="p-8 rounded-3xl bg-rose-50/60 border border-rose-200 text-left space-y-4 hover:border-rose-300 hover:shadow-lg transition-all duration-300">
-            <span className="px-3 py-1 bg-rose-100 text-rose-800 text-xs font-black rounded-full">
-              Without UWO Connect
-            </span>
-            <h4 className="text-lg font-black text-slate-900">Disconnected Chaos</h4>
-            <p className="text-xs text-slate-600 font-medium">
-              10 browser tabs, manual copy-pasting, lost leads, delayed replies, and chaotic manual invoicing.
-            </p>
+        <div className="relative z-10">
+          <div className="text-center space-y-3 mb-12">
+            <h2 
+              className="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight italic font-serif"
+              style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
+            >
+              Stop Switching Between Tools
+            </h2>
           </div>
 
-          {/* WITH UWO CONNECT */}
-          <div className="p-8 rounded-3xl bg-emerald-50/60 border border-emerald-200 text-left space-y-4 landing-card-hover">
-            <span className="px-3 py-1 bg-emerald-100 text-emerald-800 text-xs font-black rounded-full">
-              With UWO Connect
-            </span>
-            <h4 className="text-lg font-black text-slate-900">One Clean Central Workspace</h4>
-            <p className="text-xs text-slate-600 font-medium">
-              Messages, Leads, Documents, Quotations, Payments, and Invoices automatically synced in real time.
-            </p>
-          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            
+            {/* WITHOUT UWO CONNECT */}
+            <div className="p-8 rounded-3xl bg-rose-50/60 border border-rose-200 text-left space-y-4 hover:border-rose-300 hover:shadow-lg transition-all duration-300">
+              <span className="px-3 py-1 bg-rose-100 text-rose-800 text-xs font-black rounded-full">
+                Without UWO Connect
+              </span>
+              <h4 className="text-lg font-black text-slate-900">Disconnected Chaos</h4>
+              <p className="text-xs text-slate-600 font-medium">
+                10 browser tabs, manual copy-pasting, lost leads, delayed replies, and chaotic manual invoicing.
+              </p>
+            </div>
 
+            {/* WITH UWO CONNECT */}
+            <div className="p-8 rounded-3xl bg-emerald-50/60 border border-emerald-200 text-left space-y-4 landing-card-hover">
+              <span className="px-3 py-1 bg-emerald-100 text-emerald-800 text-xs font-black rounded-full">
+                With UWO Connect
+              </span>
+              <h4 className="text-lg font-black text-slate-900">One Clean Central Workspace</h4>
+              <p className="text-xs text-slate-600 font-medium">
+                Messages, Leads, Documents, Quotations, Payments, and Invoices automatically synced in real time.
+              </p>
+            </div>
+
+          </div>
         </div>
       </section>
 
@@ -1339,8 +1377,16 @@ export default function UwoLandingPage() {
       {/* ════════════════════════════════════════════════════════════════ */}
       {/* 11.5 PRICING & SUBSCRIPTION PLANS */}
       {/* ════════════════════════════════════════════════════════════════ */}
-      <section id="pricing" className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto text-center border-t border-slate-200/80">
-        <PricingComparisonTable onSelectPlan={() => router.push('/auth/login')} />
+      <section id="pricing" className="relative py-20 px-6 sm:px-10 lg:px-12 max-w-7xl mx-auto my-16 text-center bg-gradient-to-br from-slate-50/90 via-white to-emerald-50/50 rounded-[2.5rem] border border-slate-200/90 shadow-xl overflow-hidden">
+        
+        {/* Ambient Glows */}
+        <div className="absolute -top-32 -left-32 w-80 h-80 bg-emerald-500/10 rounded-full blur-[100px] pointer-events-none" />
+        <div className="absolute -bottom-32 -right-32 w-80 h-80 bg-teal-500/10 rounded-full blur-[100px] pointer-events-none" />
+        <div className="absolute inset-0 bg-[radial-gradient(#059669_1px,transparent_1px)] [background-size:28px_28px] opacity-10 pointer-events-none" />
+
+        <div className="relative z-10">
+          <PricingComparisonTable onSelectPlan={() => router.push('/auth/login')} />
+        </div>
       </section>
 
       {/* ════════════════════════════════════════════════════════════════ */}
