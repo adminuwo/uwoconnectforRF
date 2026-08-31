@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Loader2, ShieldCheck, ArrowRight, Lock, Mail, User, AlertCircle } from 'lucide-react';
 import { API_URL, getUnifiedApiBaseUrl } from '@/config/apiConfig';
+import { useBrand } from '@/context/BrandContext';
 
 export const UWOLoginModal = ({
   isOpen,
@@ -12,6 +13,7 @@ export const UWOLoginModal = ({
   appCode = 'uwoconnect',
   apiKey = 'key_uwoconnect_live_master_2026',
 }) => {
+  const { brand } = useBrand();
   const [isRegisterMode, setIsRegisterMode] = useState(false);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('abha@uwo24.com');
@@ -197,15 +199,19 @@ export const UWOLoginModal = ({
           <div className="flex items-start justify-between relative z-10 mb-6">
             <div className="flex items-center gap-3">
               <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-400 p-0.5 shadow-lg shadow-emerald-500/20">
-                <div className="w-full h-full bg-[#111e16] rounded-[14px] flex items-center justify-center">
-                  <ShieldCheck className="w-6 h-6 text-emerald-400" />
+                <div className="w-full h-full bg-[#111e16] rounded-[14px] flex items-center justify-center p-1.5 overflow-hidden">
+                  {brand?.logo_url ? (
+                    <img src={brand.logo_url} alt={brand.brand_name} className="w-full h-full object-contain" />
+                  ) : (
+                    <ShieldCheck className="w-6 h-6 text-emerald-400" />
+                  )}
                 </div>
               </div>
               <div>
                 <h3 className="text-xl font-bold tracking-tight text-white flex items-center gap-2">
-                  {isRegisterMode ? 'Create UWO Connect Account' : 'Sign In to UWO Connect'}
+                  {isRegisterMode ? `Create ${brand?.brand_name || 'Account'}` : `Sign In to ${brand?.brand_name || 'Account'}`}
                 </h3>
-                <p className="text-xs text-emerald-300/70">Unified Communication & Business Automation</p>
+                <p className="text-xs text-emerald-300/70">{brand?.tagline || 'Unified Communication & Business Automation'}</p>
               </div>
             </div>
             <button

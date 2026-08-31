@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { User, Mail, Phone, Lock, Loader2, ShieldCheck, LogOut, MapPin, Sparkles, ArrowUpRight, Upload, Trash2, Check, Building2, CheckCircle2, Camera, ExternalLink, CreditCard, X, Layers } from 'lucide-react';
+import { User, Mail, Phone, Lock, Loader2, ShieldCheck, LogOut, MapPin, Sparkles, ArrowUpRight, Upload, Trash2, Check, Building2, CheckCircle2, Camera, ExternalLink, CreditCard, X, Layers, Globe, Palette, Copy, HelpCircle } from 'lucide-react';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import axios from 'axios';
 import { useTour } from '@/context/TourContext';
@@ -10,10 +10,12 @@ import PaymentModal from '@/components/billing/PaymentModal';
 import { API_BASE_URL } from '@/config/apiConfig';
 import LearningCenterModal from '@/components/guides/LearningCenterModal';
 import { cn } from '@/lib/utils';
+import { useBrand } from '@/context/BrandContext';
 
 const ClientSettingsPage = () => {
   const searchParams = useSearchParams();
   const { resetTour } = useTour();
+  const { refreshBrand } = useBrand();
   const [isGuideOpen, setIsGuideOpen] = useState(false);
   const [client, setClient] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -28,13 +30,21 @@ const ClientSettingsPage = () => {
   const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
   const [activePlans, setActivePlans] = useState([]);
   const [billingCycle, setBillingCycle] = useState('MONTHLY');
+  const [copiedCname, setCopiedCname] = useState(false);
   const [editData, setEditData] = useState({ 
     name: '', 
     phone_number: '',
     address: '',
     business_name: '',
     tax_id_gstin: '',
-    company_logo_url: ''
+    company_logo_url: '',
+    white_label_name: '',
+    white_label_domain: '',
+    white_label_logo: '',
+    primary_color: '#059669',
+    accent_color: '#10B981',
+    support_email: '',
+    tagline: ''
   });
   
   const user = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('user') || '{}') : {};
@@ -48,10 +58,11 @@ const ClientSettingsPage = () => {
       });
       const clientData = (res.data?.client && typeof res.data.client === 'object') ? res.data.client : (typeof res.data === 'object' ? res.data : {});
       const userData = (res.data?.user && typeof res.data.user === 'object') ? res.data.user : (typeof res.data === 'object' ? res.data : {});
+      const clientSettings = clientData.settings && typeof clientData.settings === 'object' ? clientData.settings : {};
 
       setClient(clientData);
       
-      const logoUrl = clientData.company_logo_url || '';
+      const logoUrl = clientData.company_logo_url || clientData.white_label_logo || '';
       if (logoUrl) {
         localStorage.setItem('client_company_logo', logoUrl);
         window.dispatchEvent(new CustomEvent('profileUpdated', { detail: { company_logo_url: logoUrl } }));
@@ -63,7 +74,14 @@ const ClientSettingsPage = () => {
         phone_number: clientData.phone_number || userData.phone_number || '',
         address: clientData.address || '',
         company_logo_url: logoUrl,
-        tax_id_gstin: clientData.tax_id_gstin || ''
+        tax_id_gstin: clientData.tax_id_gstin || '',
+        white_label_name: clientData.white_label_name || '',
+        white_label_domain: clientData.white_label_domain || clientSettings.custom_domain || '',
+        white_label_logo: clientData.white_label_logo || '',
+        primary_color: clientSettings.primary_color || '#059669',
+        accent_color: clientSettings.accent_color || '#10B981',
+        support_email: clientSettings.support_email || '',
+        tagline: clientSettings.tagline || ''
       });
     } catch (err) {
       console.error('Failed to fetch profile', err);
@@ -297,7 +315,18 @@ const ClientSettingsPage = () => {
         phone_number: editData.phone_number,
         address: editData.address,
         tax_id_gstin: editData.tax_id_gstin,
-        company_logo_url: editData.company_logo_url
+        company_logo_url: editData.company_logo_url,
+        white_label_name: editData.white_label_name,
+        white_label_domain: editData.white_label_domain,
+        white_label_logo: editData.white_label_logo || editData.company_logo_url,
+        settings: {
+          ...(client?.settings && typeof client.settings === 'object' ? client.settings : {}),
+          primary_color: editData.primary_color,
+          accent_color: editData.accent_color,
+          support_email: editData.support_email,
+          tagline: editData.tagline,
+          custom_domain: editData.white_label_domain
+        }
       };
 
       const res = await axios.patch(`${API_BASE_URL}/api/profile`, payload, {
@@ -311,20 +340,29 @@ const ClientSettingsPage = () => {
         localStorage.setItem('user', JSON.stringify({
           ...storedUser,
           first_name: editData.name || storedUser.first_name,
-          name: editData.name || storedUser.name
+          name: editData.name || storedUser.name,
+          client: {
+            ...(storedUser.client || {}),
+            business_name: editData.business_name,
+            white_label_name: editData.white_label_name,
+            white_label_domain: editData.white_label_domain,
+            white_label_logo: editData.white_label_logo || editData.company_logo_url
+          }
         }));
-        if (editData.company_logo_url) {
-          localStorage.setItem('client_company_logo', editData.company_logo_url);
+        if (editData.company_logo_url || editData.white_label_logo) {
+          localStorage.setItem('client_company_logo', editData.white_label_logo || editData.company_logo_url);
         } else {
           localStorage.removeItem('client_company_logo');
         }
         window.dispatchEvent(new CustomEvent('profileUpdated', {
-          detail: { company_logo_url: editData.company_logo_url || '', name: editData.name }
+          detail: { company_logo_url: editData.white_label_logo || editData.company_logo_url || '', name: editData.name }
         }));
+        window.dispatchEvent(new CustomEvent('brandUpdated'));
+        if (refreshBrand) refreshBrand();
       } catch (e) {}
 
       await fetchProfile();
-      setLogoSuccessMessage("Profile updated successfully!");
+      setLogoSuccessMessage("Profile & Branding updated successfully!");
       setTimeout(() => setLogoSuccessMessage(null), 3500);
     } catch (err) {
       alert(err.response?.data?.message || err.response?.data?.error || 'Failed to update profile');
@@ -669,7 +707,267 @@ const ClientSettingsPage = () => {
             </div>
           </div>
 
-          {/* 5. Security & Actions */}
+          {/* 5. White-Label & Custom Branding Suite */}
+          <div className="p-6 sm:p-8 space-y-6 bg-gradient-to-b from-white via-slate-50/30 to-emerald-50/10">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white flex items-center justify-center font-bold shadow-md shadow-emerald-600/20">
+                  <Globe size={18} />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-sm font-extrabold uppercase tracking-wider text-slate-900">White-Label & Custom Domain</h3>
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-300/80">
+                      Agency Reseller
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Deploy your platform under your own custom domain, brand logo, and corporate color theme.
+                  </p>
+                </div>
+              </div>
+
+              {editData.white_label_domain && (
+                <div className="flex items-center gap-2 self-start sm:self-auto px-3 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                  <span>https://{editData.white_label_domain}</span>
+                </div>
+              )}
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 pt-2">
+              {/* Left Column: Input Settings */}
+              <div className="lg:col-span-7 space-y-5">
+                
+                {/* White-Label Brand Name */}
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
+                    White-Label Brand Display Name
+                  </label>
+                  {isEditing ? (
+                    <input
+                      type="text"
+                      value={editData.white_label_name}
+                      onChange={(e) => setEditData({ ...editData, white_label_name: e.target.value })}
+                      placeholder="e.g. Apex Marketing Suite"
+                      className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-900 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 transition-all shadow-2xs"
+                    />
+                  ) : (
+                    <p className="text-base font-bold text-slate-900">
+                      {editData.white_label_name || 'UwoConnect (Default)'}
+                    </p>
+                  )}
+                  <span className="text-[11px] text-slate-400 mt-1 block">Replaces all system header titles, emails, and modal banners.</span>
+                </div>
+
+                {/* Custom Domain / Subdomain */}
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
+                    Custom Domain / Subdomain
+                  </label>
+                  {isEditing ? (
+                    <div className="relative">
+                      <input
+                        type="text"
+                        value={editData.white_label_domain}
+                        onChange={(e) => setEditData({ ...editData, white_label_domain: e.target.value.toLowerCase().replace(/^(https?:\/\/)/, '') })}
+                        placeholder="e.g. portal.youragency.com"
+                        className="w-full pl-4 pr-10 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-mono font-semibold text-slate-900 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 transition-all shadow-2xs"
+                      />
+                    </div>
+                  ) : (
+                    <p className="text-sm font-mono font-bold text-emerald-700">
+                      {editData.white_label_domain ? `https://${editData.white_label_domain}` : 'Not Linked (Access via default domain)'}
+                    </p>
+                  )}
+                  <span className="text-[11px] text-slate-400 mt-1 block">Sub-clients and agents will log in and access dashboards through this domain.</span>
+                </div>
+
+                {/* Custom Platform Tagline */}
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
+                    Platform Tagline / Slogan
+                  </label>
+                  {isEditing ? (
+                    <input
+                      type="text"
+                      value={editData.tagline}
+                      onChange={(e) => setEditData({ ...editData, tagline: e.target.value })}
+                      placeholder="e.g. Next-Gen Multi-Channel Automation & CRM"
+                      className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-900 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 transition-all shadow-2xs"
+                    />
+                  ) : (
+                    <p className="text-sm font-medium text-slate-700">
+                      {editData.tagline || 'Multi-channel automation platform'}
+                    </p>
+                  )}
+                </div>
+
+                {/* Primary Brand Theme Color Picker */}
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">
+                    Brand Primary Accent Color
+                  </label>
+                  {isEditing ? (
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2.5 flex-wrap">
+                        {[
+                          { name: 'Emerald', hex: '#059669' },
+                          { name: 'Royal Blue', hex: '#2563EB' },
+                          { name: 'Indigo', hex: '#4F46E5' },
+                          { name: 'Purple', hex: '#7C3AED' },
+                          { name: 'Crimson', hex: '#DC2626' },
+                          { name: 'Orange', hex: '#EA580C' },
+                          { name: 'Midnight', hex: '#0F172A' },
+                        ].map((c) => (
+                          <button
+                            key={c.hex}
+                            type="button"
+                            onClick={() => setEditData({ ...editData, primary_color: c.hex })}
+                            className={cn(
+                              "w-8 h-8 rounded-xl flex items-center justify-center transition-all cursor-pointer shadow-xs",
+                              editData.primary_color === c.hex ? "ring-2 ring-offset-2 ring-slate-900 scale-110" : "hover:scale-105 opacity-80 hover:opacity-100"
+                            )}
+                            style={{ backgroundColor: c.hex }}
+                            title={c.name}
+                          >
+                            {editData.primary_color === c.hex && <Check size={14} className="text-white drop-shadow" />}
+                          </button>
+                        ))}
+                      </div>
+                      <div className="flex items-center gap-3 pt-1">
+                        <div className="w-8 h-8 rounded-xl border border-slate-200 shadow-2xs shrink-0" style={{ backgroundColor: editData.primary_color || '#059669' }} />
+                        <input
+                          type="text"
+                          value={editData.primary_color}
+                          onChange={(e) => setEditData({ ...editData, primary_color: e.target.value })}
+                          placeholder="#059669"
+                          className="w-32 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-mono font-bold text-slate-800 outline-none focus:border-emerald-500"
+                        />
+                        <span className="text-xs text-slate-400">Custom Hex Code</span>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-6 h-6 rounded-lg shadow-2xs border border-slate-200" style={{ backgroundColor: editData.primary_color || '#059669' }} />
+                      <span className="text-xs font-mono font-bold text-slate-700">{editData.primary_color || '#059669'}</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Support Email */}
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
+                    White-Label Support Email
+                  </label>
+                  {isEditing ? (
+                    <input
+                      type="email"
+                      value={editData.support_email}
+                      onChange={(e) => setEditData({ ...editData, support_email: e.target.value })}
+                      placeholder="e.g. support@yourdomain.com"
+                      className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-900 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 transition-all shadow-2xs"
+                    />
+                  ) : (
+                    <p className="text-sm font-semibold text-slate-800">
+                      {editData.support_email || client?.email || 'support@uwoconnect.com'}
+                    </p>
+                  )}
+                </div>
+
+              </div>
+
+              {/* Right Column: Live Realtime Preview & DNS Setup */}
+              <div className="lg:col-span-5 space-y-5">
+                
+                {/* Live Realtime Preview Card */}
+                <div className="bg-slate-900 rounded-3xl p-5 text-white shadow-xl space-y-4 border border-slate-800">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-emerald-400 flex items-center gap-1.5">
+                      <Sparkles size={12} /> Live Preview
+                    </span>
+                    <span className="text-[10px] font-mono text-slate-400">Sidebar Header</span>
+                  </div>
+
+                  {/* Mock Sidebar Header */}
+                  <div className="bg-slate-800/90 rounded-2xl p-3.5 border border-slate-700/60 flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <div className="w-8 h-8 rounded-xl bg-white p-1 flex items-center justify-center shrink-0 shadow-xs">
+                        <img
+                          src={displayLogo || "/download (3).gif"}
+                          alt="Brand Preview"
+                          className="w-full h-full object-contain rounded-lg"
+                        />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-xs font-black text-white truncate">{editData.white_label_name || editData.business_name || 'UwoConnect'}</p>
+                        <p className="text-[9px] font-bold uppercase tracking-wider" style={{ color: editData.primary_color || '#10B981' }}>
+                          V1.0 CLIENT PORTAL
+                        </p>
+                      </div>
+                    </div>
+                    <div className="w-2 h-2 rounded-full" style={{ backgroundColor: editData.primary_color || '#10B981' }} />
+                  </div>
+
+                  {/* Mock Action Button */}
+                  <button
+                    type="button"
+                    className="w-full py-2.5 rounded-xl text-xs font-bold text-white shadow-lg transition-transform"
+                    style={{ backgroundColor: editData.primary_color || '#059669' }}
+                  >
+                    Custom Branded Button
+                  </button>
+                </div>
+
+                {/* DNS Setup Guide Card */}
+                <div className="bg-white border border-slate-200/90 rounded-2xl p-5 space-y-3 shadow-2xs">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-xs font-extrabold uppercase tracking-wider text-slate-900 flex items-center gap-1.5">
+                      <HelpCircle size={14} className="text-emerald-600" /> DNS CNAME Configuration
+                    </h4>
+                    <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md">
+                      SSL Included
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-500 leading-relaxed">
+                    Go to your DNS provider (Cloudflare, GoDaddy, Namecheap) and add a CNAME record:
+                  </p>
+
+                  <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 font-mono text-xs space-y-2">
+                    <div className="flex justify-between items-center text-slate-600 text-[11px]">
+                      <span>Type:</span>
+                      <strong className="text-slate-900 font-black">CNAME</strong>
+                    </div>
+                    <div className="flex justify-between items-center text-slate-600 text-[11px]">
+                      <span>Host / Name:</span>
+                      <strong className="text-slate-900 font-bold">{editData.white_label_domain ? editData.white_label_domain.split('.')[0] : 'portal'}</strong>
+                    </div>
+                    <div className="flex justify-between items-center text-slate-600 text-[11px] pt-1 border-t border-slate-200">
+                      <span>Points To:</span>
+                      <div className="flex items-center gap-1.5">
+                        <strong className="text-emerald-700 font-black">uwoconnect.aisa24.com</strong>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            navigator.clipboard.writeText('uwoconnect.aisa24.com');
+                            setCopiedCname(true);
+                            setTimeout(() => setCopiedCname(false), 2000);
+                          }}
+                          className="p-1 text-slate-400 hover:text-slate-700 rounded transition cursor-pointer"
+                          title="Copy target"
+                        >
+                          {copiedCname ? <Check size={12} className="text-emerald-600" /> : <Copy size={12} />}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+          {/* 6. Security & Actions */}
           <div className="p-6 sm:p-8 space-y-5 bg-slate-50/40">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center font-bold">

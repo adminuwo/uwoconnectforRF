@@ -1,6 +1,7 @@
 import { Inter } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
+import { BrandProvider } from "@/context/BrandContext";
 import { TourProvider } from "@/context/TourContext";
 import { EntitlementProvider } from "@/context/EntitlementContext";
 import UpgradeModal from "@/components/common/UpgradeModal";
@@ -37,12 +38,14 @@ export default function RootLayout({ children }) {
           data-endpoint="https://admin.uwo24.com/api/web-stats/collect"
         />
         <AxiosNetworkFixer />
-        <EntitlementProvider>
-          <TourProvider>
-            {children}
-            <UpgradeModal />
-          </TourProvider>
-        </EntitlementProvider>
+        <BrandProvider>
+          <EntitlementProvider>
+            <TourProvider>
+              {children}
+              <UpgradeModal />
+            </TourProvider>
+          </EntitlementProvider>
+        </BrandProvider>
       </body>
     </html>
   );

@@ -37,6 +37,7 @@ import {
 import { cn } from '@/lib/utils';
 import { API_BASE_URL } from '@/config/apiConfig';
 import { UWOLoginModal } from '@/components/UWOLoginModal';
+import { useBrand } from '@/context/BrandContext';
 
 // ═════════════════════════════════════════════════════════════════════════════════
 // ── BRAND LOGOS (same as Admin Plans page) ──
@@ -302,6 +303,7 @@ const getFeatureBrandLogo = (key, size = 22) => {
 };
 
 export default function ClientPlansPage() {
+  const { brand } = useBrand();
   const [plans, setPlans] = useState([]);
   const [client, setClient] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -321,20 +323,23 @@ export default function ClientPlansPage() {
 
   useEffect(() => {
     fetchPlansAndProfile();
-  }, []);
+  }, [brand?.custom_domain]);
 
   const fetchPlansAndProfile = async () => {
     try {
       setLoading(true);
       const token = localStorage.getItem('token') || localStorage.getItem('uwo_token');
-      
+      const brandDomain = brand?.custom_domain || '';
+      const brandQuery = brandDomain ? `?brand_domain=${encodeURIComponent(brandDomain)}` : '';
+      const authHeader = token ? { Authorization: `Bearer ${token}` } : {};
+
       const requests = [
-        axios.get(`${API_BASE_URL}/api/plans/public/`)
+        axios.get(`${API_BASE_URL}/api/plans/public/${brandQuery}`, { headers: authHeader })
       ];
       if (token) {
         requests.push(
           axios.get(`${API_BASE_URL}/api/profile`, {
-            headers: { Authorization: `Bearer ${token}` }
+            headers: authHeader
           })
         );
       }

@@ -14,6 +14,7 @@ import AutomationNetwork from './AutomationNetwork';
 import HeroWorkflowAnimation from './HeroWorkflowAnimation';
 import UWOLoginModal from '@/components/UWOLoginModal';
 import PricingComparisonTable from '@/components/pricing/PricingComparisonTable';
+import { useBrand } from '@/context/BrandContext';
 
 // ── AUTHENTIC SVG BRAND LOGOS ──
 const WhatsAppLogo = ({ size = 22 }) => (
@@ -97,6 +98,7 @@ const GoogleDocsLogo = ({ size = 22 }) => (
 
 export default function UwoLandingPage() {
   const router = useRouter();
+  const { brand, isWhiteLabel } = useBrand();
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [activeWorkflowTab, setActiveWorkflowTab] = useState(0);
 
@@ -112,6 +114,11 @@ export default function UwoLandingPage() {
     router.push('/auth/login');
   };
 
+  const primaryColor = brand?.primary_color || '#059669';
+  const brandName = brand?.brand_name || 'UWO Connect';
+  const brandTagline = brand?.tagline || 'Automated SaaS Platform';
+  const logoUrl = brand?.logo_url || '/download (3).gif';
+
   return (
     <div className="min-h-screen bg-white text-slate-900 font-sans selection:bg-emerald-500/20 selection:text-emerald-800">
       
@@ -123,12 +130,18 @@ export default function UwoLandingPage() {
           
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2.5">
-            <div className="w-10 h-10 rounded-2xl bg-[#059669] text-white flex items-center justify-center shadow-lg shadow-emerald-700/20">
-              <Zap size={22} className="fill-white" />
-            </div>
+            {isWhiteLabel && logoUrl && logoUrl !== '/download (3).gif' ? (
+              <div className="w-10 h-10 rounded-2xl bg-slate-50 border border-slate-200 p-1 flex items-center justify-center shadow-sm overflow-hidden">
+                <img src={logoUrl} alt={brandName} className="w-full h-full object-contain rounded-xl" />
+              </div>
+            ) : (
+              <div className="w-10 h-10 rounded-2xl text-white flex items-center justify-center shadow-lg shadow-emerald-700/20" style={{ backgroundColor: primaryColor }}>
+                <Zap size={22} className="fill-white" />
+              </div>
+            )}
             <div className="flex flex-col">
-              <span className="text-xl font-black tracking-tight text-slate-900 leading-none">UWO Connect</span>
-              <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-600 mt-0.5">Automated SaaS Platform</span>
+              <span className="text-xl font-black tracking-tight text-slate-900 leading-none">{brandName}</span>
+              <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-600 mt-0.5">{brandTagline}</span>
             </div>
           </Link>
 
@@ -152,7 +165,8 @@ export default function UwoLandingPage() {
             </button>
             <button
               onClick={() => router.push('/auth/login')}
-              className="px-5 py-2.5 rounded-xl bg-[#059669] hover:bg-[#047857] text-white text-xs font-extrabold shadow-md shadow-emerald-700/20 transition-all flex items-center gap-1.5 cursor-pointer"
+              className="px-5 py-2.5 rounded-xl text-white text-xs font-extrabold shadow-md transition-all flex items-center gap-1.5 cursor-pointer"
+              style={{ backgroundColor: primaryColor }}
             >
               <span>Get Started</span>
               <ArrowRight size={14} />
@@ -175,21 +189,22 @@ export default function UwoLandingPage() {
         {/* Headline */}
         <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black text-slate-900 tracking-tight leading-[1.1] max-w-5xl mx-auto">
           Connect Everything. <br className="hidden sm:inline" />
-          <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#059669] via-emerald-600 to-teal-600">
+          <span className="bg-clip-text text-transparent" style={{ backgroundImage: `linear-gradient(to right, ${primaryColor}, #059669, #0d9488)` }}>
             Automate Anything.
           </span>
         </h1>
 
         {/* Supporting Copy */}
         <p className="text-base sm:text-xl text-slate-600 font-medium max-w-2xl mx-auto mt-6 leading-relaxed">
-          UWO Connect brings your communication channels, business tools, and automation into one intelligent workspace.
+          {brandName} brings your communication channels, business tools, and automation into one intelligent workspace.
         </p>
 
         {/* Hero CTAs */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-8">
           <button
             onClick={handleStartFree}
-            className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-[#059669] hover:bg-[#047857] text-white text-sm font-extrabold shadow-xl shadow-emerald-700/25 transition-all flex items-center justify-center gap-2 cursor-pointer transform hover:-translate-y-0.5"
+            className="w-full sm:w-auto px-8 py-4 rounded-2xl text-white text-sm font-extrabold shadow-xl transition-all flex items-center justify-center gap-2 cursor-pointer transform hover:-translate-y-0.5"
+            style={{ backgroundColor: primaryColor }}
           >
             <span>Start Free</span>
             <ArrowRight size={18} />

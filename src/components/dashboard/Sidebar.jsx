@@ -34,10 +34,13 @@ import {
   Bot,
   Layers,
   X,
-  Lock
+  Lock,
+  Globe,
+  Building2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useEntitlement } from '@/context/EntitlementContext';
+import { useBrand } from '@/context/BrandContext';
 
 // Tour ID → sidebar link name mapping
 const TOUR_IDS = {
@@ -88,7 +91,7 @@ const getPlanRank = (planObj, rawUserPlan = '') => {
     ''
   ).toLowerCase();
 
-  if (str.includes('advanced') || str.includes('enterprise') || str.includes('power')) return 3;
+  if (str.includes('advanced') || str.includes('enterprise') || str.includes('power') || str.includes('agency')) return 3;
   if (str.includes('growth') || str.includes('pro')) return 2;
   return 1;
 };
@@ -102,6 +105,7 @@ const Sidebar = ({ role, isOpen, onClose, onToggle }) => {
   const handleToggle = onToggle || onClose;
   const pathname = usePathname();
   const { entitlements, openUpgradeModal } = useEntitlement();
+  const { brand } = useBrand();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -157,6 +161,7 @@ const Sidebar = ({ role, isOpen, onClose, onToggle }) => {
   const adminLinks = [
     { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
     { name: 'Clients', href: '/admin/clients', icon: Users },
+    { name: 'White-Label Hub', href: '/admin/whitelabel', icon: Globe },
     { name: 'Global Search', href: '/admin/search', icon: Search },
     { name: 'Team', href: '/admin/team', icon: ShieldCheck },
     { name: 'Channels', href: '/admin/channels', icon: Link2 },
@@ -176,7 +181,17 @@ const Sidebar = ({ role, isOpen, onClose, onToggle }) => {
     { name: 'Support', href: '/admin/support', icon: LifeBuoy },
   ];
 
+  const isAgencyUser = Boolean(
+    rawUserPlan?.toUpperCase() === 'AGENCY' || 
+    userObj?.client?.is_agency || 
+    userObj?.client?.white_label_domain || 
+    brand?.is_whitelabel
+  );
+
   const clientLinks = [
+    ...(isAgencyUser ? [
+      { name: 'Agency Command Hub', href: '/client/agency', icon: Building2, requiredPlan: 'Starter' }
+    ] : []),
     { name: 'Dashboard', href: '/client', icon: LayoutDashboard, requiredPlan: 'Starter' },
     { name: 'Learning Center', href: '/client/guides', icon: BookOpen, requiredPlan: 'Starter' },
     { name: 'Channels', href: '/client/channels', icon: Link2, requiredPlan: 'Starter' },
@@ -220,7 +235,9 @@ const Sidebar = ({ role, isOpen, onClose, onToggle }) => {
     { name: 'Support', href: '/client/support', icon: LifeBuoy },
   ];
 
-  const links = role === 'ADMIN' ? adminLinks : role === 'AGENT' ? agentLinks : clientLinks;
+  const isImpersonating = mounted && typeof window !== 'undefined' && Boolean(localStorage.getItem('impersonation_session'));
+  const effectiveRole = (userObj?.role === 'ADMIN' && !isImpersonating) ? 'ADMIN' : role;
+  const links = effectiveRole === 'ADMIN' ? adminLinks : effectiveRole === 'AGENT' ? agentLinks : clientLinks;
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -257,17 +274,30 @@ const Sidebar = ({ role, isOpen, onClose, onToggle }) => {
           'flex items-center border-b border-slate-100/80 shrink-0 transition-all duration-300',
           isOpen ? 'px-3.5 sm:px-4 py-3 justify-between gap-2' : 'px-0 py-3 justify-center'
         )}>
-          {isOpen && (
+          {isOpen ? (
             <div className="flex items-center gap-2.5 min-w-0 flex-1">
               <img
-                src="/download (3).gif"
-                alt="UwoConnect Logo"
+                src={brand?.logo_url || "/download (3).gif"}
+                alt={brand?.brand_name || "Brand Logo"}
                 className="w-8 h-8 rounded-xl object-contain shadow-xs shrink-0"
               />
               <div className="min-w-0 flex-1">
-                <h1 className="text-sm font-black text-slate-900 tracking-tight leading-tight whitespace-nowrap">UwoConnect</h1>
-                <span className="text-[7.5px] font-black text-[#059669] uppercase tracking-[0.18em] block mt-0.5 whitespace-nowrap">V1.0 {role}</span>
+                <h1 className="text-sm font-black text-slate-900 tracking-tight leading-tight whitespace-nowrap truncate">{brand?.brand_name || "UwoConnect"}</h1>
+                <span className={cn(
+                  "text-[7.5px] font-black uppercase tracking-[0.18em] block mt-0.5 whitespace-nowrap",
+                  role === 'ADMIN' ? "text-[#059669]" : isAgencyUser ? "text-blue-600" : "text-[#059669]"
+                )}>
+                  V1.0 {mounted ? (role === 'ADMIN' ? 'SUPER ADMIN' : isAgencyUser ? 'AGENCY ADMIN' : (role || 'WORKSPACE')) : (role === 'ADMIN' ? 'SUPER ADMIN' : 'WORKSPACE')}
+                </span>
               </div>
+            </div>
+          ) : (
+            <div className="flex items-center justify-center">
+              <img
+                src={brand?.logo_url || "/download (3).gif"}
+                alt={brand?.brand_name || "Brand Logo"}
+                className="w-7 h-7 rounded-lg object-contain"
+              />
             </div>
           )}
 

@@ -16,8 +16,10 @@ import {
 } from '@/lib/firebase';
 import { storeUserSession } from '@/features/auth/authHelpers';
 import { API_BASE_URL } from '@/config/apiConfig';
+import { useBrand } from '@/context/BrandContext';
 
 const RegisterPage = () => {
+  const { brand } = useBrand();
   const searchParams = useSearchParams();
   const inviteToken = searchParams?.get('invite_token');
 
@@ -181,6 +183,7 @@ const RegisterPage = () => {
         department: formData.department.trim(),
         password: formData.password,
         invite_token: inviteToken || '',
+        brand_domain: brand?.custom_domain || (typeof window !== 'undefined' ? window.location.hostname : '')
       });
 
       if (res.status === 201 && res.data.token) {
@@ -231,11 +234,12 @@ const RegisterPage = () => {
           </div>
           <h2 className="text-2xl font-extrabold text-slate-900 mb-2">Registration Submitted</h2>
           <p className="text-slate-600 mb-8 leading-relaxed text-sm font-medium">
-            Your account is currently pending review by our administrator. You will receive an email once your workspace access has been approved.
+            Your account is currently pending review by {brand?.brand_name || 'our administrator'}. You will receive access once approved.
           </p>
           <Link 
-            href="/auth/login" 
-            className="w-full py-3.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-2xl font-bold text-sm tracking-wide shadow-lg shadow-emerald-600/25 flex items-center justify-center gap-2 transition-all"
+            href={brand?.custom_domain ? `/auth/login?brand_domain=${brand.custom_domain}` : '/auth/login'} 
+            style={{ backgroundColor: brand?.primary_color || '#059669' }}
+            className="w-full py-3.5 text-white rounded-2xl font-bold text-sm tracking-wide shadow-lg flex items-center justify-center gap-2 transition-all hover:brightness-110"
           >
             <span>Return to Login</span>
             <ArrowRight className="w-4 h-4" />
@@ -246,33 +250,32 @@ const RegisterPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#edf7f0] font-sans flex flex-col items-center justify-center p-4 sm:p-6 relative overflow-hidden py-10">
+    <div className="min-h-screen bg-slate-50 font-sans flex flex-col items-center justify-center p-4 sm:p-6 relative overflow-hidden py-10">
       {/* Dynamic ambient background glow circles */}
-      <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-emerald-300/30 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] bg-teal-300/30 rounded-full blur-[140px] pointer-events-none" />
-      <div className="absolute top-[30%] right-[15%] w-[350px] h-[350px] bg-emerald-200/40 rounded-full blur-[100px] pointer-events-none" />
-
-      {/* Decorative Grid Pattern */}
       <div 
-        className="absolute inset-0 opacity-[0.03] pointer-events-none"
-        style={{
-          backgroundImage: `radial-gradient(#059669 1px, transparent 1px)`,
-          backgroundSize: '24px 24px'
-        }}
+        className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full blur-[120px] pointer-events-none opacity-20"
+        style={{ backgroundColor: brand?.primary_color || '#059669' }}
+      />
+      <div 
+        className="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] rounded-full blur-[140px] pointer-events-none opacity-20"
+        style={{ backgroundColor: brand?.primary_color || '#059669' }}
       />
 
-      <div className="w-full max-w-[480px] z-10 bg-white/90 backdrop-blur-2xl border border-white/80 rounded-[32px] p-6 sm:p-8 shadow-[0_25px_60px_-15px_rgba(5,150,105,0.15),0_0_20px_rgba(255,255,255,0.8)_inset] flex flex-col items-center transition-all">
+      <div className="w-full max-w-[480px] z-10 bg-white/90 backdrop-blur-2xl border border-white/80 rounded-[32px] p-6 sm:p-8 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.1)] flex flex-col items-center transition-all">
         {/* Brand Header */}
-        <div className="flex items-center gap-2.5 mb-4 px-4 py-1.5 rounded-full bg-emerald-50/80 border border-emerald-200/60 shadow-sm">
+        <div className="flex items-center gap-2.5 mb-4 px-4 py-1.5 rounded-full bg-slate-50 border border-slate-200/80 shadow-xs">
           <img 
-            src="/download (3).gif" 
-            alt="UwoConnect Logo" 
+            src={brand?.logo_url || "/download (3).gif"} 
+            alt={brand?.brand_name || "Brand Logo"} 
             className="w-5 h-5 rounded-full object-contain"
           />
-          <span className="text-emerald-900 font-bold text-xs tracking-wider uppercase">
-            UwoConnect
+          <span className="text-slate-800 font-bold text-xs tracking-wider uppercase">
+            {brand?.brand_name || "UwoConnect"}
           </span>
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+          <span 
+            className="w-1.5 h-1.5 rounded-full animate-pulse" 
+            style={{ backgroundColor: brand?.primary_color || '#059669' }}
+          />
         </div>
 
         {/* Title Section */}
@@ -508,7 +511,8 @@ const RegisterPage = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3.5 bg-gradient-to-r from-emerald-600 via-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-sm tracking-wide rounded-2xl transition-all duration-200 shadow-lg shadow-emerald-600/25 hover:shadow-emerald-600/35 hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
+              style={{ backgroundColor: brand?.primary_color || '#059669' }}
+              className="w-full py-3.5 text-white font-bold text-sm tracking-wide rounded-2xl transition-all duration-200 shadow-lg hover:brightness-110 hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
             >
               {loading ? (
                 <Loader2 className="animate-spin text-white w-5 h-5" />
@@ -531,16 +535,16 @@ const RegisterPage = () => {
           <div className="h-[1px] bg-slate-200 flex-1" />
         </div>
 
-        {/* UWO SSO & Social */}
+        {/* Brand SSO & Social */}
         <div className="w-full space-y-2.5">
           <button
             type="button"
             onClick={() => setShowUWOModal(true)}
-            title="Sign up with Unified Web Options (UWO SSO)"
-            className="w-full py-3 px-4 bg-gradient-to-r from-[#112317] via-[#1a3824] to-[#112317] hover:from-[#0d1c12] hover:to-[#152e1d] text-white rounded-2xl flex items-center justify-center gap-2 shadow-md border border-emerald-500/30 hover:border-emerald-400/60 hover:-translate-y-0.5 active:translate-y-0 transition-all cursor-pointer font-bold text-xs tracking-wider uppercase"
+            title={`Sign up with ${brand?.brand_name || 'UWO'} SSO`}
+            className="w-full py-3 px-4 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 hover:from-slate-800 hover:to-slate-950 text-white rounded-2xl flex items-center justify-center gap-2 shadow-md border border-slate-700 hover:-translate-y-0.5 active:translate-y-0 transition-all cursor-pointer font-bold text-xs tracking-wider uppercase"
           >
-            <ShieldCheck className="w-4 h-4 text-emerald-400" />
-            <span>Sign Up with UWO SSO</span>
+            <ShieldCheck className="w-4 h-4 text-blue-400" />
+            <span>Sign Up with {brand?.brand_name || 'UWO'} SSO</span>
           </button>
 
           <div className="grid grid-cols-3 gap-2.5">
@@ -585,8 +589,9 @@ const RegisterPage = () => {
           <p className="text-xs font-semibold text-slate-500">
             Already have an account?{' '}
             <Link 
-              href="/auth/login" 
-              className="text-emerald-700 hover:text-emerald-800 font-bold hover:underline transition-all"
+              href={brand?.custom_domain ? `/auth/login?brand_domain=${brand.custom_domain}` : '/auth/login'} 
+              style={{ color: brand?.primary_color || '#059669' }}
+              className="font-bold hover:underline transition-all"
             >
               Log In
             </Link>

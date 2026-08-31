@@ -25,8 +25,10 @@ import {
 } from '@/lib/firebase';
 import { storeUserSession } from '@/features/auth/authHelpers';
 import { API_BASE_URL } from '@/config/apiConfig';
+import { useBrand } from '@/context/BrandContext';
 
 const LoginPage = () => {
+  const { brand, isWhiteLabel } = useBrand();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loadingProvider, setLoadingProvider] = useState(null); // 'email' | 'google' | 'github' | 'facebook' | null
@@ -181,16 +183,16 @@ const LoginPage = () => {
         className="w-full max-w-[430px] z-10 bg-white/95 backdrop-blur-2xl border border-white/90 rounded-[28px] p-6 sm:p-8 shadow-[0_20px_60px_-15px_rgba(5,150,105,0.18),0_0_20px_rgba(255,255,255,0.85)_inset] flex flex-col items-center relative"
       >
         {/* Brand Header */}
-        <div className="flex items-center gap-2 mb-4 px-3.5 py-1.5 rounded-full bg-emerald-50/90 border border-emerald-200/70 shadow-xs">
+        <div className="flex items-center gap-2 mb-4 px-3.5 py-1.5 rounded-full bg-slate-50 border border-slate-200/80 shadow-xs">
           <img
-            src="/download (3).gif"
-            alt="UwoConnect Logo"
+            src={brand?.logo_url || "/download (3).gif"}
+            alt={brand?.brand_name || "Brand Logo"}
             className="w-5 h-5 rounded-full object-contain"
           />
-          <span className="text-emerald-900 font-extrabold text-xs tracking-wider uppercase">
-            UwoConnect
+          <span className="text-slate-900 font-extrabold text-xs tracking-wider uppercase">
+            {brand?.brand_name || "UwoConnect"}
           </span>
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" style={{ backgroundColor: brand?.primary_color || '#059669' }} />
         </div>
 
         {/* Title Section */}
@@ -314,7 +316,8 @@ const LoginPage = () => {
             <button
               type="submit"
               disabled={isAnyLoading}
-              className="w-full py-3 bg-gradient-to-r from-emerald-600 via-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-sm tracking-wide rounded-2xl transition-all duration-200 shadow-md shadow-emerald-600/25 hover:shadow-lg hover:shadow-emerald-600/35 hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+              className="w-full py-3 text-white font-bold text-sm tracking-wide rounded-2xl transition-all duration-200 shadow-md hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+              style={{ backgroundColor: brand?.primary_color || '#059669' }}
             >
               {loadingProvider === 'email' ? (
                 <Loader2 className="animate-spin text-white w-4 h-4" />
@@ -337,18 +340,18 @@ const LoginPage = () => {
           <div className="h-[1px] bg-slate-200/90 flex-1" />
         </div>
 
-        {/* UWO SSO & Social Login Stack */}
+        {/* SSO & Social Login Stack */}
         <div className="w-full space-y-2">
-          {/* UWO Single Sign-On Button */}
+          {/* Single Sign-On Button */}
           <button
             type="button"
             disabled={isAnyLoading}
             onClick={() => setShowUWOModal(true)}
-            title="Sign in with Unified Web Options (UWO SSO)"
-            className="w-full py-2.5 px-4 bg-gradient-to-r from-[#102216] via-[#1a3a25] to-[#102216] hover:from-[#0d1d13] hover:to-[#15321f] text-white rounded-2xl flex items-center justify-center gap-2 shadow-sm border border-emerald-500/30 hover:border-emerald-400/60 hover:-translate-y-0.5 active:translate-y-0 transition-all cursor-pointer font-bold text-xs tracking-wider uppercase disabled:opacity-60 disabled:cursor-not-allowed"
+            title={`Sign in with ${brand?.brand_name || 'Unified Web Options'} SSO`}
+            className="w-full py-2.5 px-4 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 hover:from-slate-800 hover:to-slate-700 text-white rounded-2xl flex items-center justify-center gap-2 shadow-sm border border-slate-700 hover:-translate-y-0.5 active:translate-y-0 transition-all cursor-pointer font-bold text-xs tracking-wider uppercase disabled:opacity-60 disabled:cursor-not-allowed"
           >
             <ShieldCheck className="w-4 h-4 text-emerald-400" />
-            <span>Sign In with UWO SSO</span>
+            <span>Sign In with {brand?.brand_name || 'UWO'} SSO</span>
           </button>
 
           {/* Social Logins: Google, GitHub, Facebook */}

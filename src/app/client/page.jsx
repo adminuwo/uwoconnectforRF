@@ -14,6 +14,7 @@ import FeatureDetailDrawer from '@/components/dashboard/FeatureDetailDrawer';
 import LearningCenterModal from '@/components/guides/LearningCenterModal';
 import { cn } from '@/lib/utils';
 import { API_BASE_URL } from '@/config/apiConfig';
+import AgencyAdminDashboard from './agency/page';
 
 const ClientOverview = () => {
   const router = useRouter();
@@ -21,17 +22,24 @@ const ClientOverview = () => {
   const [loading, setLoading] = useState(false);
   const [userName, setUserName] = useState('User');
   const [contacts, setContacts] = useState([]);
+  const [viewMode, setViewMode] = useState('agency'); // 'agency' | 'workspace'
 
   useEffect(() => {
     setMounted(true);
-    const token = localStorage.getItem('uwo_token');
+    const token = localStorage.getItem('uwo_token') || localStorage.getItem('token');
     if (!token) {
       router.push('/auth/login');
+      return;
     }
     const userStr = localStorage.getItem('user');
     if (userStr) {
       try {
         const u = JSON.parse(userStr);
+        // If Super Admin visits /client without impersonating, redirect to /admin
+        if (u.role === 'ADMIN' && !localStorage.getItem('impersonation_session')) {
+          router.push('/admin');
+          return;
+        }
         setUserName(u.name || u.first_name || u.username || u.business_name || 'User');
       } catch (e) {}
     }
@@ -287,26 +295,70 @@ const ClientOverview = () => {
     );
   }
 
+  const userObj = mounted && typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('user') || '{}') : {};
+  const isAgencyUser = Boolean(
+    userObj?.plan?.toUpperCase() === 'AGENCY' ||
+    userObj?.client?.plan?.toUpperCase() === 'AGENCY' ||
+    userObj?.is_agency ||
+    userObj?.client?.is_agency ||
+    userObj?.client?.white_label_domain
+  );
+
   return (
     <DashboardLayout role="CLIENT">
-      <div className="max-w-7xl mx-auto w-full p-4 sm:p-6 pb-20">
-        
-        {/* Welcome Section */}
-        <div data-tour="dashboard-welcome" className="flex flex-col sm:flex-row sm:items-center justify-between mb-8">
-          <div>
-            <h1 className="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight mb-2">
-              Welcome, <span className="italic font-bold text-emerald-800">{userName}</span>
-            </h1>
-            <p className="text-slate-500 font-medium italic text-xs sm:text-sm">Your automation command center is running smoothly.</p>
+      {isAgencyUser && (
+        <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 pt-4 flex items-center justify-between border-b border-slate-200/80 pb-3 mb-2">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setViewMode('agency')}
+              className={cn(
+                "flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer",
+                viewMode === 'agency'
+                  ? "bg-blue-600 text-white shadow-md shadow-blue-600/20 font-black"
+                  : "bg-slate-100 text-slate-600 hover:text-slate-900"
+              )}
+            >
+              <ShieldCheck size={14} />
+              <span>Agency Reseller Command Center</span>
+            </button>
+
+            <button
+              onClick={() => setViewMode('workspace')}
+              className={cn(
+                "flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer",
+                viewMode === 'workspace'
+                  ? "bg-slate-900 text-white shadow-sm font-black"
+                  : "bg-slate-100 text-slate-600 hover:text-slate-900"
+              )}
+            >
+              <Zap size={14} />
+              <span>My Agency Personal Tools</span>
+            </button>
           </div>
-          <button 
-            data-tour="dashboard-launch-btn"
-            onClick={() => router.push('/client/workflows')}
-            className="mt-4 sm:mt-0 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-2xl text-xs uppercase tracking-wider transition-all shadow-sm flex items-center gap-2 cursor-pointer"
-          >
-            <GitBranch size={16} /> Launch Workflow Builder
-          </button>
         </div>
+      )}
+
+      {isAgencyUser && viewMode === 'agency' ? (
+        <AgencyAdminDashboard />
+      ) : (
+        <div className="max-w-7xl mx-auto w-full p-4 sm:p-6 pb-20">
+          
+          {/* Welcome Section */}
+          <div data-tour="dashboard-welcome" className="flex flex-col sm:flex-row sm:items-center justify-between mb-8">
+            <div>
+              <h1 className="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight mb-2">
+                Welcome, <span className="italic font-bold text-emerald-800">{userName}</span>
+              </h1>
+              <p className="text-slate-500 font-medium italic text-xs sm:text-sm">Your automation command center is running smoothly.</p>
+            </div>
+            <button 
+              data-tour="dashboard-launch-btn"
+              onClick={() => router.push('/client/workflows')}
+              className="mt-4 sm:mt-0 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-2xl text-xs uppercase tracking-wider transition-all shadow-sm flex items-center gap-2 cursor-pointer"
+            >
+              <GitBranch size={16} /> Launch Workflow Builder
+            </button>
+          </div>
 
         {/* Option 2: 2-Row Compact Grid */}
         <div data-tour="dashboard-stats" className="space-y-4 mb-10">
@@ -820,6 +872,7 @@ const ClientOverview = () => {
           onClose={() => setActiveGuideSlug(null)}
         />
       </div>
+      )}
     </DashboardLayout>
   );
 };

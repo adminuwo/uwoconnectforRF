@@ -39,6 +39,7 @@ function AdminClientsContent() {
   const [statusFilter, setStatusFilter] = useState(initialStatus);
   const [approvalFilter, setApprovalFilter] = useState(initialApproval);
   const [planFilter, setPlanFilter] = useState('ALL');
+  const [agencyTypeFilter, setAgencyTypeFilter] = useState('ALL'); // ALL, AGENCIES, SUB_CLIENTS, DIRECT
   const [dynamicPlans, setDynamicPlans] = useState(['Starter', 'Professional', 'Enterprise']);
   const [sortKey, setSortKey] = useState('created_at');
   const [sortOrder, setSortOrder] = useState('desc');
@@ -67,6 +68,11 @@ function AdminClientsContent() {
     phone_number: '',
     address: '',
     company_logo_url: '',
+    white_label_name: '',
+    white_label_domain: '',
+    primary_color: '#059669',
+    support_email: '',
+    tagline: '',
     plan: 'GROWTH',
     status: 'ACTIVE',
     approval_status: 'APPROVED'
@@ -183,6 +189,7 @@ function AdminClientsContent() {
           status: statusFilter,
           approval: approvalFilter,
           plan: planFilter,
+          agency_type: agencyTypeFilter,
           sort_by: sortKey,
           sort_order: sortOrder,
           page: page,
@@ -271,11 +278,17 @@ function AdminClientsContent() {
   // Open Client Profile & Credentials Modal
   const handleViewProfile = (client) => {
     setSelectedProfileClient(client);
+    const clientSettings = client.settings && typeof client.settings === 'object' ? client.settings : {};
     setProfileFormState({
       business_name: client.business_name || '',
       phone_number: client.phone_number || '',
       address: client.address || '',
-      company_logo_url: client.company_logo_url || '',
+      company_logo_url: client.company_logo_url || client.white_label_logo || '',
+      white_label_name: client.white_label_name || '',
+      white_label_domain: client.white_label_domain || clientSettings.custom_domain || '',
+      primary_color: clientSettings.primary_color || '#059669',
+      support_email: clientSettings.support_email || '',
+      tagline: clientSettings.tagline || '',
       plan: client.plan || 'GROWTH',
       status: client.status || 'ACTIVE',
       approval_status: client.approval_status || 'APPROVED'
@@ -785,6 +798,18 @@ function AdminClientsContent() {
               ))}
             </select>
 
+            {/* White-Label / Agency Network Filter */}
+            <select
+              value={agencyTypeFilter}
+              onChange={(e) => { setAgencyTypeFilter(e.target.value); setPage(1); }}
+              className="px-3 py-2 bg-slate-50/70 hover:bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 outline-none focus:border-emerald-500 transition-all cursor-pointer"
+            >
+              <option value="ALL">All Network Types</option>
+              <option value="AGENCIES">🏢 White-Label Agencies</option>
+              <option value="SUB_CLIENTS">👥 Sub-Clients under WL</option>
+              <option value="DIRECT">⚡ Direct Clients</option>
+            </select>
+
             {/* Page Size Selector */}
             <select
               value={pageSize}
@@ -798,13 +823,14 @@ function AdminClientsContent() {
             </select>
 
             {/* Reset Filters */}
-            {(searchInput || statusFilter !== 'ALL' || approvalFilter !== 'ALL' || planFilter !== 'ALL') && (
+            {(searchInput || statusFilter !== 'ALL' || approvalFilter !== 'ALL' || planFilter !== 'ALL' || agencyTypeFilter !== 'ALL') && (
               <button
                 onClick={() => {
                   setSearchInput('');
                   setStatusFilter('ALL');
                   setApprovalFilter('ALL');
                   setPlanFilter('ALL');
+                  setAgencyTypeFilter('ALL');
                   setPage(1);
                 }}
                 className="px-3 py-2 text-xs font-bold text-rose-600 hover:bg-rose-50 rounded-xl transition-all whitespace-nowrap cursor-pointer"
@@ -931,12 +957,28 @@ function AdminClientsContent() {
                                 )}
                               </button>
                               <div>
-                                <button 
-                                  onClick={() => handleViewProfile(client)}
-                                  className="font-bold text-slate-900 hover:text-emerald-600 transition-colors text-sm text-left cursor-pointer block"
-                                >
-                                  {client.business_name}
-                                </button>
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <button 
+                                    onClick={() => handleViewProfile(client)}
+                                    className="font-bold text-slate-900 hover:text-emerald-600 transition-colors text-sm text-left cursor-pointer block"
+                                  >
+                                    {client.business_name}
+                                  </button>
+                                  {client.white_label_domain && (
+                                    <a
+                                      href={`https://${client.white_label_domain}`}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      onClick={(e) => e.stopPropagation()}
+                                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-mono font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100 transition-colors"
+                                      title="Open White-Label Custom Domain"
+                                    >
+                                      <Globe size={10} />
+                                      <span>{client.white_label_domain}</span>
+                                      <ExternalLink size={9} />
+                                    </a>
+                                  )}
+                                </div>
                                 <div className="text-xs text-slate-400 flex items-center gap-2 mt-0.5">
                                   <span className="text-slate-600 font-medium">{client.client_name || client.name || client.email}</span>
                                   {client.phone_number && (
@@ -946,6 +988,35 @@ function AdminClientsContent() {
                                     </>
                                   )}
                                 </div>
+
+                                {/* White-Label Network Badges */}
+                                {client.parent_agency ? (
+                                  <div className="mt-1.5 flex items-center gap-1.5 flex-wrap">
+                                    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-[10px] font-black bg-purple-50 text-purple-700 border border-purple-200 shadow-2xs">
+                                      <Building2 size={11} className="text-purple-600 shrink-0" />
+                                      <span>Sub-Client of:</span>
+                                      <span className="text-purple-950 font-black underline">{client.parent_agency.name}</span>
+                                    </span>
+                                    {client.parent_agency.domain && (
+                                      <span className="font-mono text-[9px] font-bold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded-md border border-slate-200">
+                                        {client.parent_agency.domain}
+                                      </span>
+                                    )}
+                                  </div>
+                                ) : (client.is_agency || (client.plan || '').toUpperCase() === 'AGENCY' || client.white_label_domain || client.white_label_name) ? (
+                                  <div className="mt-1.5 flex items-center gap-1.5 flex-wrap">
+                                    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-[10px] font-black bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-2xs">
+                                      <Globe size={11} className="text-emerald-600 shrink-0" />
+                                      <span>👑 White-Label Reseller Agency</span>
+                                    </span>
+                                  </div>
+                                ) : (
+                                  <div className="mt-1 flex items-center gap-1">
+                                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-medium text-slate-400 bg-slate-50 border border-slate-200/60">
+                                      Direct Client
+                                    </span>
+                                  </div>
+                                )}
                               </div>
                             </div>
                           </td>
@@ -1428,6 +1499,86 @@ function AdminClientsContent() {
                             </button>
                           )}
                           <span className="text-[10px] text-slate-400">PNG, JPG or WebP (Max 3MB)</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* White-Label & Custom Domain Configuration for Super Admin */}
+                    <div className="sm:col-span-2 pt-3 border-t border-slate-100 space-y-3 bg-emerald-50/30 p-3.5 rounded-2xl border border-emerald-100">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Globe size={15} className="text-emerald-700" />
+                          <label className="font-extrabold text-slate-800 text-[11px] uppercase tracking-wider">
+                            White-Label & Custom Domain Configuration
+                          </label>
+                        </div>
+                        {profileFormState.white_label_domain && (
+                          <a
+                            href={`https://${profileFormState.white_label_domain}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-100 hover:bg-emerald-200 px-2.5 py-0.5 rounded-md transition-colors"
+                          >
+                            <span>Open Portal</span>
+                            <ExternalLink size={10} />
+                          </a>
+                        )}
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+                            Brand Display Name
+                          </label>
+                          <input
+                            type="text"
+                            value={profileFormState.white_label_name}
+                            onChange={(e) => setProfileFormState({ ...profileFormState, white_label_name: e.target.value })}
+                            placeholder="e.g. Apex Marketing Suite"
+                            className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 outline-none focus:border-emerald-500"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+                            Custom Domain / Subdomain
+                          </label>
+                          <input
+                            type="text"
+                            value={profileFormState.white_label_domain}
+                            onChange={(e) => setProfileFormState({ ...profileFormState, white_label_domain: e.target.value.toLowerCase().replace(/^(https?:\/\/)/, '') })}
+                            placeholder="portal.clientdomain.com"
+                            className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs font-mono font-semibold text-slate-800 outline-none focus:border-emerald-500"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+                            Primary Theme Color (Hex)
+                          </label>
+                          <div className="flex items-center gap-2">
+                            <div className="w-6 h-6 rounded-lg border border-slate-200 shrink-0 shadow-2xs" style={{ backgroundColor: profileFormState.primary_color || '#059669' }} />
+                            <input
+                              type="text"
+                              value={profileFormState.primary_color}
+                              onChange={(e) => setProfileFormState({ ...profileFormState, primary_color: e.target.value })}
+                              placeholder="#059669"
+                              className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs font-mono font-bold text-slate-800 outline-none focus:border-emerald-500"
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+                            Support Email
+                          </label>
+                          <input
+                            type="email"
+                            value={profileFormState.support_email}
+                            onChange={(e) => setProfileFormState({ ...profileFormState, support_email: e.target.value })}
+                            placeholder="support@clientbrand.com"
+                            className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 outline-none focus:border-emerald-500"
+                          />
                         </div>
                       </div>
                     </div>

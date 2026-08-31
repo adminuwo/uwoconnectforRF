@@ -1,0 +1,146 @@
+'use client';
+
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import axios from 'axios';
+import { API_BASE_URL } from '@/config/apiConfig';
+
+const DEFAULT_BRAND = {
+  is_whitelabel: false,
+  client_id: null,
+  brand_name: 'UwoConnect',
+  tagline: 'Multi-channel automation platform',
+  logo_url: '/download (3).gif',
+  favicon_url: '/download (3).gif',
+  primary_color: '#059669',
+  accent_color: '#10B981',
+  support_email: 'support@uwoconnect.com',
+  copyright_text: '© UwoConnect Automation. All rights reserved.',
+  custom_domain: ''
+};
+
+const BrandContext = createContext({
+  brand: DEFAULT_BRAND,
+  isWhiteLabel: false,
+  loading: true,
+  refreshBrand: () => {}
+});
+
+export function BrandProvider({ children }) {
+  const [brand, setBrand] = useState(DEFAULT_BRAND);
+  const [loading, setLoading] = useState(true);
+
+  const applyBrandToDOM = useCallback((brandData) => {
+    if (typeof document === 'undefined') return;
+
+    // 1. Apply Dynamic CSS Theme Variables
+    const root = document.documentElement;
+    if (brandData.primary_color) {
+      root.style.setProperty('--brand-primary', brandData.primary_color);
+      root.style.setProperty('--color-primary', brandData.primary_color);
+    }
+    if (brandData.accent_color) {
+      root.style.setProperty('--brand-accent', brandData.accent_color);
+    }
+
+    // 2. Update Page Title if custom brand name present
+    if (brandData.is_whitelabel && brandData.brand_name) {
+      if (document.title.includes('UwoConnect')) {
+        document.title = document.title.replace('UwoConnect', brandData.brand_name);
+      }
+    }
+
+    // 3. Update Favicon dynamically
+    if (brandData.favicon_url) {
+      let link = document.querySelector("link[rel~='icon']");
+      if (!link) {
+        link = document.createElement('link');
+        link.rel = 'icon';
+        document.getElementsByTagName('head')[0].appendChild(link);
+      }
+      link.href = brandData.favicon_url;
+    }
+  }, []);
+
+  const fetchBrandConfig = useCallback(async () => {
+    try {
+      setLoading(true);
+      let host = typeof window !== 'undefined' ? window.location.hostname : '';
+      
+      // Support instant local testing via ?brand_domain=query param or session cache
+      if (typeof window !== 'undefined') {
+        const urlParams = new URLSearchParams(window.location.search);
+        const queryBrandDomain = urlParams.get('brand_domain') || urlParams.get('domain');
+        if (queryBrandDomain) {
+          host = queryBrandDomain;
+          sessionStorage.setItem('test_brand_domain', queryBrandDomain);
+        } else if ((host === 'localhost' || host === '127.0.0.1') && sessionStorage.getItem('test_brand_domain')) {
+          host = sessionStorage.getItem('test_brand_domain');
+        }
+      }
+      
+      // Also check if logged in user has local client branding cached
+      let localUserClient = null;
+      if (typeof window !== 'undefined') {
+        try {
+          const userStr = localStorage.getItem('user');
+          if (userStr) {
+            const parsed = JSON.parse(userStr);
+            localUserClient = parsed.client;
+          }
+        } catch (e) {
+          // ignore parsing error
+        }
+      }
+
+      const clientIdParam = localUserClient?.id ? `&client_id=${localUserClient.id}` : '';
+      const res = await axios.get(`${API_BASE_URL}/api/whitelabel/config?domain=${host}${clientIdParam}`);
+      
+      if (res.data) {
+        const mergedBrand = {
+          ...DEFAULT_BRAND,
+          ...res.data
+        };
+        setBrand(mergedBrand);
+        applyBrandToDOM(mergedBrand);
+      }
+    } catch (err) {
+      console.warn('[BrandContext] Falling back to default branding:', err?.message || err);
+      setBrand(DEFAULT_BRAND);
+      applyBrandToDOM(DEFAULT_BRAND);
+    } finally {
+      setLoading(false);
+    }
+  }, [applyBrandToDOM]);
+
+  useEffect(() => {
+    fetchBrandConfig();
+  }, [fetchBrandConfig]);
+
+  // Listen to custom event when client updates branding in settings
+  useEffect(() => {
+    const handleProfileUpdate = () => {
+      fetchBrandConfig();
+    };
+    window.addEventListener('profileUpdated', handleProfileUpdate);
+    window.addEventListener('brandUpdated', handleProfileUpdate);
+    return () => {
+      window.removeEventListener('profileUpdated', handleProfileUpdate);
+      window.removeEventListener('brandUpdated', handleProfileUpdate);
+    };
+  }, [fetchBrandConfig]);
+
+  return (
+    <BrandContext.Provider
+      value={{
+        brand,
+        isWhiteLabel: Boolean(brand.is_whitelabel),
+        loading,
+        refreshBrand: fetchBrandConfig
+      }}
+    >
+      {children}
+    </BrandContext.Provider>
+  );
+}
+
+export const useBrand = () => useContext(BrandContext);

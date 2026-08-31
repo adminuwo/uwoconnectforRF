@@ -15,8 +15,10 @@ const GlobalIncomingCallListener = dynamic(() => import('./GlobalIncomingCallLis
 
 const PAGE_TITLES = {
   '/client': 'Dashboard',
+  '/client/agency': 'Agency & Reseller Command Hub',
   '/admin': 'Control Center',
   '/admin/clients': 'Client Management Directory',
+  '/admin/whitelabel': 'White-Label & Reseller Command Center',
   '/admin/search': 'Global Platform Search',
   '/admin/team': 'Team & Projects',
   '/admin/channels': 'Channel & Integration Center',
@@ -213,7 +215,31 @@ const DashboardLayout = ({ children, role: initialRole }) => {
 
     if (storedUser) {
       try {
-        const parsed = JSON.parse(storedUser);
+        let parsed = JSON.parse(storedUser);
+
+        // If visiting an admin route with a non-admin token, auto-restore admin backup if available
+        if (pathname.startsWith('/admin') || initialRole === 'ADMIN') {
+          if (parsed.role !== 'ADMIN') {
+            const backupToken = localStorage.getItem('admin_backup_token');
+            const backupUser = localStorage.getItem('admin_backup_user');
+            if (backupToken && backupUser) {
+              localStorage.setItem('token', backupToken);
+              localStorage.setItem('uwo_token', backupToken);
+              localStorage.setItem('user', backupUser);
+              localStorage.removeItem('admin_backup_token');
+              localStorage.removeItem('admin_backup_user');
+              localStorage.removeItem('impersonation_session');
+              parsed = JSON.parse(backupUser);
+              window.location.reload();
+              return;
+            } else {
+              // Non-admin user trying to access admin route without backup -> redirect to client
+              window.location.href = parsed.is_agency || parsed.client?.is_agency ? '/client/agency' : '/client';
+              return;
+            }
+          }
+        }
+
         setUser(parsed);
         if (!storedLogo && (parsed?.company_logo_url || parsed?.client?.company_logo_url || parsed?.profile_picture_url)) {
           const l = parsed.company_logo_url || parsed.client?.company_logo_url || parsed.profile_picture_url;
@@ -361,9 +387,19 @@ const DashboardLayout = ({ children, role: initialRole }) => {
 
 
 
+  const isAgencyUser = mounted && Boolean(
+    rawUserPlan?.toUpperCase() === 'AGENCY' || 
+    userObj?.client?.is_agency || 
+    userObj?.client?.white_label_domain ||
+    user?.client?.plan === 'AGENCY' ||
+    user?.client?.white_label_domain
+  );
+
   const displayName = user?.name || user?.username || 'User';
-  const displayRole = user?.role || initialRole || '';
-  const currentTitle = PAGE_TITLES[pathname] || (displayRole === 'ADMIN' ? 'Control Center' : 'Dashboard');
+  const displayRole = mounted 
+    ? (user?.role === 'ADMIN' ? 'SUPER ADMIN' : isAgencyUser ? 'AGENCY ADMIN' : (user?.role || initialRole || 'CLIENT'))
+    : (initialRole === 'ADMIN' ? 'SUPER ADMIN' : 'CLIENT');
+  const currentTitle = PAGE_TITLES[pathname] || (initialRole === 'ADMIN' ? 'Control Center' : 'Dashboard');
 
   return (
     <div className="flex flex-col h-screen w-screen bg-[#fcfdfe] overflow-hidden">

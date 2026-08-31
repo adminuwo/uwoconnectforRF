@@ -57,7 +57,7 @@ export const PUBLIC_APP_URL = (function () {
   return 'https://uwoconnectforrf-743928421487.asia-south1.run.app';
 })();
 
-export const getPublicDocumentUrl = (type, token) => {
+export const getPublicDocumentUrl = (type, token, customDomain = null) => {
   const normType = (type || 'quote').toLowerCase();
   let segment = 'proposal';
   if (normType === 'quotation' || normType === 'quote') {
@@ -67,6 +67,11 @@ export const getPublicDocumentUrl = (type, token) => {
   } else if (normType === 'proposal') {
     segment = 'proposal';
   }
-  return `${PUBLIC_APP_URL}/public/${segment}/${token}`;
+
+  let baseUrl = PUBLIC_APP_URL;
+  if (customDomain) {
+    baseUrl = customDomain.startsWith('http') ? customDomain.replace(/\/$/, '') : `https://${customDomain.replace(/\/$/, '')}`;
+  }
+  return `${baseUrl}/public/${segment}/${token}`;
 };
 
