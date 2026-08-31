@@ -68,21 +68,21 @@ import { Lock, Zap } from 'lucide-react';
 const PLAN_RANKS = { starter: 1, growth: 2, advanced: 3 };
 
 const FEATURE_REQUIRED_PLAN = {
-  '/client/workflows': 'Growth',
-  '/client/proposals': 'Growth',
-  '/client/invoices': 'Growth',
-  '/client/campaigns': 'Growth',
-  '/client/catalog': 'Growth',
-  '/client/payments': 'Growth',
-  '/client/orders': 'Growth',
-  '/client/email': 'Growth',
-  '/client/gmail': 'Growth',
-  '/client/youtube': 'Growth',
-  '/client/google-news': 'Advanced',
-  '/client/calls': 'Advanced',
-  '/client/knowledge': 'Advanced',
-  '/client/team': 'Advanced',
-  '/client/reports': 'Advanced',
+  '/client/workflows': 'Starter',
+  '/client/proposals': 'Starter',
+  '/client/invoices': 'Starter',
+  '/client/campaigns': 'Starter',
+  '/client/catalog': 'Starter',
+  '/client/payments': 'Starter',
+  '/client/orders': 'Starter',
+  '/client/email': 'Starter',
+  '/client/gmail': 'Starter',
+  '/client/youtube': 'Starter',
+  '/client/google-news': 'Starter',
+  '/client/calls': 'Starter',
+  '/client/knowledge': 'Starter',
+  '/client/team': 'Starter',
+  '/client/reports': 'Starter',
 };
 
 const ROUTE_FEATURE_KEYS = {
@@ -141,21 +141,35 @@ const DashboardLayout = ({ children, role: initialRole }) => {
   let isDynamicRemoved = false;
   let isDynamicAvailable = false;
   if (routeFeatKey && entitlements) {
-    const customRemoved = entitlements?.custom_removed || [];
-    if (customRemoved.some(k => k.toLowerCase() === routeFeatKey.toLowerCase())) {
+    const baseKey = String(routeFeatKey).toLowerCase().trim();
+    const cleanKey = baseKey.replace(/^feature_/, '').replace(/^connector_/, '').replace(/^channel_/, '');
+    const keyVariants = [
+      baseKey,
+      cleanKey,
+      `feature_${cleanKey}`,
+      `connector_${cleanKey}`,
+      `channel_${cleanKey}`
+    ];
+
+    const customRemoved = (entitlements?.custom_removed || []).map(k => String(k).toLowerCase());
+    if (keyVariants.some(v => customRemoved.includes(v))) {
       isDynamicRemoved = true;
     }
 
-    const featStatus = entitlements?.features?.[routeFeatKey]?.status || entitlements?.connectors?.[routeFeatKey]?.status;
-    if (featStatus === 'UPGRADE_REQUIRED' || featStatus === 'LOCKED') {
-      isDynamicRemoved = true;
-    }
-    if (featStatus === 'AVAILABLE' || featStatus === 'CONNECTED') {
-      isDynamicAvailable = true;
+    for (const variant of keyVariants) {
+      const featStatus = entitlements?.features?.[variant]?.status || 
+                         entitlements?.connectors?.[variant]?.status || 
+                         entitlements?.channels?.[variant]?.status;
+      if (featStatus === 'UPGRADE_REQUIRED' || featStatus === 'LOCKED') {
+        isDynamicRemoved = true;
+      }
+      if (featStatus === 'AVAILABLE' || featStatus === 'CONNECTED' || featStatus === 'ENABLED') {
+        isDynamicAvailable = true;
+      }
     }
 
-    const customAdded = entitlements?.custom_added || [];
-    if (customAdded.some(k => k.toLowerCase() === routeFeatKey.toLowerCase())) {
+    const customAdded = (entitlements?.custom_added || []).map(k => String(k).toLowerCase());
+    if (keyVariants.some(v => customAdded.includes(v))) {
       isDynamicAvailable = true;
     }
   }

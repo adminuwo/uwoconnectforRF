@@ -67,21 +67,12 @@ const FacebookLogo = ({ size = 22 }) => (
   </svg>
 );
 
-const InstagramLogo = ({ size = 22 }) => (
-  <svg width={size} height={size} viewBox="0 0 48 48" fill="none" className="shrink-0">
-    <defs>
-      <linearGradient id="igFinalGrad" x1="0%" y1="100%" x2="100%" y2="0%">
-        <stop offset="0%" stopColor="#FFD600" />
-        <stop offset="25%" stopColor="#FF7A00" />
-        <stop offset="50%" stopColor="#FF0069" />
-        <stop offset="75%" stopColor="#D300C5" />
-        <stop offset="100%" stopColor="#7638FA" />
-      </linearGradient>
-    </defs>
-    <rect width="48" height="48" rx="12" fill="url(#igFinalGrad)"/>
-    <rect x="11" y="11" width="26" height="26" rx="7" stroke="white" strokeWidth="3" fill="none"/>
-    <circle cx="24" cy="24" r="6" stroke="white" strokeWidth="3" fill="none"/>
-    <circle cx="31.5" cy="16.5" r="1.75" fill="white"/>
+const InstagramLogo = ({ size = 22, className = "" }) => (
+  <svg width={size} height={size} viewBox="0 0 48 48" fill="none" className={cn("shrink-0", className)}>
+    <circle cx="24" cy="24" r="24" fill="#E1306C" />
+    <rect x="13" y="13" width="22" height="22" rx="6" stroke="white" strokeWidth="2.5" fill="none"/>
+    <circle cx="24" cy="24" r="5" stroke="white" strokeWidth="2.5" fill="none"/>
+    <circle cx="30" cy="18" r="1.5" fill="white"/>
   </svg>
 );
 
@@ -477,6 +468,7 @@ export default function AdminPlansPage() {
   // Active Category & Tab Filter inside Plan Modal
   const [modalActiveCategory, setModalActiveCategory] = useState('ALL');
   const [modalEditorTab, setModalEditorTab] = useState('basic'); // 'basic' | 'what_you_get' | 'features' | 'limits' | 'costs' | 'entitlements'
+  const [editorChannelTab, setEditorChannelTab] = useState('whatsapp'); // 'whatsapp' | 'facebook' | 'instagram'
 
   // ── Feature Type Counts ──
   const channelCount = useMemo(() => {
@@ -777,6 +769,8 @@ export default function AdminPlansPage() {
 
     const meta = plan.metadata || {};
     const legacyWA = plan.channel_details?.whatsapp || {};
+    const legacyFB = plan.channel_details?.facebook || {};
+    const legacyIG = plan.channel_details?.instagram || {};
 
     const extractConfig = (cycleName, defaultPrice) => {
       const savedConfig = meta[`${cycleName}Config`] || meta[`${cycleName}_config`] || plan[`${cycleName}Config`];
@@ -789,7 +783,11 @@ export default function AdminPlansPage() {
           custom_tags_limit: (savedConfig.custom_tags_limit || legacyWA.limits?.custom_tags?.value || 15).toString(),
           custom_events_limit: (savedConfig.custom_events_limit || legacyWA.limits?.events?.value || 5).toString(),
           whatsapp_what_you_get: savedConfig.whatsapp_what_you_get || (Array.isArray(legacyWA.what_you_get) ? legacyWA.what_you_get.join('\n') : "WhatsApp Business API Automation\nShared Team Inbox for WhatsApp\nAutomated Keyword Replies\nContact & Lead Sync"),
+          facebook_what_you_get: savedConfig.facebook_what_you_get || (Array.isArray(legacyFB.what_you_get) ? legacyFB.what_you_get.join('\n') : "Facebook Messenger Automation\nFacebook Page Inbox Sync\nAutomated Page Quick-Replies\nLead Form Acquisition"),
+          instagram_what_you_get: savedConfig.instagram_what_you_get || (Array.isArray(legacyIG.what_you_get) ? legacyIG.what_you_get.join('\n') : "Instagram Direct DM Automation\nStory Mention Auto-Replies\nComment Automation & Quick-Flows\nShared Inbox for Insta DMs"),
           whatsapp_features: savedConfig.whatsapp_features || (Array.isArray(legacyWA.features) ? legacyWA.features.join('\n') : "WhatsApp Auto Replies\nShared Inbox\nKeyword Triggers\nContact Management"),
+          facebook_features: savedConfig.facebook_features || (Array.isArray(legacyFB.features) ? legacyFB.features.join('\n') : "Facebook Auto Replies\nShared Page Inbox\nAd Lead Capture\nContact Management"),
+          instagram_features: savedConfig.instagram_features || (Array.isArray(legacyIG.features) ? legacyIG.features.join('\n') : "Insta Quick-Flows & Price Query Bots\nComment & Story Mention Triggers\nShared Inbox for DMs & Comments\nGiveaway & Promo Automation"),
           whatsapp_marketing_cost: savedConfig.whatsapp_marketing_cost || legacyWA.message_costs?.find(c => c.type === 'Marketing')?.price || '₹0.970',
           whatsapp_auth_cost: savedConfig.whatsapp_auth_cost || legacyWA.message_costs?.find(c => c.type === 'Authentication')?.price || '₹0.129',
           whatsapp_utility_cost: savedConfig.whatsapp_utility_cost || legacyWA.message_costs?.find(c => c.type === 'Utility')?.price || '₹0.160',
@@ -810,7 +808,11 @@ export default function AdminPlansPage() {
         custom_tags_limit: (legacyWA.limits?.custom_tags?.value || 15).toString(),
         custom_events_limit: (legacyWA.limits?.events?.value || 5).toString(),
         whatsapp_what_you_get: Array.isArray(legacyWA.what_you_get) ? legacyWA.what_you_get.join('\n') : "WhatsApp Business API Automation\nShared Team Inbox for WhatsApp\nAutomated Keyword Replies\nContact & Lead Sync",
+        facebook_what_you_get: Array.isArray(legacyFB.what_you_get) ? legacyFB.what_you_get.join('\n') : "Facebook Messenger Automation\nFacebook Page Inbox Sync\nAutomated Page Quick-Replies\nLead Form Acquisition",
+        instagram_what_you_get: Array.isArray(legacyIG.what_you_get) ? legacyIG.what_you_get.join('\n') : "Instagram Direct DM Automation\nStory Mention Auto-Replies\nComment Automation & Quick-Flows\nShared Inbox for Insta DMs",
         whatsapp_features: Array.isArray(legacyWA.features) ? legacyWA.features.join('\n') : "WhatsApp Auto Replies\nShared Inbox\nKeyword Triggers\nContact Management",
+        facebook_features: Array.isArray(legacyFB.features) ? legacyFB.features.join('\n') : "Facebook Auto Replies\nShared Page Inbox\nAd Lead Capture\nContact Management",
+        instagram_features: Array.isArray(legacyIG.features) ? legacyIG.features.join('\n') : "Insta Quick-Flows & Price Query Bots\nComment & Story Mention Triggers\nShared Inbox for DMs & Comments\nGiveaway & Promo Automation",
         whatsapp_marketing_cost: legacyWA.message_costs?.find(c => c.type === 'Marketing')?.price || '₹0.970',
         whatsapp_auth_cost: legacyWA.message_costs?.find(c => c.type === 'Authentication')?.price || '₹0.129',
         whatsapp_utility_cost: legacyWA.message_costs?.find(c => c.type === 'Utility')?.price || '₹0.160',
@@ -1609,7 +1611,7 @@ export default function AdminPlansPage() {
            ════════════════════════════════════════════════════════════════ */}
         {(isCreatePlanModalOpen || isEditPlanModalOpen) && (
           <div className="fixed inset-0 z-[260] flex items-center justify-center p-2.5 sm:p-4 md:p-6 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150">
-            <div className="relative w-full max-w-3xl bg-white rounded-2xl sm:rounded-3xl shadow-2xl border border-slate-200 flex flex-col max-h-[92vh] sm:max-h-[90vh] overflow-hidden animate-in zoom-in-95 duration-150">
+            <div className="relative w-full max-w-3xl sm:max-w-4xl bg-white rounded-2xl sm:rounded-3xl shadow-2xl border border-slate-200 flex flex-col max-h-[92vh] sm:max-h-[90vh] overflow-hidden animate-in zoom-in-95 duration-150">
               
               {/* Modal Header */}
               <div className="px-4 py-3.5 sm:px-6 sm:py-5 border-b border-slate-200 flex items-center justify-between bg-slate-50/80">
@@ -1630,7 +1632,10 @@ export default function AdminPlansPage() {
               </div>
 
               {/* Modal Navigation Tabs */}
-              <div className="px-4 pt-3 border-b border-slate-200 bg-slate-50/50 flex items-center gap-1.5 overflow-x-auto no-scrollbar shrink-0">
+              <div 
+                onWheel={(e) => { if (e.deltaY) e.currentTarget.scrollLeft += e.deltaY; }}
+                className="px-4 pt-3 border-b border-slate-200 bg-slate-50/50 flex items-center gap-1.5 overflow-x-auto custom-scrollbar shrink-0 pb-1.5"
+              >
                 <button
                   type="button"
                   onClick={() => setModalEditorTab('basic')}
@@ -1851,42 +1856,158 @@ export default function AdminPlansPage() {
 
                 {/* TAB 2: WHAT YOU GET */}
                 {modalEditorTab === 'what_you_get' && (
-                  <div className="bg-slate-50/80 p-3.5 sm:p-5 rounded-2xl border border-slate-200/80 space-y-3">
+                  <div className="bg-slate-50/80 p-3.5 sm:p-5 rounded-2xl border border-slate-200/80 space-y-4">
                     <div>
                       <h4 className="text-xs font-black text-slate-900 uppercase tracking-wide mb-1">
                         1. WHAT YOU GET ({planForm.activeCycle.toUpperCase()} CHANNEL CAPABILITIES)
                       </h4>
-                      <p className="text-[11px] text-slate-500 mb-2 font-medium">
-                        Enter each bullet point on a new line for the <strong className="text-emerald-700 uppercase">{planForm.activeCycle}</strong> subscription matrix.
+                      <p className="text-[11px] text-slate-500 mb-3 font-medium">
+                        Select a channel to edit its bullet points for the <strong className="text-emerald-700 uppercase">{planForm.activeCycle}</strong> subscription matrix.
                       </p>
-                      <textarea
-                        rows={7}
-                        placeholder={"WhatsApp Business API Automation\nShared Team Inbox for WhatsApp\nAutomated Keyword Replies\nContact & Lead Sync"}
-                        value={getActiveConfig().whatsapp_what_you_get || ''}
-                        onChange={(e) => updateActiveConfigField('whatsapp_what_you_get', e.target.value)}
-                        className="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-900 outline-none focus:border-emerald-500 leading-relaxed transition-all"
-                      />
+
+                      {/* Channel Sub-Tabs */}
+                      <div className="flex items-center gap-2 mb-3">
+                        <button
+                          type="button"
+                          onClick={() => setEditorChannelTab('whatsapp')}
+                          className={cn(
+                            "px-3 py-1.5 rounded-xl text-xs font-extrabold flex items-center gap-1.5 transition-all border cursor-pointer",
+                            editorChannelTab === 'whatsapp' ? "bg-emerald-600 text-white border-emerald-600 shadow-sm" : "bg-white text-slate-700 border-slate-200 hover:bg-slate-100"
+                          )}
+                        >
+                          <WhatsAppLogo size={14} />
+                          <span>WhatsApp</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setEditorChannelTab('facebook')}
+                          className={cn(
+                            "px-3 py-1.5 rounded-xl text-xs font-extrabold flex items-center gap-1.5 transition-all border cursor-pointer",
+                            editorChannelTab === 'facebook' ? "bg-blue-600 text-white border-blue-600 shadow-sm" : "bg-white text-slate-700 border-slate-200 hover:bg-slate-100"
+                          )}
+                        >
+                          <FacebookLogo size={14} />
+                          <span>Facebook</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setEditorChannelTab('instagram')}
+                          className={cn(
+                            "px-3 py-1.5 rounded-xl text-xs font-extrabold flex items-center gap-1.5 transition-all border cursor-pointer",
+                            editorChannelTab === 'instagram' ? "bg-rose-600 text-white border-rose-600 shadow-sm" : "bg-white text-slate-700 border-slate-200 hover:bg-slate-100"
+                          )}
+                        >
+                          <InstagramLogo size={14} />
+                          <span>Instagram</span>
+                        </button>
+                      </div>
+
+                      {editorChannelTab === 'whatsapp' && (
+                        <textarea
+                          rows={6}
+                          placeholder={"WhatsApp Business API Automation\nShared Team Inbox for WhatsApp\nAutomated Keyword Replies\nContact & Lead Sync"}
+                          value={getActiveConfig().whatsapp_what_you_get || ''}
+                          onChange={(e) => updateActiveConfigField('whatsapp_what_you_get', e.target.value)}
+                          className="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-900 outline-none focus:border-emerald-500 leading-relaxed transition-all"
+                        />
+                      )}
+                      {editorChannelTab === 'facebook' && (
+                        <textarea
+                          rows={6}
+                          placeholder={"Facebook Messenger Automation\nFacebook Page Inbox Sync\nAutomated Page Quick-Replies\nLead Form Acquisition"}
+                          value={getActiveConfig().facebook_what_you_get || ''}
+                          onChange={(e) => updateActiveConfigField('facebook_what_you_get', e.target.value)}
+                          className="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-900 outline-none focus:border-emerald-500 leading-relaxed transition-all"
+                        />
+                      )}
+                      {editorChannelTab === 'instagram' && (
+                        <textarea
+                          rows={6}
+                          placeholder={"Instagram Direct DM Automation\nStory Mention Auto-Replies\nComment Automation & Quick-Flows\nShared Inbox for Insta DMs"}
+                          value={getActiveConfig().instagram_what_you_get || ''}
+                          onChange={(e) => updateActiveConfigField('instagram_what_you_get', e.target.value)}
+                          className="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-900 outline-none focus:border-emerald-500 leading-relaxed transition-all"
+                        />
+                      )}
                     </div>
                   </div>
                 )}
 
                 {/* TAB 3: FEATURES */}
                 {modalEditorTab === 'features' && (
-                  <div className="bg-slate-50/80 p-3.5 sm:p-5 rounded-2xl border border-slate-200/80 space-y-3">
+                  <div className="bg-slate-50/80 p-3.5 sm:p-5 rounded-2xl border border-slate-200/80 space-y-4">
                     <div>
                       <h4 className="text-xs font-black text-slate-900 uppercase tracking-wide mb-1">
                         2. FEATURES & AUTOMATION ({planForm.activeCycle.toUpperCase()})
                       </h4>
-                      <p className="text-[11px] text-slate-500 mb-2 font-medium">
-                        Enter each feature point on a new line for the <strong className="text-emerald-700 uppercase">{planForm.activeCycle}</strong> comparison matrix.
+                      <p className="text-[11px] text-slate-500 mb-3 font-medium">
+                        Select a channel to edit its features & automation points for the <strong className="text-emerald-700 uppercase">{planForm.activeCycle}</strong> matrix.
                       </p>
-                      <textarea
-                        rows={7}
-                        placeholder={"WhatsApp Auto Replies\nShared Inbox\nKeyword Triggers\nContact Management"}
-                        value={getActiveConfig().whatsapp_features || ''}
-                        onChange={(e) => updateActiveConfigField('whatsapp_features', e.target.value)}
-                        className="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-900 outline-none focus:border-emerald-500 leading-relaxed transition-all"
-                      />
+
+                      {/* Channel Sub-Tabs */}
+                      <div className="flex items-center gap-2 mb-3">
+                        <button
+                          type="button"
+                          onClick={() => setEditorChannelTab('whatsapp')}
+                          className={cn(
+                            "px-3 py-1.5 rounded-xl text-xs font-extrabold flex items-center gap-1.5 transition-all border cursor-pointer",
+                            editorChannelTab === 'whatsapp' ? "bg-emerald-600 text-white border-emerald-600 shadow-sm" : "bg-white text-slate-700 border-slate-200 hover:bg-slate-100"
+                          )}
+                        >
+                          <WhatsAppLogo size={14} />
+                          <span>WhatsApp</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setEditorChannelTab('facebook')}
+                          className={cn(
+                            "px-3 py-1.5 rounded-xl text-xs font-extrabold flex items-center gap-1.5 transition-all border cursor-pointer",
+                            editorChannelTab === 'facebook' ? "bg-blue-600 text-white border-blue-600 shadow-sm" : "bg-white text-slate-700 border-slate-200 hover:bg-slate-100"
+                          )}
+                        >
+                          <FacebookLogo size={14} />
+                          <span>Facebook</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setEditorChannelTab('instagram')}
+                          className={cn(
+                            "px-3 py-1.5 rounded-xl text-xs font-extrabold flex items-center gap-1.5 transition-all border cursor-pointer",
+                            editorChannelTab === 'instagram' ? "bg-rose-600 text-white border-rose-600 shadow-sm" : "bg-white text-slate-700 border-slate-200 hover:bg-slate-100"
+                          )}
+                        >
+                          <InstagramLogo size={14} />
+                          <span>Instagram</span>
+                        </button>
+                      </div>
+
+                      {editorChannelTab === 'whatsapp' && (
+                        <textarea
+                          rows={6}
+                          placeholder={"WhatsApp Auto Replies\nShared Inbox\nKeyword Triggers\nContact Management"}
+                          value={getActiveConfig().whatsapp_features || ''}
+                          onChange={(e) => updateActiveConfigField('whatsapp_features', e.target.value)}
+                          className="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-900 outline-none focus:border-emerald-500 leading-relaxed transition-all"
+                        />
+                      )}
+                      {editorChannelTab === 'facebook' && (
+                        <textarea
+                          rows={6}
+                          placeholder={"Facebook Auto Replies\nShared Page Inbox\nAd Lead Capture\nContact Management"}
+                          value={getActiveConfig().facebook_features || ''}
+                          onChange={(e) => updateActiveConfigField('facebook_features', e.target.value)}
+                          className="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-900 outline-none focus:border-emerald-500 leading-relaxed transition-all"
+                        />
+                      )}
+                      {editorChannelTab === 'instagram' && (
+                        <textarea
+                          rows={6}
+                          placeholder={"Insta Quick-Flows & Price Query Bots\nComment & Story Mention Triggers\nShared Inbox for DMs & Comments\nGiveaway & Promo Automation"}
+                          value={getActiveConfig().instagram_features || ''}
+                          onChange={(e) => updateActiveConfigField('instagram_features', e.target.value)}
+                          className="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-900 outline-none focus:border-emerald-500 leading-relaxed transition-all"
+                        />
+                      )}
                     </div>
                   </div>
                 )}
