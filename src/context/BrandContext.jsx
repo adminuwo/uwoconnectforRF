@@ -7,14 +7,14 @@ import { API_BASE_URL } from '@/config/apiConfig';
 const DEFAULT_BRAND = {
   is_whitelabel: false,
   client_id: null,
-  brand_name: 'UwoConnect',
+  brand_name: 'UWO Connect',
   tagline: 'Multi-channel automation platform',
   logo_url: '/download (3).gif',
   favicon_url: '/download (3).gif',
   primary_color: '#059669',
   accent_color: '#10B981',
   support_email: 'support@uwoconnect.com',
-  copyright_text: '© UwoConnect Automation. All rights reserved.',
+  copyright_text: '© UWO Connect Automation. All rights reserved.',
   custom_domain: ''
 };
 
@@ -92,7 +92,8 @@ export function BrandProvider({ children }) {
         }
       }
 
-      const clientIdParam = localUserClient?.id ? `&client_id=${localUserClient.id}` : '';
+      const isDefaultHost = ['localhost', '127.0.0.1', 'uwoconnect.aisa24.com'].includes(host);
+      const clientIdParam = (!isDefaultHost && localUserClient?.id) ? `&client_id=${localUserClient.id}` : '';
       const res = await axios.get(`${API_BASE_URL}/api/whitelabel/config?domain=${host}${clientIdParam}`);
       
       if (res.data) {
