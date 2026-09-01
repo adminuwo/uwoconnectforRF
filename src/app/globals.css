@@ -934,4 +934,50 @@
 .landing-button-glow:hover::after {
   opacity: 1;
 }
+
+/* ── Rich Micro-Animations & Glow Effects ── */
+@keyframes rotateGlow {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes borderPulse {
+  0%, 100% { border-color: rgba(5, 150, 105, 0.2); }
+  50% { border-color: rgba(5, 150, 105, 0.6); }
+}
+
+@keyframes bounceSubtle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+.animate-spin-slow {
+  animation: rotateGlow 20s linear infinite;
+}
+
+.animate-border-pulse {
+  animation: borderPulse 3s ease-in-out infinite;
+}
+
+.animate-bounce-subtle {
+  animation: bounceSubtle 2.5s ease-in-out infinite;
+}
+
+.glow-shadow-emerald {
+  box-shadow: 0 10px 30px -5px rgba(5, 150, 105, 0.25);
+}
+
+.glow-shadow-emerald:hover {
+  box-shadow: 0 15px 40px 0px rgba(5, 150, 105, 0.4);
+}
+
+.text-shimmer-emerald {
+  background: linear-gradient(90deg, #059669 0%, #10B981 30%, #34D399 50%, #10B981 70%, #059669 100%);
+  background-size: 200% auto;
+  color: transparent;
+  -webkit-background-clip: text;
+  background-clip: text;
+  animation: badgeShimmer 4s linear infinite;
+}
+
 

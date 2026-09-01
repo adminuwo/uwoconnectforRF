@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import CreateCampaignModal from '@/components/campaigns/CreateCampaignModal';
 import CampaignDetailModal from '@/components/campaigns/CampaignDetailModal';
+import AddMoneyModal from '@/components/billing/AddMoneyModal';
 import { 
   Megaphone, RefreshCw, Loader2, Play, Users, CheckCircle2, XCircle, 
   CheckCheck, Eye, ChevronRight, Trash2
@@ -16,14 +17,39 @@ export default function CampaignsPage() {
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isAddMoneyOpen, setIsAddMoneyOpen] = useState(false);
   const [selectedCampaign, setSelectedCampaign] = useState(null);
   const [platformFilter, setPlatformFilter] = useState('ALL');
 
+  const [entitlement, setEntitlement] = useState({
+    included_quantity: 1,
+    used_quantity: 0,
+    remaining_quantity: 1,
+    broadcast_rate_inr: 0.94,
+    wallet_balance_inr: 0
+  });
+
   useEffect(() => {
     fetchCampaigns();
-    const interval = setInterval(fetchCampaigns, 5000);
+    fetchEntitlement();
+    const interval = setInterval(() => {
+      fetchCampaigns();
+      fetchEntitlement();
+    }, 5000);
     return () => clearInterval(interval);
   }, []);
+
+  const fetchEntitlement = async () => {
+    try {
+      const token = localStorage.getItem('uwo_token') || localStorage.getItem('token');
+      const res = await axios.get(`${API_BASE_URL}/api/broadcasts/entitlement/`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.data) setEntitlement(res.data);
+    } catch (err) {
+      console.error("Failed to fetch entitlement summary", err);
+    }
+  };
 
   const fetchCampaigns = async () => {
     try {
@@ -127,16 +153,35 @@ export default function CampaignsPage() {
           </div>
         </div>
 
-        {/* Clean Stat Pills */}
-        <div className="grid grid-cols-3 gap-2 sm:gap-3">
+        {/* Clean 4-Stat Pills Grid */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3">
+          <button
+            type="button"
+            onClick={() => setIsAddMoneyOpen(true)}
+            className="bg-gradient-to-br from-slate-900 to-indigo-950 p-2.5 sm:p-4 rounded-2xl border border-slate-800 shadow-xs text-center text-white cursor-pointer hover:scale-[1.02] transition-all group relative overflow-hidden"
+            title="Click to Recharge / Add Money to Wallet"
+          >
+            <span className="text-[9px] sm:text-[10px] text-indigo-300 font-black uppercase block mb-0.5 truncate flex items-center justify-center gap-1">
+              <span>Broadcasts Remaining</span>
+              <span className="text-[8px] bg-emerald-500/20 text-emerald-300 px-1.5 py-0.5 rounded font-black">+ Topup</span>
+            </span>
+            <span className={`text-base sm:text-xl font-black block ${entitlement.remaining_quantity > 0 ? 'text-emerald-400' : 'text-amber-400'}`}>
+              {entitlement.remaining_quantity > 0 
+                ? `${entitlement.remaining_quantity} / ${entitlement.included_quantity} Plan Included`
+                : `0 Included (₹${entitlement.broadcast_rate_inr.toFixed(2)}/wallet)`}
+            </span>
+          </button>
+
           <div className="bg-white p-2.5 sm:p-4 rounded-2xl border border-slate-200/80 shadow-xs text-center">
             <span className="text-[9px] sm:text-[10px] text-slate-400 font-bold uppercase block mb-0.5 truncate">Total Campaigns</span>
             <span className="text-base sm:text-xl font-black text-slate-900">{campaigns.length}</span>
           </div>
+          
           <div className="bg-white p-2.5 sm:p-4 rounded-2xl border border-slate-200/80 shadow-xs text-center">
             <span className="text-[9px] sm:text-[10px] text-slate-400 font-bold uppercase block mb-0.5 truncate">Messages Sent</span>
             <span className="text-base sm:text-xl font-black text-emerald-600">{totalSent.toLocaleString()}</span>
           </div>
+          
           <div className="bg-white p-2.5 sm:p-4 rounded-2xl border border-slate-200/80 shadow-xs text-center">
             <span className="text-[9px] sm:text-[10px] text-slate-400 font-bold uppercase block mb-0.5 truncate">Failed Deliveries</span>
             <span className="text-base sm:text-xl font-black text-rose-600">{totalFailed.toLocaleString()}</span>
@@ -256,6 +301,16 @@ export default function CampaignsPage() {
         onClose={() => setSelectedCampaign(null)}
         onRefresh={fetchCampaigns}
       />
+      {/* Add Money Razorpay Modal */}
+      {isAddMoneyOpen && (
+        <AddMoneyModal
+          isOpen={isAddMoneyOpen}
+          onClose={() => setIsAddMoneyOpen(false)}
+          onSuccess={() => {
+            fetchEntitlement();
+          }}
+        />
+      )}
     </DashboardLayout>
   );
 }

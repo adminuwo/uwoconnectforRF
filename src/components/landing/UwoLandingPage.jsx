@@ -3,16 +3,17 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { 
-  Zap, MessageSquare, Share2, Layers, CheckCircle2, 
-  LayoutDashboard, FileCheck, Receipt, FileText, ShoppingBag, 
-  CreditCard, Users, Bot, Video, Sparkles, ArrowRight, ShieldCheck, 
-  ChevronLeft, ChevronRight, ChevronDown, ChevronUp, RefreshCw, Check, Star, Lock, Globe, HelpCircle
+import {
+  Zap, MessageSquare, Share2, Layers, CheckCircle2,
+  LayoutDashboard, FileCheck, Receipt, FileText, ShoppingBag,
+  CreditCard, Users, Bot, Video, Sparkles, ArrowRight, ShieldCheck,
+  ChevronLeft, ChevronRight, ChevronDown, ChevronUp, RefreshCw, Check, Star, Lock, Globe, HelpCircle, Plus, Minus, Sun, Moon
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import AutomationNetwork from './AutomationNetwork';
 import HeroWorkflowAnimation from './HeroWorkflowAnimation';
 import UWOLoginModal from '@/components/UWOLoginModal';
+import TermsModal from '@/components/TermsModal';
 import PricingComparisonTable from '@/components/pricing/PricingComparisonTable';
 import { useBrand } from '@/context/BrandContext';
 
@@ -20,7 +21,7 @@ import { useBrand } from '@/context/BrandContext';
 const WhatsAppLogo = ({ size = 22 }) => (
   <svg width={size} height={size} viewBox="0 0 48 48" fill="none" className="shrink-0">
     <circle cx="24" cy="24" r="24" fill="#25D366" />
-    <path fillRule="evenodd" clipRule="evenodd" d="M35.2 12.8C32.3 9.9 28.3 8.3 24.1 8.3C15.4 8.3 8.4 15.3 8.4 24C8.4 26.8 9.1 29.5 10.5 31.9L8.4 39.6L16.3 37.5C18.6 38.8 21.3 39.5 24.1 39.5C32.8 39.5 39.8 32.5 39.8 23.8C39.8 19.6 38.1 15.6 35.2 12.8ZM24.1 36.8C21.7 36.8 19.4 36.1 17.4 35L16.9 34.7L12.2 35.9L13.5 31.3L13.2 30.8C12 28.7 11.3 26.4 11.3 24C11.3 17 17 11.3 24.1 11.3C27.5 11.3 30.7 12.6 33.1 15C35.5 17.4 36.8 20.6 36.8 24C36.8 31 31.1 36.8 24.1 36.8ZM31 27.2C30.6 27 28.7 26.1 28.4 26C28 25.8 27.8 25.7 27.5 26.1C27.2 26.5 26.5 27.4 26.3 27.6C26.1 27.9 25.8 27.9 25.4 27.7C25 27.5 23.7 27.1 22.2 25.7C21 24.7 20.2 23.4 20 23C19.8 22.6 20 22.4 20.8 21.5C21 21.3 21.1 21.1 21.2 20.9C21.3 20.7 21.3 20.5 21.2 20.3C21.1 20.1 20.3 18.2 20 17.4C19.7 16.6 19.4 16.7 19.1 16.7H18.4C18.1 16.7 17.7 16.8 17.3 17.2C16.9 17.6 16 18.5 16 20.3C16 22.1 17.3 23.9 17.5 24.1C17.7 24.3 20.1 28 23.7 29.6C24.6 30 25.2 30.2 25.8 30.4C26.7 30.7 27.5 30.6 28.2 30.5C28.9 30.4 30.5 29.5 30.8 28.6C31.1 27.8 31.1 27.1 31 27.2Z" fill="white"/>
+    <path fillRule="evenodd" clipRule="evenodd" d="M35.2 12.8C32.3 9.9 28.3 8.3 24.1 8.3C15.4 8.3 8.4 15.3 8.4 24C8.4 26.8 9.1 29.5 10.5 31.9L8.4 39.6L16.3 37.5C18.6 38.8 21.3 39.5 24.1 39.5C32.8 39.5 39.8 32.5 39.8 23.8C39.8 19.6 38.1 15.6 35.2 12.8ZM24.1 36.8C21.7 36.8 19.4 36.1 17.4 35L16.9 34.7L12.2 35.9L13.5 31.3L13.2 30.8C12 28.7 11.3 26.4 11.3 24C11.3 17 17 11.3 24.1 11.3C27.5 11.3 30.7 12.6 33.1 15C35.5 17.4 36.8 20.6 36.8 24C36.8 31 31.1 36.8 24.1 36.8ZM31 27.2C30.6 27 28.7 26.1 28.4 26C28 25.8 27.8 25.7 27.5 26.1C27.2 26.5 26.5 27.4 26.3 27.6C26.1 27.9 25.8 27.9 25.4 27.7C25 27.5 23.7 27.1 22.2 25.7C21 24.7 20.2 23.4 20 23C19.8 22.6 20 22.4 20.8 21.5C21 21.3 21.1 21.1 21.2 20.9C21.3 20.7 21.3 20.5 21.2 20.3C21.1 20.1 20.3 18.2 20 17.4C19.7 16.6 19.4 16.7 19.1 16.7H18.4C18.1 16.7 17.7 16.8 17.3 17.2C16.9 17.6 16 18.5 16 20.3C16 22.1 17.3 23.9 17.5 24.1C17.7 24.3 20.1 28 23.7 29.6C24.6 30 25.2 30.2 25.8 30.4C26.7 30.7 27.5 30.6 28.2 30.5C28.9 30.4 30.5 29.5 30.8 28.6C31.1 27.8 31.1 27.1 31 27.2Z" fill="white" />
   </svg>
 );
 
@@ -35,34 +36,34 @@ const InstagramLogo = ({ size = 22 }) => (
         <stop offset="100%" stopColor="#7638FA" />
       </linearGradient>
     </defs>
-    <rect width="48" height="48" rx="12" fill="url(#igGradLanding)"/>
-    <rect x="11" y="11" width="26" height="26" rx="7" stroke="white" strokeWidth="3" fill="none"/>
-    <circle cx="24" cy="24" r="6" stroke="white" strokeWidth="3" fill="none"/>
-    <circle cx="31.5" cy="16.5" r="1.75" fill="white"/>
+    <rect width="48" height="48" rx="12" fill="url(#igGradLanding)" />
+    <rect x="11" y="11" width="26" height="26" rx="7" stroke="white" strokeWidth="3" fill="none" />
+    <circle cx="24" cy="24" r="6" stroke="white" strokeWidth="3" fill="none" />
+    <circle cx="31.5" cy="16.5" r="1.75" fill="white" />
   </svg>
 );
 
 const FacebookLogo = ({ size = 22 }) => (
   <svg width={size} height={size} viewBox="0 0 48 48" fill="none" className="shrink-0">
-    <circle cx="24" cy="24" r="24" fill="#1877F2"/>
-    <path d="M29.5 25.1L30.3 19.9H25.3V16.5C25.3 15.1 26 13.7 28.2 13.7H30.5V9.3C30.5 9.3 28.4 9 26.4 9C22.3 9 19.6 11.5 19.6 16V19.9H15V25.1H19.6V37.7C20.5 37.9 21.5 38 22.5 38C23.5 38 24.4 37.9 25.3 37.7V25.1H29.5Z" fill="white"/>
+    <circle cx="24" cy="24" r="24" fill="#1877F2" />
+    <path d="M29.5 25.1L30.3 19.9H25.3V16.5C25.3 15.1 26 13.7 28.2 13.7H30.5V9.3C30.5 9.3 28.4 9 26.4 9C22.3 9 19.6 11.5 19.6 16V19.9H15V25.1H19.6V37.7C20.5 37.9 21.5 38 22.5 38C23.5 38 24.4 37.9 25.3 37.7V25.1H29.5Z" fill="white" />
   </svg>
 );
 
 const YouTubeLogo = ({ size = 22 }) => (
   <svg width={size} height={size} viewBox="0 0 48 48" fill="none" className="shrink-0">
     <rect width="48" height="48" rx="12" fill="#FF0000" />
-    <path d="M33.2 24.1L19.5 16.2C19.2 16 18.8 16.2 18.8 16.6V32.4C18.8 32.8 19.2 33 19.5 32.8L33.2 24.9C33.5 24.7 33.5 24.3 33.2 24.1Z" fill="white"/>
+    <path d="M33.2 24.1L19.5 16.2C19.2 16 18.8 16.2 18.8 16.6V32.4C18.8 32.8 19.2 33 19.5 32.8L33.2 24.9C33.5 24.7 33.5 24.3 33.2 24.1Z" fill="white" />
   </svg>
 );
 
 const GmailLogo = ({ size = 22 }) => (
   <svg width={size} height={size} viewBox="0 0 48 48" fill="none" className="shrink-0">
-    <path d="M10 38V18.8L3 13.5V35C3 36.6 4.3 38 6 38H10Z" fill="#4285F4"/>
-    <path d="M38 38V18.8L45 13.5V35C45 36.6 43.7 38 42 38H38Z" fill="#34A853"/>
-    <path d="M38 18.8V10L24 20.5L10 10V18.8L24 29.3L38 18.8Z" fill="#EA4335"/>
-    <path d="M10 10L3 13.5L10 18.8V10Z" fill="#C5221F"/>
-    <path d="M38 10L45 13.5L38 18.8V10Z" fill="#FBBC04"/>
+    <path d="M10 38V18.8L3 13.5V35C3 36.6 4.3 38 6 38H10Z" fill="#4285F4" />
+    <path d="M38 38V18.8L45 13.5V35C45 36.6 43.7 38 42 38H38Z" fill="#34A853" />
+    <path d="M38 18.8V10L24 20.5L10 10V18.8L24 29.3L38 18.8Z" fill="#EA4335" />
+    <path d="M10 10L3 13.5L10 18.8V10Z" fill="#C5221F" />
+    <path d="M38 10L45 13.5L38 18.8V10Z" fill="#FBBC04" />
   </svg>
 );
 
@@ -78,21 +79,72 @@ const OutlookLogo = ({ size = 22 }) => (
 const GoogleSheetsLogo = ({ size = 22 }) => (
   <svg width={size} height={size} viewBox="0 0 48 48" fill="none" className="shrink-0">
     <rect x="8" y="4" width="32" height="40" rx="4" fill="#0F9D58" />
-    <path d="M30 4L40 14H32C30.9 14 30 13.1 30 12V4Z" fill="#87CEAC"/>
-    <rect x="15" y="19" width="18" height="16" rx="1" fill="white"/>
-    <line x1="15" y1="24.5" x2="33" y2="24.5" stroke="#0F9D58" strokeWidth="1.5"/>
-    <line x1="15" y1="30" x2="33" y2="30" stroke="#0F9D58" strokeWidth="1.5"/>
-    <line x1="24" y1="19" x2="24" y2="35" stroke="#0F9D58" strokeWidth="1.5"/>
+    <path d="M30 4L40 14H32C30.9 14 30 13.1 30 12V4Z" fill="#87CEAC" />
+    <rect x="15" y="19" width="18" height="16" rx="1" fill="white" />
+    <line x1="15" y1="24.5" x2="33" y2="24.5" stroke="#0F9D58" strokeWidth="1.5" />
+    <line x1="15" y1="30" x2="33" y2="30" stroke="#0F9D58" strokeWidth="1.5" />
+    <line x1="24" y1="19" x2="24" y2="35" stroke="#0F9D58" strokeWidth="1.5" />
   </svg>
 );
 
 const GoogleDocsLogo = ({ size = 22 }) => (
   <svg width={size} height={size} viewBox="0 0 48 48" fill="none" className="shrink-0">
     <rect x="8" y="4" width="32" height="40" rx="4" fill="#4285F4" />
-    <path d="M30 4L40 14H32C30.9 14 30 13.1 30 12V4Z" fill="#A1C2FA"/>
+    <path d="M30 4L40 14H32C30.9 14 30 13.1 30 12V4Z" fill="#A1C2FA" />
     <rect x="15" y="20" width="18" height="2.5" rx="1.25" fill="white" />
     <rect x="15" y="26" width="18" height="2.5" rx="1.25" fill="white" />
     <rect x="15" y="32" width="11" height="2.5" rx="1.25" fill="white" />
+  </svg>
+);
+
+const XLogo = ({ size = 20 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className="shrink-0">
+    <rect width="24" height="24" rx="6" fill="#000000" />
+    <path d="M17.75 4H19.5L13.25 11.25L20.5 20H15.5L11.5 14.75L7 20H5.25L12 12.25L5 4H10.25L13.75 8.75L17.75 4ZM17 18.5H18L8.25 5.5H7.25L17 18.5Z" fill="white" />
+  </svg>
+);
+
+const LinkedInLogo = ({ size = 20 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className="shrink-0">
+    <rect width="24" height="24" rx="6" fill="#0A66C2" />
+    <path d="M6.5 9H9.5V19H6.5V9ZM8 7.75C7.03 7.75 6.25 6.97 6.25 6C6.25 5.03 7.03 4.25 8 4.25C8.97 4.25 9.75 5.03 9.75 6C9.75 6.97 8.97 7.75 8 7.75ZM11 9H13.8V10.4H13.85C14.2 9.7 15.1 9 16.4 9C19.1 9 19.6 10.8 19.6 13.1V19H16.6V13.8C16.6 12.5 16.6 10.9 14.8 10.9C13 10.9 12.7 12.3 12.7 13.7V19H9.7V9H11Z" fill="white" />
+  </svg>
+);
+
+const PinterestLogo = ({ size = 20 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className="shrink-0">
+    <circle cx="12" cy="12" r="12" fill="#E60023" />
+    <path d="M12.2 5C8.3 5 6 7.8 6 10.5C6 11.9 6.6 13.1 7.7 13.6C7.9 13.7 8.1 13.6 8.1 13.4C8.2 13.1 8.3 12.6 8.4 12.4C8.4 12.2 8.4 12.1 8.2 11.9C7.8 11.4 7.5 10.6 7.5 9.8C7.5 7.6 9.1 5.8 11.8 5.8C14.1 5.8 15.6 7.1 15.6 9.3C15.6 11.8 14.3 14 12.3 14C11.3 14 10.5 13.1 10.7 12C11 10.7 11.6 9.4 11.6 8.5C11.6 7.7 11.2 7.1 10.3 7.1C9.3 7.1 8.5 8.1 8.5 9.6C8.5 10.5 8.8 11.1 8.8 11.1L7.6 16.3C7.2 17.9 7.4 19.8 7.4 19.9C7.4 20 7.5 20.1 7.6 20C7.7 19.9 9.1 18 9.6 16.1C9.8 15.4 10.6 12.3 10.6 12.3C10.9 12.9 11.8 13.4 12.8 13.4C15.7 13.4 17.8 10.7 17.8 7.3C17.7 4.8 15.2 5 12.2 5Z" fill="white" />
+  </svg>
+);
+
+const ThreadsLogo = ({ size = 20 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className="shrink-0">
+    <rect width="24" height="24" rx="6" fill="#000000" />
+    <path d="M15.4 11.7C15.2 11.7 15.1 11.7 15 11.7C14.4 10 13.3 9.1 11.7 9.1C9.7 9.1 8.5 10.5 8.5 12.4C8.5 14.4 9.8 15.8 11.9 15.8C13.4 15.8 14.6 15.1 15.1 14C15.2 14.4 15.3 14.8 15.3 15.2C15.3 17.2 14.1 18.2 12 18.2C10.5 18.2 9.2 17.5 8.8 16.4C8.7 16.1 8.4 16 8.1 16.1L6.8 16.6C6.6 16.7 6.4 17 6.6 17.3C7.2 19.1 9.2 20.2 12 20.2C15.3 20.2 17.3 18.4 17.3 14.9C17.3 10 14.7 7.2 10.8 7.2C6.9 7.2 4.2 10 4.2 14.5C4.2 19 7 22 12.1 22C14.7 22 16.9 21.1 18.3 19.5C18.5 19.3 18.4 19 18.2 18.8L17.1 17.8C16.9 17.6 16.6 17.7 16.4 17.9C15.3 19.2 13.7 19.9 11.9 19.9C8.2 19.9 6.2 17.6 6.2 14.4C6.2 11.2 8.3 9.1 11 9.1C13.6 9.1 15.3 10.9 15.4 11.7Z" fill="white" />
+  </svg>
+);
+
+const RedditLogo = ({ size = 20 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className="shrink-0">
+    <circle cx="12" cy="12" r="12" fill="#FF4500" />
+    <path d="M19 12C19 11.2 18.3 10.5 17.5 10.5C17.1 10.5 16.7 10.7 16.5 11C15.4 10.2 13.9 9.7 12.2 9.6L13 6L15.5 6.6C15.6 7.1 16.1 7.5 16.6 7.5C17.2 7.5 17.6 7 17.6 6.5C17.6 6 17.1 5.5 16.6 5.5C16.1 5.5 15.7 5.8 15.6 6.2L12.8 5.6C12.7 5.6 12.5 5.7 12.5 5.8L11.6 9.6C9.9 9.7 8.4 10.2 7.3 11C7 10.7 6.7 10.5 6.3 10.5C5.4 10.5 4.8 11.2 4.8 12C4.8 12.6 5.1 13.1 5.6 13.3C5.5 13.5 5.5 13.8 5.5 14C5.5 16.5 8.4 18.5 12 18.5C15.6 18.5 18.5 16.5 18.5 14C18.5 13.8 18.5 13.5 18.4 13.3C18.9 13.1 19.2 12.6 19 12ZM9 13.5C9.6 13.5 10 14 10 14.5C10 15 9.6 15.5 9 15.5C8.4 15.5 8 15 8 14.5C8 14 8.4 13.5 9 13.5ZM14.3 16.8C13.6 17.3 12.8 17.5 12 17.5C11.2 17.5 10.4 17.3 9.7 16.8C9.5 16.7 9.5 16.4 9.7 16.3C9.8 16.2 10.1 16.2 10.2 16.4C10.7 16.7 11.3 16.9 12 16.9C12.7 16.9 13.3 16.7 13.8 16.4C13.9 16.3 14.2 16.3 14.3 16.4C14.5 16.5 14.5 16.7 14.3 16.8ZM15 15.5C14.4 15.5 14 15 14 14.5C14 14 14.4 13.5 15 13.5C15.6 13.5 16 14 16 14.5C16 15 15.6 15.5 15 15.5Z" fill="white" />
+  </svg>
+);
+
+const QuoraLogo = ({ size = 20 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className="shrink-0">
+    <rect width="24" height="24" rx="6" fill="#B92B27" />
+    <path d="M12 4.5C8 4.5 4.8 7.5 4.8 11.5C4.8 15.5 8 18.5 12 18.5C13.5 18.5 14.8 18.1 15.9 17.3L17.2 19.2C17.4 19.5 17.8 19.5 18.1 19.3C18.3 19.1 18.4 18.7 18.2 18.4L17.1 16.7C18.4 15.3 19.2 13.5 19.2 11.5C19.2 7.5 16 4.5 12 4.5ZM12 16.2C9.2 16.2 7 14.1 7 11.5C7 8.9 9.2 6.8 12 6.8C14.8 6.8 17 8.9 17 11.5C17 14.1 14.8 16.2 12 16.2Z" fill="white" />
+  </svg>
+);
+
+const MediumLogo = ({ size = 20 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className="shrink-0">
+    <rect width="24" height="24" rx="6" fill="#000000" />
+    <path d="M7 16.5C9.48528 16.5 11.5 14.4853 11.5 12C11.5 9.51472 9.48528 7.5 7 7.5C4.51472 7.5 2.5 9.51472 2.5 12C2.5 14.4853 4.51472 16.5 7 16.5Z" fill="white" />
+    <path d="M15.5 16.35C16.8807 16.35 18 14.4024 18 12C18 9.59763 16.8807 7.65 15.5 7.65C14.1193 7.65 13 9.59763 13 12C13 14.4024 14.1193 16.35 15.5 16.35Z" fill="white" />
+    <path d="M20.5 16C21.0523 16 21.5 14.2091 21.5 12C21.5 9.79086 21.0523 8 20.5 8C19.9477 8 19.5 9.79086 19.5 12C19.5 14.2091 19.9477 16 20.5 16Z" fill="white" />
   </svg>
 );
 
@@ -157,10 +209,31 @@ export default function UwoLandingPage() {
   const router = useRouter();
   const { brand, isWhiteLabel } = useBrand();
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [isTermsModalOpen, setIsTermsModalOpen] = useState(false);
   const [activeWorkflowTab, setActiveWorkflowTab] = useState(0);
   const [activeModuleIndex, setActiveModuleIndex] = useState(0);
   const [showWhiteLabelDetails, setShowWhiteLabelDetails] = useState(false);
+  const [openFaqIndex, setOpenFaqIndex] = useState(null);
+  const [showAllFaqs, setShowAllFaqs] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(false);
   const section11Ref = useRef(null);
+
+  useEffect(() => {
+    try {
+      const savedTheme = localStorage.getItem('uwo_landing_theme');
+      if (savedTheme === 'dark') {
+        setIsDarkMode(true);
+      }
+    } catch (e) {}
+  }, []);
+
+  const toggleTheme = () => {
+    const newTheme = !isDarkMode;
+    setIsDarkMode(newTheme);
+    try {
+      localStorage.setItem('uwo_landing_theme', newTheme ? 'dark' : 'light');
+    } catch (e) {}
+  };
 
   // Real-time Scroll Observer to update active module index as user scrolls section 11
   useEffect(() => {
@@ -168,7 +241,7 @@ export default function UwoLandingPage() {
       if (!section11Ref.current) return;
       const rect = section11Ref.current.getBoundingClientRect();
       const windowHeight = window.innerHeight;
-      
+
       // Start tracking as soon as Section 11 top reaches 25% from top of viewport
       const startOffset = windowHeight * 0.25;
       const scrollableDistance = rect.height - windowHeight;
@@ -176,7 +249,7 @@ export default function UwoLandingPage() {
 
       const scrolled = startOffset - rect.top;
       const progress = Math.max(0, Math.min(0.999, scrolled / scrollableDistance));
-      
+
       const newIndex = Math.floor(progress * 9);
       setActiveModuleIndex(newIndex);
     };
@@ -204,68 +277,89 @@ export default function UwoLandingPage() {
   const logoUrl = brand?.logo_url || '/download (3).gif';
 
   return (
-    <div className="min-h-screen bg-white text-slate-900 font-sans selection:bg-emerald-500/20 selection:text-emerald-800">
-      
+    <div className={cn(
+      "min-h-screen transition-colors duration-500 font-serif selection:bg-emerald-500/20 selection:text-emerald-800",
+      isDarkMode ? "bg-slate-950 text-slate-100" : "bg-white text-slate-900"
+    )} style={{ fontFamily: "'Times New Roman', Times, serif" }}>
+
       {/* ════════════════════════════════════════════════════════════════ */}
-      {/* 1. STICKY GLASSY NAVBAR */}
+      {/* 1. STICKY GLASSY NAVBAR WITH THEME SWITCHER */}
       {/* ════════════════════════════════════════════════════════════════ */}
-      {/* 1. STICKY GLASSY NAVBAR */}
-      {/* ════════════════════════════════════════════════════════════════ */}
-      <header className="sticky top-0 z-50 bg-white/85 backdrop-blur-xl border-b border-slate-200/80 transition-all duration-300 shadow-xs">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between">
-          
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-3 group cursor-pointer">
-            {isWhiteLabel && logoUrl && logoUrl !== '/download (3).gif' ? (
-              <div className="w-10 h-10 rounded-2xl bg-slate-50 border border-slate-200 p-1 flex items-center justify-center shadow-sm overflow-hidden group-hover:scale-105 transition-transform duration-300">
-                <img src={logoUrl} alt={brandName} className="w-full h-full object-contain rounded-xl" />
-              </div>
-            ) : (
-              <img
-                src="/download (3).gif"
-                alt="UWO Connect Logo"
-                className="w-10 h-10 rounded-2xl object-contain shadow-md shadow-emerald-600/30 group-hover:scale-105 transition-transform duration-300 shrink-0"
-              />
-            )}
-            <div className="flex flex-col text-left">
-              <span className="text-xl font-black tracking-tight text-slate-900 leading-none group-hover:text-[#059669] transition-colors mb-1">
-                {brandName}
-              </span>
-              <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#059669] block leading-none">
-                {brandTagline}
-              </span>
-            </div>
+      <header className={cn(
+        "sticky top-0 z-50 backdrop-blur-xl border-b transition-all duration-300 shadow-xs",
+        isDarkMode ? "bg-slate-950/90 border-slate-800 text-slate-100" : "bg-white/85 border-slate-200/80 text-slate-900"
+      )}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
+
+          {/* Logo (No Background Wrapper, Brand Name Only) */}
+          <Link href="/" className="flex items-center gap-2 group cursor-pointer">
+            <img
+              src={isWhiteLabel && logoUrl ? logoUrl : "/download (3).gif"}
+              alt={brandName}
+              className="w-8 h-8 object-contain group-hover:scale-105 transition-transform duration-300 shrink-0"
+            />
+            <span className={cn(
+              "text-lg font-black tracking-tight leading-none group-hover:text-[#059669] transition-colors",
+              isDarkMode ? "text-white" : "text-slate-900"
+            )}>
+              {brandName}
+            </span>
           </Link>
 
           {/* Navigation Links */}
-          <nav className="hidden md:flex items-center gap-7 text-xs font-extrabold text-slate-600">
-            <a href="#platform" className="hover:text-emerald-600 transition-colors relative py-1 after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-emerald-600 hover:after:w-full after:transition-all after:duration-300">Platform</a>
-            <a href="#channels" className="hover:text-emerald-600 transition-colors relative py-1 after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-emerald-600 hover:after:w-full after:transition-all after:duration-300">Channels</a>
-            <a href="#connectors" className="hover:text-emerald-600 transition-colors relative py-1 after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-emerald-600 hover:after:w-full after:transition-all after:duration-300">Connectors</a>
-            <a href="#features" className="hover:text-emerald-600 transition-colors relative py-1 after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-emerald-600 hover:after:w-full after:transition-all after:duration-300">Features</a>
-            <a href="#how-it-works" className="hover:text-emerald-600 transition-colors relative py-1 after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-emerald-600 hover:after:w-full after:transition-all after:duration-300">How It Works</a>
-            <a href="#pricing" className="hover:text-emerald-600 transition-colors relative py-1 after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-emerald-600 hover:after:w-full after:transition-all after:duration-300">Pricing</a>
-            <a href="#white-label" className="hover:text-emerald-600 transition-colors relative py-1 flex items-center gap-1.5 after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-emerald-600 hover:after:w-full after:transition-all after:duration-300">
+          <nav className={cn(
+            "hidden md:flex items-center gap-6 text-xs font-extrabold",
+            isDarkMode ? "text-slate-300" : "text-slate-600"
+          )}>
+            <a href="#platform" className="hover:text-emerald-500 transition-colors relative py-1 after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-emerald-500 hover:after:w-full after:transition-all after:duration-300">Platform</a>
+            <a href="#channels" className="hover:text-emerald-500 transition-colors relative py-1 after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-emerald-500 hover:after:w-full after:transition-all after:duration-300">Channels</a>
+            <a href="#connectors" className="hover:text-emerald-500 transition-colors relative py-1 after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-emerald-500 hover:after:w-full after:transition-all after:duration-300">Connectors</a>
+            <a href="#features" className="hover:text-emerald-500 transition-colors relative py-1 after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-emerald-500 hover:after:w-full after:transition-all after:duration-300">Features</a>
+            <a href="#how-it-works" className="hover:text-emerald-500 transition-colors relative py-1 after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-emerald-500 hover:after:w-full after:transition-all after:duration-300">How It Works</a>
+            <a href="#pricing" className="hover:text-emerald-500 transition-colors relative py-1 after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-emerald-500 hover:after:w-full after:transition-all after:duration-300">Pricing</a>
+            <a href="#white-label" className="hover:text-emerald-500 transition-colors relative py-1 flex items-center gap-1.5 after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-emerald-500 hover:after:w-full after:transition-all after:duration-300">
               <span>White-Label</span>
-              <span className="px-1.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-700 text-[9px] font-black uppercase">Agency</span>
+              <span className="px-1.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-500 text-[9px] font-black uppercase">Agency</span>
             </a>
           </nav>
 
-          {/* Auth CTAs */}
-          <div className="flex items-center gap-3">
+          {/* Auth CTAs & Light/Dark Theme Switcher */}
+          <div className="flex items-center gap-2.5">
+            {/* Theme Toggle Button (Icon Only) */}
+            <button
+              type="button"
+              onClick={toggleTheme}
+              className={cn(
+                "p-2 rounded-lg border transition-all duration-300 flex items-center justify-center cursor-pointer active:scale-95 shadow-2xs",
+                isDarkMode
+                  ? "bg-slate-900 border-slate-700 text-amber-400 hover:bg-slate-800 hover:border-amber-400/50"
+                  : "bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100 hover:border-emerald-300"
+              )}
+              title={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
+            >
+              {isDarkMode ? (
+                <Sun size={16} className="text-amber-400 animate-spin-slow" />
+              ) : (
+                <Moon size={16} className="text-emerald-700" />
+              )}
+            </button>
+
             <button
               onClick={() => router.push('/auth/login')}
-              className="px-4 py-2 text-xs font-extrabold text-slate-700 hover:text-emerald-600 transition-colors cursor-pointer active:scale-95"
+              className={cn(
+                "px-3 py-1.5 text-xs font-extrabold transition-colors cursor-pointer active:scale-95",
+                isDarkMode ? "text-slate-300 hover:text-emerald-400" : "text-slate-700 hover:text-emerald-600"
+              )}
             >
               Log In
             </button>
             <button
               onClick={() => router.push('/auth/login')}
-              className="landing-button-glow px-5 py-2.5 rounded-xl bg-[#059669] hover:bg-[#047857] text-white text-xs font-extrabold shadow-md shadow-emerald-700/20 hover:shadow-lg hover:shadow-emerald-700/30 hover:scale-[1.03] active:scale-95 transition-all duration-300 flex items-center gap-1.5 cursor-pointer"
+              className="landing-button-glow px-4 py-1.5 rounded-lg bg-[#059669] hover:bg-[#047857] text-white text-xs font-extrabold shadow-md shadow-emerald-700/20 hover:shadow-lg hover:shadow-emerald-700/30 hover:scale-[1.03] active:scale-95 transition-all duration-300 flex items-center gap-1.5 cursor-pointer"
               style={isWhiteLabel && primaryColor ? { backgroundColor: primaryColor } : undefined}
             >
               <span>Get Started</span>
-              <ArrowRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
+              <ArrowRight size={13} className="group-hover:translate-x-0.5 transition-transform" />
             </button>
           </div>
         </div>
@@ -274,11 +368,14 @@ export default function UwoLandingPage() {
       {/* ════════════════════════════════════════════════════════════════ */}
       {/* 2. HERO SECTION WITH PURE CODE WIRE CIRCUIT NETWORK (NO IMAGE) */}
       {/* ════════════════════════════════════════════════════════════════ */}
-      <section className="relative w-full pt-20 pb-28 px-4 sm:px-6 lg:px-8 text-center overflow-hidden min-h-[85vh] flex items-center justify-center bg-gradient-to-b from-[#ecfdf5]/80 via-white to-emerald-50/40 border-b border-slate-200/70">
-        
+      <section className={cn(
+        "relative w-full pt-20 pb-28 px-4 sm:px-6 lg:px-8 text-center overflow-hidden min-h-[85vh] flex items-center justify-center border-b transition-colors duration-500",
+        isDarkMode ? "bg-gradient-to-b from-slate-950 via-slate-900 to-emerald-950/70 border-slate-800" : "bg-gradient-to-b from-[#ecfdf5]/80 via-white to-emerald-50/40 border-slate-200/70"
+      )}>
+
         {/* Pure SVG Animated Wire Circuit & Connection Nodes Background */}
         <div className="absolute inset-0 w-full h-full pointer-events-none overflow-hidden">
-          
+
           {/* Ambient Radial Soft Spotlights */}
           <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[450px] bg-emerald-400/20 rounded-full blur-[140px] animate-pulse" />
           <div className="absolute top-10 left-10 w-96 h-96 bg-teal-300/20 rounded-full blur-[110px]" />
@@ -328,17 +425,23 @@ export default function UwoLandingPage() {
 
         {/* Main Content (relative z-10) */}
         <div className="relative z-10 max-w-5xl mx-auto">
-          
+
           {/* Hero Pill Badge */}
-          <div className="inline-flex items-center gap-2.5 px-5 py-2 rounded-full bg-white/95 border border-emerald-300 text-emerald-800 text-xs font-extrabold mb-8 shadow-sm hover:shadow-md transition-all">
-            <Sparkles size={14} className="text-emerald-600 animate-pulse" />
+          <div className={cn(
+            "inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full text-xs font-extrabold mb-8 shadow-md hover:shadow-lg transition-all animate-bounce-subtle animate-border-pulse",
+            isDarkMode ? "bg-slate-900/90 border border-emerald-500/60 text-emerald-300 shadow-emerald-950/50" : "bg-white/95 border border-emerald-400/60 text-emerald-800"
+          )}>
+            <Sparkles size={15} className="text-emerald-500 animate-pulse" />
             <span>Unified Communication + Business Automation Platform</span>
           </div>
 
           {/* Headline */}
-          <h1 
-            className="text-4xl sm:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.1] max-w-5xl mx-auto italic font-serif text-[#064e3b] drop-shadow-xs"
-            style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
+          <h1
+            className={cn(
+              "text-4xl sm:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.1] max-w-5xl mx-auto font-serif",
+              isDarkMode ? "text-emerald-400 drop-shadow-[0_0_35px_rgba(16,185,129,0.35)]" : "text-[#064e3b] drop-shadow-xs"
+            )}
+            style={{ fontFamily: "'Times New Roman', Times, serif" }}
           >
             <span>Connect Everything.</span> <br className="hidden sm:inline" />
             <span className="pr-2">
@@ -347,7 +450,10 @@ export default function UwoLandingPage() {
           </h1>
 
           {/* Supporting Copy */}
-          <p className="text-base sm:text-xl text-slate-700 font-bold max-w-2xl mx-auto mt-6 leading-relaxed">
+          <p className={cn(
+            "text-base sm:text-xl font-bold max-w-2xl mx-auto mt-6 leading-relaxed",
+            isDarkMode ? "text-slate-300" : "text-slate-700"
+          )}>
             {brandName} brings your communication channels, business tools, and automation into one intelligent workspace.
           </p>
 
@@ -378,7 +484,7 @@ export default function UwoLandingPage() {
       {/* 4. ONE PLATFORM, THREE LAYERS */}
       {/* ════════════════════════════════════════════════════════════════ */}
       <section id="platform" className="relative py-24 px-6 sm:px-10 lg:px-12 max-w-7xl mx-auto my-14 bg-gradient-to-br from-emerald-50/60 via-white to-slate-50/70 rounded-[2.5rem] border border-slate-200/90 shadow-xl overflow-hidden">
-        
+
         {/* Ambient Subtle Glow & Pattern */}
         <div className="absolute -top-32 -left-32 w-80 h-80 bg-emerald-500/10 rounded-full blur-[100px] pointer-events-none" />
         <div className="absolute -bottom-32 -right-32 w-80 h-80 bg-teal-500/10 rounded-full blur-[100px] pointer-events-none" />
@@ -386,7 +492,7 @@ export default function UwoLandingPage() {
 
         <div className="relative z-10">
           <div className="text-center space-y-3 mb-12">
-            <h2 
+            <h2
               className="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight italic font-serif"
               style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
             >
@@ -397,106 +503,106 @@ export default function UwoLandingPage() {
             </p>
           </div>
 
-        {/* 3 Interactive Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          
-          {/* CARD 1: CHANNELS */}
-          <ScrollReveal delay={100}>
-            <div className="p-8 rounded-3xl bg-white border border-slate-200 landing-card-hover shadow-xs hover:shadow-xl flex flex-col justify-between group cursor-pointer h-full">
-              <div className="space-y-4">
-                <div className="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300">
-                  <MessageSquare size={24} />
+          {/* 3 Interactive Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+
+            {/* CARD 1: CHANNELS */}
+            <ScrollReveal delay={100}>
+              <div className="p-8 rounded-3xl bg-white border border-slate-200 landing-card-hover shadow-xs hover:shadow-xl flex flex-col justify-between group cursor-pointer h-full">
+                <div className="space-y-4">
+                  <div className="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300">
+                    <MessageSquare size={24} />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-xl font-black text-slate-900 group-hover:text-emerald-700 transition-colors">Channels</h3>
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800 uppercase">
+                      4 Channels
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-500 font-medium leading-relaxed">
+                    Connect with customers wherever they are. WhatsApp, Instagram, Facebook, and YouTube.
+                  </p>
+
+                  <div className="flex items-center gap-2 pt-2 group-hover:scale-105 transition-transform duration-300 origin-left">
+                    <WhatsAppLogo size={22} />
+                    <InstagramLogo size={22} />
+                    <FacebookLogo size={22} />
+                    <YouTubeLogo size={22} />
+                  </div>
                 </div>
-                <div className="flex items-center justify-between">
-                  <h3 className="text-xl font-black text-slate-900 group-hover:text-emerald-700 transition-colors">Channels</h3>
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800 uppercase">
-                    4 Channels
-                  </span>
-                </div>
-                <p className="text-xs text-slate-500 font-medium leading-relaxed">
-                  Connect with customers wherever they are. WhatsApp, Instagram, Facebook, and YouTube.
-                </p>
-                
-                <div className="flex items-center gap-2 pt-2 group-hover:scale-105 transition-transform duration-300 origin-left">
-                  <WhatsAppLogo size={22} />
-                  <InstagramLogo size={22} />
-                  <FacebookLogo size={22} />
-                  <YouTubeLogo size={22} />
-                </div>
+
+                <a href="#channels" className="mt-8 text-xs font-extrabold text-emerald-600 hover:text-emerald-700 flex items-center gap-1.5 group-hover:translate-x-1.5 transition-transform">
+                  <span>Explore Channels</span>
+                  <ArrowRight size={14} />
+                </a>
               </div>
+            </ScrollReveal>
 
-              <a href="#channels" className="mt-8 text-xs font-extrabold text-emerald-600 hover:text-emerald-700 flex items-center gap-1.5 group-hover:translate-x-1.5 transition-transform">
-                <span>Explore Channels</span>
-                <ArrowRight size={14} />
-              </a>
-            </div>
-          </ScrollReveal>
+            {/* CARD 2: CONNECTORS */}
+            <ScrollReveal delay={250}>
+              <div className="p-8 rounded-3xl bg-white border border-slate-200 landing-card-hover shadow-xs hover:shadow-xl flex flex-col justify-between group cursor-pointer h-full">
+                <div className="space-y-4">
+                  <div className="w-12 h-12 rounded-2xl bg-blue-50 border border-blue-200 text-blue-600 flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300">
+                    <Share2 size={24} />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-xl font-black text-slate-900 group-hover:text-blue-700 transition-colors">Connectors</h3>
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-blue-100 text-blue-800 uppercase">
+                      8 Connectors
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-500 font-medium leading-relaxed">
+                    Connect your everyday business tools, files, maps, spreadsheets, and data sources.
+                  </p>
 
-          {/* CARD 2: CONNECTORS */}
-          <ScrollReveal delay={250}>
-            <div className="p-8 rounded-3xl bg-white border border-slate-200 landing-card-hover shadow-xs hover:shadow-xl flex flex-col justify-between group cursor-pointer h-full">
-              <div className="space-y-4">
-                <div className="w-12 h-12 rounded-2xl bg-blue-50 border border-blue-200 text-blue-600 flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300">
-                  <Share2 size={24} />
+                  <div className="flex items-center gap-2 pt-2 group-hover:scale-105 transition-transform duration-300 origin-left">
+                    <GmailLogo size={20} />
+                    <OutlookLogo size={20} />
+                    <GoogleSheetsLogo size={20} />
+                    <GoogleDocsLogo size={20} />
+                  </div>
                 </div>
-                <div className="flex items-center justify-between">
-                  <h3 className="text-xl font-black text-slate-900 group-hover:text-blue-700 transition-colors">Connectors</h3>
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-blue-100 text-blue-800 uppercase">
-                    8 Connectors
-                  </span>
-                </div>
-                <p className="text-xs text-slate-500 font-medium leading-relaxed">
-                  Connect your everyday business tools, files, maps, spreadsheets, and data sources.
-                </p>
-                
-                <div className="flex items-center gap-2 pt-2 group-hover:scale-105 transition-transform duration-300 origin-left">
-                  <GmailLogo size={20} />
-                  <OutlookLogo size={20} />
-                  <GoogleSheetsLogo size={20} />
-                  <GoogleDocsLogo size={20} />
-                </div>
+
+                <a href="#connectors" className="mt-8 text-xs font-extrabold text-blue-600 hover:text-blue-700 flex items-center gap-1.5 group-hover:translate-x-1.5 transition-transform">
+                  <span>Explore Connectors</span>
+                  <ArrowRight size={14} />
+                </a>
               </div>
+            </ScrollReveal>
 
-              <a href="#connectors" className="mt-8 text-xs font-extrabold text-blue-600 hover:text-blue-700 flex items-center gap-1.5 group-hover:translate-x-1.5 transition-transform">
-                <span>Explore Connectors</span>
-                <ArrowRight size={14} />
-              </a>
-            </div>
-          </ScrollReveal>
+            {/* CARD 3: AUTOMATION MODULES */}
+            <ScrollReveal delay={400}>
+              <div className="p-8 rounded-3xl bg-white border border-slate-200 landing-card-hover shadow-xs hover:shadow-xl flex flex-col justify-between group cursor-pointer h-full">
+                <div className="space-y-4">
+                  <div className="w-12 h-12 rounded-2xl bg-purple-50 border border-purple-200 text-purple-600 flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300">
+                    <Zap size={24} />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-xl font-black text-slate-900 group-hover:text-purple-700 transition-colors">Business Automation</h3>
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-purple-100 text-purple-800 uppercase">
+                      9 Modules
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-500 font-medium leading-relaxed">
+                    Turn conversations and business data into automated lead creation, quotations, payments, and invoices.
+                  </p>
 
-          {/* CARD 3: AUTOMATION MODULES */}
-          <ScrollReveal delay={400}>
-            <div className="p-8 rounded-3xl bg-white border border-slate-200 landing-card-hover shadow-xs hover:shadow-xl flex flex-col justify-between group cursor-pointer h-full">
-              <div className="space-y-4">
-                <div className="w-12 h-12 rounded-2xl bg-purple-50 border border-purple-200 text-purple-600 flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300">
-                  <Zap size={24} />
+                  <div className="flex flex-wrap items-center gap-1.5 pt-2">
+                    <span className="px-2 py-0.5 bg-slate-100 group-hover:bg-purple-50 text-slate-700 group-hover:text-purple-800 text-[10px] font-bold rounded transition-colors">CRM</span>
+                    <span className="px-2 py-0.5 bg-slate-100 group-hover:bg-purple-50 text-slate-700 group-hover:text-purple-800 text-[10px] font-bold rounded transition-colors">Auto Reply</span>
+                    <span className="px-2 py-0.5 bg-slate-100 group-hover:bg-purple-50 text-slate-700 group-hover:text-purple-800 text-[10px] font-bold rounded transition-colors">Quotation</span>
+                    <span className="px-2 py-0.5 bg-slate-100 group-hover:bg-purple-50 text-slate-700 group-hover:text-purple-800 text-[10px] font-bold rounded transition-colors">Invoice</span>
+                  </div>
                 </div>
-                <div className="flex items-center justify-between">
-                  <h3 className="text-xl font-black text-slate-900 group-hover:text-purple-700 transition-colors">Business Automation</h3>
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-purple-100 text-purple-800 uppercase">
-                    9 Modules
-                  </span>
-                </div>
-                <p className="text-xs text-slate-500 font-medium leading-relaxed">
-                  Turn conversations and business data into automated lead creation, quotations, payments, and invoices.
-                </p>
-                
-                <div className="flex flex-wrap items-center gap-1.5 pt-2">
-                  <span className="px-2 py-0.5 bg-slate-100 group-hover:bg-purple-50 text-slate-700 group-hover:text-purple-800 text-[10px] font-bold rounded transition-colors">CRM</span>
-                  <span className="px-2 py-0.5 bg-slate-100 group-hover:bg-purple-50 text-slate-700 group-hover:text-purple-800 text-[10px] font-bold rounded transition-colors">Auto Reply</span>
-                  <span className="px-2 py-0.5 bg-slate-100 group-hover:bg-purple-50 text-slate-700 group-hover:text-purple-800 text-[10px] font-bold rounded transition-colors">Quotation</span>
-                  <span className="px-2 py-0.5 bg-slate-100 group-hover:bg-purple-50 text-slate-700 group-hover:text-purple-800 text-[10px] font-bold rounded transition-colors">Invoice</span>
-                </div>
+
+                <a href="#features" className="mt-8 text-xs font-extrabold text-purple-600 hover:text-purple-700 flex items-center gap-1.5 group-hover:translate-x-1.5 transition-transform">
+                  <span>Explore Features</span>
+                  <ArrowRight size={14} />
+                </a>
               </div>
+            </ScrollReveal>
 
-              <a href="#features" className="mt-8 text-xs font-extrabold text-purple-600 hover:text-purple-700 flex items-center gap-1.5 group-hover:translate-x-1.5 transition-transform">
-                <span>Explore Features</span>
-                <ArrowRight size={14} />
-              </a>
-            </div>
-          </ScrollReveal>
-
-        </div>
+          </div>
         </div>
       </section>
 
@@ -505,7 +611,7 @@ export default function UwoLandingPage() {
       {/* ════════════════════════════════════════════════════════════════ */}
       <section id="channels" className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto bg-slate-50/50 rounded-3xl border border-slate-200/80 my-10">
         <div className="text-center space-y-3 mb-12">
-          <h2 
+          <h2
             className="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight italic font-serif"
             style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
           >
@@ -517,7 +623,7 @@ export default function UwoLandingPage() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          
+
           {/* WHATSAPP */}
           <ScrollReveal delay={100}>
             <div className="p-6 rounded-2xl bg-white border border-slate-200 landing-card-hover space-y-3 shadow-2xs group cursor-pointer h-full">
@@ -597,7 +703,7 @@ export default function UwoLandingPage() {
       {/* 6. CONNECTORS SECTION */}
       {/* ════════════════════════════════════════════════════════════════ */}
       <section id="connectors" className="relative py-24 px-6 sm:px-10 lg:px-12 max-w-7xl mx-auto my-14 bg-gradient-to-br from-slate-50/90 via-white to-teal-50/60 rounded-[2.5rem] border border-slate-200/90 shadow-xl overflow-hidden">
-        
+
         {/* Ambient Glows */}
         <div className="absolute -top-32 -right-32 w-80 h-80 bg-teal-500/10 rounded-full blur-[100px] pointer-events-none" />
         <div className="absolute -bottom-32 -left-32 w-80 h-80 bg-emerald-500/10 rounded-full blur-[100px] pointer-events-none" />
@@ -605,7 +711,7 @@ export default function UwoLandingPage() {
 
         <div className="relative z-10">
           <div className="text-center space-y-4 mb-16">
-            <h2 
+            <h2
               className="text-4xl sm:text-5xl lg:text-6xl font-bold text-slate-900 tracking-tight italic font-serif leading-tight"
               style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
             >
@@ -648,7 +754,7 @@ export default function UwoLandingPage() {
       {/* ════════════════════════════════════════════════════════════════ */}
       <section id="features" className="py-24 px-6 sm:px-10 lg:px-12 max-w-7xl mx-auto bg-gradient-to-b from-emerald-50/80 via-white to-emerald-50/40 rounded-[2.5rem] border border-emerald-200/90 my-16 shadow-xl">
         <div className="text-center space-y-4 mb-16">
-          <h2 
+          <h2
             className="text-4xl sm:text-5xl lg:text-6xl font-bold text-slate-900 tracking-tight italic font-serif leading-tight"
             style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
           >
@@ -671,7 +777,7 @@ export default function UwoLandingPage() {
             { step: 'STEP 07', icon: <CheckCircle2 size={22} />, label: 'Workflow Completed', desc: 'Closed deal in 0.2s', bg: 'bg-slate-900', border: 'hover:border-slate-900' }
           ].map((item, idx) => (
             <ScrollReveal key={idx} delay={idx * 90}>
-              <div 
+              <div
                 className={cn(
                   "p-5 sm:p-6 rounded-3xl bg-white border border-slate-200/90 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group cursor-pointer text-center flex flex-col items-center justify-between relative overflow-hidden h-full",
                   item.border
@@ -703,7 +809,7 @@ export default function UwoLandingPage() {
 
       {/* 8. HOW UWO CONNECT WORKS - CONNECTED PIPELINE */}
       <section id="how-it-works" className="relative py-24 px-6 sm:px-10 lg:px-12 max-w-7xl mx-auto my-14 bg-gradient-to-br from-emerald-50/50 via-white to-indigo-50/40 rounded-[2.5rem] border border-slate-200/90 shadow-xl overflow-hidden">
-        
+
         {/* Ambient Subtle Glow & Pattern */}
         <div className="absolute -top-32 -left-32 w-80 h-80 bg-emerald-500/10 rounded-full blur-[100px] pointer-events-none" />
         <div className="absolute -bottom-32 -right-32 w-80 h-80 bg-indigo-500/10 rounded-full blur-[100px] pointer-events-none" />
@@ -712,7 +818,7 @@ export default function UwoLandingPage() {
         <div className="relative z-10">
           <div className="text-center space-y-4 mb-16">
             <UwoBrandHeader align="center" />
-            <h2 
+            <h2
               className="text-4xl sm:text-5xl lg:text-6xl font-bold text-slate-900 tracking-tight italic font-serif leading-tight"
               style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
             >
@@ -725,83 +831,83 @@ export default function UwoLandingPage() {
 
           {/* Connected Pipeline Steps Container */}
           <div className="relative">
-          {/* Connecting Glow Line (Desktop) */}
-          <div className="hidden md:block absolute top-1/2 left-[15%] right-[15%] h-1 bg-gradient-to-r from-emerald-400 via-emerald-600 to-indigo-600 -translate-y-1/2 z-0 rounded-full opacity-60 animate-pulse" />
+            {/* Connecting Glow Line (Desktop) */}
+            <div className="hidden md:block absolute top-1/2 left-[15%] right-[15%] h-1 bg-gradient-to-r from-emerald-400 via-emerald-600 to-indigo-600 -translate-y-1/2 z-0 rounded-full opacity-60 animate-pulse" />
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative z-10">
-            
-            {/* Step 01 */}
-            <ScrollReveal delay={150}>
-              <div className="relative p-8 rounded-3xl bg-white border border-slate-200/90 shadow-md hover:border-emerald-500 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group cursor-pointer text-left flex flex-col justify-between space-y-5 h-full">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-extrabold uppercase tracking-widest text-emerald-600 px-3.5 py-1 rounded-full bg-emerald-50 border border-emerald-200/80">
-                    Step 01
-                  </span>
-                  <div className="w-12 h-12 rounded-2xl bg-emerald-500 text-white flex items-center justify-center shadow-lg shadow-emerald-500/20 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300">
-                    <Zap size={24} className="fill-white" />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative z-10">
+
+              {/* Step 01 */}
+              <ScrollReveal delay={150}>
+                <div className="relative p-8 rounded-3xl bg-white border border-slate-200/90 shadow-md hover:border-emerald-500 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group cursor-pointer text-left flex flex-col justify-between space-y-5 h-full">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-extrabold uppercase tracking-widest text-emerald-600 px-3.5 py-1 rounded-full bg-emerald-50 border border-emerald-200/80">
+                      Step 01
+                    </span>
+                    <div className="w-12 h-12 rounded-2xl bg-emerald-500 text-white flex items-center justify-center shadow-lg shadow-emerald-500/20 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300">
+                      <Zap size={24} className="fill-white" />
+                    </div>
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-black text-slate-900 group-hover:text-emerald-700 transition-colors mb-2">CONNECT</h3>
+                    <p className="text-sm text-slate-500 font-medium leading-relaxed">
+                      Connect your communication channels (WhatsApp, Instagram, Gmail) and business tools in minutes.
+                    </p>
+                  </div>
+
+                  {/* Connecting Pipeline Connector Arrow (Desktop) */}
+                  <div className="hidden md:flex absolute -right-6 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-emerald-600 text-white items-center justify-center shadow-lg shadow-emerald-600/30 group-hover:scale-125 transition-transform duration-300 border-2 border-white">
+                    <ArrowRight size={18} />
                   </div>
                 </div>
-                <div>
-                  <h3 className="text-2xl font-black text-slate-900 group-hover:text-emerald-700 transition-colors mb-2">CONNECT</h3>
-                  <p className="text-sm text-slate-500 font-medium leading-relaxed">
-                    Connect your communication channels (WhatsApp, Instagram, Gmail) and business tools in minutes.
-                  </p>
-                </div>
+              </ScrollReveal>
 
-                {/* Connecting Pipeline Connector Arrow (Desktop) */}
-                <div className="hidden md:flex absolute -right-6 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-emerald-600 text-white items-center justify-center shadow-lg shadow-emerald-600/30 group-hover:scale-125 transition-transform duration-300 border-2 border-white">
-                  <ArrowRight size={18} />
-                </div>
-              </div>
-            </ScrollReveal>
+              {/* Step 02 */}
+              <ScrollReveal delay={300}>
+                <div className="relative p-8 rounded-3xl bg-white border border-slate-200/90 shadow-md hover:border-emerald-500 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group cursor-pointer text-left flex flex-col justify-between space-y-5 h-full">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-extrabold uppercase tracking-widest text-indigo-600 px-3.5 py-1 rounded-full bg-indigo-50 border border-indigo-200/80">
+                      Step 02
+                    </span>
+                    <div className="w-12 h-12 rounded-2xl bg-indigo-600 text-white flex items-center justify-center shadow-lg shadow-indigo-600/20 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300">
+                      <Bot size={24} className="fill-white" />
+                    </div>
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-black text-slate-900 group-hover:text-emerald-700 transition-colors mb-2">AUTOMATE</h3>
+                    <p className="text-sm text-slate-500 font-medium leading-relaxed">
+                      Create intelligent AI workflows that handle lead qualification, quotations, and repetitive replies automatically.
+                    </p>
+                  </div>
 
-            {/* Step 02 */}
-            <ScrollReveal delay={300}>
-              <div className="relative p-8 rounded-3xl bg-white border border-slate-200/90 shadow-md hover:border-emerald-500 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group cursor-pointer text-left flex flex-col justify-between space-y-5 h-full">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-extrabold uppercase tracking-widest text-indigo-600 px-3.5 py-1 rounded-full bg-indigo-50 border border-indigo-200/80">
-                    Step 02
-                  </span>
-                  <div className="w-12 h-12 rounded-2xl bg-indigo-600 text-white flex items-center justify-center shadow-lg shadow-indigo-600/20 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300">
-                    <Bot size={24} className="fill-white" />
+                  {/* Connecting Pipeline Connector Arrow (Desktop) */}
+                  <div className="hidden md:flex absolute -right-6 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-indigo-600 text-white items-center justify-center shadow-lg shadow-indigo-600/30 group-hover:scale-125 transition-transform duration-300 border-2 border-white">
+                    <ArrowRight size={18} />
                   </div>
                 </div>
-                <div>
-                  <h3 className="text-2xl font-black text-slate-900 group-hover:text-emerald-700 transition-colors mb-2">AUTOMATE</h3>
-                  <p className="text-sm text-slate-500 font-medium leading-relaxed">
-                    Create intelligent AI workflows that handle lead qualification, quotations, and repetitive replies automatically.
-                  </p>
-                </div>
+              </ScrollReveal>
 
-                {/* Connecting Pipeline Connector Arrow (Desktop) */}
-                <div className="hidden md:flex absolute -right-6 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-indigo-600 text-white items-center justify-center shadow-lg shadow-indigo-600/30 group-hover:scale-125 transition-transform duration-300 border-2 border-white">
-                  <ArrowRight size={18} />
-                </div>
-              </div>
-            </ScrollReveal>
-
-            {/* Step 03 */}
-            <ScrollReveal delay={450}>
-              <div className="relative p-8 rounded-3xl bg-white border border-slate-200/90 shadow-md hover:border-emerald-500 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group cursor-pointer text-left flex flex-col justify-between space-y-5 h-full">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-extrabold uppercase tracking-widest text-emerald-600 px-3.5 py-1 rounded-full bg-emerald-50 border border-emerald-200/80">
-                    Step 03
-                  </span>
-                  <div className="w-12 h-12 rounded-2xl bg-emerald-600 text-white flex items-center justify-center shadow-lg shadow-emerald-600/20 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300">
-                    <Sparkles size={24} className="fill-white" />
+              {/* Step 03 */}
+              <ScrollReveal delay={450}>
+                <div className="relative p-8 rounded-3xl bg-white border border-slate-200/90 shadow-md hover:border-emerald-500 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group cursor-pointer text-left flex flex-col justify-between space-y-5 h-full">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-extrabold uppercase tracking-widest text-emerald-600 px-3.5 py-1 rounded-full bg-emerald-50 border border-emerald-200/80">
+                      Step 03
+                    </span>
+                    <div className="w-12 h-12 rounded-2xl bg-emerald-600 text-white flex items-center justify-center shadow-lg shadow-emerald-600/20 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300">
+                      <Sparkles size={24} className="fill-white" />
+                    </div>
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-black text-slate-900 group-hover:text-emerald-700 transition-colors mb-2">GROW</h3>
+                    <p className="text-sm text-slate-500 font-medium leading-relaxed">
+                      Spend zero time switching between disconnected tools and focus on scaling your business revenue.
+                    </p>
                   </div>
                 </div>
-                <div>
-                  <h3 className="text-2xl font-black text-slate-900 group-hover:text-emerald-700 transition-colors mb-2">GROW</h3>
-                  <p className="text-sm text-slate-500 font-medium leading-relaxed">
-                    Spend zero time switching between disconnected tools and focus on scaling your business revenue.
-                  </p>
-                </div>
-              </div>
-            </ScrollReveal>
+              </ScrollReveal>
 
+            </div>
           </div>
-        </div>
         </div>
       </section>
 
@@ -809,7 +915,7 @@ export default function UwoLandingPage() {
       {/* 9. REAL-WORLD AUTOMATION EXAMPLE - DYNAMIC SHOWCASE CARD */}
       {/* ════════════════════════════════════════════════════════════════ */}
       <section className="relative py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white rounded-[2.5rem] my-12 shadow-2xl hover:shadow-emerald-950/70 transition-shadow duration-500 border border-slate-800/80 overflow-hidden">
-        
+
         {/* Ambient Glowing Gradient Orbs & Tech Dot Matrix Grid Background */}
         <div className="absolute -top-24 -left-24 w-96 h-96 bg-emerald-500/20 rounded-full blur-[100px] pointer-events-none animate-pulse" />
         <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-indigo-500/20 rounded-full blur-[100px] pointer-events-none animate-pulse" />
@@ -819,7 +925,7 @@ export default function UwoLandingPage() {
         <div className="relative z-10">
           <div className="text-center space-y-4 mb-16">
             <UwoBrandHeader align="center" dark />
-            <h2 
+            <h2
               className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white tracking-tight italic font-serif leading-tight drop-shadow-md"
               style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
             >
@@ -830,226 +936,226 @@ export default function UwoLandingPage() {
             </p>
           </div>
 
-        {/* Step-by-Step Interactive Playback & Large Showcase Card */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch max-w-6xl mx-auto text-left">
-          
-          {/* Left Side: 6 Interactive Step Options */}
-          <div className="lg:col-span-5 space-y-3 flex flex-col justify-center">
-            {[
-              { title: 'Customer sends WhatsApp message', desc: '"Hi! I want to know the price of your product."' },
-              { title: 'UWO Connect detects incoming conversation', desc: 'Channel message routed to Unified Engine' },
-              { title: 'CRM Lead Created Automatically', desc: 'New contact record saved to lead pipeline' },
-              { title: 'Auto Reply Dispatches Catalog', desc: 'Interactive catalog & PDF shared instantly' },
-              { title: 'Quotation Automatically Prepared', desc: 'Quotation #QT-9482 created' },
-              { title: 'Payment Link & Invoice Issued', desc: 'UPI payment link generated & GST Invoice saved' }
-            ].map((st, i) => (
-              <div
-                key={i}
-                onClick={() => setActiveWorkflowTab(i)}
-                className={cn(
-                  "p-4 sm:p-4.5 rounded-2xl border transition-all duration-300 cursor-pointer transform hover:translate-x-1.5 flex items-center justify-between",
-                  activeWorkflowTab === i
-                    ? "bg-emerald-950/80 border-emerald-500 text-white shadow-lg shadow-emerald-500/20 scale-[1.02]"
-                    : "bg-slate-800/50 border-slate-700/60 text-slate-400 hover:text-white hover:border-slate-600 hover:bg-slate-800/80"
-                )}
-              >
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className={cn("text-[10px] font-black px-2 py-0.5 rounded-md uppercase tracking-wider", activeWorkflowTab === i ? "bg-emerald-500 text-slate-950" : "bg-slate-700 text-slate-300")}>
-                      0{i + 1}
-                    </span>
-                    <h5 className="text-xs sm:text-sm font-bold">{st.title}</h5>
-                  </div>
-                  <p className="text-[11px] text-slate-400 mt-1 pl-7">{st.desc}</p>
-                </div>
+          {/* Step-by-Step Interactive Playback & Large Showcase Card */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch max-w-6xl mx-auto text-left">
 
-                {activeWorkflowTab === i && (
-                  <CheckCircle2 size={18} className="text-emerald-400 shrink-0 ml-2 animate-pulse" />
+            {/* Left Side: 6 Interactive Step Options */}
+            <div className="lg:col-span-5 space-y-3 flex flex-col justify-center">
+              {[
+                { title: 'Customer sends WhatsApp message', desc: '"Hi! I want to know the price of your product."' },
+                { title: 'UWO Connect detects incoming conversation', desc: 'Channel message routed to Unified Engine' },
+                { title: 'CRM Lead Created Automatically', desc: 'New contact record saved to lead pipeline' },
+                { title: 'Auto Reply Dispatches Catalog', desc: 'Interactive catalog & PDF shared instantly' },
+                { title: 'Quotation Automatically Prepared', desc: 'Quotation #QT-9482 created' },
+                { title: 'Payment Link & Invoice Issued', desc: 'UPI payment link generated & GST Invoice saved' }
+              ].map((st, i) => (
+                <div
+                  key={i}
+                  onClick={() => setActiveWorkflowTab(i)}
+                  className={cn(
+                    "p-4 sm:p-4.5 rounded-2xl border transition-all duration-300 cursor-pointer transform hover:translate-x-1.5 flex items-center justify-between",
+                    activeWorkflowTab === i
+                      ? "bg-emerald-950/80 border-emerald-500 text-white shadow-lg shadow-emerald-500/20 scale-[1.02]"
+                      : "bg-slate-800/50 border-slate-700/60 text-slate-400 hover:text-white hover:border-slate-600 hover:bg-slate-800/80"
+                  )}
+                >
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className={cn("text-[10px] font-black px-2 py-0.5 rounded-md uppercase tracking-wider", activeWorkflowTab === i ? "bg-emerald-500 text-slate-950" : "bg-slate-700 text-slate-300")}>
+                        0{i + 1}
+                      </span>
+                      <h5 className="text-xs sm:text-sm font-bold">{st.title}</h5>
+                    </div>
+                    <p className="text-[11px] text-slate-400 mt-1 pl-7">{st.desc}</p>
+                  </div>
+
+                  {activeWorkflowTab === i && (
+                    <CheckCircle2 size={18} className="text-emerald-400 shrink-0 ml-2 animate-pulse" />
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {/* Right Side: LARGE DESCRIPTIVE SHOWCASE CARD */}
+            <div className="lg:col-span-7 p-6 sm:p-8 rounded-3xl bg-slate-950 border border-slate-800 shadow-2xl flex flex-col justify-between relative overflow-hidden min-h-[420px]">
+              {/* Top Bar */}
+              <div className="flex items-center justify-between pb-4 border-b border-slate-800 mb-4">
+                <span className={cn(
+                  "px-3 py-1 rounded-full text-[10px] font-extrabold tracking-widest uppercase border",
+                  activeWorkflowTab === 0 && "bg-[#25D366]/15 text-[#25D366] border-[#25D366]/40",
+                  activeWorkflowTab === 1 && "bg-indigo-500/15 text-indigo-400 border-indigo-500/40",
+                  activeWorkflowTab === 2 && "bg-emerald-500/15 text-emerald-400 border-emerald-500/40",
+                  activeWorkflowTab === 3 && "bg-purple-500/15 text-purple-400 border-purple-500/40",
+                  activeWorkflowTab === 4 && "bg-amber-500/15 text-amber-400 border-amber-500/40",
+                  activeWorkflowTab === 5 && "bg-rose-500/15 text-rose-400 border-rose-500/40"
+                )}>
+                  Step 0{activeWorkflowTab + 1} Workflow Node
+                </span>
+
+                <span className="text-[10px] font-mono text-slate-400 flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" /> LIVE SHOWCASE
+                </span>
+              </div>
+
+              {/* Dynamic Step Description Header */}
+              <div className="space-y-2 mb-6">
+                <h3 className="text-xl sm:text-2xl font-black text-white leading-tight">
+                  {[
+                    'Customer Sends WhatsApp Message',
+                    'UWO Connect Detects & Routes Message',
+                    'CRM Lead Created Automatically',
+                    'Auto Reply Dispatches Interactive Catalog',
+                    'Quotation Automatically Prepared',
+                    'Payment Link & Invoice Issued'
+                  ][activeWorkflowTab]}
+                </h3>
+                <p className="text-xs text-slate-400 font-medium leading-relaxed">
+                  {[
+                    'Inbound customer query arrives via official WhatsApp Business API.',
+                    'AI Orchestration Engine analyzes intent, sentiment, and routes payload in 0.02 seconds.',
+                    'New customer contact and deal record created instantly without manual data entry.',
+                    'Personalized catalog, PDF brochure, and quick links sent back to customer WhatsApp.',
+                    'System generates official GST quotation PDF with items, discount, and taxes.',
+                    'UPI Payment link generated, payment verified, and final GST Invoice synced to Google Sheets.'
+                  ][activeWorkflowTab]}
+                </p>
+              </div>
+
+              {/* Dynamic Live Mockup Visual Preview */}
+              <div className="flex-1">
+                {activeWorkflowTab === 0 && (
+                  <div className="p-4 rounded-2xl bg-slate-900 border border-slate-800 space-y-3 text-left">
+                    <div className="flex items-center justify-between text-[11px] text-slate-400 font-mono">
+                      <span className="flex items-center gap-1.5 text-emerald-400 font-bold">
+                        <WhatsAppLogo size={16} /> WhatsApp Business API
+                      </span>
+                      <span>14:02 PM • Just Now</span>
+                    </div>
+                    <div className="p-3.5 rounded-xl bg-emerald-950/60 border border-emerald-500/30 text-emerald-100 text-xs leading-relaxed">
+                      "Hi! I want to know the pricing and features of your UWO Connect Pro Plan."
+                    </div>
+                    <div className="grid grid-cols-2 gap-3 text-[11px]">
+                      <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 space-y-1">
+                        <span className="text-slate-500 font-medium">Customer Name</span>
+                        <p className="font-bold text-slate-200">Rahul Sharma</p>
+                      </div>
+                      <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 space-y-1">
+                        <span className="text-slate-500 font-medium">Phone Number</span>
+                        <p className="font-bold text-slate-200">+91 98765 43210</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {activeWorkflowTab === 1 && (
+                  <div className="p-4 rounded-2xl bg-slate-900 border border-indigo-500/30 space-y-3 text-left font-mono text-xs">
+                    <div className="flex items-center justify-between">
+                      <span className="text-indigo-400 font-bold flex items-center gap-1.5"><Bot size={16} /> AI Intent Analysis</span>
+                      <span className="px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 text-[10px]">99.8% Confidence</span>
+                    </div>
+                    <div className="p-3.5 rounded-xl bg-indigo-950/40 border border-indigo-500/20 text-indigo-200 text-[11px] leading-relaxed space-y-1">
+                      <p>Detected Intent: <span className="text-white font-bold">Pricing_Inquiry</span></p>
+                      <p>Extracted Channel: <span className="text-white font-bold">WhatsApp_Inbound</span></p>
+                      <p>Priority Score: <span className="text-emerald-400 font-bold">98/100 (Hot Lead)</span></p>
+                    </div>
+                    <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 text-[11px] text-slate-300 flex items-center justify-between">
+                      <span>Target Route</span>
+                      <span className="text-emerald-400 font-bold">Sales & Quotation Engine</span>
+                    </div>
+                  </div>
+                )}
+
+                {activeWorkflowTab === 2 && (
+                  <div className="p-4 rounded-2xl bg-slate-900 border border-emerald-500/30 space-y-3 text-left">
+                    <div className="flex items-center justify-between">
+                      <span className="text-emerald-400 font-bold text-xs flex items-center gap-1.5"><Users size={16} /> Unified CRM Record</span>
+                      <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px]">Deal Stage: New Lead</span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3 text-xs">
+                      <div className="p-3 rounded-xl bg-slate-950 border border-slate-800">
+                        <span className="text-[10px] text-slate-500">Contact</span>
+                        <p className="font-bold text-white">Rahul Sharma</p>
+                      </div>
+                      <div className="p-3 rounded-xl bg-slate-950 border border-slate-800">
+                        <span className="text-[10px] text-slate-500">Source</span>
+                        <p className="font-bold text-emerald-400">WhatsApp Direct</p>
+                      </div>
+                    </div>
+                    <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 text-[11px] text-slate-300 flex items-center justify-between">
+                      <span>Assigned Sales Agent</span>
+                      <span className="text-indigo-400 font-bold">AI Assistant Core</span>
+                    </div>
+                  </div>
+                )}
+
+                {activeWorkflowTab === 3 && (
+                  <div className="p-4 rounded-2xl bg-slate-900 border border-purple-500/30 space-y-3 text-left text-xs">
+                    <div className="flex items-center justify-between">
+                      <span className="text-purple-400 font-bold flex items-center gap-1.5"><MessageSquare size={16} /> Automated Bot Reply</span>
+                      <span className="text-[10px] text-slate-500">Dispatched in 0.4s</span>
+                    </div>
+                    <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 leading-relaxed text-[11px]">
+                      "Hello Rahul! 👋 Thanks for reaching out to UWO Connect. Here is our official product catalog and plan details."
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="px-3 py-2 rounded-xl bg-purple-600/30 text-purple-200 border border-purple-500/40 text-[11px] font-bold flex items-center gap-1.5">
+                        📄 UWO_Connect_Catalog.pdf
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {activeWorkflowTab === 4 && (
+                  <div className="p-4 rounded-2xl bg-slate-900 border border-amber-500/30 space-y-3 text-left text-xs">
+                    <div className="flex items-center justify-between">
+                      <span className="text-amber-400 font-bold flex items-center gap-1.5"><FileCheck size={16} /> Official Quotation #QT-9482</span>
+                      <span className="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 text-[10px]">Status: Active</span>
+                    </div>
+                    <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800 space-y-2 text-[11px]">
+                      <div className="flex justify-between text-slate-300">
+                        <span>UWO Connect Pro Plan (12 Mo)</span>
+                        <span className="font-bold">₹49,999.00</span>
+                      </div>
+                      <div className="flex justify-between text-slate-400 text-[10px]">
+                        <span>GST (18%)</span>
+                        <span>₹8,999.82</span>
+                      </div>
+                      <div className="pt-2 border-t border-slate-800 flex justify-between font-bold text-white text-xs">
+                        <span>Total Amount</span>
+                        <span className="text-amber-400">₹58,998.82</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {activeWorkflowTab === 5 && (
+                  <div className="p-4 rounded-2xl bg-slate-900 border border-rose-500/30 space-y-3 text-left text-xs">
+                    <div className="flex items-center justify-between">
+                      <span className="text-rose-400 font-bold flex items-center gap-1.5"><Receipt size={16} /> GST Invoice #INV-2026-8812</span>
+                      <span className="px-2.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px] font-bold">Paid via UPI</span>
+                    </div>
+                    <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800 space-y-2 text-[11px]">
+                      <div className="flex items-center justify-between text-slate-300">
+                        <span>UPI Payment Link</span>
+                        <span className="text-rose-400 font-bold">pay.uwoconnect.com/qt9482</span>
+                      </div>
+                      <div className="flex items-center justify-between text-emerald-400 text-[10px] font-mono pt-1 border-t border-slate-800">
+                        <span>✓ Synced to Google Sheets & Tally</span>
+                        <span>0.2s</span>
+                      </div>
+                    </div>
+                  </div>
                 )}
               </div>
-            ))}
+
+              {/* Bottom Status Progress Indicator */}
+              <div className="pt-4 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400 font-mono mt-4">
+                <span>Status: <strong className="text-emerald-400">Node Active</strong></span>
+                <span>Workflow Progress: <strong className="text-white">{Math.round(((activeWorkflowTab + 1) / 6) * 100)}%</strong></span>
+              </div>
+            </div>
+
           </div>
-
-          {/* Right Side: LARGE DESCRIPTIVE SHOWCASE CARD */}
-          <div className="lg:col-span-7 p-6 sm:p-8 rounded-3xl bg-slate-950 border border-slate-800 shadow-2xl flex flex-col justify-between relative overflow-hidden min-h-[420px]">
-            {/* Top Bar */}
-            <div className="flex items-center justify-between pb-4 border-b border-slate-800 mb-4">
-              <span className={cn(
-                "px-3 py-1 rounded-full text-[10px] font-extrabold tracking-widest uppercase border",
-                activeWorkflowTab === 0 && "bg-[#25D366]/15 text-[#25D366] border-[#25D366]/40",
-                activeWorkflowTab === 1 && "bg-indigo-500/15 text-indigo-400 border-indigo-500/40",
-                activeWorkflowTab === 2 && "bg-emerald-500/15 text-emerald-400 border-emerald-500/40",
-                activeWorkflowTab === 3 && "bg-purple-500/15 text-purple-400 border-purple-500/40",
-                activeWorkflowTab === 4 && "bg-amber-500/15 text-amber-400 border-amber-500/40",
-                activeWorkflowTab === 5 && "bg-rose-500/15 text-rose-400 border-rose-500/40"
-              )}>
-                Step 0{activeWorkflowTab + 1} Workflow Node
-              </span>
-
-              <span className="text-[10px] font-mono text-slate-400 flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" /> LIVE SHOWCASE
-              </span>
-            </div>
-
-            {/* Dynamic Step Description Header */}
-            <div className="space-y-2 mb-6">
-              <h3 className="text-xl sm:text-2xl font-black text-white leading-tight">
-                {[
-                  'Customer Sends WhatsApp Message',
-                  'UWO Connect Detects & Routes Message',
-                  'CRM Lead Created Automatically',
-                  'Auto Reply Dispatches Interactive Catalog',
-                  'Quotation Automatically Prepared',
-                  'Payment Link & Invoice Issued'
-                ][activeWorkflowTab]}
-              </h3>
-              <p className="text-xs text-slate-400 font-medium leading-relaxed">
-                {[
-                  'Inbound customer query arrives via official WhatsApp Business API.',
-                  'AI Orchestration Engine analyzes intent, sentiment, and routes payload in 0.02 seconds.',
-                  'New customer contact and deal record created instantly without manual data entry.',
-                  'Personalized catalog, PDF brochure, and quick links sent back to customer WhatsApp.',
-                  'System generates official GST quotation PDF with items, discount, and taxes.',
-                  'UPI Payment link generated, payment verified, and final GST Invoice synced to Google Sheets.'
-                ][activeWorkflowTab]}
-              </p>
-            </div>
-
-            {/* Dynamic Live Mockup Visual Preview */}
-            <div className="flex-1">
-              {activeWorkflowTab === 0 && (
-                <div className="p-4 rounded-2xl bg-slate-900 border border-slate-800 space-y-3 text-left">
-                  <div className="flex items-center justify-between text-[11px] text-slate-400 font-mono">
-                    <span className="flex items-center gap-1.5 text-emerald-400 font-bold">
-                      <WhatsAppLogo size={16} /> WhatsApp Business API
-                    </span>
-                    <span>14:02 PM • Just Now</span>
-                  </div>
-                  <div className="p-3.5 rounded-xl bg-emerald-950/60 border border-emerald-500/30 text-emerald-100 text-xs leading-relaxed">
-                    "Hi! I want to know the pricing and features of your UWO Connect Pro Plan."
-                  </div>
-                  <div className="grid grid-cols-2 gap-3 text-[11px]">
-                    <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 space-y-1">
-                      <span className="text-slate-500 font-medium">Customer Name</span>
-                      <p className="font-bold text-slate-200">Rahul Sharma</p>
-                    </div>
-                    <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 space-y-1">
-                      <span className="text-slate-500 font-medium">Phone Number</span>
-                      <p className="font-bold text-slate-200">+91 98765 43210</p>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {activeWorkflowTab === 1 && (
-                <div className="p-4 rounded-2xl bg-slate-900 border border-indigo-500/30 space-y-3 text-left font-mono text-xs">
-                  <div className="flex items-center justify-between">
-                    <span className="text-indigo-400 font-bold flex items-center gap-1.5"><Bot size={16} /> AI Intent Analysis</span>
-                    <span className="px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 text-[10px]">99.8% Confidence</span>
-                  </div>
-                  <div className="p-3.5 rounded-xl bg-indigo-950/40 border border-indigo-500/20 text-indigo-200 text-[11px] leading-relaxed space-y-1">
-                    <p>Detected Intent: <span className="text-white font-bold">Pricing_Inquiry</span></p>
-                    <p>Extracted Channel: <span className="text-white font-bold">WhatsApp_Inbound</span></p>
-                    <p>Priority Score: <span className="text-emerald-400 font-bold">98/100 (Hot Lead)</span></p>
-                  </div>
-                  <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 text-[11px] text-slate-300 flex items-center justify-between">
-                    <span>Target Route</span>
-                    <span className="text-emerald-400 font-bold">Sales & Quotation Engine</span>
-                  </div>
-                </div>
-              )}
-
-              {activeWorkflowTab === 2 && (
-                <div className="p-4 rounded-2xl bg-slate-900 border border-emerald-500/30 space-y-3 text-left">
-                  <div className="flex items-center justify-between">
-                    <span className="text-emerald-400 font-bold text-xs flex items-center gap-1.5"><Users size={16} /> Unified CRM Record</span>
-                    <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px]">Deal Stage: New Lead</span>
-                  </div>
-                  <div className="grid grid-cols-2 gap-3 text-xs">
-                    <div className="p-3 rounded-xl bg-slate-950 border border-slate-800">
-                      <span className="text-[10px] text-slate-500">Contact</span>
-                      <p className="font-bold text-white">Rahul Sharma</p>
-                    </div>
-                    <div className="p-3 rounded-xl bg-slate-950 border border-slate-800">
-                      <span className="text-[10px] text-slate-500">Source</span>
-                      <p className="font-bold text-emerald-400">WhatsApp Direct</p>
-                    </div>
-                  </div>
-                  <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 text-[11px] text-slate-300 flex items-center justify-between">
-                    <span>Assigned Sales Agent</span>
-                    <span className="text-indigo-400 font-bold">AI Assistant Core</span>
-                  </div>
-                </div>
-              )}
-
-              {activeWorkflowTab === 3 && (
-                <div className="p-4 rounded-2xl bg-slate-900 border border-purple-500/30 space-y-3 text-left text-xs">
-                  <div className="flex items-center justify-between">
-                    <span className="text-purple-400 font-bold flex items-center gap-1.5"><MessageSquare size={16} /> Automated Bot Reply</span>
-                    <span className="text-[10px] text-slate-500">Dispatched in 0.4s</span>
-                  </div>
-                  <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 leading-relaxed text-[11px]">
-                    "Hello Rahul! 👋 Thanks for reaching out to UWO Connect. Here is our official product catalog and plan details."
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="px-3 py-2 rounded-xl bg-purple-600/30 text-purple-200 border border-purple-500/40 text-[11px] font-bold flex items-center gap-1.5">
-                      📄 UWO_Connect_Catalog.pdf
-                    </span>
-                  </div>
-                </div>
-              )}
-
-              {activeWorkflowTab === 4 && (
-                <div className="p-4 rounded-2xl bg-slate-900 border border-amber-500/30 space-y-3 text-left text-xs">
-                  <div className="flex items-center justify-between">
-                    <span className="text-amber-400 font-bold flex items-center gap-1.5"><FileCheck size={16} /> Official Quotation #QT-9482</span>
-                    <span className="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 text-[10px]">Status: Active</span>
-                  </div>
-                  <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800 space-y-2 text-[11px]">
-                    <div className="flex justify-between text-slate-300">
-                      <span>UWO Connect Pro Plan (12 Mo)</span>
-                      <span className="font-bold">₹49,999.00</span>
-                    </div>
-                    <div className="flex justify-between text-slate-400 text-[10px]">
-                      <span>GST (18%)</span>
-                      <span>₹8,999.82</span>
-                    </div>
-                    <div className="pt-2 border-t border-slate-800 flex justify-between font-bold text-white text-xs">
-                      <span>Total Amount</span>
-                      <span className="text-amber-400">₹58,998.82</span>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {activeWorkflowTab === 5 && (
-                <div className="p-4 rounded-2xl bg-slate-900 border border-rose-500/30 space-y-3 text-left text-xs">
-                  <div className="flex items-center justify-between">
-                    <span className="text-rose-400 font-bold flex items-center gap-1.5"><Receipt size={16} /> GST Invoice #INV-2026-8812</span>
-                    <span className="px-2.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px] font-bold">Paid via UPI</span>
-                  </div>
-                  <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800 space-y-2 text-[11px]">
-                    <div className="flex items-center justify-between text-slate-300">
-                      <span>UPI Payment Link</span>
-                      <span className="text-rose-400 font-bold">pay.uwoconnect.com/qt9482</span>
-                    </div>
-                    <div className="flex items-center justify-between text-emerald-400 text-[10px] font-mono pt-1 border-t border-slate-800">
-                      <span>✓ Synced to Google Sheets & Tally</span>
-                      <span>0.2s</span>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Bottom Status Progress Indicator */}
-            <div className="pt-4 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400 font-mono mt-4">
-              <span>Status: <strong className="text-emerald-400">Node Active</strong></span>
-              <span>Workflow Progress: <strong className="text-white">{Math.round(((activeWorkflowTab + 1) / 6) * 100)}%</strong></span>
-            </div>
-          </div>
-
-        </div>
         </div>
       </section>
 
@@ -1057,7 +1163,7 @@ export default function UwoLandingPage() {
       {/* 10. UNIFIED WORKSPACE SECTION (CHAOS VS CONNECTED) */}
       {/* ════════════════════════════════════════════════════════════════ */}
       <section className="relative py-24 px-6 sm:px-10 lg:px-12 max-w-7xl mx-auto my-14 bg-gradient-to-br from-slate-50 via-white to-emerald-50/40 rounded-[2.5rem] border border-slate-200/90 shadow-xl overflow-hidden">
-        
+
         {/* Ambient Subtle Glow & Pattern */}
         <div className="absolute -top-32 -right-32 w-80 h-80 bg-rose-500/10 rounded-full blur-[100px] pointer-events-none" />
         <div className="absolute -bottom-32 -left-32 w-80 h-80 bg-emerald-500/10 rounded-full blur-[100px] pointer-events-none" />
@@ -1065,7 +1171,7 @@ export default function UwoLandingPage() {
 
         <div className="relative z-10">
           <div className="text-center space-y-3 mb-12">
-            <h2 
+            <h2
               className="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight italic font-serif"
               style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
             >
@@ -1074,7 +1180,7 @@ export default function UwoLandingPage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            
+
             {/* WITHOUT UWO CONNECT */}
             <div className="p-8 rounded-3xl bg-rose-50/60 border border-rose-200 text-left space-y-4 hover:border-rose-300 hover:shadow-lg transition-all duration-300">
               <span className="px-3 py-1 bg-rose-100 text-rose-800 text-xs font-black rounded-full">
@@ -1104,7 +1210,7 @@ export default function UwoLandingPage() {
       {/* ════════════════════════════════════════════════════════════════ */}
       {/* 11. FEATURE SHOWCASE - SINGLE DYNAMIC CARD WITH ZERO WHITE SPACE GAP */}
       {/* ════════════════════════════════════════════════════════════════ */}
-      <section 
+      <section
         onWheel={(e) => {
           if (e.deltaY > 0 && activeModuleIndex < 8) {
             e.preventDefault();
@@ -1117,12 +1223,12 @@ export default function UwoLandingPage() {
         className="relative py-12 sm:py-16 px-6 sm:px-10 lg:px-12 max-w-7xl mx-auto my-6"
       >
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-stretch">
-          
+
           {/* Left Column: HEADING & 4-OPTION SLIDING WINDOW */}
           <div className="lg:col-span-5 flex flex-col justify-between space-y-6 text-left h-full">
             <div className="space-y-4">
               <UwoBrandHeader align="left" />
-              <h2 
+              <h2
                 className="text-4xl sm:text-5xl font-bold text-slate-900 tracking-tight italic font-serif leading-[1.15]"
                 style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
               >
@@ -1155,8 +1261,8 @@ export default function UwoLandingPage() {
                     const isActive = item.index === activeModuleIndex;
 
                     return (
-                      <button 
-                        key={item.index} 
+                      <button
+                        key={item.index}
                         onClick={() => setActiveModuleIndex(item.index)}
                         className={cn(
                           "flex items-center gap-2.5 text-xs font-bold transition-all duration-300 rounded-xl border px-3.5 py-2.5 text-left cursor-pointer",
@@ -1175,7 +1281,7 @@ export default function UwoLandingPage() {
             </div>
 
             <div className="pt-2">
-              <button 
+              <button
                 onClick={() => router.push('/auth/login')}
                 className="landing-button-glow px-6 py-3.5 rounded-2xl bg-[#059669] hover:bg-[#047857] text-white text-xs font-extrabold shadow-lg shadow-emerald-700/20 flex items-center gap-2 transition-all cursor-pointer"
               >
@@ -1189,100 +1295,100 @@ export default function UwoLandingPage() {
           <div className="lg:col-span-7 flex">
             {(() => {
               const modulesList = [
-                { 
+                {
                   num: '01',
-                  icon: <LayoutDashboard size={26} />, 
-                  title: 'Team Dashboard', 
-                  desc: 'Keep team tasks, channel feeds, and automated business activity organized in one central hub with real-time updates and live activity monitoring.', 
-                  tag: 'CORE ENGINE', 
+                  icon: <LayoutDashboard size={26} />,
+                  title: 'Team Dashboard',
+                  desc: 'Keep team tasks, channel feeds, and automated business activity organized in one central hub with real-time updates and live activity monitoring.',
+                  tag: 'CORE ENGINE',
                   tagStyle: 'bg-emerald-500/10 text-emerald-700 border-emerald-500/30',
                   iconBg: 'bg-gradient-to-br from-emerald-500 to-teal-600 shadow-emerald-500/20',
                   features: ['Multi-user Team Permissions', 'Real-time Feed Sync', 'Role-Based Access'],
                   previewText: '🚀 Active Sessions: 14 Agents Online • 2,480 Automation Events Processed Today • 0 Pending Escalations'
                 },
-                { 
+                {
                   num: '02',
-                  icon: <Users size={26} />, 
-                  title: 'Unified CRM', 
-                  desc: 'Auto-capture customer leads from WhatsApp, Instagram DMs, and contact forms directly into visual sales pipeline stages with smart tags.', 
-                  tag: 'SALES PIPELINE', 
+                  icon: <Users size={26} />,
+                  title: 'Unified CRM',
+                  desc: 'Auto-capture customer leads from WhatsApp, Instagram DMs, and contact forms directly into visual sales pipeline stages with smart tags.',
+                  tag: 'SALES PIPELINE',
                   tagStyle: 'bg-teal-500/10 text-teal-700 border-teal-500/30',
                   iconBg: 'bg-gradient-to-br from-teal-500 to-emerald-600 shadow-teal-500/20',
                   features: ['Automated Lead Scoring', 'Custom Deal Pipeline', 'Contact History Log'],
                   previewText: '👤 New Lead Captured: Rohan Sharma (+91 98765-XXXX) → Tagged as "High Intent Enterprise" → Moved to Stage: Proposal Sent'
                 },
-                { 
+                {
                   num: '03',
-                  icon: <Bot size={26} />, 
-                  title: 'Smart AI Auto Reply', 
-                  desc: 'Instant 24/7 customer response bot with intelligent catalog lookup, FAQs resolution, and automated lead qualification without human delay.', 
-                  tag: '24/7 AI AGENT', 
+                  icon: <Bot size={26} />,
+                  title: 'Smart AI Auto Reply',
+                  desc: 'Instant 24/7 customer response bot with intelligent catalog lookup, FAQs resolution, and automated lead qualification without human delay.',
+                  tag: '24/7 AI AGENT',
                   tagStyle: 'bg-indigo-500/10 text-indigo-700 border-indigo-500/30',
                   iconBg: 'bg-gradient-to-br from-indigo-500 to-purple-600 shadow-indigo-500/20',
                   features: ['0.2s Instant Dispatch', 'Multi-lingual Understanding', 'Human Handover Mode'],
                   previewText: '💬 Customer: "Do you offer GST invoices for enterprise plans?" → AI Bot (0.2s): "Yes! GST tax invoices are generated automatically."'
                 },
-                { 
+                {
                   num: '04',
-                  icon: <FileCheck size={26} />, 
-                  title: 'Quotation Generator', 
-                  desc: 'Create, customize, and dispatch professional PDF GST quotations directly to customer chat conversations in seconds.', 
-                  tag: 'INSTANT PDF', 
+                  icon: <FileCheck size={26} />,
+                  title: 'Quotation Generator',
+                  desc: 'Create, customize, and dispatch professional PDF GST quotations directly to customer chat conversations in seconds.',
+                  tag: 'INSTANT PDF',
                   tagStyle: 'bg-amber-500/10 text-amber-800 border-amber-500/30',
                   iconBg: 'bg-gradient-to-br from-amber-500 to-orange-600 shadow-amber-500/20',
                   features: ['GST & HSN Tax Calculation', 'Dynamic Discounting', 'Instant WhatsApp Share'],
                   previewText: '📄 Generated Quotation #QT-2026-8890 for ₹45,000 + 18% GST → Auto-dispatched as PDF to WhatsApp chat.'
                 },
-                { 
+                {
                   num: '05',
-                  icon: <Receipt size={26} />, 
-                  title: 'GST Invoicing Engine', 
-                  desc: 'Generate official GST tax invoices automatically upon successful payment and sync records directly to Google Sheets & Tally.', 
-                  tag: 'TAX & ACCOUNTING', 
+                  icon: <Receipt size={26} />,
+                  title: 'GST Invoicing Engine',
+                  desc: 'Generate official GST tax invoices automatically upon successful payment and sync records directly to Google Sheets & Tally.',
+                  tag: 'TAX & ACCOUNTING',
                   tagStyle: 'bg-emerald-500/10 text-emerald-700 border-emerald-500/30',
                   iconBg: 'bg-gradient-to-br from-emerald-600 to-green-600 shadow-emerald-500/20',
                   features: ['Automatic PDF Issuance', 'Google Sheets & Tally Sync', 'Tax Audit Compliance'],
                   previewText: '🧾 Invoice #INV-8910 Issued • Amount: ₹53,100 Incl. GST • Auto-synced to Google Sheets Row #1,420 & Tally ERP'
                 },
-                { 
+                {
                   num: '06',
-                  icon: <FileText size={26} />, 
-                  title: 'Proposal & Deals', 
-                  desc: 'Design high-converting business proposals with custom pricing tables, e-signature links, and real-time open notifications.', 
-                  tag: 'CONTRACTS', 
+                  icon: <FileText size={26} />,
+                  title: 'Proposal & Deals',
+                  desc: 'Design high-converting business proposals with custom pricing tables, e-signature links, and real-time open notifications.',
+                  tag: 'CONTRACTS',
                   tagStyle: 'bg-purple-500/10 text-purple-700 border-purple-500/30',
                   iconBg: 'bg-gradient-to-br from-purple-500 to-indigo-600 shadow-purple-500/20',
                   features: ['Real-time View Tracking', 'E-Signature Ready', 'Interactive Pricing Tables'],
                   previewText: '🔔 Notification: Client opened Proposal "Enterprise Automation Suite v2" (Spent 4 mins 12 secs viewing pricing section)'
                 },
-                { 
+                {
                   num: '07',
-                  icon: <ShoppingBag size={26} />, 
-                  title: 'Product & Service Catalog', 
-                  desc: 'Present digital product catalogs with rich images, descriptions, pricing, and 1-click WhatsApp order checkout links.', 
-                  tag: 'E-COMMERCE', 
+                  icon: <ShoppingBag size={26} />,
+                  title: 'Product & Service Catalog',
+                  desc: 'Present digital product catalogs with rich images, descriptions, pricing, and 1-click WhatsApp order checkout links.',
+                  tag: 'E-COMMERCE',
                   tagStyle: 'bg-cyan-500/10 text-cyan-700 border-cyan-500/30',
                   iconBg: 'bg-gradient-to-br from-cyan-500 to-blue-600 shadow-cyan-500/20',
                   features: ['Interactive Category Grid', '1-Click WhatsApp Cart', 'Live Stock Sync'],
                   previewText: '🛍️ Catalog Link Dispatched → Customer selected 2 Items (Total ₹12,499) → Checkout initiated via WhatsApp'
                 },
-                { 
+                {
                   num: '08',
-                  icon: <CreditCard size={26} />, 
-                  title: 'Payment Integration', 
-                  desc: 'Connect Razorpay, PhonePe, and UPI payment actions directly into your business chat workflow for 0-friction sales.', 
-                  tag: 'RAZORPAY UPI', 
+                  icon: <CreditCard size={26} />,
+                  title: 'Payment Integration',
+                  desc: 'Connect Razorpay, PhonePe, and UPI payment actions directly into your business chat workflow for 0-friction sales.',
+                  tag: 'RAZORPAY UPI',
                   tagStyle: 'bg-rose-500/10 text-rose-700 border-rose-500/30',
                   iconBg: 'bg-gradient-to-br from-rose-500 to-red-600 shadow-rose-500/20',
                   features: ['Native UPI Link Dispatch', 'Instant Payment Verification', 'Auto Webhook Triggers'],
                   previewText: '💳 Payment Link Generated via Razorpay UPI → Webhook Received: Payment Verified ₹12,499 → Order Confirmed!'
                 },
-                { 
+                {
                   num: '09',
-                  icon: <Video size={26} />, 
-                  title: 'Voice & Video Calling', 
-                  desc: 'Engage high-intent customers through crystal-clear HD WebRTC voice and video calls directly inside the web browser without any download.', 
-                  tag: 'LIVE MEDIA', 
+                  icon: <Video size={26} />,
+                  title: 'Voice & Video Calling',
+                  desc: 'Engage high-intent customers through crystal-clear HD WebRTC voice and video calls directly inside the web browser without any download.',
+                  tag: 'LIVE MEDIA',
                   tagStyle: 'bg-blue-500/10 text-blue-700 border-blue-500/30',
                   iconBg: 'bg-gradient-to-br from-blue-500 to-indigo-600 shadow-blue-500/20',
                   features: ['In-Browser HD Video', 'Call Recording Logs', 'Screen Share Support'],
@@ -1294,7 +1400,7 @@ export default function UwoLandingPage() {
 
               return (
                 <div key={activeModuleIndex} className="p-7 sm:p-8 rounded-[2.5rem] bg-white border border-slate-200/90 shadow-2xl shadow-emerald-900/5 relative overflow-hidden text-left transition-all duration-500 flex flex-col justify-between w-full h-full">
-                  
+
                   {/* Top Accent Gradient Line */}
                   <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600" />
 
@@ -1307,7 +1413,7 @@ export default function UwoLandingPage() {
                         </div>
                         <div>
                           <span className="text-[11px] font-black text-slate-400 tracking-widest uppercase">MODULE {currentModule.num} OF 09</span>
-                          <h3 
+                          <h3
                             className="text-2xl sm:text-3xl font-bold text-slate-900 leading-tight italic font-serif"
                             style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
                           >
@@ -1393,7 +1499,7 @@ export default function UwoLandingPage() {
       {/* 11.5 PRICING & SUBSCRIPTION PLANS */}
       {/* ════════════════════════════════════════════════════════════════ */}
       <section id="pricing" className="relative py-20 px-6 sm:px-10 lg:px-12 max-w-7xl mx-auto my-16 text-center bg-gradient-to-br from-slate-50/90 via-white to-emerald-50/50 rounded-[2.5rem] border border-slate-200/90 shadow-xl overflow-hidden">
-        
+
         {/* Ambient Glows */}
         <div className="absolute -top-32 -left-32 w-80 h-80 bg-emerald-500/10 rounded-full blur-[100px] pointer-events-none" />
         <div className="absolute -bottom-32 -right-32 w-80 h-80 bg-teal-500/10 rounded-full blur-[100px] pointer-events-none" />
@@ -1408,14 +1514,14 @@ export default function UwoLandingPage() {
       {/* 12. WHITE-LABEL & AGENCY RESELLER PROGRAM - COMPACT & EXPANDABLE */}
       {/* ════════════════════════════════════════════════════════════════ */}
       <section id="white-label" className="relative py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto my-16 bg-gradient-to-br from-slate-50 via-white to-emerald-50/40 text-slate-900 rounded-[2.5rem] shadow-xl border border-slate-200/90 overflow-hidden text-left transition-all duration-500">
-        
+
         {/* Ambient Animated Glow & Pattern */}
         <div className="absolute -top-32 -left-32 w-96 h-96 bg-emerald-500/10 rounded-full blur-[120px] pointer-events-none animate-pulse" />
         <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-teal-500/10 rounded-full blur-[120px] pointer-events-none animate-pulse" />
         <div className="absolute inset-0 bg-[radial-gradient(#059669_1px,transparent_1px)] [background-size:28px_28px] opacity-10 pointer-events-none" />
 
         <div className="relative z-10 space-y-12">
-          
+
           {/* 1. HERO & MAIN HEADING (ALWAYS VISIBLE) */}
           <ScrollReveal>
             <div className="text-center max-w-4xl mx-auto space-y-6">
@@ -1423,7 +1529,7 @@ export default function UwoLandingPage() {
                 AGENCY RESELLER & WHITE-LABEL PARTNER PROGRAM
               </span>
 
-              <h2 
+              <h2
                 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-slate-900 tracking-tight italic font-serif leading-tight"
                 style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
               >
@@ -1436,15 +1542,15 @@ export default function UwoLandingPage() {
 
               {/* CTAs & Micro-Proof */}
               <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-4">
-                <button 
-                  onClick={() => router.push('/auth/login')}
+                <button
+                  onClick={() => window.open('https://docs.google.com/forms/d/e/1FAIpQLSeEVo1MoqqGLPZvBnUVpS3stqKzvr41V3qNLJ94zwQ3psRiNw/viewform?usp=dialog', '_blank')}
                   className="landing-button-glow px-8 py-4 rounded-2xl bg-[#059669] hover:bg-[#047857] text-white text-sm font-extrabold shadow-lg shadow-emerald-700/25 flex items-center gap-2.5 transition-all hover:scale-105 active:scale-95 cursor-pointer"
                 >
                   <span>🚀 Apply for Agency White-Label</span>
                   <ArrowRight size={18} />
                 </button>
 
-                <button 
+                <button
                   onClick={() => router.push('/book')}
                   className="px-8 py-4 rounded-2xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/90 text-sm font-bold shadow-xs hover:border-emerald-500 hover:scale-105 transition-all cursor-pointer"
                 >
@@ -1478,13 +1584,13 @@ export default function UwoLandingPage() {
           {/* EXPANDABLE FULL DETAILS (SHOWN WHEN USER CLICKS EXPLORE PROGRAM DETAILS) */}
           {showWhiteLabelDetails && (
             <div className="space-y-16 pt-8 border-t border-slate-200/80 transition-all duration-500">
-              
+
               {/* 2. HOW IT WORKS (4-STEP ONBOARDING JOURNEY) */}
               <div className="space-y-8">
                 <ScrollReveal>
                   <div className="text-center space-y-2">
                     <span className="text-xs font-black tracking-widest text-[#059669] uppercase">4-STEP ONBOARDING JOURNEY</span>
-                    <h3 
+                    <h3
                       className="text-3xl sm:text-4xl font-bold text-slate-900 italic font-serif"
                       style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
                     >
@@ -1541,7 +1647,7 @@ export default function UwoLandingPage() {
                 <ScrollReveal>
                   <div className="text-center space-y-2">
                     <span className="text-xs font-black tracking-widest text-[#059669] uppercase">AGENCY DELIVERABLES</span>
-                    <h3 
+                    <h3
                       className="text-3xl sm:text-4xl font-bold text-slate-900 italic font-serif"
                       style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
                     >
@@ -1662,7 +1768,7 @@ export default function UwoLandingPage() {
                 <div className="p-8 rounded-3xl bg-slate-50/80 border border-slate-200/90 space-y-6">
                   <div className="text-left space-y-2">
                     <span className="text-xs font-black tracking-widest text-[#059669] uppercase">PREREQUISITES CHECKLIST</span>
-                    <h3 
+                    <h3
                       className="text-2xl sm:text-3xl font-bold text-slate-900 italic font-serif"
                       style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
                     >
@@ -1707,7 +1813,7 @@ export default function UwoLandingPage() {
                 <ScrollReveal>
                   <div className="text-center space-y-2">
                     <span className="text-xs font-black tracking-widest text-[#059669] uppercase">AGENCY PARTNER FAQS</span>
-                    <h3 
+                    <h3
                       className="text-3xl sm:text-4xl font-bold text-slate-900 italic font-serif"
                       style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
                     >
@@ -1753,7 +1859,7 @@ export default function UwoLandingPage() {
               {/* Bottom Banner CTA */}
               <ScrollReveal>
                 <div className="p-8 sm:p-10 rounded-3xl bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-emerald-50/80 border border-emerald-200 text-center space-y-4 shadow-sm hover:shadow-md transition-shadow">
-                  <h3 
+                  <h3
                     className="text-3xl sm:text-4xl font-bold text-slate-900 italic font-serif"
                     style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
                   >
@@ -1763,8 +1869,8 @@ export default function UwoLandingPage() {
                     Get your custom white-label domain configured in minutes. Rebrand, sell, and keep 100% of the revenue.
                   </p>
                   <div className="pt-2">
-                    <button 
-                      onClick={() => router.push('/auth/login')}
+                    <button
+                      onClick={() => window.open('https://docs.google.com/forms/d/e/1FAIpQLSeEVo1MoqqGLPZvBnUVpS3stqKzvr41V3qNLJ94zwQ3psRiNw/viewform?usp=dialog', '_blank')}
                       className="landing-button-glow px-8 py-4 rounded-2xl bg-[#059669] hover:bg-[#047857] text-white text-sm font-extrabold shadow-xl shadow-emerald-700/25 inline-flex items-center gap-2.5 transition-all hover:scale-105 active:scale-95 cursor-pointer"
                     >
                       <span>Apply for Agency White-Label License</span>
@@ -1780,15 +1886,222 @@ export default function UwoLandingPage() {
         </div>
       </section>
 
+      {/* ════════════════════════════════════════════════════════════════ */}
+      {/* 12.5 FREQUENTLY ASKED QUESTIONS (FAQ) */}
+      {/* ════════════════════════════════════════════════════════════════ */}
+      <section id="faq" className="relative py-20 px-6 sm:px-10 lg:px-14 max-w-5xl mx-auto my-20 bg-gradient-to-br from-emerald-500/15 via-teal-500/10 to-emerald-100/40 rounded-[2.5rem] border-2 border-emerald-500/30 shadow-2xl shadow-emerald-600/15 overflow-hidden text-left">
+        {/* Vibrant Glowing Ambient Light Spheres & Grid Pattern Background */}
+        <div className="absolute -top-32 -left-32 w-96 h-96 bg-emerald-400/35 rounded-full blur-[90px] pointer-events-none animate-pulse-glow" />
+        <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-teal-400/35 rounded-full blur-[90px] pointer-events-none animate-pulse-glow" />
+        <div className="absolute inset-0 bg-[radial-gradient(#059669_1.5px,transparent_1.5px)] [background-size:24px_24px] opacity-25 pointer-events-none" />
+        
+        {/* Decorative Rotating Help Icon Watermark */}
+        <div className="absolute -right-12 -bottom-12 opacity-[0.12] text-[#059669] pointer-events-none">
+          <HelpCircle size={280} className="animate-spin-slow" />
+        </div>
+
+        <ScrollReveal>
+          <div className="relative z-10 text-center space-y-3 mb-12">
+            <span className="px-4 py-1.5 rounded-full bg-[#059669] text-white text-xs font-black tracking-widest uppercase inline-block shadow-md shadow-emerald-600/30">
+              STILL HAVE QUESTIONS?
+            </span>
+            <h2
+              className="text-3xl sm:text-5xl font-bold text-slate-900 font-serif leading-tight"
+              style={{ fontFamily: "'Times New Roman', Times, serif" }}
+            >
+              Frequently Asked Questions
+            </h2>
+            <p className="text-sm sm:text-base text-slate-700 font-bold max-w-xl mx-auto">
+              Everything you need to know about UwoConnect.
+            </p>
+          </div>
+        </ScrollReveal>
+
+        {/* Accordion Questions List */}
+        <div className="relative z-10 space-y-3">
+          {(() => {
+            const faqList = [
+              {
+                q: 'What is UwoConnect?',
+                a: 'UwoConnect is a business automation platform that helps businesses manage customer conversations, leads, sales, payments and daily business activities from one place.'
+              },
+              {
+                q: 'Which channels can I connect with UwoConnect?',
+                a: 'UwoConnect supports supported channels such as WhatsApp Business, Instagram, Facebook and other available communication integrations. Channel availability may depend on the selected plan and third-party platform requirements.'
+              },
+              {
+                q: 'What is included in my UwoConnect plan?',
+                a: 'Each plan includes a specific set of features, channels, connectors and usage limits. The exact features included in each plan are shown in the Pricing Plans section above.'
+              },
+              {
+                q: 'Are subscription and wallet charges separate?',
+                a: 'Yes. Your UwoConnect subscription and prepaid usage wallet are completely separate. Subscription pays for your platform plan, while the wallet covers usage-based services. Wallet balance is not used to pay the subscription.'
+              },
+              {
+                q: 'What is the UwoConnect wallet?',
+                a: 'The wallet is a prepaid balance that can be used for applicable usage-based UwoConnect services. You can add money to the wallet separately from your subscription.'
+              },
+              {
+                q: 'How can I add money to my wallet?',
+                a: 'You can select an amount from the available recharge options or enter a custom amount. You will then complete the payment through the available payment gateway. The wallet is credited only after successful payment confirmation.'
+              },
+              {
+                q: 'What happens after I use all my included broadcasts?',
+                a: 'Once the broadcasts included in your plan have been used, additional broadcasts can be charged from your wallet if sufficient wallet balance is available. The applicable additional broadcast price will be shown in UwoConnect.'
+              },
+              {
+                q: 'How much does an additional broadcast cost?',
+                a: 'The applicable additional broadcast charge is shown in the UwoConnect platform and may be updated according to the current pricing configuration.'
+              },
+              {
+                q: 'Will my wallet be charged when I recharge it?',
+                a: 'No. When you recharge your wallet, the amount you pay is added to your wallet balance. Usage charges are deducted separately when a billable service is actually used.'
+              },
+              {
+                q: 'What happens if my wallet balance reaches zero?',
+                a: 'Your subscription can remain active. However, usage-based services that require wallet balance may be restricted until you recharge your wallet.'
+              },
+              {
+                q: 'Can I use UwoConnect without coding?',
+                a: 'Yes. UwoConnect is designed to make common business automation workflows accessible without requiring coding for normal use.'
+              },
+              {
+                q: 'Can I use AI automation?',
+                a: 'Yes. UwoConnect provides AI-powered automation for supported customer conversations, FAQs, lead qualification and business workflows. AI-generated responses may not always be perfect, so important information should be reviewed.'
+              },
+              {
+                q: 'Can I manage my leads and customers?',
+                a: 'Yes. UwoConnect provides CRM and lead-management capabilities to help businesses organize customer information and manage sales stages.'
+              },
+              {
+                q: 'Can I create quotations and invoices?',
+                a: 'Yes. Supported UwoConnect features allow businesses to create quotations, proposals and GST invoices. Businesses are responsible for checking their invoice and tax information.'
+              },
+              {
+                q: 'Can I connect my existing business tools?',
+                a: 'UwoConnect provides connectors for supported services such as Google, Microsoft, payment services and other business tools. Available connectors depend on your plan and the current integration availability.'
+              },
+              {
+                q: 'Can I add team members?',
+                a: 'Yes. Depending on your plan, you can add team members and manage their access using supported roles and permissions.'
+              },
+              {
+                q: 'Does UwoConnect offer white-label solutions?',
+                a: 'Yes. UwoConnect provides white-label/agency capabilities for eligible partners. Availability and commercial terms may vary.'
+              },
+              {
+                q: 'Is my payment information secure?',
+                a: 'Payments are processed through supported payment providers. UwoConnect does not ask users to share payment credentials directly through normal chat or support channels.'
+              }
+            ];
+
+            const displayedFaqs = showAllFaqs ? faqList : faqList.slice(0, 8);
+
+            return (
+              <>
+                {displayedFaqs.map((faq, idx) => {
+                  const isOpen = openFaqIndex === idx;
+                  return (
+                    <ScrollReveal key={idx} delay={idx * 30}>
+                      <div className="bg-white/95 backdrop-blur-md border border-emerald-200/90 hover:border-[#059669] hover:shadow-xl hover:shadow-emerald-600/10 rounded-2xl transition-all duration-300 overflow-hidden group">
+                        <button
+                          type="button"
+                          onClick={() => setOpenFaqIndex(isOpen ? null : idx)}
+                          className="w-full p-5 sm:p-6 text-left flex items-center justify-between gap-4 cursor-pointer select-none font-extrabold text-slate-900 text-sm sm:text-base hover:text-[#059669] transition-colors"
+                        >
+                          <span className="leading-snug">{faq.q}</span>
+                          <span className={cn(
+                            "w-8 h-8 rounded-full flex items-center justify-center shrink-0 border transition-all duration-500 transform shadow-xs",
+                            isOpen
+                              ? "bg-[#059669] text-white border-[#059669] rotate-180"
+                              : "bg-emerald-50 text-[#059669] border-emerald-200 group-hover:bg-[#059669] group-hover:text-white group-hover:border-[#059669] rotate-0"
+                          )}>
+                            {isOpen ? <Minus size={18} /> : <Plus size={18} />}
+                          </span>
+                        </button>
+
+                        <div 
+                          className={cn(
+                            "grid transition-all duration-500 ease-in-out border-emerald-100",
+                            isOpen 
+                              ? "grid-rows-[1fr] opacity-100 pt-3 pb-6 px-5 sm:px-6 border-t" 
+                              : "grid-rows-[0fr] opacity-0 py-0 px-5 sm:px-6 border-t-0"
+                          )}
+                        >
+                          <div className="overflow-hidden text-xs sm:text-sm text-slate-700 leading-relaxed font-medium">
+                            {faq.a}
+                          </div>
+                        </div>
+                      </div>
+                    </ScrollReveal>
+                  );
+                })}
+
+                {/* View More FAQs Toggle Button */}
+                <div className="text-center pt-8">
+                  <button
+                    type="button"
+                    onClick={() => setShowAllFaqs(!showAllFaqs)}
+                    className="px-8 py-3.5 rounded-full bg-[#059669] hover:bg-[#047857] text-white text-xs font-black tracking-wider uppercase inline-flex items-center gap-2 transition-all hover:scale-105 shadow-lg shadow-emerald-700/25 cursor-pointer group"
+                  >
+                    <span>{showAllFaqs ? 'Show Fewer Questions' : 'View More FAQs'}</span>
+                    {showAllFaqs ? <ChevronUp size={16} /> : <ChevronDown size={16} className="group-hover:translate-y-0.5 transition-transform" />}
+                  </button>
+                </div>
+              </>
+            );
+          })()}
+        </div>
+      </section>
 
       {/* ════════════════════════════════════════════════════════════════ */}
-      {/* 13. FOOTER */}
+      {/* 12.6 FINAL CTA SECTION */}
       {/* ════════════════════════════════════════════════════════════════ */}
+      <section className="relative py-16 px-6 sm:px-10 max-w-5xl mx-auto my-12 text-center bg-gradient-to-r from-slate-900 via-slate-800 to-emerald-950 text-white rounded-3xl border border-slate-800 shadow-2xl overflow-hidden">
+        <div className="relative z-10 space-y-4">
+          <h3
+            className="text-3xl sm:text-4xl font-bold text-white font-serif leading-tight"
+            style={{ fontFamily: "'Times New Roman', Times, serif" }}
+          >
+            Ready to simplify your business?
+          </h3>
+          <p className="text-sm text-slate-300 font-medium max-w-lg mx-auto leading-relaxed">
+            Start managing your conversations, leads and automation with UwoConnect.
+          </p>
+          <div className="pt-2">
+            <button
+              type="button"
+              onClick={() => router.push('/auth/register')}
+              className="landing-button-glow px-8 py-4 rounded-2xl bg-[#059669] hover:bg-[#047857] text-white text-sm font-extrabold shadow-xl shadow-emerald-700/25 inline-flex items-center gap-2.5 transition-all hover:scale-105 active:scale-95 cursor-pointer"
+            >
+              <span>Get Started</span>
+              <ArrowRight size={18} />
+            </button>
+          </div>
+        </div>
+      </section>
       <footer className="bg-slate-50 border-t border-slate-200 py-16 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-5 gap-8 text-left text-xs">
-          
-          <div className="col-span-2 space-y-4">
-            <div className="flex items-center gap-3">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 items-start text-xs">
+
+          {/* Left Column: Company Links (Centered) */}
+          <div className="space-y-3 text-center">
+            <h5
+              className="font-bold text-sm text-[#059669] font-serif text-center"
+              style={{ fontFamily: "'Times New Roman', Times, serif" }}
+            >
+              Company
+            </h5>
+            <ul className="space-y-2 text-slate-900 font-bold text-center">
+              <li><Link href="/about" className="hover:text-emerald-700 transition-colors">About Us</Link></li>
+              <li><Link href="/contact" className="hover:text-emerald-700 transition-colors">Contact</Link></li>
+              <li><Link href="/book" className="hover:text-emerald-700 transition-colors">Book Demo</Link></li>
+              <li><Link href="/admin/whitelabel" className="hover:text-emerald-700 transition-colors">White Label</Link></li>
+            </ul>
+          </div>
+
+          {/* Center Column: Brand Info & Social Media Icons */}
+          <div className="flex flex-col items-center justify-center text-center space-y-4 max-w-md mx-auto">
+            <div className="flex items-center justify-center gap-3">
               <div className="w-10 h-10 rounded-2xl overflow-hidden shadow-md shadow-emerald-600/20 flex items-center justify-center bg-white border border-emerald-500/30 p-0.5 shrink-0">
                 <img
                   src="/download (3).gif"
@@ -1798,75 +2111,73 @@ export default function UwoLandingPage() {
                   height={40}
                 />
               </div>
-              <span 
+              <span
                 className="text-xl font-bold tracking-tight text-slate-900 italic font-serif"
                 style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
               >
                 UWO <span className="text-[#059669]">Connect</span>
               </span>
             </div>
-            
-            <p className="text-slate-900 font-semibold max-w-sm leading-relaxed">
+
+            <p className="text-slate-900 font-semibold max-w-sm text-center leading-relaxed">
               Unified Communication & Business Automation Platform. Connect channels, tools, and workflows seamlessly.
             </p>
 
-            {/* Social Media Brand Icons */}
-            <div className="flex items-center gap-2.5 pt-1">
-              <a href="https://whatsapp.com" target="_blank" rel="noopener noreferrer" className="p-2 rounded-xl bg-white border border-slate-200 shadow-2xs hover:scale-110 hover:border-emerald-500 hover:shadow-md transition-all duration-300 cursor-pointer">
-                <WhatsAppLogo size={20} />
+            {/* Social Media Icons (Single Row) */}
+            <div className="flex flex-wrap sm:flex-nowrap items-center justify-center gap-1.5 sm:gap-2 pt-1 mx-auto max-w-full">
+              <a href="https://www.instagram.com/aimall.global/" target="_blank" rel="noopener noreferrer" title="Instagram" className="p-1.5 sm:p-2 rounded-xl bg-white border border-slate-200 shadow-2xs hover:scale-110 hover:border-pink-500 hover:shadow-md transition-all duration-300 cursor-pointer flex items-center justify-center shrink-0">
+                <InstagramLogo size={18} />
               </a>
-              <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="p-2 rounded-xl bg-white border border-slate-200 shadow-2xs hover:scale-110 hover:border-pink-500 hover:shadow-md transition-all duration-300 cursor-pointer">
-                <InstagramLogo size={20} />
+              <a href="https://www.linkedin.com/in/aimall-global/" target="_blank" rel="noopener noreferrer" title="LinkedIn" className="p-1.5 sm:p-2 rounded-xl bg-white border border-slate-200 shadow-2xs hover:scale-110 hover:border-blue-600 hover:shadow-md transition-all duration-300 cursor-pointer flex items-center justify-center shrink-0">
+                <LinkedInLogo size={18} />
               </a>
-              <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="p-2 rounded-xl bg-white border border-slate-200 shadow-2xs hover:scale-110 hover:border-blue-500 hover:shadow-md transition-all duration-300 cursor-pointer">
-                <FacebookLogo size={20} />
+              <a href="https://x.com/aimallglobal" target="_blank" rel="noopener noreferrer" title="X (Twitter)" className="p-1.5 sm:p-2 rounded-xl bg-white border border-slate-200 shadow-2xs hover:scale-110 hover:border-slate-900 hover:shadow-md transition-all duration-300 cursor-pointer flex items-center justify-center shrink-0">
+                <XLogo size={18} />
               </a>
-              <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" className="p-2 rounded-xl bg-white border border-slate-200 shadow-2xs hover:scale-110 hover:border-red-500 hover:shadow-md transition-all duration-300 cursor-pointer">
-                <YouTubeLogo size={20} />
+              <a href="https://www.youtube.com/@aimallglobal" target="_blank" rel="noopener noreferrer" title="YouTube" className="p-1.5 sm:p-2 rounded-xl bg-white border border-slate-200 shadow-2xs hover:scale-110 hover:border-red-500 hover:shadow-md transition-all duration-300 cursor-pointer flex items-center justify-center shrink-0">
+                <YouTubeLogo size={18} />
+              </a>
+              <a href="https://in.pinterest.com/aimallglobal/" target="_blank" rel="noopener noreferrer" title="Pinterest" className="p-1.5 sm:p-2 rounded-xl bg-white border border-slate-200 shadow-2xs hover:scale-110 hover:border-red-600 hover:shadow-md transition-all duration-300 cursor-pointer flex items-center justify-center shrink-0">
+                <PinterestLogo size={18} />
+              </a>
+              <a href="https://www.facebook.com/aimallglobal/" target="_blank" rel="noopener noreferrer" title="Facebook" className="p-1.5 sm:p-2 rounded-xl bg-white border border-slate-200 shadow-2xs hover:scale-110 hover:border-blue-500 hover:shadow-md transition-all duration-300 cursor-pointer flex items-center justify-center shrink-0">
+                <FacebookLogo size={18} />
+              </a>
+              <a href="https://api.whatsapp.com/send?phone=918359890909" target="_blank" rel="noopener noreferrer" title="WhatsApp" className="p-1.5 sm:p-2 rounded-xl bg-white border border-slate-200 shadow-2xs hover:scale-110 hover:border-emerald-500 hover:shadow-md transition-all duration-300 cursor-pointer flex items-center justify-center shrink-0">
+                <WhatsAppLogo size={18} />
+              </a>
+              <a href="mailto:admin@uwo24.com" target="_blank" rel="noopener noreferrer" title="Gmail" className="p-1.5 sm:p-2 rounded-xl bg-white border border-slate-200 shadow-2xs hover:scale-110 hover:border-red-500 hover:shadow-md transition-all duration-300 cursor-pointer flex items-center justify-center shrink-0">
+                <GmailLogo size={18} />
+              </a>
+              <a href="https://www.threads.net/@aimallglobal" target="_blank" rel="noopener noreferrer" title="Threads" className="p-1.5 sm:p-2 rounded-xl bg-white border border-slate-200 shadow-2xs hover:scale-110 hover:border-slate-900 hover:shadow-md transition-all duration-300 cursor-pointer flex items-center justify-center shrink-0">
+                <ThreadsLogo size={18} />
+              </a>
+              <a href="https://www.reddit.com/settings/profile/#visibility" target="_blank" rel="noopener noreferrer" title="Reddit" className="p-1.5 sm:p-2 rounded-xl bg-white border border-slate-200 shadow-2xs hover:scale-110 hover:border-orange-500 hover:shadow-md transition-all duration-300 cursor-pointer flex items-center justify-center shrink-0">
+                <RedditLogo size={18} />
+              </a>
+              <a href="https://www.quora.com/profile/Aimallglobal" target="_blank" rel="noopener noreferrer" title="Quora" className="p-1.5 sm:p-2 rounded-xl bg-white border border-slate-200 shadow-2xs hover:scale-110 hover:border-red-700 hover:shadow-md transition-all duration-300 cursor-pointer flex items-center justify-center shrink-0">
+                <QuoraLogo size={18} />
+              </a>
+              <a href="https://medium.com/@03sonalijain" target="_blank" rel="noopener noreferrer" title="Medium" className="p-1.5 sm:p-2 rounded-xl bg-white border border-slate-200 shadow-2xs hover:scale-110 hover:border-slate-800 hover:shadow-md transition-all duration-300 cursor-pointer flex items-center justify-center shrink-0">
+                <MediumLogo size={18} />
               </a>
             </div>
           </div>
 
-          <div className="space-y-3">
-            <h5 
-              className="font-bold text-sm text-[#059669] italic font-serif"
-              style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
-            >
-              Product
-            </h5>
-            <ul className="space-y-2 text-slate-900 font-bold">
-              <li><a href="#channels" className="hover:text-emerald-700 transition-colors">Channels</a></li>
-              <li><a href="#connectors" className="hover:text-emerald-700 transition-colors">Connectors</a></li>
-              <li><a href="#features" className="hover:text-emerald-700 transition-colors">Features</a></li>
-              <li><Link href="/client/plans" className="hover:text-emerald-700 transition-colors">Pricing</Link></li>
-            </ul>
-          </div>
-
-          <div className="space-y-3">
-            <h5 
-              className="font-bold text-sm text-[#059669] italic font-serif"
-              style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
-            >
-              Company
-            </h5>
-            <ul className="space-y-2 text-slate-900 font-bold">
-              <li><Link href="/about" className="hover:text-emerald-700 transition-colors">About Us</Link></li>
-              <li><Link href="/contact" className="hover:text-emerald-700 transition-colors">Contact</Link></li>
-              <li><Link href="/book" className="hover:text-emerald-700 transition-colors">Book Demo</Link></li>
-            </ul>
-          </div>
-
-          <div className="space-y-3">
-            <h5 
-              className="font-bold text-sm text-[#059669] italic font-serif"
-              style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
+          {/* Right Column: Legal Links (Centered) */}
+          <div className="space-y-3 text-center">
+            <h5
+              className="font-bold text-sm text-[#059669] font-serif text-center"
+              style={{ fontFamily: "'Times New Roman', Times, serif" }}
             >
               Legal
             </h5>
-            <ul className="space-y-2 text-slate-900 font-bold">
-              <li><Link href="/privacy" className="hover:text-emerald-700 transition-colors">Privacy Policy</Link></li>
-              <li><Link href="/terms" className="hover:text-emerald-700 transition-colors">Terms of Service</Link></li>
-              <li><Link href="/refund-policy" className="hover:text-emerald-700 transition-colors">Refund Policy</Link></li>
+            <ul className="space-y-2 text-slate-900 font-bold text-center">
+              <li><button onClick={() => setIsTermsModalOpen(true)} className="hover:text-emerald-700 transition-colors cursor-pointer text-center mx-auto block">Terms &amp; Conditions</button></li>
+              <li><Link href="/privacy" className="hover:text-emerald-700 transition-colors cursor-pointer text-center mx-auto block">Privacy Policy</Link></li>
+              <li><Link href="/cookie-policy" className="hover:text-emerald-700 transition-colors cursor-pointer text-center mx-auto block">Cookie Policy</Link></li>
+              <li><button onClick={() => typeof window !== 'undefined' && window.dispatchEvent(new CustomEvent('open_cookie_settings'))} className="hover:text-emerald-700 transition-colors cursor-pointer text-center mx-auto block">Cookie Settings</button></li>
+              <li><button onClick={() => setIsTermsModalOpen(true)} className="hover:text-emerald-700 transition-colors cursor-pointer text-center mx-auto block">Refund Policy</button></li>
             </ul>
           </div>
 
@@ -1880,6 +2191,11 @@ export default function UwoLandingPage() {
       {/* Auth Modal Trigger */}
       {isLoginModalOpen && (
         <UWOLoginModal isOpen={isLoginModalOpen} onClose={() => setIsLoginModalOpen(false)} />
+      )}
+
+      {/* Terms & Legal Popup Modal Trigger */}
+      {isTermsModalOpen && (
+        <TermsModal isOpen={isTermsModalOpen} onClose={() => setIsTermsModalOpen(false)} />
       )}
 
     </div>

@@ -13,10 +13,10 @@ const getApiBaseUrl = () => {
   if (typeof window !== 'undefined' && window.location) {
     const currentHost = window.location.hostname;
     if (currentHost === 'localhost' || currentHost === '127.0.0.1') {
-      return 'http://127.0.0.1:8080';
+      return 'http://127.0.0.1:8000';
     }
     if (PRIVATE_IP_REGEX.test(currentHost)) {
-      return `http://${currentHost}:8080`;
+      return `http://${currentHost}:8000`;
     }
   }
   if (process.env.NEXT_PUBLIC_API_URL) {

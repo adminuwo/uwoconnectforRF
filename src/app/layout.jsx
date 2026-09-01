@@ -7,6 +7,8 @@ import { EntitlementProvider } from "@/context/EntitlementContext";
 import UpgradeModal from "@/components/common/UpgradeModal";
 import AxiosNetworkFixer from "@/components/AxiosNetworkFixer";
 
+import CookieConsentBanner from "@/components/common/CookieConsentBanner";
+
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
@@ -29,20 +31,13 @@ export default function RootLayout({ children }) {
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col overflow-x-hidden font-sans" suppressHydrationWarning>
-        {/* Unified Analytics Platform Auto-Tracker */}
-        <Script
-          id="unified-analytics-tracker"
-          strategy="afterInteractive"
-          src="https://admin.uwo24.com/api/web-stats/tracker.js"
-          data-site="uwoconnect"
-          data-endpoint="https://admin.uwo24.com/api/web-stats/collect"
-        />
         <AxiosNetworkFixer />
         <BrandProvider>
           <EntitlementProvider>
             <TourProvider>
               {children}
               <UpgradeModal />
+              <CookieConsentBanner />
             </TourProvider>
           </EntitlementProvider>
         </BrandProvider>

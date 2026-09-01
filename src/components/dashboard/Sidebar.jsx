@@ -36,7 +36,8 @@ import {
   X,
   Lock,
   Globe,
-  Building2
+  Building2,
+  Wallet
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useEntitlement } from '@/context/EntitlementContext';
@@ -184,6 +185,7 @@ const Sidebar = ({ role, isOpen, onClose, onToggle }) => {
     { name: 'Emails', href: '/admin/emails', icon: Mail },
     { name: 'Products', href: '/admin/products', icon: ShoppingBag },
     { name: 'Sales & Orders', href: '/admin/sales', icon: CreditCard },
+    { name: 'Wallet & Rates', href: '/admin/billing', icon: Wallet },
     { name: 'Quotations', href: '/admin/quotations', icon: FileCheck },
     { name: 'Proposals', href: '/admin/proposals', icon: FileText },
     { name: 'Invoices', href: '/admin/invoices', icon: Receipt },
@@ -223,6 +225,7 @@ const Sidebar = ({ role, isOpen, onClose, onToggle }) => {
     { name: 'Knowledge Base', href: '/client/knowledge', icon: Brain, requiredPlan: 'Starter', featureKey: 'feature_knowledge_base' },
     { name: 'Catalog', href: '/client/catalog', icon: ShoppingBag, requiredPlan: 'Starter', featureKey: 'feature_catalog' },
     { name: 'Payments', href: '/client/payments', icon: CreditCard, requiredPlan: 'Starter', featureKey: 'feature_payment' },
+    { name: 'Billing & Wallet', href: '/client/billing', icon: Wallet, requiredPlan: 'Starter' },
     { name: 'Orders', href: '/client/orders', icon: Receipt, requiredPlan: 'Starter', featureKey: 'feature_order' },
     { name: 'Team', href: '/client/team', icon: ShieldCheck, requiredPlan: 'Starter', featureKey: 'feature_team_dashboard' },
     { name: 'Work Reports', href: '/client/reports', icon: FileCheck, requiredPlan: 'Starter', featureKey: 'feature_reports' },

@@ -39,13 +39,13 @@ export default function AxiosNetworkFixer() {
       const url = config.url || '';
       
       if (isLocal) {
-        // When developing locally, redirect Cloud Run backend requests to local Django backend
-        if (url.includes('uwoconnectforrb-743928421487.asia-south1.run.app')) {
-          config.url = url.replace('https://uwoconnectforrb-743928421487.asia-south1.run.app', 'http://127.0.0.1:8080');
+        // When developing locally, redirect Cloud Run backend requests to local Django backend if not already retried
+        if (url.includes('uwoconnectforrb-743928421487.asia-south1.run.app') && !config._retried) {
+          config.url = url.replace('https://uwoconnectforrb-743928421487.asia-south1.run.app', 'http://127.0.0.1:8000');
         } else if (host === 'localhost' || host === '127.0.0.1') {
-          // If browser is on localhost, ensure any LAN IP request (e.g. 192.168.x.x:8080) maps directly to 127.0.0.1:8080
+          // Map LAN IP to 127.0.0.1
           if (/^https?:\/\/(192\.168\.[0-9.]+|10\.[0-9.]+|172\.(1[6-9]|2[0-9]|3[01])\.[0-9.]+):8080/.test(url)) {
-            config.url = url.replace(/^https?:\/\/[^/]+/, 'http://127.0.0.1:8080');
+            config.url = url.replace(/^https?:\/\/[^/]+/, 'http://127.0.0.1:8000');
           }
         }
       } else if (isExternalHost(host)) {
@@ -61,29 +61,46 @@ export default function AxiosNetworkFixer() {
       return config;
     });
 
-    const responseInterceptorId = axios.interceptors.response.use((response) => {
-      // Safely unwrap Django REST Framework paginated responses ONLY if it's a strict DRF pagination format
-      if (response.data && response.data.results !== undefined && Array.isArray(response.data.results)) {
-        // If it's a generic response that happens to have a 'results' array along with other custom metadata
-        // (like 'summary', 'total_count', 'clients'), we should NOT completely replace response.data.
-        // We only do this if it looks like a standard DRF limit/offset or page number pagination response
-        // which typically only has 'count', 'next', 'previous', and 'results'.
-        const keys = Object.keys(response.data);
-        const standardKeys = ['count', 'next', 'previous', 'results'];
-        const isStandardPagination = keys.every(key => standardKeys.includes(key));
-        
-        if (isStandardPagination) {
-          const arr = response.data.results;
-          arr.pagination = {
-            count: response.data.count,
-            next: response.data.next,
-            previous: response.data.previous
-          };
-          response.data = arr;
+    const responseInterceptorId = axios.interceptors.response.use(
+      (response) => {
+        // Safely unwrap Django REST Framework paginated responses
+        if (response.data && response.data.results !== undefined && Array.isArray(response.data.results)) {
+          const keys = Object.keys(response.data);
+          const standardKeys = ['count', 'next', 'previous', 'results'];
+          const isStandardPagination = keys.every(key => standardKeys.includes(key));
+          
+          if (isStandardPagination) {
+            const arr = response.data.results;
+            arr.pagination = {
+              count: response.data.count,
+              next: response.data.next,
+              previous: response.data.previous
+            };
+            response.data = arr;
+          }
         }
+        return response;
+      },
+      async (error) => {
+        const config = error.config;
+        if (!config || config._retried) {
+          return Promise.reject(error);
+        }
+
+        // Catch Axios Network Error when local port 8080 is unreachable
+        if (error.code === 'ERR_NETWORK' || error.message === 'Network Error' || !error.response) {
+          config._retried = true;
+
+          // If failed on 8080, try 8000
+          if (config.url && config.url.includes('127.0.0.1:8080')) {
+            config.url = config.url.replace('http://127.0.0.1:8080', 'http://127.0.0.1:8000');
+            return axios(config);
+          }
+        }
+
+        return Promise.reject(error);
       }
-      return response;
-    });
+    );
 
     return () => {
       axios.interceptors.request.eject(interceptorId);

@@ -746,8 +746,9 @@ export default function PricingComparisonTable({ plansData, onSelectPlan, isAdmi
               {/* Price */}
               <div className="space-y-1 bg-slate-50 p-3.5 rounded-2xl border border-slate-100">
                 <div className="flex items-baseline gap-1">
-                  <span className="text-3xl font-black text-slate-900">
-                    {plan.currency || '₹'}{displayPrice.toLocaleString('en-IN')}
+                  <span className="text-xl font-black text-slate-900">
+                    {plan.currency && plan.currency.trim().length > 1 ? `${plan.currency.trim()} ` : (plan.currency || '₹')}
+                    {displayPrice.toLocaleString('en-IN')}
                   </span>
                   <span className="text-xs text-slate-500 font-bold">{periodLabel}</span>
                   <span className="text-[10px] text-slate-400 font-medium ml-1">{plan.tax_info}</span>
@@ -1035,14 +1036,15 @@ export default function PricingComparisonTable({ plansData, onSelectPlan, isAdmi
                         </div>
                       )}
 
-                      <div className="space-y-1">
-                        <div className="flex items-baseline gap-1">
-                          <span className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
-                            {plan.currency || '₹'}{displayPrice.toLocaleString('en-IN')}
-                          </span>
-                          <span className="text-xs text-slate-500 font-bold">{periodLabel}</span>
-                          <span className="text-[10px] text-slate-400 font-medium ml-0.5">{plan.tax_info}</span>
-                        </div>
+                        <div className="space-y-1">
+                          <div className="flex items-baseline gap-1">
+                            <span className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                              {plan.currency && plan.currency.trim().length > 1 ? `${plan.currency.trim()} ` : (plan.currency || '₹')}
+                              {displayPrice.toLocaleString('en-IN')}
+                            </span>
+                            <span className="text-xs text-slate-500 font-bold">{periodLabel}</span>
+                            <span className="text-[10px] text-slate-400 font-medium ml-0.5">{plan.tax_info}</span>
+                          </div>
 
                         {billingPeriod === 'YEARLY' && (
                           <div className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200 inline-block">

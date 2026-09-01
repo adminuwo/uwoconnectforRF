@@ -208,7 +208,10 @@ export const UWOLoginModal = ({
                 </div>
               </div>
               <div>
-                <h3 className="text-xl font-bold tracking-tight text-white flex items-center gap-2">
+                <h3
+                  className="text-xl font-bold tracking-tight text-white flex items-center gap-2 font-serif"
+                  style={{ fontFamily: "'Times New Roman', Times, serif" }}
+                >
                   {isRegisterMode ? `Create ${brand?.brand_name || 'Account'}` : `Sign In to ${brand?.brand_name || 'Account'}`}
                 </h3>
                 <p className="text-xs text-emerald-300/70">{brand?.tagline || 'Unified Communication & Business Automation'}</p>

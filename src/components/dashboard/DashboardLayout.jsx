@@ -5,13 +5,14 @@ import dynamic from 'next/dynamic';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import Sidebar from './Sidebar';
-import { MessageCircle, Building2, ChevronDown, Search, Menu, Crown } from 'lucide-react';
+import { MessageCircle, Building2, ChevronDown, Search, Menu, Crown, Wallet } from 'lucide-react';
 import axios from 'axios';
 import { API_BASE_URL } from '@/config/apiConfig';
 
 const ProductTour = dynamic(() => import('@/components/tour/ProductTour'), { ssr: false });
 const TeamChatDrawer = dynamic(() => import('@/components/team/TeamChatDrawer'), { ssr: false });
 const GlobalIncomingCallListener = dynamic(() => import('./GlobalIncomingCallListener'), { ssr: false });
+const AddMoneyModal = dynamic(() => import('@/components/billing/AddMoneyModal'), { ssr: false });
 
 const PAGE_TITLES = {
   '/client': 'Dashboard',
@@ -177,6 +178,8 @@ const DashboardLayout = ({ children, role: initialRole }) => {
   const isPageLocked = mounted && initialRole !== 'ADMIN' && reqPlanName && (isDynamicRemoved || (!isDynamicAvailable && activePlanRank < reqPlanRank));
   const [profileLogo, setProfileLogo] = useState('');
   const [impersonationData, setImpersonationData] = useState(null);
+  const [walletBalance, setWalletBalance] = useState(null);
+  const [isAddMoneyOpen, setIsAddMoneyOpen] = useState(false);
   const [clients, setClients] = useState([]);
   const [switcherOpen, setSwitcherOpen] = useState(false);
   const [clientSearch, setClientSearch] = useState('');
@@ -291,6 +294,17 @@ const DashboardLayout = ({ children, role: initialRole }) => {
             name: uData.name || uData.first_name || prev?.name
           }));
         }
+
+        // Fetch wallet balance
+        try {
+          const wRes = await axios.get(`${API_BASE_URL}/api/wallet/dashboard`, {
+            headers: { Authorization: `Bearer ${authToken}` }
+          });
+          if (wRes.data && wRes.data.wallet_balance_inr !== undefined) {
+            setWalletBalance(wRes.data.wallet_balance_inr);
+          }
+        } catch (wErr) {}
+
       } catch (err) {
         // Silently handle
       }
@@ -512,6 +526,19 @@ const DashboardLayout = ({ children, role: initialRole }) => {
                     </div>
                   )}
 
+                  {/* Prepaid Usage Wallet Widget near Profile */}
+                  <button
+                    onClick={() => setIsAddMoneyOpen(true)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50/80 hover:bg-emerald-100/90 text-emerald-900 rounded-xl border border-emerald-200/80 transition-all text-xs font-bold shadow-xs hover:shadow-sm cursor-pointer"
+                    title="Click to Add Money / Recharge Wallet"
+                  >
+                    <Wallet size={15} className="text-[#059669]" />
+                    <span className="font-extrabold text-slate-900">
+                      {walletBalance !== null ? `₹${walletBalance.toLocaleString('en-IN', { minimumFractionDigits: 2 })}` : 'Wallet'}
+                    </span>
+                    <span className="text-[10px] font-black text-emerald-700 bg-emerald-200/60 px-1.5 py-0.5 rounded-md ml-0.5">+ Topup</span>
+                  </button>
+
                   <Link
                     href={displayRole === 'ADMIN' ? '/admin/plans' : '/client/plans'}
                     className="p-2 text-slate-500 hover:text-amber-500 bg-slate-50 hover:bg-amber-50 rounded-full transition-colors relative"
@@ -597,6 +624,26 @@ const DashboardLayout = ({ children, role: initialRole }) => {
           <TeamChatDrawer isOpen={chatOpen} onClose={() => setChatOpen(false)} />
           <GlobalIncomingCallListener />
           <UpgradeModal />
+          {/* Global Add Money Razorpay Modal */}
+          {isAddMoneyOpen && (
+            <AddMoneyModal
+              isOpen={isAddMoneyOpen}
+              onClose={() => setIsAddMoneyOpen(false)}
+              onSuccess={() => {
+                // Refresh wallet balance
+                const token = localStorage.getItem('token');
+                if (token) {
+                  axios.get(`${API_BASE_URL}/api/wallet/dashboard`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                  }).then(wRes => {
+                    if (wRes.data && wRes.data.wallet_balance_inr !== undefined) {
+                      setWalletBalance(wRes.data.wallet_balance_inr);
+                    }
+                  }).catch(() => {});
+                }
+              }}
+            />
+          )}
         </>
       )}
     </div>
@@ -604,4 +651,5 @@ const DashboardLayout = ({ children, role: initialRole }) => {
 };
 
 export default DashboardLayout;
+
 
