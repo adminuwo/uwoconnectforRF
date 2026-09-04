@@ -1,10 +1,10 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import ReactFlow, { 
-  addEdge, 
-  Background, 
-  Controls, 
+import ReactFlow, {
+  addEdge,
+  Background,
+  Controls,
   useNodesState,
   useEdgesState,
   Panel,
@@ -16,8 +16,8 @@ import ReactFlow, {
   EdgeLabelRenderer
 } from 'reactflow';
 import 'reactflow/dist/style.css';
-import { 
-  Save, MessageSquare, Clock, Zap, Loader2, 
+import {
+  Save, MessageSquare, Clock, Zap, Loader2,
   ChevronDown, Image as ImageIcon, Video, List, FileText, Webhook, Tag, BarChart3,
   MousePointer2, ArrowLeft, CheckCircle2, XCircle, Play, X, Plus, Trash2, Edit3, User, ShoppingBag, ExternalLink
 } from 'lucide-react';
@@ -291,7 +291,7 @@ const WorkflowBuilderInner = () => {
   const [selectedNode, setSelectedNode] = useState(null);
   const [deploymentChannels, setDeploymentChannels] = useState(['WHATSAPP']); // WHATSAPP, INSTAGRAM, FACEBOOK
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  
+
   const { screenToFlowPosition } = useReactFlow();
 
   const handleAddNodeDirectly = useCallback((type) => {
@@ -299,7 +299,7 @@ const WorkflowBuilderInner = () => {
     if (type === 'handoff') {
       defaultMsg = 'Connecting you to a human agent. Please wait...';
     }
-    const center = typeof window !== 'undefined' 
+    const center = typeof window !== 'undefined'
       ? { x: window.innerWidth / 2, y: window.innerHeight / 2 }
       : { x: 250, y: 250 };
     const position = screenToFlowPosition(center);
@@ -341,21 +341,21 @@ const WorkflowBuilderInner = () => {
         const channels = channelsParam.split(',').filter(Boolean);
         const is_shared = params.get('is_shared') === 'true';
         const category = params.get('category') || 'General';
-        
+
         setWorkflow({ name, enabled: false, channels, is_shared, category });
         setDeploymentChannels(channels);
-        
+
         if (template && templateData[template]) {
           const tData = templateData[template];
           setNodes(tData.nodes.map(n => ({
             ...n,
             data: n.data || {},
-            position: n.position || {x:0, y:0},
+            position: n.position || { x: 0, y: 0 },
             type: (!n.type || n.type === 'default') ? 'plain' : n.type
           })));
           setEdges(Array.isArray(tData.edges) ? tData.edges : []);
         } else {
-          setNodes([{ id: 'start', type: 'trigger', position: {x:250, y:50}, data: { keyword: 'Any Keyword' } }]);
+          setNodes([{ id: 'start', type: 'trigger', position: { x: 250, y: 50 }, data: { keyword: 'Any Keyword' } }]);
         }
       } else {
         const token = localStorage.getItem('uwo_token');
@@ -363,17 +363,17 @@ const WorkflowBuilderInner = () => {
         setWorkflow(res.data);
         setDeploymentChannels(res.data.channels || ['WHATSAPP']);
         let steps = res.data.steps;
-        if (typeof steps === 'string') try { steps = JSON.parse(steps); } catch(e) { steps = {}; }
+        if (typeof steps === 'string') try { steps = JSON.parse(steps); } catch (e) { steps = {}; }
         if (steps && Array.isArray(steps.nodes) && steps.nodes.length > 0) {
-          setNodes(steps.nodes.map(n => ({ 
-            ...n, 
-            data: n.data || {}, 
-            position: n.position || {x:0, y:0}, 
-            type: (!n.type || n.type === 'default') ? 'plain' : n.type 
+          setNodes(steps.nodes.map(n => ({
+            ...n,
+            data: n.data || {},
+            position: n.position || { x: 0, y: 0 },
+            type: (!n.type || n.type === 'default') ? 'plain' : n.type
           })));
           setEdges(Array.isArray(steps.edges) ? steps.edges : []);
         } else {
-          setNodes([{ id: 'start', type: 'trigger', position: {x:250, y:50}, data: { keyword: 'Any Keyword' } }]);
+          setNodes([{ id: 'start', type: 'trigger', position: { x: 250, y: 50 }, data: { keyword: 'Any Keyword' } }]);
         }
       }
     } catch (err) { console.error(err); } finally { setLoading(false); }
@@ -387,7 +387,7 @@ const WorkflowBuilderInner = () => {
     try {
       setIsSaving(true);
       const token = localStorage.getItem('uwo_token');
-      
+
       // Find the trigger node and extract its keyword(s)
       const triggerNode = nodes.find(n => n.type === 'trigger');
       let trigger_value = [];
@@ -404,8 +404,8 @@ const WorkflowBuilderInner = () => {
 
         if (isShared) {
           const res = await axios.post(
-            `${API_BASE_URL}/api/workflows/`, 
-            { 
+            `${API_BASE_URL}/api/workflows/`,
+            {
               name: workflow.name,
               category: category,
               industry: template || 'None',
@@ -415,7 +415,7 @@ const WorkflowBuilderInner = () => {
               channels: deploymentChannels,
               is_shared: true,
               enabled: false
-            }, 
+            },
             { headers: { Authorization: `Bearer ${token}` } }
           );
           alert('Workflow created successfully!');
@@ -424,8 +424,8 @@ const WorkflowBuilderInner = () => {
           let firstSavedId = null;
           for (const channel of deploymentChannels) {
             const res = await axios.post(
-              `${API_BASE_URL}/api/workflows/`, 
-              { 
+              `${API_BASE_URL}/api/workflows/`,
+              {
                 name: deploymentChannels.length > 1 ? `${workflow.name} (${channel})` : workflow.name,
                 category: category,
                 industry: template || 'None',
@@ -435,7 +435,7 @@ const WorkflowBuilderInner = () => {
                 channels: [channel],
                 is_shared: false,
                 enabled: false
-              }, 
+              },
               { headers: { Authorization: `Bearer ${token}` } }
             );
             if (!firstSavedId) firstSavedId = res.data.id;
@@ -449,14 +449,14 @@ const WorkflowBuilderInner = () => {
         }
       } else {
         await axios.patch(
-          `${API_BASE_URL}/api/workflows/${id}/`, 
-          { 
+          `${API_BASE_URL}/api/workflows/${id}/`,
+          {
             name: workflow?.name,
             steps: { nodes, edges },
             trigger_value: trigger_value,
             channels: deploymentChannels,
             is_shared: deploymentChannels.length > 1 || (workflow && workflow.is_shared)
-          }, 
+          },
           { headers: { Authorization: `Bearer ${token}` } }
         );
         alert('Workflow saved successfully!');
@@ -464,8 +464,8 @@ const WorkflowBuilderInner = () => {
     } catch (err) {
       console.error('Workflow save error:', err);
       alert('Save failed: ' + (err.response?.data?.detail || JSON.stringify(err.response?.data) || err.message));
-    } finally { 
-      setIsSaving(false); 
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -479,7 +479,7 @@ const WorkflowBuilderInner = () => {
     const type = event.dataTransfer.getData('application/reactflow');
     if (!type) return;
     const position = screenToFlowPosition({ x: event.clientX, y: event.clientY });
-    
+
     let defaultMsg = 'Type your message here...';
     if (type === 'handoff') {
       defaultMsg = 'Connecting you to a human agent. Please wait...';
@@ -513,7 +513,7 @@ const WorkflowBuilderInner = () => {
               <ArrowLeft size={14} /> <span className="hidden sm:inline">Go back</span>
             </button>
             <div className="h-6 w-px bg-slate-200" />
-            <button 
+            <button
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
               className="md:hidden p-2 text-slate-600 hover:text-slate-900 border border-slate-200 rounded-xl bg-slate-50 hover:bg-slate-100 transition-colors shrink-0"
               title="Toggle actions panel"
@@ -535,9 +535,9 @@ const WorkflowBuilderInner = () => {
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2 bg-slate-50 border border-slate-100 rounded-xl px-4 py-2 w-full md:w-auto">
           <span className="text-[9px] font-black text-slate-400 uppercase tracking-wider w-full sm:w-auto">Deployment:</span>
           <label className="flex items-center gap-1.5 text-xs font-bold text-slate-700 cursor-pointer">
-            <input 
-              type="checkbox" 
-              checked={deploymentChannels.includes('WHATSAPP')} 
+            <input
+              type="checkbox"
+              checked={deploymentChannels.includes('WHATSAPP')}
               onChange={(e) => {
                 const checked = e.target.checked;
                 let updated = [...deploymentChannels];
@@ -548,14 +548,14 @@ const WorkflowBuilderInner = () => {
                 }
                 setDeploymentChannels(updated);
               }}
-              className="accent-emerald-600 rounded" 
+              className="accent-emerald-600 rounded"
             />
             <span>🟢 WhatsApp</span>
           </label>
           <label className="flex items-center gap-1.5 text-xs font-bold text-slate-700 cursor-pointer">
-            <input 
-              type="checkbox" 
-              checked={deploymentChannels.includes('INSTAGRAM')} 
+            <input
+              type="checkbox"
+              checked={deploymentChannels.includes('INSTAGRAM')}
               onChange={(e) => {
                 const checked = e.target.checked;
                 let updated = [...deploymentChannels];
@@ -566,14 +566,14 @@ const WorkflowBuilderInner = () => {
                 }
                 setDeploymentChannels(updated);
               }}
-              className="accent-emerald-600 rounded" 
+              className="accent-emerald-600 rounded"
             />
             <span>🟣 Instagram</span>
           </label>
           <label className="flex items-center gap-1.5 text-xs font-bold text-slate-700 cursor-pointer">
-            <input 
-              type="checkbox" 
-              checked={deploymentChannels.includes('FACEBOOK')} 
+            <input
+              type="checkbox"
+              checked={deploymentChannels.includes('FACEBOOK')}
               onChange={(e) => {
                 const checked = e.target.checked;
                 let updated = [...deploymentChannels];
@@ -584,7 +584,7 @@ const WorkflowBuilderInner = () => {
                 }
                 setDeploymentChannels(updated);
               }}
-              className="accent-emerald-600 rounded" 
+              className="accent-emerald-600 rounded"
             />
             <span>🔵 Facebook</span>
           </label>
@@ -613,40 +613,40 @@ const WorkflowBuilderInner = () => {
           </div>
           <div className="p-5 border-b border-slate-100 bg-slate-50/50"><h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Actions</h3></div>
           <div className="flex-1">
-             <SidebarCategory title="Messages" icon={MessageSquare} expanded>
-                <SidebarItem icon={MessageSquare} label="Plain Message" onDragStart={(e) => onDragStart(e, 'plain')} onClick={() => { handleAddNodeDirectly('plain'); setIsSidebarOpen(false); }} />
-                <SidebarItem icon={MousePointer2} label="Message + Buttons" onDragStart={(e) => onDragStart(e, 'buttons')} onClick={() => { handleAddNodeDirectly('buttons'); setIsSidebarOpen(false); }} />
-                <SidebarItem icon={ImageIcon} label="Message + Image" onDragStart={(e) => onDragStart(e, 'image')} onClick={() => { handleAddNodeDirectly('image'); setIsSidebarOpen(false); }} />
-                <SidebarItem icon={Video} label="Message + Video" onDragStart={(e) => onDragStart(e, 'video')} onClick={() => { handleAddNodeDirectly('video'); setIsSidebarOpen(false); }} />
-             </SidebarCategory>
-             <SidebarCategory title="Commerce & Catalog" icon={ShoppingBag} expanded>
-                <SidebarItem icon={ShoppingBag} label="Send Catalog Product" onDragStart={(e) => onDragStart(e, 'catalog_product')} onClick={() => { handleAddNodeDirectly('catalog_product'); setIsSidebarOpen(false); }} color="emerald" />
-              </SidebarCategory>
-             <SidebarCategory title="Integrations & Meetings" icon={Zap} expanded>
-                <SidebarItem icon={Video} label="Google Meet & Calendar" onDragStart={(e) => onDragStart(e, 'google_meet')} onClick={() => { handleAddNodeDirectly('google_meet'); setIsSidebarOpen(false); }} color="blue" />
-             </SidebarCategory>
-             <div className="px-4 py-2 mt-4">
-               <SidebarItem icon={Zap} label="Set a Condition" onDragStart={(e) => onDragStart(e, 'condition')} onClick={() => { handleAddNodeDirectly('condition'); setIsSidebarOpen(false); }} color="amber" />
-             </div>
-             <div className="px-4 py-2">
-               <SidebarItem icon={User} label="Talk to Human" onDragStart={(e) => onDragStart(e, 'handoff')} onClick={() => { handleAddNodeDirectly('handoff'); setIsSidebarOpen(false); }} color="rose" />
-             </div>
+            <SidebarCategory title="Messages" icon={MessageSquare} expanded>
+              <SidebarItem icon={MessageSquare} label="Plain Message" onDragStart={(e) => onDragStart(e, 'plain')} onClick={() => { handleAddNodeDirectly('plain'); setIsSidebarOpen(false); }} />
+              <SidebarItem icon={MousePointer2} label="Message + Buttons" onDragStart={(e) => onDragStart(e, 'buttons')} onClick={() => { handleAddNodeDirectly('buttons'); setIsSidebarOpen(false); }} />
+              <SidebarItem icon={ImageIcon} label="Message + Image" onDragStart={(e) => onDragStart(e, 'image')} onClick={() => { handleAddNodeDirectly('image'); setIsSidebarOpen(false); }} />
+              <SidebarItem icon={Video} label="Message + Video" onDragStart={(e) => onDragStart(e, 'video')} onClick={() => { handleAddNodeDirectly('video'); setIsSidebarOpen(false); }} />
+            </SidebarCategory>
+            <SidebarCategory title="Commerce & Catalog" icon={ShoppingBag} expanded>
+              <SidebarItem icon={ShoppingBag} label="Send Catalog Product" onDragStart={(e) => onDragStart(e, 'catalog_product')} onClick={() => { handleAddNodeDirectly('catalog_product'); setIsSidebarOpen(false); }} color="emerald" />
+            </SidebarCategory>
+            <SidebarCategory title="Integrations & Meetings" icon={Zap} expanded>
+              <SidebarItem icon={Video} label="Google Meet & Calendar" onDragStart={(e) => onDragStart(e, 'google_meet')} onClick={() => { handleAddNodeDirectly('google_meet'); setIsSidebarOpen(false); }} color="blue" />
+            </SidebarCategory>
+            <div className="px-4 py-2 mt-4">
+              <SidebarItem icon={Zap} label="Set a Condition" onDragStart={(e) => onDragStart(e, 'condition')} onClick={() => { handleAddNodeDirectly('condition'); setIsSidebarOpen(false); }} color="amber" />
+            </div>
+            <div className="px-4 py-2">
+              <SidebarItem icon={User} label="Talk to Human" onDragStart={(e) => onDragStart(e, 'handoff')} onClick={() => { handleAddNodeDirectly('handoff'); setIsSidebarOpen(false); }} color="rose" />
+            </div>
           </div>
         </div>
 
         {/* Canvas Area */}
         <div className="flex-1 relative bg-[#f1f5f9]" ref={reactFlowWrapper}>
-          <ReactFlow 
-            nodes={nodes} 
-            edges={edges} 
-            onNodesChange={onNodesChange} 
-            onEdgesChange={onEdgesChange} 
-            onConnect={onConnect} 
-            nodeTypes={nodeTypes} 
+          <ReactFlow
+            nodes={nodes}
+            edges={edges}
+            onNodesChange={onNodesChange}
+            onEdgesChange={onEdgesChange}
+            onConnect={onConnect}
+            nodeTypes={nodeTypes}
             edgeTypes={edgeTypes}
-            onDrop={onDrop} 
-            onDragOver={(e) => e.preventDefault()} 
-            onNodeDoubleClick={onNodeDoubleClick} 
+            onDrop={onDrop}
+            onDragOver={(e) => e.preventDefault()}
+            onNodeDoubleClick={onNodeDoubleClick}
             fitView
           >
             <Background color="#cbd5e1" gap={25} size={1} variant="dots" />
@@ -664,10 +664,10 @@ const WorkflowBuilderInner = () => {
                 <button onClick={() => setSelectedNode(null)} className="text-slate-400 hover:text-slate-900"><X size={20} /></button>
               </div>
               <div className="p-6 sm:p-8 flex-1 overflow-y-auto">
-                <MessageForm 
-                  key={selectedNode.id} 
-                  data={selectedNode.data} 
-                  type={selectedNode.type} 
+                <MessageForm
+                  key={selectedNode.id}
+                  data={selectedNode.data}
+                  type={selectedNode.type}
                   onSave={(d) => updateNodeData(selectedNode.id, d)}
                   onDelete={() => {
                     setNodes(nds => nds.filter(n => n.id !== selectedNode.id));
@@ -743,8 +743,8 @@ const MessageForm = ({ data, type, onSave, onDelete }) => {
               }}
               className={cn(
                 "py-2.5 px-3 rounded-lg text-xs font-bold transition-all",
-                triggerMode === 'KEYWORDS' 
-                  ? "bg-white text-emerald-600 shadow-sm border border-slate-200" 
+                triggerMode === 'KEYWORDS'
+                  ? "bg-white text-emerald-600 shadow-sm border border-slate-200"
                   : "text-slate-500 hover:text-slate-900"
               )}
             >
@@ -758,8 +758,8 @@ const MessageForm = ({ data, type, onSave, onDelete }) => {
               }}
               className={cn(
                 "py-2.5 px-3 rounded-lg text-xs font-bold transition-all",
-                triggerMode === 'ALL' 
-                  ? "bg-white text-emerald-600 shadow-sm border border-slate-200" 
+                triggerMode === 'ALL'
+                  ? "bg-white text-emerald-600 shadow-sm border border-slate-200"
                   : "text-slate-500 hover:text-slate-900"
               )}
             >
@@ -772,11 +772,11 @@ const MessageForm = ({ data, type, onSave, onDelete }) => {
           <div>
             <label className="text-[10px] font-black uppercase text-slate-400 mb-2 block">Trigger Keywords</label>
             <p className="text-[10px] text-slate-500 mb-2">Enter keywords separated by commas (e.g. mall, offer, hi)</p>
-            <input 
-              value={keyword === '*' ? '' : keyword} 
-              onChange={e => setKeyword(e.target.value)} 
-              className="w-full bg-slate-50 border p-4 rounded-xl text-sm font-bold focus:border-emerald-500 outline-none text-slate-800 placeholder:text-slate-400" 
-              placeholder="e.g. hi, hello, hospital..." 
+            <input
+              value={keyword === '*' ? '' : keyword}
+              onChange={e => setKeyword(e.target.value)}
+              className="w-full bg-slate-50 border p-4 rounded-xl text-sm font-bold focus:border-emerald-500 outline-none text-slate-800 placeholder:text-slate-400"
+              placeholder="e.g. hi, hello, hospital..."
             />
           </div>
         ) : (
@@ -795,9 +795,9 @@ const MessageForm = ({ data, type, onSave, onDelete }) => {
       <div className="space-y-4">
         <div>
           <label className="text-[10px] font-black uppercase text-slate-400 mb-2 block">Condition Field</label>
-          <select 
-            value={conditionField} 
-            onChange={e => setConditionField(e.target.value)} 
+          <select
+            value={conditionField}
+            onChange={e => setConditionField(e.target.value)}
             className="w-full bg-slate-50 border border-slate-200 p-3 rounded-xl text-sm font-bold text-slate-700 focus:border-emerald-500 outline-none"
           >
             <option value="tag" className="text-slate-700 bg-white">Tag</option>
@@ -810,9 +810,9 @@ const MessageForm = ({ data, type, onSave, onDelete }) => {
         </div>
         <div>
           <label className="text-[10px] font-black uppercase text-slate-400 mb-2 block">Operator</label>
-          <select 
-            value={conditionOperator} 
-            onChange={e => setConditionOperator(e.target.value)} 
+          <select
+            value={conditionOperator}
+            onChange={e => setConditionOperator(e.target.value)}
             className="w-full bg-slate-50 border border-slate-200 p-3 rounded-xl text-sm font-bold text-slate-700 focus:border-emerald-500 outline-none"
           >
             <option value="=" className="text-slate-700 bg-white">=  (Equals)</option>
@@ -826,11 +826,11 @@ const MessageForm = ({ data, type, onSave, onDelete }) => {
         </div>
         <div>
           <label className="text-[10px] font-black uppercase text-slate-400 mb-2 block">Value</label>
-          <input 
-            value={conditionValue} 
-            onChange={e => setConditionValue(e.target.value)} 
-            className="w-full bg-slate-50 border border-slate-200 p-3 rounded-xl text-sm font-bold text-slate-700 focus:border-emerald-500 outline-none" 
-            placeholder="e.g. VIP, Premium, etc." 
+          <input
+            value={conditionValue}
+            onChange={e => setConditionValue(e.target.value)}
+            className="w-full bg-slate-50 border border-slate-200 p-3 rounded-xl text-sm font-bold text-slate-700 focus:border-emerald-500 outline-none"
+            placeholder="e.g. VIP, Premium, etc."
           />
         </div>
         <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
@@ -844,7 +844,7 @@ const MessageForm = ({ data, type, onSave, onDelete }) => {
         <textarea value={msg} onChange={e => setMsg(e.target.value)} className="w-full bg-slate-50 border p-4 rounded-xl text-sm font-bold focus:border-emerald-500 outline-none text-slate-800 placeholder:text-slate-400" rows={4} placeholder="Type your message here..." />
       </div>
     )}
-    
+
     {type === 'buttons' && (
       <div>
         <div className="flex justify-between items-center mb-2">
@@ -873,11 +873,11 @@ const MessageForm = ({ data, type, onSave, onDelete }) => {
       <div>
         <label className="text-[10px] font-black uppercase text-slate-400 mb-2 block">Upload Media</label>
         <div className="relative border-2 border-dashed border-slate-200 rounded-xl p-6 text-center hover:bg-slate-50 transition-colors">
-          <input 
-            type="file" 
-            accept={type === 'image' ? 'image/*' : 'video/*'} 
-            onChange={handleFileUpload} 
-            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" 
+          <input
+            type="file"
+            accept={type === 'image' ? 'image/*' : 'video/*'}
+            onChange={handleFileUpload}
+            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
           />
           {mediaUrl ? (
             <div className="flex flex-col items-center gap-2">
@@ -898,18 +898,18 @@ const MessageForm = ({ data, type, onSave, onDelete }) => {
       <div className="space-y-4">
         <div>
           <label className="text-[10px] font-black uppercase text-slate-400 mb-2 block">Meeting Title / Subject</label>
-          <input 
-            value={title} 
-            onChange={e => setTitle(e.target.value)} 
-            className="w-full bg-slate-50 border p-3 rounded-xl text-sm font-bold focus:border-blue-500 outline-none text-slate-800" 
-            placeholder="e.g. Product Demo Call" 
+          <input
+            value={title}
+            onChange={e => setTitle(e.target.value)}
+            className="w-full bg-slate-50 border p-3 rounded-xl text-sm font-bold focus:border-blue-500 outline-none text-slate-800"
+            placeholder="e.g. Product Demo Call"
           />
         </div>
         <div>
           <label className="text-[10px] font-black uppercase text-slate-400 mb-2 block">Meeting Duration (Minutes)</label>
-          <select 
-            value={duration} 
-            onChange={e => setDuration(e.target.value)} 
+          <select
+            value={duration}
+            onChange={e => setDuration(e.target.value)}
             className="w-full bg-slate-50 border p-3 rounded-xl text-sm font-bold focus:border-blue-500 outline-none text-slate-800"
           >
             <option value="15">15 Minutes</option>
@@ -932,32 +932,32 @@ const MessageForm = ({ data, type, onSave, onDelete }) => {
 
         <div>
           <label className="text-[10px] font-black uppercase text-slate-400 mb-2 block">Product Name *</label>
-          <input 
-            value={msg || data.productName || ''} 
-            onChange={e => setMsg(e.target.value)} 
-            className="w-full bg-slate-50 border p-3 rounded-xl text-sm font-bold focus:border-emerald-500 outline-none text-slate-800" 
-            placeholder="e.g. AI Automation Book" 
+          <input
+            value={msg || data.productName || ''}
+            onChange={e => setMsg(e.target.value)}
+            className="w-full bg-slate-50 border p-3 rounded-xl text-sm font-bold focus:border-emerald-500 outline-none text-slate-800"
+            placeholder="e.g. AI Automation Book"
           />
         </div>
 
         <div className="grid grid-cols-2 gap-3">
           <div>
             <label className="text-[10px] font-black uppercase text-slate-400 mb-2 block">Price ($)</label>
-            <input 
-              value={title || data.productPrice || '29.99'} 
-              onChange={e => setTitle(e.target.value)} 
-              className="w-full bg-slate-50 border p-3 rounded-xl text-sm font-bold focus:border-emerald-500 outline-none text-slate-800" 
-              placeholder="29.99" 
+            <input
+              value={title || data.productPrice || '29.99'}
+              onChange={e => setTitle(e.target.value)}
+              className="w-full bg-slate-50 border p-3 rounded-xl text-sm font-bold focus:border-emerald-500 outline-none text-slate-800"
+              placeholder="29.99"
             />
           </div>
 
           <div>
             <label className="text-[10px] font-black uppercase text-slate-400 mb-2 block">CTA Button Text</label>
-            <input 
-              value={keyword || data.ctaText || 'View Product'} 
-              onChange={e => setKeyword(e.target.value)} 
-              className="w-full bg-slate-50 border p-3 rounded-xl text-sm font-bold focus:border-emerald-500 outline-none text-slate-800" 
-              placeholder="View Product" 
+            <input
+              value={keyword || data.ctaText || 'View Product'}
+              onChange={e => setKeyword(e.target.value)}
+              className="w-full bg-slate-50 border p-3 rounded-xl text-sm font-bold focus:border-emerald-500 outline-none text-slate-800"
+              placeholder="View Product"
             />
           </div>
         </div>
@@ -978,16 +978,16 @@ const MessageForm = ({ data, type, onSave, onDelete }) => {
     ) : null}
 
     <div className="flex items-center gap-3 pt-2">
-      <button onClick={() => onSave({ 
-        message: msg, 
+      <button onClick={() => onSave({
+        message: msg,
         title,
         duration,
-        buttons, 
-        mediaUrl, 
+        buttons,
+        mediaUrl,
         productName: msg,
         productPrice: title,
         ctaText: keyword,
-        keyword: triggerMode === 'ALL' ? '*' : keyword, 
+        keyword: triggerMode === 'ALL' ? '*' : keyword,
         triggerMode,
         condition: type === 'condition' ? buildCondition() : (data.condition || ''),
         conditionField,
@@ -1014,9 +1014,9 @@ const SidebarCategory = ({ title, icon: Icon, expanded, children }) => (
 );
 
 const SidebarItem = ({ icon: Icon, label, onDragStart, onClick, color = "slate" }) => (
-  <div 
-    draggable={!!onDragStart} 
-    onDragStart={onDragStart} 
+  <div
+    draggable={!!onDragStart}
+    onDragStart={onDragStart}
     onClick={onClick}
     className="w-full p-4 pl-12 flex items-center gap-4 group cursor-grab active:cursor-grabbing hover:bg-slate-50 transition-all cursor-pointer"
   >

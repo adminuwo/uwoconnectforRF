@@ -551,8 +551,11 @@ const ClientChannelsPage = () => {
   }, []);
 
   const handleWhatsAppSaved = (updatedClient) => {
-    setClient(updatedClient);
-    setToast({ msg: 'WhatsApp configured', type: 'success' });
+    if (updatedClient) {
+      setClient(prev => ({ ...(prev || {}), ...updatedClient }));
+    }
+    fetchClient();
+    setToast({ msg: 'WhatsApp profile and configuration updated!', type: 'success' });
     setTimeout(() => setToast(null), 3000);
   };
 

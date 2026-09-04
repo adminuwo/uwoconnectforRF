@@ -454,24 +454,24 @@ const DashboardLayout = ({ children, role: initialRole }) => {
 
         <main className="flex-1 dashboard-main h-full flex flex-col min-w-0 overflow-hidden">
           {/* Header */}
-          <header className="h-14 sm:h-16 bg-white/80 backdrop-blur-xl border-b border-slate-100 px-3 sm:px-6 flex items-center justify-between sticky top-0 z-20 shrink-0 shadow-xs">
-            <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+          <header className="h-14 sm:h-16 bg-white/80 backdrop-blur-xl border-b border-slate-100 px-2.5 sm:px-6 flex items-center justify-between sticky top-0 z-20 shrink-0 shadow-xs">
+            <div className="flex items-center gap-1.5 sm:gap-3 min-w-0 flex-1 mr-2">
               {/* Mobile Menu Button */}
               <button
                 type="button"
                 onClick={() => setSidebarOpen(prev => !prev)}
-                className="lg:hidden p-2 -ml-1 text-slate-600 hover:text-[#059669] hover:bg-emerald-50 rounded-xl transition-all cursor-pointer flex items-center justify-center shrink-0"
+                className="lg:hidden p-1.5 sm:p-2 -ml-1 text-slate-600 hover:text-[#059669] hover:bg-emerald-50 rounded-xl transition-all cursor-pointer flex items-center justify-center shrink-0"
                 aria-label="Toggle navigation menu"
               >
                 <Menu size={20} />
               </button>
               <div className="w-1.5 h-6 bg-gradient-to-b from-[#16A34A] to-[#059669] rounded-full shadow-[0_0_10px_rgba(5,150,105,0.2)] hidden sm:block shrink-0" />
-              <h1 className="text-xs sm:text-sm md:text-base font-black text-slate-800 tracking-tight uppercase truncate max-w-[200px] sm:max-w-none">
+              <h1 className="text-xs sm:text-sm md:text-base font-black text-slate-800 tracking-tight uppercase truncate max-w-[110px] xs:max-w-[170px] sm:max-w-none">
                 {currentTitle}
               </h1>
             </div>
 
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-1.5 sm:gap-3 md:gap-4 shrink-0">
               {mounted && (
                 <>
                   {displayRole === 'ADMIN' && !impersonationData && (
@@ -529,42 +529,49 @@ const DashboardLayout = ({ children, role: initialRole }) => {
                   {/* Prepaid Usage Wallet Widget near Profile */}
                   <button
                     onClick={() => setIsAddMoneyOpen(true)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50/80 hover:bg-emerald-100/90 text-emerald-900 rounded-xl border border-emerald-200/80 transition-all text-xs font-bold shadow-xs hover:shadow-sm cursor-pointer"
+                    className="flex items-center gap-1 sm:gap-1.5 px-2 py-1 sm:px-3 sm:py-1.5 bg-emerald-50/80 hover:bg-emerald-100/90 text-emerald-900 rounded-xl border border-emerald-200/80 transition-all text-xs font-bold shadow-xs hover:shadow-sm cursor-pointer shrink-0"
                     title="Click to Add Money / Recharge Wallet"
                   >
-                    <Wallet size={15} className="text-[#059669]" />
-                    <span className="font-extrabold text-slate-900">
-                      {walletBalance !== null ? `₹${walletBalance.toLocaleString('en-IN', { minimumFractionDigits: 2 })}` : 'Wallet'}
+                    <Wallet size={14} className="text-[#059669] shrink-0" />
+                    <span className="font-extrabold text-slate-900 text-[11px] sm:text-xs">
+                      {walletBalance !== null ? (
+                        <>
+                          ₹{Math.floor(walletBalance).toLocaleString('en-IN')}
+                          <span className="hidden sm:inline">
+                            {(walletBalance % 1).toFixed(2).substring(1)}
+                          </span>
+                        </>
+                      ) : 'Wallet'}
                     </span>
-                    <span className="text-[10px] font-black text-emerald-700 bg-emerald-200/60 px-1.5 py-0.5 rounded-md ml-0.5">+ Topup</span>
+                    <span className="hidden sm:inline-block text-[10px] font-black text-emerald-700 bg-emerald-200/60 px-1.5 py-0.5 rounded-md ml-0.5">+ Topup</span>
                   </button>
 
                   <Link
                     href={displayRole === 'ADMIN' ? '/admin/plans' : '/client/plans'}
-                    className="p-2 text-slate-500 hover:text-amber-500 bg-slate-50 hover:bg-amber-50 rounded-full transition-colors relative"
+                    className="hidden xs:flex p-1.5 sm:p-2 text-slate-500 hover:text-amber-500 bg-slate-50 hover:bg-amber-50 rounded-full transition-colors relative shrink-0"
                     title="Plans & Subscriptions"
                   >
-                    <Crown size={18} />
+                    <Crown size={17} />
                   </Link>
 
                   <button
                     data-tour="header-team-chat"
                     onClick={() => setChatOpen(true)}
-                    className="p-2 text-slate-500 hover:text-[#10B981] bg-slate-50 hover:bg-emerald-50 rounded-full transition-colors relative"
+                    className="p-1.5 sm:p-2 text-slate-500 hover:text-[#10B981] bg-slate-50 hover:bg-emerald-50 rounded-full transition-colors relative shrink-0 cursor-pointer"
                     title="Team Chat"
                   >
-                    <MessageCircle size={18} />
+                    <MessageCircle size={17} />
                   </button>
                   <Link
                     href={displayRole === 'ADMIN' ? '/admin/settings' : '/client/settings'}
-                    className="flex items-center gap-2 sm:gap-3 group cursor-pointer hover:bg-slate-50 p-1 sm:p-1.5 pr-2 sm:pr-4 rounded-full transition-all duration-300 border border-transparent hover:border-slate-100"
+                    className="flex items-center gap-1.5 sm:gap-3 group cursor-pointer hover:bg-slate-50 p-0.5 sm:p-1.5 pr-1 sm:pr-4 rounded-full transition-all duration-300 border border-transparent hover:border-slate-100 shrink-0"
                     title="Account Settings"
                   >
                     <div className="text-right hidden sm:block">
                       <p className="text-xs font-black text-slate-900 leading-none mb-0.5 group-hover:text-[#059669] transition-all">{displayName}</p>
                       <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest leading-none">{displayRole}</p>
                     </div>
-                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-tr from-slate-100 to-slate-50 text-slate-600 flex items-center justify-center font-black text-sm border border-slate-200 shadow-xs group-hover:border-[#059669]/30 group-hover:text-[#059669] transition-all duration-300 relative overflow-hidden shrink-0">
+                    <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-full bg-gradient-to-tr from-slate-100 to-slate-50 text-slate-600 flex items-center justify-center font-black text-xs sm:text-sm border border-slate-200 shadow-xs group-hover:border-[#059669]/30 group-hover:text-[#059669] transition-all duration-300 relative overflow-hidden shrink-0">
                       {profileLogo ? (
                         <img
                           src={profileLogo}

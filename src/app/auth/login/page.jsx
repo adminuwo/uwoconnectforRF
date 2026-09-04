@@ -189,6 +189,9 @@ const LoginPage = () => {
           <img
             src={brand?.logo_url || "/download (3).gif"}
             alt={brand?.brand_name || "Brand Logo"}
+            width={20}
+            height={20}
+            style={{ width: '20px', height: '20px' }}
             className="w-5 h-5 rounded-full object-contain"
           />
           <span className="text-slate-900 font-extrabold text-xs tracking-wider uppercase">

@@ -174,6 +174,7 @@ export default function ClientInboxPage() {
           lockedBy: c.locked_by || null,
           lockedByName: c.locked_by_name || null,
           convoDbId: c.id || null,
+          botPaused: Boolean(c.bot_paused),
           status: c.status || 'OPEN',
           contactObj: { platform_id: c.contact_platform_id, phone_number: c.contact_phone, name: c.contact_name },
           messages: []
@@ -304,10 +305,12 @@ export default function ClientInboxPage() {
   useEffect(() => {
     if (selectedConvoId) {
       setMessagesOffset(0);
-      const addressToFetch = selectedRawAddressRef.current || selectedConvoId;
+      const targetConvo = conversations.find(c => c.id === selectedConvoId);
+      const addressToFetch = targetConvo?.rawAddress || selectedRawAddressRef.current || selectedConvoId;
+      selectedRawAddressRef.current = addressToFetch;
       fetchMessages(addressToFetch, 0, false);
     }
-  }, [selectedConvoId]);
+  }, [selectedConvoId, conversations]);
 
   // Instant reactive client-side filtered conversations
   const convoList = useMemo(() => {
@@ -336,6 +339,7 @@ export default function ClientInboxPage() {
     if (convoList.length > 0) {
       const exists = convoList.some(c => c.id === selectedConvoId);
       if (!exists) {
+        selectedRawAddressRef.current = convoList[0].rawAddress || convoList[0].id;
         setSelectedConvoId(convoList[0].id);
       }
     } else {
@@ -343,105 +347,133 @@ export default function ClientInboxPage() {
     }
   }, [activeChannelFilter, convoList]);
 
-  // 2. Real-Time WebSocket Connection & Event Handlers
+  // 2. Real-Time WebSocket Connection & Event Handlers with Auto-Reconnect
   useEffect(() => {
-    const token = localStorage.getItem('uwo_token');
-    if (!token) return;
+    let reconnectTimeout = null;
+    let isUnmounted = false;
 
-    let wsUrl = API_BASE_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app';
-    wsUrl = wsUrl.replace(/^http/, 'ws') + `/ws/inbox/?token=${token}`;
-    
-    const ws = new WebSocket(wsUrl);
-    wsRef.current = ws;
+    const connectWebSocket = () => {
+      if (isUnmounted) return;
+      const token = localStorage.getItem('uwo_token') || localStorage.getItem('token');
+      if (!token) return;
 
-    ws.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data);
-        
-        if (data.type === 'new_message') {
-          const msg = data.message;
-          const contactAddr = msg.message_type === 'INCOMING' ? msg.from_address : msg.to_address;
-          const currentRaw = selectedRawAddressRef.current;
-          const currentId = selectedConvoIdRef.current;
-          const isForCurrentConvo = 
-            (currentRaw && (msg.from_address === currentRaw || msg.to_address === currentRaw)) ||
-            (currentId && (msg.from_address === currentId || msg.to_address === currentId));
-            
-          if (isForCurrentConvo) {
-            setMessages(prev => {
-              if (prev.some(m => m.id === msg.id)) return prev;
-              return [...prev, msg];
+      let wsUrl = API_BASE_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app';
+      wsUrl = wsUrl.replace(/^http/, 'ws') + `/ws/inbox/?token=${token}`;
+      
+      const ws = new WebSocket(wsUrl);
+      wsRef.current = ws;
+
+      ws.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          
+          if (data.type === 'new_message') {
+            const msg = data.message;
+            const contactAddr = msg.message_type === 'INCOMING' ? msg.from_address : msg.to_address;
+            const currentRaw = selectedRawAddressRef.current;
+            const currentId = selectedConvoIdRef.current;
+            const isForCurrentConvo = 
+              (currentRaw && (msg.from_address === currentRaw || msg.to_address === currentRaw)) ||
+              (currentId && (msg.from_address === currentId || msg.to_address === currentId));
+              
+            if (isForCurrentConvo) {
+              setMessages(prev => {
+                if (prev.some(m => m.id === msg.id)) return prev;
+                const tempIdx = prev.findIndex(m => String(m.id).startsWith('temp_') && m.body === msg.body);
+                if (tempIdx !== -1) {
+                  const copy = [...prev];
+                  copy[tempIdx] = msg;
+                  return copy;
+                }
+                return [...prev, msg];
+              });
+            }
+
+            // Real-time Auto-Bump: Move or add this contact to index 0 (top of the list) with newest message!
+            setConversations(prev => {
+              const addrLower = String(contactAddr || '').toLowerCase();
+              const existingIdx = prev.findIndex(c => 
+                String(c.rawAddress || '').toLowerCase() === addrLower || 
+                String(c.id || '').toLowerCase() === addrLower
+              );
+
+              if (existingIdx !== -1) {
+                const updatedItem = {
+                  ...prev[existingIdx],
+                  lastMessage: msg.body || prev[existingIdx].lastMessage,
+                  time: msg.created_at || new Date().toISOString()
+                };
+                const remaining = prev.filter((_, idx) => idx !== existingIdx);
+                return [updatedItem, ...remaining];
+              } else {
+                const newItem = {
+                  id: contactAddr,
+                  name: msg.sender_name || contactAddr,
+                  rawAddress: contactAddr,
+                  lastMessage: msg.body || 'New message',
+                  time: msg.created_at || new Date().toISOString(),
+                  unread: 1,
+                  channel: (msg.channel || 'WHATSAPP').toUpperCase(),
+                  status: 'OPEN',
+                  contactObj: { platform_id: contactAddr, phone_number: contactAddr, name: msg.sender_name || contactAddr },
+                  messages: []
+                };
+                return [newItem, ...prev];
+              }
             });
           }
 
-          // Real-time Auto-Bump: Move or add this contact to index 0 (top of the list) with newest message!
-          setConversations(prev => {
-            const addrLower = String(contactAddr || '').toLowerCase();
-            const existingIdx = prev.findIndex(c => 
-              String(c.rawAddress || '').toLowerCase() === addrLower || 
-              String(c.id || '').toLowerCase() === addrLower
-            );
+          // Live Presence / Viewing / Typing Broadcasting
+          if (data.type === 'typing_status') {
+            setLivePresence(prev => ({
+              ...prev,
+              [data.conversation_id]: {
+                ...prev[data.conversation_id],
+                isTyping: data.is_typing,
+                typingUser: data.username,
+                typingDepartment: data.department
+              }
+            }));
+          }
 
-            if (existingIdx !== -1) {
-              const updatedItem = {
-                ...prev[existingIdx],
-                lastMessage: msg.body || prev[existingIdx].lastMessage,
-                time: msg.created_at || new Date().toISOString()
-              };
-              const remaining = prev.filter((_, idx) => idx !== existingIdx);
-              return [updatedItem, ...remaining];
-            } else {
-              const newItem = {
-                id: contactAddr,
-                name: msg.sender_name || contactAddr,
-                rawAddress: contactAddr,
-                lastMessage: msg.body || 'New message',
-                time: msg.created_at || new Date().toISOString(),
-                unread: 1,
-                channel: (msg.channel || 'WHATSAPP').toUpperCase(),
-                status: 'OPEN',
-                contactObj: { platform_id: contactAddr, phone_number: contactAddr, name: msg.sender_name || contactAddr },
-                messages: []
-              };
-              return [newItem, ...prev];
-            }
-          });
-        }
+          if (data.type === 'view_conversation') {
+            setLivePresence(prev => ({
+              ...prev,
+              [data.conversation_id]: {
+                ...prev[data.conversation_id],
+                viewer: data.username,
+                role: data.role
+              }
+            }));
+          }
 
-        // Live Presence / Viewing / Typing Broadcasting
-        if (data.type === 'typing_status') {
-          setLivePresence(prev => ({
-            ...prev,
-            [data.conversation_id]: {
-              ...prev[data.conversation_id],
-              isTyping: data.is_typing,
-              typingUser: data.username,
-              typingDepartment: data.department
-            }
-          }));
+          if (data.type === 'takeover_event' || data.type === 'transfer_event' || data.type === 'note_event') {
+            fetchData(); // Refresh UI live
+          }
+        } catch (err) {
+          console.error('WebSocket event parse error:', err);
         }
+      };
 
-        if (data.type === 'view_conversation') {
-          setLivePresence(prev => ({
-            ...prev,
-            [data.conversation_id]: {
-              ...prev[data.conversation_id],
-              viewer: data.username,
-              role: data.role
-            }
-          }));
+      ws.onclose = () => {
+        if (!isUnmounted) {
+          reconnectTimeout = setTimeout(connectWebSocket, 3000);
         }
+      };
 
-        if (data.type === 'takeover_event' || data.type === 'transfer_event' || data.type === 'note_event') {
-          fetchData(); // Refresh UI live
-        }
-      } catch (err) {
-        console.error('WebSocket event parse error:', err);
-      }
+      ws.onerror = () => {
+        try { ws.close(); } catch (_) {}
+      };
     };
 
+    connectWebSocket();
+
     return () => {
-      ws.close();
+      isUnmounted = true;
+      if (reconnectTimeout) clearTimeout(reconnectTimeout);
+      if (wsRef.current) {
+        try { wsRef.current.close(); } catch (_) {}
+      }
     };
   }, []);
 
@@ -530,6 +562,10 @@ export default function ClientInboxPage() {
 
       if (res.data) {
         setMessages(prev => {
+          const alreadyExists = prev.some(m => m.id === res.data.id);
+          if (alreadyExists) {
+            return prev.filter(m => m.id !== optimisticMsg.id);
+          }
           const replaced = prev.map(m => m.id === optimisticMsg.id ? res.data : m);
           if (!replaced.some(m => m.id === res.data.id)) {
             replaced.push(res.data);
@@ -570,6 +606,7 @@ export default function ClientInboxPage() {
       if (c.id === activeConvo.id) {
         return {
           ...c,
+          botPaused: true,
           handlerName: currentName,
           assignedToName: currentName,
           isLocked: true,
@@ -600,6 +637,7 @@ export default function ClientInboxPage() {
       if (c.id === activeConvo.id) {
         return {
           ...c,
+          botPaused: false,
           handlerName: null,
           assignedToName: null,
           isLocked: false,
@@ -619,6 +657,43 @@ export default function ClientInboxPage() {
       fetchData();
     } catch (err) {
       console.warn('Resume bot event error:', err);
+    }
+  };
+
+  // Quick toggle bot ON / OFF directly from contact list
+  const handleToggleBotForConvo = async (convo) => {
+    if (!convo) return;
+    const isCurrentlyPaused = Boolean(convo.botPaused);
+    const newPausedState = !isCurrentlyPaused;
+    const currentName = currentUser?.first_name 
+      ? `${currentUser.first_name} ${currentUser.last_name || ''}`.trim() 
+      : currentUser?.name || currentUser?.username || 'You';
+
+    // Optimistic UI update
+    setConversations(prev => prev.map(c => {
+      if (c.id === convo.id) {
+        return {
+          ...c,
+          botPaused: newPausedState,
+          isLocked: newPausedState,
+          handlerName: newPausedState ? currentName : null,
+          assignedToName: newPausedState ? currentName : null
+        };
+      }
+      return c;
+    }));
+
+    try {
+      const token = localStorage.getItem('uwo_token') || localStorage.getItem('token');
+      const apiUrl = API_BASE_URL;
+      const convoIdToUse = convo.convoDbId || convo.id;
+      const endpoint = isCurrentlyPaused ? 'resume_bot' : 'takeover';
+      await axios.post(`${apiUrl}/api/conversations/${convoIdToUse}/${endpoint}/`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+    } catch (err) {
+      console.warn(`Failed to toggle bot (${isCurrentlyPaused ? 'resume' : 'takeover'}):`, err);
+      setConversations(prev => prev.map(c => c.id === convo.id ? { ...c, botPaused: isCurrentlyPaused } : c));
     }
   };
 
@@ -825,7 +900,26 @@ export default function ClientInboxPage() {
                           <span className="text-[10px] text-slate-400 font-medium whitespace-nowrap">
                             {new Date(convo.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                           </span>
-                          {liveState?.viewer && (
+
+                          {/* Quick Bot ON/OFF Toggle Button */}
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleToggleBotForConvo(convo);
+                            }}
+                            title={convo.botPaused ? "Bot is Paused (Click to Turn Bot ON)" : "Bot is Active (Click to Turn Bot OFF / Take Over)"}
+                            className={`mt-1.5 inline-flex items-center gap-1 text-[9px] sm:text-[10px] font-bold px-2 py-0.5 rounded-full border transition-all cursor-pointer shadow-2xs ${
+                              convo.botPaused
+                                ? "bg-amber-50 text-amber-700 border-amber-300 hover:bg-amber-100"
+                                : "bg-emerald-50 text-emerald-700 border-emerald-300 hover:bg-emerald-100"
+                            }`}
+                          >
+                            <Bot className={`w-3 h-3 ${convo.botPaused ? "text-amber-500" : "text-emerald-600"}`} />
+                            <span>{convo.botPaused ? "Bot OFF" : "Bot ON"}</span>
+                          </button>
+
+                          {liveState?.viewer && liveState.viewer !== currentUser?.username && liveState.viewer !== currentUser?.email && (
                             <div className="mt-1 flex justify-end">
                               <span className="inline-flex items-center gap-1 text-[9px] px-1.5 py-0.5 rounded-md bg-blue-100 text-blue-700 font-bold max-w-[110px] truncate">
                                 🟢 {liveState.viewer}
@@ -924,7 +1018,7 @@ export default function ClientInboxPage() {
                           <span className="text-emerald-600 font-bold flex items-center gap-1 animate-pulse truncate">
                             ✍️ {livePresence[activeConvo.id]?.typingUser || activeConvo.handlerName || 'Agent'} is typing...
                           </span>
-                        ) : livePresence[activeConvo.id]?.viewer ? (
+                        ) : livePresence[activeConvo.id]?.viewer && livePresence[activeConvo.id]?.viewer !== currentUser?.username && livePresence[activeConvo.id]?.viewer !== currentUser?.email ? (
                           <span className="text-blue-600 font-semibold flex items-center gap-1 truncate">
                             🟢 {livePresence[activeConvo.id]?.viewer}
                           </span>
@@ -937,23 +1031,25 @@ export default function ClientInboxPage() {
 
                   {/* Action Buttons Toolbar */}
                   <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
-                    <button
-                      onClick={handleResumeBot}
-                      className="px-2 sm:px-2.5 py-1 rounded-lg text-[10px] sm:text-[11px] font-bold bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-300 transition-all flex items-center gap-1 cursor-pointer shadow-2xs shrink-0"
-                      title="Resume AI Bot & Workflow for this conversation"
-                    >
-                      <Bot className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                      <span className="hidden xs:inline sm:inline">Resume Bot</span>
-                    </button>
-
-                    <button
-                      onClick={handleTakeover}
-                      className="px-2 sm:px-2.5 py-1 rounded-lg text-[10px] sm:text-[11px] font-bold bg-rose-50 text-rose-600 hover:bg-rose-100 border border-rose-200 transition-all flex items-center gap-1 cursor-pointer shrink-0"
-                      title="Take Over"
-                    >
-                      <ShieldAlert className="w-3 h-3 shrink-0" />
-                      <span className="hidden sm:inline">Take Over</span>
-                    </button>
+                    {activeConvo.botPaused ? (
+                      <button
+                        onClick={handleResumeBot}
+                        className="px-2 sm:px-2.5 py-1 rounded-lg text-[10px] sm:text-[11px] font-bold bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-300 transition-all flex items-center gap-1 cursor-pointer shadow-2xs shrink-0"
+                        title="Resume AI Bot & Workflow for this conversation"
+                      >
+                        <Bot className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                        <span className="hidden xs:inline sm:inline">Resume Bot</span>
+                      </button>
+                    ) : (
+                      <button
+                        onClick={handleTakeover}
+                        className="px-2 sm:px-2.5 py-1 rounded-lg text-[10px] sm:text-[11px] font-bold bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-300 transition-all flex items-center gap-1 cursor-pointer shadow-2xs shrink-0"
+                        title="Pause AI Bot and take over manually"
+                      >
+                        <ShieldAlert className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                        <span className="hidden sm:inline">Take Over</span>
+                      </button>
+                    )}
 
                     <button
                       onClick={() => setIsTransferModalOpen(true)}

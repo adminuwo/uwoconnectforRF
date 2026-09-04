@@ -41,11 +41,11 @@ export default function AxiosNetworkFixer() {
       if (isLocal) {
         // When developing locally, redirect Cloud Run backend requests to local Django backend if not already retried
         if (url.includes('uwoconnectforrb-743928421487.asia-south1.run.app') && !config._retried) {
-          config.url = url.replace('https://uwoconnectforrb-743928421487.asia-south1.run.app', 'http://127.0.0.1:8000');
+          config.url = url.replace('https://uwoconnectforrb-743928421487.asia-south1.run.app', 'http://127.0.0.1:8080');
         } else if (host === 'localhost' || host === '127.0.0.1') {
           // Map LAN IP to 127.0.0.1
           if (/^https?:\/\/(192\.168\.[0-9.]+|10\.[0-9.]+|172\.(1[6-9]|2[0-9]|3[01])\.[0-9.]+):8080/.test(url)) {
-            config.url = url.replace(/^https?:\/\/[^/]+/, 'http://127.0.0.1:8000');
+            config.url = url.replace(/^https?:\/\/[^/]+/, 'http://127.0.0.1:8080');
           }
         }
       } else if (isExternalHost(host)) {
@@ -87,13 +87,15 @@ export default function AxiosNetworkFixer() {
           return Promise.reject(error);
         }
 
-        // Catch Axios Network Error when local port 8080 is unreachable
+        // Catch Axios Network Error when local port is unreachable, retry on alternate port
         if (error.code === 'ERR_NETWORK' || error.message === 'Network Error' || !error.response) {
           config._retried = true;
 
-          // If failed on 8080, try 8000
           if (config.url && config.url.includes('127.0.0.1:8080')) {
             config.url = config.url.replace('http://127.0.0.1:8080', 'http://127.0.0.1:8000');
+            return axios(config);
+          } else if (config.url && config.url.includes('127.0.0.1:8000')) {
+            config.url = config.url.replace('http://127.0.0.1:8000', 'http://127.0.0.1:8080');
             return axios(config);
           }
         }

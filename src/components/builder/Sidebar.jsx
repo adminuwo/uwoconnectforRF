@@ -15,9 +15,9 @@ export default function Sidebar() {
         <h3 className="font-semibold text-slate-800">Nodes</h3>
         <p className="text-xs text-slate-500 mt-1">Drag and drop to build workflow.</p>
       </div>
-      
+
       <div className="p-4 space-y-3 overflow-y-auto">
-        <div 
+        <div
           className="flex items-center gap-3 p-3 bg-slate-50 border border-slate-200 rounded cursor-grab hover:bg-slate-100 transition-colors"
           onDragStart={(event) => onDragStart(event, 'trigger')}
           draggable
@@ -29,7 +29,7 @@ export default function Sidebar() {
           </div>
         </div>
 
-        <div 
+        <div
           className="flex items-center gap-3 p-3 bg-slate-50 border border-slate-200 rounded cursor-grab hover:bg-slate-100 transition-colors"
           onDragStart={(event) => onDragStart(event, 'message')}
           draggable
@@ -41,7 +41,7 @@ export default function Sidebar() {
           </div>
         </div>
 
-        <div 
+        <div
           className="flex items-center gap-3 p-3 bg-slate-50 border border-slate-200 rounded cursor-grab hover:bg-slate-100 transition-colors"
           onDragStart={(event) => onDragStart(event, 'buttons')}
           draggable
@@ -53,7 +53,7 @@ export default function Sidebar() {
           </div>
         </div>
 
-        <div 
+        <div
           className="flex items-center gap-3 p-3 bg-slate-50 border border-slate-200 rounded cursor-grab hover:bg-slate-100 transition-colors"
           onDragStart={(event) => onDragStart(event, 'condition')}
           draggable
@@ -65,7 +65,7 @@ export default function Sidebar() {
           </div>
         </div>
 
-        <div 
+        <div
           className="flex items-center gap-3 p-3 bg-slate-50 border border-slate-200 rounded cursor-grab hover:bg-slate-100 transition-colors"
           onDragStart={(event) => onDragStart(event, 'handoff')}
           draggable

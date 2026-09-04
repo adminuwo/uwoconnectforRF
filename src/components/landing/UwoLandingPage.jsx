@@ -296,6 +296,9 @@ export default function UwoLandingPage() {
             <img
               src={isWhiteLabel && logoUrl ? logoUrl : "/download (3).gif"}
               alt={brandName}
+              width={32}
+              height={32}
+              style={{ width: '32px', height: '32px', objectFit: 'contain' }}
               className="w-8 h-8 object-contain group-hover:scale-105 transition-transform duration-300 shrink-0"
             />
             <span className={cn(
@@ -702,7 +705,7 @@ export default function UwoLandingPage() {
       {/* ════════════════════════════════════════════════════════════════ */}
       {/* 6. CONNECTORS SECTION */}
       {/* ════════════════════════════════════════════════════════════════ */}
-      <section id="connectors" className="relative py-24 px-6 sm:px-10 lg:px-12 max-w-7xl mx-auto my-14 bg-gradient-to-br from-slate-50/90 via-white to-teal-50/60 rounded-[2.5rem] border border-slate-200/90 shadow-xl overflow-hidden">
+      <section id="connectors" className="relative pt-16 pb-12 sm:pt-20 sm:pb-14 px-6 sm:px-10 lg:px-12 max-w-7xl mx-auto my-12 bg-gradient-to-br from-slate-50/90 via-white to-teal-50/60 rounded-[2.5rem] border border-slate-200/90 shadow-xl overflow-hidden">
 
         {/* Ambient Glows */}
         <div className="absolute -top-32 -right-32 w-80 h-80 bg-teal-500/10 rounded-full blur-[100px] pointer-events-none" />
@@ -710,7 +713,7 @@ export default function UwoLandingPage() {
         <div className="absolute inset-0 bg-[radial-gradient(#0d9488_1px,transparent_1px)] [background-size:28px_28px] opacity-10 pointer-events-none" />
 
         <div className="relative z-10">
-          <div className="text-center space-y-4 mb-16">
+          <div className="text-center space-y-4 mb-14">
             <h2
               className="text-4xl sm:text-5xl lg:text-6xl font-bold text-slate-900 tracking-tight italic font-serif leading-tight"
               style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
@@ -745,6 +748,19 @@ export default function UwoLandingPage() {
                 </div>
               </ScrollReveal>
             ))}
+          </div>
+
+          {/* Prominent Clean Coming Soon Badge in Green */}
+          <div className="mt-8 sm:mt-10 flex justify-center">
+            <div className="inline-flex items-center gap-3 px-8 py-3 sm:px-10 sm:py-3.5 rounded-full bg-emerald-50 border border-emerald-300 shadow-md shadow-emerald-500/10 hover:border-emerald-500 hover:bg-emerald-100/80 hover:shadow-lg hover:shadow-emerald-500/20 hover:scale-[1.02] transition-all duration-300">
+              <span className="relative flex h-2.5 w-2.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-600"></span>
+              </span>
+              <span className="text-sm sm:text-base md:text-lg font-black text-emerald-800 tracking-wider uppercase">
+                Coming Soon
+              </span>
+            </div>
           </div>
         </div>
       </section>

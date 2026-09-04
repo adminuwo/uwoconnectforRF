@@ -20,8 +20,8 @@ const BaseNode = ({ icon, title, content, children }) => (
 export const TriggerNode = ({ data, isConnectable }) => {
   return (
     <>
-      <BaseNode 
-        icon={<Zap size={14} className="text-amber-500" />} 
+      <BaseNode
+        icon={<Zap size={14} className="text-amber-500" />}
         title="Trigger"
         content={data.label || 'Incoming message'}
       >
@@ -44,8 +44,8 @@ export const MessageNode = ({ data, isConnectable }) => {
   return (
     <>
       <Handle type="target" position={Position.Left} isConnectable={isConnectable} className="w-3 h-3 bg-emerald-500 border-2 border-white" />
-      <BaseNode 
-        icon={<MessageSquare size={14} className="text-emerald-500" />} 
+      <BaseNode
+        icon={<MessageSquare size={14} className="text-emerald-500" />}
         title="Send Message"
       >
         <div className="bg-emerald-50 p-2 rounded border border-emerald-100 text-xs text-emerald-900 line-clamp-3">
@@ -64,30 +64,30 @@ export const MessageNode = ({ data, isConnectable }) => {
 
 export const ButtonsNode = ({ data, isConnectable }) => {
   const buttons = data.buttons || [];
-  
+
   return (
     <>
       <Handle type="target" position={Position.Left} isConnectable={isConnectable} className="w-3 h-3 bg-blue-500 border-2 border-white" />
-      <BaseNode 
-        icon={<Target size={14} className="text-blue-500" />} 
+      <BaseNode
+        icon={<Target size={14} className="text-blue-500" />}
         title="Interactive Buttons"
       >
         <div className="bg-blue-50 p-2 rounded border border-blue-100 text-xs text-blue-900 line-clamp-2 mb-2">
           {data.message || <span className="text-blue-400 italic">Configure message...</span>}
         </div>
-        
+
         <div className="space-y-1 relative">
           {buttons.map((btn, idx) => (
             <div key={idx} className="relative">
               <div className="bg-white border border-blue-200 text-blue-700 text-xs text-center py-1 rounded shadow-sm">
                 {btn}
               </div>
-              <Handle 
-                type="source" 
-                position={Position.Right} 
-                id={`btn-${idx}`} 
+              <Handle
+                type="source"
+                position={Position.Right}
+                id={`btn-${idx}`}
                 style={{ top: '50%', right: -15, transform: 'translateY(-50%)' }}
-                isConnectable={isConnectable} 
+                isConnectable={isConnectable}
                 className="w-3 h-3 bg-blue-500 border-2 border-white"
               />
             </div>
@@ -115,26 +115,26 @@ export const ConditionNode = ({ data, isConnectable }) => {
             {data.condition || 'Configure condition...'}
           </div>
         </div>
-        
+
         {/* True Branch */}
         <div className="absolute top-1/3 right-0 -mr-2 bg-emerald-500 text-white text-[9px] px-1 rounded-sm shadow z-10 translate-x-full mt-2">True</div>
-        <Handle 
-          type="source" 
-          position={Position.Right} 
-          id="true" 
+        <Handle
+          type="source"
+          position={Position.Right}
+          id="true"
           style={{ top: '33%' }}
-          isConnectable={isConnectable} 
+          isConnectable={isConnectable}
           className="w-3 h-3 bg-emerald-500 border-2 border-white"
         />
-        
+
         {/* False Branch */}
         <div className="absolute top-2/3 right-0 -mr-2 bg-rose-500 text-white text-[9px] px-1 rounded-sm shadow z-10 translate-x-full mt-2">False</div>
-        <Handle 
-          type="source" 
-          position={Position.Right} 
-          id="false" 
+        <Handle
+          type="source"
+          position={Position.Right}
+          id="false"
           style={{ top: '66%' }}
-          isConnectable={isConnectable} 
+          isConnectable={isConnectable}
           className="w-3 h-3 bg-rose-500 border-2 border-white"
         />
       </div>
@@ -146,8 +146,8 @@ export const HandoffNode = ({ data, isConnectable }) => {
   return (
     <>
       <Handle type="target" position={Position.Left} isConnectable={isConnectable} className="w-3 h-3 bg-rose-500 border-2 border-white" />
-      <BaseNode 
-        icon={<UserPlus size={14} className="text-rose-500" />} 
+      <BaseNode
+        icon={<UserPlus size={14} className="text-rose-500" />}
         title="Agent Handoff"
       >
         <div className="text-xs text-slate-600">
