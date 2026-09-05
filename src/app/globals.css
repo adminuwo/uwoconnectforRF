@@ -65,6 +65,42 @@
   }
 }
 
+/* ── Times New Roman for All Pages Except Landing Page ── */
+body.font-times-new-roman,
+html.font-times-new-roman,
+body.font-times-new-roman button,
+body.font-times-new-roman input,
+body.font-times-new-roman select,
+body.font-times-new-roman textarea,
+body.font-times-new-roman h1,
+body.font-times-new-roman h2,
+body.font-times-new-roman h3,
+body.font-times-new-roman h4,
+body.font-times-new-roman h5,
+body.font-times-new-roman h6,
+body.font-times-new-roman p,
+body.font-times-new-roman span,
+body.font-times-new-roman div,
+body.font-times-new-roman a,
+body.font-times-new-roman label,
+body.font-times-new-roman table,
+body.font-times-new-roman td,
+body.font-times-new-roman th,
+.dashboard-font-times,
+.dashboard-font-times * {
+  font-family: "Times New Roman", Times, serif !important;
+}
+
+body.font-times-new-roman code,
+body.font-times-new-roman kbd,
+body.font-times-new-roman pre {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+}
+
+body.font-times-new-roman svg {
+  font-family: initial !important;
+}
+
 /* Premium Glass Cards in Dark Mode */
 .glass-card {
   background: rgba(17, 24, 39, 0.6);

@@ -593,7 +593,7 @@ export default function PricingComparisonTable({ plansData, onSelectPlan, isAdmi
   };
 
   return (
-    <div className="w-full space-y-10 pb-16 text-slate-900 bg-white" style={{ fontFamily: "'Times New Roman', Times, serif" }}>
+    <div className="w-full space-y-10 pb-16 text-slate-900 bg-white">
 
       {/* CAPACITY WARNING TOAST */}
       {capacityNotice && (

@@ -427,10 +427,20 @@ const DashboardLayout = ({ children, role: initialRole }) => {
   const displayRole = mounted 
     ? (user?.role === 'ADMIN' ? 'SUPER ADMIN' : isAgencyUser ? 'AGENCY ADMIN' : (user?.role || initialRole || 'CLIENT'))
     : (initialRole === 'ADMIN' ? 'SUPER ADMIN' : 'CLIENT');
+  const isAdminUser = Boolean(
+    initialRole === 'ADMIN' ||
+    displayRole === 'SUPER ADMIN' ||
+    user?.role === 'ADMIN' ||
+    userObj?.role === 'ADMIN' ||
+    (typeof pathname === 'string' && pathname.startsWith('/admin'))
+  );
   const currentTitle = PAGE_TITLES[pathname] || (initialRole === 'ADMIN' ? 'Control Center' : 'Dashboard');
 
   return (
-    <div className="flex flex-col h-screen w-screen bg-[#fcfdfe] overflow-hidden">
+    <div 
+      className="flex flex-col h-screen w-screen bg-[#fcfdfe] overflow-hidden dashboard-font-times font-serif"
+      style={{ fontFamily: "'Times New Roman', Times, serif" }}
+    >
       {/* ── Super Admin Impersonation Top Banner ── */}
       {impersonationData && (
         <div className="bg-gradient-to-r from-amber-600 via-amber-500 to-orange-600 text-white px-4 py-2 text-xs font-bold flex items-center justify-between shadow-md z-50 shrink-0">
@@ -449,10 +459,13 @@ const DashboardLayout = ({ children, role: initialRole }) => {
         </div>
       )}
 
-      <div className="flex bg-[#fcfdfe] h-full w-full font-sans selection:bg-emerald-100 selection:text-emerald-900 text-slate-900 flex-1 overflow-hidden">
+      <div 
+        className="flex bg-[#fcfdfe] h-full w-full dashboard-font-times font-serif selection:bg-emerald-100 selection:text-emerald-900 text-slate-900 flex-1 overflow-hidden"
+        style={{ fontFamily: "'Times New Roman', Times, serif" }}
+      >
         <Sidebar role={displayRole} isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} onToggle={() => setSidebarOpen(v => !v)} />
 
-        <main className="flex-1 dashboard-main h-full flex flex-col min-w-0 overflow-hidden">
+        <main className="flex-1 dashboard-main h-full flex flex-col min-w-0 overflow-hidden dashboard-font-times font-serif" style={{ fontFamily: "'Times New Roman', Times, serif" }}>
           {/* Header */}
           <header className="h-14 sm:h-16 bg-white/80 backdrop-blur-xl border-b border-slate-100 px-2.5 sm:px-6 flex items-center justify-between sticky top-0 z-20 shrink-0 shadow-xs">
             <div className="flex items-center gap-1.5 sm:gap-3 min-w-0 flex-1 mr-2">
@@ -527,27 +540,48 @@ const DashboardLayout = ({ children, role: initialRole }) => {
                   )}
 
                   {/* Prepaid Usage Wallet Widget near Profile */}
-                  <button
-                    onClick={() => setIsAddMoneyOpen(true)}
-                    className="flex items-center gap-1 sm:gap-1.5 px-2 py-1 sm:px-3 sm:py-1.5 bg-emerald-50/80 hover:bg-emerald-100/90 text-emerald-900 rounded-xl border border-emerald-200/80 transition-all text-xs font-bold shadow-xs hover:shadow-sm cursor-pointer shrink-0"
-                    title="Click to Add Money / Recharge Wallet"
-                  >
-                    <Wallet size={14} className="text-[#059669] shrink-0" />
-                    <span className="font-extrabold text-slate-900 text-[11px] sm:text-xs">
-                      {walletBalance !== null ? (
-                        <>
-                          ₹{Math.floor(walletBalance).toLocaleString('en-IN')}
-                          <span className="hidden sm:inline">
-                            {(walletBalance % 1).toFixed(2).substring(1)}
-                          </span>
-                        </>
-                      ) : 'Wallet'}
-                    </span>
-                    <span className="hidden sm:inline-block text-[10px] font-black text-emerald-700 bg-emerald-200/60 px-1.5 py-0.5 rounded-md ml-0.5">+ Topup</span>
-                  </button>
+                  {isAdminUser ? (
+                    <Link
+                      href="/admin/billing"
+                      className="flex items-center gap-1 sm:gap-1.5 px-2 py-1 sm:px-3 sm:py-1.5 bg-emerald-50/80 hover:bg-emerald-100/90 text-emerald-900 rounded-xl border border-emerald-200/80 transition-all text-xs font-bold shadow-xs hover:shadow-sm cursor-pointer shrink-0"
+                      title="Master Wallet & Rate Management"
+                    >
+                      <Wallet size={14} className="text-[#059669] shrink-0" />
+                      <span className="font-extrabold text-slate-900 text-[11px] sm:text-xs">
+                        {walletBalance !== null ? (
+                          <>
+                            ₹{Math.floor(walletBalance).toLocaleString('en-IN')}
+                            <span className="hidden sm:inline">
+                              {(walletBalance % 1).toFixed(2).substring(1)}
+                            </span>
+                          </>
+                        ) : 'Wallets'}
+                      </span>
+                      <span className="hidden sm:inline-block text-[10px] font-black text-emerald-700 bg-emerald-200/60 px-1.5 py-0.5 rounded-md ml-0.5">Manage</span>
+                    </Link>
+                  ) : (
+                    <button
+                      onClick={() => setIsAddMoneyOpen(true)}
+                      className="flex items-center gap-1 sm:gap-1.5 px-2 py-1 sm:px-3 sm:py-1.5 bg-emerald-50/80 hover:bg-emerald-100/90 text-emerald-900 rounded-xl border border-emerald-200/80 transition-all text-xs font-bold shadow-xs hover:shadow-sm cursor-pointer shrink-0"
+                      title="Click to Add Money / Recharge Wallet"
+                    >
+                      <Wallet size={14} className="text-[#059669] shrink-0" />
+                      <span className="font-extrabold text-slate-900 text-[11px] sm:text-xs">
+                        {walletBalance !== null ? (
+                          <>
+                            ₹{Math.floor(walletBalance).toLocaleString('en-IN')}
+                            <span className="hidden sm:inline">
+                              {(walletBalance % 1).toFixed(2).substring(1)}
+                            </span>
+                          </>
+                        ) : 'Wallet'}
+                      </span>
+                      <span className="hidden sm:inline-block text-[10px] font-black text-emerald-700 bg-emerald-200/60 px-1.5 py-0.5 rounded-md ml-0.5">+ Topup</span>
+                    </button>
+                  )}
 
                   <Link
-                    href={displayRole === 'ADMIN' ? '/admin/plans' : '/client/plans'}
+                    href={isAdminUser ? '/admin/plans' : '/client/plans'}
                     className="hidden xs:flex p-1.5 sm:p-2 text-slate-500 hover:text-amber-500 bg-slate-50 hover:bg-amber-50 rounded-full transition-colors relative shrink-0"
                     title="Plans & Subscriptions"
                   >
@@ -563,7 +597,7 @@ const DashboardLayout = ({ children, role: initialRole }) => {
                     <MessageCircle size={17} />
                   </button>
                   <Link
-                    href={displayRole === 'ADMIN' ? '/admin/settings' : '/client/settings'}
+                    href={isAdminUser ? '/admin/settings' : '/client/settings'}
                     className="flex items-center gap-1.5 sm:gap-3 group cursor-pointer hover:bg-slate-50 p-0.5 sm:p-1.5 pr-1 sm:pr-4 rounded-full transition-all duration-300 border border-transparent hover:border-slate-100 shrink-0"
                     title="Account Settings"
                   >

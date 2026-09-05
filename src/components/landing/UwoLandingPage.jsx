@@ -278,9 +278,9 @@ export default function UwoLandingPage() {
 
   return (
     <div className={cn(
-      "min-h-screen transition-colors duration-500 font-serif selection:bg-emerald-500/20 selection:text-emerald-800",
+      "min-h-screen transition-colors duration-500 font-sans selection:bg-emerald-500/20 selection:text-emerald-800",
       isDarkMode ? "bg-slate-950 text-slate-100" : "bg-white text-slate-900"
-    )} style={{ fontFamily: "'Times New Roman', Times, serif" }}>
+    )}>
 
       {/* ════════════════════════════════════════════════════════════════ */}
       {/* 1. STICKY GLASSY NAVBAR WITH THEME SWITCHER */}
@@ -441,10 +441,9 @@ export default function UwoLandingPage() {
           {/* Headline */}
           <h1
             className={cn(
-              "text-4xl sm:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.1] max-w-5xl mx-auto font-serif",
+              "text-4xl sm:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.1] max-w-5xl mx-auto font-sans",
               isDarkMode ? "text-emerald-400 drop-shadow-[0_0_35px_rgba(16,185,129,0.35)]" : "text-[#064e3b] drop-shadow-xs"
             )}
-            style={{ fontFamily: "'Times New Roman', Times, serif" }}
           >
             <span>Connect Everything.</span> <br className="hidden sm:inline" />
             <span className="pr-2">
@@ -496,8 +495,7 @@ export default function UwoLandingPage() {
         <div className="relative z-10">
           <div className="text-center space-y-3 mb-12">
             <h2
-              className="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight italic font-serif"
-              style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
+              className="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight italic font-sans"
             >
               Everything Your Business Needs. Connected in One Place.
             </h2>
@@ -615,8 +613,7 @@ export default function UwoLandingPage() {
       <section id="channels" className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto bg-slate-50/50 rounded-3xl border border-slate-200/80 my-10">
         <div className="text-center space-y-3 mb-12">
           <h2
-            className="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight italic font-serif"
-            style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
+            className="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight italic font-sans"
           >
             Meet Your Customers Where They Are
           </h2>
@@ -715,8 +712,7 @@ export default function UwoLandingPage() {
         <div className="relative z-10">
           <div className="text-center space-y-4 mb-14">
             <h2
-              className="text-4xl sm:text-5xl lg:text-6xl font-bold text-slate-900 tracking-tight italic font-serif leading-tight"
-              style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
+              className="text-4xl sm:text-5xl lg:text-6xl font-bold text-slate-900 tracking-tight italic font-sans leading-tight"
             >
               Connect the Tools Your Business Already Uses
             </h2>
@@ -771,8 +767,7 @@ export default function UwoLandingPage() {
       <section id="features" className="py-24 px-6 sm:px-10 lg:px-12 max-w-7xl mx-auto bg-gradient-to-b from-emerald-50/80 via-white to-emerald-50/40 rounded-[2.5rem] border border-emerald-200/90 my-16 shadow-xl">
         <div className="text-center space-y-4 mb-16">
           <h2
-            className="text-4xl sm:text-5xl lg:text-6xl font-bold text-slate-900 tracking-tight italic font-serif leading-tight"
-            style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
+            className="text-4xl sm:text-5xl lg:text-6xl font-bold text-slate-900 tracking-tight italic font-sans leading-tight"
           >
             From Conversation to Completion — Automatically
           </h2>
@@ -835,8 +830,7 @@ export default function UwoLandingPage() {
           <div className="text-center space-y-4 mb-16">
             <UwoBrandHeader align="center" />
             <h2
-              className="text-4xl sm:text-5xl lg:text-6xl font-bold text-slate-900 tracking-tight italic font-serif leading-tight"
-              style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
+              className="text-4xl sm:text-5xl lg:text-6xl font-bold text-slate-900 tracking-tight italic font-sans leading-tight"
             >
               How UWO Connect Works
             </h2>
@@ -942,8 +936,7 @@ export default function UwoLandingPage() {
           <div className="text-center space-y-4 mb-16">
             <UwoBrandHeader align="center" dark />
             <h2
-              className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white tracking-tight italic font-serif leading-tight drop-shadow-md"
-              style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
+              className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white tracking-tight italic font-sans leading-tight drop-shadow-md"
             >
               See Automation in Action
             </h2>
@@ -1188,8 +1181,7 @@ export default function UwoLandingPage() {
         <div className="relative z-10">
           <div className="text-center space-y-3 mb-12">
             <h2
-              className="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight italic font-serif"
-              style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
+              className="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight italic font-sans"
             >
               Stop Switching Between Tools
             </h2>
@@ -1245,8 +1237,7 @@ export default function UwoLandingPage() {
             <div className="space-y-4">
               <UwoBrandHeader align="left" />
               <h2
-                className="text-4xl sm:text-5xl font-bold text-slate-900 tracking-tight italic font-serif leading-[1.15]"
-                style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
+                className="text-4xl sm:text-5xl font-bold text-slate-900 tracking-tight italic font-sans leading-[1.15]"
               >
                 Everything You Need to Run Smarter
               </h2>
@@ -1430,8 +1421,7 @@ export default function UwoLandingPage() {
                         <div>
                           <span className="text-[11px] font-black text-slate-400 tracking-widest uppercase">MODULE {currentModule.num} OF 09</span>
                           <h3
-                            className="text-2xl sm:text-3xl font-bold text-slate-900 leading-tight italic font-serif"
-                            style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
+                            className="text-2xl sm:text-3xl font-bold text-slate-900 leading-tight italic font-sans"
                           >
                             {currentModule.title}
                           </h3>
@@ -1546,8 +1536,7 @@ export default function UwoLandingPage() {
               </span>
 
               <h2
-                className="text-4xl sm:text-5xl lg:text-6xl font-bold text-slate-900 tracking-tight italic font-serif leading-tight"
-                style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
+                className="text-4xl sm:text-5xl lg:text-6xl font-bold text-slate-900 tracking-tight italic font-sans leading-tight"
               >
                 Build & Scale Your Own White-Label Software Agency
               </h2>
@@ -1607,8 +1596,7 @@ export default function UwoLandingPage() {
                   <div className="text-center space-y-2">
                     <span className="text-xs font-black tracking-widest text-[#059669] uppercase">4-STEP ONBOARDING JOURNEY</span>
                     <h3
-                      className="text-3xl sm:text-4xl font-bold text-slate-900 italic font-serif"
-                      style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
+                      className="text-3xl sm:text-4xl font-bold text-slate-900 italic font-sans"
                     >
                       Launch Your SaaS Brand in 4 Simple Steps
                     </h3>
@@ -1664,8 +1652,7 @@ export default function UwoLandingPage() {
                   <div className="text-center space-y-2">
                     <span className="text-xs font-black tracking-widest text-[#059669] uppercase">AGENCY DELIVERABLES</span>
                     <h3
-                      className="text-3xl sm:text-4xl font-bold text-slate-900 italic font-serif"
-                      style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
+                      className="text-3xl sm:text-4xl font-bold text-slate-900 italic font-sans"
                     >
                       Everything Included in Your White-Label Portal
                     </h3>
@@ -1785,8 +1772,7 @@ export default function UwoLandingPage() {
                   <div className="text-left space-y-2">
                     <span className="text-xs font-black tracking-widest text-[#059669] uppercase">PREREQUISITES CHECKLIST</span>
                     <h3
-                      className="text-2xl sm:text-3xl font-bold text-slate-900 italic font-serif"
-                      style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
+                      className="text-2xl sm:text-3xl font-bold text-slate-900 italic font-sans"
                     >
                       What is Required From Your Agency
                     </h3>
@@ -1830,8 +1816,7 @@ export default function UwoLandingPage() {
                   <div className="text-center space-y-2">
                     <span className="text-xs font-black tracking-widest text-[#059669] uppercase">AGENCY PARTNER FAQS</span>
                     <h3
-                      className="text-3xl sm:text-4xl font-bold text-slate-900 italic font-serif"
-                      style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
+                      className="text-3xl sm:text-4xl font-bold text-slate-900 italic font-sans"
                     >
                       Frequently Asked Questions
                     </h3>
@@ -1876,8 +1861,7 @@ export default function UwoLandingPage() {
               <ScrollReveal>
                 <div className="p-8 sm:p-10 rounded-3xl bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-emerald-50/80 border border-emerald-200 text-center space-y-4 shadow-sm hover:shadow-md transition-shadow">
                   <h3
-                    className="text-3xl sm:text-4xl font-bold text-slate-900 italic font-serif"
-                    style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
+                    className="text-3xl sm:text-4xl font-bold text-slate-900 italic font-sans"
                   >
                     Ready to Launch Your Software Agency Today?
                   </h3>
@@ -1922,8 +1906,7 @@ export default function UwoLandingPage() {
               STILL HAVE QUESTIONS?
             </span>
             <h2
-              className="text-3xl sm:text-5xl font-bold text-slate-900 font-serif leading-tight"
-              style={{ fontFamily: "'Times New Roman', Times, serif" }}
+              className="text-3xl sm:text-5xl font-bold text-slate-900 font-sans leading-tight"
             >
               Frequently Asked Questions
             </h2>
@@ -2076,8 +2059,7 @@ export default function UwoLandingPage() {
       <section className="relative py-16 px-6 sm:px-10 max-w-5xl mx-auto my-12 text-center bg-gradient-to-r from-slate-900 via-slate-800 to-emerald-950 text-white rounded-3xl border border-slate-800 shadow-2xl overflow-hidden">
         <div className="relative z-10 space-y-4">
           <h3
-            className="text-3xl sm:text-4xl font-bold text-white font-serif leading-tight"
-            style={{ fontFamily: "'Times New Roman', Times, serif" }}
+            className="text-3xl sm:text-4xl font-bold text-white font-sans leading-tight"
           >
             Ready to simplify your business?
           </h3>
@@ -2102,8 +2084,7 @@ export default function UwoLandingPage() {
           {/* Left Column: Company Links (Centered) */}
           <div className="space-y-3 text-center">
             <h5
-              className="font-bold text-sm text-[#059669] font-serif text-center"
-              style={{ fontFamily: "'Times New Roman', Times, serif" }}
+              className="font-bold text-sm text-[#059669] font-sans text-center"
             >
               Company
             </h5>
@@ -2128,8 +2109,7 @@ export default function UwoLandingPage() {
                 />
               </div>
               <span
-                className="text-xl font-bold tracking-tight text-slate-900 italic font-serif"
-                style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
+                className="text-xl font-bold tracking-tight text-slate-900 italic font-sans"
               >
                 UWO <span className="text-[#059669]">Connect</span>
               </span>
@@ -2183,8 +2163,7 @@ export default function UwoLandingPage() {
           {/* Right Column: Legal Links (Centered) */}
           <div className="space-y-3 text-center">
             <h5
-              className="font-bold text-sm text-[#059669] font-serif text-center"
-              style={{ fontFamily: "'Times New Roman', Times, serif" }}
+              className="font-bold text-sm text-[#059669] font-sans text-center"
             >
               Legal
             </h5>

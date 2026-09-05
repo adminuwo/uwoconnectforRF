@@ -8,6 +8,7 @@ import UpgradeModal from "@/components/common/UpgradeModal";
 import AxiosNetworkFixer from "@/components/AxiosNetworkFixer";
 
 import CookieConsentBanner from "@/components/common/CookieConsentBanner";
+import RouteFontController from "@/components/common/RouteFontController";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -31,6 +32,7 @@ export default function RootLayout({ children }) {
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col overflow-x-hidden font-sans" suppressHydrationWarning>
+        <RouteFontController />
         <AxiosNetworkFixer />
         <BrandProvider>
           <EntitlementProvider>

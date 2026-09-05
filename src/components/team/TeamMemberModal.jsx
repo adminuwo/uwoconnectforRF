@@ -258,20 +258,20 @@ export default function TeamMemberModal({ isOpen, onClose, onSuccess, existingMe
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 backdrop-blur-sm p-4 overflow-y-auto">
-      <div className="bg-white rounded-3xl max-w-xl w-full shadow-2xl border border-slate-100 flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 backdrop-blur-sm p-2 sm:p-4 overflow-hidden">
+      <div className="bg-white rounded-2xl sm:rounded-3xl max-w-xl w-full max-h-[92dvh] sm:max-h-[88vh] shadow-2xl border border-slate-100 flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200 my-auto">
         
         {/* Header */}
-        <div className="px-6 pt-5 pb-4 flex items-center justify-between border-b border-slate-100">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
-              {editMember ? <UserCheck size={18} /> : <UserPlus size={18} />}
+        <div className="px-4 sm:px-6 pt-3.5 sm:pt-5 pb-3 sm:pb-4 flex items-center justify-between border-b border-slate-100 shrink-0">
+          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold shrink-0">
+              {editMember ? <UserCheck size={16} className="sm:w-[18px] sm:h-[18px]" /> : <UserPlus size={16} className="sm:w-[18px] sm:h-[18px]" />}
             </div>
-            <div>
-              <h2 className="text-base font-black text-slate-900 leading-tight">
+            <div className="min-w-0">
+              <h2 className="text-sm sm:text-base font-black text-slate-900 leading-tight truncate">
                 {editMember ? `Edit: ${username || 'Team Member'}` : 'Add Team Member'}
               </h2>
-              <p className="text-xs text-slate-400 font-medium">
+              <p className="text-[11px] sm:text-xs text-slate-400 font-medium truncate">
                 {activeStep === 1 && '1. Member profile & role'}
                 {activeStep === 2 && `2. Assign channels (${assignedSocialChannels.length} active)`}
                 {activeStep === 3 && '3. Permission access levels'}
@@ -281,24 +281,24 @@ export default function TeamMemberModal({ isOpen, onClose, onSuccess, existingMe
 
           <button 
             onClick={onClose} 
-            className="p-2 text-slate-400 hover:text-slate-600 rounded-xl hover:bg-slate-100 transition-colors cursor-pointer"
+            className="p-1.5 sm:p-2 text-slate-400 hover:text-slate-600 rounded-xl hover:bg-slate-100 transition-colors cursor-pointer shrink-0 ml-2"
           >
             <X size={18} />
           </button>
         </div>
 
-        {/* Minimal Stepper Bar */}
-        <div className="px-6 py-3 bg-slate-50/60 border-b border-slate-100 flex items-center justify-between text-xs font-bold">
+        {/* Stepper Bar */}
+        <div className="px-3 sm:px-6 py-2 sm:py-2.5 bg-slate-50/60 border-b border-slate-100 flex items-center justify-between text-xs font-bold shrink-0">
           {[
-            { step: 1, label: 'Profile & Role' },
-            { step: 2, label: 'Channels' },
-            { step: 3, label: 'Permissions' },
+            { step: 1, label: 'Profile & Role', short: 'Profile' },
+            { step: 2, label: 'Channels', short: 'Channels' },
+            { step: 3, label: 'Permissions', short: 'Permissions' },
           ].map((s) => (
             <button
               key={s.step}
               type="button"
               onClick={() => setActiveStep(s.step)}
-              className={`flex items-center gap-2 cursor-pointer transition-colors ${
+              className={`flex items-center gap-1.5 sm:gap-2 cursor-pointer transition-colors text-[11px] sm:text-xs ${
                 activeStep === s.step 
                   ? 'text-emerald-700 font-black' 
                   : activeStep > s.step 
@@ -306,38 +306,39 @@ export default function TeamMemberModal({ isOpen, onClose, onSuccess, existingMe
                   : 'text-slate-400'
               }`}
             >
-              <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] ${
+              <span className={`w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center text-[9px] sm:text-[10px] shrink-0 ${
                 activeStep === s.step 
                   ? 'bg-emerald-600 text-white' 
                   : activeStep > s.step 
                   ? 'bg-emerald-100 text-emerald-700' 
                   : 'bg-slate-200 text-slate-500'
               }`}>
-                {activeStep > s.step ? <Check size={11} /> : s.step}
+                {activeStep > s.step ? <Check size={10} className="sm:w-[11px] sm:h-[11px]" /> : s.step}
               </span>
-              <span>{s.label}</span>
+              <span className="hidden sm:inline">{s.label}</span>
+              <span className="sm:hidden">{s.short}</span>
             </button>
           ))}
         </div>
 
         {/* Error notification */}
         {error && (
-          <div className="mx-6 mt-4 p-3 bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold rounded-2xl">
+          <div className="mx-4 sm:mx-6 mt-3 p-2.5 sm:p-3 bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold rounded-xl sm:rounded-2xl shrink-0">
             {error}
           </div>
         )}
 
-        {/* Modal Body */}
-        <div className="p-6 space-y-4">
+        {/* Modal Body - Fully Scrollable */}
+        <div className="p-4 sm:p-6 space-y-4 overflow-y-auto flex-1 overscroll-contain">
           
           {/* ======================================================== */}
           {/* STEP 1: CLEAN PROFILE & ROLE FORM                        */}
           {/* ======================================================== */}
           {activeStep === 1 && (
-            <div className="space-y-4">
+            <div className="space-y-3.5 sm:space-y-4">
               
               {/* Full Name & Email */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-3.5">
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">
                     Full Name <span className="text-emerald-600">*</span>
@@ -347,7 +348,7 @@ export default function TeamMemberModal({ isOpen, onClose, onSuccess, existingMe
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     placeholder="Rahul Sharma"
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-800 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 transition-all"
+                    className="w-full px-3.5 py-2 sm:py-2.5 rounded-xl border border-slate-200 text-xs sm:text-xs font-semibold text-slate-800 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 transition-all"
                     required
                   />
                 </div>
@@ -361,14 +362,14 @@ export default function TeamMemberModal({ isOpen, onClose, onSuccess, existingMe
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="rahul@company.com"
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-800 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 transition-all"
+                    className="w-full px-3.5 py-2 sm:py-2.5 rounded-xl border border-slate-200 text-xs sm:text-xs font-semibold text-slate-800 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 transition-all"
                     required
                   />
                 </div>
               </div>
 
               {/* Phone & Password */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-3.5">
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">
                     Phone Number
@@ -378,7 +379,7 @@ export default function TeamMemberModal({ isOpen, onClose, onSuccess, existingMe
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder="+91 98765 43210"
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-800 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 transition-all"
+                    className="w-full px-3.5 py-2 sm:py-2.5 rounded-xl border border-slate-200 text-xs sm:text-xs font-semibold text-slate-800 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 transition-all"
                   />
                 </div>
 
@@ -400,17 +401,17 @@ export default function TeamMemberModal({ isOpen, onClose, onSuccess, existingMe
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder={editMember ? 'Leave blank to keep current' : '••••••••••••'}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-mono font-bold text-slate-800 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 transition-all"
+                    className="w-full px-3.5 py-2 sm:py-2.5 rounded-xl border border-slate-200 text-xs font-mono font-bold text-slate-800 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 transition-all"
                   />
                 </div>
               </div>
 
-              {/* Role Selection (Simple Pills) */}
+              {/* Role Selection (Mobile 2 cols, Desktop 4 cols) */}
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1.5">
                   Select Role
                 </label>
-                <div className="grid grid-cols-4 gap-2">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                   {SIMPLE_ROLES.map((r) => {
                     const isSelected = enterpriseRole === r.value;
                     return (
@@ -432,13 +433,13 @@ export default function TeamMemberModal({ isOpen, onClose, onSuccess, existingMe
               </div>
 
               {/* Department & Designation */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-3.5">
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">Department</label>
                   <select
                     value={department}
                     onChange={(e) => setDepartment(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-800 bg-white focus:outline-none focus:border-emerald-500 cursor-pointer"
+                    className="w-full px-3.5 py-2 sm:py-2.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-800 bg-white focus:outline-none focus:border-emerald-500 cursor-pointer"
                   >
                     {DEPARTMENTS.map((dept) => (
                       <option key={dept} value={dept}>{dept}</option>
@@ -453,7 +454,7 @@ export default function TeamMemberModal({ isOpen, onClose, onSuccess, existingMe
                     value={designation}
                     onChange={(e) => setDesignation(e.target.value)}
                     placeholder="e.g. Sales Specialist"
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-800 focus:outline-none focus:border-emerald-500"
+                    className="w-full px-3.5 py-2 sm:py-2.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-800 focus:outline-none focus:border-emerald-500"
                   />
                 </div>
               </div>
@@ -473,7 +474,7 @@ export default function TeamMemberModal({ isOpen, onClose, onSuccess, existingMe
                 </span>
               </div>
 
-              <div className="space-y-2 max-h-[320px] overflow-y-auto pr-1">
+              <div className="space-y-2">
                 {CONNECTED_CHANNELS.map((ch) => {
                   const isAssigned = assignedSocialChannels.includes(ch.id);
                   const Icon = ch.icon;
@@ -487,17 +488,17 @@ export default function TeamMemberModal({ isOpen, onClose, onSuccess, existingMe
                           : 'bg-white border-slate-200/80 hover:bg-slate-50'
                       }`}
                     >
-                      <div className="flex items-center gap-3">
-                        <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${ch.color}`}>
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${ch.color}`}>
                           <Icon size={18} />
                         </div>
-                        <div>
-                          <p className="text-xs font-bold text-slate-900">{ch.name}</p>
-                          <p className="text-[10px] text-slate-400 font-medium">{ch.details}</p>
+                        <div className="min-w-0">
+                          <p className="text-xs font-bold text-slate-900 truncate">{ch.name}</p>
+                          <p className="text-[10px] text-slate-400 font-medium truncate">{ch.details}</p>
                         </div>
                       </div>
 
-                      <div className={`w-5 h-5 rounded-lg flex items-center justify-center transition-all ${
+                      <div className={`w-5 h-5 rounded-lg flex items-center justify-center shrink-0 transition-all ${
                         isAssigned ? 'bg-emerald-600 text-white shadow-xs' : 'border border-slate-300'
                       }`}>
                         {isAssigned && <Check size={12} />}
@@ -515,34 +516,34 @@ export default function TeamMemberModal({ isOpen, onClose, onSuccess, existingMe
           {activeStep === 3 && (
             <div className="space-y-3">
               {/* Presets */}
-              <div className="flex items-center justify-between gap-2 pb-1">
-                <span className="text-xs font-bold text-slate-700">Presets:</span>
-                <div className="flex items-center gap-1">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-1">
+                <span className="text-xs font-bold text-slate-700">Quick Presets:</span>
+                <div className="flex flex-wrap items-center gap-1.5">
                   <button
                     type="button"
                     onClick={() => applyPreset('ALL_FULL')}
-                    className="px-2.5 py-1 bg-slate-900 hover:bg-slate-800 text-white text-[10px] font-bold rounded-lg cursor-pointer"
+                    className="px-2.5 py-1 bg-slate-900 hover:bg-slate-800 text-white text-[10px] font-bold rounded-lg cursor-pointer transition-all"
                   >
                     Full Admin
                   </button>
                   <button
                     type="button"
                     onClick={() => applyPreset('SUPPORT')}
-                    className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] font-bold rounded-lg cursor-pointer"
+                    className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] font-bold rounded-lg cursor-pointer transition-all"
                   >
                     Support
                   </button>
                   <button
                     type="button"
                     onClick={() => applyPreset('SALES')}
-                    className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] font-bold rounded-lg cursor-pointer"
+                    className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] font-bold rounded-lg cursor-pointer transition-all"
                   >
                     Sales
                   </button>
                   <button
                     type="button"
                     onClick={() => applyPreset('VIEW_ONLY')}
-                    className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] font-bold rounded-lg cursor-pointer"
+                    className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] font-bold rounded-lg cursor-pointer transition-all"
                   >
                     View Only
                   </button>
@@ -550,7 +551,7 @@ export default function TeamMemberModal({ isOpen, onClose, onSuccess, existingMe
               </div>
 
               {/* Permission List */}
-              <div className="space-y-3 max-h-[320px] overflow-y-auto pr-1">
+              <div className="space-y-3">
                 {PERMISSION_GROUPS.map((grp, idx) => (
                   <div key={idx} className="border border-slate-200 rounded-2xl p-3 bg-slate-50/50">
                     <p className={`text-[11px] font-black uppercase tracking-wider mb-2 ${grp.color}`}>
@@ -560,9 +561,9 @@ export default function TeamMemberModal({ isOpen, onClose, onSuccess, existingMe
                       {grp.features.map((f) => {
                         const level = permissionMatrix[f.key] || 'FULL';
                         return (
-                          <div key={f.key} className="flex items-center justify-between py-1 text-xs">
+                          <div key={f.key} className="flex flex-col sm:flex-row sm:items-center justify-between py-1.5 sm:py-1 gap-1.5 sm:gap-2 text-xs border-b border-slate-50 last:border-b-0">
                             <span className="font-semibold text-slate-800 text-[11px]">{f.label}</span>
-                            <div className="flex items-center gap-1 bg-slate-100 p-0.5 rounded-lg">
+                            <div className="flex items-center gap-1 bg-slate-100 p-0.5 rounded-lg self-end sm:self-auto shrink-0">
                               {['NONE', 'VIEW', 'MANAGE', 'FULL'].map((lvl) => (
                                 <button
                                   key={lvl}
@@ -591,13 +592,13 @@ export default function TeamMemberModal({ isOpen, onClose, onSuccess, existingMe
         </div>
 
         {/* Modal Footer Controls */}
-        <div className="px-6 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
+        <div className="px-4 sm:px-6 py-3 sm:py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between shrink-0 gap-2">
           <div>
             {activeStep > 1 ? (
               <button
                 type="button"
                 onClick={() => setActiveStep(prev => prev - 1)}
-                className="px-3.5 py-2 text-xs font-bold text-slate-600 hover:text-slate-900 flex items-center gap-1.5 cursor-pointer"
+                className="px-3 sm:px-3.5 py-2 text-xs font-bold text-slate-600 hover:text-slate-900 flex items-center gap-1.5 cursor-pointer"
               >
                 <ArrowLeft size={14} /> Back
               </button>
@@ -605,7 +606,7 @@ export default function TeamMemberModal({ isOpen, onClose, onSuccess, existingMe
               <button
                 type="button"
                 onClick={onClose}
-                className="px-3.5 py-2 text-xs font-bold text-slate-400 hover:text-slate-700 cursor-pointer"
+                className="px-3 sm:px-3.5 py-2 text-xs font-bold text-slate-400 hover:text-slate-700 cursor-pointer"
               >
                 Cancel
               </button>
@@ -624,7 +625,7 @@ export default function TeamMemberModal({ isOpen, onClose, onSuccess, existingMe
                   setError('');
                   setActiveStep(prev => prev + 1);
                 }}
-                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 cursor-pointer shadow-sm"
+                className="px-3.5 sm:px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 cursor-pointer shadow-sm"
               >
                 <span>Next: {activeStep === 1 ? 'Channels' : 'Permissions'}</span>
                 <ArrowRight size={14} />
@@ -634,7 +635,7 @@ export default function TeamMemberModal({ isOpen, onClose, onSuccess, existingMe
                 type="button"
                 onClick={handleSubmit}
                 disabled={isSubmitting}
-                className="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 cursor-pointer shadow-sm disabled:opacity-50"
+                className="px-4 sm:px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 cursor-pointer shadow-sm disabled:opacity-50"
               >
                 {isSubmitting ? (
                   <>
