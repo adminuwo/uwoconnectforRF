@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Plus, Trash2, Loader2, X, GitBranch, ArrowRight, Play, Pause, 
-  Search, Filter, ChevronDown, Check, Info, Copy, Share2, Eye, Calendar, Layers, CheckSquare, MessageCircle
+  Search, Filter, ChevronDown, Check, Info, Copy, Share2, Eye, Calendar, Layers, CheckSquare, MessageCircle, Edit3
 } from 'lucide-react';
 import axios from 'axios';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
@@ -76,6 +76,47 @@ const ClientWorkflowsPage = () => {
 
   // Action dropdown active state
   const [activeDropdownId, setActiveDropdownId] = useState(null);
+
+  // Rename Workflow Modal states
+  const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
+  const [workflowToRename, setWorkflowToRename] = useState(null);
+  const [renameValue, setRenameValue] = useState('');
+  const [isRenaming, setIsRenaming] = useState(false);
+  const [renameError, setRenameError] = useState('');
+
+  const openRenameModal = (flow) => {
+    setWorkflowToRename(flow);
+    setRenameValue(flow.name || '');
+    setRenameError('');
+    setIsRenameModalOpen(true);
+  };
+
+  const handleRenameSubmit = async (e) => {
+    e.preventDefault();
+    if (!workflowToRename || !renameValue.trim()) return;
+
+    try {
+      setIsRenaming(true);
+      setRenameError('');
+      const token = localStorage.getItem('uwo_token');
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app';
+      
+      await axios.patch(
+        `${apiUrl}/api/workflows/${workflowToRename.id}/`,
+        { name: renameValue.trim() },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      setWorkflows(prev => prev.map(w => w.id === workflowToRename.id ? { ...w, name: renameValue.trim() } : w));
+      setIsRenameModalOpen(false);
+      setWorkflowToRename(null);
+    } catch (err) {
+      console.error('Rename failed:', err);
+      setRenameError(err.response?.data?.name?.[0] || err.response?.data?.detail || 'Failed to rename workflow.');
+    } finally {
+      setIsRenaming(false);
+    }
+  };
 
   const workflowTemplates = [
     "Hospital",
@@ -426,6 +467,13 @@ const ClientWorkflowsPage = () => {
                                 Edit Workflow
                               </button>
                               <button 
+                                onClick={() => { setActiveDropdownId(null); openRenameModal(flow); }}
+                                className="w-full text-left px-4 py-2.5 hover:bg-slate-50 text-xs font-bold text-slate-700 flex items-center gap-2 cursor-pointer"
+                              >
+                                <Edit3 size={13} className="text-slate-400" />
+                                Rename Workflow
+                              </button>
+                              <button 
                                 onClick={() => handleDuplicate(flow)}
                                 className="w-full text-left px-4 py-2.5 hover:bg-slate-50 text-xs font-bold text-slate-700 flex items-center gap-2 cursor-pointer"
                               >
@@ -450,7 +498,21 @@ const ClientWorkflowsPage = () => {
                       </div>
                     </div>
 
-                    <h3 className="text-base font-bold text-slate-900 tracking-tight mb-1 group-hover:text-emerald-600 transition-colors">{flow.name}</h3>
+                    <div className="flex items-center justify-between gap-2 mb-1 group/title">
+                      <h3 className="text-base font-bold text-slate-900 tracking-tight group-hover/title:text-emerald-600 transition-colors truncate">
+                        {flow.name}
+                      </h3>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openRenameModal(flow);
+                        }}
+                        title="Rename workflow"
+                        className="p-1 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-emerald-600 transition-all cursor-pointer shrink-0 opacity-70 hover:opacity-100"
+                      >
+                        <Edit3 size={13} />
+                      </button>
+                    </div>
                     <p className="text-[11px] text-slate-400 font-bold mb-4">{flow.category || 'General'} • v{flow.version || '1.0'}</p>
                     
                     {/* Channel Badges */}
@@ -726,6 +788,71 @@ const ClientWorkflowsPage = () => {
                   Continue Editing
                 </button>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* RENAME WORKFLOW MODAL */}
+        {isRenameModalOpen && workflowToRename && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+            <div onClick={() => setIsRenameModalOpen(false)} className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" />
+            <div className="relative bg-white w-full max-w-md rounded-2xl shadow-2xl p-6 border border-slate-200 animate-in fade-in zoom-in duration-150">
+              <div className="flex items-center justify-between pb-4 border-b border-slate-100 mb-5">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100">
+                    <Edit3 size={17} />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-slate-900">Rename Workflow</h3>
+                    <p className="text-[11px] text-slate-400">Enter a new display name for this workflow</p>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => setIsRenameModalOpen(false)}
+                  className="text-slate-400 hover:text-slate-700 p-1 rounded-lg hover:bg-slate-50 transition-colors cursor-pointer"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              <form onSubmit={handleRenameSubmit} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">
+                    Workflow Name
+                  </label>
+                  <input
+                    type="text"
+                    value={renameValue}
+                    onChange={(e) => setRenameValue(e.target.value)}
+                    placeholder="e.g., Customer Onboarding Flow"
+                    autoFocus
+                    required
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
+                  />
+                </div>
+
+                {renameError && (
+                  <p className="text-xs text-red-500 font-semibold">{renameError}</p>
+                )}
+
+                <div className="flex items-center justify-end gap-2.5 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setIsRenameModalOpen(false)}
+                    className="px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50 transition-colors cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isRenaming || !renameValue.trim()}
+                    className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all shadow-sm shadow-emerald-600/20 flex items-center gap-2 cursor-pointer disabled:opacity-50"
+                  >
+                    {isRenaming ? <Loader2 size={13} className="animate-spin" /> : <Check size={14} />}
+                    Save Changes
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
         )}

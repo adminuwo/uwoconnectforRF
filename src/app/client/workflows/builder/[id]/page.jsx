@@ -19,7 +19,7 @@ import 'reactflow/dist/style.css';
 import {
   Save, MessageSquare, Clock, Zap, Loader2,
   ChevronDown, Image as ImageIcon, Video, List, FileText, Webhook, Tag, BarChart3,
-  MousePointer2, ArrowLeft, CheckCircle2, XCircle, Play, X, Plus, Trash2, Edit3, User, ShoppingBag, ExternalLink
+  MousePointer2, ArrowLeft, CheckCircle2, XCircle, Play, X, Plus, Trash2, Edit3, User, ShoppingBag, ExternalLink, Check
 } from 'lucide-react';
 import axios from 'axios';
 import { useParams, useRouter } from 'next/navigation';
@@ -291,6 +291,31 @@ const WorkflowBuilderInner = () => {
   const [selectedNode, setSelectedNode] = useState(null);
   const [deploymentChannels, setDeploymentChannels] = useState(['WHATSAPP']); // WHATSAPP, INSTAGRAM, FACEBOOK
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [editedName, setEditedName] = useState('');
+
+  const handleSaveWorkflowName = async () => {
+    if (!editedName.trim()) {
+      setIsEditingName(false);
+      return;
+    }
+    const newName = editedName.trim();
+    setWorkflow(prev => ({ ...prev, name: newName }));
+    setIsEditingName(false);
+
+    if (id !== 'new') {
+      try {
+        const token = localStorage.getItem('uwo_token');
+        await axios.patch(
+          `${API_BASE_URL}/api/workflows/${id}/`,
+          { name: newName },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+      } catch (err) {
+        console.error('Failed to update workflow name:', err);
+      }
+    }
+  };
 
   const { screenToFlowPosition } = useReactFlow();
 
@@ -521,7 +546,50 @@ const WorkflowBuilderInner = () => {
               <List size={16} />
             </button>
             <div className="flex items-center gap-2 min-w-0">
-              <h1 className="text-xs sm:text-sm font-bold tracking-tight text-slate-800 uppercase truncate">{workflow?.name}</h1>
+              {isEditingName ? (
+                <div className="flex items-center gap-1.5">
+                  <input
+                    type="text"
+                    value={editedName}
+                    onChange={(e) => setEditedName(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') handleSaveWorkflowName();
+                      if (e.key === 'Escape') setIsEditingName(false);
+                    }}
+                    autoFocus
+                    placeholder="Workflow Name"
+                    className="px-2.5 py-1 bg-white border border-emerald-500 rounded-lg text-xs sm:text-sm font-bold text-slate-800 focus:outline-none ring-2 ring-emerald-500/20 max-w-[180px] sm:max-w-xs"
+                  />
+                  <button
+                    onClick={handleSaveWorkflowName}
+                    className="p-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors cursor-pointer"
+                    title="Save name"
+                  >
+                    <Check size={12} strokeWidth={3} />
+                  </button>
+                  <button
+                    onClick={() => setIsEditingName(false)}
+                    className="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg transition-colors cursor-pointer"
+                    title="Cancel"
+                  >
+                    <X size={12} strokeWidth={3} />
+                  </button>
+                </div>
+              ) : (
+                <div 
+                  onClick={() => {
+                    setEditedName(workflow?.name || '');
+                    setIsEditingName(true);
+                  }}
+                  className="flex items-center gap-1.5 group cursor-pointer hover:bg-slate-100 px-2 py-1 rounded-lg transition-colors min-w-0"
+                  title="Click to rename workflow"
+                >
+                  <h1 className="text-xs sm:text-sm font-bold tracking-tight text-slate-800 uppercase truncate">
+                    {workflow?.name || 'Untitled Workflow'}
+                  </h1>
+                  <Edit3 size={13} className="text-slate-400 group-hover:text-slate-700 opacity-60 group-hover:opacity-100 transition-all shrink-0" />
+                </div>
+              )}
               {isShared && (
                 <span className="text-[9px] font-black uppercase bg-slate-900 text-white px-2 py-0.5 rounded tracking-wider shrink-0 hidden sm:inline">
                   Shared

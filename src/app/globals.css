@@ -15,6 +15,7 @@
   --color-logo-green: var(--logo-green);
 
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-serif: "Times New Roman", Times, Georgia, Cambria, serif;
 }
 
 :root {
@@ -38,7 +39,7 @@
   body {
     background-color: #F0FDF4;
     color: var(--foreground);
-    font-family: var(--font-inter), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-family: "Times New Roman", Times, serif;
     overflow-x: hidden;
     max-width: 100vw;
     -webkit-tap-highlight-color: transparent;
@@ -65,40 +66,241 @@
   }
 }
 
-/* ── Times New Roman for All Pages Except Landing Page ── */
-body.font-times-new-roman,
-html.font-times-new-roman,
-body.font-times-new-roman button,
-body.font-times-new-roman input,
-body.font-times-new-roman select,
-body.font-times-new-roman textarea,
-body.font-times-new-roman h1,
-body.font-times-new-roman h2,
-body.font-times-new-roman h3,
-body.font-times-new-roman h4,
-body.font-times-new-roman h5,
-body.font-times-new-roman h6,
-body.font-times-new-roman p,
-body.font-times-new-roman span,
-body.font-times-new-roman div,
-body.font-times-new-roman a,
-body.font-times-new-roman label,
-body.font-times-new-roman table,
-body.font-times-new-roman td,
-body.font-times-new-roman th,
+/* ── Times New Roman Globally (Including Landing Page) ── */
+body,
+html,
+body button,
+body input,
+body select,
+body textarea,
+body h1,
+body h2,
+body h3,
+body h4,
+body h5,
+body h6,
+body p,
+body span,
+body div,
+body a,
+body label,
+body table,
+body td,
+body th,
+.landing-page-root,
+.landing-page-root *,
 .dashboard-font-times,
 .dashboard-font-times * {
   font-family: "Times New Roman", Times, serif !important;
 }
 
-body.font-times-new-roman code,
-body.font-times-new-roman kbd,
-body.font-times-new-roman pre {
+code,
+kbd,
+pre,
+code *,
+kbd *,
+pre * {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
 }
 
-body.font-times-new-roman svg {
+svg,
+svg * {
   font-family: initial !important;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   LANDING PAGE DARK MODE CONTRAST & VISIBILITY FIXES
+   ══════════════════════════════════════════════════════════════════════════════ */
+.dark.landing-page-root,
+.dark .landing-page-root {
+  background-color: #020617 !important; /* slate-950 */
+  color: #f8fafc !important;
+}
+
+/* Sections in dark mode */
+.dark.landing-page-root section,
+.dark .landing-page-root section,
+.dark.landing-page-root #platform,
+.dark .landing-page-root #platform,
+.dark.landing-page-root #channels,
+.dark .landing-page-root #channels,
+.dark.landing-page-root #connectors,
+.dark .landing-page-root #connectors,
+.dark.landing-page-root #features,
+.dark .landing-page-root #features,
+.dark.landing-page-root #how-it-works,
+.dark .landing-page-root #how-it-works,
+.dark.landing-page-root #pricing,
+.dark .landing-page-root #pricing,
+.dark.landing-page-root #white-label,
+.dark .landing-page-root #white-label,
+.dark.landing-page-root #faq,
+.dark .landing-page-root #faq {
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.85)) !important;
+  border-color: rgba(51, 65, 85, 0.8) !important; /* slate-700 */
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* All cards inside landing sections in dark mode */
+.dark.landing-page-root [class*="bg-white"],
+.dark .landing-page-root [class*="bg-white"],
+.dark.landing-page-root [class*="bg-slate-50"],
+.dark .landing-page-root [class*="bg-slate-50"],
+.dark.landing-page-root [class*="bg-slate-100"],
+.dark .landing-page-root [class*="bg-slate-100"],
+.dark.landing-page-root .landing-card-hover,
+.dark .landing-page-root .landing-card-hover {
+  background-color: #1e293b !important; /* slate-800 */
+  border-color: #334155 !important; /* slate-700 */
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4) !important;
+  color: #f1f5f9 !important;
+}
+
+.dark.landing-page-root [class*="bg-slate-50"]:hover,
+.dark .landing-page-root [class*="bg-slate-50"]:hover,
+.dark.landing-page-root .landing-card-hover:hover,
+.dark .landing-page-root .landing-card-hover:hover {
+  background-color: #243248 !important;
+  border-color: #10b981 !important; /* emerald-500 hover */
+  box-shadow: 0 14px 40px rgba(16, 185, 129, 0.2) !important;
+}
+
+/* Ensure active green buttons and badges remain green */
+.dark.landing-page-root .bg-\[\#059669\],
+.dark .landing-page-root .bg-\[\#059669\],
+.dark.landing-page-root button.bg-\[\#059669\],
+.dark .landing-page-root button.bg-\[\#059669\],
+.dark.landing-page-root .bg-emerald-600,
+.dark .landing-page-root .bg-emerald-600 {
+  background-color: #059669 !important;
+  color: #ffffff !important;
+  border-color: #059669 !important;
+}
+
+/* Headings in dark mode */
+.dark.landing-page-root h1,
+.dark .landing-page-root h1,
+.dark.landing-page-root h2,
+.dark .landing-page-root h2,
+.dark.landing-page-root h3,
+.dark .landing-page-root h3,
+.dark.landing-page-root h4,
+.dark .landing-page-root h4,
+.dark.landing-page-root h5,
+.dark .landing-page-root h5,
+.dark.landing-page-root .text-slate-900,
+.dark .landing-page-root .text-slate-900 {
+  color: #f8fafc !important; /* Crisp pure white */
+}
+
+/* Descriptions & secondary paragraphs in dark mode */
+.dark.landing-page-root p,
+.dark .landing-page-root p,
+.dark.landing-page-root .text-slate-500,
+.dark .landing-page-root .text-slate-500,
+.dark.landing-page-root .text-slate-600,
+.dark .landing-page-root .text-slate-600,
+.dark.landing-page-root .text-slate-700,
+.dark .landing-page-root .text-slate-700 {
+  color: #cbd5e1 !important; /* slate-300 / high contrast */
+}
+
+/* Badges & pill tags in dark mode */
+.dark.landing-page-root .bg-slate-100,
+.dark .landing-page-root .bg-slate-100 {
+  background-color: #334155 !important;
+  color: #f1f5f9 !important;
+}
+
+.dark.landing-page-root .bg-emerald-50,
+.dark .landing-page-root .bg-emerald-50,
+.dark.landing-page-root .bg-emerald-100,
+.dark .landing-page-root .bg-emerald-100 {
+  background-color: rgba(6, 78, 59, 0.5) !important;
+  border-color: rgba(16, 185, 129, 0.4) !important;
+  color: #6ee7b7 !important;
+}
+
+.dark.landing-page-root .bg-blue-50,
+.dark .landing-page-root .bg-blue-50,
+.dark.landing-page-root .bg-blue-100,
+.dark .landing-page-root .bg-blue-100 {
+  background-color: rgba(30, 58, 138, 0.5) !important;
+  border-color: rgba(59, 130, 246, 0.4) !important;
+  color: #93c5fd !important;
+}
+
+.dark.landing-page-root .bg-purple-50,
+.dark .landing-page-root .bg-purple-50,
+.dark.landing-page-root .bg-purple-100,
+.dark .landing-page-root .bg-purple-100 {
+  background-color: rgba(88, 28, 135, 0.5) !important;
+  border-color: rgba(168, 85, 247, 0.4) !important;
+  color: #d8b4fe !important;
+}
+
+/* Pricing comparison table in dark mode */
+.dark.landing-page-root table,
+.dark .landing-page-root table,
+.dark.landing-page-root table th,
+.dark .landing-page-root table th,
+.dark.landing-page-root table td,
+.dark .landing-page-root table td {
+  border-color: #334155 !important;
+  color: #f1f5f9 !important;
+}
+
+.dark.landing-page-root table th,
+.dark .landing-page-root table th {
+  background-color: transparent !important;
+}
+
+.dark.landing-page-root table tr.bg-slate-50\/80,
+.dark .landing-page-root table tr.bg-slate-50\/80,
+.dark.landing-page-root table [class*="bg-emerald-50\/"],
+.dark .landing-page-root table [class*="bg-emerald-50\/"] {
+  background-color: transparent !important;
+}
+
+.dark.landing-page-root table td.bg-slate-50\/50,
+.dark .landing-page-root table td.bg-slate-50\/50,
+.dark.landing-page-root table td.bg-slate-50,
+.dark .landing-page-root table td.bg-slate-50 {
+  background-color: #0f172a !important;
+}
+
+.dark.landing-page-root [class*="PricingComparisonTable"],
+.dark .landing-page-root [class*="PricingComparisonTable"],
+.dark.landing-page-root div:has(> table) {
+  background-color: transparent !important;
+}
+
+/* FAQ Accordion items in dark mode */
+.dark.landing-page-root #faq [class*="bg-white"],
+.dark .landing-page-root #faq [class*="bg-white"],
+.dark.landing-page-root #faq [class*="bg-slate"],
+.dark .landing-page-root #faq [class*="bg-slate"] {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+}
+
+/* Footer in dark mode */
+.dark.landing-page-root footer,
+.dark .landing-page-root footer {
+  background-color: #020617 !important;
+  border-color: #1e293b !important;
+}
+
+.dark.landing-page-root footer p,
+.dark .landing-page-root footer p,
+.dark.landing-page-root footer li a,
+.dark .landing-page-root footer li a {
+  color: #94a3b8 !important;
+}
+
+.dark.landing-page-root footer li a:hover,
+.dark .landing-page-root footer li a:hover {
+  color: #34d399 !important;
 }
 
 /* Premium Glass Cards in Dark Mode */

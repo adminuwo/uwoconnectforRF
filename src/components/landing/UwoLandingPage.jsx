@@ -189,10 +189,17 @@ const ScrollReveal = ({ children, className = '', delay = 0 }) => {
 };
 
 // ── REUSABLE UWO BRAND LOGO HEADER ──
-const UwoBrandHeader = ({ align = 'left', dark = false }) => (
+const UwoBrandHeader = ({ align = 'left', dark = false, logo = '/download (3).gif' }) => (
   <div className={cn("flex items-center gap-3 mb-2.5", align === 'center' && "justify-center")}>
-    <div className="w-10 h-10 rounded-2xl bg-[#059669] flex items-center justify-center text-white shadow-md shadow-emerald-600/30 shrink-0">
-      <Zap size={20} className="fill-white text-white" />
+    <div className="w-10 h-10 rounded-2xl overflow-hidden shadow-md shadow-emerald-600/20 flex items-center justify-center p-0.5 shrink-0">
+      <img
+        src={logo || "/download (3).gif"}
+        alt="UWO Connect Logo"
+        width={38}
+        height={38}
+        style={{ width: '38px', height: '38px', objectFit: 'contain' }}
+        className="w-full h-full object-contain drop-shadow-sm"
+      />
     </div>
     <div className="text-left">
       <h4 className={cn("text-lg font-black tracking-tight leading-none mb-1", dark ? "text-white" : "text-slate-900")}>
@@ -223,6 +230,11 @@ export default function UwoLandingPage() {
       const savedTheme = localStorage.getItem('uwo_landing_theme');
       if (savedTheme === 'dark') {
         setIsDarkMode(true);
+        document.documentElement.classList.add('dark');
+        document.body.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+        document.body.classList.remove('dark');
       }
     } catch (e) {}
   }, []);
@@ -230,6 +242,13 @@ export default function UwoLandingPage() {
   const toggleTheme = () => {
     const newTheme = !isDarkMode;
     setIsDarkMode(newTheme);
+    if (newTheme) {
+      document.documentElement.classList.add('dark');
+      document.body.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      document.body.classList.remove('dark');
+    }
     try {
       localStorage.setItem('uwo_landing_theme', newTheme ? 'dark' : 'light');
     } catch (e) {}
@@ -277,10 +296,13 @@ export default function UwoLandingPage() {
   const logoUrl = brand?.logo_url || '/download (3).gif';
 
   return (
-    <div className={cn(
-      "min-h-screen transition-colors duration-500 font-sans selection:bg-emerald-500/20 selection:text-emerald-800",
-      isDarkMode ? "bg-slate-950 text-slate-100" : "bg-white text-slate-900"
-    )}>
+    <div 
+      className={cn(
+        "landing-page-root min-h-screen transition-colors duration-500 font-serif selection:bg-emerald-500/20 selection:text-emerald-800",
+        isDarkMode ? "dark bg-slate-950 text-slate-100" : "bg-white text-slate-900"
+      )}
+      style={{ fontFamily: "'Times New Roman', Times, serif" }}
+    >
 
       {/* ════════════════════════════════════════════════════════════════ */}
       {/* 1. STICKY GLASSY NAVBAR WITH THEME SWITCHER */}
@@ -301,10 +323,13 @@ export default function UwoLandingPage() {
               style={{ width: '32px', height: '32px', objectFit: 'contain' }}
               className="w-8 h-8 object-contain group-hover:scale-105 transition-transform duration-300 shrink-0"
             />
-            <span className={cn(
-              "text-lg font-black tracking-tight leading-none group-hover:text-[#059669] transition-colors",
-              isDarkMode ? "text-white" : "text-slate-900"
-            )}>
+            <span 
+              className={cn(
+                "text-lg font-black tracking-tight leading-none transition-colors",
+                isDarkMode ? "text-emerald-400" : "text-[#059669]"
+              )}
+              style={{ color: isDarkMode ? '#10B981' : '#059669' }}
+            >
               {brandName}
             </span>
           </Link>
@@ -441,7 +466,7 @@ export default function UwoLandingPage() {
           {/* Headline */}
           <h1
             className={cn(
-              "text-4xl sm:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.1] max-w-5xl mx-auto font-sans",
+              "text-4xl sm:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.1] max-w-5xl mx-auto font-serif",
               isDarkMode ? "text-emerald-400 drop-shadow-[0_0_35px_rgba(16,185,129,0.35)]" : "text-[#064e3b] drop-shadow-xs"
             )}
           >
@@ -495,7 +520,7 @@ export default function UwoLandingPage() {
         <div className="relative z-10">
           <div className="text-center space-y-3 mb-12">
             <h2
-              className="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight italic font-sans"
+              className="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight italic font-serif"
             >
               Everything Your Business Needs. Connected in One Place.
             </h2>
@@ -613,7 +638,7 @@ export default function UwoLandingPage() {
       <section id="channels" className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto bg-slate-50/50 rounded-3xl border border-slate-200/80 my-10">
         <div className="text-center space-y-3 mb-12">
           <h2
-            className="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight italic font-sans"
+            className="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight italic font-serif"
           >
             Meet Your Customers Where They Are
           </h2>
@@ -712,7 +737,7 @@ export default function UwoLandingPage() {
         <div className="relative z-10">
           <div className="text-center space-y-4 mb-14">
             <h2
-              className="text-4xl sm:text-5xl lg:text-6xl font-bold text-slate-900 tracking-tight italic font-sans leading-tight"
+              className="text-4xl sm:text-5xl lg:text-6xl font-bold text-slate-900 tracking-tight italic font-serif leading-tight"
             >
               Connect the Tools Your Business Already Uses
             </h2>
@@ -767,7 +792,7 @@ export default function UwoLandingPage() {
       <section id="features" className="py-24 px-6 sm:px-10 lg:px-12 max-w-7xl mx-auto bg-gradient-to-b from-emerald-50/80 via-white to-emerald-50/40 rounded-[2.5rem] border border-emerald-200/90 my-16 shadow-xl">
         <div className="text-center space-y-4 mb-16">
           <h2
-            className="text-4xl sm:text-5xl lg:text-6xl font-bold text-slate-900 tracking-tight italic font-sans leading-tight"
+            className="text-4xl sm:text-5xl lg:text-6xl font-bold text-slate-900 tracking-tight italic font-serif leading-tight"
           >
             From Conversation to Completion — Automatically
           </h2>
@@ -828,9 +853,9 @@ export default function UwoLandingPage() {
 
         <div className="relative z-10">
           <div className="text-center space-y-4 mb-16">
-            <UwoBrandHeader align="center" />
+            <UwoBrandHeader align="center" dark={isDarkMode} logo={isWhiteLabel && logoUrl ? logoUrl : "/download (3).gif"} />
             <h2
-              className="text-4xl sm:text-5xl lg:text-6xl font-bold text-slate-900 tracking-tight italic font-sans leading-tight"
+              className="text-4xl sm:text-5xl lg:text-6xl font-bold text-slate-900 tracking-tight italic font-serif leading-tight"
             >
               How UWO Connect Works
             </h2>
@@ -934,9 +959,9 @@ export default function UwoLandingPage() {
 
         <div className="relative z-10">
           <div className="text-center space-y-4 mb-16">
-            <UwoBrandHeader align="center" dark />
+            <UwoBrandHeader align="center" dark logo={isWhiteLabel && logoUrl ? logoUrl : "/download (3).gif"} />
             <h2
-              className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white tracking-tight italic font-sans leading-tight drop-shadow-md"
+              className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white tracking-tight italic font-serif leading-tight drop-shadow-md"
             >
               See Automation in Action
             </h2>
@@ -1181,7 +1206,7 @@ export default function UwoLandingPage() {
         <div className="relative z-10">
           <div className="text-center space-y-3 mb-12">
             <h2
-              className="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight italic font-sans"
+              className="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight italic font-serif"
             >
               Stop Switching Between Tools
             </h2>
@@ -1235,9 +1260,9 @@ export default function UwoLandingPage() {
           {/* Left Column: HEADING & 4-OPTION SLIDING WINDOW */}
           <div className="lg:col-span-5 flex flex-col justify-between space-y-6 text-left h-full">
             <div className="space-y-4">
-              <UwoBrandHeader align="left" />
+              <UwoBrandHeader align="left" dark={isDarkMode} logo={isWhiteLabel && logoUrl ? logoUrl : "/download (3).gif"} />
               <h2
-                className="text-4xl sm:text-5xl font-bold text-slate-900 tracking-tight italic font-sans leading-[1.15]"
+                className="text-4xl sm:text-5xl font-bold text-slate-900 tracking-tight italic font-serif leading-[1.15]"
               >
                 Everything You Need to Run Smarter
               </h2>
@@ -1275,7 +1300,9 @@ export default function UwoLandingPage() {
                           "flex items-center gap-2.5 text-xs font-bold transition-all duration-300 rounded-xl border px-3.5 py-2.5 text-left cursor-pointer",
                           isActive
                             ? "bg-[#059669] text-white border-emerald-600 shadow-lg shadow-emerald-600/25 translate-x-2 font-extrabold scale-[1.02]"
-                            : "bg-slate-50/80 border-slate-200/70 text-slate-600 hover:text-emerald-700 hover:bg-emerald-50/60"
+                            : isDarkMode
+                              ? "bg-slate-900 border-slate-800 text-slate-300 hover:text-white hover:bg-slate-800/90 hover:border-emerald-500/50"
+                              : "bg-slate-50/80 border-slate-200/70 text-slate-600 hover:text-emerald-700 hover:bg-emerald-50/60"
                         )}
                       >
                         <span className={cn("w-2 h-2 rounded-full shrink-0 transition-colors", isActive ? "bg-white animate-ping" : "bg-emerald-500/50")} />
@@ -1406,7 +1433,12 @@ export default function UwoLandingPage() {
               const currentModule = modulesList[activeModuleIndex] || modulesList[0];
 
               return (
-                <div key={activeModuleIndex} className="p-7 sm:p-8 rounded-[2.5rem] bg-white border border-slate-200/90 shadow-2xl shadow-emerald-900/5 relative overflow-hidden text-left transition-all duration-500 flex flex-col justify-between w-full h-full">
+                <div key={activeModuleIndex} className={cn(
+                  "p-7 sm:p-8 rounded-[2.5rem] relative overflow-hidden text-left transition-all duration-500 flex flex-col justify-between w-full h-full",
+                  isDarkMode 
+                    ? "bg-slate-900 border border-slate-800 shadow-2xl shadow-slate-950/80 text-slate-100" 
+                    : "bg-white border border-slate-200/90 shadow-2xl shadow-emerald-900/5 text-slate-900"
+                )}>
 
                   {/* Top Accent Gradient Line */}
                   <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600" />
@@ -1421,7 +1453,7 @@ export default function UwoLandingPage() {
                         <div>
                           <span className="text-[11px] font-black text-slate-400 tracking-widest uppercase">MODULE {currentModule.num} OF 09</span>
                           <h3
-                            className="text-2xl sm:text-3xl font-bold text-slate-900 leading-tight italic font-sans"
+                            className="text-2xl sm:text-3xl font-bold text-slate-900 leading-tight italic font-serif"
                           >
                             {currentModule.title}
                           </h3>
@@ -1433,14 +1465,19 @@ export default function UwoLandingPage() {
                       </span>
                     </div>
 
-                    <p className="text-sm text-slate-600 font-medium leading-relaxed">
+                    <p className={cn("text-sm font-medium leading-relaxed", isDarkMode ? "text-slate-300" : "text-slate-600")}>
                       {currentModule.desc}
                     </p>
 
                     {/* Sub Features Grid */}
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-1">
                       {currentModule.features.map((ft, fi) => (
-                        <div key={fi} className="p-2.5 rounded-xl bg-emerald-50/70 border border-emerald-200/80 text-[11px] font-bold text-emerald-900 flex items-center gap-1.5">
+                        <div key={fi} className={cn(
+                          "p-2.5 rounded-xl text-[11px] font-bold flex items-center gap-1.5",
+                          isDarkMode
+                            ? "bg-emerald-950/50 border border-emerald-800/60 text-emerald-300"
+                            : "bg-emerald-50/70 border border-emerald-200/80 text-emerald-900"
+                        )}>
                           <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
                           <span className="truncate">{ft}</span>
                         </div>
@@ -1536,7 +1573,7 @@ export default function UwoLandingPage() {
               </span>
 
               <h2
-                className="text-4xl sm:text-5xl lg:text-6xl font-bold text-slate-900 tracking-tight italic font-sans leading-tight"
+                className="text-4xl sm:text-5xl lg:text-6xl font-bold text-slate-900 tracking-tight italic font-serif leading-tight"
               >
                 Build & Scale Your Own White-Label Software Agency
               </h2>
@@ -1596,7 +1633,7 @@ export default function UwoLandingPage() {
                   <div className="text-center space-y-2">
                     <span className="text-xs font-black tracking-widest text-[#059669] uppercase">4-STEP ONBOARDING JOURNEY</span>
                     <h3
-                      className="text-3xl sm:text-4xl font-bold text-slate-900 italic font-sans"
+                      className="text-3xl sm:text-4xl font-bold text-slate-900 italic font-serif"
                     >
                       Launch Your SaaS Brand in 4 Simple Steps
                     </h3>
@@ -1652,7 +1689,7 @@ export default function UwoLandingPage() {
                   <div className="text-center space-y-2">
                     <span className="text-xs font-black tracking-widest text-[#059669] uppercase">AGENCY DELIVERABLES</span>
                     <h3
-                      className="text-3xl sm:text-4xl font-bold text-slate-900 italic font-sans"
+                      className="text-3xl sm:text-4xl font-bold text-slate-900 italic font-serif"
                     >
                       Everything Included in Your White-Label Portal
                     </h3>
@@ -1772,7 +1809,7 @@ export default function UwoLandingPage() {
                   <div className="text-left space-y-2">
                     <span className="text-xs font-black tracking-widest text-[#059669] uppercase">PREREQUISITES CHECKLIST</span>
                     <h3
-                      className="text-2xl sm:text-3xl font-bold text-slate-900 italic font-sans"
+                      className="text-2xl sm:text-3xl font-bold text-slate-900 italic font-serif"
                     >
                       What is Required From Your Agency
                     </h3>
@@ -1816,7 +1853,7 @@ export default function UwoLandingPage() {
                   <div className="text-center space-y-2">
                     <span className="text-xs font-black tracking-widest text-[#059669] uppercase">AGENCY PARTNER FAQS</span>
                     <h3
-                      className="text-3xl sm:text-4xl font-bold text-slate-900 italic font-sans"
+                      className="text-3xl sm:text-4xl font-bold text-slate-900 italic font-serif"
                     >
                       Frequently Asked Questions
                     </h3>
@@ -1861,7 +1898,7 @@ export default function UwoLandingPage() {
               <ScrollReveal>
                 <div className="p-8 sm:p-10 rounded-3xl bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-emerald-50/80 border border-emerald-200 text-center space-y-4 shadow-sm hover:shadow-md transition-shadow">
                   <h3
-                    className="text-3xl sm:text-4xl font-bold text-slate-900 italic font-sans"
+                    className="text-3xl sm:text-4xl font-bold text-slate-900 italic font-serif"
                   >
                     Ready to Launch Your Software Agency Today?
                   </h3>
@@ -1889,7 +1926,12 @@ export default function UwoLandingPage() {
       {/* ════════════════════════════════════════════════════════════════ */}
       {/* 12.5 FREQUENTLY ASKED QUESTIONS (FAQ) */}
       {/* ════════════════════════════════════════════════════════════════ */}
-      <section id="faq" className="relative py-20 px-6 sm:px-10 lg:px-14 max-w-5xl mx-auto my-20 bg-gradient-to-br from-emerald-500/15 via-teal-500/10 to-emerald-100/40 rounded-[2.5rem] border-2 border-emerald-500/30 shadow-2xl shadow-emerald-600/15 overflow-hidden text-left">
+      <section id="faq" className={cn(
+        "relative py-20 px-6 sm:px-10 lg:px-14 max-w-5xl mx-auto my-20 rounded-[2.5rem] border-2 shadow-2xl overflow-hidden text-left",
+        isDarkMode
+          ? "bg-slate-900/95 border-slate-800 shadow-slate-950/60 text-slate-100"
+          : "bg-gradient-to-br from-emerald-500/15 via-teal-500/10 to-emerald-100/40 border-emerald-500/30 shadow-emerald-600/15 text-slate-900"
+      )}>
         {/* Vibrant Glowing Ambient Light Spheres & Grid Pattern Background */}
         <div className="absolute -top-32 -left-32 w-96 h-96 bg-emerald-400/35 rounded-full blur-[90px] pointer-events-none animate-pulse-glow" />
         <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-teal-400/35 rounded-full blur-[90px] pointer-events-none animate-pulse-glow" />
@@ -1906,11 +1948,17 @@ export default function UwoLandingPage() {
               STILL HAVE QUESTIONS?
             </span>
             <h2
-              className="text-3xl sm:text-5xl font-bold text-slate-900 font-sans leading-tight"
+              className={cn(
+                "text-3xl sm:text-5xl font-bold font-serif leading-tight",
+                isDarkMode ? "text-white" : "text-slate-900"
+              )}
             >
               Frequently Asked Questions
             </h2>
-            <p className="text-sm sm:text-base text-slate-700 font-bold max-w-xl mx-auto">
+            <p className={cn(
+              "text-sm sm:text-base font-bold max-w-xl mx-auto",
+              isDarkMode ? "text-slate-300" : "text-slate-700"
+            )}>
               Everything you need to know about UwoConnect.
             </p>
           </div>
@@ -2002,18 +2050,28 @@ export default function UwoLandingPage() {
                   const isOpen = openFaqIndex === idx;
                   return (
                     <ScrollReveal key={idx} delay={idx * 30}>
-                      <div className="bg-white/95 backdrop-blur-md border border-emerald-200/90 hover:border-[#059669] hover:shadow-xl hover:shadow-emerald-600/10 rounded-2xl transition-all duration-300 overflow-hidden group">
+                      <div className={cn(
+                        "backdrop-blur-md border rounded-2xl transition-all duration-300 overflow-hidden group",
+                        isDarkMode
+                          ? "bg-slate-800/90 border-slate-700/80 hover:border-emerald-500 hover:shadow-xl hover:shadow-emerald-950/40 text-slate-100"
+                          : "bg-white/95 border-emerald-200/90 hover:border-[#059669] hover:shadow-xl hover:shadow-emerald-600/10 text-slate-900"
+                      )}>
                         <button
                           type="button"
                           onClick={() => setOpenFaqIndex(isOpen ? null : idx)}
-                          className="w-full p-5 sm:p-6 text-left flex items-center justify-between gap-4 cursor-pointer select-none font-extrabold text-slate-900 text-sm sm:text-base hover:text-[#059669] transition-colors"
+                          className={cn(
+                            "w-full p-5 sm:p-6 text-left flex items-center justify-between gap-4 cursor-pointer select-none font-extrabold text-sm sm:text-base hover:text-[#059669] transition-colors",
+                            isDarkMode ? "text-slate-100" : "text-slate-900"
+                          )}
                         >
                           <span className="leading-snug">{faq.q}</span>
                           <span className={cn(
                             "w-8 h-8 rounded-full flex items-center justify-center shrink-0 border transition-all duration-500 transform shadow-xs",
                             isOpen
                               ? "bg-[#059669] text-white border-[#059669] rotate-180"
-                              : "bg-emerald-50 text-[#059669] border-emerald-200 group-hover:bg-[#059669] group-hover:text-white group-hover:border-[#059669] rotate-0"
+                              : isDarkMode
+                                ? "bg-slate-700 text-emerald-400 border-slate-600 group-hover:bg-[#059669] group-hover:text-white group-hover:border-[#059669] rotate-0"
+                                : "bg-emerald-50 text-[#059669] border-emerald-200 group-hover:bg-[#059669] group-hover:text-white group-hover:border-[#059669] rotate-0"
                           )}>
                             {isOpen ? <Minus size={18} /> : <Plus size={18} />}
                           </span>
@@ -2021,13 +2079,17 @@ export default function UwoLandingPage() {
 
                         <div 
                           className={cn(
-                            "grid transition-all duration-500 ease-in-out border-emerald-100",
+                            "grid transition-all duration-500 ease-in-out",
+                            isDarkMode ? "border-slate-700/80" : "border-emerald-100",
                             isOpen 
                               ? "grid-rows-[1fr] opacity-100 pt-3 pb-6 px-5 sm:px-6 border-t" 
                               : "grid-rows-[0fr] opacity-0 py-0 px-5 sm:px-6 border-t-0"
                           )}
                         >
-                          <div className="overflow-hidden text-xs sm:text-sm text-slate-700 leading-relaxed font-medium">
+                          <div className={cn(
+                            "overflow-hidden text-xs sm:text-sm leading-relaxed font-medium",
+                            isDarkMode ? "text-slate-300" : "text-slate-700"
+                          )}>
                             {faq.a}
                           </div>
                         </div>
@@ -2059,7 +2121,7 @@ export default function UwoLandingPage() {
       <section className="relative py-16 px-6 sm:px-10 max-w-5xl mx-auto my-12 text-center bg-gradient-to-r from-slate-900 via-slate-800 to-emerald-950 text-white rounded-3xl border border-slate-800 shadow-2xl overflow-hidden">
         <div className="relative z-10 space-y-4">
           <h3
-            className="text-3xl sm:text-4xl font-bold text-white font-sans leading-tight"
+            className="text-3xl sm:text-4xl font-bold text-white font-serif leading-tight"
           >
             Ready to simplify your business?
           </h3>
@@ -2084,7 +2146,7 @@ export default function UwoLandingPage() {
           {/* Left Column: Company Links (Centered) */}
           <div className="space-y-3 text-center">
             <h5
-              className="font-bold text-sm text-[#059669] font-sans text-center"
+              className="font-bold text-sm text-[#059669] font-serif text-center"
             >
               Company
             </h5>
@@ -2109,7 +2171,7 @@ export default function UwoLandingPage() {
                 />
               </div>
               <span
-                className="text-xl font-bold tracking-tight text-slate-900 italic font-sans"
+                className="text-xl font-bold tracking-tight text-slate-900 italic font-serif"
               >
                 UWO <span className="text-[#059669]">Connect</span>
               </span>
@@ -2163,7 +2225,7 @@ export default function UwoLandingPage() {
           {/* Right Column: Legal Links (Centered) */}
           <div className="space-y-3 text-center">
             <h5
-              className="font-bold text-sm text-[#059669] font-sans text-center"
+              className="font-bold text-sm text-[#059669] font-serif text-center"
             >
               Legal
             </h5>

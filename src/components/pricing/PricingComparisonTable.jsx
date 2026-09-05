@@ -593,7 +593,7 @@ export default function PricingComparisonTable({ plansData, onSelectPlan, isAdmi
   };
 
   return (
-    <div className="w-full space-y-10 pb-16 text-slate-900 bg-white">
+    <div className="w-full space-y-10 pb-16 text-slate-900 bg-white font-serif" style={{ fontFamily: "'Times New Roman', Times, serif" }}>
 
       {/* CAPACITY WARNING TOAST */}
       {capacityNotice && (
@@ -990,10 +990,7 @@ export default function PricingComparisonTable({ plansData, onSelectPlan, isAdmi
                 return (
                   <th
                     key={plan.id}
-                    className={cn(
-                      "p-6 w-1/4 align-top relative border-r last:border-r-0 border-slate-200 transition-colors",
-                      isGrowth && "bg-emerald-50/40"
-                    )}
+                    className="p-6 w-1/4 align-top relative border-r last:border-r-0 border-slate-200 transition-colors"
                   >
                     {/* Badge Header */}
                     {plan.badge_text && (
