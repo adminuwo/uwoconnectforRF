@@ -682,16 +682,12 @@ const ClientChannelsPage = () => {
     const origin = typeof window !== 'undefined' ? window.location.origin : 'https://uwoconnect.aisa24.com';
     const redirectUri = encodeURIComponent(`${origin}/client/channels?state=whatsapp`);
     const appId = process.env.NEXT_PUBLIC_META_APP_ID || '991147863536661';
-    const url = `https://business.facebook.com/messaging/whatsapp/onboard/?app_id=${appId}&config_id=970003505994896&extras=%7B%22sessionInfoVersion%22%3A%223%22%2C%22version%22%3A%22v4%22%7D&redirect_uri=${redirectUri}`;
-
-    const width = 600;
-    const height = 750;
-    const left = (window.innerWidth - width) / 2 + window.screenX;
-    const top = (window.innerHeight - height) / 2 + window.screenY;
-    const popup = window.open(url, 'WhatsAppEmbeddedSignup', `width=${width},height=${height},top=${top},left=${left},status=no,resizable=yes,toolbar=no,menubar=no,scrollbars=yes`);
-    if (!popup || popup.closed || typeof popup.closed === 'undefined') {
-      window.location.href = url;
-    }
+    const configId = '970003505994896';
+    
+    // Seamless OAuth redirect - identical to Instagram flow
+    const oauthUrl = `https://www.facebook.com/v20.0/dialog/oauth?client_id=${appId}&redirect_uri=${redirectUri}&config_id=${configId}&response_type=code&state=whatsapp`;
+    
+    window.location.href = oauthUrl;
   };
 
   const handleFacebookConnect = () => {
