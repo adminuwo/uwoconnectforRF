@@ -157,6 +157,8 @@ const ClientChannelsPage = () => {
   const [fbLoading, setFbLoading] = useState(false);
   const [igLoading, setIgLoading] = useState(false);
   const [toast, setToast] = useState(null);
+  const [waConnecting, setWaConnecting] = useState(false);
+  const sessionInfoRef = React.useRef({ waba_id: null, phone_number_id: null });
 
   useEffect(() => {
     const handleOpenModal = () => {
@@ -279,27 +281,33 @@ const ClientChannelsPage = () => {
 
   // Facebook JS SDK
   useEffect(() => {
-    const timer = setTimeout(() => {
-      if (document.getElementById('facebook-jssdk')) return;
+    if (typeof window === 'undefined') return;
+
+    window.fbAsyncInit = function() {
+      window.FB.init({
+        appId: '991147863536661',
+        cookie: true,
+        xfbml: true,
+        version: 'v20.0'
+      });
+    };
+
+    if (!document.getElementById('facebook-jssdk')) {
       const script = document.createElement('script');
       script.id = 'facebook-jssdk';
       script.src = 'https://connect.facebook.net/en_US/sdk.js';
       script.async = true;
       script.defer = true;
       script.crossOrigin = 'anonymous';
-      script.onload = () => {
-        if (window.FB) {
-          window.FB.init({
-            appId: '991147863536661',
-            cookie: true,
-            xfbml: true,
-            version: 'v19.0'
-          });
-        }
-      };
       document.body.appendChild(script);
-    }, 1200);
-    return () => clearTimeout(timer);
+    } else if (window.FB) {
+      window.FB.init({
+        appId: '991147863536661',
+        cookie: true,
+        xfbml: true,
+        version: 'v20.0'
+      });
+    }
   }, []);
 
   // OAuth & Meta Embedded Signup callback handler
@@ -523,7 +531,8 @@ const ClientChannelsPage = () => {
     }
 
     // Listen for Meta Embedded Signup postMessage events from popup
-    const handleMetaMessage = async (event) => {
+    const handleMetaMessage = (event) => {
+      // 1. WhatsApp connected notification from popup
       if (event.data?.type === 'UWO_WHATSAPP_CONNECTED') {
         fetchClient();
         setToast({ msg: '✅ WhatsApp Business connected successfully!', type: 'success' });
@@ -531,6 +540,46 @@ const ClientChannelsPage = () => {
         return;
       }
 
+      // 2. Authorization code relayed from redirect_uri popup
+      if (event.data?.type === 'UWO_WHATSAPP_CODE' && event.data?.code) {
+        const code = event.data.code;
+        const { waba_id, phone_number_id } = sessionInfoRef.current;
+        setWaConnecting(true);
+        setToast({ msg: 'Saving WhatsApp configuration & credentials...', type: 'success' });
+        const token = localStorage.getItem('uwo_token') || localStorage.getItem('token');
+        axios.post(`${API_BASE_URL}/api/auth/whatsapp/embedded-signup`, {
+          code,
+          waba_id,
+          phone_number_id,
+          redirect_uri: 'https://uwoconnectforrf-743928421487.asia-south1.run.app/'
+        }, {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+        .then((res) => {
+          if (res.data?.whatsapp_config) {
+            setClient(prev => ({
+              ...(prev || {}),
+              ...res.data.whatsapp_config,
+              whatsapp_enabled: true
+            }));
+          }
+          fetchClient();
+          setToast({ msg: '✅ WhatsApp Business connected successfully!', type: 'success' });
+          setTimeout(() => setToast(null), 4000);
+        })
+        .catch((err) => {
+          console.error('[WhatsApp Embedded Signup Error]:', err);
+          const errMsg = err?.response?.data?.error || err?.response?.data?.details?.error?.message || 'Failed to complete WhatsApp connection';
+          setToast({ msg: errMsg, type: 'error' });
+          setTimeout(() => setToast(null), 5000);
+        })
+        .finally(() => {
+          setWaConnecting(false);
+        });
+        return;
+      }
+
+      // 3. Session info from Meta Embedded Signup iframe/popup
       if (
         event.origin !== 'https://www.facebook.com' &&
         event.origin !== 'https://web.facebook.com' &&
@@ -541,27 +590,14 @@ const ClientChannelsPage = () => {
       try {
         const data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
         if (data && (data.type === 'WA_EMBEDDED_SIGNUP' || data.event === 'FINISH' || data.event === 'FINISH_ALL')) {
-          console.log('Received Meta WA_EMBEDDED_SIGNUP event:', data);
+          console.log('[Meta Embedded Signup Session Info]:', data);
           const phone_number_id = data?.data?.phone_number_id || data?.phone_number_id;
           const waba_id = data?.data?.waba_id || data?.waba_id;
-          
-          if (waba_id || phone_number_id) {
-            setToast({ msg: 'Saving WhatsApp configuration...', type: 'success' });
-            const token = localStorage.getItem('uwo_token') || localStorage.getItem('token');
-            await axios.put(`${API_BASE_URL}/api/profile`, {
-              whatsapp_waba_id: waba_id,
-              whatsapp_phone_number_id: phone_number_id,
-              whatsapp_enabled: true
-            }, {
-              headers: { Authorization: `Bearer ${token}` }
-            });
-            await fetchClient();
-            setToast({ msg: '✅ WhatsApp connected successfully!', type: 'success' });
-            setTimeout(() => setToast(null), 4000);
-          }
+          if (waba_id) sessionInfoRef.current.waba_id = waba_id;
+          if (phone_number_id) sessionInfoRef.current.phone_number_id = phone_number_id;
         }
       } catch (err) {
-        console.error('Error handling Meta message event', err);
+        // Non-JSON message from other extensions or iframes, ignore
       }
     };
     window.addEventListener('message', handleMetaMessage);
@@ -679,8 +715,8 @@ const ClientChannelsPage = () => {
   };
 
   const handleWhatsAppConnect = () => {
-    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://uwoconnect.aisa24.com';
-    const redirectUri = encodeURIComponent(`${origin}/client/channels?state=whatsapp`);
+    if (typeof window === 'undefined') return;
+
     const appId = '991147863536661';
     const configId = '1048515390903125';
     const extras = encodeURIComponent(JSON.stringify({
@@ -688,24 +724,16 @@ const ClientChannelsPage = () => {
       sessionInfoVersion: '3',
       featureType: 'whatsapp_business_app_onboarding'
     }));
-
-    const onboardUrl = `https://business.facebook.com/messaging/whatsapp/onboard/?app_id=${appId}&config_id=${configId}&extras=${extras}&redirect_uri=${redirectUri}`;
     
-    // Clean, perfectly sized centered popup window (600x750)
-    const width = 600;
-    const height = 750;
-    const left = Math.max(0, Math.round((window.innerWidth - width) / 2 + (window.screenX || 0)));
-    const top = Math.max(0, Math.round((window.innerHeight - height) / 2 + (window.screenY || 0)));
+    // Explicitly target uwoconnect.aisa24.com channels page
+    const targetRedirectUri = 'https://uwoconnect.aisa24.com/client/channels?state=whatsapp';
+    const redirectUri = encodeURIComponent(targetRedirectUri);
+    const onboardUrl = `https://business.facebook.com/messaging/whatsapp/onboard/?app_id=${appId}&config_id=${configId}&extras=${extras}&redirect_uri=${redirectUri}&state=whatsapp`;
 
-    const popup = window.open(
-      onboardUrl,
-      'WhatsAppEmbeddedSignup',
-      `width=${width},height=${height},top=${top},left=${left},status=no,resizable=yes,toolbar=no,menubar=no,scrollbars=yes`
-    );
+    setToast({ msg: 'Redirecting to WhatsApp Business Setup...', type: 'success' });
 
-    if (!popup || popup.closed || typeof popup.closed === 'undefined') {
-      window.location.href = onboardUrl;
-    }
+    // Direct browser redirect to Meta Embedded Signup
+    window.location.href = onboardUrl;
   };
 
   const handleFacebookConnect = () => {
@@ -883,13 +911,33 @@ const ClientChannelsPage = () => {
                         ) : isConn ? (
                           <div className="space-y-2 py-2.5 sm:py-3 px-3 sm:px-3.5 rounded-xl sm:rounded-2xl bg-slate-50/80 border border-slate-100 text-xs mb-3 sm:mb-4">
                             <div className="flex justify-between items-center text-[11px]">
+                              <span className="text-slate-400 font-bold uppercase tracking-wider text-[9px]">Number</span>
+                              <span className="font-bold text-slate-800">{client?.phone_number || client?.whatsapp_config?.display_phone_number || 'Live Connected'}</span>
+                            </div>
+                            <div className="flex justify-between items-center text-[11px]">
                               <span className="text-slate-400 font-bold uppercase tracking-wider text-[9px]">Phone ID</span>
-                              <span className="font-mono font-semibold text-slate-700">{client?.whatsapp_phone_number_id ? `${client.whatsapp_phone_number_id.slice(0, 6)}...` : 'Connected'}</span>
+                              <span className="font-mono font-semibold text-slate-700 flex items-center gap-1">
+                                <span>{client?.whatsapp_phone_number_id || 'Configured'}</span>
+                                {client?.whatsapp_phone_number_id && <CopyButton text={client.whatsapp_phone_number_id} />}
+                              </span>
+                            </div>
+                            <div className="flex justify-between items-center text-[11px]">
+                              <span className="text-slate-400 font-bold uppercase tracking-wider text-[9px]">WABA ID</span>
+                              <span className="font-mono font-semibold text-slate-700 flex items-center gap-1">
+                                <span>{client?.whatsapp_waba_id || 'Configured'}</span>
+                                {client?.whatsapp_waba_id && <CopyButton text={client.whatsapp_waba_id} />}
+                              </span>
+                            </div>
+                            <div className="flex justify-between items-center text-[11px]">
+                              <span className="text-slate-400 font-bold uppercase tracking-wider text-[9px]">Token</span>
+                              <span className="font-bold text-emerald-700 text-[10px] bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
+                                Permanent Token Active
+                              </span>
                             </div>
                             <div className="flex justify-between items-center text-[11px]">
                               <span className="text-slate-400 font-bold uppercase tracking-wider text-[9px]">Status</span>
                               <span className="font-bold text-emerald-600 flex items-center gap-1">
-                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> Live Ready
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> Live Ready
                               </span>
                             </div>
                           </div>
@@ -929,10 +977,20 @@ const ClientChannelsPage = () => {
                           <div className="flex items-center gap-2">
                             <button
                               onClick={handleWhatsAppConnect}
-                              className="flex-1 py-2 sm:py-2.5 px-3 bg-[#25D366] hover:bg-[#20bd5a] text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer shadow-md shadow-emerald-600/20"
+                              disabled={waConnecting}
+                              className="flex-1 py-2 sm:py-2.5 px-3 bg-[#25D366] hover:bg-[#20bd5a] text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer shadow-md shadow-emerald-600/20 disabled:opacity-60"
                             >
-                              <WhatsAppBrandIcon size={16} />
-                              <span>Connect</span>
+                              {waConnecting ? (
+                                <>
+                                  <Loader2 size={15} className="animate-spin" />
+                                  <span>Connecting...</span>
+                                </>
+                              ) : (
+                                <>
+                                  <WhatsAppBrandIcon size={16} />
+                                  <span>Connect</span>
+                                </>
+                              )}
                             </button>
                             <Link
                               href="/client/plans"
