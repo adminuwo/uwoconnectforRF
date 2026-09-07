@@ -481,6 +481,7 @@ const ClientChannelsPage = () => {
         setToast({ msg: 'Connecting WhatsApp Business...', type: 'success' });
         const connectWhatsApp = async () => {
           try {
+            const token = localStorage.getItem('uwo_token') || localStorage.getItem('token');
             const origin = typeof window !== 'undefined' ? window.location.origin : 'https://uwoconnect.aisa24.com';
             const res = await axios.post(`${API_BASE_URL}/api/auth/whatsapp/embedded-signup`,
               { 
@@ -499,6 +500,16 @@ const ClientChannelsPage = () => {
             await fetchClient();
             setToast({ msg: '✅ WhatsApp Business connected successfully!', type: 'success' });
             setTimeout(() => setToast(null), 4000);
+
+            // If this executed in popup window, notify opener and auto-close
+            if (typeof window !== 'undefined' && window.opener && !window.opener.closed) {
+              try {
+                window.opener.postMessage({ type: 'UWO_WHATSAPP_CONNECTED' }, '*');
+              } catch (e) {}
+              setTimeout(() => {
+                window.close();
+              }, 1500);
+            }
           } catch (err) {
             console.error("Error connecting WhatsApp", err);
             setToast({ msg: err.response?.data?.error || 'Failed to connect WhatsApp', type: 'error' });
@@ -513,6 +524,13 @@ const ClientChannelsPage = () => {
 
     // Listen for Meta Embedded Signup postMessage events from popup
     const handleMetaMessage = async (event) => {
+      if (event.data?.type === 'UWO_WHATSAPP_CONNECTED') {
+        fetchClient();
+        setToast({ msg: '✅ WhatsApp Business connected successfully!', type: 'success' });
+        setTimeout(() => setToast(null), 4000);
+        return;
+      }
+
       if (
         event.origin !== 'https://www.facebook.com' &&
         event.origin !== 'https://web.facebook.com' &&
@@ -529,7 +547,7 @@ const ClientChannelsPage = () => {
           
           if (waba_id || phone_number_id) {
             setToast({ msg: 'Saving WhatsApp configuration...', type: 'success' });
-            const token = localStorage.getItem('uwo_token');
+            const token = localStorage.getItem('uwo_token') || localStorage.getItem('token');
             await axios.put(`${API_BASE_URL}/api/profile`, {
               whatsapp_waba_id: waba_id,
               whatsapp_phone_number_id: phone_number_id,
