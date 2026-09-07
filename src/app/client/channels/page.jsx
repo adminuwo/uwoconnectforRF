@@ -734,30 +734,35 @@ const ClientChannelsPage = () => {
 
     const appId = '991147863536661';
     const configId = '1048515390903125';
+    const extras = encodeURIComponent(JSON.stringify({
+      version: 'v4',
+      sessionInfoVersion: '3',
+      featureType: 'whatsapp_business_app_onboarding'
+    }));
     
     // Whitelisted Redirect URI
     const targetRedirectUri = 'https://uwoconnect.aisa24.com/client/channels';
     const redirectUri = encodeURIComponent(targetRedirectUri);
 
-    // Direct OAuth Dialog URL (bypasses the intermediate "Get started" landing page!)
-    const directOAuthUrl = `https://www.facebook.com/v20.0/dialog/oauth?client_id=${appId}&config_id=${configId}&response_type=code&redirect_uri=${redirectUri}&state=whatsapp`;
+    // Meta WhatsApp Embedded Signup with WhatsApp Business App onboarding enabled
+    const onboardUrl = `https://business.facebook.com/messaging/whatsapp/onboard/?app_id=${appId}&config_id=${configId}&extras=${extras}&redirect_uri=${redirectUri}&state=whatsapp`;
 
     setToast({ msg: 'Opening WhatsApp Business Setup...', type: 'success' });
 
-    // Compact, perfectly centered popup window (520px x 680px)
-    const width = 520;
-    const height = 680;
+    // Clean, perfectly sized centered popup window (600px x 750px)
+    const width = 600;
+    const height = 750;
     const left = Math.max(0, Math.round((window.innerWidth - width) / 2 + (window.screenX || window.screenLeft || 0)));
     const top = Math.max(0, Math.round((window.innerHeight - height) / 2 + (window.screenY || window.screenTop || 0)));
 
     const popup = window.open(
-      directOAuthUrl,
+      onboardUrl,
       'WhatsAppEmbeddedSignup',
       `width=${width},height=${height},top=${top},left=${left},status=no,resizable=yes,toolbar=no,menubar=no,scrollbars=yes,location=no`
     );
 
     if (!popup || popup.closed || typeof popup.closed === 'undefined') {
-      window.location.href = directOAuthUrl;
+      window.location.href = onboardUrl;
     }
   };
 
