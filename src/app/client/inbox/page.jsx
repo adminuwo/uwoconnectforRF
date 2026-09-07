@@ -133,8 +133,8 @@ export default function ClientInboxPage() {
 
       let rawConvos = Array.isArray(convoRes.data) ? convoRes.data : (convoRes.data?.results || []);
 
-      // If conversations table is empty for this client on initial load, fallback to contacts
-      if (rawConvos.length === 0 && offset === 0) {
+      // If conversations table is empty for this client on initial load, fallback to contacts only for 'ALL' tab
+      if (rawConvos.length === 0 && offset === 0 && (!channel || channel === 'ALL')) {
         const contactRes = await axios.get(
           `${apiUrl}/api/contacts/?limit=${limit}&offset=0${searchParam}`,
           { headers }
