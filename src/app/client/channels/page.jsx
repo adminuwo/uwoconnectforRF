@@ -691,7 +691,21 @@ const ClientChannelsPage = () => {
 
     const onboardUrl = `https://business.facebook.com/messaging/whatsapp/onboard/?app_id=${appId}&config_id=${configId}&extras=${extras}&redirect_uri=${redirectUri}`;
     
-    window.location.href = onboardUrl;
+    // Clean, perfectly sized centered popup window (600x750)
+    const width = 600;
+    const height = 750;
+    const left = Math.max(0, Math.round((window.innerWidth - width) / 2 + (window.screenX || 0)));
+    const top = Math.max(0, Math.round((window.innerHeight - height) / 2 + (window.screenY || 0)));
+
+    const popup = window.open(
+      onboardUrl,
+      'WhatsAppEmbeddedSignup',
+      `width=${width},height=${height},top=${top},left=${left},status=no,resizable=yes,toolbar=no,menubar=no,scrollbars=yes`
+    );
+
+    if (!popup || popup.closed || typeof popup.closed === 'undefined') {
+      window.location.href = onboardUrl;
+    }
   };
 
   const handleFacebookConnect = () => {
