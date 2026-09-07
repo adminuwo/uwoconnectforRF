@@ -269,13 +269,13 @@ const ClientChannelsPage = () => {
 
   // Helper function to save WhatsApp credentials to the backend
   const saveWhatsAppCredentials = async (code, explicitWabaId, explicitPhoneId) => {
-    if (!code) return;
+    const waba_id = explicitWabaId || sessionInfoRef.current?.waba_id;
+    const phone_number_id = explicitPhoneId || sessionInfoRef.current?.phone_number_id;
+    if (!code && !waba_id && !phone_number_id) return;
     setWaConnecting(true);
     setToast({ msg: 'Saving WhatsApp configuration & credentials...', type: 'success' });
     try {
       const token = localStorage.getItem('uwo_token') || localStorage.getItem('token');
-      const waba_id = explicitWabaId || sessionInfoRef.current?.waba_id;
-      const phone_number_id = explicitPhoneId || sessionInfoRef.current?.phone_number_id;
 
       const res = await axios.post(`${API_BASE_URL}/api/auth/whatsapp/embedded-signup`, {
         code,
