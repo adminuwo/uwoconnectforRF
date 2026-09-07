@@ -339,12 +339,9 @@ export function getChannelAccessState(channelKey, clientData, activePlans = []) 
   // 3. Live Connection Check
   let isConnected = false;
   if (key === 'whatsapp') {
-    isConnected = Boolean(
-      (clientData?.whatsapp_access_token && clientData?.whatsapp_phone_number_id) ||
-      clientData?.whatsapp_waba_id ||
-      clientData?.whatsapp_phone_number_id ||
-      clientData?.whatsapp_access_token
-    );
+    const hasPhoneId = Boolean(clientData?.whatsapp_phone_number_id || clientData?.whatsapp_config?.phone_number_id);
+    const hasWaba = Boolean(clientData?.whatsapp_waba_id || clientData?.whatsapp_config?.waba_id);
+    isConnected = Boolean(clientData?.whatsapp_enabled && hasPhoneId && hasWaba);
   } else if (key === 'facebook') {
     isConnected = Boolean(
       clientData?.facebook_enabled ||

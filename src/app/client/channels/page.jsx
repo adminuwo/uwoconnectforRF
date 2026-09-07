@@ -659,7 +659,11 @@ const ClientChannelsPage = () => {
   };
 
   // Connection state checks
-  const isWhatsAppConnected = Boolean((client?.whatsapp_access_token && client?.whatsapp_phone_number_id) || client?.whatsapp_waba_id || client?.whatsapp_phone_number_id || client?.whatsapp_access_token);
+  const isWhatsAppConnected = Boolean(
+    client?.whatsapp_enabled &&
+    (client?.whatsapp_phone_number_id || client?.whatsapp_config?.phone_number_id) &&
+    (client?.whatsapp_waba_id || client?.whatsapp_config?.waba_id)
+  );
   const isFacebookConnected = Boolean((client?.facebook_config?.page_id || client?.facebook_config?.access_token) && client?.facebook_enabled !== false);
   const isInstagramConnected = Boolean(client?.instagram_enabled || client?.instagram_config?.instagram_business_id || client?.instagram_config?.instagram_business_account_id || client?.instagram_config?.access_token || client?.instagram_config?.username);
   const isGmailConnected = Boolean(client?.gmail_enabled || client?.gmail_config?.email_address || client?.gmail_config?.email || client?.gmail_config?.token || client?.gmail_config?.access_token);
@@ -858,7 +862,9 @@ const ClientChannelsPage = () => {
                 {(() => {
                   const state = getChannelAccessState('whatsapp', client, activePlans);
                   const isComingSoon = state.status === 'COMING_SOON';
-                  const isConn = state.status === 'CONNECTED' && !isComingSoon;
+                  const hasPhoneId = Boolean(client?.whatsapp_phone_number_id || client?.whatsapp_config?.phone_number_id);
+                  const hasWaba = Boolean(client?.whatsapp_waba_id || client?.whatsapp_config?.waba_id);
+                  const isConn = state.status === 'CONNECTED' && !isComingSoon && hasPhoneId && hasWaba;
 
                   return (
                     <div className={cn(
