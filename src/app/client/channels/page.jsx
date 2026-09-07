@@ -494,7 +494,7 @@ const ClientChannelsPage = () => {
             const res = await axios.post(`${API_BASE_URL}/api/auth/whatsapp/embedded-signup`,
               { 
                 code: code,
-                redirect_uri: `${origin}/client/channels?state=whatsapp`
+                redirect_uri: `https://uwoconnect.aisa24.com/client/channels`
               },
               { headers: { Authorization: `Bearer ${token}` } }
             );
@@ -725,8 +725,8 @@ const ClientChannelsPage = () => {
       featureType: 'whatsapp_business_app_onboarding'
     }));
     
-    // Explicitly target uwoconnect.aisa24.com channels page
-    const targetRedirectUri = 'https://uwoconnect.aisa24.com/client/channels?state=whatsapp';
+    // Exactly matches Meta Console Whitelisted URI: https://uwoconnect.aisa24.com/client/channels
+    const targetRedirectUri = 'https://uwoconnect.aisa24.com/client/channels';
     const redirectUri = encodeURIComponent(targetRedirectUri);
     const onboardUrl = `https://business.facebook.com/messaging/whatsapp/onboard/?app_id=${appId}&config_id=${configId}&extras=${extras}&redirect_uri=${redirectUri}&state=whatsapp`;
 
