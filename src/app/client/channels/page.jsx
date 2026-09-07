@@ -481,9 +481,12 @@ const ClientChannelsPage = () => {
         setToast({ msg: 'Connecting WhatsApp Business...', type: 'success' });
         const connectWhatsApp = async () => {
           try {
-            const token = localStorage.getItem('uwo_token');
+            const origin = typeof window !== 'undefined' ? window.location.origin : 'https://uwoconnect.aisa24.com';
             const res = await axios.post(`${API_BASE_URL}/api/auth/whatsapp/embedded-signup`,
-              { code: code },
+              { 
+                code: code,
+                redirect_uri: `${origin}/client/channels?state=whatsapp`
+              },
               { headers: { Authorization: `Bearer ${token}` } }
             );
             if (res.data?.whatsapp_config) {
