@@ -241,7 +241,7 @@ export default function WhatsAppConfigModal({ isOpen, onClose, client, onSaved }
 
   const validate = (field, val) => {
     let err = '';
-    if (!val && field !== 'portfolioId') {
+    if (!val && field !== 'portfolioId' && field !== 'accessToken') {
       err = 'This field is required';
     } else {
       if (field === 'wabaId' || field === 'phoneId') {
@@ -259,7 +259,7 @@ export default function WhatsAppConfigModal({ isOpen, onClose, client, onSaved }
           err = 'Invalid phone number length';
         }
       }
-      if (field === 'accessToken') {
+      if (field === 'accessToken' && val) {
         if (val.length < 30) {
           err = 'Access token is too short';
         }
@@ -290,8 +290,10 @@ export default function WhatsAppConfigModal({ isOpen, onClose, client, onSaved }
       wabaId,
       phoneId,
       phoneNumberVal,
-      accessToken
     };
+    if (accessToken) {
+      fieldsToValidate.accessToken = accessToken;
+    }
     
     let isAllValid = true;
     const newTouched = {};
@@ -312,13 +314,28 @@ export default function WhatsAppConfigModal({ isOpen, onClose, client, onSaved }
       const token = localStorage.getItem('uwo_token') || localStorage.getItem('token');
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080';
       const formattedPhone = `${countryCode} ${phoneNumberVal.trim()}`;
+
+      // Sync via embedded signup endpoint first to register WABA & webhooks
+      try {
+        await axios.post(`${apiUrl}/api/auth/whatsapp/embedded-signup`, {
+          waba_id: wabaId,
+          phone_number_id: phoneId,
+          access_token: accessToken || undefined,
+          redirect_uri: 'https://uwoconnect.aisa24.com/client/channels'
+        }, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+      } catch (embErr) {
+        console.warn('Embedded signup sync note:', embErr);
+      }
       
       const payload = {
         business_name: businessName,
         phone_number: formattedPhone,
         whatsapp_waba_id: wabaId,
         whatsapp_phone_number_id: phoneId,
-        whatsapp_access_token: accessToken,
+        whatsapp_enabled: true,
+        ...(accessToken ? { whatsapp_access_token: accessToken } : {}),
         settings: {
           ...(client?.settings || {}),
           business_portfolio_id: portfolioId,
