@@ -486,6 +486,21 @@ const ClientChannelsPage = () => {
         };
         connectInstagram();
       } else if (state === 'whatsapp') {
+        // If loaded inside a popup window, relay the code to the parent dashboard immediately and close!
+        if (typeof window !== 'undefined' && window.opener && !window.opener.closed) {
+          try {
+            window.opener.postMessage({
+              type: 'UWO_WHATSAPP_CODE',
+              code: code,
+              state: 'whatsapp'
+            }, '*');
+          } catch (e) {}
+          setTimeout(() => {
+            window.close();
+          }, 600);
+          return;
+        }
+
         setToast({ msg: 'Connecting WhatsApp Business...', type: 'success' });
         const connectWhatsApp = async () => {
           try {
@@ -551,7 +566,7 @@ const ClientChannelsPage = () => {
           code,
           waba_id,
           phone_number_id,
-          redirect_uri: 'https://uwoconnectforrf-743928421487.asia-south1.run.app/'
+          redirect_uri: 'https://uwoconnect.aisa24.com/client/channels'
         }, {
           headers: { Authorization: `Bearer ${token}` }
         })
@@ -719,21 +734,31 @@ const ClientChannelsPage = () => {
 
     const appId = '991147863536661';
     const configId = '1048515390903125';
-    const extras = encodeURIComponent(JSON.stringify({
-      version: 'v4',
-      sessionInfoVersion: '3',
-      featureType: 'whatsapp_business_app_onboarding'
-    }));
     
-    // Exactly matches Meta Console Whitelisted URI: https://uwoconnect.aisa24.com/client/channels
+    // Whitelisted Redirect URI
     const targetRedirectUri = 'https://uwoconnect.aisa24.com/client/channels';
     const redirectUri = encodeURIComponent(targetRedirectUri);
-    const onboardUrl = `https://business.facebook.com/messaging/whatsapp/onboard/?app_id=${appId}&config_id=${configId}&extras=${extras}&redirect_uri=${redirectUri}&state=whatsapp`;
 
-    setToast({ msg: 'Redirecting to WhatsApp Business Setup...', type: 'success' });
+    // Direct OAuth Dialog URL (bypasses the intermediate "Get started" landing page!)
+    const directOAuthUrl = `https://www.facebook.com/v20.0/dialog/oauth?client_id=${appId}&config_id=${configId}&response_type=code&redirect_uri=${redirectUri}&state=whatsapp`;
 
-    // Direct browser redirect to Meta Embedded Signup
-    window.location.href = onboardUrl;
+    setToast({ msg: 'Opening WhatsApp Business Setup...', type: 'success' });
+
+    // Compact, perfectly centered popup window (520px x 680px)
+    const width = 520;
+    const height = 680;
+    const left = Math.max(0, Math.round((window.innerWidth - width) / 2 + (window.screenX || window.screenLeft || 0)));
+    const top = Math.max(0, Math.round((window.innerHeight - height) / 2 + (window.screenY || window.screenTop || 0)));
+
+    const popup = window.open(
+      directOAuthUrl,
+      'WhatsAppEmbeddedSignup',
+      `width=${width},height=${height},top=${top},left=${left},status=no,resizable=yes,toolbar=no,menubar=no,scrollbars=yes,location=no`
+    );
+
+    if (!popup || popup.closed || typeof popup.closed === 'undefined') {
+      window.location.href = directOAuthUrl;
+    }
   };
 
   const handleFacebookConnect = () => {
