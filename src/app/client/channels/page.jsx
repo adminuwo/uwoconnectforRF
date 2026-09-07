@@ -266,6 +266,45 @@ const ClientChannelsPage = () => {
     }
   };
 
+  // Helper function to save WhatsApp credentials to the backend
+  const saveWhatsAppCredentials = async (code, explicitWabaId, explicitPhoneId) => {
+    if (!code) return;
+    setWaConnecting(true);
+    setToast({ msg: 'Saving WhatsApp configuration & credentials...', type: 'success' });
+    try {
+      const token = localStorage.getItem('uwo_token') || localStorage.getItem('token');
+      const waba_id = explicitWabaId || sessionInfoRef.current?.waba_id;
+      const phone_number_id = explicitPhoneId || sessionInfoRef.current?.phone_number_id;
+
+      const res = await axios.post(`${API_BASE_URL}/api/auth/whatsapp/embedded-signup`, {
+        code,
+        waba_id,
+        phone_number_id,
+        redirect_uri: 'https://uwoconnect.aisa24.com/client/channels'
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      if (res.data?.whatsapp_config) {
+        setClient(prev => ({
+          ...(prev || {}),
+          ...res.data.whatsapp_config,
+          whatsapp_enabled: true
+        }));
+      }
+      await fetchClient();
+      setToast({ msg: '✅ WhatsApp Business connected successfully!', type: 'success' });
+      setTimeout(() => setToast(null), 4000);
+    } catch (err) {
+      console.error('[WhatsApp Embedded Signup Error]:', err);
+      const errMsg = err?.response?.data?.error || err?.response?.data?.details?.error?.message || 'Failed to complete WhatsApp connection';
+      setToast({ msg: errMsg, type: 'error' });
+      setTimeout(() => setToast(null), 5000);
+    } finally {
+      setWaConnecting(false);
+    }
+  };
+
   useEffect(() => {
     setIsMounted(true);
     try {
@@ -501,47 +540,8 @@ const ClientChannelsPage = () => {
           return;
         }
 
-        setToast({ msg: 'Connecting WhatsApp Business...', type: 'success' });
-        const connectWhatsApp = async () => {
-          try {
-            const token = localStorage.getItem('uwo_token') || localStorage.getItem('token');
-            const origin = typeof window !== 'undefined' ? window.location.origin : 'https://uwoconnect.aisa24.com';
-            const res = await axios.post(`${API_BASE_URL}/api/auth/whatsapp/embedded-signup`,
-              { 
-                code: code,
-                redirect_uri: `https://uwoconnect.aisa24.com/client/channels`
-              },
-              { headers: { Authorization: `Bearer ${token}` } }
-            );
-            if (res.data?.whatsapp_config) {
-              setClient(prev => ({
-                ...prev,
-                ...res.data.whatsapp_config,
-                whatsapp_enabled: true
-              }));
-            }
-            await fetchClient();
-            setToast({ msg: '✅ WhatsApp Business connected successfully!', type: 'success' });
-            setTimeout(() => setToast(null), 4000);
-
-            // If this executed in popup window, notify opener and auto-close
-            if (typeof window !== 'undefined' && window.opener && !window.opener.closed) {
-              try {
-                window.opener.postMessage({ type: 'UWO_WHATSAPP_CONNECTED' }, '*');
-              } catch (e) {}
-              setTimeout(() => {
-                window.close();
-              }, 1500);
-            }
-          } catch (err) {
-            console.error("Error connecting WhatsApp", err);
-            setToast({ msg: err.response?.data?.error || 'Failed to connect WhatsApp', type: 'error' });
-            setTimeout(() => setToast(null), 4000);
-          } finally {
-            window.history.replaceState({}, document.title, window.location.pathname);
-          }
-        };
-        connectWhatsApp();
+        saveWhatsAppCredentials(code);
+        window.history.replaceState({}, document.title, window.location.pathname);
       }
     }
 
@@ -557,40 +557,7 @@ const ClientChannelsPage = () => {
 
       // 2. Authorization code relayed from redirect_uri popup
       if (event.data?.type === 'UWO_WHATSAPP_CODE' && event.data?.code) {
-        const code = event.data.code;
-        const { waba_id, phone_number_id } = sessionInfoRef.current;
-        setWaConnecting(true);
-        setToast({ msg: 'Saving WhatsApp configuration & credentials...', type: 'success' });
-        const token = localStorage.getItem('uwo_token') || localStorage.getItem('token');
-        axios.post(`${API_BASE_URL}/api/auth/whatsapp/embedded-signup`, {
-          code,
-          waba_id,
-          phone_number_id,
-          redirect_uri: 'https://uwoconnect.aisa24.com/client/channels'
-        }, {
-          headers: { Authorization: `Bearer ${token}` }
-        })
-        .then((res) => {
-          if (res.data?.whatsapp_config) {
-            setClient(prev => ({
-              ...(prev || {}),
-              ...res.data.whatsapp_config,
-              whatsapp_enabled: true
-            }));
-          }
-          fetchClient();
-          setToast({ msg: '✅ WhatsApp Business connected successfully!', type: 'success' });
-          setTimeout(() => setToast(null), 4000);
-        })
-        .catch((err) => {
-          console.error('[WhatsApp Embedded Signup Error]:', err);
-          const errMsg = err?.response?.data?.error || err?.response?.data?.details?.error?.message || 'Failed to complete WhatsApp connection';
-          setToast({ msg: errMsg, type: 'error' });
-          setTimeout(() => setToast(null), 5000);
-        })
-        .finally(() => {
-          setWaConnecting(false);
-        });
+        saveWhatsAppCredentials(event.data.code);
         return;
       }
 
@@ -610,6 +577,11 @@ const ClientChannelsPage = () => {
           const waba_id = data?.data?.waba_id || data?.waba_id;
           if (waba_id) sessionInfoRef.current.waba_id = waba_id;
           if (phone_number_id) sessionInfoRef.current.phone_number_id = phone_number_id;
+
+          const directCode = data?.data?.code || data?.code;
+          if (directCode) {
+            saveWhatsAppCredentials(directCode, waba_id, phone_number_id);
+          }
         }
       } catch (err) {
         // Non-JSON message from other extensions or iframes, ignore
@@ -734,18 +706,47 @@ const ClientChannelsPage = () => {
 
     const appId = '991147863536661';
     const configId = '1048515390903125';
+
+    // 1. Official Meta Facebook JavaScript SDK FB.login (Primary)
+    if (window.FB && typeof window.FB.login === 'function') {
+      setToast({ msg: 'Opening WhatsApp Business Setup...', type: 'success' });
+      try {
+        window.FB.login((response) => {
+          console.log('[FB.login WhatsApp response]:', response);
+          if (response?.authResponse?.code) {
+            saveWhatsAppCredentials(response.authResponse.code);
+          } else if (response?.authResponse?.accessToken) {
+            saveWhatsAppCredentials(response.authResponse.accessToken);
+          } else {
+            console.warn('[WhatsApp Embedded Signup]: No auth code received or user cancelled', response);
+          }
+        }, {
+          config_id: configId,
+          response_type: 'code',
+          override_default_response_type: true,
+          extras: {
+            setup: {},
+            feature_type: 'whatsapp_business_app_onboarding',
+            sessionInfoVersion: '3',
+            version: 'v4'
+          }
+        });
+        return;
+      } catch (fbErr) {
+        console.warn('window.FB.login invocation error, falling back to direct OAuth popup', fbErr);
+      }
+    }
+
+    // 2. Direct OAuth dialog fallback (redirects back with authorization code to redirect_uri)
     const extras = encodeURIComponent(JSON.stringify({
       version: 'v4',
       sessionInfoVersion: '3',
       featureType: 'whatsapp_business_app_onboarding'
     }));
-    
-    // Whitelisted Redirect URI
+
     const targetRedirectUri = 'https://uwoconnect.aisa24.com/client/channels';
     const redirectUri = encodeURIComponent(targetRedirectUri);
-
-    // Meta WhatsApp Embedded Signup with WhatsApp Business App onboarding enabled
-    const onboardUrl = `https://business.facebook.com/messaging/whatsapp/onboard/?app_id=${appId}&config_id=${configId}&extras=${extras}&redirect_uri=${redirectUri}&state=whatsapp`;
+    const directOAuthUrl = `https://www.facebook.com/v20.0/dialog/oauth?client_id=${appId}&config_id=${configId}&response_type=code&redirect_uri=${redirectUri}&extras=${extras}&state=whatsapp`;
 
     setToast({ msg: 'Opening WhatsApp Business Setup...', type: 'success' });
 
@@ -756,13 +757,13 @@ const ClientChannelsPage = () => {
     const top = Math.max(0, Math.round((window.innerHeight - height) / 2 + (window.screenY || window.screenTop || 0)));
 
     const popup = window.open(
-      onboardUrl,
+      directOAuthUrl,
       'WhatsAppEmbeddedSignup',
       `width=${width},height=${height},top=${top},left=${left},status=no,resizable=yes,toolbar=no,menubar=no,scrollbars=yes,location=no`
     );
 
     if (!popup || popup.closed || typeof popup.closed === 'undefined') {
-      window.location.href = onboardUrl;
+      window.location.href = directOAuthUrl;
     }
   };
 
