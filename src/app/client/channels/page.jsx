@@ -709,38 +709,44 @@ const ClientChannelsPage = () => {
   };
 
   const handleFacebookConnect = () => {
-    if (!window.FB) {
-      setToast({ msg: 'Facebook SDK loading, opening configuration...', type: 'info' });
-      setIsFacebookConfigModalOpen(true);
+    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://uwoconnect.aisa24.com';
+    const redirectUri = encodeURIComponent(`${origin}/client/channels?state=facebook`);
+    const appId = process.env.NEXT_PUBLIC_META_APP_ID || '991147863536661';
+    const oauthUrl = `https://www.facebook.com/v20.0/dialog/oauth?client_id=${appId}&redirect_uri=${redirectUri}&scope=public_profile,email,pages_show_list,pages_read_engagement,pages_messaging&response_type=code&state=facebook`;
+
+    if (typeof window !== 'undefined' && window.FB) {
+      setFbLoading(true);
+      window.FB.login(async (response) => {
+        if (response.status !== 'connected') {
+          setFbLoading(false);
+          window.location.href = oauthUrl;
+          return;
+        }
+        try {
+          const token = localStorage.getItem('uwo_token');
+          const res = await axios.post(
+            `${API_BASE_URL}/api/auth/facebook/embedded-signup`,
+            { access_token: response.authResponse.accessToken },
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+          setClient(prev => ({ ...prev, ...res.data.facebook_config ? { facebook_config: res.data.facebook_config, facebook_enabled: true } : {} }));
+          await fetchClient();
+          setToast({ msg: '✅ Facebook Page connected!', type: 'success' });
+          setTimeout(() => setToast(null), 4000);
+        } catch (err) {
+          window.location.href = oauthUrl;
+        } finally {
+          setFbLoading(false);
+        }
+      }, {
+        scope: 'public_profile,email,pages_show_list,pages_read_engagement,pages_messaging',
+        return_scopes: true,
+      });
       return;
     }
-    setFbLoading(true);
-    window.FB.login(async (response) => {
-      if (response.status !== 'connected') {
-        setFbLoading(false);
-        setIsFacebookConfigModalOpen(true);
-        return;
-      }
-      try {
-        const token = localStorage.getItem('uwo_token');
-        const res = await axios.post(
-          `${API_BASE_URL}/api/auth/facebook/embedded-signup`,
-          { access_token: response.authResponse.accessToken },
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        setClient(prev => ({ ...prev, ...res.data.facebook_config ? { facebook_config: res.data.facebook_config, facebook_enabled: true } : {} }));
-        await fetchClient();
-        setToast({ msg: '✅ Facebook Page connected!', type: 'success' });
-        setTimeout(() => setToast(null), 4000);
-      } catch (err) {
-        setIsFacebookConfigModalOpen(true);
-      } finally {
-        setFbLoading(false);
-      }
-    }, {
-      scope: 'public_profile,email,pages_show_list,pages_read_engagement,pages_messaging',
-      return_scopes: true,
-    });
+
+    // Direct OAuth redirect if FB SDK is not available
+    window.location.href = oauthUrl;
   };
 
   const handleInstagramConnect = () => {
