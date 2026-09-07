@@ -159,6 +159,7 @@ const ClientChannelsPage = () => {
   const [toast, setToast] = useState(null);
   const [waConnecting, setWaConnecting] = useState(false);
   const sessionInfoRef = React.useRef({ waba_id: null, phone_number_id: null });
+  const popupRef = React.useRef(null);
 
   useEffect(() => {
     const handleOpenModal = () => {
@@ -561,7 +562,7 @@ const ClientChannelsPage = () => {
         return;
       }
 
-      // 3. Session info from Meta Embedded Signup iframe/popup
+      // 3. Session info & auto-finish from Meta Embedded Signup iframe/popup
       if (
         event.origin !== 'https://www.facebook.com' &&
         event.origin !== 'https://web.facebook.com' &&
@@ -575,13 +576,18 @@ const ClientChannelsPage = () => {
           console.log('[Meta Embedded Signup Session Info]:', data);
           const phone_number_id = data?.data?.phone_number_id || data?.phone_number_id;
           const waba_id = data?.data?.waba_id || data?.waba_id;
+          const directCode = data?.data?.code || data?.code;
+
           if (waba_id) sessionInfoRef.current.waba_id = waba_id;
           if (phone_number_id) sessionInfoRef.current.phone_number_id = phone_number_id;
 
-          const directCode = data?.data?.code || data?.code;
-          if (directCode) {
-            saveWhatsAppCredentials(directCode, waba_id, phone_number_id);
+          // Auto-close popup once user completes setup
+          if (popupRef.current && !popupRef.current.closed) {
+            try { popupRef.current.close(); } catch(e) {}
           }
+
+          // Trigger saving WhatsApp credentials immediately to update dashboard!
+          saveWhatsAppCredentials(directCode || null, waba_id, phone_number_id);
         }
       } catch (err) {
         // Non-JSON message from other extensions or iframes, ignore
@@ -707,37 +713,7 @@ const ClientChannelsPage = () => {
     const appId = '991147863536661';
     const configId = '1048515390903125';
 
-    // 1. Official Meta Facebook JavaScript SDK FB.login (Primary)
-    if (window.FB && typeof window.FB.login === 'function') {
-      setToast({ msg: 'Opening WhatsApp Business Setup...', type: 'success' });
-      try {
-        window.FB.login((response) => {
-          console.log('[FB.login WhatsApp response]:', response);
-          if (response?.authResponse?.code) {
-            saveWhatsAppCredentials(response.authResponse.code);
-          } else if (response?.authResponse?.accessToken) {
-            saveWhatsAppCredentials(response.authResponse.accessToken);
-          } else {
-            console.warn('[WhatsApp Embedded Signup]: No auth code received or user cancelled', response);
-          }
-        }, {
-          config_id: configId,
-          response_type: 'code',
-          override_default_response_type: true,
-          extras: {
-            setup: {},
-            feature_type: 'whatsapp_business_app_onboarding',
-            sessionInfoVersion: '3',
-            version: 'v4'
-          }
-        });
-        return;
-      } catch (fbErr) {
-        console.warn('window.FB.login invocation error, falling back to direct OAuth popup', fbErr);
-      }
-    }
-
-    // 2. Direct OAuth dialog fallback (redirects back with authorization code to redirect_uri)
+    // Extras for WhatsApp Business App Onboarding (Coexistence flow)
     const extras = encodeURIComponent(JSON.stringify({
       version: 'v4',
       sessionInfoVersion: '3',
@@ -746,24 +722,27 @@ const ClientChannelsPage = () => {
 
     const targetRedirectUri = 'https://uwoconnect.aisa24.com/client/channels';
     const redirectUri = encodeURIComponent(targetRedirectUri);
-    const directOAuthUrl = `https://www.facebook.com/v20.0/dialog/oauth?client_id=${appId}&config_id=${configId}&response_type=code&redirect_uri=${redirectUri}&extras=${extras}&state=whatsapp`;
+
+    // Meta Dedicated WhatsApp Embedded Signup URL
+    const onboardUrl = `https://business.facebook.com/messaging/whatsapp/onboard/?app_id=${appId}&config_id=${configId}&extras=${extras}&redirect_uri=${redirectUri}&state=whatsapp`;
 
     setToast({ msg: 'Opening WhatsApp Business Setup...', type: 'success' });
 
-    // Clean, perfectly sized centered popup window (600px x 750px)
+    // Clean, centered popup window
     const width = 600;
     const height = 750;
     const left = Math.max(0, Math.round((window.innerWidth - width) / 2 + (window.screenX || window.screenLeft || 0)));
     const top = Math.max(0, Math.round((window.innerHeight - height) / 2 + (window.screenY || window.screenTop || 0)));
 
     const popup = window.open(
-      directOAuthUrl,
+      onboardUrl,
       'WhatsAppEmbeddedSignup',
       `width=${width},height=${height},top=${top},left=${left},status=no,resizable=yes,toolbar=no,menubar=no,scrollbars=yes,location=no`
     );
+    popupRef.current = popup;
 
     if (!popup || popup.closed || typeof popup.closed === 'undefined') {
-      window.location.href = directOAuthUrl;
+      window.location.href = onboardUrl;
     }
   };
 
@@ -1022,6 +1001,13 @@ const ClientChannelsPage = () => {
                                   <span>Connect</span>
                                 </>
                               )}
+                            </button>
+                            <button
+                              onClick={() => setIsConfigModalOpen(true)}
+                              title="Configure / Manual Credentials"
+                              className="py-2 sm:py-2.5 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition flex items-center justify-center cursor-pointer border border-slate-200"
+                            >
+                              <Settings size={14} />
                             </button>
                             <Link
                               href="/client/plans"
