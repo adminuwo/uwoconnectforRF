@@ -631,7 +631,7 @@ const ClientChannelsPage = () => {
 
   // Connection state checks
   const isWhatsAppConnected = Boolean((client?.whatsapp_access_token && client?.whatsapp_phone_number_id) || client?.whatsapp_waba_id || client?.whatsapp_phone_number_id || client?.whatsapp_access_token);
-  const isFacebookConnected = Boolean(client?.facebook_enabled || client?.facebook_config?.page_id || client?.facebook_config?.access_token || client?.facebook_config?.page_name);
+  const isFacebookConnected = Boolean((client?.facebook_config?.page_id || client?.facebook_config?.access_token) && client?.facebook_enabled !== false);
   const isInstagramConnected = Boolean(client?.instagram_enabled || client?.instagram_config?.instagram_business_id || client?.instagram_config?.instagram_business_account_id || client?.instagram_config?.access_token || client?.instagram_config?.username);
   const isGmailConnected = Boolean(client?.gmail_enabled || client?.gmail_config?.email_address || client?.gmail_config?.email || client?.gmail_config?.token || client?.gmail_config?.access_token);
   const isOutlookConnected = Boolean(client?.outlook_enabled || client?.outlook_config?.email_address || client?.outlook_config?.access_token);
