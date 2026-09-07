@@ -681,13 +681,17 @@ const ClientChannelsPage = () => {
   const handleWhatsAppConnect = () => {
     const origin = typeof window !== 'undefined' ? window.location.origin : 'https://uwoconnect.aisa24.com';
     const redirectUri = encodeURIComponent(`${origin}/client/channels?state=whatsapp`);
-    const appId = process.env.NEXT_PUBLIC_META_APP_ID || '991147863536661';
-    const configId = '970003505994896';
+    const appId = '991147863536661';
+    const configId = '1048515390903125';
+    const extras = encodeURIComponent(JSON.stringify({
+      version: 'v4',
+      sessionInfoVersion: '3',
+      featureType: 'whatsapp_business_app_onboarding'
+    }));
+
+    const onboardUrl = `https://business.facebook.com/messaging/whatsapp/onboard/?app_id=${appId}&config_id=${configId}&extras=${extras}&redirect_uri=${redirectUri}`;
     
-    // Seamless OAuth redirect - identical to Instagram flow
-    const oauthUrl = `https://www.facebook.com/v20.0/dialog/oauth?client_id=${appId}&redirect_uri=${redirectUri}&config_id=${configId}&response_type=code&state=whatsapp`;
-    
-    window.location.href = oauthUrl;
+    window.location.href = onboardUrl;
   };
 
   const handleFacebookConnect = () => {
