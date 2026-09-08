@@ -423,6 +423,16 @@ export default function ClientInboxPage() {
             });
           }
 
+          if (data.type === 'message_status_update') {
+            setMessages(prev => prev.map(m => {
+              const matches =
+                (data.message_id && m.id === data.message_id) ||
+                (data.whatsapp_message_id && m.whatsapp_message_id === data.whatsapp_message_id) ||
+                (data.whatsapp_message_id && m.metadata?.response?.messages?.[0]?.id === data.whatsapp_message_id);
+              return matches ? { ...m, status: data.status } : m;
+            }));
+          }
+
           // Live Presence / Viewing / Typing Broadcasting
           if (data.type === 'typing_status') {
             setLivePresence(prev => ({
@@ -1383,7 +1393,19 @@ export default function ClientInboxPage() {
                             isIncoming ? 'text-slate-400' : 'text-emerald-100'
                           }`}>
                             <span>{new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                            {!isIncoming && <CheckCheck className="w-3 h-3 text-emerald-200" />}
+                            {!isIncoming && (
+                              <>
+                                {msg.status === 'READ' ? (
+                                  <CheckCheck className="w-3.5 h-3.5 text-sky-400" title="Read" />
+                                ) : msg.status === 'DELIVERED' || msg.status === 'RECEIVED' ? (
+                                  <CheckCheck className="w-3.5 h-3.5 text-emerald-200" title="Delivered" />
+                                ) : msg.status === 'FAILED' ? (
+                                  <span className="text-red-300 font-semibold text-[8px]">Failed</span>
+                                ) : (
+                                  <Check className="w-3 h-3 text-emerald-200" title="Sent" />
+                                )}
+                              </>
+                            )}
                           </div>
                         </div>
                       </div>
