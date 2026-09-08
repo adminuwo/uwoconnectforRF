@@ -111,11 +111,13 @@ const getPlanRank = (planObj, rawUserPlan = '') => {
     planObj?.id || 
     rawUserPlan || 
     ''
-  ).toLowerCase();
+  ).toLowerCase().trim();
 
-  if (str.includes('advanced') || str.includes('enterprise') || str.includes('power')) return 3;
+  if (!str || str.includes('free') || str.includes('none') || str.includes('no active plan')) return 0;
+  if (str.includes('advanced') || str.includes('enterprise') || str.includes('power') || str.includes('agency')) return 3;
   if (str.includes('growth') || str.includes('pro')) return 2;
-  return 1;
+  if (str.includes('starter') || str.includes('basic')) return 1;
+  return 0;
 };
 
 const DashboardLayout = ({ children, role: initialRole }) => {
