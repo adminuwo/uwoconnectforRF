@@ -1970,7 +1970,12 @@ const ClientChannelsPage = () => {
             isOpen={isConfigModalOpen}
             onClose={() => setIsConfigModalOpen(false)}
             client={client}
-            onSaved={handleWhatsAppSaved}
+            onSaved={(updatedData) => {
+              if (updatedData) {
+                setClient(prev => ({ ...prev, ...updatedData }));
+              }
+              fetchClient();
+            }}
           />
         )}
 

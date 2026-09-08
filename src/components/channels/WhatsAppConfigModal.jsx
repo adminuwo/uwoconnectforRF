@@ -355,7 +355,7 @@ export default function WhatsAppConfigModal({ isOpen, onClose, client, onSaved }
 
       // 2. Push WhatsApp Business Profile & Hours to Meta
       const websitesList = [website1.trim(), website2.trim()].filter(Boolean);
-      await axios.post(
+      const updateRes = await axios.post(
         `${apiUrl}/api/clients/${client.id}/update_whatsapp_business_profile/`,
         {
           profile: {
@@ -379,8 +379,32 @@ export default function WhatsAppConfigModal({ isOpen, onClose, client, onSaved }
         { headers: { Authorization: `Bearer ${token}` } }
       );
       
-      setSuccessToast('WhatsApp settings & business profile updated successfully!');
-      if (onSaved) onSaved(profileRes.data);
+      const mergedClient = {
+        ...(profileRes?.data || client || {}),
+        settings: {
+          ...(client?.settings || {}),
+          whatsapp_business_profile: updateRes.data?.profile || {
+            address: address.trim(),
+            description: description.trim(),
+            about: about.trim(),
+            email: email.trim(),
+            vertical: vertical,
+            websites: websitesList
+          },
+          whatsapp_business_hours: updateRes.data?.business_hours || {
+            enabled: hoursEnabled,
+            timezone,
+            days: workingDays,
+            open_time: openTime,
+            close_time: closeTime,
+            away_message_enabled: awayMessageEnabled,
+            away_message: awayMessage.trim()
+          }
+        }
+      };
+
+      setSuccessToast(updateRes.data?.message || 'WhatsApp settings & business profile updated successfully!');
+      if (onSaved) onSaved(mergedClient);
       setTimeout(() => {
         onClose();
       }, 1000);
