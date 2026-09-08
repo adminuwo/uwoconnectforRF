@@ -717,36 +717,65 @@ const ClientChannelsPage = () => {
     const appId = '991147863536661';
     const configId = '1048515390903125';
 
-    // Extras for WhatsApp Business App Onboarding (Coexistence flow)
+    setToast({ msg: 'Opening WhatsApp Business Setup...', type: 'success' });
+
+    const isHttps = window.location.protocol === 'https:';
+
+    // Official Meta JavaScript SDK Embedded Signup flow (Strictly requires HTTPS)
+    if (isHttps && window.FB) {
+      try {
+        window.FB.login(
+          (response) => {
+            if (response?.authResponse?.code) {
+              console.log('[FB.login Code Captured]:', response.authResponse.code);
+              saveWhatsAppCredentials(response.authResponse.code);
+            } else {
+              console.log('[FB.login response]:', response);
+            }
+          },
+          {
+            config_id: configId,
+            response_type: 'code',
+            override_default_response_type: true,
+            extras: {
+              setup: {},
+              sessionInfoVersion: '3',
+              featureType: 'whatsapp_business_app_onboarding'
+            }
+          }
+        );
+        return;
+      } catch (err) {
+        console.warn('[FB.login error, falling back to oauth dialog]:', err);
+      }
+    }
+
+    // Fallback for HTTP (e.g. localhost:3000 development) where FB.login is blocked by Meta
     const extras = encodeURIComponent(JSON.stringify({
-      version: 'v4',
+      setup: {},
       sessionInfoVersion: '3',
       featureType: 'whatsapp_business_app_onboarding'
     }));
 
-    const targetRedirectUri = 'https://uwoconnect.aisa24.com/client/channels';
+    const origin = window.location.origin;
+    const targetRedirectUri = `${origin}/client/channels`;
     const redirectUri = encodeURIComponent(targetRedirectUri);
+    const oauthUrl = `https://www.facebook.com/v20.0/dialog/oauth?client_id=${appId}&config_id=${configId}&response_type=code&override_default_response_type=true&extras=${extras}&redirect_uri=${redirectUri}&state=whatsapp`;
 
-    // Meta Dedicated WhatsApp Embedded Signup URL
-    const onboardUrl = `https://business.facebook.com/messaging/whatsapp/onboard/?app_id=${appId}&config_id=${configId}&extras=${extras}&redirect_uri=${redirectUri}&state=whatsapp`;
-
-    setToast({ msg: 'Opening WhatsApp Business Setup...', type: 'success' });
-
-    // Clean, centered popup window
     const width = 600;
     const height = 750;
     const left = Math.max(0, Math.round((window.innerWidth - width) / 2 + (window.screenX || window.screenLeft || 0)));
     const top = Math.max(0, Math.round((window.innerHeight - height) / 2 + (window.screenY || window.screenTop || 0)));
 
     const popup = window.open(
-      onboardUrl,
-      'WhatsAppEmbeddedSignup',
+      oauthUrl,
+      'WhatsAppOAuth',
       `width=${width},height=${height},top=${top},left=${left},status=no,resizable=yes,toolbar=no,menubar=no,scrollbars=yes,location=no`
     );
     popupRef.current = popup;
 
     if (!popup || popup.closed || typeof popup.closed === 'undefined') {
-      window.location.href = onboardUrl;
+      window.location.href = oauthUrl;
     }
   };
 
