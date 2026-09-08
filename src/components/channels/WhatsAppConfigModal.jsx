@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import axios from 'axios';
 import { cn } from '@/lib/utils';
+import { API_BASE_URL } from '@/config/apiConfig';
 
 const WHATSAPP_VERTICALS = [
   { value: 'PROF_SERVICES', label: 'Professional Services' },
@@ -80,7 +81,7 @@ export default function WhatsAppConfigModal({ isOpen, onClose, client, onSaved }
     if (!silent) setFetchingProfile(true);
     try {
       const token = localStorage.getItem('uwo_token') || localStorage.getItem('token');
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080';
+      const apiUrl = API_BASE_URL;
       const res = await axios.get(
         `${apiUrl}/api/clients/${client.id}/get_whatsapp_business_profile/`,
         { headers: { Authorization: `Bearer ${token}` } }
@@ -195,7 +196,7 @@ export default function WhatsAppConfigModal({ isOpen, onClose, client, onSaved }
 
     try {
       const token = localStorage.getItem('uwo_token') || localStorage.getItem('token');
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080';
+      const apiUrl = API_BASE_URL;
       const formData = new FormData();
       formData.append('profile_picture', file);
 
@@ -312,7 +313,7 @@ export default function WhatsAppConfigModal({ isOpen, onClose, client, onSaved }
     setSaving(true);
     try {
       const token = localStorage.getItem('uwo_token') || localStorage.getItem('token');
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080';
+      const apiUrl = API_BASE_URL;
       const formattedPhone = `${countryCode} ${phoneNumberVal.trim()}`;
 
       // Sync via embedded signup endpoint first to register WABA & webhooks

@@ -4,7 +4,7 @@
  *  - ngrok/external → '' (relative, proxied by Next.js)
  *  - LAN IP (192.168.x.x) → http://<same-host>:8080
  *  - localhost → http://127.0.0.1:8080
- *  - production → https://uwoconnectforrb-743928421487.asia-south1.run.app
+ *  - production → https://aisaconnectback-anaqbuapb6c6apgy.centralindia-01.azurewebsites.net
  */
 
 const PRIVATE_IP_REGEX = /^(127\.|10\.|192\.168\.|172\.(1[6-9]|2[0-9]|3[01])\.)/;
@@ -22,7 +22,7 @@ const getApiBaseUrl = () => {
   if (process.env.NEXT_PUBLIC_API_URL) {
     return process.env.NEXT_PUBLIC_API_URL;
   }
-  return 'https://uwoconnectforrb-743928421487.asia-south1.run.app';
+  return 'https://aisaconnectback-anaqbuapb6c6apgy.centralindia-01.azurewebsites.net';
 };
 
 export const getUnifiedApiBaseUrl = () => {

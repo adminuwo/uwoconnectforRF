@@ -21,7 +21,7 @@ export function getApiBase() {
       return `http://${currentHost}:8080`;
     }
   }
-  return process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app';
+  return process.env.NEXT_PUBLIC_API_URL || 'https://aisaconnectback-anaqbuapb6c6apgy.centralindia-01.azurewebsites.net';
 }
 
 // Singleton — computed once per page load
