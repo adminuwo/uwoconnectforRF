@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /client/
+Disallow: /admin/
+Disallow: /dashboard/
+Disallow: /api/
+Disallow: /checkout/
+
+Sitemap: https://uwoconnect.com/sitemap.xml
