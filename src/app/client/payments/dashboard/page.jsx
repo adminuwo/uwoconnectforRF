@@ -28,11 +28,11 @@ const formatDate = (iso) => {
 };
 
 const STATUS_CONFIG = {
-  PAID:                 { label: 'Paid',             bg: 'bg-emerald-100 text-emerald-700', dot: 'bg-emerald-500' },
-  PENDING:              { label: 'Pending',           bg: 'bg-amber-100 text-amber-700',   dot: 'bg-amber-500' },
-  FAILED:               { label: 'Failed',            bg: 'bg-red-100 text-red-600',       dot: 'bg-red-500' },
-  REFUNDED:             { label: 'Refunded',          bg: 'bg-slate-100 text-slate-600',   dot: 'bg-slate-400' },
-  PARTIALLY_REFUNDED:   { label: 'Part. Refunded',   bg: 'bg-orange-100 text-orange-700', dot: 'bg-orange-500' },
+  PAID: { label: 'Paid', bg: 'bg-emerald-100 text-emerald-700', dot: 'bg-emerald-500' },
+  PENDING: { label: 'Pending', bg: 'bg-amber-100 text-amber-700', dot: 'bg-amber-500' },
+  FAILED: { label: 'Failed', bg: 'bg-red-100 text-red-600', dot: 'bg-red-500' },
+  REFUNDED: { label: 'Refunded', bg: 'bg-slate-100 text-slate-600', dot: 'bg-slate-400' },
+  PARTIALLY_REFUNDED: { label: 'Part. Refunded', bg: 'bg-orange-100 text-orange-700', dot: 'bg-orange-500' },
 };
 
 const StatCard = ({ icon: Icon, label, value, sub, color }) => (
@@ -51,16 +51,16 @@ const StatCard = ({ icon: Icon, label, value, sub, color }) => (
 export default function PaymentsDashboardPage() {
   const router = useRouter();
 
-  const [loading, setLoading]             = useState(true);
-  const [dashStats, setDashStats]         = useState(null);
-  const [payments, setPayments]           = useState([]);
-  const [total, setTotal]                 = useState(0);
-  const [page, setPage]                   = useState(1);
-  const [statusFilter, setStatusFilter]   = useState('');
-  const [search, setSearch]               = useState('');
+  const [loading, setLoading] = useState(true);
+  const [dashStats, setDashStats] = useState(null);
+  const [payments, setPayments] = useState([]);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
+  const [statusFilter, setStatusFilter] = useState('');
+  const [search, setSearch] = useState('');
   const [refundLoading, setRefundLoading] = useState(null);
   const [showRefundConfirm, setShowRefundConfirm] = useState(null);
-  const [toast, setToast]                 = useState(null);
+  const [toast, setToast] = useState(null);
   const PER_PAGE = 15;
 
   const showToast = (msg, type = 'success') => {
@@ -129,9 +129,8 @@ export default function PaymentsDashboardPage() {
 
         {/* Toast */}
         {toast && (
-          <div className={`fixed top-5 right-5 z-50 flex items-center gap-2 px-4 py-3 rounded-xl shadow-xl text-sm font-bold ${
-            toast.type === 'success' ? 'bg-emerald-600 text-white' : 'bg-red-600 text-white'
-          }`}>
+          <div className={`fixed top-5 right-5 z-50 flex items-center gap-2 px-4 py-3 rounded-xl shadow-xl text-sm font-bold ${toast.type === 'success' ? 'bg-emerald-600 text-white' : 'bg-red-600 text-white'
+            }`}>
             {toast.type === 'success' ? <CheckCircle2 size={15} /> : <XCircle size={15} />}
             {toast.msg}
           </div>

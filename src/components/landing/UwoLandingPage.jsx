@@ -189,17 +189,10 @@ const ScrollReveal = ({ children, className = '', delay = 0 }) => {
 };
 
 // ── REUSABLE UWO BRAND LOGO HEADER ──
-const UwoBrandHeader = ({ align = 'left', dark = false, logo = '/download (3).gif' }) => (
+const UwoBrandHeader = ({ align = 'left', dark = false }) => (
   <div className={cn("flex items-center gap-3 mb-2.5", align === 'center' && "justify-center")}>
-    <div className="w-10 h-10 rounded-2xl overflow-hidden shadow-md shadow-emerald-600/20 flex items-center justify-center p-0.5 shrink-0">
-      <img
-        src={logo || "/download (3).gif"}
-        alt="UWO Connect Logo"
-        width={38}
-        height={38}
-        style={{ width: '38px', height: '38px', objectFit: 'contain' }}
-        className="w-full h-full object-contain drop-shadow-sm"
-      />
+    <div className="w-10 h-10 rounded-2xl bg-[#059669] flex items-center justify-center text-white shadow-md shadow-emerald-600/30 shrink-0">
+      <Zap size={20} className="fill-white text-white" />
     </div>
     <div className="text-left">
       <h4 className={cn("text-lg font-black tracking-tight leading-none mb-1", dark ? "text-white" : "text-slate-900")}>
@@ -230,11 +223,6 @@ export default function UwoLandingPage() {
       const savedTheme = localStorage.getItem('uwo_landing_theme');
       if (savedTheme === 'dark') {
         setIsDarkMode(true);
-        document.documentElement.classList.add('dark');
-        document.body.classList.add('dark');
-      } else {
-        document.documentElement.classList.remove('dark');
-        document.body.classList.remove('dark');
       }
     } catch (e) {}
   }, []);
@@ -242,13 +230,6 @@ export default function UwoLandingPage() {
   const toggleTheme = () => {
     const newTheme = !isDarkMode;
     setIsDarkMode(newTheme);
-    if (newTheme) {
-      document.documentElement.classList.add('dark');
-      document.body.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-      document.body.classList.remove('dark');
-    }
     try {
       localStorage.setItem('uwo_landing_theme', newTheme ? 'dark' : 'light');
     } catch (e) {}
@@ -296,13 +277,10 @@ export default function UwoLandingPage() {
   const logoUrl = brand?.logo_url || '/download (3).gif';
 
   return (
-    <div 
-      className={cn(
-        "landing-page-root min-h-screen transition-colors duration-500 font-serif selection:bg-emerald-500/20 selection:text-emerald-800",
-        isDarkMode ? "dark bg-slate-950 text-slate-100" : "bg-white text-slate-900"
-      )}
-      style={{ fontFamily: "'Times New Roman', Times, serif" }}
-    >
+    <div className={cn(
+      "min-h-screen transition-colors duration-500 font-serif selection:bg-emerald-500/20 selection:text-emerald-800",
+      isDarkMode ? "bg-slate-950 text-slate-100" : "bg-white text-slate-900"
+    )} style={{ fontFamily: "'Times New Roman', Times, serif" }}>
 
       {/* ════════════════════════════════════════════════════════════════ */}
       {/* 1. STICKY GLASSY NAVBAR WITH THEME SWITCHER */}
@@ -318,18 +296,12 @@ export default function UwoLandingPage() {
             <img
               src={isWhiteLabel && logoUrl ? logoUrl : "/download (3).gif"}
               alt={brandName}
-              width={32}
-              height={32}
-              style={{ width: '32px', height: '32px', objectFit: 'contain' }}
               className="w-8 h-8 object-contain group-hover:scale-105 transition-transform duration-300 shrink-0"
             />
-            <span 
-              className={cn(
-                "text-lg font-black tracking-tight leading-none transition-colors",
-                isDarkMode ? "text-emerald-400" : "text-[#059669]"
-              )}
-              style={{ color: isDarkMode ? '#10B981' : '#059669' }}
-            >
+            <span className={cn(
+              "text-lg font-black tracking-tight leading-none group-hover:text-[#059669] transition-colors",
+              isDarkMode ? "text-white" : "text-slate-900"
+            )}>
               {brandName}
             </span>
           </Link>
@@ -470,6 +442,7 @@ export default function UwoLandingPage() {
               "text-4xl sm:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.1] max-w-5xl mx-auto font-serif",
               isDarkMode ? "text-emerald-400 drop-shadow-[0_0_35px_rgba(16,185,129,0.35)]" : "text-[#064e3b] drop-shadow-xs"
             )}
+            style={{ fontFamily: "'Times New Roman', Times, serif" }}
           >
             <span>Connect Everything.</span> <br className="hidden sm:inline" />
             <span className="pr-2">
@@ -511,7 +484,12 @@ export default function UwoLandingPage() {
       {/* ════════════════════════════════════════════════════════════════ */}
       {/* 4. ONE PLATFORM, THREE LAYERS */}
       {/* ════════════════════════════════════════════════════════════════ */}
-      <section id="platform" className="relative py-24 px-6 sm:px-10 lg:px-12 max-w-7xl mx-auto my-14 bg-gradient-to-br from-emerald-50/60 via-white to-slate-50/70 rounded-[2.5rem] border border-slate-200/90 shadow-xl overflow-hidden">
+      <section id="platform" className={cn(
+        "relative py-20 px-6 sm:px-12 lg:px-16 w-full max-w-[1700px] mx-auto my-12 rounded-[2.5rem] border transition-colors duration-300 shadow-xl overflow-hidden",
+        isDarkMode
+          ? "bg-slate-900/80 border-slate-800 shadow-2xl shadow-emerald-950/20"
+          : "bg-gradient-to-br from-emerald-50/60 via-white to-slate-50/70 border-slate-200/90"
+      )}>
 
         {/* Ambient Subtle Glow & Pattern */}
         <div className="absolute -top-32 -left-32 w-80 h-80 bg-emerald-500/10 rounded-full blur-[100px] pointer-events-none" />
@@ -521,11 +499,15 @@ export default function UwoLandingPage() {
         <div className="relative z-10">
           <div className="text-center space-y-3 mb-12">
             <h2
-              className="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight italic font-serif"
+              className={cn(
+                "text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight italic font-serif leading-tight",
+                isDarkMode ? "text-white" : "text-slate-900"
+              )}
+              style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
             >
               Everything Your Business Needs. Connected in One Place.
             </h2>
-            <p className="text-sm sm:text-base text-slate-500 font-medium max-w-xl mx-auto">
+            <p className={cn("text-sm sm:text-base font-medium max-w-xl mx-auto", isDarkMode ? "text-slate-400" : "text-slate-500")}>
               UWO Connect brings communication, productivity tools, and business automation together.
             </p>
           </div>
@@ -535,18 +517,34 @@ export default function UwoLandingPage() {
 
             {/* CARD 1: CHANNELS */}
             <ScrollReveal delay={100}>
-              <div className="p-8 rounded-3xl bg-white border border-slate-200 landing-card-hover shadow-xs hover:shadow-xl flex flex-col justify-between group cursor-pointer h-full">
+              <div className={cn(
+                "p-8 rounded-3xl border landing-card-hover shadow-xs hover:shadow-xl flex flex-col justify-between group cursor-pointer h-full transition-all duration-300",
+                isDarkMode
+                  ? "bg-slate-950/80 border-slate-800 hover:border-emerald-500/50"
+                  : "bg-white border-slate-200 hover:border-emerald-300"
+              )}>
                 <div className="space-y-4">
-                  <div className="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300">
+                  <div className={cn(
+                    "w-12 h-12 rounded-2xl border flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300",
+                    isDarkMode ? "bg-emerald-950/50 border-emerald-500/30 text-emerald-400" : "bg-emerald-50 border-emerald-200 text-emerald-600"
+                  )}>
                     <MessageSquare size={24} />
                   </div>
                   <div className="flex items-center justify-between">
-                    <h3 className="text-xl font-black text-slate-900 group-hover:text-emerald-700 transition-colors">Channels</h3>
-                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800 uppercase">
+                    <h3 className={cn(
+                      "text-xl font-black transition-colors",
+                      isDarkMode ? "text-white group-hover:text-emerald-400" : "text-slate-900 group-hover:text-emerald-700"
+                    )}>
+                      Channels
+                    </h3>
+                    <span className={cn(
+                      "px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase",
+                      isDarkMode ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30" : "bg-emerald-100 text-emerald-800"
+                    )}>
                       4 Channels
                     </span>
                   </div>
-                  <p className="text-xs text-slate-500 font-medium leading-relaxed">
+                  <p className={cn("text-xs font-medium leading-relaxed", isDarkMode ? "text-slate-400" : "text-slate-500")}>
                     Connect with customers wherever they are. WhatsApp, Instagram, Facebook, and YouTube.
                   </p>
 
@@ -558,7 +556,10 @@ export default function UwoLandingPage() {
                   </div>
                 </div>
 
-                <a href="#channels" className="mt-8 text-xs font-extrabold text-emerald-600 hover:text-emerald-700 flex items-center gap-1.5 group-hover:translate-x-1.5 transition-transform">
+                <a href="#channels" className={cn(
+                  "mt-8 text-xs font-extrabold flex items-center gap-1.5 group-hover:translate-x-1.5 transition-transform",
+                  isDarkMode ? "text-emerald-400 hover:text-emerald-300" : "text-emerald-600 hover:text-emerald-700"
+                )}>
                   <span>Explore Channels</span>
                   <ArrowRight size={14} />
                 </a>
@@ -567,18 +568,34 @@ export default function UwoLandingPage() {
 
             {/* CARD 2: CONNECTORS */}
             <ScrollReveal delay={250}>
-              <div className="p-8 rounded-3xl bg-white border border-slate-200 landing-card-hover shadow-xs hover:shadow-xl flex flex-col justify-between group cursor-pointer h-full">
+              <div className={cn(
+                "p-8 rounded-3xl border landing-card-hover shadow-xs hover:shadow-xl flex flex-col justify-between group cursor-pointer h-full transition-all duration-300",
+                isDarkMode
+                  ? "bg-slate-950/80 border-slate-800 hover:border-blue-500/50"
+                  : "bg-white border-slate-200 hover:border-blue-300"
+              )}>
                 <div className="space-y-4">
-                  <div className="w-12 h-12 rounded-2xl bg-blue-50 border border-blue-200 text-blue-600 flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300">
+                  <div className={cn(
+                    "w-12 h-12 rounded-2xl border flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300",
+                    isDarkMode ? "bg-blue-950/50 border-blue-500/30 text-blue-400" : "bg-blue-50 border-blue-200 text-blue-600"
+                  )}>
                     <Share2 size={24} />
                   </div>
                   <div className="flex items-center justify-between">
-                    <h3 className="text-xl font-black text-slate-900 group-hover:text-blue-700 transition-colors">Connectors</h3>
-                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-blue-100 text-blue-800 uppercase">
+                    <h3 className={cn(
+                      "text-xl font-black transition-colors",
+                      isDarkMode ? "text-white group-hover:text-blue-400" : "text-slate-900 group-hover:text-blue-700"
+                    )}>
+                      Connectors
+                    </h3>
+                    <span className={cn(
+                      "px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase",
+                      isDarkMode ? "bg-blue-500/20 text-blue-300 border border-blue-500/30" : "bg-blue-100 text-blue-800"
+                    )}>
                       8 Connectors
                     </span>
                   </div>
-                  <p className="text-xs text-slate-500 font-medium leading-relaxed">
+                  <p className={cn("text-xs font-medium leading-relaxed", isDarkMode ? "text-slate-400" : "text-slate-500")}>
                     Connect your everyday business tools, files, maps, spreadsheets, and data sources.
                   </p>
 
@@ -590,7 +607,10 @@ export default function UwoLandingPage() {
                   </div>
                 </div>
 
-                <a href="#connectors" className="mt-8 text-xs font-extrabold text-blue-600 hover:text-blue-700 flex items-center gap-1.5 group-hover:translate-x-1.5 transition-transform">
+                <a href="#connectors" className={cn(
+                  "mt-8 text-xs font-extrabold flex items-center gap-1.5 group-hover:translate-x-1.5 transition-transform",
+                  isDarkMode ? "text-blue-400 hover:text-blue-300" : "text-blue-600 hover:text-blue-700"
+                )}>
                   <span>Explore Connectors</span>
                   <ArrowRight size={14} />
                 </a>
@@ -599,30 +619,49 @@ export default function UwoLandingPage() {
 
             {/* CARD 3: AUTOMATION MODULES */}
             <ScrollReveal delay={400}>
-              <div className="p-8 rounded-3xl bg-white border border-slate-200 landing-card-hover shadow-xs hover:shadow-xl flex flex-col justify-between group cursor-pointer h-full">
+              <div className={cn(
+                "p-8 rounded-3xl border landing-card-hover shadow-xs hover:shadow-xl flex flex-col justify-between group cursor-pointer h-full transition-all duration-300",
+                isDarkMode
+                  ? "bg-slate-950/80 border-slate-800 hover:border-purple-500/50"
+                  : "bg-white border-slate-200 hover:border-purple-300"
+              )}>
                 <div className="space-y-4">
-                  <div className="w-12 h-12 rounded-2xl bg-purple-50 border border-purple-200 text-purple-600 flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300">
+                  <div className={cn(
+                    "w-12 h-12 rounded-2xl border flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300",
+                    isDarkMode ? "bg-purple-950/50 border-purple-500/30 text-purple-400" : "bg-purple-50 border-purple-200 text-purple-600"
+                  )}>
                     <Zap size={24} />
                   </div>
                   <div className="flex items-center justify-between">
-                    <h3 className="text-xl font-black text-slate-900 group-hover:text-purple-700 transition-colors">Business Automation</h3>
-                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-purple-100 text-purple-800 uppercase">
+                    <h3 className={cn(
+                      "text-xl font-black transition-colors",
+                      isDarkMode ? "text-white group-hover:text-purple-400" : "text-slate-900 group-hover:text-purple-700"
+                    )}>
+                      Business Automation
+                    </h3>
+                    <span className={cn(
+                      "px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase",
+                      isDarkMode ? "bg-purple-500/20 text-purple-300 border border-purple-500/30" : "bg-purple-100 text-purple-800"
+                    )}>
                       9 Modules
                     </span>
                   </div>
-                  <p className="text-xs text-slate-500 font-medium leading-relaxed">
+                  <p className={cn("text-xs font-medium leading-relaxed", isDarkMode ? "text-slate-400" : "text-slate-500")}>
                     Turn conversations and business data into automated lead creation, quotations, payments, and invoices.
                   </p>
 
                   <div className="flex flex-wrap items-center gap-1.5 pt-2">
-                    <span className="px-2 py-0.5 bg-slate-100 group-hover:bg-purple-50 text-slate-700 group-hover:text-purple-800 text-[10px] font-bold rounded transition-colors">CRM</span>
-                    <span className="px-2 py-0.5 bg-slate-100 group-hover:bg-purple-50 text-slate-700 group-hover:text-purple-800 text-[10px] font-bold rounded transition-colors">Auto Reply</span>
-                    <span className="px-2 py-0.5 bg-slate-100 group-hover:bg-purple-50 text-slate-700 group-hover:text-purple-800 text-[10px] font-bold rounded transition-colors">Quotation</span>
-                    <span className="px-2 py-0.5 bg-slate-100 group-hover:bg-purple-50 text-slate-700 group-hover:text-purple-800 text-[10px] font-bold rounded transition-colors">Invoice</span>
+                    <span className={cn("px-2 py-0.5 text-[10px] font-bold rounded transition-colors", isDarkMode ? "bg-slate-800 text-slate-300 group-hover:text-purple-300" : "bg-slate-100 group-hover:bg-purple-50 text-slate-700 group-hover:text-purple-800")}>CRM</span>
+                    <span className={cn("px-2 py-0.5 text-[10px] font-bold rounded transition-colors", isDarkMode ? "bg-slate-800 text-slate-300 group-hover:text-purple-300" : "bg-slate-100 group-hover:bg-purple-50 text-slate-700 group-hover:text-purple-800")}>Auto Reply</span>
+                    <span className={cn("px-2 py-0.5 text-[10px] font-bold rounded transition-colors", isDarkMode ? "bg-slate-800 text-slate-300 group-hover:text-purple-300" : "bg-slate-100 group-hover:bg-purple-50 text-slate-700 group-hover:text-purple-800")}>Quotation</span>
+                    <span className={cn("px-2 py-0.5 text-[10px] font-bold rounded transition-colors", isDarkMode ? "bg-slate-800 text-slate-300 group-hover:text-purple-300" : "bg-slate-100 group-hover:bg-purple-50 text-slate-700 group-hover:text-purple-800")}>Invoice</span>
                   </div>
                 </div>
 
-                <a href="#features" className="mt-8 text-xs font-extrabold text-purple-600 hover:text-purple-700 flex items-center gap-1.5 group-hover:translate-x-1.5 transition-transform">
+                <a href="#features" className={cn(
+                  "mt-8 text-xs font-extrabold flex items-center gap-1.5 group-hover:translate-x-1.5 transition-transform",
+                  isDarkMode ? "text-purple-400 hover:text-purple-300" : "text-purple-600 hover:text-purple-700"
+                )}>
                   <span>Explore Features</span>
                   <ArrowRight size={14} />
                 </a>
@@ -636,14 +675,21 @@ export default function UwoLandingPage() {
       {/* ════════════════════════════════════════════════════════════════ */}
       {/* 5. CHANNELS SECTION */}
       {/* ════════════════════════════════════════════════════════════════ */}
-      <section id="channels" className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto bg-slate-50/50 rounded-3xl border border-slate-200/80 my-10">
+      <section id="channels" className={cn(
+        "py-20 px-6 sm:px-12 lg:px-16 w-full max-w-[1700px] mx-auto rounded-3xl border my-12 transition-colors duration-300",
+        isDarkMode ? "bg-slate-900/80 border-slate-800 shadow-2xl" : "bg-slate-50/50 border-slate-200/80"
+      )}>
         <div className="text-center space-y-3 mb-12">
           <h2
-            className="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight italic font-serif"
+            className={cn(
+              "text-3xl sm:text-4xl font-bold tracking-tight italic font-serif",
+              isDarkMode ? "text-white" : "text-slate-900"
+            )}
+            style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
           >
             Meet Your Customers Where They Are
           </h2>
-          <p className="text-sm sm:text-base text-slate-500 font-medium max-w-xl mx-auto">
+          <p className={cn("text-sm sm:text-base font-medium max-w-xl mx-auto", isDarkMode ? "text-slate-400" : "text-slate-500")}>
             Manage conversations across your most important communication channels from one unified platform.
           </p>
         </div>
@@ -652,17 +698,25 @@ export default function UwoLandingPage() {
 
           {/* WHATSAPP */}
           <ScrollReveal delay={100}>
-            <div className="p-6 rounded-2xl bg-white border border-slate-200 landing-card-hover space-y-3 shadow-2xs group cursor-pointer h-full">
+            <div className={cn(
+              "p-6 rounded-2xl border landing-card-hover space-y-3 shadow-2xs group cursor-pointer h-full transition-all duration-300",
+              isDarkMode ? "bg-slate-950/80 border-slate-800 hover:border-emerald-500/50" : "bg-white border-slate-200"
+            )}>
               <div className="flex items-center justify-between">
                 <div className="group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
                   <WhatsAppLogo size={28} />
                 </div>
-                <span className="px-2 py-0.5 text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full flex items-center gap-1">
+                <span className={cn(
+                  "px-2 py-0.5 text-[10px] font-bold border rounded-full flex items-center gap-1",
+                  isDarkMode ? "bg-emerald-950/60 text-emerald-300 border-emerald-500/30" : "bg-emerald-50 text-emerald-700 border-emerald-200"
+                )}>
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" /> Connected
                 </span>
               </div>
-              <h4 className="text-base font-black text-slate-900 group-hover:text-emerald-700 transition-colors">WhatsApp</h4>
-              <p className="text-xs text-slate-500 font-medium leading-relaxed">
+              <h4 className={cn("text-base font-black transition-colors", isDarkMode ? "text-white group-hover:text-emerald-400" : "text-slate-900 group-hover:text-emerald-700")}>
+                WhatsApp
+              </h4>
+              <p className={cn("text-xs font-medium leading-relaxed", isDarkMode ? "text-slate-400" : "text-slate-500")}>
                 Engage customers through automated conversations and official business messaging.
               </p>
             </div>
@@ -670,17 +724,25 @@ export default function UwoLandingPage() {
 
           {/* INSTAGRAM */}
           <ScrollReveal delay={200}>
-            <div className="p-6 rounded-2xl bg-white border border-slate-200 landing-card-hover space-y-3 shadow-2xs group cursor-pointer h-full">
+            <div className={cn(
+              "p-6 rounded-2xl border landing-card-hover space-y-3 shadow-2xs group cursor-pointer h-full transition-all duration-300",
+              isDarkMode ? "bg-slate-950/80 border-slate-800 hover:border-pink-500/50" : "bg-white border-slate-200"
+            )}>
               <div className="flex items-center justify-between">
                 <div className="group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
                   <InstagramLogo size={28} />
                 </div>
-                <span className="px-2 py-0.5 text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full flex items-center gap-1">
+                <span className={cn(
+                  "px-2 py-0.5 text-[10px] font-bold border rounded-full flex items-center gap-1",
+                  isDarkMode ? "bg-emerald-950/60 text-emerald-300 border-emerald-500/30" : "bg-emerald-50 text-emerald-700 border-emerald-200"
+                )}>
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" /> Connected
                 </span>
               </div>
-              <h4 className="text-base font-black text-slate-900 group-hover:text-emerald-700 transition-colors">Instagram</h4>
-              <p className="text-xs text-slate-500 font-medium leading-relaxed">
+              <h4 className={cn("text-base font-black transition-colors", isDarkMode ? "text-white group-hover:text-pink-400" : "text-slate-900 group-hover:text-emerald-700")}>
+                Instagram
+              </h4>
+              <p className={cn("text-xs font-medium leading-relaxed", isDarkMode ? "text-slate-400" : "text-slate-500")}>
                 Manage customer interactions and social conversations from one unified workspace.
               </p>
             </div>
@@ -688,17 +750,25 @@ export default function UwoLandingPage() {
 
           {/* FACEBOOK */}
           <ScrollReveal delay={300}>
-            <div className="p-6 rounded-2xl bg-white border border-slate-200 landing-card-hover space-y-3 shadow-2xs group cursor-pointer h-full">
+            <div className={cn(
+              "p-6 rounded-2xl border landing-card-hover space-y-3 shadow-2xs group cursor-pointer h-full transition-all duration-300",
+              isDarkMode ? "bg-slate-950/80 border-slate-800 hover:border-blue-500/50" : "bg-white border-slate-200"
+            )}>
               <div className="flex items-center justify-between">
                 <div className="group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
                   <FacebookLogo size={28} />
                 </div>
-                <span className="px-2 py-0.5 text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full flex items-center gap-1">
+                <span className={cn(
+                  "px-2 py-0.5 text-[10px] font-bold border rounded-full flex items-center gap-1",
+                  isDarkMode ? "bg-emerald-950/60 text-emerald-300 border-emerald-500/30" : "bg-emerald-50 text-emerald-700 border-emerald-200"
+                )}>
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" /> Connected
                 </span>
               </div>
-              <h4 className="text-base font-black text-slate-900 group-hover:text-emerald-700 transition-colors">Facebook</h4>
-              <p className="text-xs text-slate-500 font-medium leading-relaxed">
+              <h4 className={cn("text-base font-black transition-colors", isDarkMode ? "text-white group-hover:text-blue-400" : "text-slate-900 group-hover:text-emerald-700")}>
+                Facebook
+              </h4>
+              <p className={cn("text-xs font-medium leading-relaxed", isDarkMode ? "text-slate-400" : "text-slate-500")}>
                 Bring Facebook Messenger conversations into your unified communication workflow.
               </p>
             </div>
@@ -706,17 +776,25 @@ export default function UwoLandingPage() {
 
           {/* YOUTUBE */}
           <ScrollReveal delay={400}>
-            <div className="p-6 rounded-2xl bg-white border border-slate-200 landing-card-hover space-y-3 shadow-2xs group cursor-pointer h-full">
+            <div className={cn(
+              "p-6 rounded-2xl border landing-card-hover space-y-3 shadow-2xs group cursor-pointer h-full transition-all duration-300",
+              isDarkMode ? "bg-slate-950/80 border-slate-800 hover:border-red-500/50" : "bg-white border-slate-200"
+            )}>
               <div className="flex items-center justify-between">
                 <div className="group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
                   <YouTubeLogo size={28} />
                 </div>
-                <span className="px-2 py-0.5 text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full flex items-center gap-1">
+                <span className={cn(
+                  "px-2 py-0.5 text-[10px] font-bold border rounded-full flex items-center gap-1",
+                  isDarkMode ? "bg-emerald-950/60 text-emerald-300 border-emerald-500/30" : "bg-emerald-50 text-emerald-700 border-emerald-200"
+                )}>
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" /> Connected
                 </span>
               </div>
-              <h4 className="text-base font-black text-slate-900 group-hover:text-emerald-700 transition-colors">YouTube</h4>
-              <p className="text-xs text-slate-500 font-medium leading-relaxed">
+              <h4 className={cn("text-base font-black transition-colors", isDarkMode ? "text-white group-hover:text-red-400" : "text-slate-900 group-hover:text-emerald-700")}>
+                YouTube
+              </h4>
+              <p className={cn("text-xs font-medium leading-relaxed", isDarkMode ? "text-slate-400" : "text-slate-500")}>
                 Connect your YouTube presence and keep communication within your workflow.
               </p>
             </div>
@@ -728,7 +806,12 @@ export default function UwoLandingPage() {
       {/* ════════════════════════════════════════════════════════════════ */}
       {/* 6. CONNECTORS SECTION */}
       {/* ════════════════════════════════════════════════════════════════ */}
-      <section id="connectors" className="relative pt-16 pb-12 sm:pt-20 sm:pb-14 px-6 sm:px-10 lg:px-12 max-w-7xl mx-auto my-12 bg-gradient-to-br from-slate-50/90 via-white to-teal-50/60 rounded-[2.5rem] border border-slate-200/90 shadow-xl overflow-hidden">
+      <section id="connectors" className={cn(
+        "relative py-20 px-6 sm:px-12 lg:px-16 w-full max-w-[1700px] mx-auto my-12 rounded-[2.5rem] border transition-colors duration-300 shadow-xl overflow-hidden",
+        isDarkMode
+          ? "bg-slate-900/80 border-slate-800 shadow-2xl shadow-emerald-950/20"
+          : "bg-gradient-to-br from-slate-50/90 via-white to-teal-50/60 border-slate-200/90"
+      )}>
 
         {/* Ambient Glows */}
         <div className="absolute -top-32 -right-32 w-80 h-80 bg-teal-500/10 rounded-full blur-[100px] pointer-events-none" />
@@ -736,13 +819,17 @@ export default function UwoLandingPage() {
         <div className="absolute inset-0 bg-[radial-gradient(#0d9488_1px,transparent_1px)] [background-size:28px_28px] opacity-10 pointer-events-none" />
 
         <div className="relative z-10">
-          <div className="text-center space-y-4 mb-14">
+          <div className="text-center space-y-4 mb-16">
             <h2
-              className="text-4xl sm:text-5xl lg:text-6xl font-bold text-slate-900 tracking-tight italic font-serif leading-tight"
+              className={cn(
+                "text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight italic font-serif leading-tight",
+                isDarkMode ? "text-white" : "text-slate-900"
+              )}
+              style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
             >
               Connect the Tools Your Business Already Uses
             </h2>
-            <p className="text-base sm:text-lg text-slate-500 font-medium max-w-2xl mx-auto leading-relaxed">
+            <p className={cn("text-base sm:text-lg font-medium max-w-2xl mx-auto leading-relaxed", isDarkMode ? "text-slate-400" : "text-slate-500")}>
               Bring your emails, documents, spreadsheets, maps, and business data into the same workflow.
             </p>
           </div>
@@ -751,37 +838,61 @@ export default function UwoLandingPage() {
             {[
               { logo: <GmailLogo size={34} />, name: 'Gmail', desc: 'Email communication' },
               { logo: <OutlookLogo size={34} />, name: 'Microsoft Outlook', desc: 'Business email' },
-              { logo: <Layers size={30} className="text-emerald-600" />, name: 'Google Maps', desc: 'Location intelligence' },
+              { logo: <Layers size={30} className="text-emerald-500" />, name: 'Google Maps', desc: 'Location intelligence' },
               { logo: <GoogleDocsLogo size={34} />, name: 'Google Docs', desc: 'Documents & workflows' },
               { logo: <Share2 size={30} className="text-blue-500" />, name: 'OneDrive', desc: 'Cloud files' },
               { logo: <GoogleSheetsLogo size={34} />, name: 'Google Sheets', desc: 'Business data & records' },
               { logo: <FileText size={30} className="text-amber-500" />, name: 'Google Slides', desc: 'Presentations' },
-              { logo: <MessageSquare size={30} className="text-cyan-600" />, name: 'Google News Feed', desc: 'News & information' },
+              { logo: <MessageSquare size={30} className="text-cyan-500" />, name: 'Google News Feed', desc: 'News & information' },
             ].map((item, idx) => (
               <ScrollReveal key={idx} delay={idx * 80}>
-                <div className="p-6 sm:p-7 rounded-3xl bg-white border border-slate-200/90 flex items-center gap-4.5 shadow-sm hover:border-emerald-500 hover:shadow-xl hover:shadow-emerald-500/10 hover:-translate-y-1.5 transition-all duration-300 group cursor-pointer h-full">
-                  <div className="w-14 h-14 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center shrink-0 group-hover:scale-110 group-hover:rotate-3 group-hover:bg-emerald-50 group-hover:border-emerald-200 transition-all duration-300">
+                <div className={cn(
+                  "p-6 sm:p-7 rounded-3xl border flex items-center gap-4.5 shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 group cursor-pointer h-full",
+                  isDarkMode
+                    ? "bg-slate-950/80 border-slate-800 hover:border-emerald-500/50"
+                    : "bg-white border-slate-200/90 hover:border-emerald-500 hover:shadow-emerald-500/10"
+                )}>
+                  <div className={cn(
+                    "w-14 h-14 rounded-2xl border flex items-center justify-center shrink-0 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300",
+                    isDarkMode ? "bg-slate-900 border-slate-800 group-hover:bg-slate-800" : "bg-slate-50 border-slate-100 group-hover:bg-emerald-50 group-hover:border-emerald-200"
+                  )}>
                     {item.logo}
                   </div>
                   <div className="text-left overflow-hidden">
-                    <h5 className="text-sm sm:text-base font-black text-slate-900 group-hover:text-emerald-700 transition-colors truncate">{item.name}</h5>
-                    <p className="text-xs text-slate-500 font-medium mt-0.5 truncate">{item.desc}</p>
+                    <h5 className={cn("text-sm sm:text-base font-black transition-colors truncate", isDarkMode ? "text-white group-hover:text-emerald-400" : "text-slate-900 group-hover:text-emerald-700")}>
+                      {item.name}
+                    </h5>
+                    <p className={cn("text-xs font-medium mt-0.5 truncate", isDarkMode ? "text-slate-400" : "text-slate-500")}>{item.desc}</p>
                   </div>
                 </div>
               </ScrollReveal>
             ))}
           </div>
 
-          {/* Prominent Clean Coming Soon Badge in Green */}
-          <div className="mt-8 sm:mt-10 flex justify-center">
-            <div className="inline-flex items-center gap-3 px-8 py-3 sm:px-10 sm:py-3.5 rounded-full bg-emerald-50 border border-emerald-300 shadow-md shadow-emerald-500/10 hover:border-emerald-500 hover:bg-emerald-100/80 hover:shadow-lg hover:shadow-emerald-500/20 hover:scale-[1.02] transition-all duration-300">
-              <span className="relative flex h-2.5 w-2.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-600"></span>
-              </span>
-              <span className="text-sm sm:text-base md:text-lg font-black text-emerald-800 tracking-wider uppercase">
-                Coming Soon
-              </span>
+          <div className="mt-12 text-center flex items-center justify-center">
+            <div className="relative inline-flex items-center justify-center">
+              {/* Outer soft blinking green glow */}
+              <div className="absolute -inset-1 rounded-full bg-emerald-500/25 blur-md animate-pulse pointer-events-none" />
+
+              {/* Oval Pill Badge with gentle green blink */}
+              <div
+                className={cn(
+                  "relative inline-flex items-center justify-center px-8 py-2 sm:px-10 sm:py-2.5 rounded-full border-2 transition-all duration-700 animate-pulse",
+                  isDarkMode
+                    ? "border-emerald-500/80 bg-emerald-950/40 shadow-[0_0_25px_rgba(16,185,129,0.25)]"
+                    : "border-emerald-600 bg-emerald-50/70 shadow-[0_0_20px_rgba(5,150,105,0.2)]"
+                )}
+              >
+                <span
+                  className={cn(
+                    "text-xl sm:text-2xl font-bold italic tracking-wide font-serif",
+                    isDarkMode ? "text-emerald-400" : "text-[#059669]"
+                  )}
+                  style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
+                >
+                  Coming Soon
+                </span>
+              </div>
             </div>
           </div>
         </div>
@@ -790,20 +901,29 @@ export default function UwoLandingPage() {
       {/* ════════════════════════════════════════════════════════════════ */}
       {/* 7. AUTOMATION MODULES SECTION */}
       {/* ════════════════════════════════════════════════════════════════ */}
-      <section id="features" className="py-24 px-6 sm:px-10 lg:px-12 max-w-7xl mx-auto bg-gradient-to-b from-emerald-50/80 via-white to-emerald-50/40 rounded-[2.5rem] border border-emerald-200/90 my-16 shadow-xl">
+      <section id="features" className={cn(
+        "py-20 px-6 sm:px-12 lg:px-16 w-full max-w-[1700px] mx-auto rounded-[2.5rem] border my-16 shadow-xl transition-colors duration-300",
+        isDarkMode
+          ? "bg-slate-900/80 border-slate-800 shadow-2xl shadow-emerald-950/20"
+          : "bg-gradient-to-b from-emerald-50/80 via-white to-emerald-50/40 border-emerald-200/90"
+      )}>
         <div className="text-center space-y-4 mb-16">
           <h2
-            className="text-4xl sm:text-5xl lg:text-6xl font-bold text-slate-900 tracking-tight italic font-serif leading-tight"
+            className={cn(
+              "text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight italic font-serif leading-tight",
+              isDarkMode ? "text-white" : "text-slate-900"
+            )}
+            style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
           >
             From Conversation to Completion — Automatically
           </h2>
-          <p className="text-sm sm:text-base text-slate-500 font-medium max-w-xl mx-auto">
+          <p className={cn("text-sm sm:text-base font-medium max-w-xl mx-auto", isDarkMode ? "text-slate-400" : "text-slate-500")}>
             Turn everyday business activity into automated workflows.
           </p>
         </div>
 
         {/* Interactive Automation Chain Workflow Cards Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-4.5 max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-4.5 w-full mx-auto">
           {[
             { step: 'STEP 01', icon: <MessageSquare size={22} />, label: 'Customer Message', desc: 'WhatsApp / DM query received', bg: 'bg-[#25D366]', border: 'hover:border-[#25D366]' },
             { step: 'STEP 02', icon: <Users size={22} />, label: 'CRM Lead Created', desc: 'Auto-saved to sales pipeline', bg: 'bg-[#059669]', border: 'hover:border-emerald-600' },
@@ -816,14 +936,15 @@ export default function UwoLandingPage() {
             <ScrollReveal key={idx} delay={idx * 90}>
               <div
                 className={cn(
-                  "p-5 sm:p-6 rounded-3xl bg-white border border-slate-200/90 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group cursor-pointer text-center flex flex-col items-center justify-between relative overflow-hidden h-full",
+                  "p-5 sm:p-6 rounded-3xl border shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group cursor-pointer text-center flex flex-col items-center justify-between relative overflow-hidden h-full",
+                  isDarkMode ? "bg-slate-950/80 border-slate-800" : "bg-white border-slate-200/90",
                   item.border
                 )}
               >
                 {/* Subtle top indicator bar */}
                 <div className={cn("absolute top-0 left-0 right-0 h-1.5 opacity-80 group-hover:opacity-100 transition-opacity", item.bg)} />
 
-                <span className="text-[10px] font-black tracking-widest text-slate-400 uppercase mb-3">
+                <span className={cn("text-[10px] font-black tracking-widest uppercase mb-3", isDarkMode ? "text-slate-400" : "text-slate-400")}>
                   {item.step}
                 </span>
 
@@ -831,11 +952,11 @@ export default function UwoLandingPage() {
                   {item.icon}
                 </div>
 
-                <h5 className="text-sm font-black text-slate-900 group-hover:text-emerald-700 transition-colors leading-tight mb-1">
+                <h5 className={cn("text-sm font-black transition-colors leading-tight mb-1", isDarkMode ? "text-white group-hover:text-emerald-400" : "text-slate-900 group-hover:text-emerald-700")}>
                   {item.label}
                 </h5>
 
-                <p className="text-[11px] text-slate-500 font-medium leading-snug">
+                <p className={cn("text-[11px] font-medium leading-snug", isDarkMode ? "text-slate-400" : "text-slate-500")}>
                   {item.desc}
                 </p>
               </div>
@@ -845,7 +966,12 @@ export default function UwoLandingPage() {
       </section>
 
       {/* 8. HOW UWO CONNECT WORKS - CONNECTED PIPELINE */}
-      <section id="how-it-works" className="relative py-24 px-6 sm:px-10 lg:px-12 max-w-7xl mx-auto my-14 bg-gradient-to-br from-emerald-50/50 via-white to-indigo-50/40 rounded-[2.5rem] border border-slate-200/90 shadow-xl overflow-hidden">
+      <section id="how-it-works" className={cn(
+        "relative py-20 px-6 sm:px-12 lg:px-16 w-full max-w-[1700px] mx-auto my-12 rounded-[2.5rem] border transition-colors duration-300 shadow-xl overflow-hidden",
+        isDarkMode
+          ? "bg-slate-900/80 border-slate-800 shadow-2xl shadow-emerald-950/20"
+          : "bg-gradient-to-br from-emerald-50/50 via-white to-indigo-50/40 border-slate-200/90"
+      )}>
 
         {/* Ambient Subtle Glow & Pattern */}
         <div className="absolute -top-32 -left-32 w-80 h-80 bg-emerald-500/10 rounded-full blur-[100px] pointer-events-none" />
@@ -854,13 +980,17 @@ export default function UwoLandingPage() {
 
         <div className="relative z-10">
           <div className="text-center space-y-4 mb-16">
-            <UwoBrandHeader align="center" dark={isDarkMode} logo={isWhiteLabel && logoUrl ? logoUrl : "/download (3).gif"} />
+            <UwoBrandHeader align="center" dark={isDarkMode} />
             <h2
-              className="text-4xl sm:text-5xl lg:text-6xl font-bold text-slate-900 tracking-tight italic font-serif leading-tight"
+              className={cn(
+                "text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight italic font-serif leading-tight",
+                isDarkMode ? "text-white" : "text-slate-900"
+              )}
+              style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
             >
               How UWO Connect Works
             </h2>
-            <p className="text-base sm:text-lg text-slate-500 font-medium max-w-xl mx-auto">
+            <p className={cn("text-base sm:text-lg font-medium max-w-xl mx-auto", isDarkMode ? "text-slate-400" : "text-slate-500")}>
               3 simple steps to transform manual customer tasks into automated revenue pipelines.
             </p>
           </div>
@@ -874,9 +1004,17 @@ export default function UwoLandingPage() {
 
               {/* Step 01 */}
               <ScrollReveal delay={150}>
-                <div className="relative p-8 rounded-3xl bg-white border border-slate-200/90 shadow-md hover:border-emerald-500 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group cursor-pointer text-left flex flex-col justify-between space-y-5 h-full">
+                <div className={cn(
+                  "relative p-8 rounded-3xl border shadow-md hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group cursor-pointer text-left flex flex-col justify-between space-y-5 h-full",
+                  isDarkMode
+                    ? "bg-slate-950/80 border-slate-800 hover:border-emerald-500"
+                    : "bg-white border-slate-200/90 hover:border-emerald-500"
+                )}>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-extrabold uppercase tracking-widest text-emerald-600 px-3.5 py-1 rounded-full bg-emerald-50 border border-emerald-200/80">
+                    <span className={cn(
+                      "text-sm font-extrabold uppercase tracking-widest px-3.5 py-1 rounded-full border",
+                      isDarkMode ? "text-emerald-400 bg-emerald-950/60 border-emerald-500/30" : "text-emerald-600 bg-emerald-50 border-emerald-200/80"
+                    )}>
                       Step 01
                     </span>
                     <div className="w-12 h-12 rounded-2xl bg-emerald-500 text-white flex items-center justify-center shadow-lg shadow-emerald-500/20 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300">
@@ -884,14 +1022,19 @@ export default function UwoLandingPage() {
                     </div>
                   </div>
                   <div>
-                    <h3 className="text-2xl font-black text-slate-900 group-hover:text-emerald-700 transition-colors mb-2">CONNECT</h3>
-                    <p className="text-sm text-slate-500 font-medium leading-relaxed">
+                    <h3 className={cn("text-2xl font-black transition-colors mb-2", isDarkMode ? "text-white group-hover:text-emerald-400" : "text-slate-900 group-hover:text-emerald-700")}>
+                      CONNECT
+                    </h3>
+                    <p className={cn("text-sm font-medium leading-relaxed", isDarkMode ? "text-slate-400" : "text-slate-500")}>
                       Connect your communication channels (WhatsApp, Instagram, Gmail) and business tools in minutes.
                     </p>
                   </div>
 
                   {/* Connecting Pipeline Connector Arrow (Desktop) */}
-                  <div className="hidden md:flex absolute -right-6 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-emerald-600 text-white items-center justify-center shadow-lg shadow-emerald-600/30 group-hover:scale-125 transition-transform duration-300 border-2 border-white">
+                  <div className={cn(
+                    "hidden md:flex absolute -right-6 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-emerald-600 text-white items-center justify-center shadow-lg shadow-emerald-600/30 group-hover:scale-125 transition-transform duration-300 border-2",
+                    isDarkMode ? "border-slate-900" : "border-white"
+                  )}>
                     <ArrowRight size={18} />
                   </div>
                 </div>
@@ -899,9 +1042,17 @@ export default function UwoLandingPage() {
 
               {/* Step 02 */}
               <ScrollReveal delay={300}>
-                <div className="relative p-8 rounded-3xl bg-white border border-slate-200/90 shadow-md hover:border-emerald-500 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group cursor-pointer text-left flex flex-col justify-between space-y-5 h-full">
+                <div className={cn(
+                  "relative p-8 rounded-3xl border shadow-md hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group cursor-pointer text-left flex flex-col justify-between space-y-5 h-full",
+                  isDarkMode
+                    ? "bg-slate-950/80 border-slate-800 hover:border-indigo-500"
+                    : "bg-white border-slate-200/90 hover:border-indigo-500"
+                )}>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-extrabold uppercase tracking-widest text-indigo-600 px-3.5 py-1 rounded-full bg-indigo-50 border border-indigo-200/80">
+                    <span className={cn(
+                      "text-sm font-extrabold uppercase tracking-widest px-3.5 py-1 rounded-full border",
+                      isDarkMode ? "text-indigo-400 bg-indigo-950/60 border-indigo-500/30" : "text-indigo-600 bg-indigo-50 border-indigo-200/80"
+                    )}>
                       Step 02
                     </span>
                     <div className="w-12 h-12 rounded-2xl bg-indigo-600 text-white flex items-center justify-center shadow-lg shadow-indigo-600/20 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300">
@@ -909,14 +1060,19 @@ export default function UwoLandingPage() {
                     </div>
                   </div>
                   <div>
-                    <h3 className="text-2xl font-black text-slate-900 group-hover:text-emerald-700 transition-colors mb-2">AUTOMATE</h3>
-                    <p className="text-sm text-slate-500 font-medium leading-relaxed">
+                    <h3 className={cn("text-2xl font-black transition-colors mb-2", isDarkMode ? "text-white group-hover:text-indigo-400" : "text-slate-900 group-hover:text-emerald-700")}>
+                      AUTOMATE
+                    </h3>
+                    <p className={cn("text-sm font-medium leading-relaxed", isDarkMode ? "text-slate-400" : "text-slate-500")}>
                       Create intelligent AI workflows that handle lead qualification, quotations, and repetitive replies automatically.
                     </p>
                   </div>
 
                   {/* Connecting Pipeline Connector Arrow (Desktop) */}
-                  <div className="hidden md:flex absolute -right-6 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-indigo-600 text-white items-center justify-center shadow-lg shadow-indigo-600/30 group-hover:scale-125 transition-transform duration-300 border-2 border-white">
+                  <div className={cn(
+                    "hidden md:flex absolute -right-6 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-indigo-600 text-white items-center justify-center shadow-lg shadow-indigo-600/30 group-hover:scale-125 transition-transform duration-300 border-2",
+                    isDarkMode ? "border-slate-900" : "border-white"
+                  )}>
                     <ArrowRight size={18} />
                   </div>
                 </div>
@@ -924,9 +1080,17 @@ export default function UwoLandingPage() {
 
               {/* Step 03 */}
               <ScrollReveal delay={450}>
-                <div className="relative p-8 rounded-3xl bg-white border border-slate-200/90 shadow-md hover:border-emerald-500 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group cursor-pointer text-left flex flex-col justify-between space-y-5 h-full">
+                <div className={cn(
+                  "relative p-8 rounded-3xl border shadow-md hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group cursor-pointer text-left flex flex-col justify-between space-y-5 h-full",
+                  isDarkMode
+                    ? "bg-slate-950/80 border-slate-800 hover:border-emerald-500"
+                    : "bg-white border-slate-200/90 hover:border-emerald-500"
+                )}>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-extrabold uppercase tracking-widest text-emerald-600 px-3.5 py-1 rounded-full bg-emerald-50 border border-emerald-200/80">
+                    <span className={cn(
+                      "text-sm font-extrabold uppercase tracking-widest px-3.5 py-1 rounded-full border",
+                      isDarkMode ? "text-emerald-400 bg-emerald-950/60 border-emerald-500/30" : "text-emerald-600 bg-emerald-50 border-emerald-200/80"
+                    )}>
                       Step 03
                     </span>
                     <div className="w-12 h-12 rounded-2xl bg-emerald-600 text-white flex items-center justify-center shadow-lg shadow-emerald-600/20 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300">
@@ -934,8 +1098,10 @@ export default function UwoLandingPage() {
                     </div>
                   </div>
                   <div>
-                    <h3 className="text-2xl font-black text-slate-900 group-hover:text-emerald-700 transition-colors mb-2">GROW</h3>
-                    <p className="text-sm text-slate-500 font-medium leading-relaxed">
+                    <h3 className={cn("text-2xl font-black transition-colors mb-2", isDarkMode ? "text-white group-hover:text-emerald-400" : "text-slate-900 group-hover:text-emerald-700")}>
+                      GROW
+                    </h3>
+                    <p className={cn("text-sm font-medium leading-relaxed", isDarkMode ? "text-slate-400" : "text-slate-500")}>
                       Spend zero time switching between disconnected tools and focus on scaling your business revenue.
                     </p>
                   </div>
@@ -950,23 +1116,47 @@ export default function UwoLandingPage() {
       {/* ════════════════════════════════════════════════════════════════ */}
       {/* 9. REAL-WORLD AUTOMATION EXAMPLE - DYNAMIC SHOWCASE CARD */}
       {/* ════════════════════════════════════════════════════════════════ */}
-      <section className="relative py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white rounded-[2.5rem] my-12 shadow-2xl hover:shadow-emerald-950/70 transition-shadow duration-500 border border-slate-800/80 overflow-hidden">
+      <section className={cn(
+        "relative py-24 w-full max-w-[1700px] mx-auto px-6 sm:px-12 lg:px-16 rounded-[2.5rem] my-12 shadow-2xl transition-all duration-500 border overflow-hidden",
+        isDarkMode
+          ? "bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white border-slate-800/80 hover:shadow-emerald-950/70"
+          : "bg-gradient-to-br from-slate-50 via-white to-emerald-50/50 text-slate-900 border-slate-200/90 shadow-emerald-500/5 hover:shadow-emerald-500/10"
+      )}>
 
         {/* Ambient Glowing Gradient Orbs & Tech Dot Matrix Grid Background */}
-        <div className="absolute -top-24 -left-24 w-96 h-96 bg-emerald-500/20 rounded-full blur-[100px] pointer-events-none animate-pulse" />
-        <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-indigo-500/20 rounded-full blur-[100px] pointer-events-none animate-pulse" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-emerald-600/10 rounded-full blur-[140px] pointer-events-none" />
-        <div className="absolute inset-0 bg-[radial-gradient(#059669_1px,transparent_1px)] [background-size:28px_28px] opacity-15 pointer-events-none" />
+        <div className={cn(
+          "absolute -top-24 -left-24 w-96 h-96 rounded-full blur-[100px] pointer-events-none animate-pulse",
+          isDarkMode ? "bg-emerald-500/20" : "bg-emerald-500/10"
+        )} />
+        <div className={cn(
+          "absolute -bottom-24 -right-24 w-96 h-96 rounded-full blur-[100px] pointer-events-none animate-pulse",
+          isDarkMode ? "bg-indigo-500/20" : "bg-indigo-500/10"
+        )} />
+        <div className={cn(
+          "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full blur-[140px] pointer-events-none",
+          isDarkMode ? "bg-emerald-600/10" : "bg-emerald-500/5"
+        )} />
+        <div className={cn(
+          "absolute inset-0 bg-[radial-gradient(#059669_1px,transparent_1px)] [background-size:28px_28px] pointer-events-none",
+          isDarkMode ? "opacity-15" : "opacity-10"
+        )} />
 
         <div className="relative z-10">
           <div className="text-center space-y-4 mb-16">
-            <UwoBrandHeader align="center" dark logo={isWhiteLabel && logoUrl ? logoUrl : "/download (3).gif"} />
+            <UwoBrandHeader align="center" dark={isDarkMode} />
             <h2
-              className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white tracking-tight italic font-serif leading-tight drop-shadow-md"
+              className={cn(
+                "text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight italic font-serif leading-tight drop-shadow-xs",
+                isDarkMode ? "text-white" : "text-slate-900"
+              )}
+              style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
             >
               See Automation in Action
             </h2>
-            <p className="text-base sm:text-lg text-slate-400 font-medium max-w-xl mx-auto">
+            <p className={cn(
+              "text-base sm:text-lg font-medium max-w-xl mx-auto",
+              isDarkMode ? "text-slate-400" : "text-slate-600"
+            )}>
               Click any step to see how UWO Connect handles customer conversations automatically.
             </p>
           </div>
@@ -990,51 +1180,75 @@ export default function UwoLandingPage() {
                   className={cn(
                     "p-4 sm:p-4.5 rounded-2xl border transition-all duration-300 cursor-pointer transform hover:translate-x-1.5 flex items-center justify-between",
                     activeWorkflowTab === i
-                      ? "bg-emerald-950/80 border-emerald-500 text-white shadow-lg shadow-emerald-500/20 scale-[1.02]"
-                      : "bg-slate-800/50 border-slate-700/60 text-slate-400 hover:text-white hover:border-slate-600 hover:bg-slate-800/80"
+                      ? (isDarkMode
+                          ? "bg-emerald-950/80 border-emerald-500 text-white shadow-lg shadow-emerald-500/20 scale-[1.02]"
+                          : "bg-emerald-50/90 border-emerald-500 text-emerald-950 shadow-lg shadow-emerald-500/15 scale-[1.02]")
+                      : (isDarkMode
+                          ? "bg-slate-800/50 border-slate-700/60 text-slate-400 hover:text-white hover:border-slate-600 hover:bg-slate-800/80"
+                          : "bg-white border-slate-200/90 text-slate-600 hover:text-slate-900 hover:border-emerald-300 hover:bg-slate-50/80 shadow-xs")
                   )}
                 >
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className={cn("text-[10px] font-black px-2 py-0.5 rounded-md uppercase tracking-wider", activeWorkflowTab === i ? "bg-emerald-500 text-slate-950" : "bg-slate-700 text-slate-300")}>
+                      <span className={cn(
+                        "text-[10px] font-black px-2 py-0.5 rounded-md uppercase tracking-wider",
+                        activeWorkflowTab === i
+                          ? "bg-emerald-500 text-white"
+                          : (isDarkMode ? "bg-slate-700 text-slate-300" : "bg-slate-100 text-slate-700 border border-slate-200")
+                      )}>
                         0{i + 1}
                       </span>
-                      <h5 className="text-xs sm:text-sm font-bold">{st.title}</h5>
+                      <h5 className={cn(
+                        "text-xs sm:text-sm font-bold",
+                        activeWorkflowTab === i
+                          ? (isDarkMode ? "text-white" : "text-emerald-950")
+                          : (isDarkMode ? "text-slate-300" : "text-slate-800")
+                      )}>{st.title}</h5>
                     </div>
-                    <p className="text-[11px] text-slate-400 mt-1 pl-7">{st.desc}</p>
+                    <p className={cn(
+                      "text-[11px] mt-1 pl-7",
+                      activeWorkflowTab === i
+                        ? (isDarkMode ? "text-emerald-300" : "text-emerald-700")
+                        : (isDarkMode ? "text-slate-400" : "text-slate-500")
+                    )}>{st.desc}</p>
                   </div>
 
                   {activeWorkflowTab === i && (
-                    <CheckCircle2 size={18} className="text-emerald-400 shrink-0 ml-2 animate-pulse" />
+                    <CheckCircle2 size={18} className="text-emerald-500 shrink-0 ml-2 animate-pulse" />
                   )}
                 </div>
               ))}
             </div>
 
             {/* Right Side: LARGE DESCRIPTIVE SHOWCASE CARD */}
-            <div className="lg:col-span-7 p-6 sm:p-8 rounded-3xl bg-slate-950 border border-slate-800 shadow-2xl flex flex-col justify-between relative overflow-hidden min-h-[420px]">
+            <div className={cn(
+              "lg:col-span-7 p-6 sm:p-8 rounded-3xl border shadow-2xl flex flex-col justify-between relative overflow-hidden min-h-[420px] transition-colors duration-300",
+              isDarkMode
+                ? "bg-slate-950 border-slate-800"
+                : "bg-white border-slate-200/90 shadow-slate-200/60"
+            )}>
               {/* Top Bar */}
-              <div className="flex items-center justify-between pb-4 border-b border-slate-800 mb-4">
+              <div className={cn("flex items-center justify-between pb-4 border-b mb-4", isDarkMode ? "border-slate-800" : "border-slate-100")}>
                 <span className={cn(
                   "px-3 py-1 rounded-full text-[10px] font-extrabold tracking-widest uppercase border",
-                  activeWorkflowTab === 0 && "bg-[#25D366]/15 text-[#25D366] border-[#25D366]/40",
-                  activeWorkflowTab === 1 && "bg-indigo-500/15 text-indigo-400 border-indigo-500/40",
-                  activeWorkflowTab === 2 && "bg-emerald-500/15 text-emerald-400 border-emerald-500/40",
-                  activeWorkflowTab === 3 && "bg-purple-500/15 text-purple-400 border-purple-500/40",
-                  activeWorkflowTab === 4 && "bg-amber-500/15 text-amber-400 border-amber-500/40",
-                  activeWorkflowTab === 5 && "bg-rose-500/15 text-rose-400 border-rose-500/40"
+                  activeWorkflowTab === 0 && (isDarkMode ? "bg-[#25D366]/15 text-[#25D366] border-[#25D366]/40" : "bg-emerald-50 text-emerald-700 border-emerald-200"),
+                  activeWorkflowTab === 1 && (isDarkMode ? "bg-indigo-500/15 text-indigo-400 border-indigo-500/40" : "bg-indigo-50 text-indigo-700 border-indigo-200"),
+                  activeWorkflowTab === 2 && (isDarkMode ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/40" : "bg-teal-50 text-teal-700 border-teal-200"),
+                  activeWorkflowTab === 3 && (isDarkMode ? "bg-purple-500/15 text-purple-400 border-purple-500/40" : "bg-purple-50 text-purple-700 border-purple-200"),
+                  activeWorkflowTab === 4 && (isDarkMode ? "bg-amber-500/15 text-amber-400 border-amber-500/40" : "bg-amber-50 text-amber-700 border-amber-200"),
+                  activeWorkflowTab === 5 && (isDarkMode ? "bg-rose-500/15 text-rose-400 border-rose-500/40" : "bg-rose-50 text-rose-700 border-rose-200")
                 )}>
                   Step 0{activeWorkflowTab + 1} Workflow Node
                 </span>
 
-                <span className="text-[10px] font-mono text-slate-400 flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" /> LIVE SHOWCASE
+                <span className={cn("text-[10px] font-mono flex items-center gap-1.5", isDarkMode ? "text-slate-400" : "text-slate-500")}>
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" /> LIVE SHOWCASE
                 </span>
               </div>
 
               {/* Dynamic Step Description Header */}
               <div className="space-y-2 mb-6">
-                <h3 className="text-xl sm:text-2xl font-black text-white leading-tight">
+                <h3 className={cn("text-xl sm:text-2xl font-black leading-tight", isDarkMode ? "text-white" : "text-slate-900")}>
                   {[
                     'Customer Sends WhatsApp Message',
                     'UWO Connect Detects & Routes Message',
@@ -1044,7 +1258,7 @@ export default function UwoLandingPage() {
                     'Payment Link & Invoice Issued'
                   ][activeWorkflowTab]}
                 </h3>
-                <p className="text-xs text-slate-400 font-medium leading-relaxed">
+                <p className={cn("text-xs font-medium leading-relaxed", isDarkMode ? "text-slate-400" : "text-slate-600")}>
                   {[
                     'Inbound customer query arrives via official WhatsApp Business API.',
                     'AI Orchestration Engine analyzes intent, sentiment, and routes payload in 0.02 seconds.',
@@ -1059,81 +1273,81 @@ export default function UwoLandingPage() {
               {/* Dynamic Live Mockup Visual Preview */}
               <div className="flex-1">
                 {activeWorkflowTab === 0 && (
-                  <div className="p-4 rounded-2xl bg-slate-900 border border-slate-800 space-y-3 text-left">
-                    <div className="flex items-center justify-between text-[11px] text-slate-400 font-mono">
-                      <span className="flex items-center gap-1.5 text-emerald-400 font-bold">
+                  <div className={cn("p-4 rounded-2xl border space-y-3 text-left", isDarkMode ? "bg-slate-900 border-slate-800" : "bg-slate-50 border-slate-200")}>
+                    <div className={cn("flex items-center justify-between text-[11px] font-mono", isDarkMode ? "text-slate-400" : "text-slate-500")}>
+                      <span className="flex items-center gap-1.5 text-emerald-600 font-bold">
                         <WhatsAppLogo size={16} /> WhatsApp Business API
                       </span>
                       <span>14:02 PM • Just Now</span>
                     </div>
-                    <div className="p-3.5 rounded-xl bg-emerald-950/60 border border-emerald-500/30 text-emerald-100 text-xs leading-relaxed">
+                    <div className={cn("p-3.5 rounded-xl border text-xs leading-relaxed", isDarkMode ? "bg-emerald-950/60 border-emerald-500/30 text-emerald-100" : "bg-emerald-50 border-emerald-200 text-emerald-900")}>
                       "Hi! I want to know the pricing and features of your UWO Connect Pro Plan."
                     </div>
                     <div className="grid grid-cols-2 gap-3 text-[11px]">
-                      <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 space-y-1">
-                        <span className="text-slate-500 font-medium">Customer Name</span>
-                        <p className="font-bold text-slate-200">Rahul Sharma</p>
+                      <div className={cn("p-3 rounded-xl border space-y-1", isDarkMode ? "bg-slate-950 border-slate-800" : "bg-white border-slate-200 shadow-xs")}>
+                        <span className={cn("font-medium", isDarkMode ? "text-slate-500" : "text-slate-400")}>Customer Name</span>
+                        <p className={cn("font-bold", isDarkMode ? "text-slate-200" : "text-slate-900")}>Rahul Sharma</p>
                       </div>
-                      <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 space-y-1">
-                        <span className="text-slate-500 font-medium">Phone Number</span>
-                        <p className="font-bold text-slate-200">+91 98765 43210</p>
+                      <div className={cn("p-3 rounded-xl border space-y-1", isDarkMode ? "bg-slate-950 border-slate-800" : "bg-white border-slate-200 shadow-xs")}>
+                        <span className={cn("font-medium", isDarkMode ? "text-slate-500" : "text-slate-400")}>Phone Number</span>
+                        <p className={cn("font-bold", isDarkMode ? "text-slate-200" : "text-slate-900")}>+91 98765 43210</p>
                       </div>
                     </div>
                   </div>
                 )}
 
                 {activeWorkflowTab === 1 && (
-                  <div className="p-4 rounded-2xl bg-slate-900 border border-indigo-500/30 space-y-3 text-left font-mono text-xs">
+                  <div className={cn("p-4 rounded-2xl border space-y-3 text-left font-mono text-xs", isDarkMode ? "bg-slate-900 border-indigo-500/30" : "bg-indigo-50/40 border-indigo-200")}>
                     <div className="flex items-center justify-between">
-                      <span className="text-indigo-400 font-bold flex items-center gap-1.5"><Bot size={16} /> AI Intent Analysis</span>
-                      <span className="px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 text-[10px]">99.8% Confidence</span>
+                      <span className={cn("font-bold flex items-center gap-1.5", isDarkMode ? "text-indigo-400" : "text-indigo-700")}><Bot size={16} /> AI Intent Analysis</span>
+                      <span className={cn("px-2 py-0.5 rounded text-[10px] font-bold", isDarkMode ? "bg-indigo-500/20 text-indigo-300" : "bg-indigo-100 text-indigo-700")}>99.8% Confidence</span>
                     </div>
-                    <div className="p-3.5 rounded-xl bg-indigo-950/40 border border-indigo-500/20 text-indigo-200 text-[11px] leading-relaxed space-y-1">
-                      <p>Detected Intent: <span className="text-white font-bold">Pricing_Inquiry</span></p>
-                      <p>Extracted Channel: <span className="text-white font-bold">WhatsApp_Inbound</span></p>
-                      <p>Priority Score: <span className="text-emerald-400 font-bold">98/100 (Hot Lead)</span></p>
+                    <div className={cn("p-3.5 rounded-xl border text-[11px] leading-relaxed space-y-1", isDarkMode ? "bg-indigo-950/40 border-indigo-500/20 text-indigo-200" : "bg-white border-indigo-100 text-indigo-950 shadow-xs")}>
+                      <p>Detected Intent: <span className={cn("font-bold", isDarkMode ? "text-white" : "text-indigo-900")}>Pricing_Inquiry</span></p>
+                      <p>Extracted Channel: <span className={cn("font-bold", isDarkMode ? "text-white" : "text-indigo-900")}>WhatsApp_Inbound</span></p>
+                      <p>Priority Score: <span className="text-emerald-600 font-bold">98/100 (Hot Lead)</span></p>
                     </div>
-                    <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 text-[11px] text-slate-300 flex items-center justify-between">
+                    <div className={cn("p-3 rounded-xl border text-[11px] flex items-center justify-between", isDarkMode ? "bg-slate-950 border-slate-800 text-slate-300" : "bg-white border-slate-200 text-slate-700 shadow-xs")}>
                       <span>Target Route</span>
-                      <span className="text-emerald-400 font-bold">Sales & Quotation Engine</span>
+                      <span className="text-emerald-600 font-bold">Sales & Quotation Engine</span>
                     </div>
                   </div>
                 )}
 
                 {activeWorkflowTab === 2 && (
-                  <div className="p-4 rounded-2xl bg-slate-900 border border-emerald-500/30 space-y-3 text-left">
+                  <div className={cn("p-4 rounded-2xl border space-y-3 text-left", isDarkMode ? "bg-slate-900 border-emerald-500/30" : "bg-emerald-50/40 border-emerald-200")}>
                     <div className="flex items-center justify-between">
-                      <span className="text-emerald-400 font-bold text-xs flex items-center gap-1.5"><Users size={16} /> Unified CRM Record</span>
-                      <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px]">Deal Stage: New Lead</span>
+                      <span className={cn("font-bold text-xs flex items-center gap-1.5", isDarkMode ? "text-emerald-400" : "text-emerald-700")}><Users size={16} /> Unified CRM Record</span>
+                      <span className={cn("px-2 py-0.5 rounded text-[10px] font-bold", isDarkMode ? "bg-emerald-500/20 text-emerald-300" : "bg-emerald-100 text-emerald-800")}>Deal Stage: New Lead</span>
                     </div>
                     <div className="grid grid-cols-2 gap-3 text-xs">
-                      <div className="p-3 rounded-xl bg-slate-950 border border-slate-800">
-                        <span className="text-[10px] text-slate-500">Contact</span>
-                        <p className="font-bold text-white">Rahul Sharma</p>
+                      <div className={cn("p-3 rounded-xl border", isDarkMode ? "bg-slate-950 border-slate-800" : "bg-white border-slate-200 shadow-xs")}>
+                        <span className={cn("text-[10px]", isDarkMode ? "text-slate-500" : "text-slate-400")}>Contact</span>
+                        <p className={cn("font-bold", isDarkMode ? "text-white" : "text-slate-900")}>Rahul Sharma</p>
                       </div>
-                      <div className="p-3 rounded-xl bg-slate-950 border border-slate-800">
-                        <span className="text-[10px] text-slate-500">Source</span>
-                        <p className="font-bold text-emerald-400">WhatsApp Direct</p>
+                      <div className={cn("p-3 rounded-xl border", isDarkMode ? "bg-slate-950 border-slate-800" : "bg-white border-slate-200 shadow-xs")}>
+                        <span className={cn("text-[10px]", isDarkMode ? "text-slate-500" : "text-slate-400")}>Source</span>
+                        <p className="font-bold text-emerald-600">WhatsApp Direct</p>
                       </div>
                     </div>
-                    <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 text-[11px] text-slate-300 flex items-center justify-between">
+                    <div className={cn("p-3 rounded-xl border text-[11px] flex items-center justify-between", isDarkMode ? "bg-slate-950 border-slate-800 text-slate-300" : "bg-white border-slate-200 text-slate-700 shadow-xs")}>
                       <span>Assigned Sales Agent</span>
-                      <span className="text-indigo-400 font-bold">AI Assistant Core</span>
+                      <span className={cn("font-bold", isDarkMode ? "text-indigo-400" : "text-indigo-600")}>AI Assistant Core</span>
                     </div>
                   </div>
                 )}
 
                 {activeWorkflowTab === 3 && (
-                  <div className="p-4 rounded-2xl bg-slate-900 border border-purple-500/30 space-y-3 text-left text-xs">
+                  <div className={cn("p-4 rounded-2xl border space-y-3 text-left text-xs", isDarkMode ? "bg-slate-900 border-purple-500/30" : "bg-purple-50/40 border-purple-200")}>
                     <div className="flex items-center justify-between">
-                      <span className="text-purple-400 font-bold flex items-center gap-1.5"><MessageSquare size={16} /> Automated Bot Reply</span>
-                      <span className="text-[10px] text-slate-500">Dispatched in 0.4s</span>
+                      <span className={cn("font-bold flex items-center gap-1.5", isDarkMode ? "text-purple-400" : "text-purple-700")}><MessageSquare size={16} /> Automated Bot Reply</span>
+                      <span className={cn("text-[10px]", isDarkMode ? "text-slate-500" : "text-slate-400")}>Dispatched in 0.4s</span>
                     </div>
-                    <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 leading-relaxed text-[11px]">
+                    <div className={cn("p-3.5 rounded-xl border leading-relaxed text-[11px]", isDarkMode ? "bg-slate-950 border-slate-800 text-slate-200" : "bg-white border-slate-200 text-slate-800 shadow-xs")}>
                       "Hello Rahul! 👋 Thanks for reaching out to UWO Connect. Here is our official product catalog and plan details."
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="px-3 py-2 rounded-xl bg-purple-600/30 text-purple-200 border border-purple-500/40 text-[11px] font-bold flex items-center gap-1.5">
+                      <span className={cn("px-3 py-2 rounded-xl border text-[11px] font-bold flex items-center gap-1.5", isDarkMode ? "bg-purple-600/30 text-purple-200 border-purple-500/40" : "bg-purple-100 text-purple-800 border-purple-200")}>
                         📄 UWO_Connect_Catalog.pdf
                       </span>
                     </div>
@@ -1141,40 +1355,40 @@ export default function UwoLandingPage() {
                 )}
 
                 {activeWorkflowTab === 4 && (
-                  <div className="p-4 rounded-2xl bg-slate-900 border border-amber-500/30 space-y-3 text-left text-xs">
+                  <div className={cn("p-4 rounded-2xl border space-y-3 text-left text-xs", isDarkMode ? "bg-slate-900 border-amber-500/30" : "bg-amber-50/40 border-amber-200")}>
                     <div className="flex items-center justify-between">
-                      <span className="text-amber-400 font-bold flex items-center gap-1.5"><FileCheck size={16} /> Official Quotation #QT-9482</span>
-                      <span className="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 text-[10px]">Status: Active</span>
+                      <span className={cn("font-bold flex items-center gap-1.5", isDarkMode ? "text-amber-400" : "text-amber-700")}><FileCheck size={16} /> Official Quotation #QT-9482</span>
+                      <span className={cn("px-2 py-0.5 rounded text-[10px] font-bold", isDarkMode ? "bg-amber-500/20 text-amber-300" : "bg-amber-100 text-amber-800")}>Status: Active</span>
                     </div>
-                    <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800 space-y-2 text-[11px]">
-                      <div className="flex justify-between text-slate-300">
+                    <div className={cn("p-3.5 rounded-xl border space-y-2 text-[11px]", isDarkMode ? "bg-slate-950 border-slate-800" : "bg-white border-slate-200 shadow-xs")}>
+                      <div className={cn("flex justify-between", isDarkMode ? "text-slate-300" : "text-slate-700")}>
                         <span>UWO Connect Pro Plan (12 Mo)</span>
                         <span className="font-bold">₹49,999.00</span>
                       </div>
-                      <div className="flex justify-between text-slate-400 text-[10px]">
+                      <div className={cn("flex justify-between text-[10px]", isDarkMode ? "text-slate-400" : "text-slate-500")}>
                         <span>GST (18%)</span>
                         <span>₹8,999.82</span>
                       </div>
-                      <div className="pt-2 border-t border-slate-800 flex justify-between font-bold text-white text-xs">
+                      <div className={cn("pt-2 border-t flex justify-between font-bold text-xs", isDarkMode ? "border-slate-800 text-white" : "border-slate-100 text-slate-900")}>
                         <span>Total Amount</span>
-                        <span className="text-amber-400">₹58,998.82</span>
+                        <span className={cn(isDarkMode ? "text-amber-400" : "text-amber-600")}>₹58,998.82</span>
                       </div>
                     </div>
                   </div>
                 )}
 
                 {activeWorkflowTab === 5 && (
-                  <div className="p-4 rounded-2xl bg-slate-900 border border-rose-500/30 space-y-3 text-left text-xs">
+                  <div className={cn("p-4 rounded-2xl border space-y-3 text-left text-xs", isDarkMode ? "bg-slate-900 border-rose-500/30" : "bg-rose-50/40 border-rose-200")}>
                     <div className="flex items-center justify-between">
-                      <span className="text-rose-400 font-bold flex items-center gap-1.5"><Receipt size={16} /> GST Invoice #INV-2026-8812</span>
-                      <span className="px-2.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px] font-bold">Paid via UPI</span>
+                      <span className={cn("font-bold flex items-center gap-1.5", isDarkMode ? "text-rose-400" : "text-rose-700")}><Receipt size={16} /> GST Invoice #INV-2026-8812</span>
+                      <span className="px-2.5 py-0.5 rounded bg-emerald-500/20 text-emerald-700 font-bold text-[10px]">Paid via UPI</span>
                     </div>
-                    <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800 space-y-2 text-[11px]">
-                      <div className="flex items-center justify-between text-slate-300">
+                    <div className={cn("p-3.5 rounded-xl border space-y-2 text-[11px]", isDarkMode ? "bg-slate-950 border-slate-800" : "bg-white border-slate-200 shadow-xs")}>
+                      <div className={cn("flex items-center justify-between", isDarkMode ? "text-slate-300" : "text-slate-700")}>
                         <span>UPI Payment Link</span>
-                        <span className="text-rose-400 font-bold">pay.uwoconnect.com/qt9482</span>
+                        <span className={cn("font-bold", isDarkMode ? "text-rose-400" : "text-rose-600")}>pay.uwoconnect.com/qt9482</span>
                       </div>
-                      <div className="flex items-center justify-between text-emerald-400 text-[10px] font-mono pt-1 border-t border-slate-800">
+                      <div className={cn("flex items-center justify-between text-[10px] font-mono pt-1 border-t", isDarkMode ? "border-slate-800 text-emerald-400" : "border-slate-100 text-emerald-600")}>
                         <span>✓ Synced to Google Sheets & Tally</span>
                         <span>0.2s</span>
                       </div>
@@ -1184,9 +1398,9 @@ export default function UwoLandingPage() {
               </div>
 
               {/* Bottom Status Progress Indicator */}
-              <div className="pt-4 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400 font-mono mt-4">
-                <span>Status: <strong className="text-emerald-400">Node Active</strong></span>
-                <span>Workflow Progress: <strong className="text-white">{Math.round(((activeWorkflowTab + 1) / 6) * 100)}%</strong></span>
+              <div className={cn("pt-4 border-t flex items-center justify-between text-[11px] font-mono mt-4", isDarkMode ? "border-slate-800 text-slate-400" : "border-slate-100 text-slate-500")}>
+                <span>Status: <strong className="text-emerald-600">Node Active</strong></span>
+                <span>Workflow Progress: <strong className={isDarkMode ? "text-white" : "text-slate-900"}>{Math.round(((activeWorkflowTab + 1) / 6) * 100)}%</strong></span>
               </div>
             </div>
 
@@ -1197,7 +1411,12 @@ export default function UwoLandingPage() {
       {/* ════════════════════════════════════════════════════════════════ */}
       {/* 10. UNIFIED WORKSPACE SECTION (CHAOS VS CONNECTED) */}
       {/* ════════════════════════════════════════════════════════════════ */}
-      <section className="relative py-24 px-6 sm:px-10 lg:px-12 max-w-7xl mx-auto my-14 bg-gradient-to-br from-slate-50 via-white to-emerald-50/40 rounded-[2.5rem] border border-slate-200/90 shadow-xl overflow-hidden">
+      <section className={cn(
+        "relative py-20 px-6 sm:px-12 lg:px-16 w-full max-w-[1700px] mx-auto my-12 rounded-[2.5rem] border transition-colors duration-300 shadow-xl overflow-hidden",
+        isDarkMode
+          ? "bg-slate-900/80 border-slate-800 shadow-2xl shadow-emerald-950/20"
+          : "bg-gradient-to-br from-slate-50 via-white to-emerald-50/40 border-slate-200/90"
+      )}>
 
         {/* Ambient Subtle Glow & Pattern */}
         <div className="absolute -top-32 -right-32 w-80 h-80 bg-rose-500/10 rounded-full blur-[100px] pointer-events-none" />
@@ -1207,7 +1426,11 @@ export default function UwoLandingPage() {
         <div className="relative z-10">
           <div className="text-center space-y-3 mb-12">
             <h2
-              className="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight italic font-serif"
+              className={cn(
+                "text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight italic font-serif",
+                isDarkMode ? "text-white" : "text-slate-900"
+              )}
+              style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
             >
               Stop Switching Between Tools
             </h2>
@@ -1216,23 +1439,43 @@ export default function UwoLandingPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
 
             {/* WITHOUT UWO CONNECT */}
-            <div className="p-8 rounded-3xl bg-rose-50/60 border border-rose-200 text-left space-y-4 hover:border-rose-300 hover:shadow-lg transition-all duration-300">
-              <span className="px-3 py-1 bg-rose-100 text-rose-800 text-xs font-black rounded-full">
+            <div className={cn(
+              "p-8 rounded-3xl text-left space-y-4 transition-all duration-300 border",
+              isDarkMode
+                ? "bg-rose-950/20 border-rose-900/40 hover:border-rose-700/70"
+                : "bg-rose-50/60 border-rose-200 hover:border-rose-300 hover:shadow-lg"
+            )}>
+              <span className={cn(
+                "px-3 py-1 text-xs font-black rounded-full inline-block border",
+                isDarkMode ? "bg-rose-950/60 text-rose-300 border-rose-800/60" : "bg-rose-100 text-rose-800 border-transparent"
+              )}>
                 Without UWO Connect
               </span>
-              <h4 className="text-lg font-black text-slate-900">Disconnected Chaos</h4>
-              <p className="text-xs text-slate-600 font-medium">
+              <h4 className={cn("text-xl font-bold font-serif italic", isDarkMode ? "text-white" : "text-slate-900")}>
+                Disconnected Chaos
+              </h4>
+              <p className={cn("text-sm font-normal leading-relaxed", isDarkMode ? "text-slate-400" : "text-slate-600")}>
                 10 browser tabs, manual copy-pasting, lost leads, delayed replies, and chaotic manual invoicing.
               </p>
             </div>
 
             {/* WITH UWO CONNECT */}
-            <div className="p-8 rounded-3xl bg-emerald-50/60 border border-emerald-200 text-left space-y-4 landing-card-hover">
-              <span className="px-3 py-1 bg-emerald-100 text-emerald-800 text-xs font-black rounded-full">
+            <div className={cn(
+              "p-8 rounded-3xl text-left space-y-4 landing-card-hover transition-all duration-300 border",
+              isDarkMode
+                ? "bg-emerald-950/20 border-emerald-900/40 hover:border-emerald-600/70"
+                : "bg-emerald-50/60 border-emerald-200 hover:border-emerald-300 hover:shadow-lg"
+            )}>
+              <span className={cn(
+                "px-3 py-1 text-xs font-black rounded-full inline-block border",
+                isDarkMode ? "bg-emerald-950/60 text-emerald-300 border-emerald-800/60" : "bg-emerald-100 text-emerald-800 border-transparent"
+              )}>
                 With UWO Connect
               </span>
-              <h4 className="text-lg font-black text-slate-900">One Clean Central Workspace</h4>
-              <p className="text-xs text-slate-600 font-medium">
+              <h4 className={cn("text-xl font-bold font-serif italic", isDarkMode ? "text-white" : "text-slate-900")}>
+                One Clean Central Workspace
+              </h4>
+              <p className={cn("text-sm font-normal leading-relaxed", isDarkMode ? "text-slate-400" : "text-slate-600")}>
                 Messages, Leads, Documents, Quotations, Payments, and Invoices automatically synced in real time.
               </p>
             </div>
@@ -1254,26 +1497,27 @@ export default function UwoLandingPage() {
             setActiveModuleIndex(prev => Math.max(0, prev - 1));
           }
         }}
-        className="relative py-12 sm:py-16 px-6 sm:px-10 lg:px-12 max-w-7xl mx-auto my-6"
+        className="relative py-12 sm:py-16 px-6 sm:px-12 lg:px-16 w-full max-w-[1700px] mx-auto my-6"
       >
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-stretch">
 
           {/* Left Column: HEADING & 4-OPTION SLIDING WINDOW */}
           <div className="lg:col-span-5 flex flex-col justify-between space-y-6 text-left h-full">
             <div className="space-y-4">
-              <UwoBrandHeader align="left" dark={isDarkMode} logo={isWhiteLabel && logoUrl ? logoUrl : "/download (3).gif"} />
+              <UwoBrandHeader align="left" dark={isDarkMode} />
               <h2
-                className="text-4xl sm:text-5xl font-bold text-slate-900 tracking-tight italic font-serif leading-[1.15]"
+                className={cn("text-4xl sm:text-5xl font-bold tracking-tight italic font-serif leading-[1.15]", isDarkMode ? "text-white" : "text-slate-900")}
+                style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
               >
                 Everything You Need to Run Smarter
               </h2>
 
-              <p className="text-sm sm:text-base text-slate-600 font-medium leading-relaxed max-w-md">
+              <p className={cn("text-sm sm:text-base font-medium leading-relaxed max-w-md", isDarkMode ? "text-slate-400" : "text-slate-600")}>
                 9 powerful business engines built natively into your unified workspace. Scroll down to explore each module.
               </p>
 
               {/* 4-Item Window Selector (Shows ONLY 4 OPTIONS AT A TIME) */}
-              <div className="grid grid-cols-1 gap-2.5 pt-3 border-t border-slate-200/80 max-w-xs transition-all duration-300">
+              <div className={cn("grid grid-cols-1 gap-2.5 pt-3 border-t max-w-xs transition-all duration-300", isDarkMode ? "border-slate-800" : "border-slate-200/80")}>
                 {(() => {
                   const allOptions = [
                     { num: '01', title: 'Team Dashboard', index: 0 },
@@ -1301,9 +1545,9 @@ export default function UwoLandingPage() {
                           "flex items-center gap-2.5 text-xs font-bold transition-all duration-300 rounded-xl border px-3.5 py-2.5 text-left cursor-pointer",
                           isActive
                             ? "bg-[#059669] text-white border-emerald-600 shadow-lg shadow-emerald-600/25 translate-x-2 font-extrabold scale-[1.02]"
-                            : isDarkMode
-                              ? "bg-slate-900 border-slate-800 text-slate-300 hover:text-white hover:bg-slate-800/90 hover:border-emerald-500/50"
-                              : "bg-slate-50/80 border-slate-200/70 text-slate-600 hover:text-emerald-700 hover:bg-emerald-50/60"
+                            : (isDarkMode
+                                ? "bg-slate-900/80 border-slate-800 text-slate-300 hover:text-white hover:bg-slate-800"
+                                : "bg-slate-50/80 border-slate-200/70 text-slate-600 hover:text-emerald-700 hover:bg-emerald-50/60")
                         )}
                       >
                         <span className={cn("w-2 h-2 rounded-full shrink-0 transition-colors", isActive ? "bg-white animate-ping" : "bg-emerald-500/50")} />
@@ -1435,10 +1679,8 @@ export default function UwoLandingPage() {
 
               return (
                 <div key={activeModuleIndex} className={cn(
-                  "p-7 sm:p-8 rounded-[2.5rem] relative overflow-hidden text-left transition-all duration-500 flex flex-col justify-between w-full h-full",
-                  isDarkMode 
-                    ? "bg-slate-900 border border-slate-800 shadow-2xl shadow-slate-950/80 text-slate-100" 
-                    : "bg-white border border-slate-200/90 shadow-2xl shadow-emerald-900/5 text-slate-900"
+                  "p-7 sm:p-8 rounded-[2.5rem] border shadow-2xl relative overflow-hidden text-left transition-all duration-500 flex flex-col justify-between w-full h-full",
+                  isDarkMode ? "bg-slate-900/90 border-slate-800 text-white shadow-emerald-950/20" : "bg-white border-slate-200/90 shadow-emerald-900/5 text-slate-900"
                 )}>
 
                   {/* Top Accent Gradient Line */}
@@ -1454,7 +1696,8 @@ export default function UwoLandingPage() {
                         <div>
                           <span className="text-[11px] font-black text-slate-400 tracking-widest uppercase">MODULE {currentModule.num} OF 09</span>
                           <h3
-                            className="text-2xl sm:text-3xl font-bold text-slate-900 leading-tight italic font-serif"
+                            className={cn("text-2xl sm:text-3xl font-bold leading-tight italic font-serif", isDarkMode ? "text-white" : "text-slate-900")}
+                            style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
                           >
                             {currentModule.title}
                           </h3>
@@ -1473,12 +1716,15 @@ export default function UwoLandingPage() {
                     {/* Sub Features Grid */}
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-1">
                       {currentModule.features.map((ft, fi) => (
-                        <div key={fi} className={cn(
-                          "p-2.5 rounded-xl text-[11px] font-bold flex items-center gap-1.5",
-                          isDarkMode
-                            ? "bg-emerald-950/50 border border-emerald-800/60 text-emerald-300"
-                            : "bg-emerald-50/70 border border-emerald-200/80 text-emerald-900"
-                        )}>
+                        <div
+                          key={fi}
+                          className={cn(
+                            "p-2.5 rounded-xl border text-[11px] font-bold flex items-center gap-1.5",
+                            isDarkMode
+                              ? "bg-emerald-950/40 border-emerald-800/60 text-emerald-300"
+                              : "bg-emerald-50/70 border-emerald-200/80 text-emerald-900"
+                          )}
+                        >
                           <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
                           <span className="truncate">{ft}</span>
                         </div>
@@ -1501,7 +1747,7 @@ export default function UwoLandingPage() {
                   </div>
 
                   {/* Navigation Controls */}
-                  <div className="pt-3 border-t border-slate-100 flex items-center justify-between mt-4">
+                  <div className={cn("pt-3 border-t flex items-center justify-between mt-4", isDarkMode ? "border-slate-800" : "border-slate-100")}>
                     <div className="flex items-center gap-1.5">
                       {modulesList.map((_, dotIdx) => (
                         <button
@@ -1509,7 +1755,9 @@ export default function UwoLandingPage() {
                           onClick={() => setActiveModuleIndex(dotIdx)}
                           className={cn(
                             "h-2 rounded-full transition-all duration-300 cursor-pointer",
-                            dotIdx === activeModuleIndex ? "w-8 bg-[#059669]" : "w-2 bg-slate-200 hover:bg-slate-300"
+                            dotIdx === activeModuleIndex
+                              ? "w-8 bg-[#059669]"
+                              : (isDarkMode ? "w-2 bg-slate-700 hover:bg-slate-600" : "w-2 bg-slate-200 hover:bg-slate-300")
                           )}
                         />
                       ))}
@@ -1518,13 +1766,23 @@ export default function UwoLandingPage() {
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => setActiveModuleIndex(prev => (prev > 0 ? prev - 1 : 8))}
-                        className="p-2 rounded-xl border border-slate-200 hover:bg-slate-100 text-slate-700 transition-colors cursor-pointer"
+                        className={cn(
+                          "p-2 rounded-xl border transition-colors cursor-pointer",
+                          isDarkMode
+                            ? "border-slate-800 hover:bg-slate-800 text-slate-300"
+                            : "border-slate-200 hover:bg-slate-100 text-slate-700"
+                        )}
                       >
                         <ChevronLeft size={16} />
                       </button>
                       <button
                         onClick={() => setActiveModuleIndex(prev => (prev < 8 ? prev + 1 : 0))}
-                        className="p-2 rounded-xl border border-slate-200 hover:bg-slate-100 text-slate-700 transition-colors cursor-pointer"
+                        className={cn(
+                          "p-2 rounded-xl border transition-colors cursor-pointer",
+                          isDarkMode
+                            ? "border-slate-800 hover:bg-slate-800 text-slate-300"
+                            : "border-slate-200 hover:bg-slate-100 text-slate-700"
+                        )}
                       >
                         <ChevronRight size={16} />
                       </button>
@@ -1542,7 +1800,10 @@ export default function UwoLandingPage() {
       {/* ════════════════════════════════════════════════════════════════ */}
       {/* 11.5 PRICING & SUBSCRIPTION PLANS */}
       {/* ════════════════════════════════════════════════════════════════ */}
-      <section id="pricing" className="relative py-20 px-6 sm:px-10 lg:px-12 max-w-7xl mx-auto my-16 text-center bg-gradient-to-br from-slate-50/90 via-white to-emerald-50/50 rounded-[2.5rem] border border-slate-200/90 shadow-xl overflow-hidden">
+      <section id="pricing" className={cn(
+        "relative py-20 px-6 sm:px-12 lg:px-16 w-full max-w-[1700px] mx-auto my-16 text-center rounded-[2.5rem] border transition-all duration-300 overflow-hidden",
+        isDarkMode ? "bg-slate-900/80 border-slate-800 text-white shadow-2xl" : "bg-gradient-to-br from-slate-50/90 via-white to-emerald-50/50 border-slate-200/90 shadow-xl"
+      )}>
 
         {/* Ambient Glows */}
         <div className="absolute -top-32 -left-32 w-80 h-80 bg-emerald-500/10 rounded-full blur-[100px] pointer-events-none" />
@@ -1550,14 +1811,17 @@ export default function UwoLandingPage() {
         <div className="absolute inset-0 bg-[radial-gradient(#059669_1px,transparent_1px)] [background-size:28px_28px] opacity-10 pointer-events-none" />
 
         <div className="relative z-10">
-          <PricingComparisonTable onSelectPlan={() => router.push('/auth/login')} />
+          <PricingComparisonTable onSelectPlan={() => router.push('/auth/login')} dark={isDarkMode} />
         </div>
       </section>
 
       {/* ════════════════════════════════════════════════════════════════ */}
       {/* 12. WHITE-LABEL & AGENCY RESELLER PROGRAM - COMPACT & EXPANDABLE */}
       {/* ════════════════════════════════════════════════════════════════ */}
-      <section id="white-label" className="relative py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto my-16 bg-gradient-to-br from-slate-50 via-white to-emerald-50/40 text-slate-900 rounded-[2.5rem] shadow-xl border border-slate-200/90 overflow-hidden text-left transition-all duration-500">
+      <section id="white-label" className={cn(
+        "relative py-20 px-6 sm:px-12 lg:px-16 w-full max-w-[1700px] mx-auto my-16 rounded-[2.5rem] border overflow-hidden text-left transition-all duration-500",
+        isDarkMode ? "bg-slate-900/80 border-slate-800 text-white shadow-2xl" : "bg-gradient-to-br from-slate-50 via-white to-emerald-50/40 text-slate-900 border-slate-200/90 shadow-xl"
+      )}>
 
         {/* Ambient Animated Glow & Pattern */}
         <div className="absolute -top-32 -left-32 w-96 h-96 bg-emerald-500/10 rounded-full blur-[120px] pointer-events-none animate-pulse" />
@@ -1574,12 +1838,13 @@ export default function UwoLandingPage() {
               </span>
 
               <h2
-                className="text-4xl sm:text-5xl lg:text-6xl font-bold text-slate-900 tracking-tight italic font-serif leading-tight"
+                className={cn("text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight italic font-serif leading-tight", isDarkMode ? "text-white" : "text-slate-900")}
+                style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
               >
                 Build & Scale Your Own White-Label Software Agency
               </h2>
 
-              <p className="text-base sm:text-lg text-slate-600 font-medium leading-relaxed max-w-2xl mx-auto">
+              <p className={cn("text-base sm:text-lg font-medium leading-relaxed max-w-2xl mx-auto", isDarkMode ? "text-slate-300" : "text-slate-600")}>
                 Rebrand our enterprise automation platform under your own company name, custom domain, and logo. Sell omni-channel automation, CRM, and AI bots directly to your clients — and keep <span className="text-[#059669] font-bold">100% of the profits</span>.
               </p>
 
@@ -1595,13 +1860,16 @@ export default function UwoLandingPage() {
 
                 <button
                   onClick={() => router.push('/book')}
-                  className="px-8 py-4 rounded-2xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/90 text-sm font-bold shadow-xs hover:border-emerald-500 hover:scale-105 transition-all cursor-pointer"
+                  className={cn(
+                    "px-8 py-4 rounded-2xl border text-sm font-bold shadow-xs hover:border-emerald-500 hover:scale-105 transition-all cursor-pointer",
+                    isDarkMode ? "bg-slate-800 hover:bg-slate-700 text-slate-100 border-slate-700" : "bg-white hover:bg-slate-50 text-slate-700 border-slate-200/90"
+                  )}
                 >
                   <span>📞 Book a Live Platform Demo</span>
                 </button>
               </div>
 
-              <div className="flex flex-wrap items-center justify-center gap-6 text-xs text-emerald-800 font-bold pt-2">
+              <div className={cn("flex flex-wrap items-center justify-center gap-6 text-xs font-bold pt-2", isDarkMode ? "text-emerald-400" : "text-emerald-800")}>
                 <span className="flex items-center gap-1.5"><CheckCircle2 size={16} className="text-[#059669]" /> No Code Required</span>
                 <span className="flex items-center gap-1.5"><CheckCircle2 size={16} className="text-[#059669]" /> Keep 100% Revenue</span>
                 <span className="flex items-center gap-1.5"><CheckCircle2 size={16} className="text-[#059669]" /> Instant CNAME Setup</span>
@@ -1626,7 +1894,7 @@ export default function UwoLandingPage() {
 
           {/* EXPANDABLE FULL DETAILS (SHOWN WHEN USER CLICKS EXPLORE PROGRAM DETAILS) */}
           {showWhiteLabelDetails && (
-            <div className="space-y-16 pt-8 border-t border-slate-200/80 transition-all duration-500">
+            <div className={cn("space-y-16 pt-8 border-t transition-all duration-500", isDarkMode ? "border-slate-800" : "border-slate-200/80")}>
 
               {/* 2. HOW IT WORKS (4-STEP ONBOARDING JOURNEY) */}
               <div className="space-y-8">
@@ -1634,7 +1902,8 @@ export default function UwoLandingPage() {
                   <div className="text-center space-y-2">
                     <span className="text-xs font-black tracking-widest text-[#059669] uppercase">4-STEP ONBOARDING JOURNEY</span>
                     <h3
-                      className="text-3xl sm:text-4xl font-bold text-slate-900 italic font-serif"
+                      className={cn("text-3xl sm:text-4xl font-bold italic font-serif", isDarkMode ? "text-white" : "text-slate-900")}
+                      style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
                     >
                       Launch Your SaaS Brand in 4 Simple Steps
                     </h3>
@@ -1665,18 +1934,27 @@ export default function UwoLandingPage() {
                     }
                   ].map((item, i) => (
                     <ScrollReveal key={i} delay={i * 120}>
-                      <div className="p-6 rounded-3xl bg-white border border-slate-200/90 shadow-md hover:border-emerald-500 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 space-y-3 relative group cursor-pointer h-full flex flex-col justify-between">
+                      <div className={cn(
+                        "p-6 rounded-3xl border shadow-md hover:border-emerald-500 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 space-y-3 relative group cursor-pointer h-full flex flex-col justify-between",
+                        isDarkMode ? "bg-slate-950/80 border-slate-800 text-white" : "bg-white border-slate-200/90"
+                      )}>
                         <div className="space-y-3">
                           <div className="flex items-center justify-between">
-                            <span className="text-xs font-black text-emerald-800 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200/80 uppercase tracking-wider group-hover:bg-[#059669] group-hover:text-white transition-colors">
+                            <span className={cn(
+                              "text-xs font-black px-3 py-1 rounded-full uppercase tracking-wider group-hover:bg-[#059669] group-hover:text-white transition-colors",
+                              isDarkMode ? "bg-emerald-950 text-emerald-300 border border-emerald-800/80" : "bg-emerald-50 text-emerald-800 border border-emerald-200/80"
+                            )}>
                               {item.step}
                             </span>
-                            <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 group-hover:text-white group-hover:bg-[#059669] group-hover:scale-110 transition-all">
+                            <div className={cn(
+                              "w-8 h-8 rounded-full flex items-center justify-center group-hover:text-white group-hover:bg-[#059669] group-hover:scale-110 transition-all",
+                              isDarkMode ? "bg-slate-800 text-slate-400" : "bg-slate-100 text-slate-500"
+                            )}>
                               <CheckCircle2 size={16} />
                             </div>
                           </div>
-                          <h4 className="text-lg font-bold text-slate-900 group-hover:text-emerald-700 transition-colors">{item.title}</h4>
-                          <p className="text-xs text-slate-600 leading-relaxed font-medium">{item.desc}</p>
+                          <h4 className={cn("text-lg font-bold group-hover:text-emerald-400 transition-colors", isDarkMode ? "text-white" : "text-slate-900")}>{item.title}</h4>
+                          <p className={cn("text-xs leading-relaxed font-medium", isDarkMode ? "text-slate-400" : "text-slate-600")}>{item.desc}</p>
                         </div>
                       </div>
                     </ScrollReveal>
@@ -1685,12 +1963,13 @@ export default function UwoLandingPage() {
               </div>
 
               {/* 3. WHAT THE AGENCY GETS (DELIVERABLES & PLATFORM FEATURES) */}
-              <div className="space-y-8 border-t border-slate-200/80 pt-12">
+              <div className={cn("space-y-8 border-t pt-12", isDarkMode ? "border-slate-800" : "border-slate-200/80")}>
                 <ScrollReveal>
                   <div className="text-center space-y-2">
                     <span className="text-xs font-black tracking-widest text-[#059669] uppercase">AGENCY DELIVERABLES</span>
                     <h3
-                      className="text-3xl sm:text-4xl font-bold text-slate-900 italic font-serif"
+                      className={cn("text-3xl sm:text-4xl font-bold italic font-serif", isDarkMode ? "text-white" : "text-slate-900")}
+                      style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
                     >
                       Everything Included in Your White-Label Portal
                     </h3>
@@ -1700,23 +1979,26 @@ export default function UwoLandingPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   {/* Feature Box A */}
                   <ScrollReveal delay={100}>
-                    <div className="p-8 rounded-3xl bg-white border border-slate-200/90 shadow-lg space-y-4 text-left hover:border-emerald-500 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 group cursor-pointer h-full">
+                    <div className={cn(
+                      "p-8 rounded-3xl border shadow-lg space-y-4 text-left hover:border-emerald-500 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 group cursor-pointer h-full",
+                      isDarkMode ? "bg-slate-950/80 border-slate-800 text-white" : "bg-white border-slate-200/90"
+                    )}>
                       <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-[#059669] flex items-center justify-center group-hover:scale-110 transition-transform">
                         <Layers size={24} />
                       </div>
-                      <h4 className="text-xl font-bold text-slate-900 group-hover:text-[#059669] transition-colors">100% Custom-Branded Software</h4>
-                      <ul className="space-y-2.5 text-xs text-slate-600 font-medium">
+                      <h4 className={cn("text-xl font-bold transition-colors", isDarkMode ? "text-white group-hover:text-emerald-400" : "text-slate-900 group-hover:text-[#059669]")}>100% Custom-Branded Software</h4>
+                      <ul className={cn("space-y-2.5 text-xs font-medium", isDarkMode ? "text-slate-400" : "text-slate-600")}>
                         <li className="flex items-start gap-2">
                           <span className="text-[#059669] font-bold shrink-0">•</span>
-                          <span><strong className="text-slate-900">Complete Whitelabeling:</strong> Your brand name, logo, favicon, and brand color theme.</span>
+                          <span><strong className={isDarkMode ? "text-slate-100" : "text-slate-900"}>Complete Whitelabeling:</strong> Your brand name, logo, favicon, and brand color theme.</span>
                         </li>
                         <li className="flex items-start gap-2">
                           <span className="text-[#059669] font-bold shrink-0">•</span>
-                          <span><strong className="text-slate-900">Custom Subdomain:</strong> portal.yourbrand.com with free automatic SSL certificate.</span>
+                          <span><strong className={isDarkMode ? "text-slate-100" : "text-slate-900"}>Custom Subdomain:</strong> portal.yourbrand.com with free automatic SSL certificate.</span>
                         </li>
                         <li className="flex items-start gap-2">
                           <span className="text-[#059669] font-bold shrink-0">•</span>
-                          <span><strong className="text-slate-900">Agency Admin Hub:</strong> Dedicated master dashboard (/client/agency) to approve, provision, and monitor sub-clients.</span>
+                          <span><strong className={isDarkMode ? "text-slate-100" : "text-slate-900"}>Agency Admin Hub:</strong> Dedicated master dashboard (/client/agency) to approve, provision, and monitor sub-clients.</span>
                         </li>
                       </ul>
                     </div>
@@ -1724,23 +2006,26 @@ export default function UwoLandingPage() {
 
                   {/* Feature Box B */}
                   <ScrollReveal delay={200}>
-                    <div className="p-8 rounded-3xl bg-white border border-slate-200/90 shadow-lg space-y-4 text-left hover:border-teal-500 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 group cursor-pointer h-full">
+                    <div className={cn(
+                      "p-8 rounded-3xl border shadow-lg space-y-4 text-left hover:border-teal-500 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 group cursor-pointer h-full",
+                      isDarkMode ? "bg-slate-950/80 border-slate-800 text-white" : "bg-white border-slate-200/90"
+                    )}>
                       <div className="w-12 h-12 rounded-2xl bg-teal-500/10 border border-teal-500/30 text-teal-700 flex items-center justify-center group-hover:scale-110 transition-transform">
                         <CreditCard size={24} />
                       </div>
-                      <h4 className="text-xl font-bold text-slate-900 group-hover:text-teal-700 transition-colors">100% Direct Profit & Billing Control</h4>
-                      <ul className="space-y-2.5 text-xs text-slate-600 font-medium">
+                      <h4 className={cn("text-xl font-bold transition-colors", isDarkMode ? "text-white group-hover:text-teal-400" : "text-slate-900 group-hover:text-teal-700")}>100% Direct Profit & Billing Control</h4>
+                      <ul className={cn("space-y-2.5 text-xs font-medium", isDarkMode ? "text-slate-400" : "text-slate-600")}>
                         <li className="flex items-start gap-2">
                           <span className="text-teal-600 font-bold shrink-0">•</span>
-                          <span><strong className="text-slate-900">Direct Gateway Integration:</strong> Connect your Razorpay; 0% platform revenue cut.</span>
+                          <span><strong className={isDarkMode ? "text-slate-100" : "text-slate-900"}>Direct Gateway Integration:</strong> Connect your Razorpay; 0% platform revenue cut.</span>
                         </li>
                         <li className="flex items-start gap-2">
                           <span className="text-teal-600 font-bold shrink-0">•</span>
-                          <span><strong className="text-slate-900">Custom Pricing:</strong> You decide how much to charge your clients (e.g., ₹2,999/mo or ₹9,999/mo).</span>
+                          <span><strong className={isDarkMode ? "text-slate-100" : "text-slate-900"}>Custom Pricing:</strong> You decide how much to charge your clients (e.g., ₹2,999/mo or ₹9,999/mo).</span>
                         </li>
                         <li className="flex items-start gap-2">
                           <span className="text-teal-600 font-bold shrink-0">•</span>
-                          <span><strong className="text-slate-900">Instant Payouts:</strong> Money goes directly from client to your connected bank account.</span>
+                          <span><strong className={isDarkMode ? "text-slate-100" : "text-slate-900"}>Instant Payouts:</strong> Money goes directly from client to your connected bank account.</span>
                         </li>
                       </ul>
                     </div>
@@ -1748,12 +2033,15 @@ export default function UwoLandingPage() {
 
                   {/* Feature Box C */}
                   <ScrollReveal delay={300}>
-                    <div className="p-8 rounded-3xl bg-white border border-slate-200/90 shadow-lg space-y-4 text-left hover:border-indigo-500 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 group cursor-pointer h-full">
+                    <div className={cn(
+                      "p-8 rounded-3xl border shadow-lg space-y-4 text-left hover:border-indigo-500 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 group cursor-pointer h-full",
+                      isDarkMode ? "bg-slate-950/80 border-slate-800 text-white" : "bg-white border-slate-200/90"
+                    )}>
                       <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-700 flex items-center justify-center group-hover:scale-110 transition-transform">
                         <Zap size={24} />
                       </div>
-                      <h4 className="text-xl font-bold text-slate-900 group-hover:text-indigo-700 transition-colors">Full Enterprise Omni-Channel Suite</h4>
-                      <ul className="space-y-2.5 text-xs text-slate-600 font-medium">
+                      <h4 className={cn("text-xl font-bold transition-colors", isDarkMode ? "text-white group-hover:text-indigo-400" : "text-slate-900 group-hover:text-indigo-700")}>Full Enterprise Omni-Channel Suite</h4>
+                      <ul className={cn("space-y-2.5 text-xs font-medium", isDarkMode ? "text-slate-400" : "text-slate-600")}>
                         <li className="flex items-start gap-2">
                           <span className="text-indigo-600 font-bold shrink-0">•</span>
                           <span>WhatsApp Cloud API Automation & Multi-Agent Team Inbox</span>
@@ -1780,23 +2068,26 @@ export default function UwoLandingPage() {
 
                   {/* Feature Box D */}
                   <ScrollReveal delay={400}>
-                    <div className="p-8 rounded-3xl bg-white border border-slate-200/90 shadow-lg space-y-4 text-left hover:border-amber-500 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 group cursor-pointer h-full">
+                    <div className={cn(
+                      "p-8 rounded-3xl border shadow-lg space-y-4 text-left hover:border-amber-500 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 group cursor-pointer h-full",
+                      isDarkMode ? "bg-slate-950/80 border-slate-800 text-white" : "bg-white border-slate-200/90"
+                    )}>
                       <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-700 flex items-center justify-center group-hover:scale-110 transition-transform">
                         <ShieldCheck size={24} />
                       </div>
-                      <h4 className="text-xl font-bold text-slate-900 group-hover:text-amber-700 transition-colors">Zero Server & Maintenance Hassle</h4>
-                      <ul className="space-y-2.5 text-xs text-slate-600 font-medium">
+                      <h4 className={cn("text-xl font-bold transition-colors", isDarkMode ? "text-white group-hover:text-amber-400" : "text-slate-900 group-hover:text-amber-700")}>Zero Server & Maintenance Hassle</h4>
+                      <ul className={cn("space-y-2.5 text-xs font-medium", isDarkMode ? "text-slate-400" : "text-slate-600")}>
                         <li className="flex items-start gap-2">
                           <span className="text-amber-600 font-bold shrink-0">•</span>
-                          <span><strong className="text-slate-900">Cloud Infrastructure Managed:</strong> 99.9% uptime, auto-scaling, and regular backups handled for you.</span>
+                          <span><strong className={isDarkMode ? "text-slate-100" : "text-slate-900"}>Cloud Infrastructure Managed:</strong> 99.9% uptime, auto-scaling, and regular backups handled for you.</span>
                         </li>
                         <li className="flex items-start gap-2">
                           <span className="text-amber-600 font-bold shrink-0">•</span>
-                          <span><strong className="text-slate-900">Continuous Updates:</strong> All new connectors and feature updates automatically roll out to your brand.</span>
+                          <span><strong className={isDarkMode ? "text-slate-100" : "text-slate-900"}>Continuous Updates:</strong> All new connectors and feature updates automatically roll out to your brand.</span>
                         </li>
                         <li className="flex items-start gap-2">
                           <span className="text-amber-600 font-bold shrink-0">•</span>
-                          <span><strong className="text-slate-900">24/7 Agency Priority Support:</strong> Dedicated partner team to support your growth.</span>
+                          <span><strong className={isDarkMode ? "text-slate-100" : "text-slate-900"}>24/7 Agency Priority Support:</strong> Dedicated partner team to support your growth.</span>
                         </li>
                       </ul>
                     </div>
@@ -1806,11 +2097,12 @@ export default function UwoLandingPage() {
 
               {/* 4. WHAT IS REQUIRED FROM THE AGENCY (PREREQUISITES CHECKLIST) */}
               <ScrollReveal>
-                <div className="p-8 rounded-3xl bg-slate-50/80 border border-slate-200/90 space-y-6">
+                <div className={cn("p-8 rounded-3xl border space-y-6", isDarkMode ? "bg-slate-950/60 border-slate-800 text-white" : "bg-slate-50/80 border-slate-200/90")}>
                   <div className="text-left space-y-2">
                     <span className="text-xs font-black tracking-widest text-[#059669] uppercase">PREREQUISITES CHECKLIST</span>
                     <h3
-                      className="text-2xl sm:text-3xl font-bold text-slate-900 italic font-serif"
+                      className={cn("text-2xl sm:text-3xl font-bold italic font-serif", isDarkMode ? "text-white" : "text-slate-900")}
+                      style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
                     >
                       What is Required From Your Agency
                     </h3>
@@ -1835,9 +2127,15 @@ export default function UwoLandingPage() {
                         items: ['Active White-Label Agency', 'Subscription License', 'with the platform']
                       }
                     ].map((req, ri) => (
-                      <div key={ri} className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-xs hover:border-[#059669] hover:shadow-md transition-all duration-300 space-y-2 cursor-pointer group">
+                      <div
+                        key={ri}
+                        className={cn(
+                          "p-5 rounded-2xl border shadow-xs hover:border-[#059669] hover:shadow-md transition-all duration-300 space-y-2 cursor-pointer group",
+                          isDarkMode ? "bg-slate-900/90 border-slate-800 text-white" : "bg-white border-slate-200/90"
+                        )}
+                      >
                         <span className="text-[#059669] font-black text-sm group-hover:scale-105 inline-block transition-transform">{req.title}</span>
-                        <p className="text-xs text-slate-600 leading-relaxed font-medium space-y-1">
+                        <p className={cn("text-xs leading-relaxed font-medium space-y-1", isDarkMode ? "text-slate-300" : "text-slate-600")}>
                           {req.items.map((line, li) => (
                             <span key={li} className="block">{line}</span>
                           ))}
@@ -1849,12 +2147,13 @@ export default function UwoLandingPage() {
               </ScrollReveal>
 
               {/* 5. FREQUENTLY ASKED QUESTIONS (FAQ) */}
-              <div className="space-y-6 border-t border-slate-200/80 pt-12">
+              <div className={cn("space-y-6 border-t pt-12", isDarkMode ? "border-slate-800" : "border-slate-200/80")}>
                 <ScrollReveal>
                   <div className="text-center space-y-2">
                     <span className="text-xs font-black tracking-widest text-[#059669] uppercase">AGENCY PARTNER FAQS</span>
                     <h3
-                      className="text-3xl sm:text-4xl font-bold text-slate-900 italic font-serif"
+                      className={cn("text-3xl sm:text-4xl font-bold italic font-serif", isDarkMode ? "text-white" : "text-slate-900")}
+                      style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
                     >
                       Frequently Asked Questions
                     </h3>
@@ -1881,12 +2180,15 @@ export default function UwoLandingPage() {
                     }
                   ].map((faq, fi) => (
                     <ScrollReveal key={fi} delay={fi * 100}>
-                      <div className="p-6 rounded-2xl bg-white border border-slate-200/90 shadow-sm hover:shadow-md hover:border-emerald-400 transition-all duration-300 space-y-2 cursor-pointer h-full">
-                        <h4 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                      <div className={cn(
+                        "p-6 rounded-2xl border shadow-sm hover:shadow-md hover:border-emerald-400 transition-all duration-300 space-y-2 cursor-pointer h-full",
+                        isDarkMode ? "bg-slate-950/80 border-slate-800 text-white" : "bg-white border-slate-200/90"
+                      )}>
+                        <h4 className={cn("text-base font-bold flex items-center gap-2", isDarkMode ? "text-white" : "text-slate-900")}>
                           <HelpCircle size={18} className="text-[#059669] shrink-0" />
                           <span>{faq.q}</span>
                         </h4>
-                        <p className="text-xs text-slate-600 font-medium leading-relaxed pl-6">
+                        <p className={cn("text-xs font-medium leading-relaxed pl-6", isDarkMode ? "text-slate-400" : "text-slate-600")}>
                           {faq.a}
                         </p>
                       </div>
@@ -1897,13 +2199,17 @@ export default function UwoLandingPage() {
 
               {/* Bottom Banner CTA */}
               <ScrollReveal>
-                <div className="p-8 sm:p-10 rounded-3xl bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-emerald-50/80 border border-emerald-200 text-center space-y-4 shadow-sm hover:shadow-md transition-shadow">
+                <div className={cn(
+                  "p-8 sm:p-10 rounded-3xl border text-center space-y-4 shadow-sm hover:shadow-md transition-shadow",
+                  isDarkMode ? "bg-slate-950/80 border-slate-800 text-white" : "bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-emerald-50/80 border-emerald-200"
+                )}>
                   <h3
-                    className="text-3xl sm:text-4xl font-bold text-slate-900 italic font-serif"
+                    className={cn("text-3xl sm:text-4xl font-bold italic font-serif", isDarkMode ? "text-white" : "text-slate-900")}
+                    style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
                   >
                     Ready to Launch Your Software Agency Today?
                   </h3>
-                  <p className="text-sm text-slate-600 font-medium max-w-xl mx-auto">
+                  <p className={cn("text-sm font-medium max-w-xl mx-auto", isDarkMode ? "text-slate-300" : "text-slate-600")}>
                     Get your custom white-label domain configured in minutes. Rebrand, sell, and keep 100% of the revenue.
                   </p>
                   <div className="pt-2">
@@ -1928,10 +2234,8 @@ export default function UwoLandingPage() {
       {/* 12.5 FREQUENTLY ASKED QUESTIONS (FAQ) */}
       {/* ════════════════════════════════════════════════════════════════ */}
       <section id="faq" className={cn(
-        "relative py-20 px-6 sm:px-10 lg:px-14 max-w-5xl mx-auto my-20 rounded-[2.5rem] border-2 shadow-2xl overflow-hidden text-left",
-        isDarkMode
-          ? "bg-slate-900/95 border-slate-800 shadow-slate-950/60 text-slate-100"
-          : "bg-gradient-to-br from-emerald-500/15 via-teal-500/10 to-emerald-100/40 border-emerald-500/30 shadow-emerald-600/15 text-slate-900"
+        "relative py-20 px-6 sm:px-12 lg:px-16 w-full max-w-[1700px] mx-auto my-20 rounded-[2.5rem] border-2 shadow-2xl overflow-hidden text-left transition-all duration-300",
+        isDarkMode ? "bg-slate-900/80 border-slate-800 text-white shadow-emerald-950/20" : "bg-gradient-to-br from-emerald-500/15 via-teal-500/10 to-emerald-100/40 border-emerald-500/30 shadow-emerald-600/15"
       )}>
         {/* Vibrant Glowing Ambient Light Spheres & Grid Pattern Background */}
         <div className="absolute -top-32 -left-32 w-96 h-96 bg-emerald-400/35 rounded-full blur-[90px] pointer-events-none animate-pulse-glow" />
@@ -1949,17 +2253,12 @@ export default function UwoLandingPage() {
               STILL HAVE QUESTIONS?
             </span>
             <h2
-              className={cn(
-                "text-3xl sm:text-5xl font-bold font-serif leading-tight",
-                isDarkMode ? "text-white" : "text-slate-900"
-              )}
+              className={cn("text-3xl sm:text-5xl font-bold font-serif leading-tight", isDarkMode ? "text-white" : "text-slate-900")}
+              style={{ fontFamily: "'Times New Roman', Times, serif" }}
             >
               Frequently Asked Questions
             </h2>
-            <p className={cn(
-              "text-sm sm:text-base font-bold max-w-xl mx-auto",
-              isDarkMode ? "text-slate-300" : "text-slate-700"
-            )}>
+            <p className={cn("text-sm sm:text-base font-bold max-w-xl mx-auto", isDarkMode ? "text-slate-300" : "text-slate-700")}>
               Everything you need to know about UwoConnect.
             </p>
           </div>
@@ -2054,15 +2353,15 @@ export default function UwoLandingPage() {
                       <div className={cn(
                         "backdrop-blur-md border rounded-2xl transition-all duration-300 overflow-hidden group",
                         isDarkMode
-                          ? "bg-slate-800/90 border-slate-700/80 hover:border-emerald-500 hover:shadow-xl hover:shadow-emerald-950/40 text-slate-100"
-                          : "bg-white/95 border-emerald-200/90 hover:border-[#059669] hover:shadow-xl hover:shadow-emerald-600/10 text-slate-900"
+                          ? "bg-slate-950/90 border-slate-800 hover:border-emerald-500 hover:shadow-xl hover:shadow-emerald-950/20"
+                          : "bg-white/95 border-emerald-200/90 hover:border-[#059669] hover:shadow-xl hover:shadow-emerald-600/10"
                       )}>
                         <button
                           type="button"
                           onClick={() => setOpenFaqIndex(isOpen ? null : idx)}
                           className={cn(
-                            "w-full p-5 sm:p-6 text-left flex items-center justify-between gap-4 cursor-pointer select-none font-extrabold text-sm sm:text-base hover:text-[#059669] transition-colors",
-                            isDarkMode ? "text-slate-100" : "text-slate-900"
+                            "w-full p-5 sm:p-6 text-left flex items-center justify-between gap-4 cursor-pointer select-none font-extrabold text-sm sm:text-base transition-colors",
+                            isDarkMode ? "text-white hover:text-emerald-400" : "text-slate-900 hover:text-[#059669]"
                           )}
                         >
                           <span className="leading-snug">{faq.q}</span>
@@ -2070,9 +2369,9 @@ export default function UwoLandingPage() {
                             "w-8 h-8 rounded-full flex items-center justify-center shrink-0 border transition-all duration-500 transform shadow-xs",
                             isOpen
                               ? "bg-[#059669] text-white border-[#059669] rotate-180"
-                              : isDarkMode
-                                ? "bg-slate-700 text-emerald-400 border-slate-600 group-hover:bg-[#059669] group-hover:text-white group-hover:border-[#059669] rotate-0"
-                                : "bg-emerald-50 text-[#059669] border-emerald-200 group-hover:bg-[#059669] group-hover:text-white group-hover:border-[#059669] rotate-0"
+                              : (isDarkMode
+                                  ? "bg-slate-800 text-emerald-400 border-slate-700 group-hover:bg-[#059669] group-hover:text-white group-hover:border-[#059669] rotate-0"
+                                  : "bg-emerald-50 text-[#059669] border-emerald-200 group-hover:bg-[#059669] group-hover:text-white group-hover:border-[#059669] rotate-0")
                           )}>
                             {isOpen ? <Minus size={18} /> : <Plus size={18} />}
                           </span>
@@ -2081,7 +2380,7 @@ export default function UwoLandingPage() {
                         <div 
                           className={cn(
                             "grid transition-all duration-500 ease-in-out",
-                            isDarkMode ? "border-slate-700/80" : "border-emerald-100",
+                            isDarkMode ? "border-slate-800" : "border-emerald-100",
                             isOpen 
                               ? "grid-rows-[1fr] opacity-100 pt-3 pb-6 px-5 sm:px-6 border-t" 
                               : "grid-rows-[0fr] opacity-0 py-0 px-5 sm:px-6 border-t-0"
@@ -2119,14 +2418,36 @@ export default function UwoLandingPage() {
       {/* ════════════════════════════════════════════════════════════════ */}
       {/* 12.6 FINAL CTA SECTION */}
       {/* ════════════════════════════════════════════════════════════════ */}
-      <section className="relative py-16 px-6 sm:px-10 max-w-5xl mx-auto my-12 text-center bg-gradient-to-r from-slate-900 via-slate-800 to-emerald-950 text-white rounded-3xl border border-slate-800 shadow-2xl overflow-hidden">
+      <section className={cn(
+        "relative py-16 px-6 sm:px-12 lg:px-16 w-full max-w-[1700px] mx-auto my-12 text-center rounded-3xl border transition-colors duration-300 shadow-xl overflow-hidden",
+        isDarkMode
+          ? "bg-gradient-to-r from-slate-900 via-slate-800 to-emerald-950 border-slate-800 text-white shadow-2xl shadow-emerald-950/30"
+          : "bg-gradient-to-br from-emerald-50/90 via-white to-teal-50/80 border-emerald-200/90 text-slate-900 shadow-emerald-600/10"
+      )}>
+        {/* Ambient background glows */}
+        <div className={cn(
+          "absolute -top-24 -right-24 w-72 h-72 rounded-full blur-[90px] pointer-events-none",
+          isDarkMode ? "bg-emerald-500/10" : "bg-emerald-400/20"
+        )} />
+        <div className={cn(
+          "absolute -bottom-24 -left-24 w-72 h-72 rounded-full blur-[90px] pointer-events-none",
+          isDarkMode ? "bg-teal-500/10" : "bg-teal-400/20"
+        )} />
+
         <div className="relative z-10 space-y-4">
           <h3
-            className="text-3xl sm:text-4xl font-bold text-white font-serif leading-tight"
+            className={cn(
+              "text-3xl sm:text-4xl font-bold font-serif leading-tight",
+              isDarkMode ? "text-white" : "text-slate-900"
+            )}
+            style={{ fontFamily: "'Times New Roman', Times, serif" }}
           >
             Ready to simplify your business?
           </h3>
-          <p className="text-sm text-slate-300 font-medium max-w-lg mx-auto leading-relaxed">
+          <p className={cn(
+            "text-sm font-medium max-w-lg mx-auto leading-relaxed",
+            isDarkMode ? "text-slate-300" : "text-slate-600"
+          )}>
             Start managing your conversations, leads and automation with UwoConnect.
           </p>
           <div className="pt-2">
@@ -2142,21 +2463,25 @@ export default function UwoLandingPage() {
         </div>
       </section>
       </main>
-      <footer className="bg-slate-50 border-t border-slate-200 py-16 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 items-start text-xs">
+      <footer className={cn(
+        "border-t py-16 px-6 sm:px-12 lg:px-16 transition-colors duration-300",
+        isDarkMode ? "bg-slate-950 border-slate-800 text-slate-300" : "bg-slate-50 border-slate-200 text-slate-900"
+      )}>
+        <div className="w-full max-w-[1700px] mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 items-start text-xs">
 
           {/* Left Column: Company Links (Centered) */}
           <div className="space-y-3 text-center">
             <h5
               className="font-bold text-sm text-[#059669] font-serif text-center"
+              style={{ fontFamily: "'Times New Roman', Times, serif" }}
             >
               Company
             </h5>
-            <ul className="space-y-2 text-slate-900 font-bold text-center">
-              <li><Link href="/about" className="hover:text-emerald-700 transition-colors">About Us</Link></li>
-              <li><Link href="/contact" className="hover:text-emerald-700 transition-colors">Contact</Link></li>
-              <li><Link href="/book" className="hover:text-emerald-700 transition-colors">Book Demo</Link></li>
-              <li><Link href="/admin/whitelabel" className="hover:text-emerald-700 transition-colors">White Label</Link></li>
+            <ul className={cn("space-y-2 font-bold text-center", isDarkMode ? "text-slate-300" : "text-slate-900")}>
+              <li><Link href="/about" className="hover:text-emerald-500 transition-colors">About Us</Link></li>
+              <li><Link href="/contact" className="hover:text-emerald-500 transition-colors">Contact</Link></li>
+              <li><Link href="/book" className="hover:text-emerald-500 transition-colors">Book Demo</Link></li>
+              <li><Link href="/admin/whitelabel" className="hover:text-emerald-500 transition-colors">White Label</Link></li>
             </ul>
           </div>
 
@@ -2173,54 +2498,47 @@ export default function UwoLandingPage() {
                 />
               </div>
               <span
-                className="text-xl font-bold tracking-tight text-slate-900 italic font-serif"
+                className={cn("text-xl font-bold tracking-tight italic font-serif", isDarkMode ? "text-white" : "text-slate-900")}
+                style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
               >
                 UWO <span className="text-[#059669]">Connect</span>
               </span>
             </div>
 
-            <p className="text-slate-900 font-semibold max-w-sm text-center leading-relaxed">
+            <p className={cn("font-semibold max-w-sm text-center leading-relaxed", isDarkMode ? "text-slate-300" : "text-slate-900")}>
               Unified Communication & Business Automation Platform. Connect channels, tools, and workflows seamlessly.
             </p>
 
             {/* Social Media Icons (Single Row) */}
             <div className="flex flex-wrap sm:flex-nowrap items-center justify-center gap-1.5 sm:gap-2 pt-1 mx-auto max-w-full">
-              <a href="https://www.instagram.com/aimall.global/" target="_blank" rel="noopener noreferrer" title="Instagram" className="p-1.5 sm:p-2 rounded-xl bg-white border border-slate-200 shadow-2xs hover:scale-110 hover:border-pink-500 hover:shadow-md transition-all duration-300 cursor-pointer flex items-center justify-center shrink-0">
-                <InstagramLogo size={18} />
-              </a>
-              <a href="https://www.linkedin.com/in/aimall-global/" target="_blank" rel="noopener noreferrer" title="LinkedIn" className="p-1.5 sm:p-2 rounded-xl bg-white border border-slate-200 shadow-2xs hover:scale-110 hover:border-blue-600 hover:shadow-md transition-all duration-300 cursor-pointer flex items-center justify-center shrink-0">
-                <LinkedInLogo size={18} />
-              </a>
-              <a href="https://x.com/aimallglobal" target="_blank" rel="noopener noreferrer" title="X (Twitter)" className="p-1.5 sm:p-2 rounded-xl bg-white border border-slate-200 shadow-2xs hover:scale-110 hover:border-slate-900 hover:shadow-md transition-all duration-300 cursor-pointer flex items-center justify-center shrink-0">
-                <XLogo size={18} />
-              </a>
-              <a href="https://www.youtube.com/@aimallglobal" target="_blank" rel="noopener noreferrer" title="YouTube" className="p-1.5 sm:p-2 rounded-xl bg-white border border-slate-200 shadow-2xs hover:scale-110 hover:border-red-500 hover:shadow-md transition-all duration-300 cursor-pointer flex items-center justify-center shrink-0">
-                <YouTubeLogo size={18} />
-              </a>
-              <a href="https://in.pinterest.com/aimallglobal/" target="_blank" rel="noopener noreferrer" title="Pinterest" className="p-1.5 sm:p-2 rounded-xl bg-white border border-slate-200 shadow-2xs hover:scale-110 hover:border-red-600 hover:shadow-md transition-all duration-300 cursor-pointer flex items-center justify-center shrink-0">
-                <PinterestLogo size={18} />
-              </a>
-              <a href="https://www.facebook.com/aimallglobal/" target="_blank" rel="noopener noreferrer" title="Facebook" className="p-1.5 sm:p-2 rounded-xl bg-white border border-slate-200 shadow-2xs hover:scale-110 hover:border-blue-500 hover:shadow-md transition-all duration-300 cursor-pointer flex items-center justify-center shrink-0">
-                <FacebookLogo size={18} />
-              </a>
-              <a href="https://api.whatsapp.com/send?phone=918359890909" target="_blank" rel="noopener noreferrer" title="WhatsApp" className="p-1.5 sm:p-2 rounded-xl bg-white border border-slate-200 shadow-2xs hover:scale-110 hover:border-emerald-500 hover:shadow-md transition-all duration-300 cursor-pointer flex items-center justify-center shrink-0">
-                <WhatsAppLogo size={18} />
-              </a>
-              <a href="mailto:admin@uwo24.com" target="_blank" rel="noopener noreferrer" title="Gmail" className="p-1.5 sm:p-2 rounded-xl bg-white border border-slate-200 shadow-2xs hover:scale-110 hover:border-red-500 hover:shadow-md transition-all duration-300 cursor-pointer flex items-center justify-center shrink-0">
-                <GmailLogo size={18} />
-              </a>
-              <a href="https://www.threads.net/@aimallglobal" target="_blank" rel="noopener noreferrer" title="Threads" className="p-1.5 sm:p-2 rounded-xl bg-white border border-slate-200 shadow-2xs hover:scale-110 hover:border-slate-900 hover:shadow-md transition-all duration-300 cursor-pointer flex items-center justify-center shrink-0">
-                <ThreadsLogo size={18} />
-              </a>
-              <a href="https://www.reddit.com/settings/profile/#visibility" target="_blank" rel="noopener noreferrer" title="Reddit" className="p-1.5 sm:p-2 rounded-xl bg-white border border-slate-200 shadow-2xs hover:scale-110 hover:border-orange-500 hover:shadow-md transition-all duration-300 cursor-pointer flex items-center justify-center shrink-0">
-                <RedditLogo size={18} />
-              </a>
-              <a href="https://www.quora.com/profile/Aimallglobal" target="_blank" rel="noopener noreferrer" title="Quora" className="p-1.5 sm:p-2 rounded-xl bg-white border border-slate-200 shadow-2xs hover:scale-110 hover:border-red-700 hover:shadow-md transition-all duration-300 cursor-pointer flex items-center justify-center shrink-0">
-                <QuoraLogo size={18} />
-              </a>
-              <a href="https://medium.com/@03sonalijain" target="_blank" rel="noopener noreferrer" title="Medium" className="p-1.5 sm:p-2 rounded-xl bg-white border border-slate-200 shadow-2xs hover:scale-110 hover:border-slate-800 hover:shadow-md transition-all duration-300 cursor-pointer flex items-center justify-center shrink-0">
-                <MediumLogo size={18} />
-              </a>
+              {[
+                { href: "https://www.instagram.com/aimall.global/", title: "Instagram", icon: <InstagramLogo size={18} /> },
+                { href: "https://www.linkedin.com/in/aimall-global/", title: "LinkedIn", icon: <LinkedInLogo size={18} /> },
+                { href: "https://x.com/aimallglobal", title: "X (Twitter)", icon: <XLogo size={18} /> },
+                { href: "https://www.youtube.com/@aimallglobal", title: "YouTube", icon: <YouTubeLogo size={18} /> },
+                { href: "https://in.pinterest.com/aimallglobal/", title: "Pinterest", icon: <PinterestLogo size={18} /> },
+                { href: "https://www.facebook.com/aimallglobal/", title: "Facebook", icon: <FacebookLogo size={18} /> },
+                { href: "https://api.whatsapp.com/send?phone=918359890909", title: "WhatsApp", icon: <WhatsAppLogo size={18} /> },
+                { href: "mailto:admin@uwo24.com", title: "Gmail", icon: <GmailLogo size={18} /> },
+                { href: "https://www.threads.net/@aimallglobal", title: "Threads", icon: <ThreadsLogo size={18} /> },
+                { href: "https://www.reddit.com/settings/profile/#visibility", title: "Reddit", icon: <RedditLogo size={18} /> },
+                { href: "https://www.quora.com/profile/Aimallglobal", title: "Quora", icon: <QuoraLogo size={18} /> },
+                { href: "https://medium.com/@03sonalijain", title: "Medium", icon: <MediumLogo size={18} /> },
+              ].map((s, idx) => (
+                <a
+                  key={idx}
+                  href={s.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title={s.title}
+                  className={cn(
+                    "p-1.5 sm:p-2 rounded-xl border shadow-2xs hover:scale-110 hover:border-emerald-500 hover:shadow-md transition-all duration-300 cursor-pointer flex items-center justify-center shrink-0",
+                    isDarkMode ? "bg-slate-900 border-slate-800 text-white" : "bg-white border-slate-200"
+                  )}
+                >
+                  {s.icon}
+                </a>
+              ))}
             </div>
           </div>
 
@@ -2228,21 +2546,25 @@ export default function UwoLandingPage() {
           <div className="space-y-3 text-center">
             <h5
               className="font-bold text-sm text-[#059669] font-serif text-center"
+              style={{ fontFamily: "'Times New Roman', Times, serif" }}
             >
               Legal
             </h5>
-            <ul className="space-y-2 text-slate-900 font-bold text-center">
-              <li><button onClick={() => setIsTermsModalOpen(true)} className="hover:text-emerald-700 transition-colors cursor-pointer text-center mx-auto block">Terms &amp; Conditions</button></li>
-              <li><Link href="/privacy" className="hover:text-emerald-700 transition-colors cursor-pointer text-center mx-auto block">Privacy Policy</Link></li>
-              <li><Link href="/cookie-policy" className="hover:text-emerald-700 transition-colors cursor-pointer text-center mx-auto block">Cookie Policy</Link></li>
-              <li><button onClick={() => typeof window !== 'undefined' && window.dispatchEvent(new CustomEvent('open_cookie_settings'))} className="hover:text-emerald-700 transition-colors cursor-pointer text-center mx-auto block">Cookie Settings</button></li>
-              <li><button onClick={() => setIsTermsModalOpen(true)} className="hover:text-emerald-700 transition-colors cursor-pointer text-center mx-auto block">Refund Policy</button></li>
+            <ul className={cn("space-y-2 font-bold text-center", isDarkMode ? "text-slate-300" : "text-slate-900")}>
+              <li><button onClick={() => setIsTermsModalOpen(true)} className="hover:text-emerald-500 transition-colors cursor-pointer text-center mx-auto block">Terms &amp; Conditions</button></li>
+              <li><Link href="/privacy" className="hover:text-emerald-500 transition-colors cursor-pointer text-center mx-auto block">Privacy Policy</Link></li>
+              <li><Link href="/cookie-policy" className="hover:text-emerald-500 transition-colors cursor-pointer text-center mx-auto block">Cookie Policy</Link></li>
+              <li><button onClick={() => typeof window !== 'undefined' && window.dispatchEvent(new CustomEvent('open_cookie_settings'))} className="hover:text-emerald-500 transition-colors cursor-pointer text-center mx-auto block">Cookie Settings</button></li>
+              <li><button onClick={() => setIsTermsModalOpen(true)} className="hover:text-emerald-500 transition-colors cursor-pointer text-center mx-auto block">Refund Policy</button></li>
             </ul>
           </div>
 
         </div>
 
-        <div className="max-w-7xl mx-auto pt-10 mt-10 border-t border-slate-200 text-center text-xs text-slate-900 font-semibold">
+        <div className={cn(
+          "w-full max-w-[1700px] mx-auto pt-10 mt-10 border-t text-center text-xs font-semibold",
+          isDarkMode ? "border-slate-800 text-slate-400" : "border-slate-200 text-slate-900"
+        )}>
           © {new Date().getFullYear()} UWO Connect. All rights reserved. Unified Communication & Business Automation.
         </div>
       </footer>

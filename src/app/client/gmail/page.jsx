@@ -61,6 +61,8 @@ const CopyButton = ({ text }) => {
   );
 };
 
+const getAuthToken = () => typeof window !== 'undefined' ? (localStorage.getItem('token') || localStorage.getItem('uwo_token')) : null;
+
 const ClientEmailPage = () => {
   const [mounted, setMounted] = useState(false);
   const [client, setClient] = useState(null);
@@ -134,7 +136,7 @@ const ClientEmailPage = () => {
 
   const fetchClientData = async () => {
     try {
-      const token = localStorage.getItem('uwo_token');
+      const token = getAuthToken();
       if (!token) return;
 
       const res = await axios.get(`${API_BASE_URL}/api/profile`, {
@@ -163,7 +165,7 @@ const ClientEmailPage = () => {
         }
       }
       setFetchError(null);
-      const token = localStorage.getItem('uwo_token');
+      const token = getAuthToken();
       if (!token) {
         setLoading(false);
         return;
@@ -315,7 +317,7 @@ const ClientEmailPage = () => {
     }
     setSendingMail(true);
     try {
-      const token = localStorage.getItem('uwo_token');
+      const token = getAuthToken();
       const payload = {
         action: isScheduleMode ? 'schedule' : 'send',
         provider: 'gmail',
@@ -353,7 +355,7 @@ const ClientEmailPage = () => {
   const handleAIPolishText = async () => {
     setAiLoading(true);
     try {
-      const token = localStorage.getItem('uwo_token');
+      const token = getAuthToken();
       const res = await axios.post(
         `${API_BASE_URL}/api/campaigns/ai_generate/`,
         { prompt: messageBody || subject || "Business email", action_type: 'improve', tone: 'professional' },
@@ -370,7 +372,7 @@ const ClientEmailPage = () => {
   const handleDeleteEmail = async (emailId) => {
     if (!emailId) return;
     try {
-      const token = localStorage.getItem('uwo_token');
+      const token = getAuthToken();
       await axios.post(
         `${API_BASE_URL}/api/email/messages/${emailId}/delete_message/`,
         {},
@@ -393,7 +395,7 @@ const ClientEmailPage = () => {
     e.preventDefault();
     setSavingAutoReply(true);
     try {
-      const token = localStorage.getItem('uwo_token');
+      const token = getAuthToken();
       await axios.post(
         `${API_BASE_URL}/api/email/auto-replies/`,
         {

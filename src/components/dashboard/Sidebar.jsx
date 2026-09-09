@@ -90,11 +90,13 @@ const getPlanRank = (planObj, rawUserPlan = '') => {
     planObj?.id || 
     rawUserPlan || 
     ''
-  ).toLowerCase();
+  ).toLowerCase().trim();
 
+  if (!str || str.includes('free') || str.includes('none') || str.includes('no active plan')) return 0;
   if (str.includes('advanced') || str.includes('enterprise') || str.includes('power') || str.includes('agency')) return 3;
   if (str.includes('growth') || str.includes('pro')) return 2;
-  return 1;
+  if (str.includes('starter') || str.includes('basic')) return 1;
+  return 0;
 };
 
 /**
@@ -120,6 +122,7 @@ const Sidebar = ({ role, isOpen, onClose, onToggle }) => {
   const isFeatureUnlocked = (link) => {
     if (role === 'ADMIN') return true;
     if (!mounted) return false;
+    if (!link.requiredPlan) return true;
 
     const baseKey = (link.featureKey || link.name || '').toLowerCase().trim();
     const cleanKey = baseKey.replace(/^feature_/, '').replace(/^connector_/, '').replace(/\s+/g, '_');
@@ -206,9 +209,9 @@ const Sidebar = ({ role, isOpen, onClose, onToggle }) => {
     ...(isAgencyUser ? [
       { name: 'Agency Command Hub', href: '/client/agency', icon: Building2, requiredPlan: 'Starter' }
     ] : []),
-    { name: 'Dashboard', href: '/client', icon: LayoutDashboard, requiredPlan: 'Starter' },
-    { name: 'Learning Center', href: '/client/guides', icon: BookOpen, requiredPlan: 'Starter' },
-    { name: 'Channels', href: '/client/channels', icon: Link2, requiredPlan: 'Starter' },
+    { name: 'Dashboard', href: '/client', icon: LayoutDashboard },
+    { name: 'Learning Center', href: '/client/guides', icon: BookOpen },
+    { name: 'Channels', href: '/client/channels', icon: Link2, requiredPlan: 'Starter', featureKey: 'feature_channels' },
     { name: 'Outlook', href: '/client/email', icon: Mail, requiredPlan: 'Starter', featureKey: 'connector_outlook' },
     { name: 'Gmail', href: '/client/gmail', icon: Mail, requiredPlan: 'Starter', featureKey: 'connector_gmail' },
     { name: 'Voice & Video Calls', href: '/client/calls', icon: PhoneCall, requiredPlan: 'Starter', featureKey: 'feature_voice_video_call' },
@@ -220,18 +223,18 @@ const Sidebar = ({ role, isOpen, onClose, onToggle }) => {
     { name: 'Quotations', href: '/client/quotations', icon: FileCheck, requiredPlan: 'Starter', featureKey: 'feature_quotation' },
     { name: 'Proposals', href: '/client/proposals', icon: FileText, requiredPlan: 'Starter', featureKey: 'feature_proposal' },
     { name: 'Invoices', href: '/client/invoices', icon: Receipt, requiredPlan: 'Starter', featureKey: 'feature_invoice' },
-    { name: 'Messages', href: '/client/inbox', icon: MessageSquare, requiredPlan: 'Starter' },
+    { name: 'Messages', href: '/client/inbox', icon: MessageSquare, requiredPlan: 'Starter', featureKey: 'feature_shared_inbox' },
     { name: 'Broadcasts', href: '/client/campaigns', icon: Megaphone, requiredPlan: 'Starter', featureKey: 'feature_broadcast' },
     { name: 'Knowledge Base', href: '/client/knowledge', icon: Brain, requiredPlan: 'Starter', featureKey: 'feature_knowledge_base' },
     { name: 'Catalog', href: '/client/catalog', icon: ShoppingBag, requiredPlan: 'Starter', featureKey: 'feature_catalog' },
     { name: 'Payments', href: '/client/payments', icon: CreditCard, requiredPlan: 'Starter', featureKey: 'feature_payment' },
-    { name: 'Billing & Wallet', href: '/client/billing', icon: Wallet, requiredPlan: 'Starter' },
+    { name: 'Billing & Wallet', href: '/client/billing', icon: Wallet },
     { name: 'Orders', href: '/client/orders', icon: Receipt, requiredPlan: 'Starter', featureKey: 'feature_order' },
     { name: 'Team', href: '/client/team', icon: ShieldCheck, requiredPlan: 'Starter', featureKey: 'feature_team_dashboard' },
     { name: 'Work Reports', href: '/client/reports', icon: FileCheck, requiredPlan: 'Starter', featureKey: 'feature_reports' },
-    { name: 'Settings', href: '/client/settings', icon: Settings, requiredPlan: 'Starter' },
-    { name: 'Plans', href: '/client/plans', icon: Layers, requiredPlan: 'Starter' },
-    { name: 'Support', href: '/client/support', icon: LifeBuoy, requiredPlan: 'Starter' },
+    { name: 'Settings', href: '/client/settings', icon: Settings },
+    { name: 'Plans', href: '/client/plans', icon: Layers },
+    { name: 'Support', href: '/client/support', icon: LifeBuoy },
   ];
 
   const agentLinks = [
@@ -256,8 +259,17 @@ const Sidebar = ({ role, isOpen, onClose, onToggle }) => {
 
   const handleLogout = () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('uwo_token');
     localStorage.removeItem('user');
     localStorage.removeItem('client_company_logo');
+    localStorage.removeItem('cached_client_channels');
+    try {
+      Object.keys(localStorage).forEach(key => {
+        if (key.startsWith('cached_client_channels')) {
+          localStorage.removeItem(key);
+        }
+      });
+    } catch (e) {}
     window.location.href = '/auth/login';
   };
 

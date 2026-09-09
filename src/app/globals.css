@@ -57,6 +57,12 @@
     font-family: inherit;
   }
 
+  a,
+  a:visited {
+    color: inherit;
+    text-decoration: inherit;
+  }
+
   /* Disable browser native password reveal/clear buttons (Edge, IE, Chromium) */
   input::-ms-reveal,
   input::-ms-clear {

@@ -358,7 +358,7 @@ const SEEDED_FALLBACK_PLANS = [
   }
 ];
 
-export default function PricingComparisonTable({ plansData, onSelectPlan, isAdminView = false, onManagePlan }) {
+export default function PricingComparisonTable({ plansData, onSelectPlan, isAdminView = false, onManagePlan, dark = false }) {
   const router = useRouter();
   const { subscribePlan, entitlements, openUpgradeModal } = useEntitlement();
   const [billingPeriod, setBillingPeriod] = useState('MONTHLY'); // MONTHLY | YEARLY
@@ -593,7 +593,7 @@ export default function PricingComparisonTable({ plansData, onSelectPlan, isAdmi
   };
 
   return (
-    <div className="w-full space-y-10 pb-16 text-slate-900 bg-white font-serif" style={{ fontFamily: "'Times New Roman', Times, serif" }}>
+    <div className={cn("w-full space-y-10 pb-16 font-serif transition-colors", dark ? "text-white bg-transparent" : "text-slate-900 bg-white")} style={{ fontFamily: "'Times New Roman', Times, serif" }}>
 
       {/* CAPACITY WARNING TOAST */}
       {capacityNotice && (
@@ -621,27 +621,27 @@ export default function PricingComparisonTable({ plansData, onSelectPlan, isAdmi
 
       {/* UWO CONNECT HERO HEADER (PURE WHITE + GREEN) */}
       <div className="flex flex-col items-center justify-center space-y-3 sm:space-y-4 text-center max-w-3xl mx-auto pt-2 sm:pt-4 px-2">
-        <div className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-3.5 py-1 sm:py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-[10px] sm:text-xs font-extrabold tracking-wide max-w-full">
-          <Sparkles size={13} className="text-emerald-600 shrink-0" />
+        <div className={cn("inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-3.5 py-1 sm:py-1.5 rounded-full border text-[10px] sm:text-xs font-extrabold tracking-wide max-w-full", dark ? "bg-emerald-950/80 border-emerald-800 text-emerald-300" : "bg-emerald-50 border-emerald-200 text-emerald-800")}>
+          <Sparkles size={13} className="text-emerald-500 shrink-0" />
           <span className="truncate">OFFICIAL WORKSPACE PLANS</span>
         </div>
 
-        <h2 className="text-2xl sm:text-4xl font-black text-slate-900 tracking-tight">
+        <h2 className={cn("text-2xl sm:text-4xl font-black tracking-tight", dark ? "text-white" : "text-slate-900")}>
           Find the right plan for your business
         </h2>
-        <p className="text-slate-500 text-xs sm:text-sm font-medium leading-relaxed max-w-xl">
+        <p className={cn("text-xs sm:text-sm font-medium leading-relaxed max-w-xl", dark ? "text-slate-400" : "text-slate-500")}>
           Scale customer support, marketing broadcasts, and AI sales agents across WhatsApp, Facebook, and Instagram.
         </p>
 
         {/* MONTHLY | YEARLY BILLING TOGGLE (UWO GREEN HIGHLIGHT) */}
-        <div className="inline-flex items-center p-1 sm:p-1.5 bg-slate-100 rounded-2xl border border-slate-200 shadow-inner mt-2 max-w-full">
+        <div className={cn("inline-flex items-center p-1 sm:p-1.5 rounded-2xl border shadow-inner mt-2 max-w-full", dark ? "bg-slate-950 border-slate-800" : "bg-slate-100 border-slate-200")}>
           <button
             onClick={() => setBillingPeriod('MONTHLY')}
             className={cn(
               "px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-extrabold transition-all cursor-pointer",
               billingPeriod === 'MONTHLY'
-                ? "bg-white text-slate-900 shadow-sm border border-slate-200"
-                : "text-slate-600 hover:text-slate-900"
+                ? (dark ? "bg-slate-800 text-white shadow-sm border border-slate-700" : "bg-white text-slate-900 shadow-sm border border-slate-200")
+                : (dark ? "text-slate-400 hover:text-white" : "text-slate-600 hover:text-slate-900")
             )}
           >
             Monthly Billing
@@ -653,7 +653,7 @@ export default function PricingComparisonTable({ plansData, onSelectPlan, isAdmi
               "px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-extrabold transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer",
               billingPeriod === 'YEARLY'
                 ? "bg-[#059669] text-white shadow-md shadow-emerald-700/20"
-                : "text-slate-600 hover:text-slate-900"
+                : (dark ? "text-slate-400 hover:text-white" : "text-slate-600 hover:text-slate-900")
             )}
           >
             <span>Yearly Billing</span>
@@ -953,21 +953,21 @@ export default function PricingComparisonTable({ plansData, onSelectPlan, isAdmi
       {/* ═══════════════════════════════════════════════════════════════════════ */}
       {/* DESKTOP COMPARISON TABLE CONTAINER (>= lg)                             */}
       {/* ═══════════════════════════════════════════════════════════════════════ */}
-      <div className="hidden lg:block overflow-x-auto rounded-3xl border border-slate-200 bg-white shadow-sm">
+      <div className={cn("hidden lg:block overflow-x-auto rounded-3xl border shadow-sm transition-colors", dark ? "border-slate-800 bg-slate-950/80 text-white" : "border-slate-200 bg-white text-slate-900")}>
         <table className="w-full min-w-[880px] border-collapse text-left">
 
           {/* TABLE HEADER: PLAN CARDS & CHANNEL SELECTORS */}
           <thead>
-            <tr className="border-b border-slate-200 bg-slate-50/80">
-              <th className="p-6 w-1/4 align-top border-r border-slate-200">
+            <tr className={cn("border-b", dark ? "border-slate-800 bg-slate-900/90" : "border-slate-200 bg-slate-50/80")}>
+              <th className={cn("p-6 w-1/4 align-top border-r", dark ? "border-slate-800" : "border-slate-200")}>
                 <div className="space-y-2">
-                  <span className="text-[11px] font-black text-emerald-700 uppercase tracking-widest">
+                  <span className="text-[11px] font-black text-emerald-600 uppercase tracking-widest">
                     COMPARISON MATRIX
                   </span>
-                  <h3 className="text-xl font-black text-slate-900 tracking-tight">
+                  <h3 className={cn("text-xl font-black tracking-tight", dark ? "text-white" : "text-slate-900")}>
                     Compare All Plans
                   </h3>
-                  <p className="text-xs text-slate-500 font-medium leading-relaxed">
+                  <p className={cn("text-xs font-medium leading-relaxed", dark ? "text-slate-400" : "text-slate-500")}>
                     Select a channel pill inside any plan column below to inspect channel-specific features, quotas & message rates.
                   </p>
                 </div>
@@ -990,7 +990,7 @@ export default function PricingComparisonTable({ plansData, onSelectPlan, isAdmi
                 return (
                   <th
                     key={plan.id}
-                    className="p-6 w-1/4 align-top relative border-r last:border-r-0 border-slate-200 transition-colors"
+                    className={cn("p-6 w-1/4 align-top relative border-r last:border-r-0 transition-colors", dark ? "border-slate-800" : "border-slate-200")}
                   >
                     {/* Badge Header */}
                     {plan.badge_text && (
@@ -1002,10 +1002,10 @@ export default function PricingComparisonTable({ plansData, onSelectPlan, isAdmi
                     <div className="space-y-4">
                       {/* Plan Title & Price */}
                       <div>
-                        <h4 className="text-2xl font-black text-slate-900 tracking-tight">
+                        <h4 className={cn("text-2xl font-black tracking-tight", dark ? "text-white" : "text-slate-900")}>
                           {plan.name}
                         </h4>
-                        <p className="text-xs text-slate-500 mt-1 min-h-[32px] font-medium leading-relaxed">
+                        <p className={cn("text-xs mt-1 min-h-[32px] font-medium leading-relaxed", dark ? "text-slate-400" : "text-slate-500")}>
                           {plan.description}
                         </p>
                       </div>
@@ -1035,7 +1035,7 @@ export default function PricingComparisonTable({ plansData, onSelectPlan, isAdmi
 
                         <div className="space-y-1">
                           <div className="flex items-baseline gap-1">
-                            <span className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                            <span className={cn("text-xl sm:text-2xl font-black tracking-tight", dark ? "text-white" : "text-slate-900")}>
                               {plan.currency && plan.currency.trim().length > 1 ? `${plan.currency.trim()} ` : (plan.currency || '₹')}
                               {displayPrice.toLocaleString('en-IN')}
                             </span>
@@ -1044,7 +1044,7 @@ export default function PricingComparisonTable({ plansData, onSelectPlan, isAdmi
                           </div>
 
                         {billingPeriod === 'YEARLY' && (
-                          <div className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200 inline-block">
+                          <div className={cn("text-[11px] font-bold px-2 py-0.5 rounded-md border inline-block", dark ? "text-emerald-300 bg-emerald-950/80 border-emerald-800" : "text-emerald-700 bg-emerald-50 border-emerald-200")}>
                             Billed Yearly (≈ ₹{Math.round(plan.yearly_price / 12).toLocaleString('en-IN')}/mo)
                           </div>
                         )}
@@ -1069,14 +1069,14 @@ export default function PricingComparisonTable({ plansData, onSelectPlan, isAdmi
                       {/* ════════════════════════════════════════════════════════════ */}
                       {/* PER-PLAN CHANNEL SELECTOR AREA (DRILL-DOWN CONTROLLER) */}
                       {/* ════════════════════════════════════════════════════════════ */}
-                      <div className="pt-3 border-t border-slate-200/80 space-y-2">
+                      <div className={cn("pt-3 border-t space-y-2", dark ? "border-slate-800" : "border-slate-200/80")}>
                         <div className="flex items-center justify-between text-xs">
-                          <span className="font-extrabold text-slate-700">
+                          <span className={cn("font-extrabold", dark ? "text-slate-300" : "text-slate-700")}>
                             {plan.max_channels === 1 && "Choose any 1 channel"}
                             {plan.max_channels === 2 && "Choose any 2 channels"}
                             {plan.max_channels >= 3 && "All 3 channels included"}
                           </span>
-                          <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded">
+                          <span className={cn("text-[10px] font-bold px-1.5 py-0.5 rounded", dark ? "text-emerald-300 bg-emerald-950/80" : "text-emerald-700 bg-emerald-100")}>
                             {curSelected.length}/{plan.max_channels}
                           </span>
                         </div>
@@ -1092,17 +1092,17 @@ export default function PricingComparisonTable({ plansData, onSelectPlan, isAdmi
                                 key={chKey}
                                 onClick={() => handleToggleChannelPill(plan, chKey)}
                                 className={cn(
-                                  "w-full px-3.5 py-2.5 rounded-xl text-xs font-extrabold transition-all flex items-center justify-between cursor-pointer bg-white border",
+                                  "w-full px-3.5 py-2.5 rounded-xl text-xs font-extrabold transition-all flex items-center justify-between cursor-pointer border",
                                   isSelected
-                                    ? "border-2 border-[#059669] text-slate-900 shadow-2xs"
+                                    ? (dark ? "border-2 border-[#059669] bg-emerald-950/40 text-white shadow-2xs" : "border-2 border-[#059669] text-slate-900 shadow-2xs")
                                     : (isViewTabActive
-                                      ? "border border-emerald-400 bg-emerald-50/30 text-slate-900"
-                                      : "border-slate-200 text-slate-700 hover:border-emerald-300 hover:bg-emerald-50/40")
+                                      ? (dark ? "border border-emerald-500 bg-emerald-950/20 text-white" : "border border-emerald-400 bg-emerald-50/30 text-slate-900")
+                                      : (dark ? "border-slate-800 bg-slate-900/60 text-slate-300 hover:border-emerald-500" : "border-slate-200 bg-white text-slate-700 hover:border-emerald-300 hover:bg-emerald-50/40"))
                                 )}
                               >
                                 <div className="flex items-center gap-2.5">
                                   {renderChannelLogo(chKey)}
-                                  <span className="text-slate-900">{renderChannelName(chKey)}</span>
+                                  <span className={dark ? "text-white" : "text-slate-900"}>{renderChannelName(chKey)}</span>
                                 </div>
 
                                 {isSelected ? (
@@ -1110,7 +1110,7 @@ export default function PricingComparisonTable({ plansData, onSelectPlan, isAdmi
                                     ✓
                                   </span>
                                 ) : (
-                                  <span className="text-[11px] text-slate-400 font-medium hover:text-emerald-700">Select</span>
+                                  <span className="text-[11px] text-slate-400 font-medium hover:text-emerald-500">Select</span>
                                 )}
                               </div>
                             );
@@ -1127,16 +1127,16 @@ export default function PricingComparisonTable({ plansData, onSelectPlan, isAdmi
           <tbody>
 
             {/* SECTION HEADER: SELECTED CHANNEL DRILL-DOWN */}
-            <tr className="bg-slate-100 border-y border-slate-200">
-              <td colSpan={4} className="py-2.5 px-6 font-black text-xs uppercase tracking-widest text-slate-800 flex items-center gap-2">
-                <Layers size={14} className="text-emerald-700" />
+            <tr className={cn("border-y", dark ? "bg-slate-900 border-slate-800" : "bg-slate-100 border-slate-200")}>
+              <td colSpan={4} className={cn("py-2.5 px-6 font-black text-xs uppercase tracking-widest flex items-center gap-2", dark ? "text-slate-200" : "text-slate-800")}>
+                <Layers size={14} className="text-emerald-500" />
                 <span>Selected Channel Details & Entitlements</span>
               </td>
             </tr>
 
             {/* ACTIVE CHANNEL DISPLAY HEADER ROW */}
-            <tr className="border-b border-slate-200 bg-emerald-50/30">
-              <td className="p-4 font-bold text-xs text-slate-700">
+            <tr className={cn("border-b", dark ? "border-slate-800 bg-emerald-950/20" : "border-slate-200 bg-emerald-50/30")}>
+              <td className={cn("p-4 font-bold text-xs", dark ? "text-slate-300" : "text-slate-700")}>
                 ACTIVE DRILL-DOWN VIEW
               </td>
               {plans.map((plan) => {
@@ -1145,11 +1145,11 @@ export default function PricingComparisonTable({ plansData, onSelectPlan, isAdmi
                 const isSelectedInPlan = (selectedChannels[planSlug] || ['whatsapp']).includes(viewCh);
 
                 return (
-                  <td key={plan.id} className="p-4 align-middle border-r last:border-r-0 border-slate-200">
+                  <td key={plan.id} className={cn("p-4 align-middle border-r last:border-r-0", dark ? "border-slate-800" : "border-slate-200")}>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         {renderChannelLogo(viewCh)}
-                        <span className="font-extrabold text-xs uppercase tracking-wider text-slate-900">
+                        <span className={cn("font-extrabold text-xs uppercase tracking-wider", dark ? "text-white" : "text-slate-900")}>
                           {renderChannelName(viewCh)}
                         </span>
                       </div>
@@ -1166,11 +1166,11 @@ export default function PricingComparisonTable({ plansData, onSelectPlan, isAdmi
             </tr>
 
             {/* 1. WHAT YOU GET SECTION */}
-            <tr className="border-b border-slate-200">
-              <td className="p-5 align-top font-bold text-xs text-slate-900 bg-slate-50/50">
+            <tr className={cn("border-b", dark ? "border-slate-800" : "border-slate-200")}>
+              <td className={cn("p-5 align-top font-bold text-xs", dark ? "bg-slate-900/40 text-white" : "bg-slate-50/50 text-slate-900")}>
                 <div className="space-y-1">
-                  <p className="font-extrabold text-slate-900">1. WHAT YOU GET</p>
-                  <p className="text-[11px] text-slate-500 font-normal">Core channel capabilities & features</p>
+                  <p className={cn("font-extrabold", dark ? "text-white" : "text-slate-900")}>1. WHAT YOU GET</p>
+                  <p className={cn("text-[11px] font-normal", dark ? "text-slate-400" : "text-slate-500")}>Core channel capabilities & features</p>
                 </div>
               </td>
               {plans.map((plan) => {
@@ -1180,11 +1180,11 @@ export default function PricingComparisonTable({ plansData, onSelectPlan, isAdmi
                 const whatYouGet = chDetails.what_you_get || [];
 
                 return (
-                  <td key={plan.id} className="p-5 align-top border-r last:border-r-0 border-slate-200">
-                    <ul className="space-y-2 text-xs text-slate-700">
+                  <td key={plan.id} className={cn("p-5 align-top border-r last:border-r-0", dark ? "border-slate-800" : "border-slate-200")}>
+                    <ul className={cn("space-y-2 text-xs", dark ? "text-slate-300" : "text-slate-700")}>
                       {whatYouGet.map((item, idx) => (
                         <li key={idx} className="flex items-start gap-2">
-                          <Check size={15} className="text-emerald-600 shrink-0 font-extrabold mt-0.5" />
+                          <Check size={15} className="text-emerald-500 shrink-0 font-extrabold mt-0.5" />
                           <span className="font-semibold">{item}</span>
                         </li>
                       ))}
@@ -1195,11 +1195,11 @@ export default function PricingComparisonTable({ plansData, onSelectPlan, isAdmi
             </tr>
 
             {/* 2. FEATURES SECTION */}
-            <tr className="border-b border-slate-200">
-              <td className="p-5 align-top font-bold text-xs text-slate-900 bg-slate-50/50">
+            <tr className={cn("border-b", dark ? "border-slate-800" : "border-slate-200")}>
+              <td className={cn("p-5 align-top font-bold text-xs", dark ? "bg-slate-900/40 text-white" : "bg-slate-50/50 text-slate-900")}>
                 <div className="space-y-1">
-                  <p className="font-extrabold text-slate-900">2. FEATURES</p>
-                  <p className="text-[11px] text-slate-500 font-normal">Automation, inbox & triggers</p>
+                  <p className={cn("font-extrabold", dark ? "text-white" : "text-slate-900")}>2. FEATURES</p>
+                  <p className={cn("text-[11px] font-normal", dark ? "text-slate-400" : "text-slate-500")}>Automation, inbox & triggers</p>
                 </div>
               </td>
               {plans.map((plan) => {
@@ -1209,11 +1209,11 @@ export default function PricingComparisonTable({ plansData, onSelectPlan, isAdmi
                 const featuresList = chDetails.features || [];
 
                 return (
-                  <td key={plan.id} className="p-5 align-top border-r last:border-r-0 border-slate-200">
-                    <ul className="space-y-2 text-xs text-slate-700">
+                  <td key={plan.id} className={cn("p-5 align-top border-r last:border-r-0", dark ? "border-slate-800" : "border-slate-200")}>
+                    <ul className={cn("space-y-2 text-xs", dark ? "text-slate-300" : "text-slate-700")}>
                       {featuresList.map((item, idx) => (
                         <li key={idx} className="flex items-start gap-2">
-                          <Check size={15} className="text-emerald-600 shrink-0 font-extrabold mt-0.5" />
+                          <Check size={15} className="text-emerald-500 shrink-0 font-extrabold mt-0.5" />
                           <span className="font-medium">{item}</span>
                         </li>
                       ))}
@@ -1224,11 +1224,11 @@ export default function PricingComparisonTable({ plansData, onSelectPlan, isAdmi
             </tr>
 
             {/* 3. LIMITS SECTION */}
-            <tr className="border-b border-slate-200">
-              <td className="p-5 align-top font-bold text-xs text-slate-900 bg-slate-50/50">
+            <tr className={cn("border-b", dark ? "border-slate-800" : "border-slate-200")}>
+              <td className={cn("p-5 align-top font-bold text-xs", dark ? "bg-slate-900/40 text-white" : "bg-slate-50/50 text-slate-900")}>
                 <div className="space-y-1">
-                  <p className="font-extrabold text-slate-900">3. LIMITS & QUOTAS</p>
-                  <p className="text-[11px] text-slate-500 font-normal">Messages, contacts & fields</p>
+                  <p className={cn("font-extrabold", dark ? "text-white" : "text-slate-900")}>3. LIMITS & QUOTAS</p>
+                  <p className={cn("text-[11px] font-normal", dark ? "text-slate-400" : "text-slate-500")}>Messages, contacts & fields</p>
                 </div>
               </td>
               {plans.map((plan) => {
@@ -1238,15 +1238,15 @@ export default function PricingComparisonTable({ plansData, onSelectPlan, isAdmi
                 const limitsObj = chDetails.limits || {};
 
                 return (
-                  <td key={plan.id} className="p-5 align-top border-r last:border-r-0 border-slate-200">
+                  <td key={plan.id} className={cn("p-5 align-top border-r last:border-r-0", dark ? "border-slate-800" : "border-slate-200")}>
                     <div className="space-y-2.5 text-xs">
                       {Object.entries(limitsObj).map(([k, lim]) => {
                         const val = lim.value || 'unlimited';
                         const isUnl = String(val).toLowerCase() === 'unlimited';
                         return (
                           <div key={k} className="space-y-0.5">
-                            <div className="flex items-center gap-1.5 font-bold text-slate-900">
-                              <Check size={14} className="text-emerald-600 shrink-0" />
+                            <div className={cn("flex items-center gap-1.5 font-bold", dark ? "text-white" : "text-slate-900")}>
+                              <Check size={14} className="text-emerald-500 shrink-0" />
                               <span>{isUnl ? `Unlimited ${lim.label || k}` : `${val} ${lim.label || k}`}</span>
                             </div>
                             {lim.description && (
@@ -1262,11 +1262,11 @@ export default function PricingComparisonTable({ plansData, onSelectPlan, isAdmi
             </tr>
 
             {/* 4. MESSAGE COST SECTION */}
-            <tr className="border-b border-slate-200">
-              <td className="p-5 align-top font-bold text-xs text-slate-900 bg-slate-50/50">
+            <tr className={cn("border-b", dark ? "border-slate-800" : "border-slate-200")}>
+              <td className={cn("p-5 align-top font-bold text-xs", dark ? "bg-slate-900/40 text-white" : "bg-slate-50/50 text-slate-900")}>
                 <div className="space-y-1">
-                  <p className="font-extrabold text-slate-900">4. MESSAGE COST</p>
-                  <p className="text-[11px] text-slate-500 font-normal">Rates per template / message type</p>
+                  <p className={cn("font-extrabold", dark ? "text-white" : "text-slate-900")}>4. MESSAGE COST</p>
+                  <p className={cn("text-[11px] font-normal", dark ? "text-slate-400" : "text-slate-500")}>Rates per template / message type</p>
                 </div>
               </td>
               {plans.map((plan) => {
@@ -1276,14 +1276,14 @@ export default function PricingComparisonTable({ plansData, onSelectPlan, isAdmi
                 const costs = chDetails.message_costs || [];
 
                 return (
-                  <td key={plan.id} className="p-5 align-top border-r last:border-r-0 border-slate-200">
+                  <td key={plan.id} className={cn("p-5 align-top border-r last:border-r-0", dark ? "border-slate-800" : "border-slate-200")}>
                     <div className="space-y-1.5 text-xs">
                       {costs.map((c, idx) => (
-                        <div key={idx} className="flex justify-between items-center py-1 border-b border-slate-100 last:border-b-0">
-                          <span className="text-slate-600 font-medium">{c.type}:</span>
+                        <div key={idx} className={cn("flex justify-between items-center py-1 border-b last:border-b-0", dark ? "border-slate-800" : "border-slate-100")}>
+                          <span className={cn("font-medium", dark ? "text-slate-400" : "text-slate-600")}>{c.type}:</span>
                           <span className={cn(
                             "font-black",
-                            c.price === 'FREE' ? "text-emerald-700" : "text-slate-900"
+                            c.price === 'FREE' ? "text-emerald-400" : (dark ? "text-white" : "text-slate-900")
                           )}>
                             {c.price}
                           </span>
@@ -1296,11 +1296,11 @@ export default function PricingComparisonTable({ plansData, onSelectPlan, isAdmi
             </tr>
 
             {/* 5. ADDITIONAL BENEFITS */}
-            <tr className="border-b border-slate-200">
-              <td className="p-5 align-top font-bold text-xs text-slate-900 bg-slate-50/50">
+            <tr className={cn("border-b", dark ? "border-slate-800" : "border-slate-200")}>
+              <td className={cn("p-5 align-top font-bold text-xs", dark ? "bg-slate-900/40 text-white" : "bg-slate-50/50 text-slate-900")}>
                 <div className="space-y-1">
-                  <p className="font-extrabold text-slate-900">5. ADDITIONAL BENEFITS</p>
-                  <p className="text-[11px] text-slate-500 font-normal">Markup & support guarantees</p>
+                  <p className={cn("font-extrabold", dark ? "text-white" : "text-slate-900")}>5. ADDITIONAL BENEFITS</p>
+                  <p className={cn("text-[11px] font-normal", dark ? "text-slate-400" : "text-slate-500")}>Markup & support guarantees</p>
                 </div>
               </td>
               {plans.map((plan) => {
@@ -1310,11 +1310,11 @@ export default function PricingComparisonTable({ plansData, onSelectPlan, isAdmi
                 const benefits = chDetails.additional_benefits || [];
 
                 return (
-                  <td key={plan.id} className="p-5 align-top border-r last:border-r-0 border-slate-200">
-                    <ul className="space-y-2 text-xs text-slate-700">
+                  <td key={plan.id} className={cn("p-5 align-top border-r last:border-r-0", dark ? "border-slate-800" : "border-slate-200")}>
+                    <ul className={cn("space-y-2 text-xs", dark ? "text-slate-300" : "text-slate-700")}>
                       {benefits.map((b, idx) => (
                         <li key={idx} className="flex items-center gap-2 font-semibold">
-                          <Check size={14} className="text-emerald-600 shrink-0 font-extrabold" />
+                          <Check size={14} className="text-emerald-500 shrink-0 font-extrabold" />
                           <span>{typeof b === 'string' ? b : b.title}</span>
                         </li>
                       ))}
