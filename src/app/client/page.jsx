@@ -180,7 +180,7 @@ const ClientOverview = () => {
     if (storedUser) {
       try {
         const parsed = JSON.parse(storedUser);
-        let name = parsed.name || parsed.first_name || parsed.username || parsed.email || 'Abha';
+        let name = parsed.name || parsed.first_name || parsed.username || parsed.email || 'User';
         if (name.includes('@')) {
           name = name.split('@')[0];
           name = name.charAt(0).toUpperCase() + name.slice(1);
@@ -350,17 +350,27 @@ const ClientOverview = () => {
         <div className="max-w-7xl mx-auto w-full p-4 sm:p-6 pb-20">
           
           {/* Welcome Section */}
-          <div data-tour="dashboard-welcome" className="flex flex-col sm:flex-row sm:items-center justify-between mb-8">
+          <div data-tour="dashboard-welcome" className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 pb-6 border-b border-slate-100">
             <div>
-              <h1 className="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight mb-2">
-                Welcome, <span className="italic font-bold text-emerald-800">{userName}</span>
+              <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+                <span className="px-2.5 py-0.5 rounded-md bg-emerald-50 border border-emerald-200/60 text-emerald-800 text-[10px] font-black uppercase tracking-wider">
+                  🏢 {userObj?.client?.business_name || 'My Workspace'}
+                </span>
+                {userObj?.client?.plan && (
+                  <span className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 text-[10px] font-bold uppercase tracking-wider">
+                    {userObj.client.plan} Plan
+                  </span>
+                )}
+              </div>
+              <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight mb-1">
+                Welcome, <span className="text-emerald-700">{userName}</span>
               </h1>
-              <p className="text-slate-500 font-medium italic text-xs sm:text-sm">Your automation command center is running smoothly.</p>
+              <p className="text-slate-500 font-medium text-xs sm:text-sm">Your multi-channel communication & automation command center.</p>
             </div>
             <button 
               data-tour="dashboard-launch-btn"
               onClick={() => router.push('/client/workflows')}
-              className="mt-4 sm:mt-0 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-2xl text-xs uppercase tracking-wider transition-all shadow-sm flex items-center gap-2 cursor-pointer"
+              className="mt-4 sm:mt-0 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-2xl text-xs uppercase tracking-wider transition-all shadow-sm flex items-center gap-2 cursor-pointer shrink-0"
             >
               <GitBranch size={16} /> Launch Workflow Builder
             </button>

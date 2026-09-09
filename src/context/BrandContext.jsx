@@ -78,7 +78,7 @@ export function BrandProvider({ children }) {
         }
       }
       
-      // Also check if logged in user has local client branding cached
+      // Check if logged in user has local client branding cached
       let localUserClient = null;
       if (typeof window !== 'undefined') {
         try {
@@ -92,14 +92,14 @@ export function BrandProvider({ children }) {
         }
       }
 
-      const isDefaultHost = ['localhost', '127.0.0.1', 'uwoconnect.aisa24.com'].includes(host);
-      const clientIdParam = (!isDefaultHost && localUserClient?.id) ? `&client_id=${localUserClient.id}` : '';
+      const clientIdParam = localUserClient?.id ? `&client_id=${localUserClient.id}` : '';
       const res = await axios.get(`${API_BASE_URL}/api/whitelabel/config?domain=${host}${clientIdParam}`);
       
       if (res.data) {
         const mergedBrand = {
           ...DEFAULT_BRAND,
-          ...res.data
+          ...res.data,
+          brand_name: res.data.brand_name || localUserClient?.business_name || DEFAULT_BRAND.brand_name,
         };
         setBrand(mergedBrand);
         applyBrandToDOM(mergedBrand);
@@ -117,16 +117,18 @@ export function BrandProvider({ children }) {
     fetchBrandConfig();
   }, [fetchBrandConfig]);
 
-  // Listen to custom event when client updates branding in settings
+  // Listen to custom events when user logs in, updates profile, or switches tenant
   useEffect(() => {
     const handleProfileUpdate = () => {
       fetchBrandConfig();
     };
     window.addEventListener('profileUpdated', handleProfileUpdate);
     window.addEventListener('brandUpdated', handleProfileUpdate);
+    window.addEventListener('storage', handleProfileUpdate);
     return () => {
       window.removeEventListener('profileUpdated', handleProfileUpdate);
       window.removeEventListener('brandUpdated', handleProfileUpdate);
+      window.removeEventListener('storage', handleProfileUpdate);
     };
   }, [fetchBrandConfig]);
 
