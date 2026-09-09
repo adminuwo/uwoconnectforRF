@@ -1,13 +1,20 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Users, Search, MoreVertical, Phone, Mail, MessageSquare, Download, LayoutGrid, Table } from 'lucide-react';
+import { 
+  Users, Search, MoreVertical, Phone, Mail, MessageSquare, Download, 
+  LayoutGrid, Table, Calendar, Clock, AlertCircle 
+} from 'lucide-react';
 import axios from 'axios';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import ContactDetailsModal from '@/components/crm/ContactDetailsModal';
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app';
+
 const STAGES = [
   { id: 'NEW', label: 'New Lead', color: 'bg-blue-100 text-blue-700 border-blue-200' },
+  { id: 'QUALIFIED', label: 'Qualified Lead', color: 'bg-cyan-100 text-cyan-700 border-cyan-200' },
+  { id: 'HOT_LEAD', label: '🔥 Hot Lead', color: 'bg-rose-100 text-rose-700 border-rose-300' },
   { id: 'FOLLOWUP', label: 'Follow Up', color: 'bg-yellow-100 text-yellow-700 border-yellow-200' },
   { id: 'NEGOTIATION', label: 'Negotiation', color: 'bg-orange-100 text-orange-700 border-orange-200' },
   { id: 'WON', label: 'Closed Won', color: 'bg-green-100 text-green-700 border-green-200' },
@@ -22,12 +29,17 @@ export default function CRMPage() {
   const [viewMode, setViewMode] = useState('kanban'); // 'kanban' or 'sheet'
   const [selectedContact, setSelectedContact] = useState(null);
 
+  const getAuthToken = () => {
+    if (typeof window === 'undefined') return null;
+    return localStorage.getItem('uwo_token') || localStorage.getItem('token');
+  };
+
   const fetchContacts = async (query = '') => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('uwo_token');
+      const token = getAuthToken();
       const searchParam = query ? `&search=${encodeURIComponent(query)}` : '';
-      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/contacts/?limit=100&offset=0${searchParam}`, {
+      const res = await axios.get(`${API_BASE_URL}/api/contacts/?limit=100&offset=0${searchParam}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       // Handle Django Rest Framework pagination format
@@ -66,8 +78,8 @@ export default function CRMPage() {
     formData.append('file', file);
 
     try {
-      const token = localStorage.getItem('uwo_token');
-      const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/contacts/import_csv/`, formData, {
+      const token = getAuthToken();
+      const res = await axios.post(`${API_BASE_URL}/api/contacts/import_csv/`, formData, {
         headers: { 
           Authorization: `Bearer ${token}`,
           'Content-Type': 'multipart/form-data'
@@ -88,8 +100,8 @@ export default function CRMPage() {
       // Optimistic UI update
       setContacts(prev => prev.map(c => c.id === contactId ? { ...c, stage: newStage } : c));
       
-      const token = localStorage.getItem('uwo_token');
-      await axios.patch(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/contacts/${contactId}/`, { stage: newStage }, {
+      const token = getAuthToken();
+      await axios.patch(`${API_BASE_URL}/api/contacts/${contactId}/`, { stage: newStage }, {
         headers: { Authorization: `Bearer ${token}` }
       });
     } catch (error) {
@@ -118,7 +130,7 @@ export default function CRMPage() {
   const exportToCSV = () => {
     if (contacts.length === 0) return;
     
-    const headers = ['Name', 'Phone', 'Email', 'Stage', 'Platform ID', 'Created At'];
+    const headers = ['Name', 'Phone', 'Email', 'Stage', 'Next Follow Up', 'Platform ID', 'Created At'];
     const csvContent = [
       headers.join(','),
       ...contacts.map(c => [
@@ -126,6 +138,7 @@ export default function CRMPage() {
         `"${c.phone_number || ''}"`,
         `"${c.email || ''}"`,
         `"${c.stage || 'NEW'}"`,
+        `"${c.next_followup_at ? new Date(c.next_followup_at).toLocaleString() : ''}"`,
         `"${c.platform_id || ''}"`,
         `"${new Date(c.created_at).toLocaleString()}"`
       ].join(','))
@@ -141,7 +154,6 @@ export default function CRMPage() {
     document.body.removeChild(link);
   };
 
-  // Removed client-side filtering, using the contacts array directly as it's filtered by backend
   const filteredContacts = contacts;
 
   return (
@@ -218,6 +230,7 @@ export default function CRMPage() {
                     <th className="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider">Name</th>
                     <th className="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider">Contact</th>
                     <th className="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider">Stage</th>
+                    <th className="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider">Next Follow-Up</th>
                     <th className="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider">Platform ID</th>
                     <th className="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider">Created At</th>
                   </tr>
@@ -262,6 +275,20 @@ export default function CRMPage() {
                           ))}
                         </select>
                       </td>
+                      <td className="py-4 px-6">
+                        {contact.next_followup_at ? (
+                          <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold ${
+                            new Date(contact.next_followup_at) < new Date() 
+                              ? 'bg-rose-50 text-rose-700 border border-rose-200' 
+                              : 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                          }`}>
+                            <Clock size={12} className={new Date(contact.next_followup_at) < new Date() ? 'text-rose-500' : 'text-emerald-600'} />
+                            <span>{new Date(contact.next_followup_at).toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+                          </div>
+                        ) : (
+                          <span className="text-xs text-slate-400 font-medium">—</span>
+                        )}
+                      </td>
                       <td className="py-4 px-6 text-sm text-slate-500 font-medium">
                         {contact.platform_id || '-'}
                       </td>
@@ -272,7 +299,7 @@ export default function CRMPage() {
                   ))}
                   {filteredContacts.length === 0 && (
                     <tr>
-                      <td colSpan="5" className="py-12 text-center text-slate-500 font-medium">
+                      <td colSpan="6" className="py-12 text-center text-slate-500 font-medium">
                         No leads found matching your search.
                       </td>
                     </tr>
@@ -301,50 +328,70 @@ export default function CRMPage() {
                   </div>
                   
                   <div className="flex-1 overflow-y-auto p-3 space-y-3 custom-scrollbar">
-                    {stageContacts.map(contact => (
-                      <div 
-                        key={contact.id}
-                        draggable
-                        onDragStart={(e) => handleDragStart(e, contact.id)}
-                        onClick={() => setSelectedContact(contact)}
-                        className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 cursor-grab active:cursor-grabbing hover:shadow-md transition-shadow group relative"
-                      >
-                        <div className="flex justify-between items-start mb-2">
-                          <h4 className="font-bold text-slate-800 text-sm truncate pr-4">
-                            {contact.name !== 'Unknown' ? contact.name : contact.phone_number || 'Unknown User'}
-                          </h4>
-                          <button className="text-slate-300 hover:text-slate-600 transition-colors absolute right-3 top-3">
-                            <MoreVertical size={16} />
-                          </button>
-                        </div>
-                        
-                        {contact.phone_number && (
-                          <div className="flex items-center gap-2 text-xs text-slate-500 font-medium mt-2">
-                            <Phone size={12} className="text-slate-400" />
-                            {contact.phone_number}
-                          </div>
-                        )}
-                        
-                        {contact.email && (
-                          <div className="flex items-center gap-2 text-xs text-slate-500 font-medium mt-1">
-                            <Mail size={12} className="text-slate-400" />
-                            <span className="truncate">{contact.email}</span>
-                          </div>
-                        )}
+                    {stageContacts.map(contact => {
+                      const hasFollowUp = !!contact.next_followup_at;
+                      const isFuOverdue = hasFollowUp && new Date(contact.next_followup_at) < new Date();
 
-                        <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between">
-                          <div className={`text-[10px] uppercase tracking-wider font-bold px-2 py-1 rounded-md border ${stage.color}`}>
-                            {stage.label}
+                      return (
+                        <div 
+                          key={contact.id}
+                          draggable
+                          onDragStart={(e) => handleDragStart(e, contact.id)}
+                          onClick={() => setSelectedContact(contact)}
+                          className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 cursor-grab active:cursor-grabbing hover:shadow-md transition-shadow group relative"
+                        >
+                          <div className="flex justify-between items-start mb-2">
+                            <h4 className="font-bold text-slate-800 text-sm truncate pr-4">
+                              {contact.name !== 'Unknown' ? contact.name : contact.phone_number || 'Unknown User'}
+                            </h4>
+                            <button className="text-slate-300 hover:text-slate-600 transition-colors absolute right-3 top-3">
+                              <MoreVertical size={16} />
+                            </button>
                           </div>
-                          <button 
-                            className="w-6 h-6 rounded-full bg-slate-50 hover:bg-emerald-50 text-slate-400 hover:text-emerald-600 flex items-center justify-center transition-colors"
-                            title="View Chat"
-                          >
-                            <MessageSquare size={12} />
-                          </button>
+                          
+                          {contact.phone_number && (
+                            <div className="flex items-center gap-2 text-xs text-slate-500 font-medium mt-2">
+                              <Phone size={12} className="text-slate-400" />
+                              {contact.phone_number}
+                            </div>
+                          )}
+                          
+                          {contact.email && (
+                            <div className="flex items-center gap-2 text-xs text-slate-500 font-medium mt-1">
+                              <Mail size={12} className="text-slate-400" />
+                              <span className="truncate">{contact.email}</span>
+                            </div>
+                          )}
+
+                          {/* Follow-up Due Badge */}
+                          {hasFollowUp && (
+                            <div className={`mt-2.5 flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-bold ${
+                              isFuOverdue 
+                                ? 'bg-rose-50 text-rose-700 border border-rose-200' 
+                                : 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                            }`}>
+                              <Clock size={12} className={isFuOverdue ? 'text-rose-500' : 'text-emerald-600'} />
+                              <span className="truncate">
+                                {isFuOverdue ? 'Overdue: ' : 'Due: '}
+                                {new Date(contact.next_followup_at).toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                              </span>
+                            </div>
+                          )}
+
+                          <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between">
+                            <div className={`text-[10px] uppercase tracking-wider font-bold px-2 py-1 rounded-md border ${stage.color}`}>
+                              {stage.label}
+                            </div>
+                            <button 
+                              className="w-6 h-6 rounded-full bg-slate-50 hover:bg-emerald-50 text-slate-400 hover:text-emerald-600 flex items-center justify-center transition-colors"
+                              title="View Details & Follow-Ups"
+                            >
+                              <MessageSquare size={12} />
+                            </button>
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                     
                     {stageContacts.length === 0 && (
                       <div className="h-24 flex items-center justify-center border-2 border-dashed border-slate-200 rounded-xl text-xs font-bold text-slate-400 uppercase tracking-widest text-center px-4">
@@ -365,7 +412,7 @@ export default function CRMPage() {
         contact={selectedContact} 
         onClose={() => setSelectedContact(null)}
         onUpdated={(updatedContact) => {
-          setContacts(prev => prev.map(c => c.id === updatedContact.id ? updatedContact : c));
+          setContacts(prev => prev.map(c => c.id === updatedContact.id ? { ...c, ...updatedContact } : c));
         }}
       />
 
@@ -378,5 +425,3 @@ export default function CRMPage() {
     </DashboardLayout>
   );
 }
-
-

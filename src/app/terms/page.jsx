@@ -1,25 +1,44 @@
-'use client';
-
 import React from 'react';
-import { useRouter } from 'next/navigation';
-import UwoLandingPage from '@/components/landing/UwoLandingPage';
-import TermsModal from '@/components/TermsModal';
+import TermsClient from '@/components/legal/TermsClient';
+import JsonLd from '@/components/seo/JsonLd';
+import {
+  buildPageMetadata,
+  getBreadcrumbSchema,
+  getBaseUrl,
+  SITE_CONFIG,
+} from '@/lib/seo';
 
-export default function TermsRoutePage() {
-  const router = useRouter();
+export const metadata = buildPageMetadata({
+  title: 'Terms of Service — UwoConnect Platform',
+  description:
+    'Review the UwoConnect terms of service, platform usage guidelines, SaaS service level agreements, and acceptable use policies.',
+  path: '/terms',
+  keywords: ['Terms of Service', 'UwoConnect user agreement', 'acceptable use policy', 'SaaS terms'],
+});
+
+export default function TermsPage() {
+  const breadcrumbSchema = getBreadcrumbSchema([
+    { name: 'Terms of Service', url: '/terms' },
+  ]);
+
+  const webPageSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    '@id': `${getBaseUrl()}/terms#webpage`,
+    url: `${getBaseUrl()}/terms`,
+    name: 'Terms of Service — UwoConnect',
+    description: 'Platform usage agreement and terms for UwoConnect services.',
+    publisher: {
+      '@type': 'Organization',
+      name: SITE_CONFIG.name,
+    },
+  };
 
   return (
-    <main className="relative min-h-screen">
-      {/* Background Landing Page */}
-      <UwoLandingPage />
-
-      {/* Pop-up Modal rendered on /terms route */}
-      <TermsModal
-        isOpen={true}
-        onClose={() => {
-          router.push('/');
-        }}
-      />
-    </main>
+    <>
+      <JsonLd id="schema-terms" data={webPageSchema} />
+      <JsonLd id="schema-breadcrumb-terms" data={breadcrumbSchema} />
+      <TermsClient />
+    </>
   );
 }

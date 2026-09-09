@@ -393,10 +393,11 @@ export default function UwoLandingPage() {
         </div>
       </header>
 
-      {/* ════════════════════════════════════════════════════════════════ */}
-      {/* 2. HERO SECTION WITH PURE CODE WIRE CIRCUIT NETWORK (NO IMAGE) */}
-      {/* ════════════════════════════════════════════════════════════════ */}
-      <section className={cn(
+      <main id="main-content">
+        {/* ════════════════════════════════════════════════════════════════ */}
+        {/* 2. HERO SECTION WITH PURE CODE WIRE CIRCUIT NETWORK (NO IMAGE) */}
+        {/* ════════════════════════════════════════════════════════════════ */}
+        <section className={cn(
         "relative w-full pt-20 pb-28 px-4 sm:px-6 lg:px-8 text-center overflow-hidden min-h-[85vh] flex items-center justify-center border-b transition-colors duration-500",
         isDarkMode ? "bg-gradient-to-b from-slate-950 via-slate-900 to-emerald-950/70 border-slate-800" : "bg-gradient-to-b from-[#ecfdf5]/80 via-white to-emerald-50/40 border-slate-200/70"
       )}>
@@ -2140,6 +2141,7 @@ export default function UwoLandingPage() {
           </div>
         </div>
       </section>
+      </main>
       <footer className="bg-slate-50 border-t border-slate-200 py-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 items-start text-xs">
 

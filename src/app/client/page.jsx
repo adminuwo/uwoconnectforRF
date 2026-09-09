@@ -5,7 +5,7 @@ import {
   MessageSquare, Zap, TrendingUp, ArrowUpRight, Loader2, GitBranch, ShieldCheck, 
   Target, Activity, ChevronRight, Smartphone, FileText, BarChart3, Users, Clock, Plus,
   Share2, FolderKanban, Package, FileCode, Calendar, Filter,
-  Newspaper, Send, ExternalLink, Sparkles, Check
+  Newspaper, Send, ExternalLink, Sparkles, Check, Phone, AlertCircle
 } from 'lucide-react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
@@ -22,6 +22,7 @@ const ClientOverview = () => {
   const [loading, setLoading] = useState(false);
   const [userName, setUserName] = useState('User');
   const [contacts, setContacts] = useState([]);
+  const [upcomingFollowUps, setUpcomingFollowUps] = useState([]);
   const [viewMode, setViewMode] = useState('agency'); // 'agency' | 'workspace'
 
   useEffect(() => {
@@ -191,7 +192,7 @@ const ClientOverview = () => {
     }
 
     const fetchDashboardData = async () => {
-      const token = localStorage.getItem('uwo_token');
+      const token = localStorage.getItem('uwo_token') || localStorage.getItem('token');
       if (!token) {
         setLoading(false);
         return;
@@ -199,12 +200,13 @@ const ClientOverview = () => {
       const headers = { Authorization: `Bearer ${token}` };
 
       try {
-        const [statsRes, ytRes, contactsRes, newsRes, projectsRes] = await Promise.allSettled([
+        const [statsRes, ytRes, contactsRes, newsRes, projectsRes, upcomingRes] = await Promise.allSettled([
           axios.get(`${API_BASE_URL}/api/client/stats`, { headers, timeout: 7000 }),
           axios.get(`${API_BASE_URL}/api/youtube/analytics`, { headers, timeout: 7000 }),
           axios.get(`${API_BASE_URL}/api/contacts/?limit=1`, { headers, timeout: 7000 }),
           axios.get(`${API_BASE_URL}/api/google-news/feed?query=technology`, { headers, timeout: 7000 }),
           axios.get(`${API_BASE_URL}/api/team/projects/`, { headers, timeout: 7000 }),
+          axios.get(`${API_BASE_URL}/api/contacts/upcoming_followups/`, { headers, timeout: 7000 }),
         ]);
 
         if (statsRes.status === 'fulfilled' && statsRes.value?.data) {
@@ -229,6 +231,10 @@ const ClientOverview = () => {
         if (projectsRes.status === 'fulfilled' && projectsRes.value?.data) {
           const rawProjs = Array.isArray(projectsRes.value.data) ? projectsRes.value.data : (projectsRes.value.data.results || []);
           setAssignedProjects(rawProjs);
+        }
+
+        if (upcomingRes.status === 'fulfilled' && Array.isArray(upcomingRes.value?.data)) {
+          setUpcomingFollowUps(upcomingRes.value.data);
         }
       } catch (err) {
         console.warn("Dashboard fetch notice:", err.message);
@@ -822,6 +828,91 @@ const ClientOverview = () => {
 
           {/* Right Sidebar Status Section */}
           <div className="space-y-6 lg:space-y-8">
+            {/* Upcoming CRM Follow-Ups & Tasks Widget */}
+            <div className="bg-white rounded-[32px] p-6 sm:p-8 text-slate-800 premium-shadow relative overflow-hidden border border-slate-200">
+              <div className="flex items-center justify-between mb-5">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
+                    <Clock size={18} />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-bold text-slate-900">CRM Follow-Ups</h3>
+                    <p className="text-[11px] text-slate-400 font-medium">Scheduled lead actions</p>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => router.push('/client/crm')}
+                  className="text-xs font-bold text-emerald-600 hover:text-emerald-700 flex items-center gap-1 transition-colors"
+                >
+                  <span>Pipeline</span>
+                  <ChevronRight size={14} />
+                </button>
+              </div>
+
+              {upcomingFollowUps.length === 0 ? (
+                <div className="p-4 bg-slate-50 rounded-2xl border border-dashed border-slate-200 text-center">
+                  <p className="text-xs font-semibold text-slate-500">No follow-ups due this week</p>
+                  <button
+                    onClick={() => router.push('/client/crm')}
+                    className="mt-2 text-xs font-bold text-emerald-600 hover:underline inline-flex items-center gap-1"
+                  >
+                    <span>Open CRM to schedule</span> &rarr;
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {upcomingFollowUps.slice(0, 4).map((fu) => {
+                    const isOverdue = new Date(fu.scheduled_at) < new Date();
+                    return (
+                      <div
+                        key={fu.id}
+                        onClick={() => router.push('/client/crm')}
+                        className={`p-3 rounded-2xl border cursor-pointer hover:shadow-sm transition-all ${
+                          isOverdue 
+                            ? 'bg-rose-50/70 border-rose-200 hover:bg-rose-50' 
+                            : 'bg-slate-50/80 border-slate-200/80 hover:bg-slate-100/70'
+                        }`}
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <span className="font-bold text-xs text-slate-900 truncate">
+                                {fu.contact_name}
+                              </span>
+                              {isOverdue && (
+                                <span className="text-[9px] font-black uppercase px-1.5 py-0.5 bg-rose-500 text-white rounded">
+                                  Overdue
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-[11px] text-slate-600 truncate mt-0.5 font-medium">
+                              {fu.title}
+                            </p>
+                          </div>
+                          <span className="text-[10px] font-bold px-2 py-0.5 bg-white border border-slate-200 rounded-md text-slate-600 shrink-0">
+                            {fu.follow_up_type}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1.5 text-[10px] text-slate-400 mt-2 font-medium">
+                          <Calendar size={11} />
+                          <span>{new Date(fu.scheduled_at).toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                  {upcomingFollowUps.length > 4 && (
+                    <button
+                      onClick={() => router.push('/client/crm')}
+                      className="w-full text-center text-xs font-bold text-emerald-600 hover:text-emerald-700 py-1"
+                    >
+                      View all {upcomingFollowUps.length} follow-ups &rarr;
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* System Live Card */}
             <div className="bg-gradient-to-br from-[#f0fdf4] to-white rounded-[32px] p-6 sm:p-8 text-slate-800 premium-shadow relative overflow-hidden border border-emerald-100">
               <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none" />
               <h3 className="text-lg font-bold mb-6 flex items-center gap-3 text-slate-900">
