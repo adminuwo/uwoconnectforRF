@@ -19,22 +19,22 @@ const getToken = () => typeof window !== 'undefined' ? localStorage.getItem('uwo
 // ─── Razorpay SVG logo ────────────────────────────────────────────────────────
 const RazorpayLogo = () => (
   <svg width="28" height="28" viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M16 56L28.5 16H44L36.5 40H50L22 56H16Z" fill="#3395FF"/>
-    <path d="M36.5 40L44 16H58L50 40H36.5Z" fill="#072654"/>
+    <path d="M16 56L28.5 16H44L36.5 40H50L22 56H16Z" fill="#3395FF" />
+    <path d="M36.5 40L44 16H58L50 40H36.5Z" fill="#072654" />
   </svg>
 );
 
 export default function PaymentsGatewayPage() {
-  const searchParams  = useSearchParams();
-  const router        = useRouter();
+  const searchParams = useSearchParams();
+  const router = useRouter();
 
-  const [loading, setLoading]             = useState(true);
-  const [connecting, setConnecting]       = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [connecting, setConnecting] = useState(false);
   const [disconnecting, setDisconnecting] = useState(false);
   const [switchingMode, setSwitchingMode] = useState(false);
   const [showDisconnectConfirm, setShowDisconnectConfirm] = useState(false);
-  const [copied, setCopied]               = useState(false);
-  const [toast, setToast]                 = useState(null);
+  const [copied, setCopied] = useState(false);
+  const [toast, setToast] = useState(null);
 
   const [connection, setConnection] = useState({
     connected: false,
@@ -157,13 +157,12 @@ export default function PaymentsGatewayPage() {
 
           {/* ── Toast ── */}
           {toast && (
-            <div className={`fixed top-5 right-5 z-50 flex items-center gap-3 px-5 py-3.5 rounded-2xl shadow-2xl text-sm font-semibold animate-in slide-in-from-top-2 duration-300 ${
-              toast.type === 'success' ? 'bg-emerald-600 text-white' :
-              toast.type === 'error'   ? 'bg-red-600 text-white' :
-              'bg-amber-500 text-white'
-            }`}>
+            <div className={`fixed top-5 right-5 z-50 flex items-center gap-3 px-5 py-3.5 rounded-2xl shadow-2xl text-sm font-semibold animate-in slide-in-from-top-2 duration-300 ${toast.type === 'success' ? 'bg-emerald-600 text-white' :
+                toast.type === 'error' ? 'bg-red-600 text-white' :
+                  'bg-amber-500 text-white'
+              }`}>
               {toast.type === 'success' && <CheckCircle2 size={16} />}
-              {toast.type === 'error'   && <XCircle size={16} />}
+              {toast.type === 'error' && <XCircle size={16} />}
               {toast.type === 'warning' && <AlertCircle size={16} />}
               {toast.msg}
             </div>
@@ -190,9 +189,8 @@ export default function PaymentsGatewayPage() {
             <div className="space-y-4">
 
               {/* ── Razorpay Card ── */}
-              <div className={`bg-white rounded-3xl border-2 shadow-sm overflow-hidden transition-all duration-300 ${
-                isConnected ? 'border-emerald-200 shadow-emerald-100' : 'border-slate-100'
-              }`}>
+              <div className={`bg-white rounded-3xl border-2 shadow-sm overflow-hidden transition-all duration-300 ${isConnected ? 'border-emerald-200 shadow-emerald-100' : 'border-slate-100'
+                }`}>
 
                 {/* Card Header */}
                 <div className="p-6 border-b border-slate-50">
@@ -206,11 +204,10 @@ export default function PaymentsGatewayPage() {
                         <div className="flex items-center gap-2 mb-1">
                           <h2 className="text-lg font-black text-slate-900">Razorpay</h2>
                           {isConnected && (
-                            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${
-                              connection.mode === 'LIVE'
+                            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${connection.mode === 'LIVE'
                                 ? 'bg-emerald-100 text-emerald-700'
                                 : 'bg-amber-100 text-amber-700'
-                            }`}>
+                              }`}>
                               <span className={`w-1.5 h-1.5 rounded-full ${connection.mode === 'LIVE' ? 'bg-emerald-500' : 'bg-amber-500'} animate-pulse`} />
                               {connection.mode} MODE
                             </span>
@@ -225,13 +222,12 @@ export default function PaymentsGatewayPage() {
                     </div>
 
                     {/* Status badge */}
-                    <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black ${
-                      isConnected
+                    <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black ${isConnected
                         ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
                         : connection.connection_status === 'ERROR'
-                        ? 'bg-red-50 text-red-600 border border-red-200'
-                        : 'bg-slate-100 text-slate-500 border border-slate-200'
-                    }`}>
+                          ? 'bg-red-50 text-red-600 border border-red-200'
+                          : 'bg-slate-100 text-slate-500 border border-slate-200'
+                      }`}>
                       {isConnected ? (
                         <><CheckCircle2 size={12} className="text-emerald-500" /> CONNECTED</>
                       ) : connection.connection_status === 'ERROR' ? (
@@ -268,8 +264,8 @@ export default function PaymentsGatewayPage() {
                         <p className="text-sm font-bold text-slate-700">
                           {connection.connected_at
                             ? new Date(connection.connected_at).toLocaleDateString('en-IN', {
-                                day: 'numeric', month: 'short', year: 'numeric'
-                              })
+                              day: 'numeric', month: 'short', year: 'numeric'
+                            })
                             : '—'}
                         </p>
                       </div>
@@ -290,11 +286,10 @@ export default function PaymentsGatewayPage() {
                       <button
                         onClick={handleModeSwitch}
                         disabled={switchingMode}
-                        className={`relative flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black transition-all ${
-                          connection.mode === 'LIVE'
+                        className={`relative flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black transition-all ${connection.mode === 'LIVE'
                             ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'
                             : 'bg-amber-100 text-amber-700 hover:bg-amber-200'
-                        }`}
+                          }`}
                       >
                         {switchingMode ? (
                           <Loader2 size={12} className="animate-spin" />
