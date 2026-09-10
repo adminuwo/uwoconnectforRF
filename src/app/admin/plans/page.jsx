@@ -560,7 +560,7 @@ export default function AdminPlansPage() {
   const fetchBackendData = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('token') || localStorage.getItem('uwo_token');
       if (!token) {
         setLoading(false);
         return;
@@ -572,65 +572,69 @@ export default function AdminPlansPage() {
         axios.get(`${API_BASE_URL}/api/admin/clients/overview/`, { headers: { Authorization: `Bearer ${token}` } })
       ]);
 
-      if (featuresRes.status === 'fulfilled' && featuresRes.value.data?.results?.length > 0) {
-        setFeatures(featuresRes.value.data.results);
+      if (featuresRes.status === 'fulfilled' && (featuresRes.value.data?.results || Array.isArray(featuresRes.value.data))) {
+        const featList = Array.isArray(featuresRes.value.data) ? featuresRes.value.data : (featuresRes.value.data.results || []);
+        if (featList.length > 0) setFeatures(featList);
       }
-      if (plansRes.status === 'fulfilled' && plansRes.value.data?.results?.length > 0) {
-        const mappedPlans = plansRes.value.data.results.map(p => {
-          const meta = p.metadata || {};
-          const legacyWA = p.channel_details?.whatsapp || {};
+      if (plansRes.status === 'fulfilled' && (plansRes.value.data?.results || Array.isArray(plansRes.value.data))) {
+        const rawPlanList = Array.isArray(plansRes.value.data) ? plansRes.value.data : (plansRes.value.data.results || []);
+        if (rawPlanList.length > 0) {
+          const mappedPlans = rawPlanList.map(p => {
+            const meta = p.metadata || {};
+            const legacyWA = p.channel_details?.whatsapp || {};
 
-          const extractConfigFromPlan = (cycleName, defaultPrice) => {
-            const saved = meta[`${cycleName}Config`] || meta[`${cycleName}_config`] || p[`${cycleName}Config`];
-            if (saved) return saved;
+            const extractConfigFromPlan = (cycleName, defaultPrice) => {
+              const saved = meta[`${cycleName}Config`] || meta[`${cycleName}_config`] || p[`${cycleName}Config`];
+              if (saved) return saved;
 
-            const mP = p.monthly_price || p.price || 999;
-            const yP = p.yearly_price || Math.round(mP * 12 * 0.85);
-            const price = cycleName === 'monthly' ? mP : yP;
+              const mP = p.monthly_price || p.price || 999;
+              const yP = p.yearly_price || Math.round(mP * 12 * 0.85);
+              const price = cycleName === 'monthly' ? mP : yP;
+
+              return {
+                price: price.toString(),
+                max_channels: (p.max_channels || 1).toString(),
+                selected_feature_keys: p.feature_keys || [],
+                custom_fields_limit: (legacyWA.limits?.custom_fields?.value || 15).toString(),
+                custom_tags_limit: (legacyWA.limits?.custom_tags?.value || 15).toString(),
+                custom_events_limit: (legacyWA.limits?.events?.value || 5).toString(),
+                whatsapp_what_you_get: Array.isArray(legacyWA.what_you_get) ? legacyWA.what_you_get.join('\n') : "WhatsApp Business API Automation\nShared Team Inbox for WhatsApp\nAutomated Keyword Replies\nContact & Lead Sync",
+                whatsapp_features: Array.isArray(legacyWA.features) ? legacyWA.features.join('\n') : "WhatsApp Auto Replies\nShared Inbox\nKeyword Triggers\nContact Management",
+                whatsapp_marketing_cost: legacyWA.message_costs?.find(c => c.type === 'Marketing')?.price || '₹0.970',
+                whatsapp_auth_cost: legacyWA.message_costs?.find(c => c.type === 'Authentication')?.price || '₹0.129',
+                whatsapp_utility_cost: legacyWA.message_costs?.find(c => c.type === 'Utility')?.price || '₹0.160',
+                whatsapp_service_cost: legacyWA.message_costs?.find(c => c.type === 'Service')?.price || 'FREE'
+              };
+            };
+
+            const mConfig = extractConfigFromPlan('monthly', 999);
+            const yConfig = extractConfigFromPlan('yearly', 9590);
 
             return {
-              price: price.toString(),
-              max_channels: (p.max_channels || 1).toString(),
-              selected_feature_keys: p.feature_keys || [],
-              custom_fields_limit: (legacyWA.limits?.custom_fields?.value || 15).toString(),
-              custom_tags_limit: (legacyWA.limits?.custom_tags?.value || 15).toString(),
-              custom_events_limit: (legacyWA.limits?.events?.value || 5).toString(),
-              whatsapp_what_you_get: Array.isArray(legacyWA.what_you_get) ? legacyWA.what_you_get.join('\n') : "WhatsApp Business API Automation\nShared Team Inbox for WhatsApp\nAutomated Keyword Replies\nContact & Lead Sync",
-              whatsapp_features: Array.isArray(legacyWA.features) ? legacyWA.features.join('\n') : "WhatsApp Auto Replies\nShared Inbox\nKeyword Triggers\nContact Management",
-              whatsapp_marketing_cost: legacyWA.message_costs?.find(c => c.type === 'Marketing')?.price || '₹0.970',
-              whatsapp_auth_cost: legacyWA.message_costs?.find(c => c.type === 'Authentication')?.price || '₹0.129',
-              whatsapp_utility_cost: legacyWA.message_costs?.find(c => c.type === 'Utility')?.price || '₹0.160',
-              whatsapp_service_cost: legacyWA.message_costs?.find(c => c.type === 'Service')?.price || 'FREE'
+              id: p.id,
+              name: p.name,
+              badge: p.name.toUpperCase(),
+              badge_text: p.badge_text || p.name.toUpperCase(),
+              status: (p.status === 'ACTIVE' || p.is_active !== false) ? 'ACTIVE' : 'INACTIVE',
+              description: p.description || 'Custom Enterprise Plan',
+              price: Number(mConfig.price) || p.price || 0,
+              monthly_price: Number(mConfig.price) || p.price || 0,
+              yearly_price: Number(yConfig.price) || Math.round((p.price || 999) * 12 * 0.85),
+              billing_cycle: p.billing_cycle || 'Monthly',
+              currency: p.currency || 'INR',
+              feature_keys: p.feature_keys || [],
+              monthlyConfig: mConfig,
+              yearlyConfig: yConfig,
+              channel_count: p.channel_count || 4,
+              connector_count: p.connector_count || 3,
+              client_count: p.client_count || 0,
+              is_popular: p.is_popular || false,
+              channel_details: p.channel_details || {},
+              metadata: meta
             };
-          };
-
-          const mConfig = extractConfigFromPlan('monthly', 999);
-          const yConfig = extractConfigFromPlan('yearly', 9590);
-
-          return {
-            id: p.id,
-            name: p.name,
-            badge: p.name.toUpperCase(),
-            badge_text: p.badge_text || p.name.toUpperCase(),
-            status: p.is_active ? 'ACTIVE' : 'INACTIVE',
-            description: p.description || 'Custom Enterprise Plan',
-            price: Number(mConfig.price) || p.price || 0,
-            monthly_price: Number(mConfig.price) || p.price || 0,
-            yearly_price: Number(yConfig.price) || Math.round((p.price || 999) * 12 * 0.85),
-            billing_cycle: p.billing_cycle || 'Monthly',
-            currency: p.currency || 'INR',
-            feature_keys: p.feature_keys || [],
-            monthlyConfig: mConfig,
-            yearlyConfig: yConfig,
-            channel_count: p.channel_count || 4,
-            connector_count: p.connector_count || 3,
-            client_count: p.client_count || 0,
-            is_popular: p.is_popular || false,
-            channel_details: p.channel_details || {},
-            metadata: meta
-          };
-        });
-        setPlans(mappedPlans);
+          });
+          setPlans(mappedPlans);
+        }
       }
       if (clientsRes.status === 'fulfilled' && (clientsRes.value.data?.clients || clientsRes.value.data?.results)) {
         const fetchedClients = clientsRes.value.data.clients || clientsRes.value.data.results;
@@ -896,7 +900,7 @@ export default function AdminPlansPage() {
     };
 
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('token') || localStorage.getItem('uwo_token');
       await axios.post(`${API_BASE_URL}/api/plans/`, {
         name: newPlanObj.name,
         description: newPlanObj.description,
@@ -990,11 +994,12 @@ export default function AdminPlansPage() {
     };
 
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('token') || localStorage.getItem('uwo_token');
+      const targetId = editingPlan.id || editingPlan.slug;
       await Promise.allSettled([
-        axios.put(`${API_BASE_URL}/api/plans/${editingPlan.id}/monthly/`, { monthlyConfig: mConfig }, { headers: { Authorization: `Bearer ${token}` } }),
-        axios.put(`${API_BASE_URL}/api/plans/${editingPlan.id}/yearly/`, { yearlyConfig: yConfig }, { headers: { Authorization: `Bearer ${token}` } }),
-        axios.put(`${API_BASE_URL}/api/plans/${editingPlan.id}/`, {
+        axios.put(`${API_BASE_URL}/api/plans/${targetId}/monthly/`, { monthlyConfig: mConfig }, { headers: { Authorization: `Bearer ${token}` } }),
+        axios.put(`${API_BASE_URL}/api/plans/${targetId}/yearly/`, { yearlyConfig: yConfig }, { headers: { Authorization: `Bearer ${token}` } }),
+        axios.put(`${API_BASE_URL}/api/plans/${targetId}/`, {
           name: updatedPlanObj.name,
           description: updatedPlanObj.description,
           price: updatedPlanObj.price,
@@ -1025,7 +1030,7 @@ export default function AdminPlansPage() {
     if (!confirm(`Are you sure you want to delete "${planName}"?`)) return;
 
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('token') || localStorage.getItem('uwo_token');
       await axios.delete(`${API_BASE_URL}/api/plans/${planId}/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -1095,7 +1100,7 @@ export default function AdminPlansPage() {
     };
 
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('token') || localStorage.getItem('uwo_token');
       await axios.post(`${API_BASE_URL}/api/features/`, {
         name: newFeatureObj.name,
         key: newFeatureObj.key,
@@ -1126,7 +1131,7 @@ export default function AdminPlansPage() {
     if (!targetPlan) return;
 
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('token') || localStorage.getItem('uwo_token');
       await axios.post(
         `${API_BASE_URL}/api/admin/client-intelligence/clients/${selectedClientForPlanChange.id}/action/`,
         { action: 'EDIT_PROFILE', plan: targetPlan.name },
@@ -1358,7 +1363,7 @@ export default function AdminPlansPage() {
             <PricingComparisonTable 
               plansData={plans}
               isAdminView={true}
-              onManagePlan={(plan) => handleOpenManagePlan(plan)}
+              onManagePlan={(plan, cycle) => handleOpenManagePlan(plan, cycle)}
             />
           </div>
         )}

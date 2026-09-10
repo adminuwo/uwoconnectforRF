@@ -55,18 +55,18 @@ export default function CookiePreferencesModal({ isOpen, onClose, onSave }) {
   };
 
   return (
-    <div className="fixed inset-0 z-[120] flex items-center justify-center p-3 sm:p-6 bg-slate-950/70 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="bg-white rounded-[32px] w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl border border-slate-100 overflow-hidden animate-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-[120] flex items-center justify-center p-2.5 sm:p-6 bg-slate-950/70 backdrop-blur-md animate-in fade-in duration-200">
+      <div className="bg-white rounded-2xl sm:rounded-[32px] w-full max-w-2xl max-h-[92vh] sm:max-h-[90vh] flex flex-col shadow-2xl border border-slate-100 overflow-hidden animate-in zoom-in-95 duration-200">
         
         {/* Header */}
-        <div className="p-6 bg-gradient-to-r from-slate-900 via-slate-800 to-emerald-950 text-white relative flex items-center justify-between shrink-0 text-left">
+        <div className="p-4 sm:p-6 bg-gradient-to-r from-slate-900 via-slate-800 to-emerald-950 text-white relative flex items-center justify-between shrink-0 text-left">
           <div className="space-y-1">
-            <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-black uppercase tracking-wider border border-emerald-500/30">
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-black uppercase tracking-wider border border-emerald-500/30">
               <Cookie size={12} />
               <span>AISA™ PRIVACY &amp; COOKIES</span>
             </div>
             <h3 
-              className="text-2xl sm:text-3xl font-bold text-white font-serif leading-tight" 
+              className="text-xl sm:text-3xl font-bold text-white font-serif leading-tight" 
               style={serifStyle}
             >
               Cookie Preferences
@@ -84,7 +84,7 @@ export default function CookiePreferencesModal({ isOpen, onClose, onSave }) {
         </div>
 
         {/* Body - Scrollable Content with User Specifications */}
-        <div className="p-6 overflow-y-auto space-y-6 text-left text-slate-700 custom-scrollbar flex-1">
+        <div className="p-4 sm:p-6 overflow-y-auto space-y-5 sm:space-y-6 text-left text-slate-700 custom-scrollbar flex-1">
           
           <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-950 text-xs font-medium leading-relaxed">
             This Cookie Policy explains how <strong>AISA™</strong> uses cookies and similar technologies to enhance your experience. You can control cookie preferences anytime.

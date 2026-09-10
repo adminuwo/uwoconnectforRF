@@ -377,7 +377,7 @@ export default function ClientPlansPage() {
             id: 'plan-starter',
             name: 'Starter',
             description: 'Essential channels, workspace connectors & sales invoicing for small businesses.',
-            price: 499,
+            price: 599,
             currency: 'INR',
             billing_cycle: 'Monthly',
             is_active: true,

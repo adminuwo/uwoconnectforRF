@@ -7,7 +7,8 @@ import {
   Zap, MessageSquare, Share2, Layers, CheckCircle2,
   LayoutDashboard, FileCheck, Receipt, FileText, ShoppingBag,
   CreditCard, Users, Bot, Video, Sparkles, ArrowRight, ShieldCheck,
-  ChevronLeft, ChevronRight, ChevronDown, ChevronUp, RefreshCw, Check, Star, Lock, Globe, HelpCircle, Plus, Minus, Sun, Moon
+  ChevronLeft, ChevronRight, ChevronDown, ChevronUp, RefreshCw, Check, Star, Lock, Globe, HelpCircle, Plus, Minus, Sun, Moon,
+  Menu, X
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import AutomationNetwork from './AutomationNetwork';
@@ -216,6 +217,7 @@ export default function UwoLandingPage() {
   const [openFaqIndex, setOpenFaqIndex] = useState(null);
   const [showAllFaqs, setShowAllFaqs] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const section11Ref = useRef(null);
 
   useEffect(() => {
@@ -224,7 +226,7 @@ export default function UwoLandingPage() {
       if (savedTheme === 'dark') {
         setIsDarkMode(true);
       }
-    } catch (e) {}
+    } catch (e) { }
   }, []);
 
   const toggleTheme = () => {
@@ -232,7 +234,7 @@ export default function UwoLandingPage() {
     setIsDarkMode(newTheme);
     try {
       localStorage.setItem('uwo_landing_theme', newTheme ? 'dark' : 'light');
-    } catch (e) {}
+    } catch (e) { }
   };
 
   // Real-time Scroll Observer to update active module index as user scrolls section 11
@@ -299,8 +301,7 @@ export default function UwoLandingPage() {
               className="w-8 h-8 object-contain group-hover:scale-105 transition-transform duration-300 shrink-0"
             />
             <span className={cn(
-              "text-lg font-black tracking-tight leading-none group-hover:text-[#059669] transition-colors",
-              isDarkMode ? "text-white" : "text-slate-900"
+              "text-lg font-black tracking-tight leading-none text-[#059669] group-hover:text-[#047857] transition-colors"
             )}>
               {brandName}
             </span>
@@ -317,20 +318,16 @@ export default function UwoLandingPage() {
             <a href="#features" className="hover:text-emerald-500 transition-colors relative py-1 after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-emerald-500 hover:after:w-full after:transition-all after:duration-300">Features</a>
             <a href="#how-it-works" className="hover:text-emerald-500 transition-colors relative py-1 after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-emerald-500 hover:after:w-full after:transition-all after:duration-300">How It Works</a>
             <a href="#pricing" className="hover:text-emerald-500 transition-colors relative py-1 after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-emerald-500 hover:after:w-full after:transition-all after:duration-300">Pricing</a>
-            <a href="#white-label" className="hover:text-emerald-500 transition-colors relative py-1 flex items-center gap-1.5 after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-emerald-500 hover:after:w-full after:transition-all after:duration-300">
-              <span>White-Label</span>
-              <span className="px-1.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-500 text-[9px] font-black uppercase">Agency</span>
-            </a>
           </nav>
 
           {/* Auth CTAs & Light/Dark Theme Switcher */}
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2">
             {/* Theme Toggle Button (Icon Only) */}
             <button
               type="button"
               onClick={toggleTheme}
               className={cn(
-                "p-2 rounded-lg border transition-all duration-300 flex items-center justify-center cursor-pointer active:scale-95 shadow-2xs",
+                "p-2 rounded-lg border transition-all duration-300 flex items-center justify-center cursor-pointer active:scale-95 shadow-2xs shrink-0",
                 isDarkMode
                   ? "bg-slate-900 border-slate-700 text-amber-400 hover:bg-slate-800 hover:border-amber-400/50"
                   : "bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100 hover:border-emerald-300"
@@ -347,7 +344,7 @@ export default function UwoLandingPage() {
             <button
               onClick={() => router.push('/auth/login')}
               className={cn(
-                "px-3 py-1.5 text-xs font-extrabold transition-colors cursor-pointer active:scale-95",
+                "hidden sm:block px-3 py-1.5 text-xs font-extrabold transition-colors cursor-pointer active:scale-95",
                 isDarkMode ? "text-slate-300 hover:text-emerald-400" : "text-slate-700 hover:text-emerald-600"
               )}
             >
@@ -355,14 +352,103 @@ export default function UwoLandingPage() {
             </button>
             <button
               onClick={() => router.push('/auth/login')}
-              className="landing-button-glow px-4 py-1.5 rounded-lg bg-[#059669] hover:bg-[#047857] text-white text-xs font-extrabold shadow-md shadow-emerald-700/20 hover:shadow-lg hover:shadow-emerald-700/30 hover:scale-[1.03] active:scale-95 transition-all duration-300 flex items-center gap-1.5 cursor-pointer"
+              className="landing-button-glow px-3 sm:px-4 py-1.5 rounded-lg bg-[#059669] hover:bg-[#047857] text-white text-xs font-extrabold shadow-md shadow-emerald-700/20 hover:shadow-lg hover:shadow-emerald-700/30 hover:scale-[1.03] active:scale-95 transition-all duration-300 flex items-center gap-1.5 cursor-pointer shrink-0"
               style={isWhiteLabel && primaryColor ? { backgroundColor: primaryColor } : undefined}
             >
               <span>Get Started</span>
-              <ArrowRight size={13} className="group-hover:translate-x-0.5 transition-transform" />
+              <ArrowRight size={13} className="hidden sm:inline group-hover:translate-x-0.5 transition-transform" />
+            </button>
+
+            {/* Mobile Hamburger Menu Button */}
+            <button
+              type="button"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className={cn(
+                "p-2 rounded-lg border transition-all duration-300 flex items-center justify-center cursor-pointer active:scale-95 md:hidden shrink-0",
+                isDarkMode
+                  ? "bg-slate-900 border-slate-700 text-slate-200 hover:bg-slate-800"
+                  : "bg-emerald-50 border-emerald-200 text-emerald-800 hover:bg-emerald-100"
+              )}
+              aria-label="Toggle Navigation Menu"
+            >
+              {mobileMenuOpen ? <X size={17} /> : <Menu size={17} />}
             </button>
           </div>
         </div>
+
+        {/* Mobile Navigation Dropdown Drawer */}
+        {mobileMenuOpen && (
+          <div className={cn(
+            "md:hidden border-t px-4 py-4 space-y-3 backdrop-blur-2xl shadow-2xl transition-all animate-in slide-in-from-top-2 duration-200",
+            isDarkMode ? "bg-slate-950/98 border-slate-800/90 text-slate-200" : "bg-white/98 border-slate-200/90 text-slate-800"
+          )}>
+            <nav className="flex flex-col gap-1 text-sm font-extrabold">
+              <a
+                href="#platform"
+                onClick={() => setMobileMenuOpen(false)}
+                className="px-3 py-2.5 rounded-lg hover:bg-emerald-500/10 hover:text-emerald-500 transition-colors flex items-center justify-between"
+              >
+                <span>Platform</span>
+              </a>
+              <a
+                href="#channels"
+                onClick={() => setMobileMenuOpen(false)}
+                className="px-3 py-2.5 rounded-lg hover:bg-emerald-500/10 hover:text-emerald-500 transition-colors flex items-center justify-between"
+              >
+                <span>Channels</span>
+              </a>
+              <a
+                href="#connectors"
+                onClick={() => setMobileMenuOpen(false)}
+                className="px-3 py-2.5 rounded-lg hover:bg-emerald-500/10 hover:text-emerald-500 transition-colors flex items-center justify-between"
+              >
+                <span>Connectors</span>
+              </a>
+              <a
+                href="#features"
+                onClick={() => setMobileMenuOpen(false)}
+                className="px-3 py-2.5 rounded-lg hover:bg-emerald-500/10 hover:text-emerald-500 transition-colors flex items-center justify-between"
+              >
+                <span>Features</span>
+              </a>
+              <a
+                href="#how-it-works"
+                onClick={() => setMobileMenuOpen(false)}
+                className="px-3 py-2.5 rounded-lg hover:bg-emerald-500/10 hover:text-emerald-500 transition-colors flex items-center justify-between"
+              >
+                <span>How It Works</span>
+              </a>
+              <a
+                href="#pricing"
+                onClick={() => setMobileMenuOpen(false)}
+                className="px-3 py-2.5 rounded-lg hover:bg-emerald-500/10 hover:text-emerald-500 transition-colors flex items-center justify-between"
+              >
+                <span>Pricing</span>
+              </a>
+            </nav>
+
+            {/* Mobile Action Buttons */}
+            <div className="pt-3 border-t border-slate-200/60 dark:border-slate-800/80 flex items-center gap-2.5">
+              <button
+                onClick={() => { setMobileMenuOpen(false); router.push('/auth/login'); }}
+                className={cn(
+                  "w-1/2 py-2.5 text-center text-xs font-black rounded-lg border transition-all active:scale-95 cursor-pointer",
+                  isDarkMode ? "border-slate-800 bg-slate-900/80 text-slate-200 hover:bg-slate-800" : "border-slate-200 bg-slate-50 text-slate-800 hover:bg-slate-100"
+                )}
+              >
+                Log In
+              </button>
+              <button
+                onClick={() => { setMobileMenuOpen(false); router.push('/auth/login'); }}
+                className="w-1/2 py-2.5 text-center text-xs font-black rounded-lg bg-[#059669] hover:bg-[#047857] text-white shadow-md shadow-emerald-700/20 active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                style={isWhiteLabel && primaryColor ? { backgroundColor: primaryColor } : undefined}
+              >
+                <span>Get Started</span>
+                <ArrowRight size={13} />
+              </button>
+            </div>
+          </div>
+        )}
       </header>
 
       {/* ════════════════════════════════════════════════════════════════ */}
@@ -979,7 +1065,6 @@ export default function UwoLandingPage() {
 
         <div className="relative z-10">
           <div className="text-center space-y-4 mb-16">
-            <UwoBrandHeader align="center" dark={isDarkMode} />
             <h2
               className={cn(
                 "text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight italic font-serif leading-tight",
@@ -1142,7 +1227,6 @@ export default function UwoLandingPage() {
 
         <div className="relative z-10">
           <div className="text-center space-y-4 mb-16">
-            <UwoBrandHeader align="center" dark={isDarkMode} />
             <h2
               className={cn(
                 "text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight italic font-serif leading-tight drop-shadow-xs",
@@ -1180,11 +1264,11 @@ export default function UwoLandingPage() {
                     "p-4 sm:p-4.5 rounded-2xl border transition-all duration-300 cursor-pointer transform hover:translate-x-1.5 flex items-center justify-between",
                     activeWorkflowTab === i
                       ? (isDarkMode
-                          ? "bg-emerald-950/80 border-emerald-500 text-white shadow-lg shadow-emerald-500/20 scale-[1.02]"
-                          : "bg-emerald-50/90 border-emerald-500 text-emerald-950 shadow-lg shadow-emerald-500/15 scale-[1.02]")
+                        ? "bg-emerald-950/80 border-emerald-500 text-white shadow-lg shadow-emerald-500/20 scale-[1.02]"
+                        : "bg-emerald-50/90 border-emerald-500 text-emerald-950 shadow-lg shadow-emerald-500/15 scale-[1.02]")
                       : (isDarkMode
-                          ? "bg-slate-800/50 border-slate-700/60 text-slate-400 hover:text-white hover:border-slate-600 hover:bg-slate-800/80"
-                          : "bg-white border-slate-200/90 text-slate-600 hover:text-slate-900 hover:border-emerald-300 hover:bg-slate-50/80 shadow-xs")
+                        ? "bg-slate-800/50 border-slate-700/60 text-slate-400 hover:text-white hover:border-slate-600 hover:bg-slate-800/80"
+                        : "bg-white border-slate-200/90 text-slate-600 hover:text-slate-900 hover:border-emerald-300 hover:bg-slate-50/80 shadow-xs")
                   )}
                 >
                   <div>
@@ -1503,7 +1587,6 @@ export default function UwoLandingPage() {
           {/* Left Column: HEADING & 4-OPTION SLIDING WINDOW */}
           <div className="lg:col-span-5 flex flex-col justify-between space-y-6 text-left h-full">
             <div className="space-y-4">
-              <UwoBrandHeader align="left" dark={isDarkMode} />
               <h2
                 className={cn("text-4xl sm:text-5xl font-bold tracking-tight italic font-serif leading-[1.15]", isDarkMode ? "text-white" : "text-slate-900")}
                 style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
@@ -1545,8 +1628,8 @@ export default function UwoLandingPage() {
                           isActive
                             ? "bg-[#059669] text-white border-emerald-600 shadow-lg shadow-emerald-600/25 translate-x-2 font-extrabold scale-[1.02]"
                             : (isDarkMode
-                                ? "bg-slate-900/80 border-slate-800 text-slate-300 hover:text-white hover:bg-slate-800"
-                                : "bg-slate-50/80 border-slate-200/70 text-slate-600 hover:text-emerald-700 hover:bg-emerald-50/60")
+                              ? "bg-slate-900/80 border-slate-800 text-slate-300 hover:text-white hover:bg-slate-800"
+                              : "bg-slate-50/80 border-slate-200/70 text-slate-600 hover:text-emerald-700 hover:bg-emerald-50/60")
                         )}
                       >
                         <span className={cn("w-2 h-2 rounded-full shrink-0 transition-colors", isActive ? "bg-white animate-ping" : "bg-emerald-500/50")} />
@@ -2240,7 +2323,7 @@ export default function UwoLandingPage() {
         <div className="absolute -top-32 -left-32 w-96 h-96 bg-emerald-400/35 rounded-full blur-[90px] pointer-events-none animate-pulse-glow" />
         <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-teal-400/35 rounded-full blur-[90px] pointer-events-none animate-pulse-glow" />
         <div className="absolute inset-0 bg-[radial-gradient(#059669_1.5px,transparent_1.5px)] [background-size:24px_24px] opacity-25 pointer-events-none" />
-        
+
         {/* Decorative Rotating Help Icon Watermark */}
         <div className="absolute -right-12 -bottom-12 opacity-[0.12] text-[#059669] pointer-events-none">
           <HelpCircle size={280} className="animate-spin-slow" />
@@ -2369,19 +2452,19 @@ export default function UwoLandingPage() {
                             isOpen
                               ? "bg-[#059669] text-white border-[#059669] rotate-180"
                               : (isDarkMode
-                                  ? "bg-slate-800 text-emerald-400 border-slate-700 group-hover:bg-[#059669] group-hover:text-white group-hover:border-[#059669] rotate-0"
-                                  : "bg-emerald-50 text-[#059669] border-emerald-200 group-hover:bg-[#059669] group-hover:text-white group-hover:border-[#059669] rotate-0")
+                                ? "bg-slate-800 text-emerald-400 border-slate-700 group-hover:bg-[#059669] group-hover:text-white group-hover:border-[#059669] rotate-0"
+                                : "bg-emerald-50 text-[#059669] border-emerald-200 group-hover:bg-[#059669] group-hover:text-white group-hover:border-[#059669] rotate-0")
                           )}>
                             {isOpen ? <Minus size={18} /> : <Plus size={18} />}
                           </span>
                         </button>
 
-                        <div 
+                        <div
                           className={cn(
                             "grid transition-all duration-500 ease-in-out",
                             isDarkMode ? "border-slate-800" : "border-emerald-100",
-                            isOpen 
-                              ? "grid-rows-[1fr] opacity-100 pt-3 pb-6 px-5 sm:px-6 border-t" 
+                            isOpen
+                              ? "grid-rows-[1fr] opacity-100 pt-3 pb-6 px-5 sm:px-6 border-t"
                               : "grid-rows-[0fr] opacity-0 py-0 px-5 sm:px-6 border-t-0"
                           )}
                         >

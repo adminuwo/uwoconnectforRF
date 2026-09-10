@@ -1466,7 +1466,7 @@ const ClientChannelsPage = () => {
                   desc: 'Sync customer emails, send automated notifications, and trigger AI auto-replies.',
                   icon: <GmailBrandIcon size={28} />,
                   isConnected: isGmailConnected,
-                  connectedInfo: client?.gmail_config?.email || 'Connected Account',
+                  connectedInfo: client?.gmail_config?.email_address || client?.gmail_config?.email || 'Connected Account',
                   onConnect: () => isGmailConnected ? setIsGmailConfigModalOpen(true) : handleConnectGmail(),
                   onConfigure: () => setIsGmailConfigModalOpen(true),
                   badge: 'Email Sync',
