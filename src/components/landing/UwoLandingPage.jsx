@@ -217,10 +217,23 @@ export default function UwoLandingPage() {
   const [openFaqIndex, setOpenFaqIndex] = useState(null);
   const [showAllFaqs, setShowAllFaqs] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [loggedInUser, setLoggedInUser] = useState(null);
+  const [mounted, setMounted] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const section11Ref = useRef(null);
 
   useEffect(() => {
+    setMounted(true);
+    try {
+      const token = localStorage.getItem('uwo_token') || localStorage.getItem('token');
+      const userStr = localStorage.getItem('user');
+      if (token && userStr) {
+        setLoggedInUser(JSON.parse(userStr));
+      } else {
+        setLoggedInUser(null);
+      }
+    } catch (e) {}
+
     try {
       const savedTheme = localStorage.getItem('uwo_landing_theme');
       if (savedTheme === 'dark') {
@@ -269,14 +282,26 @@ export default function UwoLandingPage() {
     return () => clearInterval(timer);
   }, []);
 
-  const handleStartFree = () => {
-    router.push('/auth/login');
+  const handleDashboardRedirect = () => {
+    if (loggedInUser?.role === 'ADMIN') {
+      router.push('/admin');
+    } else {
+      router.push('/client');
+    }
   };
 
-  const primaryColor = brand?.primary_color || '#059669';
-  const brandName = brand?.brand_name || 'UWO Connect';
-  const brandTagline = brand?.tagline || 'Automated SaaS Platform';
-  const logoUrl = brand?.logo_url || '/download (3).gif';
+  const handleStartFree = () => {
+    if (loggedInUser) {
+      handleDashboardRedirect();
+    } else {
+      router.push('/auth/login');
+    }
+  };
+
+  const primaryColor = isWhiteLabel && brand?.primary_color ? brand.primary_color : '#059669';
+  const brandName = isWhiteLabel && brand?.brand_name ? brand.brand_name : 'UWO Connect';
+  const brandTagline = isWhiteLabel && brand?.tagline ? brand.tagline : 'Automated SaaS Platform';
+  const logoUrl = isWhiteLabel && brand?.logo_url ? brand.logo_url : '/download (3).gif';
 
   return (
     <div className={cn(
@@ -341,23 +366,36 @@ export default function UwoLandingPage() {
               )}
             </button>
 
-            <button
-              onClick={() => router.push('/auth/login')}
-              className={cn(
-                "hidden sm:block px-3 py-1.5 text-xs font-extrabold transition-colors cursor-pointer active:scale-95",
-                isDarkMode ? "text-slate-300 hover:text-emerald-400" : "text-slate-700 hover:text-emerald-600"
-              )}
-            >
-              Log In
-            </button>
-            <button
-              onClick={() => router.push('/auth/login')}
-              className="landing-button-glow px-3 sm:px-4 py-1.5 rounded-lg bg-[#059669] hover:bg-[#047857] text-white text-xs font-extrabold shadow-md shadow-emerald-700/20 hover:shadow-lg hover:shadow-emerald-700/30 hover:scale-[1.03] active:scale-95 transition-all duration-300 flex items-center gap-1.5 cursor-pointer shrink-0"
-              style={isWhiteLabel && primaryColor ? { backgroundColor: primaryColor } : undefined}
-            >
-              <span>Get Started</span>
-              <ArrowRight size={13} className="hidden sm:inline group-hover:translate-x-0.5 transition-transform" />
-            </button>
+            {loggedInUser ? (
+              <button
+                onClick={handleDashboardRedirect}
+                className="landing-button-glow px-3.5 sm:px-4 py-1.5 rounded-lg bg-[#059669] hover:bg-[#047857] text-white text-xs font-extrabold shadow-md shadow-emerald-700/20 hover:shadow-lg hover:shadow-emerald-700/30 hover:scale-[1.03] active:scale-95 transition-all duration-300 flex items-center gap-1.5 cursor-pointer shrink-0"
+                style={isWhiteLabel && primaryColor ? { backgroundColor: primaryColor } : undefined}
+              >
+                <span>Dashboard</span>
+                <ArrowRight size={13} className="hidden sm:inline group-hover:translate-x-0.5 transition-transform" />
+              </button>
+            ) : (
+              <>
+                <button
+                  onClick={() => router.push('/auth/login')}
+                  className={cn(
+                    "hidden sm:block px-3 py-1.5 text-xs font-extrabold transition-colors cursor-pointer active:scale-95",
+                    isDarkMode ? "text-slate-300 hover:text-emerald-400" : "text-slate-700 hover:text-emerald-600"
+                  )}
+                >
+                  Log In
+                </button>
+                <button
+                  onClick={() => router.push('/auth/login')}
+                  className="landing-button-glow px-3 sm:px-4 py-1.5 rounded-lg bg-[#059669] hover:bg-[#047857] text-white text-xs font-extrabold shadow-md shadow-emerald-700/20 hover:shadow-lg hover:shadow-emerald-700/30 hover:scale-[1.03] active:scale-95 transition-all duration-300 flex items-center gap-1.5 cursor-pointer shrink-0"
+                  style={isWhiteLabel && primaryColor ? { backgroundColor: primaryColor } : undefined}
+                >
+                  <span>Get Started</span>
+                  <ArrowRight size={13} className="hidden sm:inline group-hover:translate-x-0.5 transition-transform" />
+                </button>
+              </>
+            )}
 
             {/* Mobile Hamburger Menu Button */}
             <button
@@ -429,23 +467,36 @@ export default function UwoLandingPage() {
 
             {/* Mobile Action Buttons */}
             <div className="pt-3 border-t border-slate-200/60 dark:border-slate-800/80 flex items-center gap-2.5">
-              <button
-                onClick={() => { setMobileMenuOpen(false); router.push('/auth/login'); }}
-                className={cn(
-                  "w-1/2 py-2.5 text-center text-xs font-black rounded-lg border transition-all active:scale-95 cursor-pointer",
-                  isDarkMode ? "border-slate-800 bg-slate-900/80 text-slate-200 hover:bg-slate-800" : "border-slate-200 bg-slate-50 text-slate-800 hover:bg-slate-100"
-                )}
-              >
-                Log In
-              </button>
-              <button
-                onClick={() => { setMobileMenuOpen(false); router.push('/auth/login'); }}
-                className="w-1/2 py-2.5 text-center text-xs font-black rounded-lg bg-[#059669] hover:bg-[#047857] text-white shadow-md shadow-emerald-700/20 active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-                style={isWhiteLabel && primaryColor ? { backgroundColor: primaryColor } : undefined}
-              >
-                <span>Get Started</span>
-                <ArrowRight size={13} />
-              </button>
+              {loggedInUser ? (
+                <button
+                  onClick={() => { setMobileMenuOpen(false); handleDashboardRedirect(); }}
+                  className="w-full py-2.5 text-center text-xs font-black rounded-lg bg-[#059669] hover:bg-[#047857] text-white shadow-md shadow-emerald-700/20 active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                  style={isWhiteLabel && primaryColor ? { backgroundColor: primaryColor } : undefined}
+                >
+                  <span>Go to Dashboard</span>
+                  <ArrowRight size={13} />
+                </button>
+              ) : (
+                <>
+                  <button
+                    onClick={() => { setMobileMenuOpen(false); router.push('/auth/login'); }}
+                    className={cn(
+                      "w-1/2 py-2.5 text-center text-xs font-black rounded-lg border transition-all active:scale-95 cursor-pointer",
+                      isDarkMode ? "border-slate-800 bg-slate-900/80 text-slate-200 hover:bg-slate-800" : "border-slate-200 bg-slate-50 text-slate-800 hover:bg-slate-100"
+                    )}
+                  >
+                    Log In
+                  </button>
+                  <button
+                    onClick={() => { setMobileMenuOpen(false); router.push('/auth/login'); }}
+                    className="w-1/2 py-2.5 text-center text-xs font-black rounded-lg bg-[#059669] hover:bg-[#047857] text-white shadow-md shadow-emerald-700/20 active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                    style={isWhiteLabel && primaryColor ? { backgroundColor: primaryColor } : undefined}
+                  >
+                    <span>Get Started</span>
+                    <ArrowRight size={13} />
+                  </button>
+                </>
+              )}
             </div>
           </div>
         )}

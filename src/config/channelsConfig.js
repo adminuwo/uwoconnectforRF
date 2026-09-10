@@ -290,12 +290,21 @@ export function getChannelAccessState(channelKey, clientData, activePlans = []) 
   }
 
   // 2. Level 3: Admin Plans Check
-  // If activePlans exist, check if ANY active admin plan contains this feature key
+  // If activePlans exist, check if ANY active admin plan contains this feature key or channel/connector
   let containingPlans = [];
   if (Array.isArray(activePlans) && activePlans.length > 0) {
     containingPlans = activePlans.filter(p => {
-      if (!p || p.is_active === false) return false;
-      const keys = p.feature_keys || p.metadata?.feature_keys || [];
+      if (!p || p.is_active === false || p.status === 'INACTIVE') return false;
+      const keys = [
+        ...(Array.isArray(p.feature_keys) ? p.feature_keys : []),
+        ...(Array.isArray(p.metadata?.feature_keys) ? p.metadata.feature_keys : []),
+        ...(Array.isArray(p.allowed_channels) ? p.allowed_channels : []),
+        ...(Array.isArray(p.metadata?.allowed_channels) ? p.metadata.allowed_channels : []),
+        ...(Array.isArray(p.allowed_connectors) ? p.allowed_connectors : []),
+        ...(Array.isArray(p.metadata?.allowed_connectors) ? p.metadata.allowed_connectors : []),
+        ...(Array.isArray(p.allowed_features) ? p.allowed_features : []),
+        ...(Array.isArray(p.metadata?.allowed_features) ? p.metadata.allowed_features : [])
+      ];
       return keys.includes(featureKey) || keys.includes(key);
     });
 
@@ -328,7 +337,12 @@ export function getChannelAccessState(channelKey, clientData, activePlans = []) 
     } else if (customAdded.includes(featureKey) || customAdded.includes(key)) {
       isIncludedInPlan = true;
     } else if (clientPlanId && containingPlans.length > 0) {
-      const match = containingPlans.find(p => p.id === clientPlanId || p.name.toLowerCase() === clientPlanName);
+      const match = containingPlans.find(p => {
+        if (!p) return false;
+        const isMatchId = p.id === clientPlanId || p.slug === clientPlanId;
+        const isMatchName = (p.name || '').toLowerCase() === clientPlanName;
+        return isMatchId || isMatchName;
+      });
       if (!match) {
         // Client's current plan does not include this connector, but another plan does
         isIncludedInPlan = false;

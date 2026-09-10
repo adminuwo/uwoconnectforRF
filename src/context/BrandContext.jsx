@@ -78,31 +78,20 @@ export function BrandProvider({ children }) {
         }
       }
       
-      // Check if logged in user has local client branding cached
-      let localUserClient = null;
-      if (typeof window !== 'undefined') {
-        try {
-          const userStr = localStorage.getItem('user');
-          if (userStr) {
-            const parsed = JSON.parse(userStr);
-            localUserClient = parsed.client;
-          }
-        } catch (e) {
-          // ignore parsing error
-        }
-      }
-
-      const clientIdParam = localUserClient?.id ? `&client_id=${localUserClient.id}` : '';
-      const res = await axios.get(`${API_BASE_URL}/api/whitelabel/config?domain=${host}${clientIdParam}`);
+      // Query whitelabel configuration for domain
+      const res = await axios.get(`${API_BASE_URL}/api/whitelabel/config?domain=${host}`);
       
-      if (res.data) {
+      if (res.data && res.data.is_whitelabel) {
         const mergedBrand = {
           ...DEFAULT_BRAND,
           ...res.data,
-          brand_name: res.data.brand_name || localUserClient?.business_name || DEFAULT_BRAND.brand_name,
+          brand_name: res.data.brand_name || DEFAULT_BRAND.brand_name,
         };
         setBrand(mergedBrand);
         applyBrandToDOM(mergedBrand);
+      } else {
+        setBrand(DEFAULT_BRAND);
+        applyBrandToDOM(DEFAULT_BRAND);
       }
     } catch (err) {
       console.warn('[BrandContext] Falling back to default branding:', err?.message || err);

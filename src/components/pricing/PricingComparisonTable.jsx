@@ -564,8 +564,26 @@ export default function PricingComparisonTable({ plansData, onSelectPlan, isAdmi
   const getChannelDetails = (planObj, chKey) => {
     if (!planObj) return {};
     const keyToFind = (chKey || 'whatsapp').toString().toLowerCase();
+    const meta = planObj.metadata || {};
+    const isYearly = (billingPeriod || '').toUpperCase() === 'YEARLY';
 
-    const chMap = planObj.channel_details;
+    // 1. First check cycle-specific configuration
+    const cycleConfig = isYearly
+      ? (meta.yearlyConfig || meta.yearly_config || planObj.yearlyConfig)
+      : (meta.monthlyConfig || meta.monthly_config || planObj.monthlyConfig);
+
+    let chMap = cycleConfig && cycleConfig.channel_details;
+
+    if (!chMap || typeof chMap !== 'object' || Object.keys(chMap).length === 0) {
+      chMap = isYearly
+        ? (meta.yearly_channel_details || planObj.yearly_channel_details)
+        : (meta.monthly_channel_details || planObj.monthly_channel_details);
+    }
+
+    if (!chMap || typeof chMap !== 'object' || Object.keys(chMap).length === 0) {
+      chMap = planObj.channel_details;
+    }
+
     if (chMap && typeof chMap === 'object') {
       for (const k of Object.keys(chMap)) {
         if (k.toLowerCase() === keyToFind && chMap[k] && typeof chMap[k] === 'object' && Object.keys(chMap[k]).length > 0) {

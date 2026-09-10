@@ -110,12 +110,36 @@ const Sidebar = ({ role, isOpen, onClose, onToggle }) => {
   const { entitlements, openUpgradeModal } = useEntitlement();
   const { brand } = useBrand();
   const [mounted, setMounted] = useState(false);
+  const [userObj, setUserObj] = useState({});
+
+  const loadUser = () => {
+    try {
+      const u = JSON.parse(localStorage.getItem('user') || '{}');
+      setUserObj(u);
+    } catch (e) {
+      setUserObj({});
+    }
+  };
 
   useEffect(() => {
     setMounted(true);
+    loadUser();
+
+    const handleUpdate = () => {
+      loadUser();
+    };
+
+    window.addEventListener('profileUpdated', handleUpdate);
+    window.addEventListener('brandUpdated', handleUpdate);
+    window.addEventListener('storage', handleUpdate);
+
+    return () => {
+      window.removeEventListener('profileUpdated', handleUpdate);
+      window.removeEventListener('brandUpdated', handleUpdate);
+      window.removeEventListener('storage', handleUpdate);
+    };
   }, []);
 
-  const userObj = mounted && typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('user') || '{}') : {};
   const rawUserPlan = userObj?.client?.plan || userObj?.plan || '';
   const activePlanRank = getPlanRank(entitlements?.plan, rawUserPlan);
 
@@ -305,7 +329,13 @@ const Sidebar = ({ role, isOpen, onClose, onToggle }) => {
             const displayBrandName = effectiveRole === 'ADMIN'
               ? (brand?.brand_name || "UwoConnect")
               : (userObj?.client?.business_name || userObj?.business_name || brand?.brand_name || "Workspace");
-            const displayBrandLogo = (userObj?.client?.company_logo_url || userObj?.company_logo_url || brand?.logo_url || "/download (3).gif");
+            const displayBrandLogo = (
+              userObj?.client?.company_logo_url ||
+              userObj?.company_logo_url ||
+              (mounted && typeof window !== 'undefined' ? localStorage.getItem('client_company_logo') : null) ||
+              brand?.logo_url ||
+              "/download (3).gif"
+            );
 
             return isOpen ? (
               <div className="flex items-center gap-2.5 min-w-0 flex-1">

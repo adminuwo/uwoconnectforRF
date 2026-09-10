@@ -495,19 +495,56 @@ export default function AdminPlansPage() {
   }, [features]);
 
   // ── Form States ──
+  // ── Form States ──
   const createDefaultCycleConfig = (defaultPrice, defaultChannels = '1') => ({
     price: defaultPrice,
     max_channels: defaultChannels,
     selected_feature_keys: DEFAULT_FEATURES.slice(0, 8).map(f => f.key),
+    // WhatsApp
     whatsapp_what_you_get: "WhatsApp Business API Automation\nShared Team Inbox for WhatsApp\nAutomated Keyword Replies\nContact & Lead Sync",
     whatsapp_features: "WhatsApp Auto Replies\nShared Inbox\nKeyword Triggers\nContact Management",
+    whatsapp_messages_limit: 'unlimited',
+    whatsapp_messages_desc: 'Based on your WhatsApp Number',
+    whatsapp_contacts_limit: 'unlimited',
+    whatsapp_custom_fields: '15',
+    whatsapp_custom_tags: '15',
+    whatsapp_custom_events: '5',
     whatsapp_marketing_cost: '₹0.970',
     whatsapp_auth_cost: '₹0.129',
     whatsapp_utility_cost: '₹0.160',
     whatsapp_service_cost: 'FREE',
+    // Facebook
+    facebook_what_you_get: "Facebook Messenger Automation\nFacebook Page Inbox Sync\nAutomated Page Quick-Replies\nLead Form Acquisition",
+    facebook_features: "Facebook Auto Replies\nShared Page Inbox\nAd Lead Capture\nContact Management",
+    facebook_messages_limit: 'unlimited',
+    facebook_messages_desc: 'Facebook Page Messaging',
+    facebook_contacts_limit: 'unlimited',
+    facebook_custom_fields: '15',
+    facebook_custom_tags: '15',
+    facebook_custom_events: '5',
+    facebook_messaging_cost: 'FREE',
+    facebook_lead_cost: 'FREE',
+    // Instagram
+    instagram_what_you_get: "Instagram Direct DM Automation\nStory Mention Auto-Replies\nComment Automation & Quick-Flows\nShared Inbox for Insta DMs",
+    instagram_features: "Insta Quick-Flows & Price Query Bots\nComment & Story Mention Triggers\nShared Inbox for DMs & Comments\nGiveaway & Promo Automation",
+    instagram_messages_limit: 'unlimited',
+    instagram_messages_desc: 'Instagram Professional Account',
+    instagram_contacts_limit: 'unlimited',
+    instagram_custom_fields: '15',
+    instagram_custom_tags: '15',
+    instagram_custom_events: '5',
+    instagram_dms_cost: 'FREE',
+    instagram_price_cost: 'FREE',
+    instagram_giveaway_cost: 'FREE',
+    // General
     custom_fields_limit: '15',
     custom_tags_limit: '15',
-    custom_events_limit: '5'
+    custom_events_limit: '5',
+    messages_limit: 'unlimited',
+    contacts_limit: 'unlimited',
+    team_members_limit: '3',
+    workflows_limit: '5',
+    custom_quota_fields: []
   });
 
   // ── Form States ──
@@ -518,6 +555,7 @@ export default function AdminPlansPage() {
     currency: 'INR',
     status: 'ACTIVE',
     activeCycle: 'monthly',
+    yearly_discount_percent: '15',
     monthlyConfig: createDefaultCycleConfig('999', '1'),
     yearlyConfig: createDefaultCycleConfig('9590', '1')
   });
@@ -534,8 +572,62 @@ export default function AdminPlansPage() {
     }));
   };
 
+  const updateSpecificCycleField = (cycle, field, value) => {
+    const configKey = cycle === 'yearly' ? 'yearlyConfig' : 'monthlyConfig';
+    setPlanForm(prev => ({
+      ...prev,
+      [configKey]: {
+        ...(prev[configKey] || {}),
+        [field]: value
+      }
+    }));
+  };
+
   const getActiveConfig = () => {
     return (planForm.activeCycle === 'yearly' ? planForm.yearlyConfig : planForm.monthlyConfig) || {};
+  };
+
+  const addCustomQuotaField = () => {
+    const cycle = planForm.activeCycle || 'monthly';
+    const configKey = cycle === 'yearly' ? 'yearlyConfig' : 'monthlyConfig';
+    const currentFields = getActiveConfig().custom_quota_fields || [];
+    const newItem = { id: 'cq_' + Date.now(), label: '', value: '' };
+    setPlanForm(prev => ({
+      ...prev,
+      [configKey]: {
+        ...(prev[configKey] || {}),
+        custom_quota_fields: [...currentFields, newItem]
+      }
+    }));
+  };
+
+  const updateCustomQuotaField = (index, key, val) => {
+    const cycle = planForm.activeCycle || 'monthly';
+    const configKey = cycle === 'yearly' ? 'yearlyConfig' : 'monthlyConfig';
+    const currentFields = [...(getActiveConfig().custom_quota_fields || [])];
+    if (currentFields[index]) {
+      currentFields[index] = { ...currentFields[index], [key]: val };
+      setPlanForm(prev => ({
+        ...prev,
+        [configKey]: {
+          ...(prev[configKey] || {}),
+          custom_quota_fields: currentFields
+        }
+      }));
+    }
+  };
+
+  const removeCustomQuotaField = (index) => {
+    const cycle = planForm.activeCycle || 'monthly';
+    const configKey = cycle === 'yearly' ? 'yearlyConfig' : 'monthlyConfig';
+    const currentFields = (getActiveConfig().custom_quota_fields || []).filter((_, i) => i !== index);
+    setPlanForm(prev => ({
+      ...prev,
+      [configKey]: {
+        ...(prev[configKey] || {}),
+        custom_quota_fields: currentFields
+      }
+    }));
   };
 
   const [featureForm, setFeatureForm] = useState({
@@ -582,28 +674,60 @@ export default function AdminPlansPage() {
           const mappedPlans = rawPlanList.map(p => {
             const meta = p.metadata || {};
             const legacyWA = p.channel_details?.whatsapp || {};
+            const legacyFB = p.channel_details?.facebook || {};
+            const legacyIG = p.channel_details?.instagram || {};
 
             const extractConfigFromPlan = (cycleName, defaultPrice) => {
               const saved = meta[`${cycleName}Config`] || meta[`${cycleName}_config`] || p[`${cycleName}Config`];
               if (saved) return saved;
 
               const mP = p.monthly_price || p.price || 999;
-              const yP = p.yearly_price || Math.round(mP * 12 * 0.85);
+              const yP = p.yearly_price || meta.yearly_price || Math.round(mP * 12 * 0.85);
               const price = cycleName === 'monthly' ? mP : yP;
 
               return {
                 price: price.toString(),
-                max_channels: (p.max_channels || 1).toString(),
+                max_channels: (p.max_channels || (p.name?.toLowerCase().includes('starter') ? 1 : p.name?.toLowerCase().includes('growth') ? 2 : 3)).toString(),
                 selected_feature_keys: p.feature_keys || [],
+                // Limits
                 custom_fields_limit: (legacyWA.limits?.custom_fields?.value || 15).toString(),
                 custom_tags_limit: (legacyWA.limits?.custom_tags?.value || 15).toString(),
                 custom_events_limit: (legacyWA.limits?.events?.value || 5).toString(),
+                messages_limit: (legacyWA.limits?.messages?.value || 'unlimited').toString(),
+                contacts_limit: (legacyWA.limits?.contacts?.value || 'unlimited').toString(),
+                // WhatsApp
                 whatsapp_what_you_get: Array.isArray(legacyWA.what_you_get) ? legacyWA.what_you_get.join('\n') : "WhatsApp Business API Automation\nShared Team Inbox for WhatsApp\nAutomated Keyword Replies\nContact & Lead Sync",
                 whatsapp_features: Array.isArray(legacyWA.features) ? legacyWA.features.join('\n') : "WhatsApp Auto Replies\nShared Inbox\nKeyword Triggers\nContact Management",
+                whatsapp_messages_limit: (legacyWA.limits?.messages?.value || 'unlimited').toString(),
+                whatsapp_contacts_limit: (legacyWA.limits?.contacts?.value || 'unlimited').toString(),
+                whatsapp_custom_fields: (legacyWA.limits?.custom_fields?.value || 15).toString(),
+                whatsapp_custom_tags: (legacyWA.limits?.custom_tags?.value || 15).toString(),
+                whatsapp_custom_events: (legacyWA.limits?.events?.value || 5).toString(),
                 whatsapp_marketing_cost: legacyWA.message_costs?.find(c => c.type === 'Marketing')?.price || '₹0.970',
                 whatsapp_auth_cost: legacyWA.message_costs?.find(c => c.type === 'Authentication')?.price || '₹0.129',
                 whatsapp_utility_cost: legacyWA.message_costs?.find(c => c.type === 'Utility')?.price || '₹0.160',
-                whatsapp_service_cost: legacyWA.message_costs?.find(c => c.type === 'Service')?.price || 'FREE'
+                whatsapp_service_cost: legacyWA.message_costs?.find(c => c.type === 'Service')?.price || 'FREE',
+                // Facebook
+                facebook_what_you_get: Array.isArray(legacyFB.what_you_get) ? legacyFB.what_you_get.join('\n') : "Facebook Messenger Automation\nFacebook Page Inbox Sync\nAutomated Page Quick-Replies\nLead Form Acquisition",
+                facebook_features: Array.isArray(legacyFB.features) ? legacyFB.features.join('\n') : "Facebook Auto Replies\nShared Page Inbox\nAd Lead Capture\nContact Management",
+                facebook_messages_limit: (legacyFB.limits?.messages?.value || 'unlimited').toString(),
+                facebook_contacts_limit: (legacyFB.limits?.contacts?.value || 'unlimited').toString(),
+                facebook_custom_fields: (legacyFB.limits?.custom_fields?.value || 15).toString(),
+                facebook_custom_tags: (legacyFB.limits?.custom_tags?.value || 15).toString(),
+                facebook_custom_events: (legacyFB.limits?.events?.value || 5).toString(),
+                facebook_messaging_cost: legacyFB.message_costs?.find(c => c.type === 'Standard Messaging')?.price || 'FREE',
+                facebook_lead_cost: legacyFB.message_costs?.find(c => c.type === 'Lead Form Triggers')?.price || 'FREE',
+                // Instagram
+                instagram_what_you_get: Array.isArray(legacyIG.what_you_get) ? legacyIG.what_you_get.join('\n') : "Instagram Direct DM Automation\nStory Mention Auto-Replies\nComment Automation & Quick-Flows\nShared Inbox for Insta DMs",
+                instagram_features: Array.isArray(legacyIG.features) ? legacyIG.features.join('\n') : "Insta Quick-Flows & Price Query Bots\nComment & Story Mention Triggers\nShared Inbox for DMs & Comments\nGiveaway & Promo Automation",
+                instagram_messages_limit: (legacyIG.limits?.messages?.value || 'unlimited').toString(),
+                instagram_contacts_limit: (legacyIG.limits?.contacts?.value || 'unlimited').toString(),
+                instagram_custom_fields: (legacyIG.limits?.custom_fields?.value || 15).toString(),
+                instagram_custom_tags: (legacyIG.limits?.custom_tags?.value || 15).toString(),
+                instagram_custom_events: (legacyIG.limits?.events?.value || 5).toString(),
+                instagram_dms_cost: legacyIG.message_costs?.find(c => c.type === 'Unlimited DMs & Comments')?.price || 'FREE',
+                instagram_price_cost: legacyIG.message_costs?.find(c => c.type === 'Price Automation')?.price || 'FREE',
+                instagram_giveaway_cost: legacyIG.message_costs?.find(c => c.type === 'Giveaway Automation')?.price || 'FREE'
               };
             };
 
@@ -629,7 +753,7 @@ export default function AdminPlansPage() {
               connector_count: p.connector_count || 3,
               client_count: p.client_count || 0,
               is_popular: p.is_popular || false,
-              channel_details: p.channel_details || {},
+              channel_details: p.channel_details || meta.channel_details || {},
               metadata: meta
             };
           });
@@ -778,49 +902,84 @@ export default function AdminPlansPage() {
 
     const extractConfig = (cycleName, defaultPrice) => {
       const savedConfig = meta[`${cycleName}Config`] || meta[`${cycleName}_config`] || plan[`${cycleName}Config`];
-      if (savedConfig) {
-        return {
-          price: (savedConfig.price || defaultPrice).toString(),
-          max_channels: (savedConfig.max_channels || plan.max_channels || 1).toString(),
-          selected_feature_keys: savedConfig.selected_feature_keys || plan.feature_keys || [],
-          custom_fields_limit: (savedConfig.custom_fields_limit || legacyWA.limits?.custom_fields?.value || 15).toString(),
-          custom_tags_limit: (savedConfig.custom_tags_limit || legacyWA.limits?.custom_tags?.value || 15).toString(),
-          custom_events_limit: (savedConfig.custom_events_limit || legacyWA.limits?.events?.value || 5).toString(),
-          whatsapp_what_you_get: savedConfig.whatsapp_what_you_get || (Array.isArray(legacyWA.what_you_get) ? legacyWA.what_you_get.join('\n') : "WhatsApp Business API Automation\nShared Team Inbox for WhatsApp\nAutomated Keyword Replies\nContact & Lead Sync"),
-          facebook_what_you_get: savedConfig.facebook_what_you_get || (Array.isArray(legacyFB.what_you_get) ? legacyFB.what_you_get.join('\n') : "Facebook Messenger Automation\nFacebook Page Inbox Sync\nAutomated Page Quick-Replies\nLead Form Acquisition"),
-          instagram_what_you_get: savedConfig.instagram_what_you_get || (Array.isArray(legacyIG.what_you_get) ? legacyIG.what_you_get.join('\n') : "Instagram Direct DM Automation\nStory Mention Auto-Replies\nComment Automation & Quick-Flows\nShared Inbox for Insta DMs"),
-          whatsapp_features: savedConfig.whatsapp_features || (Array.isArray(legacyWA.features) ? legacyWA.features.join('\n') : "WhatsApp Auto Replies\nShared Inbox\nKeyword Triggers\nContact Management"),
-          facebook_features: savedConfig.facebook_features || (Array.isArray(legacyFB.features) ? legacyFB.features.join('\n') : "Facebook Auto Replies\nShared Page Inbox\nAd Lead Capture\nContact Management"),
-          instagram_features: savedConfig.instagram_features || (Array.isArray(legacyIG.features) ? legacyIG.features.join('\n') : "Insta Quick-Flows & Price Query Bots\nComment & Story Mention Triggers\nShared Inbox for DMs & Comments\nGiveaway & Promo Automation"),
-          whatsapp_marketing_cost: savedConfig.whatsapp_marketing_cost || legacyWA.message_costs?.find(c => c.type === 'Marketing')?.price || '₹0.970',
-          whatsapp_auth_cost: savedConfig.whatsapp_auth_cost || legacyWA.message_costs?.find(c => c.type === 'Authentication')?.price || '₹0.129',
-          whatsapp_utility_cost: savedConfig.whatsapp_utility_cost || legacyWA.message_costs?.find(c => c.type === 'Utility')?.price || '₹0.160',
-          whatsapp_service_cost: savedConfig.whatsapp_service_cost || legacyWA.message_costs?.find(c => c.type === 'Service')?.price || 'FREE'
-        };
+      const mP = plan.monthly_price || plan.price || defaultPrice;
+      const yP = plan.yearly_price || meta.yearly_price || Math.round(mP * 12 * 0.85);
+      const targetPrice = cycleName === 'monthly' ? mP : yP;
+
+      const cycleChannelDetails = savedConfig?.channel_details || (cycleName === 'yearly' ? (meta.yearly_channel_details || meta.yearlyConfig?.channel_details || plan.yearly_channel_details) : (meta.monthly_channel_details || meta.monthlyConfig?.channel_details || plan.monthly_channel_details));
+      const pWA = cycleChannelDetails?.whatsapp || plan.channel_details?.whatsapp || legacyWA;
+      const pFB = cycleChannelDetails?.facebook || plan.channel_details?.facebook || legacyFB;
+      const pIG = cycleChannelDetails?.instagram || plan.channel_details?.instagram || legacyIG;
+
+      let extractedCustomQuotas = [];
+      if (Array.isArray(savedConfig?.custom_quota_fields) && savedConfig.custom_quota_fields.length > 0) {
+        extractedCustomQuotas = savedConfig.custom_quota_fields;
+      } else if (pWA.limits && typeof pWA.limits === 'object') {
+        const standardKeys = new Set(['messages', 'contacts', 'custom_fields', 'custom_tags', 'events', 'custom_events']);
+        Object.entries(pWA.limits).forEach(([k, v], idx) => {
+          if (!standardKeys.has(k) && v && typeof v === 'object' && v.label) {
+            extractedCustomQuotas.push({
+              id: 'cq_' + idx + '_' + Date.now(),
+              label: v.label,
+              value: v.value || '—'
+            });
+          }
+        });
       }
 
-      // Legacy fallback
-      const mP = plan.monthly_price || plan.price || 999;
-      const yP = plan.yearly_price || Math.round(mP * 12 * 0.85);
-      const price = cycleName === 'monthly' ? mP : yP;
-
       return {
-        price: price.toString(),
-        max_channels: (plan.max_channels || (plan.name?.toLowerCase().includes('starter') ? 1 : plan.name?.toLowerCase().includes('growth') ? 2 : 3)).toString(),
-        selected_feature_keys: plan.feature_keys || [],
-        custom_fields_limit: (legacyWA.limits?.custom_fields?.value || 15).toString(),
-        custom_tags_limit: (legacyWA.limits?.custom_tags?.value || 15).toString(),
-        custom_events_limit: (legacyWA.limits?.events?.value || 5).toString(),
-        whatsapp_what_you_get: Array.isArray(legacyWA.what_you_get) ? legacyWA.what_you_get.join('\n') : "WhatsApp Business API Automation\nShared Team Inbox for WhatsApp\nAutomated Keyword Replies\nContact & Lead Sync",
-        facebook_what_you_get: Array.isArray(legacyFB.what_you_get) ? legacyFB.what_you_get.join('\n') : "Facebook Messenger Automation\nFacebook Page Inbox Sync\nAutomated Page Quick-Replies\nLead Form Acquisition",
-        instagram_what_you_get: Array.isArray(legacyIG.what_you_get) ? legacyIG.what_you_get.join('\n') : "Instagram Direct DM Automation\nStory Mention Auto-Replies\nComment Automation & Quick-Flows\nShared Inbox for Insta DMs",
-        whatsapp_features: Array.isArray(legacyWA.features) ? legacyWA.features.join('\n') : "WhatsApp Auto Replies\nShared Inbox\nKeyword Triggers\nContact Management",
-        facebook_features: Array.isArray(legacyFB.features) ? legacyFB.features.join('\n') : "Facebook Auto Replies\nShared Page Inbox\nAd Lead Capture\nContact Management",
-        instagram_features: Array.isArray(legacyIG.features) ? legacyIG.features.join('\n') : "Insta Quick-Flows & Price Query Bots\nComment & Story Mention Triggers\nShared Inbox for DMs & Comments\nGiveaway & Promo Automation",
-        whatsapp_marketing_cost: legacyWA.message_costs?.find(c => c.type === 'Marketing')?.price || '₹0.970',
-        whatsapp_auth_cost: legacyWA.message_costs?.find(c => c.type === 'Authentication')?.price || '₹0.129',
-        whatsapp_utility_cost: legacyWA.message_costs?.find(c => c.type === 'Utility')?.price || '₹0.160',
-        whatsapp_service_cost: legacyWA.message_costs?.find(c => c.type === 'Service')?.price || 'FREE'
+        price: (savedConfig?.price || targetPrice).toString(),
+        max_channels: (savedConfig?.max_channels || plan.max_channels || (plan.name?.toLowerCase().includes('starter') ? 1 : plan.name?.toLowerCase().includes('growth') ? 2 : 3)).toString(),
+        selected_feature_keys: savedConfig?.selected_feature_keys || plan.feature_keys || [],
+
+        // General limits
+        custom_fields_limit: (savedConfig?.custom_fields_limit || pWA.limits?.custom_fields?.value || 15).toString(),
+        custom_tags_limit: (savedConfig?.custom_tags_limit || pWA.limits?.custom_tags?.value || 15).toString(),
+        custom_events_limit: (savedConfig?.custom_events_limit || pWA.limits?.events?.value || 5).toString(),
+        messages_limit: (savedConfig?.messages_limit || pWA.limits?.messages?.value || 'unlimited').toString(),
+        contacts_limit: (savedConfig?.contacts_limit || pWA.limits?.contacts?.value || 'unlimited').toString(),
+        team_members_limit: (savedConfig?.team_members_limit || plan.team_members_limit || '3').toString(),
+        workflows_limit: (savedConfig?.workflows_limit || plan.workflows_limit || '5').toString(),
+        custom_quota_fields: extractedCustomQuotas,
+
+        // WhatsApp
+        whatsapp_what_you_get: savedConfig?.whatsapp_what_you_get || (Array.isArray(pWA.what_you_get) ? pWA.what_you_get.join('\n') : "WhatsApp Business API Automation\nShared Team Inbox for WhatsApp\nAutomated Keyword Replies\nContact & Lead Sync"),
+        whatsapp_features: savedConfig?.whatsapp_features || (Array.isArray(pWA.features) ? pWA.features.join('\n') : "WhatsApp Auto Replies\nShared Inbox\nKeyword Triggers\nContact Management"),
+        whatsapp_messages_limit: (savedConfig?.whatsapp_messages_limit || pWA.limits?.messages?.value || 'unlimited').toString(),
+        whatsapp_messages_desc: savedConfig?.whatsapp_messages_desc || pWA.limits?.messages?.description || 'Based on your WhatsApp Number',
+        whatsapp_contacts_limit: (savedConfig?.whatsapp_contacts_limit || pWA.limits?.contacts?.value || 'unlimited').toString(),
+        whatsapp_custom_fields: (savedConfig?.whatsapp_custom_fields || pWA.limits?.custom_fields?.value || 15).toString(),
+        whatsapp_custom_tags: (savedConfig?.whatsapp_custom_tags || pWA.limits?.custom_tags?.value || 15).toString(),
+        whatsapp_custom_events: (savedConfig?.whatsapp_custom_events || pWA.limits?.events?.value || 5).toString(),
+        whatsapp_marketing_cost: savedConfig?.whatsapp_marketing_cost || pWA.message_costs?.find(c => c.type === 'Marketing')?.price || '₹0.970',
+        whatsapp_auth_cost: savedConfig?.whatsapp_auth_cost || pWA.message_costs?.find(c => c.type === 'Authentication')?.price || '₹0.129',
+        whatsapp_utility_cost: savedConfig?.whatsapp_utility_cost || pWA.message_costs?.find(c => c.type === 'Utility')?.price || '₹0.160',
+        whatsapp_service_cost: savedConfig?.whatsapp_service_cost || pWA.message_costs?.find(c => c.type === 'Service')?.price || 'FREE',
+
+        // Facebook
+        facebook_what_you_get: savedConfig?.facebook_what_you_get || (Array.isArray(pFB.what_you_get) ? pFB.what_you_get.join('\n') : "Facebook Messenger Automation\nFacebook Page Inbox Sync\nAutomated Page Quick-Replies\nLead Form Acquisition"),
+        facebook_features: savedConfig?.facebook_features || (Array.isArray(pFB.features) ? pFB.features.join('\n') : "Facebook Auto Replies\nShared Page Inbox\nAd Lead Capture\nContact Management"),
+        facebook_messages_limit: (savedConfig?.facebook_messages_limit || pFB.limits?.messages?.value || 'unlimited').toString(),
+        facebook_messages_desc: savedConfig?.facebook_messages_desc || pFB.limits?.messages?.description || 'Facebook Page Messaging',
+        facebook_contacts_limit: (savedConfig?.facebook_contacts_limit || pFB.limits?.contacts?.value || 'unlimited').toString(),
+        facebook_custom_fields: (savedConfig?.facebook_custom_fields || pFB.limits?.custom_fields?.value || 15).toString(),
+        facebook_custom_tags: (savedConfig?.facebook_custom_tags || pFB.limits?.custom_tags?.value || 15).toString(),
+        facebook_custom_events: (savedConfig?.facebook_custom_events || pFB.limits?.events?.value || 5).toString(),
+        facebook_messaging_cost: savedConfig?.facebook_messaging_cost || pFB.message_costs?.find(c => c.type === 'Standard Messaging')?.price || 'FREE',
+        facebook_lead_cost: savedConfig?.facebook_lead_cost || pFB.message_costs?.find(c => c.type === 'Lead Form Triggers')?.price || 'FREE',
+
+        // Instagram
+        instagram_what_you_get: savedConfig?.instagram_what_you_get || (Array.isArray(pIG.what_you_get) ? pIG.what_you_get.join('\n') : "Instagram Direct DM Automation\nStory Mention Auto-Replies\nComment Automation & Quick-Flows\nShared Inbox for Insta DMs"),
+        instagram_features: savedConfig?.instagram_features || (Array.isArray(pIG.features) ? pIG.features.join('\n') : "Insta Quick-Flows & Price Query Bots\nComment & Story Mention Triggers\nShared Inbox for DMs & Comments\nGiveaway & Promo Automation"),
+        instagram_messages_limit: (savedConfig?.instagram_messages_limit || pIG.limits?.messages?.value || 'unlimited').toString(),
+        instagram_messages_desc: savedConfig?.instagram_messages_desc || pIG.limits?.messages?.description || 'Instagram Professional Account',
+        instagram_contacts_limit: (savedConfig?.instagram_contacts_limit || pIG.limits?.contacts?.value || 'unlimited').toString(),
+        instagram_custom_fields: (savedConfig?.instagram_custom_fields || pIG.limits?.custom_fields?.value || 15).toString(),
+        instagram_custom_tags: (savedConfig?.instagram_custom_tags || pIG.limits?.custom_tags?.value || 15).toString(),
+        instagram_custom_events: (savedConfig?.instagram_custom_events || pIG.limits?.events?.value || 5).toString(),
+        instagram_dms_cost: savedConfig?.instagram_dms_cost || pIG.message_costs?.find(c => c.type === 'Unlimited DMs & Comments')?.price || 'FREE',
+        instagram_price_cost: savedConfig?.instagram_price_cost || pIG.message_costs?.find(c => c.type === 'Price Automation')?.price || 'FREE',
+        instagram_giveaway_cost: savedConfig?.instagram_giveaway_cost || pIG.message_costs?.find(c => c.type === 'Giveaway Automation')?.price || 'FREE'
       };
     };
 
@@ -831,11 +990,120 @@ export default function AdminPlansPage() {
       currency: plan.currency || 'INR',
       status: plan.status || 'ACTIVE',
       activeCycle: targetCycle,
+      yearly_discount_percent: (meta.yearly_discount_percent || 15).toString(),
       monthlyConfig: extractConfig('monthly', 999),
       yearlyConfig: extractConfig('yearly', 9590)
     });
 
     setIsEditPlanModalOpen(true);
+  };
+
+  // ── Helper to build complete channel_details object ──
+  const buildChannelDetailsForCycle = (config, baseChannelDetails = {}) => {
+    const waWhatYouGet = (config.whatsapp_what_you_get || '').split('\n').map(s => s.trim()).filter(Boolean);
+    const waFeatures = (config.whatsapp_features || '').split('\n').map(s => s.trim()).filter(Boolean);
+    const fbWhatYouGet = (config.facebook_what_you_get || '').split('\n').map(s => s.trim()).filter(Boolean);
+    const fbFeatures = (config.facebook_features || '').split('\n').map(s => s.trim()).filter(Boolean);
+    const igWhatYouGet = (config.instagram_what_you_get || '').split('\n').map(s => s.trim()).filter(Boolean);
+    const igFeatures = (config.instagram_features || '').split('\n').map(s => s.trim()).filter(Boolean);
+
+    const dynamicCustomLimits = {};
+    (config.custom_quota_fields || []).forEach((item, idx) => {
+      if (item.label && item.label.trim()) {
+        const k = 'custom_quota_' + idx;
+        dynamicCustomLimits[k] = { value: item.value || '—', label: item.label.trim() };
+      }
+    });
+
+    return {
+      whatsapp: {
+        name: 'WhatsApp',
+        what_you_get: waWhatYouGet.length > 0 ? waWhatYouGet : (baseChannelDetails.whatsapp?.what_you_get || [
+          'WhatsApp Business API Automation',
+          'Shared Team Inbox for WhatsApp',
+          'Automated Keyword Replies',
+          'Contact & Lead Sync'
+        ]),
+        features: waFeatures.length > 0 ? waFeatures : (baseChannelDetails.whatsapp?.features || [
+          'WhatsApp Auto Replies',
+          'Shared Inbox',
+          'Keyword Triggers',
+          'Contact Management'
+        ]),
+        limits: {
+          messages: { value: config.whatsapp_messages_limit || config.messages_limit || 'unlimited', label: 'Messages', description: config.whatsapp_messages_desc || 'Based on your WhatsApp Number' },
+          contacts: { value: config.whatsapp_contacts_limit || config.contacts_limit || 'unlimited', label: 'Contacts' },
+          custom_fields: { value: config.whatsapp_custom_fields || config.custom_fields_limit || '15', label: 'Custom Fields' },
+          custom_tags: { value: config.whatsapp_custom_tags || config.custom_tags_limit || '15', label: 'Custom Tags' },
+          events: { value: config.whatsapp_custom_events || config.custom_events_limit || '—', label: 'Custom Events' },
+          ...dynamicCustomLimits
+        },
+        message_costs: [
+          { type: 'Marketing', price: config.whatsapp_marketing_cost || '₹0.970' },
+          { type: 'Authentication', price: config.whatsapp_auth_cost || '₹0.129' },
+          { type: 'Utility', price: config.whatsapp_utility_cost || '₹0.160' },
+          { type: 'Service', price: config.whatsapp_service_cost || 'FREE' }
+        ],
+        additional_benefits: baseChannelDetails.whatsapp?.additional_benefits || ['No Markup Charges', 'Standard Support']
+      },
+      facebook: {
+        name: 'Facebook',
+        what_you_get: fbWhatYouGet.length > 0 ? fbWhatYouGet : (baseChannelDetails.facebook?.what_you_get || [
+          'Facebook Messenger Automation',
+          'Facebook Page Inbox Sync',
+          'Automated Page Quick-Replies',
+          'Lead Form Acquisition'
+        ]),
+        features: fbFeatures.length > 0 ? fbFeatures : (baseChannelDetails.facebook?.features || [
+          'Facebook Auto Replies',
+          'Shared Page Inbox',
+          'Ad Lead Capture',
+          'Contact Management'
+        ]),
+        limits: {
+          messages: { value: config.facebook_messages_limit || config.messages_limit || 'unlimited', label: 'Conversations', description: config.facebook_messages_desc || 'Facebook Page Messaging' },
+          contacts: { value: config.facebook_contacts_limit || config.contacts_limit || 'unlimited', label: 'Contacts' },
+          custom_fields: { value: config.facebook_custom_fields || config.custom_fields_limit || '15', label: 'Custom Fields' },
+          custom_tags: { value: config.facebook_custom_tags || config.custom_tags_limit || '15', label: 'Custom Tags' },
+          events: { value: config.facebook_custom_events || config.custom_events_limit || '—', label: 'Custom Events' },
+          ...dynamicCustomLimits
+        },
+        message_costs: [
+          { type: 'Standard Messaging', price: config.facebook_messaging_cost || 'FREE' },
+          { type: 'Lead Form Triggers', price: config.facebook_lead_cost || 'FREE' }
+        ],
+        additional_benefits: baseChannelDetails.facebook?.additional_benefits || ['Meta Graph API Sync', 'Standard Support']
+      },
+      instagram: {
+        name: 'Instagram',
+        what_you_get: igWhatYouGet.length > 0 ? igWhatYouGet : (baseChannelDetails.instagram?.what_you_get || [
+          'Instagram Direct DM Automation',
+          'Story Mention Auto-Replies',
+          'Comment Automation & Quick-Flows',
+          'Shared Inbox for Insta DMs'
+        ]),
+        features: igFeatures.length > 0 ? igFeatures : (baseChannelDetails.instagram?.features || [
+          'Insta Quick-Flows & Price Query Bots',
+          'Comment & Story Mention Triggers',
+          'Shared Inbox for DMs & Comments',
+          'Giveaway & Promo Automation'
+        ]),
+        limits: {
+          messages: { value: config.instagram_messages_limit || config.messages_limit || 'unlimited', label: 'DMs & Comments', description: config.instagram_messages_desc || 'Instagram Professional Account' },
+          contacts: { value: config.instagram_contacts_limit || config.contacts_limit || 'unlimited', label: 'Contacts' },
+          custom_fields: { value: config.instagram_custom_fields || config.custom_fields_limit || '15', label: 'Custom Fields' },
+          custom_tags: { value: config.instagram_custom_tags || config.custom_tags_limit || '15', label: 'Custom Tags' },
+          events: { value: config.instagram_custom_events || config.custom_events_limit || '—', label: 'Custom Events' },
+          ...dynamicCustomLimits
+        },
+        message_costs: [
+          { type: 'Unlimited DMs & Comments', price: config.instagram_dms_cost || 'FREE' },
+          { type: 'Price Automation', price: config.instagram_price_cost || 'FREE' },
+          { type: 'Giveaway Automation', price: config.instagram_giveaway_cost || 'FREE' }
+        ],
+        additional_benefits: baseChannelDetails.instagram?.additional_benefits || ['IG Conversations FREE', 'Standard Support']
+      }
+    };
   };
 
   // ── Submit Create Plan ──
@@ -851,31 +1119,7 @@ export default function AdminPlansPage() {
     const mPrice = Number(mConfig.price) || 0;
     const yPrice = Number(yConfig.price) || 0;
 
-    const buildChannelDetailsForCycle = (config) => {
-      const updatedWhatYouGet = (config.whatsapp_what_you_get || '').split('\n').map(s => s.trim()).filter(Boolean);
-      const updatedFeatures = (config.whatsapp_features || '').split('\n').map(s => s.trim()).filter(Boolean);
-      return {
-        whatsapp: {
-          name: 'WhatsApp',
-          what_you_get: updatedWhatYouGet.length > 0 ? updatedWhatYouGet : ['WhatsApp Business API Automation'],
-          features: updatedFeatures.length > 0 ? updatedFeatures : ['WhatsApp Auto Replies'],
-          limits: {
-            messages: { value: 'unlimited', label: 'Messages', description: 'Based on your WhatsApp Number' },
-            contacts: { value: 'unlimited', label: 'Contacts' },
-            custom_fields: { value: config.custom_fields_limit || '15', label: 'Custom Fields' },
-            custom_tags: { value: config.custom_tags_limit || '15', label: 'Custom Tags' },
-            events: { value: config.custom_events_limit || '—', label: 'Custom Events' }
-          },
-          message_costs: [
-            { type: 'Marketing', price: config.whatsapp_marketing_cost || '₹0.970' },
-            { type: 'Authentication', price: config.whatsapp_auth_cost || '₹0.129' },
-            { type: 'Utility', price: config.whatsapp_utility_cost || '₹0.160' },
-            { type: 'Service', price: config.whatsapp_service_cost || 'FREE' }
-          ],
-          additional_benefits: ['No Markup Charges', 'Standard Support']
-        }
-      };
-    };
+    const fullChannelDetails = buildChannelDetailsForCycle(mConfig);
 
     const newPlanObj = {
       id: `plan-${Date.now()}`,
@@ -889,14 +1133,25 @@ export default function AdminPlansPage() {
       yearly_price: yPrice,
       max_channels: Number(mConfig.max_channels) || 1,
       currency: planForm.currency,
-      feature_keys: mConfig.selected_feature_keys,
+      feature_keys: mConfig.selected_feature_keys || [],
       monthlyConfig: mConfig,
       yearlyConfig: yConfig,
       channel_count: Number(mConfig.max_channels) || 1,
-      connector_count: mConfig.selected_feature_keys.filter(k => k.startsWith('connector_')).length || 1,
+      connector_count: (mConfig.selected_feature_keys || []).filter(k => k.startsWith('connector_')).length || 1,
       client_count: 0,
       is_popular: false,
-      channel_details: buildChannelDetailsForCycle(mConfig)
+      channel_details: fullChannelDetails,
+      metadata: {
+        monthlyConfig: mConfig,
+        yearlyConfig: yConfig,
+        monthly_price: mPrice,
+        yearly_price: yPrice,
+        yearly_discount_percent: Number(planForm.yearly_discount_percent) || 15.0,
+        allowed_channels: ['whatsapp', 'facebook', 'instagram'],
+        allowed_connectors: ['whatsapp', 'facebook', 'instagram'],
+        feature_keys: mConfig.selected_feature_keys || [],
+        channel_details: fullChannelDetails
+      }
     };
 
     try {
@@ -914,11 +1169,7 @@ export default function AdminPlansPage() {
         feature_keys: newPlanObj.feature_keys,
         monthlyConfig: mConfig,
         yearlyConfig: yConfig,
-        metadata: {
-          monthlyConfig: mConfig,
-          yearlyConfig: yConfig,
-          channel_details: buildChannelDetailsForCycle(mConfig)
-        }
+        metadata: newPlanObj.metadata
       }, { headers: { Authorization: `Bearer ${token}` } });
     } catch (err) {
       console.log('Saved to local pool:', err);
@@ -934,36 +1185,17 @@ export default function AdminPlansPage() {
     e.preventDefault();
     if (!editingPlan) return;
 
-    const mConfig = planForm.monthlyConfig;
-    const yConfig = planForm.yearlyConfig;
+    const mConfig = { ...planForm.monthlyConfig };
+    const yConfig = { ...planForm.yearlyConfig };
     const mPrice = Number(mConfig.price) || 0;
     const yPrice = Number(yConfig.price) || 0;
 
-    const buildChannelDetailsForCycle = (config) => {
-      const updatedWhatYouGet = (config.whatsapp_what_you_get || '').split('\n').map(s => s.trim()).filter(Boolean);
-      const updatedFeatures = (config.whatsapp_features || '').split('\n').map(s => s.trim()).filter(Boolean);
-      return {
-        whatsapp: {
-          name: 'WhatsApp',
-          what_you_get: updatedWhatYouGet.length > 0 ? updatedWhatYouGet : ['WhatsApp Business API Automation'],
-          features: updatedFeatures.length > 0 ? updatedFeatures : ['WhatsApp Auto Replies'],
-          limits: {
-            messages: { value: 'unlimited', label: 'Messages', description: 'Based on your WhatsApp Number' },
-            contacts: { value: 'unlimited', label: 'Contacts' },
-            custom_fields: { value: config.custom_fields_limit || '15', label: 'Custom Fields' },
-            custom_tags: { value: config.custom_tags_limit || '15', label: 'Custom Tags' },
-            events: { value: config.custom_events_limit || '—', label: 'Custom Events' }
-          },
-          message_costs: [
-            { type: 'Marketing', price: config.whatsapp_marketing_cost || '₹0.970' },
-            { type: 'Authentication', price: config.whatsapp_auth_cost || '₹0.129' },
-            { type: 'Utility', price: config.whatsapp_utility_cost || '₹0.160' },
-            { type: 'Service', price: config.whatsapp_service_cost || 'FREE' }
-          ],
-          additional_benefits: ['No Markup Charges', 'Standard Support']
-        }
-      };
-    };
+    // Build channel_details for BOTH cycles independently
+    const monthlyChannelDetails = buildChannelDetailsForCycle(mConfig, editingPlan.channel_details || {});
+    const yearlyChannelDetails = buildChannelDetailsForCycle(yConfig, editingPlan.channel_details || {});
+    
+    mConfig.channel_details = monthlyChannelDetails;
+    yConfig.channel_details = yearlyChannelDetails;
 
     const updatedPlanObj = {
       ...editingPlan,
@@ -977,44 +1209,57 @@ export default function AdminPlansPage() {
       yearly_price: yPrice,
       max_channels: Number(mConfig.max_channels) || 1,
       currency: planForm.currency,
-      feature_keys: mConfig.selected_feature_keys,
+      feature_keys: mConfig.selected_feature_keys || [],
       monthlyConfig: mConfig,
       yearlyConfig: yConfig,
+      monthly_channel_details: monthlyChannelDetails,
+      yearly_channel_details: yearlyChannelDetails,
       channel_count: Number(mConfig.max_channels) || 1,
-      connector_count: mConfig.selected_feature_keys.filter(k => k.startsWith('connector_')).length || 1,
-      channel_details: buildChannelDetailsForCycle(mConfig),
+      connector_count: (mConfig.selected_feature_keys || []).filter(k => k.startsWith('connector_')).length || 1,
+      channel_details: monthlyChannelDetails,
       metadata: {
         ...(editingPlan.metadata || {}),
         monthlyConfig: mConfig,
         yearlyConfig: yConfig,
         monthly_price: mPrice,
         yearly_price: yPrice,
-        channel_details: buildChannelDetailsForCycle(mConfig)
+        monthly_channel_details: monthlyChannelDetails,
+        yearly_channel_details: yearlyChannelDetails,
+        yearly_discount_percent: Number(planForm.yearly_discount_percent) || 15.0,
+        allowed_channels: editingPlan.metadata?.allowed_channels || ['whatsapp', 'facebook', 'instagram'],
+        allowed_connectors: editingPlan.metadata?.allowed_connectors || ['whatsapp', 'facebook', 'instagram'],
+        feature_keys: mConfig.selected_feature_keys || [],
+        channel_details: monthlyChannelDetails
       }
     };
 
     try {
       const token = localStorage.getItem('token') || localStorage.getItem('uwo_token');
       const targetId = editingPlan.id || editingPlan.slug;
+      
+      // Step 1: Send monthly & yearly configs first (parallel is ok between these two)
       await Promise.allSettled([
         axios.put(`${API_BASE_URL}/api/plans/${targetId}/monthly/`, { monthlyConfig: mConfig }, { headers: { Authorization: `Bearer ${token}` } }),
-        axios.put(`${API_BASE_URL}/api/plans/${targetId}/yearly/`, { yearlyConfig: yConfig }, { headers: { Authorization: `Bearer ${token}` } }),
-        axios.put(`${API_BASE_URL}/api/plans/${targetId}/`, {
-          name: updatedPlanObj.name,
-          description: updatedPlanObj.description,
-          price: updatedPlanObj.price,
-          monthly_price: mPrice,
-          yearly_price: yPrice,
-          badge_text: updatedPlanObj.badge_text,
-          max_channels: updatedPlanObj.max_channels,
-          currency: updatedPlanObj.currency,
-          is_active: updatedPlanObj.status === 'ACTIVE',
-          feature_keys: updatedPlanObj.feature_keys,
-          monthlyConfig: mConfig,
-          yearlyConfig: yConfig,
-          metadata: updatedPlanObj.metadata
-        }, { headers: { Authorization: `Bearer ${token}` } })
+        axios.put(`${API_BASE_URL}/api/plans/${targetId}/yearly/`, { yearlyConfig: yConfig }, { headers: { Authorization: `Bearer ${token}` } })
       ]);
+
+      // Step 2: THEN send the main plan update (so metadata won't overwrite cycle configs)
+      await axios.put(`${API_BASE_URL}/api/plans/${targetId}/`, {
+        name: updatedPlanObj.name,
+        description: updatedPlanObj.description,
+        price: updatedPlanObj.price,
+        monthly_price: mPrice,
+        yearly_price: yPrice,
+        badge_text: updatedPlanObj.badge_text,
+        max_channels: updatedPlanObj.max_channels,
+        currency: updatedPlanObj.currency,
+        is_active: updatedPlanObj.status === 'ACTIVE',
+        feature_keys: updatedPlanObj.feature_keys,
+        monthlyConfig: mConfig,
+        yearlyConfig: yConfig,
+        channel_details: monthlyChannelDetails,
+        metadata: updatedPlanObj.metadata
+      }, { headers: { Authorization: `Bearer ${token}` } });
     } catch (err) {
       console.log('Updated in state pool:', err);
     }
@@ -1024,6 +1269,7 @@ export default function AdminPlansPage() {
     setEditingPlan(null);
     showToast(`Plan "${updatedPlanObj.name}" updated with independent Monthly & Yearly configurations!`);
   };
+
 
   // ── Delete Plan ──
   const handleDeletePlan = async (planId, planName) => {
@@ -2017,51 +2263,368 @@ export default function AdminPlansPage() {
                   </div>
                 )}
 
-                {/* TAB 4: LIMITS & QUOTAS */}
+                {/* TAB 3: LIMITS & QUOTAS */}
                 {modalEditorTab === 'limits' && (
-                  <div className="bg-slate-50/80 p-3.5 sm:p-5 rounded-2xl border border-slate-200/80 space-y-4">
-                    <h4 className="text-xs font-black text-slate-900 uppercase tracking-wide mb-1">
-                      3. LIMITS & QUOTAS ({planForm.activeCycle.toUpperCase()})
-                    </h4>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                      <div>
-                        <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
-                          Custom Fields Limit
-                        </label>
-                        <input
-                          type="text"
-                          placeholder="e.g. 15, 25, 30"
-                          value={getActiveConfig().custom_fields_limit || '15'}
-                          onChange={(e) => updateActiveConfigField('custom_fields_limit', e.target.value)}
-                          className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-900 outline-none focus:border-emerald-500 transition-all"
-                        />
+                  <div className="space-y-4">
+                    {/* 1. Global Workspace Quotas */}
+                    <div className="bg-slate-50/80 p-3.5 sm:p-5 rounded-2xl border border-slate-200/80 space-y-4">
+                      <div className="flex items-center justify-between">
+                        <h4 className="text-xs font-black text-slate-900 uppercase tracking-wide">
+                          1. Workspace & Account Quotas ({planForm.activeCycle.toUpperCase()})
+                        </h4>
+                        <span className="text-[10px] font-bold text-slate-500 bg-white px-2 py-0.5 rounded-md border border-slate-200">
+                          Type exact number or 'unlimited'
+                        </span>
                       </div>
 
-                      <div>
-                        <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
-                          Custom Tags Limit
-                        </label>
-                        <input
-                          type="text"
-                          placeholder="e.g. 15, 30, 45"
-                          value={getActiveConfig().custom_tags_limit || '15'}
-                          onChange={(e) => updateActiveConfigField('custom_tags_limit', e.target.value)}
-                          className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-900 outline-none focus:border-emerald-500 transition-all"
-                        />
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                        <div>
+                          <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
+                            Messages / Convs
+                          </label>
+                          <input
+                            type="text"
+                            placeholder="e.g. unlimited, 50000"
+                            value={getActiveConfig().messages_limit || 'unlimited'}
+                            onChange={(e) => updateActiveConfigField('messages_limit', e.target.value)}
+                            className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-900 outline-none focus:border-emerald-500 transition-all"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
+                            Contacts Limit
+                          </label>
+                          <input
+                            type="text"
+                            placeholder="e.g. unlimited, 10000"
+                            value={getActiveConfig().contacts_limit || 'unlimited'}
+                            onChange={(e) => updateActiveConfigField('contacts_limit', e.target.value)}
+                            className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-900 outline-none focus:border-emerald-500 transition-all"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
+                            Team / Agents
+                          </label>
+                          <input
+                            type="text"
+                            placeholder="e.g. 3, 10, unlimited"
+                            value={getActiveConfig().team_members_limit || '3'}
+                            onChange={(e) => updateActiveConfigField('team_members_limit', e.target.value)}
+                            className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-900 outline-none focus:border-emerald-500 transition-all"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
+                            Bots / Workflows
+                          </label>
+                          <input
+                            type="text"
+                            placeholder="e.g. 5, 25, unlimited"
+                            value={getActiveConfig().workflows_limit || '5'}
+                            onChange={(e) => updateActiveConfigField('workflows_limit', e.target.value)}
+                            className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-900 outline-none focus:border-emerald-500 transition-all"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* 2. Custom Fields & CRM Data Quotas */}
+                    <div className="bg-slate-50/80 p-3.5 sm:p-5 rounded-2xl border border-slate-200/80 space-y-4">
+                      <h4 className="text-xs font-black text-slate-900 uppercase tracking-wide">
+                        2. CRM Custom Data Quotas ({planForm.activeCycle.toUpperCase()})
+                      </h4>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div>
+                          <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
+                            Custom Fields Limit
+                          </label>
+                          <input
+                            type="text"
+                            placeholder="e.g. 15, 25, 30"
+                            value={getActiveConfig().custom_fields_limit || '15'}
+                            onChange={(e) => updateActiveConfigField('custom_fields_limit', e.target.value)}
+                            className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-900 outline-none focus:border-emerald-500 transition-all"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
+                            Custom Tags Limit
+                          </label>
+                          <input
+                            type="text"
+                            placeholder="e.g. 15, 30, 45"
+                            value={getActiveConfig().custom_tags_limit || '15'}
+                            onChange={(e) => updateActiveConfigField('custom_tags_limit', e.target.value)}
+                            className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-900 outline-none focus:border-emerald-500 transition-all"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
+                            Custom Events Limit
+                          </label>
+                          <input
+                            type="text"
+                            placeholder="e.g. —, 5, 7"
+                            value={getActiveConfig().custom_events_limit || '5'}
+                            onChange={(e) => updateActiveConfigField('custom_events_limit', e.target.value)}
+                            className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-900 outline-none focus:border-emerald-500 transition-all"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* 3. Per-Channel Specific Quotas */}
+                    <div className="bg-slate-50/80 p-3.5 sm:p-5 rounded-2xl border border-slate-200/80 space-y-4">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <h4 className="text-xs font-black text-slate-900 uppercase tracking-wide">
+                          3. Channel-Specific Quotas ({planForm.activeCycle.toUpperCase()})
+                        </h4>
+                        <div className="flex items-center gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => setEditorChannelTab('whatsapp')}
+                            className={cn(
+                              "px-3 py-1 rounded-lg text-xs font-bold border transition-all cursor-pointer",
+                              editorChannelTab === 'whatsapp' ? "bg-emerald-600 text-white border-emerald-600 shadow-xs" : "bg-white text-slate-700 border-slate-200 hover:bg-slate-100"
+                            )}
+                          >
+                            WhatsApp
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setEditorChannelTab('facebook')}
+                            className={cn(
+                              "px-3 py-1 rounded-lg text-xs font-bold border transition-all cursor-pointer",
+                              editorChannelTab === 'facebook' ? "bg-blue-600 text-white border-blue-600 shadow-xs" : "bg-white text-slate-700 border-slate-200 hover:bg-slate-100"
+                            )}
+                          >
+                            Facebook
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setEditorChannelTab('instagram')}
+                            className={cn(
+                              "px-3 py-1 rounded-lg text-xs font-bold border transition-all cursor-pointer",
+                              editorChannelTab === 'instagram' ? "bg-rose-600 text-white border-rose-600 shadow-xs" : "bg-white text-slate-700 border-slate-200 hover:bg-slate-100"
+                            )}
+                          >
+                            Instagram
+                          </button>
+                        </div>
                       </div>
 
-                      <div>
-                        <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
-                          Custom Events Limit
-                        </label>
-                        <input
-                          type="text"
-                          placeholder="e.g. —, 5, 7"
-                          value={getActiveConfig().custom_events_limit || '5'}
-                          onChange={(e) => updateActiveConfigField('custom_events_limit', e.target.value)}
-                          className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-900 outline-none focus:border-emerald-500 transition-all"
-                        />
+                      {editorChannelTab === 'whatsapp' && (
+                        <div className="space-y-3">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                            <div>
+                              <label className="block text-xs font-bold text-slate-700 mb-1">WhatsApp Messages Limit</label>
+                              <input
+                                type="text"
+                                placeholder="e.g. unlimited, 50000"
+                                value={getActiveConfig().whatsapp_messages_limit || 'unlimited'}
+                                onChange={(e) => updateActiveConfigField('whatsapp_messages_limit', e.target.value)}
+                                className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-900 outline-none focus:border-emerald-500"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-xs font-bold text-slate-700 mb-1">WhatsApp Contacts Limit</label>
+                              <input
+                                type="text"
+                                placeholder="e.g. unlimited, 10000"
+                                value={getActiveConfig().whatsapp_contacts_limit || 'unlimited'}
+                                onChange={(e) => updateActiveConfigField('whatsapp_contacts_limit', e.target.value)}
+                                className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-900 outline-none focus:border-emerald-500"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-xs font-bold text-slate-700 mb-1">WhatsApp Custom Fields</label>
+                              <input
+                                type="text"
+                                placeholder="e.g. 15, 25"
+                                value={getActiveConfig().whatsapp_custom_fields || '15'}
+                                onChange={(e) => updateActiveConfigField('whatsapp_custom_fields', e.target.value)}
+                                className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-900 outline-none focus:border-emerald-500"
+                              />
+                            </div>
+                          </div>
+                          <div>
+                            <label className="block text-xs font-bold text-slate-700 mb-1">Messages Subtitle / Description Text</label>
+                            <input
+                              type="text"
+                              placeholder="e.g. Based on your WhatsApp Number"
+                              value={getActiveConfig().whatsapp_messages_desc || 'Based on your WhatsApp Number'}
+                              onChange={(e) => updateActiveConfigField('whatsapp_messages_desc', e.target.value)}
+                              className="w-full px-3.5 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-900 outline-none focus:border-emerald-500"
+                            />
+                          </div>
+                        </div>
+                      )}
+
+                      {editorChannelTab === 'facebook' && (
+                        <div className="space-y-3">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                            <div>
+                              <label className="block text-xs font-bold text-slate-700 mb-1">Facebook Convs Limit</label>
+                              <input
+                                type="text"
+                                placeholder="e.g. unlimited, 50000"
+                                value={getActiveConfig().facebook_messages_limit || 'unlimited'}
+                                onChange={(e) => updateActiveConfigField('facebook_messages_limit', e.target.value)}
+                                className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-900 outline-none focus:border-blue-500"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-xs font-bold text-slate-700 mb-1">Facebook Contacts Limit</label>
+                              <input
+                                type="text"
+                                placeholder="e.g. unlimited, 10000"
+                                value={getActiveConfig().facebook_contacts_limit || 'unlimited'}
+                                onChange={(e) => updateActiveConfigField('facebook_contacts_limit', e.target.value)}
+                                className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-900 outline-none focus:border-blue-500"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-xs font-bold text-slate-700 mb-1">Facebook Custom Fields</label>
+                              <input
+                                type="text"
+                                placeholder="e.g. 15, 25"
+                                value={getActiveConfig().facebook_custom_fields || '15'}
+                                onChange={(e) => updateActiveConfigField('facebook_custom_fields', e.target.value)}
+                                className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-900 outline-none focus:border-blue-500"
+                              />
+                            </div>
+                          </div>
+                          <div>
+                            <label className="block text-xs font-bold text-slate-700 mb-1">Conversations Subtitle / Description Text</label>
+                            <input
+                              type="text"
+                              placeholder="e.g. Facebook Page Messaging"
+                              value={getActiveConfig().facebook_messages_desc || 'Facebook Page Messaging'}
+                              onChange={(e) => updateActiveConfigField('facebook_messages_desc', e.target.value)}
+                              className="w-full px-3.5 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-900 outline-none focus:border-blue-500"
+                            />
+                          </div>
+                        </div>
+                      )}
+
+                      {editorChannelTab === 'instagram' && (
+                        <div className="space-y-3">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                            <div>
+                              <label className="block text-xs font-bold text-slate-700 mb-1">Instagram DMs Limit</label>
+                              <input
+                                type="text"
+                                placeholder="e.g. unlimited, 50000"
+                                value={getActiveConfig().instagram_messages_limit || 'unlimited'}
+                                onChange={(e) => updateActiveConfigField('instagram_messages_limit', e.target.value)}
+                                className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-900 outline-none focus:border-rose-500"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-xs font-bold text-slate-700 mb-1">Instagram Contacts Limit</label>
+                              <input
+                                type="text"
+                                placeholder="e.g. unlimited, 10000"
+                                value={getActiveConfig().instagram_contacts_limit || 'unlimited'}
+                                onChange={(e) => updateActiveConfigField('instagram_contacts_limit', e.target.value)}
+                                className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-900 outline-none focus:border-rose-500"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-xs font-bold text-slate-700 mb-1">Instagram Custom Fields</label>
+                              <input
+                                type="text"
+                                placeholder="e.g. 15, 25"
+                                value={getActiveConfig().instagram_custom_fields || '15'}
+                                onChange={(e) => updateActiveConfigField('instagram_custom_fields', e.target.value)}
+                                className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-900 outline-none focus:border-rose-500"
+                              />
+                            </div>
+                          </div>
+                          <div>
+                            <label className="block text-xs font-bold text-slate-700 mb-1">DMs Subtitle / Description Text</label>
+                            <input
+                              type="text"
+                              placeholder="e.g. Instagram Professional Account"
+                              value={getActiveConfig().instagram_messages_desc || 'Instagram Professional Account'}
+                              onChange={(e) => updateActiveConfigField('instagram_messages_desc', e.target.value)}
+                              className="w-full px-3.5 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-900 outline-none focus:border-rose-500"
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* 4. Dynamic Custom Quota Fields (Add Any Custom Limit) */}
+                    <div className="bg-slate-50/80 p-3.5 sm:p-5 rounded-2xl border border-slate-200/80 space-y-4">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <div>
+                          <h4 className="text-xs font-black text-slate-900 uppercase tracking-wide">
+                            4. Custom Limit & Quota Rows ({planForm.activeCycle.toUpperCase()})
+                          </h4>
+                          <p className="text-[11px] text-slate-500 font-medium">
+                            Add your own custom quota items (e.g. "Cloud Storage", "Daily Webhooks", "API Rate Limit")
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={addCustomQuotaField}
+                          className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-xs transition-all cursor-pointer shrink-0"
+                        >
+                          <Plus size={14} />
+                          <span>Add Custom Limit</span>
+                        </button>
                       </div>
+
+                      {(getActiveConfig().custom_quota_fields || []).length === 0 ? (
+                        <div className="text-center py-5 border-2 border-dashed border-slate-200 rounded-xl bg-white/60">
+                          <p className="text-xs font-bold text-slate-600">No custom quota rows added yet</p>
+                          <p className="text-[11px] text-slate-400 mt-0.5">Click "+ Add Custom Limit" above to add your own custom plan limit with name & value</p>
+                        </div>
+                      ) : (
+                        <div className="space-y-2.5">
+                          {(getActiveConfig().custom_quota_fields || []).map((item, idx) => (
+                            <div key={item.id || idx} className="flex items-center gap-2 bg-white p-2.5 rounded-xl border border-slate-200 shadow-2xs">
+                              <div className="flex-1">
+                                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Limit Title / Field Name</label>
+                                <input
+                                  type="text"
+                                  placeholder="e.g. Cloud Storage, Daily Webhooks"
+                                  value={item.label || ''}
+                                  onChange={(e) => updateCustomQuotaField(idx, 'label', e.target.value)}
+                                  className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-900 outline-none focus:border-emerald-500"
+                                />
+                              </div>
+                              <div className="flex-1">
+                                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Limit Value</label>
+                                <input
+                                  type="text"
+                                  placeholder="e.g. 10 GB, 50 / day, Unlimited"
+                                  value={item.value || ''}
+                                  onChange={(e) => updateCustomQuotaField(idx, 'value', e.target.value)}
+                                  className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-900 outline-none focus:border-emerald-500"
+                                />
+                              </div>
+                              <div className="pt-4">
+                                <button
+                                  type="button"
+                                  onClick={() => removeCustomQuotaField(idx)}
+                                  className="p-2 text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
+                                  title="Delete Limit Row"
+                                >
+                                  <Trash2 size={16} />
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
