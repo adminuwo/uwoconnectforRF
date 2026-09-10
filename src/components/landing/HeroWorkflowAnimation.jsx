@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { 
-  MessageSquare, Users, Bot, FileCheck, CreditCard, Receipt, 
+import {
+  MessageSquare, Users, Bot, FileCheck, CreditCard, Receipt,
   CheckCircle2, ArrowRight, Sparkles, RefreshCw
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -77,7 +77,7 @@ export default function HeroWorkflowAnimation() {
 
   return (
     <div className="w-full max-w-4xl mx-auto my-8 p-6 rounded-3xl bg-white/90 border border-slate-200 shadow-xl backdrop-blur-md">
-      
+
       {/* Header Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 border-b border-slate-200">
         <div className="flex items-center gap-2">

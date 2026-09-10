@@ -12,23 +12,23 @@ import { useEntitlement } from '@/context/EntitlementContext';
 const WhatsAppLogo = ({ size = 16, className = "" }) => (
   <svg width={size} height={size} viewBox="0 0 48 48" fill="none" className={cn("shrink-0", className)}>
     <circle cx="24" cy="24" r="24" fill="#25D366" />
-    <path fillRule="evenodd" clipRule="evenodd" d="M35.2 12.8C32.3 9.9 28.3 8.3 24.1 8.3C15.4 8.3 8.4 15.3 8.4 24C8.4 26.8 9.1 29.5 10.5 31.9L8.4 39.6L16.3 37.5C18.6 38.8 21.3 39.5 24.1 39.5C32.8 39.5 39.8 32.5 39.8 23.8C39.8 19.6 38.1 15.6 35.2 12.8ZM24.1 36.8C21.7 36.8 19.4 36.1 17.4 35L16.9 34.7L12.2 35.9L13.5 31.3L13.2 30.8C12 28.7 11.3 26.4 11.3 24C11.3 17 17 11.3 24.1 11.3C27.5 11.3 30.7 12.6 33.1 15C35.5 17.4 36.8 20.6 36.8 24C36.8 31 31.1 36.8 24.1 36.8ZM31 27.2C30.6 27 28.7 26.1 28.4 26C28 25.8 27.8 25.7 27.5 26.1C27.2 26.5 26.5 27.4 26.3 27.6C26.1 27.9 25.8 27.9 25.4 27.7C25 27.5 23.7 27.1 22.2 25.7C21 24.7 20.2 23.4 20 23C19.8 22.6 20 22.4 20.2 22.2C20.4 22 20.6 21.7 20.8 21.5C21 21.3 21.1 21.1 21.2 20.9C21.3 20.7 21.3 20.5 21.2 20.3C21.1 20.1 20.3 18.2 20 17.4C19.7 16.6 19.4 16.7 19.1 16.7H18.4C18.1 16.7 17.7 16.8 17.3 17.2C16.9 17.6 16 18.5 16 20.3C16 22.1 17.3 23.9 17.5 24.1C17.7 24.3 20.1 28 23.7 29.6C24.6 30 25.2 30.2 25.8 30.4C26.7 30.7 27.5 30.6 28.2 30.5C28.9 30.4 30.5 29.5 30.8 28.6C31.1 27.8 31.1 27.1 31 27.2Z" fill="white"/>
+    <path fillRule="evenodd" clipRule="evenodd" d="M35.2 12.8C32.3 9.9 28.3 8.3 24.1 8.3C15.4 8.3 8.4 15.3 8.4 24C8.4 26.8 9.1 29.5 10.5 31.9L8.4 39.6L16.3 37.5C18.6 38.8 21.3 39.5 24.1 39.5C32.8 39.5 39.8 32.5 39.8 23.8C39.8 19.6 38.1 15.6 35.2 12.8ZM24.1 36.8C21.7 36.8 19.4 36.1 17.4 35L16.9 34.7L12.2 35.9L13.5 31.3L13.2 30.8C12 28.7 11.3 26.4 11.3 24C11.3 17 17 11.3 24.1 11.3C27.5 11.3 30.7 12.6 33.1 15C35.5 17.4 36.8 20.6 36.8 24C36.8 31 31.1 36.8 24.1 36.8ZM31 27.2C30.6 27 28.7 26.1 28.4 26C28 25.8 27.8 25.7 27.5 26.1C27.2 26.5 26.5 27.4 26.3 27.6C26.1 27.9 25.8 27.9 25.4 27.7C25 27.5 23.7 27.1 22.2 25.7C21 24.7 20.2 23.4 20 23C19.8 22.6 20 22.4 20.2 22.2C20.4 22 20.6 21.7 20.8 21.5C21 21.3 21.1 21.1 21.2 20.9C21.3 20.7 21.3 20.5 21.2 20.3C21.1 20.1 20.3 18.2 20 17.4C19.7 16.6 19.4 16.7 19.1 16.7H18.4C18.1 16.7 17.7 16.8 17.3 17.2C16.9 17.6 16 18.5 16 20.3C16 22.1 17.3 23.9 17.5 24.1C17.7 24.3 20.1 28 23.7 29.6C24.6 30 25.2 30.2 25.8 30.4C26.7 30.7 27.5 30.6 28.2 30.5C28.9 30.4 30.5 29.5 30.8 28.6C31.1 27.8 31.1 27.1 31 27.2Z" fill="white" />
   </svg>
 );
 
 const FacebookLogo = ({ size = 16, className = "" }) => (
   <svg width={size} height={size} viewBox="0 0 48 48" fill="none" className={cn("shrink-0", className)}>
-    <circle cx="24" cy="24" r="24" fill="#1877F2"/>
-    <path d="M29.5 25.1L30.3 19.9H25.3V16.5C25.3 15.1 26 13.7 28.2 13.7H30.5V9.3C30.5 9.3 28.4 9 26.4 9C22.3 9 19.6 11.5 19.6 16V19.9H15V25.1H19.6V37.7C20.5 37.9 21.5 38 22.5 38C23.5 38 24.4 37.9 25.3 37.7V25.1H29.5Z" fill="white"/>
+    <circle cx="24" cy="24" r="24" fill="#1877F2" />
+    <path d="M29.5 25.1L30.3 19.9H25.3V16.5C25.3 15.1 26 13.7 28.2 13.7H30.5V9.3C30.5 9.3 28.4 9 26.4 9C22.3 9 19.6 11.5 19.6 16V19.9H15V25.1H19.6V37.7C20.5 37.9 21.5 38 22.5 38C23.5 38 24.4 37.9 25.3 37.7V25.1H29.5Z" fill="white" />
   </svg>
 );
 
 const InstagramLogo = ({ size = 16, className = "" }) => (
   <svg width={size} height={size} viewBox="0 0 48 48" fill="none" className={cn("shrink-0", className)}>
     <circle cx="24" cy="24" r="24" fill="#E1306C" />
-    <rect x="13" y="13" width="22" height="22" rx="6" stroke="white" strokeWidth="2.5" fill="none"/>
-    <circle cx="24" cy="24" r="5" stroke="white" strokeWidth="2.5" fill="none"/>
-    <circle cx="30" cy="18" r="1.5" fill="white"/>
+    <rect x="13" y="13" width="22" height="22" rx="6" stroke="white" strokeWidth="2.5" fill="none" />
+    <circle cx="24" cy="24" r="5" stroke="white" strokeWidth="2.5" fill="none" />
+    <circle cx="30" cy="18" r="1.5" fill="white" />
   </svg>
 );
 
@@ -39,8 +39,8 @@ const SEEDED_FALLBACK_PLANS = [
     name: 'Starter',
     slug: 'starter',
     description: 'Perfect for small teams starting automation on 1 chosen channel',
-    monthly_price: 499,
-    yearly_price: 4999,
+    monthly_price: 599,
+    yearly_price: 5999,
     yearly_discount_percent: 83.0,
     currency: '₹',
     tax_info: '(+taxes)',
@@ -577,8 +577,8 @@ export default function PricingComparisonTable({ plansData, onSelectPlan, isAdmi
     const planSlug = (planObj.slug || planObj.name || planObj.id || '').toString().toLowerCase();
     const fallbackPlan = SEEDED_FALLBACK_PLANS.find(
       p => (p.slug || '').toLowerCase() === planSlug ||
-           (p.name || '').toLowerCase() === planSlug ||
-           (p.id || '').toLowerCase() === planSlug
+        (p.name || '').toLowerCase() === planSlug ||
+        (p.id || '').toLowerCase() === planSlug
     );
 
     if (fallbackPlan && fallbackPlan.channel_details) {
@@ -708,7 +708,7 @@ export default function PricingComparisonTable({ plansData, onSelectPlan, isAdmi
           const hasAuthToken = typeof window !== 'undefined' && Boolean(localStorage.getItem('token') || localStorage.getItem('uwo_token') || localStorage.getItem('access'));
           const isCurrent = hasAuthToken && (entitlements?.plan?.slug === planSlug);
           const isGrowth = plan.name.toLowerCase().includes('growth');
-          
+
           const displayPrice = billingPeriod === 'YEARLY'
             ? plan.yearly_price
             : plan.monthly_price;
@@ -978,7 +978,7 @@ export default function PricingComparisonTable({ plansData, onSelectPlan, isAdmi
                 const hasAuthToken = typeof window !== 'undefined' && Boolean(localStorage.getItem('token') || localStorage.getItem('uwo_token') || localStorage.getItem('access'));
                 const isCurrent = hasAuthToken && (entitlements?.plan?.slug === planSlug);
                 const isGrowth = plan.name.toLowerCase().includes('growth');
-                
+
                 const displayPrice = billingPeriod === 'YEARLY'
                   ? plan.yearly_price
                   : plan.monthly_price;
@@ -1033,15 +1033,15 @@ export default function PricingComparisonTable({ plansData, onSelectPlan, isAdmi
                         </div>
                       )}
 
-                        <div className="space-y-1">
-                          <div className="flex items-baseline gap-1">
-                            <span className={cn("text-xl sm:text-2xl font-black tracking-tight", dark ? "text-white" : "text-slate-900")}>
-                              {plan.currency && plan.currency.trim().length > 1 ? `${plan.currency.trim()} ` : (plan.currency || '₹')}
-                              {displayPrice.toLocaleString('en-IN')}
-                            </span>
-                            <span className="text-xs text-slate-500 font-bold">{periodLabel}</span>
-                            <span className="text-[10px] text-slate-400 font-medium ml-0.5">{plan.tax_info}</span>
-                          </div>
+                      <div className="space-y-1">
+                        <div className="flex items-baseline gap-1">
+                          <span className={cn("text-xl sm:text-2xl font-black tracking-tight", dark ? "text-white" : "text-slate-900")}>
+                            {plan.currency && plan.currency.trim().length > 1 ? `${plan.currency.trim()} ` : (plan.currency || '₹')}
+                            {displayPrice.toLocaleString('en-IN')}
+                          </span>
+                          <span className="text-xs text-slate-500 font-bold">{periodLabel}</span>
+                          <span className="text-[10px] text-slate-400 font-medium ml-0.5">{plan.tax_info}</span>
+                        </div>
 
                         {billingPeriod === 'YEARLY' && (
                           <div className={cn("text-[11px] font-bold px-2 py-0.5 rounded-md border inline-block", dark ? "text-emerald-300 bg-emerald-950/80 border-emerald-800" : "text-emerald-700 bg-emerald-50 border-emerald-200")}>
