@@ -12,16 +12,19 @@
 const PRIVATE_IP_REGEX = /^(127\.|10\.|192\.168\.|172\.(1[6-9]|2[0-9]|3[01])\.)/;
 
 export function getApiBase() {
+  if (process.env.NEXT_PUBLIC_API_URL) {
+    return process.env.NEXT_PUBLIC_API_URL;
+  }
   if (typeof window !== 'undefined' && window.location) {
     const currentHost = window.location.hostname;
     if (currentHost === 'localhost' || currentHost === '127.0.0.1') {
-      return 'http://127.0.0.1:8080';
+      return 'http://127.0.0.1:8000';
     }
     if (PRIVATE_IP_REGEX.test(currentHost)) {
-      return `http://${currentHost}:8080`;
+      return `http://${currentHost}:8000`;
     }
   }
-  return process.env.NEXT_PUBLIC_API_URL || 'https://aisaconnectback-anaqbuapb6c6apgy.centralindia-01.azurewebsites.net';
+  return 'http://127.0.0.1:8000';
 }
 
 // Singleton — computed once per page load
