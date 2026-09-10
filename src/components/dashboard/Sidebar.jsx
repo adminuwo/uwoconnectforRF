@@ -301,32 +301,43 @@ const Sidebar = ({ role, isOpen, onClose, onToggle }) => {
           'flex items-center border-b border-slate-100/80 shrink-0 transition-all duration-300',
           isOpen ? 'px-3.5 sm:px-4 py-3 justify-between gap-2' : 'px-0 py-3 justify-center'
         )}>
-          {isOpen ? (
-            <div className="flex items-center gap-2.5 min-w-0 flex-1">
-              <img
-                src={brand?.logo_url || "/download (3).gif"}
-                alt={brand?.brand_name || "Brand Logo"}
-                className="w-8 h-8 rounded-xl object-contain shadow-xs shrink-0"
-              />
-              <div className="min-w-0 flex-1">
-                <h1 className="text-sm font-black text-slate-900 tracking-tight leading-tight whitespace-nowrap truncate">{brand?.brand_name || "UwoConnect"}</h1>
-                <span className={cn(
-                  "text-[7.5px] font-black uppercase tracking-[0.18em] block mt-0.5 whitespace-nowrap",
-                  role === 'ADMIN' ? "text-[#059669]" : isAgencyUser ? "text-blue-600" : "text-[#059669]"
-                )}>
-                  V1.0 {mounted ? (role === 'ADMIN' ? 'SUPER ADMIN' : isAgencyUser ? 'AGENCY ADMIN' : (role || 'WORKSPACE')) : (role === 'ADMIN' ? 'SUPER ADMIN' : 'WORKSPACE')}
-                </span>
+          {(() => {
+            const displayBrandName = effectiveRole === 'ADMIN'
+              ? (brand?.brand_name || "UwoConnect")
+              : (userObj?.client?.business_name || userObj?.business_name || brand?.brand_name || "Workspace");
+            const displayBrandLogo = (userObj?.client?.company_logo_url || userObj?.company_logo_url || brand?.logo_url || "/download (3).gif");
+
+            return isOpen ? (
+              <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                <img
+                  src={displayBrandLogo}
+                  alt={displayBrandName}
+                  className="w-8 h-8 rounded-xl object-contain shadow-xs shrink-0 bg-white"
+                  onError={(e) => { e.currentTarget.src = "/download (3).gif"; }}
+                />
+                <div className="min-w-0 flex-1">
+                  <h1 className="text-sm font-black text-slate-900 tracking-tight leading-tight whitespace-nowrap truncate" title={displayBrandName}>
+                    {displayBrandName}
+                  </h1>
+                  <span className={cn(
+                    "text-[7.5px] font-black uppercase tracking-[0.18em] block mt-0.5 whitespace-nowrap",
+                    effectiveRole === 'ADMIN' ? "text-[#059669]" : isAgencyUser ? "text-blue-600" : "text-[#059669]"
+                  )}>
+                    V1.0 {mounted ? (effectiveRole === 'ADMIN' ? 'SUPER ADMIN' : isAgencyUser ? 'AGENCY ADMIN' : (effectiveRole || 'WORKSPACE')) : (effectiveRole === 'ADMIN' ? 'SUPER ADMIN' : 'WORKSPACE')}
+                  </span>
+                </div>
               </div>
-            </div>
-          ) : (
-            <div className="flex items-center justify-center">
-              <img
-                src={brand?.logo_url || "/download (3).gif"}
-                alt={brand?.brand_name || "Brand Logo"}
-                className="w-7 h-7 rounded-lg object-contain"
-              />
-            </div>
-          )}
+            ) : (
+              <div className="flex items-center justify-center">
+                <img
+                  src={displayBrandLogo}
+                  alt={displayBrandName}
+                  className="w-7 h-7 rounded-lg object-contain bg-white"
+                  onError={(e) => { e.currentTarget.src = "/download (3).gif"; }}
+                />
+              </div>
+            );
+          })()}
 
           {/* Desktop Toggle button (hidden on mobile) */}
           <button

@@ -1,25 +1,44 @@
-'use client';
-
 import React from 'react';
-import { useRouter } from 'next/navigation';
-import UwoLandingPage from '@/components/landing/UwoLandingPage';
-import CookiePreferencesModal from '@/components/common/CookiePreferencesModal';
+import CookiePolicyClient from '@/components/legal/CookiePolicyClient';
+import JsonLd from '@/components/seo/JsonLd';
+import {
+  buildPageMetadata,
+  getBreadcrumbSchema,
+  getBaseUrl,
+  SITE_CONFIG,
+} from '@/lib/seo';
 
-export default function CookiePolicyRoutePage() {
-  const router = useRouter();
+export const metadata = buildPageMetadata({
+  title: 'Cookie Policy & Preferences — UwoConnect',
+  description:
+    'Learn how UwoConnect uses essential, analytical, and functional cookies to improve workspace performance and provide secure user authentication.',
+  path: '/cookie-policy',
+  keywords: ['Cookie Policy', 'cookie preferences', 'session cookies', 'UwoConnect tracking settings'],
+});
+
+export default function CookiePolicyPage() {
+  const breadcrumbSchema = getBreadcrumbSchema([
+    { name: 'Cookie Policy', url: '/cookie-policy' },
+  ]);
+
+  const webPageSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    '@id': `${getBaseUrl()}/cookie-policy#webpage`,
+    url: `${getBaseUrl()}/cookie-policy`,
+    name: 'Cookie Policy — UwoConnect',
+    description: 'Cookie policy and consent settings for UwoConnect platform users.',
+    publisher: {
+      '@type': 'Organization',
+      name: SITE_CONFIG.name,
+    },
+  };
 
   return (
-    <main className="relative min-h-screen">
-      {/* Background Landing Page */}
-      <UwoLandingPage />
-
-      {/* Pop-up Modal rendered on /cookie-policy route */}
-      <CookiePreferencesModal
-        isOpen={true}
-        onClose={() => {
-          router.push('/');
-        }}
-      />
-    </main>
+    <>
+      <JsonLd id="schema-cookies" data={webPageSchema} />
+      <JsonLd id="schema-breadcrumb-cookies" data={breadcrumbSchema} />
+      <CookiePolicyClient />
+    </>
   );
 }

@@ -484,6 +484,14 @@ const DashboardLayout = ({ children, role: initialRole }) => {
               <h1 className="text-xs sm:text-sm md:text-base font-black text-slate-800 tracking-tight uppercase truncate max-w-[110px] xs:max-w-[170px] sm:max-w-none">
                 {currentTitle}
               </h1>
+
+              {/* Workspace Indicator Badge */}
+              {user?.client?.business_name && displayRole !== 'ADMIN' && (
+                <div className="hidden md:flex items-center gap-1.5 px-2.5 py-1 bg-emerald-50/80 border border-emerald-200/60 rounded-xl text-emerald-900 text-xs font-black max-w-[220px] shadow-2xs" title={`Workspace: ${user.client.business_name}`}>
+                  <Building2 size={13} className="text-[#059669] shrink-0" />
+                  <span className="truncate">{user.client.business_name}</span>
+                </div>
+              )}
             </div>
 
             <div className="flex items-center gap-1.5 sm:gap-3 md:gap-4 shrink-0">

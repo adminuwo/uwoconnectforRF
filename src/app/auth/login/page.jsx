@@ -13,6 +13,8 @@ import {
   Lock,
   AlertCircle,
   ArrowRight,
+  QrCode,
+  ChevronRight,
 } from 'lucide-react';
 import axios from 'axios';
 import UWOLoginModal from '@/components/UWOLoginModal';
@@ -212,6 +214,25 @@ const LoginPage = () => {
             Sign in to access your automation workspace
           </p>
         </div>
+
+        {/* WhatsApp Web-Style Mobile QR Login CTA */}
+        <Link
+          href="/auth/qr"
+          className="w-full mb-4 p-3 bg-emerald-50/80 hover:bg-emerald-100/80 border border-emerald-200/90 rounded-2xl flex items-center justify-between transition-all group shadow-2xs"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold shadow-sm group-hover:scale-105 transition-transform">
+              <QrCode size={18} />
+            </div>
+            <div className="text-left">
+              <h4 className="text-xs font-bold text-slate-900 group-hover:text-emerald-800 transition-colors">
+                Login with Uwo Connect Mobile
+              </h4>
+              <p className="text-[11px] text-emerald-700 font-medium">Scan QR code for instant passwordless entry</p>
+            </div>
+          </div>
+          <ChevronRight size={16} className="text-emerald-600 group-hover:translate-x-0.5 transition-transform" />
+        </Link>
 
         {/* Error Alert */}
         <AnimatePresence>

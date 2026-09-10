@@ -9,6 +9,7 @@ import axios from 'axios';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import GuideCard from '@/components/guides/GuideCard';
 import LearningCenterModal from '@/components/guides/LearningCenterModal';
+import { API_BASE_URL } from '@/config/apiConfig';
 
 const LearningCenterPage = () => {
   const [guides, setGuides] = useState([]);
@@ -23,9 +24,9 @@ const LearningCenterPage = () => {
 
   const fetchGuides = async () => {
     setLoading(true);
-    const token = localStorage.getItem('uwo_token');
+    const token = localStorage.getItem('uwo_token') || localStorage.getItem('token');
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app';
+    const API_URL = API_BASE_URL;
 
     try {
       const res = await axios.get(`${API_URL}/api/guides/`, { headers });

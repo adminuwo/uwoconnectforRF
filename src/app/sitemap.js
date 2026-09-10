@@ -1,11 +1,7 @@
-export default function sitemap() {
-  const baseUrl = (
-    process.env.NEXT_PUBLIC_SITE_URL ||
-    process.env.NEXT_PUBLIC_APP_URL ||
-    process.env.NEXT_PUBLIC_FRONTEND_URL ||
-    'https://uwoconnect.com'
-  ).replace(/\/$/, '');
+import { getBaseUrl } from '@/lib/seo';
 
+export default function sitemap() {
+  const baseUrl = getBaseUrl();
   const currentDate = new Date();
 
   return [
@@ -28,51 +24,27 @@ export default function sitemap() {
       priority: 0.8,
     },
     {
-      url: `${baseUrl}/book`,
-      lastModified: currentDate,
-      changeFrequency: 'weekly',
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/auth/login`,
+      url: `${baseUrl}/terms`,
       lastModified: currentDate,
       changeFrequency: 'monthly',
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/auth/register`,
-      lastModified: currentDate,
-      changeFrequency: 'monthly',
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/auth/forgot-password`,
-      lastModified: currentDate,
-      changeFrequency: 'yearly',
-      priority: 0.4,
+      priority: 0.5,
     },
     {
       url: `${baseUrl}/privacy`,
       lastModified: currentDate,
-      changeFrequency: 'yearly',
-      priority: 0.5,
-    },
-    {
-      url: `${baseUrl}/terms`,
-      lastModified: currentDate,
-      changeFrequency: 'yearly',
+      changeFrequency: 'monthly',
       priority: 0.5,
     },
     {
       url: `${baseUrl}/refund-policy`,
       lastModified: currentDate,
-      changeFrequency: 'yearly',
+      changeFrequency: 'monthly',
       priority: 0.5,
     },
     {
       url: `${baseUrl}/cookie-policy`,
       lastModified: currentDate,
-      changeFrequency: 'yearly',
+      changeFrequency: 'monthly',
       priority: 0.5,
     },
   ];

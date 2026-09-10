@@ -1,25 +1,34 @@
-'use client';
-
 import React from 'react';
-import { useRouter } from 'next/navigation';
-import UwoLandingPage from '@/components/landing/UwoLandingPage';
-import AboutModal from '@/components/AboutModal';
+import AboutClient from '@/components/about/AboutClient';
+import JsonLd from '@/components/seo/JsonLd';
+import {
+  buildPageMetadata,
+  getAboutPageSchema,
+  getOrganizationSchema,
+  getBreadcrumbSchema,
+} from '@/lib/seo';
 
-export default function AboutRoutePage() {
-  const router = useRouter();
+export const metadata = buildPageMetadata({
+  title: 'About UwoConnect — Enterprise Multi-Channel Automation & AI Workflows',
+  description:
+    'Discover UwoConnect’s mission to empower modern businesses with intelligent multi-channel customer communications, automated workflows, and enterprise-grade data security.',
+  path: '/about',
+  keywords: ['About UwoConnect', 'enterprise communication platform', 'Aisa Technologies', 'multi-channel SaaS'],
+});
+
+export default function AboutPage() {
+  const aboutSchema = getAboutPageSchema();
+  const orgSchema = getOrganizationSchema();
+  const breadcrumbSchema = getBreadcrumbSchema([
+    { name: 'About UwoConnect', url: '/about' },
+  ]);
 
   return (
-    <main className="relative min-h-screen">
-      {/* Background Landing Page */}
-      <UwoLandingPage />
-
-      {/* Pop-up Modal rendered on /about route */}
-      <AboutModal
-        isOpen={true}
-        onClose={() => {
-          router.push('/');
-        }}
-      />
-    </main>
+    <>
+      <JsonLd id="schema-about" data={aboutSchema} />
+      <JsonLd id="schema-org-about" data={orgSchema} />
+      <JsonLd id="schema-breadcrumb-about" data={breadcrumbSchema} />
+      <AboutClient />
+    </>
   );
 }

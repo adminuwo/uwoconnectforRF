@@ -1,23 +1,44 @@
-'use client';
+import React from 'react';
+import PrivacyClient from '@/components/legal/PrivacyClient';
+import JsonLd from '@/components/seo/JsonLd';
+import {
+  buildPageMetadata,
+  getBreadcrumbSchema,
+  getBaseUrl,
+  SITE_CONFIG,
+} from '@/lib/seo';
 
-import { useEffect } from 'react';
+export const metadata = buildPageMetadata({
+  title: 'Privacy Policy — UwoConnect Data Protection & Security',
+  description:
+    'Understand how UwoConnect securely handles enterprise communication data, WhatsApp Meta API tokens, and protects customer privacy under international data standards.',
+  path: '/privacy',
+  keywords: ['Privacy Policy', 'data security', 'GDPR compliance', 'WhatsApp API data protection'],
+});
 
-export default function PrivacyRedirectPage() {
-  useEffect(() => {
-    window.location.href = 'https://uwo24.com/privacy-policy';
-  }, []);
+export default function PrivacyPage() {
+  const breadcrumbSchema = getBreadcrumbSchema([
+    { name: 'Privacy Policy', url: '/privacy' },
+  ]);
+
+  const webPageSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    '@id': `${getBaseUrl()}/privacy#webpage`,
+    url: `${getBaseUrl()}/privacy`,
+    name: 'Privacy Policy — UwoConnect',
+    description: 'Privacy policy and data protection terms for UwoConnect platform users.',
+    publisher: {
+      '@type': 'Organization',
+      name: SITE_CONFIG.name,
+    },
+  };
 
   return (
-    <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-6 text-white font-sans">
-      <div className="space-y-3 text-center">
-        <p className="text-sm text-slate-300 font-medium">Redirecting to official UwoConnect Privacy Policy...</p>
-        <a
-          href="https://uwo24.com/privacy-policy"
-          className="text-emerald-400 font-bold text-xs underline"
-        >
-          Click here if not redirected automatically
-        </a>
-      </div>
-    </div>
+    <>
+      <JsonLd id="schema-privacy" data={webPageSchema} />
+      <JsonLd id="schema-breadcrumb-privacy" data={breadcrumbSchema} />
+      <PrivacyClient />
+    </>
   );
 }

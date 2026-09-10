@@ -324,6 +324,8 @@ const ClientEmailPage = () => {
         to: toEmail,
         subject,
         body: messageBody,
+        cc: ccEmail ? ccEmail.trim() : undefined,
+        bcc: bccEmail ? bccEmail.trim() : undefined,
       };
       if (isScheduleMode) {
         payload.scheduled_date = scheduleDate;
