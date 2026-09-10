@@ -398,9 +398,10 @@ export default function AgencyAdminDashboard() {
               <thead className="bg-slate-50/80 text-slate-400 font-bold uppercase tracking-wider text-[10px] border-b border-slate-100">
                 <tr>
                   <th className="py-3.5 px-6">Client Business</th>
-                  <th className="py-3.5 px-6">Contact & Email</th>
+                  <th className="py-3.5 px-6">Contact &amp; Email</th>
                   <th className="py-3.5 px-6">Plan</th>
                   <th className="py-3.5 px-6">Status</th>
+                  <th className="py-3.5 px-6">Usage Metrics</th>
                   <th className="py-3.5 px-6">Registered On</th>
                   <th className="py-3.5 px-6 text-right">Admin Actions</th>
                 </tr>
@@ -408,14 +409,14 @@ export default function AgencyAdminDashboard() {
               <tbody className="divide-y divide-slate-100 font-medium">
                 {loading ? (
                   <tr>
-                    <td colSpan={6} className="py-12 text-center text-slate-400">
+                    <td colSpan={7} className="py-12 text-center text-slate-400">
                       <Loader2 size={24} className="animate-spin mx-auto mb-2 text-blue-600" />
                       <span>Loading agency sub-clients...</span>
                     </td>
                   </tr>
                 ) : filteredSubClients.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="py-12 text-center text-slate-400">
+                    <td colSpan={7} className="py-12 text-center text-slate-400">
                       <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-3 text-slate-400">
                         <Users size={20} />
                       </div>
@@ -476,6 +477,28 @@ export default function AgencyAdminDashboard() {
                             <AlertCircle size={10} /> Suspended
                           </span>
                         )}
+                      </td>
+
+                      {/* Usage Metrics */}
+                      <td className="py-4 px-6">
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-1.5 text-[10px] text-slate-500 font-medium">
+                            <span className="w-1.5 h-1.5 rounded-full bg-blue-400"></span>
+                            <span className="font-bold text-slate-700">{(client.usage?.messages || 0).toLocaleString()}</span> msgs
+                          </div>
+                          <div className="flex items-center gap-1.5 text-[10px] text-slate-500 font-medium">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                            <span className="font-bold text-slate-700">{(client.usage?.contacts || 0).toLocaleString()}</span> contacts
+                          </div>
+                          <div className="flex items-center gap-1.5 text-[10px] text-slate-500 font-medium">
+                            <span className="w-1.5 h-1.5 rounded-full bg-purple-400"></span>
+                            <span className="font-bold text-slate-700">{(client.usage?.products || 0).toLocaleString()}</span> products
+                          </div>
+                          <div className="flex items-center gap-1.5 text-[10px] text-slate-500 font-medium">
+                            <span className="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+                            <span className="font-bold text-slate-700">{(client.usage?.knowledge_docs || 0).toLocaleString()}</span> AI docs
+                          </div>
+                        </div>
                       </td>
 
                       {/* Date */}

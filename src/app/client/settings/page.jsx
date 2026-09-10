@@ -49,6 +49,14 @@ const ClientSettingsPage = () => {
   
   const user = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('user') || '{}') : {};
 
+  const isAgencyClient = Boolean(
+    client?.is_agency || 
+    (client?.plan || '').toUpperCase() === 'AGENCY' ||
+    Boolean(client?.white_label_domain) ||
+    Boolean(user?.client?.is_agency) ||
+    (user?.client?.plan || '').toUpperCase() === 'AGENCY'
+  );
+
   const fetchProfile = async () => {
     try {
       setLoading(true);
@@ -707,8 +715,9 @@ const ClientSettingsPage = () => {
             </div>
           </div>
 
-          {/* 5. White-Label & Custom Branding Suite */}
-          <div className="p-6 sm:p-8 space-y-6 bg-gradient-to-b from-white via-slate-50/30 to-emerald-50/10">
+          {/* 5. White-Label & Custom Branding Suite (Agency / White-Label Plan only) */}
+          {isAgencyClient && (
+          <div className="p-6 sm:p-8 space-y-6 bg-gradient-to-b from-white via-slate-50/30 to-emerald-50/10 border-t border-slate-100">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white flex items-center justify-center font-bold shadow-md shadow-emerald-600/20">
@@ -966,6 +975,7 @@ const ClientSettingsPage = () => {
               </div>
             </div>
           </div>
+          )}
 
           {/* 6. Security & Actions */}
           <div className="p-6 sm:p-8 space-y-5 bg-slate-50/40">

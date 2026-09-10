@@ -25,13 +25,25 @@ export function EntitlementProvider({ children }) {
       const token = typeof window !== 'undefined' 
         ? (localStorage.getItem('token') || localStorage.getItem('uwo_token')) 
         : null;
+
+      // If user is not logged in, they don't have client entitlements
+      if (!token) {
+        setEntitlements(null);
+        setLoading(false);
+        return;
+      }
+
       const res = await axios.get(`${API_BASE_URL}/api/client/entitlements/`, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {}
+        headers: { Authorization: `Bearer ${token}` }
       });
       setEntitlements(res.data);
       setError(null);
     } catch (err) {
-      console.warn("Failed to fetch entitlements:", err?.response?.data || err.message);
+      if (err?.response?.status === 401) {
+        setEntitlements(null);
+      } else {
+        console.warn("Failed to fetch entitlements:", err?.response?.data || err.message);
+      }
       setError(err);
     } finally {
       setLoading(false);
@@ -57,9 +69,9 @@ export function EntitlementProvider({ children }) {
 
   const selectChannel = useCallback(async (channelKey) => {
     try {
-      const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+      const token = typeof window !== 'undefined' ? (localStorage.getItem('token') || localStorage.getItem('uwo_token')) : null;
       const res = await axios.post(
-        `${API_BASE_URL}/client/select-channel/`,
+        `${API_BASE_URL}/api/client/select-channel/`,
         { action: 'select_channel', channel: channelKey },
         { headers: token ? { Authorization: `Bearer ${token}` } : {} }
       );
@@ -81,9 +93,9 @@ export function EntitlementProvider({ children }) {
 
   const subscribePlan = useCallback(async (planSlug, billingPeriod = 'MONTHLY') => {
     try {
-      const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+      const token = typeof window !== 'undefined' ? (localStorage.getItem('token') || localStorage.getItem('uwo_token')) : null;
       const res = await axios.post(
-        `${API_BASE_URL}/client/subscribe/`,
+        `${API_BASE_URL}/api/client/subscribe/`,
         { action: 'subscribe', plan_slug: planSlug, billing_period: billingPeriod },
         { headers: token ? { Authorization: `Bearer ${token}` } : {} }
       );
