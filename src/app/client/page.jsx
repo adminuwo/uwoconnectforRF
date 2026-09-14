@@ -14,13 +14,16 @@ import FeatureDetailDrawer from '@/components/dashboard/FeatureDetailDrawer';
 import LearningCenterModal from '@/components/guides/LearningCenterModal';
 import { cn } from '@/lib/utils';
 import { API_BASE_URL } from '@/config/apiConfig';
+import { useEntitlement } from '@/context/EntitlementContext';
 import AgencyAdminDashboard from './agency/page';
 
 const ClientOverview = () => {
   const router = useRouter();
+  const { entitlements } = useEntitlement();
   const [mounted, setMounted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [userName, setUserName] = useState('User');
+  const [userState, setUserState] = useState(null);
   const [contacts, setContacts] = useState([]);
   const [upcomingFollowUps, setUpcomingFollowUps] = useState([]);
   const [viewMode, setViewMode] = useState('agency'); // 'agency' | 'workspace'
@@ -45,6 +48,25 @@ const ClientOverview = () => {
       } catch (e) {}
     }
   }, [router]);
+
+  useEffect(() => {
+    const handleUserUpdate = (e) => {
+      const u = e?.detail || (typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('user') || '{}') : {});
+      if (u) {
+        setUserState(u);
+        const name = u.name || (u.first_name ? `${u.first_name} ${u.last_name || ''}`.trim() : (u.username || u.business_name || 'User'));
+        if (name) setUserName(name);
+      }
+    };
+    window.addEventListener('user_profile_updated', handleUserUpdate);
+    window.addEventListener('profileUpdated', handleUserUpdate);
+    window.addEventListener('storage', handleUserUpdate);
+    return () => {
+      window.removeEventListener('user_profile_updated', handleUserUpdate);
+      window.removeEventListener('profileUpdated', handleUserUpdate);
+      window.removeEventListener('storage', handleUserUpdate);
+    };
+  }, []);
 
   // Time Range Filter State
   const [selectedPeriod, setSelectedPeriod] = useState('30d'); // '7d' | '30d' | '90d' | '1y' | 'custom'
@@ -301,8 +323,10 @@ const ClientOverview = () => {
     );
   }
 
-  const userObj = mounted && typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('user') || '{}') : {};
+  const userObj = userState || (mounted && typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('user') || '{}') : {});
+  const activePlanName = entitlements?.plan?.name || userObj?.client?.plan || userObj?.plan || '';
   const isAgencyUser = Boolean(
+    activePlanName.toUpperCase() === 'AGENCY' ||
     userObj?.plan?.toUpperCase() === 'AGENCY' ||
     userObj?.client?.plan?.toUpperCase() === 'AGENCY' ||
     userObj?.is_agency ||
@@ -356,9 +380,9 @@ const ClientOverview = () => {
                 <span className="px-2.5 py-0.5 rounded-md bg-emerald-50 border border-emerald-200/60 text-emerald-800 text-[10px] font-black uppercase tracking-wider">
                   🏢 {userObj?.client?.business_name || 'My Workspace'}
                 </span>
-                {userObj?.client?.plan && (
+                {activePlanName && (
                   <span className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 text-[10px] font-bold uppercase tracking-wider">
-                    {userObj.client.plan} Plan
+                    {activePlanName} Plan
                   </span>
                 )}
               </div>

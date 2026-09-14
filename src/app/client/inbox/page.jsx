@@ -457,7 +457,7 @@ export default function ClientInboxPage() {
             }));
           }
 
-          if (data.type === 'takeover_event' || data.type === 'transfer_event' || data.type === 'note_event') {
+          if (data.type === 'takeover_event' || data.type === 'transfer_event' || data.type === 'note_event' || data.type === 'bot_paused_event') {
             fetchData(); // Refresh UI live
           }
         } catch (err) {

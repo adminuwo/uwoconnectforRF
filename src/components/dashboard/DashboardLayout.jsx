@@ -129,7 +129,7 @@ const DashboardLayout = ({ children, role: initialRole }) => {
   const [user, setUser] = useState(null);
 
   const userObj = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('user') || '{}') : {};
-  const rawUserPlan = userObj?.client?.plan || userObj?.plan || '';
+  const rawUserPlan = entitlements?.plan?.name || user?.client?.plan || user?.plan || userObj?.client?.plan || userObj?.plan || '';
   const activePlanRank = getPlanRank(entitlements?.plan, rawUserPlan);
 
   const reqPlanName = FEATURE_REQUIRED_PLAN[pathname];
@@ -281,6 +281,8 @@ const DashboardLayout = ({ children, role: initialRole }) => {
         });
         const cData = res.data?.client && typeof res.data.client === 'object' ? res.data.client : (typeof res.data === 'object' ? res.data : {});
         const uData = res.data?.user && typeof res.data.user === 'object' ? res.data.user : {};
+        const activePlan = res.data?.plan || cData?.plan || uData?.plan || 'Starter';
+
         const logo = cData?.company_logo_url || uData?.profile_picture_url || res.data?.company_logo_url || '';
         if (logo) {
           setProfileLogo(logo);
@@ -289,13 +291,24 @@ const DashboardLayout = ({ children, role: initialRole }) => {
           setProfileLogo('');
           localStorage.removeItem('client_company_logo');
         }
-        if (uData?.name || uData?.first_name) {
-          setUser(prev => ({
-            ...(prev || {}),
-            ...uData,
-            name: uData.name || uData.first_name || prev?.name
-          }));
-        }
+
+        // Synchronize updated user & client profile into localStorage
+        const existingStored = JSON.parse(localStorage.getItem('user') || '{}');
+        const updatedUser = {
+          ...existingStored,
+          ...uData,
+          name: uData.name || uData.first_name || existingStored.name,
+          plan: activePlan,
+          client_plan: activePlan,
+          client: {
+            ...(existingStored.client || {}),
+            ...cData,
+            plan: activePlan
+          }
+        };
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+        setUser(updatedUser);
+        window.dispatchEvent(new CustomEvent('user_profile_updated', { detail: updatedUser }));
 
         // Fetch wallet balance
         try {
@@ -320,11 +333,14 @@ const DashboardLayout = ({ children, role: initialRole }) => {
         const sLogo = localStorage.getItem('client_company_logo');
         setProfileLogo(sLogo || '');
       }
-      if (e?.detail?.name) {
-        setUser(prev => prev ? ({ ...prev, name: e.detail.name, first_name: e.detail.name }) : prev);
-      }
+      const fresh = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('user') || '{}') : {};
+      const detailUser = (e?.detail && typeof e.detail === 'object') ? (e.detail.user || e.detail) : {};
+      const mergedUser = { ...fresh, ...detailUser };
+      if (detailUser.name) mergedUser.name = detailUser.name;
+      setUser(prev => ({ ...(prev || {}), ...mergedUser }));
     };
     window.addEventListener('profileUpdated', handleProfileUpdate);
+    window.addEventListener('user_profile_updated', handleProfileUpdate);
     window.addEventListener('storage', handleProfileUpdate);
 
     const impRaw = localStorage.getItem('impersonation_session');
@@ -425,7 +441,7 @@ const DashboardLayout = ({ children, role: initialRole }) => {
     user?.client?.white_label_domain
   );
 
-  const displayName = user?.name || user?.username || 'User';
+  const displayName = user?.name || (user?.first_name ? `${user.first_name} ${user.last_name || ''}`.trim() : (user?.username || 'User'));
   const displayRole = mounted 
     ? (user?.role === 'ADMIN' ? 'SUPER ADMIN' : isAgencyUser ? 'AGENCY ADMIN' : (user?.role || initialRole || 'CLIENT'))
     : (initialRole === 'ADMIN' ? 'SUPER ADMIN' : 'CLIENT');

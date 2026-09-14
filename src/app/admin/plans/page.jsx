@@ -1367,7 +1367,8 @@ export default function AdminPlansPage() {
   // ── Open Change Plan for Client ──
   const handleOpenChangeClientPlan = (client) => {
     setSelectedClientForPlanChange(client);
-    setTempSelectedPlanId(client.plan_id || plans[0]?.id || '');
+    const existingPlan = plans.find(p => p.id === client.plan_id || p.name?.toLowerCase() === (client.plan_name || '').toLowerCase());
+    setTempSelectedPlanId(existingPlan?.id || client.plan_id || plans[0]?.id || '');
     setIsChangePlanModalOpen(true);
   };
 
@@ -1380,7 +1381,7 @@ export default function AdminPlansPage() {
       const token = localStorage.getItem('token') || localStorage.getItem('uwo_token');
       await axios.post(
         `${API_BASE_URL}/api/admin/client-intelligence/clients/${selectedClientForPlanChange.id}/action/`,
-        { action: 'EDIT_PROFILE', plan: targetPlan.name },
+        { action: 'ASSIGN_PLAN', plan: targetPlan.name },
         { headers: { Authorization: `Bearer ${token}` } }
       );
     } catch (err) {
@@ -1400,6 +1401,7 @@ export default function AdminPlansPage() {
 
     setIsChangePlanModalOpen(false);
     showToast(`🎉 Assigned "${targetPlan.name}" plan to ${selectedClientForPlanChange.business_name}!`);
+    fetchBackendData();
   };
 
   // ── Open Client Custom Feature Access Modal ──

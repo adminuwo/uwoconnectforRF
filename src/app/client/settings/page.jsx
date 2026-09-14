@@ -47,7 +47,9 @@ const ClientSettingsPage = () => {
     tagline: ''
   });
   
-  const user = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('user') || '{}') : {};
+  const [userProfile, setUserProfile] = useState(() => typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('user') || '{}') : {});
+  
+  const user = userProfile;
 
   const isAgencyClient = Boolean(
     client?.is_agency || 
@@ -60,24 +62,43 @@ const ClientSettingsPage = () => {
   const fetchProfile = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('uwo_token');
+      const token = localStorage.getItem('token') || localStorage.getItem('uwo_token');
       const res = await axios.get(`${API_BASE_URL}/api/profile`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const clientData = (res.data?.client && typeof res.data.client === 'object') ? res.data.client : (typeof res.data === 'object' ? res.data : {});
       const userData = (res.data?.user && typeof res.data.user === 'object') ? res.data.user : (typeof res.data === 'object' ? res.data : {});
       const clientSettings = clientData.settings && typeof clientData.settings === 'object' ? clientData.settings : {};
+      const activePlan = res.data?.plan || clientData.plan || userData.plan || 'Starter';
 
       setClient(clientData);
+      
+      const existingUser = JSON.parse(localStorage.getItem('user') || '{}');
+      const resolvedName = userData.name || (userData.first_name ? `${userData.first_name} ${userData.last_name || ''}`.trim() : '') || existingUser.name || '';
+      const updatedUser = {
+        ...existingUser,
+        ...userData,
+        name: resolvedName,
+        plan: activePlan,
+        client_plan: activePlan,
+        client: {
+          ...(existingUser.client || {}),
+          ...clientData,
+          plan: activePlan
+        }
+      };
+      setUserProfile(updatedUser);
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      window.dispatchEvent(new CustomEvent('user_profile_updated', { detail: updatedUser }));
       
       const logoUrl = clientData.company_logo_url || clientData.white_label_logo || '';
       if (logoUrl) {
         localStorage.setItem('client_company_logo', logoUrl);
-        window.dispatchEvent(new CustomEvent('profileUpdated', { detail: { company_logo_url: logoUrl } }));
+        window.dispatchEvent(new CustomEvent('profileUpdated', { detail: { company_logo_url: logoUrl, name: resolvedName, user: updatedUser } }));
       }
 
       setEditData({
-        name: userData.name || userData.first_name || user.first_name || '',
+        name: resolvedName || userData.first_name || '',
         business_name: clientData.business_name || '',
         phone_number: clientData.phone_number || userData.phone_number || '',
         address: clientData.address || '',
@@ -167,7 +188,7 @@ const ClientSettingsPage = () => {
       window.dispatchEvent(new CustomEvent('profileUpdated', { detail: { company_logo_url: compressedLogoDataUrl } }));
 
       // Immediate auto-save to backend
-      const token = localStorage.getItem('uwo_token');
+      const token = localStorage.getItem('token') || localStorage.getItem('uwo_token');
       const res = await axios.patch(`${API_BASE_URL}/api/profile`, {
         company_logo_url: compressedLogoDataUrl
       }, {
@@ -202,7 +223,7 @@ const ClientSettingsPage = () => {
       localStorage.removeItem('client_company_logo');
       window.dispatchEvent(new CustomEvent('profileUpdated', { detail: { company_logo_url: '' } }));
       
-      const token = localStorage.getItem('uwo_token');
+      const token = localStorage.getItem('token') || localStorage.getItem('uwo_token');
       await axios.patch(`${API_BASE_URL}/api/profile`, {
         company_logo_url: ''
       }, {
@@ -219,7 +240,7 @@ const ClientSettingsPage = () => {
 
   const fetchPaymentHistory = async () => {
     try {
-      const token = localStorage.getItem('uwo_token');
+      const token = localStorage.getItem('token') || localStorage.getItem('uwo_token');
       const res = await axios.get(`${API_BASE_URL}/api/payments/history`, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -231,7 +252,7 @@ const ClientSettingsPage = () => {
 
   const fetchActivePlans = async () => {
     try {
-      const token = localStorage.getItem('uwo_token');
+      const token = localStorage.getItem('token') || localStorage.getItem('uwo_token');
       const res = await axios.get(`${API_BASE_URL}/api/plans/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -315,7 +336,7 @@ const ClientSettingsPage = () => {
   const handleUpdate = async () => {
     try {
       setIsSaving(true);
-      const token = localStorage.getItem('uwo_token');
+      const token = localStorage.getItem('token') || localStorage.getItem('uwo_token');
 
       const payload = {
         name: editData.name,
@@ -345,26 +366,38 @@ const ClientSettingsPage = () => {
       // Update local storage user if name changed
       try {
         const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
-        localStorage.setItem('user', JSON.stringify({
+        const updatedFullName = (editData.name || res.data?.user?.name || res.data?.name || storedUser.name || '').trim();
+        const nameParts = updatedFullName.split(' ');
+        const fName = nameParts[0] || '';
+        const lName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : '';
+
+        const newStoredUser = {
           ...storedUser,
-          first_name: editData.name || storedUser.first_name,
-          name: editData.name || storedUser.name,
+          ...(res.data?.user || {}),
+          name: updatedFullName,
+          first_name: fName,
+          last_name: lName,
           client: {
             ...(storedUser.client || {}),
+            ...(res.data?.client || {}),
             business_name: editData.business_name,
             white_label_name: editData.white_label_name,
             white_label_domain: editData.white_label_domain,
             white_label_logo: editData.white_label_logo || editData.company_logo_url
           }
-        }));
+        };
+        setUserProfile(newStoredUser);
+        localStorage.setItem('user', JSON.stringify(newStoredUser));
+
         if (editData.company_logo_url || editData.white_label_logo) {
           localStorage.setItem('client_company_logo', editData.white_label_logo || editData.company_logo_url);
         } else {
           localStorage.removeItem('client_company_logo');
         }
         window.dispatchEvent(new CustomEvent('profileUpdated', {
-          detail: { company_logo_url: editData.white_label_logo || editData.company_logo_url || '', name: editData.name }
+          detail: { company_logo_url: editData.white_label_logo || editData.company_logo_url || '', name: updatedFullName, user: newStoredUser }
         }));
+        window.dispatchEvent(new CustomEvent('user_profile_updated', { detail: newStoredUser }));
         window.dispatchEvent(new CustomEvent('brandUpdated'));
         if (refreshBrand) refreshBrand();
       } catch (e) {}
@@ -639,7 +672,7 @@ const ClientSettingsPage = () => {
                   />
                 ) : (
                   <p className="text-base font-bold text-slate-900 truncate">
-                    {editData.name || client?.name || user.first_name || user.username || 'N/A'}
+                    {userProfile?.name || editData.name || (userProfile?.first_name ? `${userProfile.first_name} ${userProfile.last_name || ''}`.trim() : '') || user?.name || user?.first_name || user?.username || 'N/A'}
                   </p>
                 )}
               </div>

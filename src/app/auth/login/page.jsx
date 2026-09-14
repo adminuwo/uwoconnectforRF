@@ -94,8 +94,13 @@ const LoginPage = () => {
       const result = await signInWithPopup(auth, googleProvider);
       await handleBackendAuth(result.user);
     } catch (err) {
+      if (err?.code === 'auth/popup-closed-by-user' || err?.code === 'auth/cancelled-popup-request') {
+        // User closed or cancelled the popup intentionally - no error overlay needed
+        return;
+      }
       console.error('Google login error:', err);
       setError(parseAuthError(err, 'Google'));
+    } finally {
       setLoadingProvider(null);
     }
   };
@@ -107,8 +112,12 @@ const LoginPage = () => {
       const result = await signInWithPopup(auth, githubProvider);
       await handleBackendAuth(result.user);
     } catch (err) {
+      if (err?.code === 'auth/popup-closed-by-user' || err?.code === 'auth/cancelled-popup-request') {
+        return;
+      }
       console.error('Github login error:', err);
       setError(parseAuthError(err, 'GitHub'));
+    } finally {
       setLoadingProvider(null);
     }
   };
@@ -120,8 +129,12 @@ const LoginPage = () => {
       const result = await signInWithPopup(auth, facebookProvider);
       await handleBackendAuth(result.user);
     } catch (err) {
+      if (err?.code === 'auth/popup-closed-by-user' || err?.code === 'auth/cancelled-popup-request') {
+        return;
+      }
       console.error('Facebook login error:', err);
       setError(parseAuthError(err, 'Facebook'));
+    } finally {
       setLoadingProvider(null);
     }
   };

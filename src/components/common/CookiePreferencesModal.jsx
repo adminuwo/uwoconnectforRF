@@ -50,7 +50,7 @@ export default function CookiePreferencesModal({ isOpen, onClose, onSave }) {
       console.error('Failed to save cookie preferences:', e);
     }
 
-    onSave && onSave(consentObj);
+    if (onSave) onSave(consentObj);
     onClose();
   };
 

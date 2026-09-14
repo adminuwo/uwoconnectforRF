@@ -108,7 +108,7 @@ export default function AddMoneyModal({ isOpen, onClose, onSuccess }) {
             if (verifyRes.data.success) {
               setSuccessMsg(`Payment Successful! ₹${currentAmount.toLocaleString('en-IN')} has been added to your wallet.`);
               setTimeout(() => {
-                onSuccess && onSuccess(verifyRes.data);
+                if (onSuccess) onSuccess(verifyRes.data);
                 onClose();
               }, 1200);
             } else {

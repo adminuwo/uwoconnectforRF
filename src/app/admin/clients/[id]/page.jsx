@@ -331,11 +331,11 @@ export default function ClientAdminDetailDashboard({ params }) {
                 </h1>
                 <span className={cn(
                   "px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide border",
-                  client.approval_status === 'APPROVED' ? "bg-emerald-50 text-emerald-700 border-emerald-200" :
-                  client.approval_status === 'PENDING' ? "bg-amber-50 text-amber-700 border-amber-200" :
-                  "bg-rose-50 text-rose-700 border-rose-200"
+                  client.status === 'ACTIVE' ? "bg-emerald-50 text-emerald-700 border-emerald-200" :
+                  client.status === 'SUSPENDED' ? "bg-rose-50 text-rose-700 border-rose-200" :
+                  "bg-slate-100 text-slate-700 border-slate-200"
                 )}>
-                  {client.approval_status}
+                  {client.status || 'ACTIVE'}
                 </span>
                 <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-slate-100 text-slate-700 border border-slate-200">
                   {client.plan} Plan
@@ -1253,6 +1253,7 @@ export default function ClientAdminDetailDashboard({ params }) {
                       <option value="FREE">Free</option>
                       <option value="STARTER">Starter</option>
                       <option value="GROWTH">Growth</option>
+                      <option value="ADVANCED">Advanced</option>
                       <option value="ENTERPRISE">Enterprise</option>
                     </select>
                   </div>

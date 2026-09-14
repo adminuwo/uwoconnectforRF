@@ -23,8 +23,6 @@ function AdminClientsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // Initial params from URL query (e.g. ?approval=PENDING)
-  const initialApproval = searchParams.get('approval') || 'ALL';
   const initialStatus = searchParams.get('status') || 'ALL';
 
   const [clients, setClients] = useState([]);
@@ -37,7 +35,6 @@ function AdminClientsContent() {
   const [searchInput, setSearchInput] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState(initialStatus);
-  const [approvalFilter, setApprovalFilter] = useState(initialApproval);
   const [planFilter, setPlanFilter] = useState('ALL');
   const [agencyTypeFilter, setAgencyTypeFilter] = useState('ALL'); // ALL, AGENCIES, SUB_CLIENTS, DIRECT
   const [dynamicPlans, setDynamicPlans] = useState(['Starter', 'Professional', 'Enterprise']);
@@ -74,8 +71,7 @@ function AdminClientsContent() {
     support_email: '',
     tagline: '',
     plan: 'GROWTH',
-    status: 'ACTIVE',
-    approval_status: 'APPROVED'
+    status: 'ACTIVE'
   });
   const [modalNewPassword, setModalNewPassword] = useState('');
   const [showPasswordInModal, setShowPasswordInModal] = useState(false);
@@ -187,7 +183,6 @@ function AdminClientsContent() {
         params: {
           search: debouncedSearch,
           status: statusFilter,
-          approval: approvalFilter,
           plan: planFilter,
           agency_type: agencyTypeFilter,
           sort_by: sortKey,
@@ -216,11 +211,11 @@ function AdminClientsContent() {
       setLoading(false);
       setIsFetching(false);
     }
-  }, [debouncedSearch, statusFilter, approvalFilter, planFilter, sortKey, sortOrder, page, pageSize, summary]);
+  }, [debouncedSearch, statusFilter, planFilter, sortKey, sortOrder, page, pageSize, summary]);
 
   useEffect(() => {
     fetchClientDirectory();
-  }, [debouncedSearch, statusFilter, approvalFilter, planFilter, sortKey, sortOrder, page, pageSize]);
+  }, [debouncedSearch, statusFilter, planFilter, sortKey, sortOrder, page, pageSize]);
 
   useEffect(() => {
     const fetchPlans = async () => {
@@ -290,8 +285,7 @@ function AdminClientsContent() {
       support_email: clientSettings.support_email || '',
       tagline: clientSettings.tagline || '',
       plan: client.plan || 'GROWTH',
-      status: client.status || 'ACTIVE',
-      approval_status: client.approval_status || 'APPROVED'
+      status: client.status || 'ACTIVE'
     });
     setModalNewPassword('');
     setShowPasswordInModal(false);
@@ -392,15 +386,6 @@ function AdminClientsContent() {
         { action: 'EDIT_PROFILE', ...profileFormState },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-
-      // If approval status changed, also sync approval status
-      if (profileFormState.approval_status !== selectedProfileClient.approval_status) {
-        await axios.post(
-          `${API_BASE_URL}/api/admin/client-intelligence/clients/${selectedProfileClient.id}/action/`,
-          { action: 'SET_APPROVAL_STATUS', approval_status: profileFormState.approval_status },
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-      }
 
       showToast('Client profile details updated successfully!');
       setIsProfileModalOpen(false);
@@ -592,13 +577,6 @@ function AdminClientsContent() {
     window.open(`${API_BASE_URL}/api/admin/client-intelligence/export/?token=${token}`, '_blank');
   };
 
-  const approvalStats = summary || {
-    totalClients: totalCount,
-    approved: totalCount,
-    pending: 0,
-    rejected: 0
-  };
-
   return (
     <DashboardLayout role="ADMIN">
       <div className="max-w-full pb-24 px-4 sm:px-10 lg:px-12 font-sans" onClick={() => setActiveMenuId(null)}>
@@ -616,7 +594,7 @@ function AdminClientsContent() {
           <div>
             <div className="flex items-center gap-2.5">
               <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-                Client Approvals & Directory
+                Client Directory & Workspaces
               </h1>
               <span className="px-2.5 py-0.5 bg-emerald-50 text-emerald-700 text-xs font-bold rounded-full border border-emerald-100">
                 {totalCount} Total
@@ -628,7 +606,7 @@ function AdminClientsContent() {
               )}
             </div>
             <p className="text-slate-500 text-xs sm:text-sm mt-1">
-              Review client registrations, approve or reject access requests, access client credentials, and manage active workspaces.
+              Manage client directory, credentials, user profiles, feature entitlements, and active workspaces.
             </p>
           </div>
 
@@ -656,81 +634,50 @@ function AdminClientsContent() {
           </div>
         </div>
 
-        {/* ── 2. Top Navigation Tabs: Approval Distribution ── */}
+        {/* ── 2. Top Navigation Tabs: Workspaces ── */}
         <div className="flex items-center gap-2 mb-6 overflow-x-auto pb-1">
           <button
-            onClick={() => { setApprovalFilter('ALL'); setPage(1); }}
+            onClick={() => { setStatusFilter('ALL'); setPage(1); }}
             className={cn(
               "px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer whitespace-nowrap shadow-xs",
-              approvalFilter === 'ALL'
+              statusFilter === 'ALL'
                 ? "bg-emerald-600 text-white shadow-emerald-600/20"
                 : "bg-white text-slate-600 hover:bg-slate-50 border border-slate-200/80"
             )}
           >
-            <span>All Clients</span>
+            <span>All Workspaces</span>
             <span className={cn(
               "px-2 py-0.5 rounded-full text-[10px] font-mono",
-              approvalFilter === 'ALL' ? "bg-white/20 text-white" : "bg-slate-100 text-slate-600"
+              statusFilter === 'ALL' ? "bg-white/20 text-white" : "bg-slate-100 text-slate-600"
             )}>
-              {approvalStats.totalClients || totalCount}
+              {totalCount}
             </span>
           </button>
 
           <button
-            onClick={() => { setApprovalFilter('APPROVED'); setPage(1); }}
+            onClick={() => { setStatusFilter('ACTIVE'); setPage(1); }}
             className={cn(
               "px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer whitespace-nowrap shadow-xs",
-              approvalFilter === 'APPROVED'
+              statusFilter === 'ACTIVE'
                 ? "bg-emerald-600 text-white shadow-emerald-600/20"
                 : "bg-white text-slate-600 hover:bg-emerald-50/50 border border-slate-200/80"
             )}
           >
             <span className="w-2 h-2 rounded-full bg-emerald-400" />
-            <span>Approved</span>
-            <span className={cn(
-              "px-2 py-0.5 rounded-full text-[10px] font-mono",
-              approvalFilter === 'APPROVED' ? "bg-white/20 text-white" : "bg-emerald-50 text-emerald-700"
-            )}>
-              {approvalStats.approved}
-            </span>
+            <span>Active</span>
           </button>
 
           <button
-            onClick={() => { setApprovalFilter('PENDING'); setPage(1); }}
+            onClick={() => { setStatusFilter('SUSPENDED'); setPage(1); }}
             className={cn(
               "px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer whitespace-nowrap shadow-xs",
-              approvalFilter === 'PENDING'
-                ? "bg-amber-500 text-white shadow-amber-500/20"
-                : "bg-white text-slate-600 hover:bg-amber-50/50 border border-slate-200/80"
+              statusFilter === 'SUSPENDED'
+                ? "bg-slate-800 text-white shadow-slate-800/20"
+                : "bg-white text-slate-600 hover:bg-slate-50 border border-slate-200/80"
             )}
           >
-            <span className="w-2 h-2 rounded-full bg-amber-400" />
-            <span>Pending</span>
-            <span className={cn(
-              "px-2 py-0.5 rounded-full text-[10px] font-mono",
-              approvalFilter === 'PENDING' ? "bg-white/20 text-white" : "bg-amber-50 text-amber-700"
-            )}>
-              {approvalStats.pending}
-            </span>
-          </button>
-
-          <button
-            onClick={() => { setApprovalFilter('REJECTED'); setPage(1); }}
-            className={cn(
-              "px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer whitespace-nowrap shadow-xs",
-              approvalFilter === 'REJECTED'
-                ? "bg-rose-600 text-white shadow-rose-600/20"
-                : "bg-white text-slate-600 hover:bg-rose-50/50 border border-slate-200/80"
-            )}
-          >
-            <span className="w-2 h-2 rounded-full bg-rose-400" />
-            <span>Rejected</span>
-            <span className={cn(
-              "px-2 py-0.5 rounded-full text-[10px] font-mono",
-              approvalFilter === 'REJECTED' ? "bg-white/20 text-white" : "bg-rose-50 text-rose-700"
-            )}>
-              {approvalStats.rejected}
-            </span>
+            <span className="w-2 h-2 rounded-full bg-slate-400" />
+            <span>Suspended</span>
           </button>
         </div>
 
@@ -823,12 +770,11 @@ function AdminClientsContent() {
             </select>
 
             {/* Reset Filters */}
-            {(searchInput || statusFilter !== 'ALL' || approvalFilter !== 'ALL' || planFilter !== 'ALL' || agencyTypeFilter !== 'ALL') && (
+            {(searchInput || statusFilter !== 'ALL' || planFilter !== 'ALL' || agencyTypeFilter !== 'ALL') && (
               <button
                 onClick={() => {
                   setSearchInput('');
                   setStatusFilter('ALL');
-                  setApprovalFilter('ALL');
                   setPlanFilter('ALL');
                   setAgencyTypeFilter('ALL');
                   setPage(1);
@@ -879,12 +825,6 @@ function AdminClientsContent() {
                         <ArrowUpDown size={11} className="text-slate-400" />
                       </div>
                     </th>
-                    <th className="py-3.5 px-6 cursor-pointer" onClick={() => handleSort('approval_status')}>
-                      <div className="flex items-center gap-1">
-                        Approval Status
-                        <ArrowUpDown size={11} className="text-slate-400" />
-                      </div>
-                    </th>
                     <th className="py-3.5 px-6 cursor-pointer" onClick={() => handleSort('created_at')}>
                       <div className="flex items-center gap-1">
                         Registered Date
@@ -902,7 +842,7 @@ function AdminClientsContent() {
                 <tbody className="divide-y divide-slate-100 font-sans">
                   {(loading || (isFetching && clients.length === 0)) ? (
                     <tr>
-                      <td colSpan={5} className="py-24 text-center">
+                      <td colSpan={4} className="py-24 text-center">
                         <div className="flex flex-col items-center justify-center gap-3.5">
                           <div className="relative flex items-center justify-center">
                             <div className="absolute w-14 h-14 rounded-2xl bg-emerald-500/15 animate-ping" />
@@ -913,7 +853,7 @@ function AdminClientsContent() {
                           <div>
                             <p className="text-sm font-extrabold text-slate-800 tracking-tight">Loading Clients...</p>
                             <p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
-                              Fetching client approval statuses, credentials and workspace records
+                              Fetching client directory, credentials, and workspace records
                             </p>
                           </div>
                         </div>
@@ -921,12 +861,12 @@ function AdminClientsContent() {
                     </tr>
                   ) : clients.length === 0 ? (
                     <tr>
-                      <td colSpan={5} className="py-16 text-center text-slate-400">
+                      <td colSpan={4} className="py-16 text-center text-slate-400">
                         <div className="flex flex-col items-center justify-center gap-2">
                           <AlertCircle size={28} className="text-slate-300" />
                           <p className="text-xs font-bold text-slate-600">No clients match your filter criteria.</p>
                           <button
-                            onClick={() => { setSearchInput(''); setStatusFilter('ALL'); setApprovalFilter('ALL'); setPlanFilter('ALL'); }}
+                            onClick={() => { setSearchInput(''); setStatusFilter('ALL'); setPlanFilter('ALL'); }}
                             className="text-xs text-emerald-600 font-semibold hover:underline cursor-pointer"
                           >
                             Clear filters
@@ -1038,49 +978,7 @@ function AdminClientsContent() {
                             </button>
                           </td>
 
-                          {/* 2. Approval Status */}
-                          <td className="py-4 px-6 whitespace-nowrap">
-                            <div className="flex items-center gap-2">
-                              <span className={cn(
-                                "px-3 py-1 rounded-full text-xs font-bold tracking-wide uppercase inline-flex items-center gap-1.5 border shadow-2xs",
-                                client.approval_status === 'APPROVED' ? "bg-emerald-50 text-emerald-700 border-emerald-200" :
-                                client.approval_status === 'PENDING' ? "bg-amber-50 text-amber-700 border-amber-200" :
-                                "bg-rose-50 text-rose-700 border-rose-200"
-                              )}>
-                                <span className={cn(
-                                  "w-2 h-2 rounded-full",
-                                  client.approval_status === 'APPROVED' ? "bg-emerald-500" :
-                                  client.approval_status === 'PENDING' ? "bg-amber-500 animate-pulse" :
-                                  "bg-rose-500"
-                                )} />
-                                {client.approval_status || 'APPROVED'}
-                              </span>
-
-                              {/* Quick 1-click toggles for pending */}
-                              {client.approval_status === 'PENDING' && (
-                                <div className="flex items-center gap-1">
-                                  <button
-                                    onClick={() => handleClientAction(client.id, 'SET_APPROVAL_STATUS', { approval_status: 'APPROVED' })}
-                                    disabled={actionLoading[client.id]}
-                                    className="p-1 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors cursor-pointer"
-                                    title="Approve immediately"
-                                  >
-                                    <CheckCircle2 size={15} />
-                                  </button>
-                                  <button
-                                    onClick={() => handleClientAction(client.id, 'SET_APPROVAL_STATUS', { approval_status: 'REJECTED' })}
-                                    disabled={actionLoading[client.id]}
-                                    className="p-1 text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
-                                    title="Reject access"
-                                  >
-                                    <XCircle size={15} />
-                                  </button>
-                                </div>
-                              )}
-                            </div>
-                          </td>
-
-                          {/* 3. Registered Date */}
+                          {/* 2. Registered Date */}
                           <td className="py-4 px-6 whitespace-nowrap text-slate-600 text-xs font-medium">
                             <div className="flex items-center gap-1.5">
                               <Clock size={13} className="text-slate-400" />
@@ -1175,11 +1073,10 @@ function AdminClientsContent() {
                       </h2>
                       <span className={cn(
                         "px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase border shadow-2xs",
-                        profileFormState.approval_status === 'APPROVED' ? "bg-emerald-50 text-emerald-700 border-emerald-200" :
-                        profileFormState.approval_status === 'PENDING' ? "bg-amber-50 text-amber-700 border-amber-200" :
+                        profileFormState.status === 'ACTIVE' ? "bg-emerald-50 text-emerald-700 border-emerald-200" :
                         "bg-rose-50 text-rose-700 border-rose-200"
                       )}>
-                        {profileFormState.approval_status}
+                        {profileFormState.status || 'ACTIVE'}
                       </span>
                       <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-emerald-50 text-emerald-800 border border-emerald-200">
                         {profileFormState.plan} PLAN
@@ -1421,9 +1318,11 @@ function AdminClientsContent() {
                         className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200/80 rounded-xl text-xs font-bold text-slate-800 outline-none focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 cursor-pointer transition-all"
                       >
                         <option value="Free">Free Tier (₹0/mo)</option>
-                        <option value="Starter">Starter Tier (₹999/mo)</option>
-                        <option value="Professional">Professional Tier (₹2,999/mo)</option>
-                        <option value="Enterprise">Enterprise Tier (₹9,999/mo)</option>
+                        <option value="Starter">Starter Tier (₹499/mo)</option>
+                        <option value="Growth">Growth Tier (₹1,599/mo)</option>
+                        <option value="Advanced">Advanced Tier (₹2,499/mo)</option>
+                        <option value="Professional">Professional Tier</option>
+                        <option value="Enterprise">Enterprise Tier</option>
                         <option value="Custom">Custom Tailored Plan</option>
                       </select>
                     </div>
@@ -1439,20 +1338,6 @@ function AdminClientsContent() {
                         <option value="ACTIVE">Active</option>
                         <option value="TRIAL">Trial Period</option>
                         <option value="SUSPENDED">Suspended</option>
-                      </select>
-                    </div>
-
-                    {/* Approval Status */}
-                    <div>
-                      <label className="block font-bold text-slate-700 mb-1 text-[11px]">Registration Approval</label>
-                      <select
-                        value={profileFormState.approval_status}
-                        onChange={(e) => setProfileFormState({ ...profileFormState, approval_status: e.target.value })}
-                        className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200/80 rounded-xl text-xs font-bold text-slate-800 outline-none focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 cursor-pointer transition-all"
-                      >
-                        <option value="APPROVED">Approved</option>
-                        <option value="PENDING">Pending Review</option>
-                        <option value="REJECTED">Rejected</option>
                       </select>
                     </div>
 

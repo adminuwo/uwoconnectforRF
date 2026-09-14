@@ -279,20 +279,6 @@ export default function AgencyAdminDashboard() {
           </div>
         </div>
 
-        {/* Pending Approvals */}
-        <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs flex items-center justify-between">
-          <div>
-            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Pending Approvals</span>
-            <div className="text-2xl sm:text-3xl font-black text-amber-600 mt-1">
-              {stats?.pending_approvals || subClients.filter(c => c.status === 'PENDING').length}
-            </div>
-            <span className="text-[11px] text-amber-600 font-bold mt-1 inline-block">Awaiting your approval</span>
-          </div>
-          <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold">
-            <Clock size={22} />
-          </div>
-        </div>
-
         {/* Active Workspaces */}
         <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs flex items-center justify-between">
           <div>
@@ -300,10 +286,24 @@ export default function AgencyAdminDashboard() {
             <div className="text-2xl sm:text-3xl font-black text-emerald-600 mt-1">
               {stats?.active_workspaces || subClients.filter(c => c.status === 'APPROVED').length}
             </div>
-            <span className="text-[11px] text-slate-400 font-bold mt-1 inline-block">100% Live on portal</span>
+            <span className="text-[11px] text-emerald-600 font-bold mt-1 inline-block">100% Live on portal</span>
           </div>
           <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
             <CheckCircle2 size={22} />
+          </div>
+        </div>
+
+        {/* Custom Domains */}
+        <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs flex items-center justify-between">
+          <div>
+            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Custom Domains</span>
+            <div className="text-2xl sm:text-3xl font-black text-blue-600 mt-1">
+              {subClients.filter(c => c.domain || c.white_label_domain).length || 0}
+            </div>
+            <span className="text-[11px] text-slate-400 font-bold mt-1 inline-block">White-label branded</span>
+          </div>
+          <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
+            <Globe size={22} />
           </div>
         </div>
 

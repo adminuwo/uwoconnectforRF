@@ -36,6 +36,11 @@ export default function SuperAdminOverview() {
       setError(null);
 
       const token = localStorage.getItem('token');
+      if (!token) {
+        router.push('/auth/login');
+        return;
+      }
+
       const [resOverview, resIntel] = await Promise.allSettled([
         axios.get(`${API_BASE_URL}/api/admin/overview/`, {
           headers: { Authorization: `Bearer ${token}` }
@@ -48,6 +53,10 @@ export default function SuperAdminOverview() {
       if (resOverview.status === 'fulfilled') {
         setData(resOverview.value.data);
       } else {
+        if (resOverview.reason?.response?.status === 401) {
+          router.push('/auth/login');
+          return;
+        }
         console.error('Overview API failed:', resOverview.reason);
         setError(resOverview.reason?.response?.data?.detail || resOverview.reason?.message || 'Failed to fetch overview data.');
       }
@@ -58,6 +67,10 @@ export default function SuperAdminOverview() {
         console.error('Intel Stats API failed:', resIntel.reason);
       }
     } catch (err) {
+      if (err.response?.status === 401) {
+        router.push('/auth/login');
+        return;
+      }
       console.error('Failed to fetch super admin overview', err);
       setError(err.message || 'An unexpected error occurred.');
     } finally {
@@ -74,16 +87,6 @@ export default function SuperAdminOverview() {
   const clientComparison = data?.clientComparison || [];
   const recentActivity = data?.recentActivity || [];
   const recentLogins = data?.recentLogins || [];
-
-  const approvalData = intelStats?.approvalStatus || {
-    total: kpis.totalClients || 0,
-    approved: kpis.activeClients || 0,
-    pending: 0,
-    rejected: 0,
-    approvedPercentage: 100,
-    pendingPercentage: 0,
-    rejectedPercentage: 0
-  };
 
   const overviewData = intelStats?.overview || {
     totalClients: kpis.totalClients || 0,
@@ -235,16 +238,16 @@ export default function SuperAdminOverview() {
             </div>
           </div>
 
-          {/* Approval Status Distribution Card */}
+          {/* Workspace Status & Platform Health Card */}
           <div className="lg:col-span-8 bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-2xs flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between mb-3">
                 <span className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
                   <ShieldCheck size={14} className="text-emerald-600" />
-                  Approval Status Distribution
+                  Workspace Status & Directory Health
                 </span>
                 <span className="text-[11px] font-semibold text-slate-400">
-                  {approvalData.total} Total Registered
+                  {overviewData.totalClients} Total Active Workspaces
                 </span>
               </div>
 
@@ -252,67 +255,67 @@ export default function SuperAdminOverview() {
               <div className="w-full bg-slate-100 h-3 rounded-full overflow-hidden flex gap-0.5 mb-4 p-0.5">
                 <div 
                   className="bg-emerald-500 h-full rounded-l-full transition-all duration-500" 
-                  style={{ width: `${Math.max(4, approvalData.approvedPercentage || 0)}%` }} 
-                  title={`Approved: ${approvalData.approved} (${approvalData.approvedPercentage}%)`}
+                  style={{ width: `${Math.max(4, ((overviewData.activeClients || 1) / Math.max(1, overviewData.totalClients || 1)) * 100)}%` }} 
+                  title={`Active: ${overviewData.activeClients}`}
                 />
                 <div 
-                  className="bg-amber-400 h-full transition-all duration-500" 
-                  style={{ width: `${Math.max(approvalData.pending > 0 ? 4 : 0, approvalData.pendingPercentage || 0)}%` }} 
-                  title={`Pending: ${approvalData.pending} (${approvalData.pendingPercentage}%)`}
+                  className="bg-teal-400 h-full transition-all duration-500" 
+                  style={{ width: `${Math.max(4, ((overviewData.trialClients || 0) / Math.max(1, overviewData.totalClients || 1)) * 100)}%` }} 
+                  title={`Trial: ${overviewData.trialClients || 0}`}
                 />
                 <div 
-                  className="bg-rose-500 h-full rounded-r-full transition-all duration-500" 
-                  style={{ width: `${Math.max(approvalData.rejected > 0 ? 4 : 0, approvalData.rejectedPercentage || 0)}%` }} 
-                  title={`Rejected: ${approvalData.rejected} (${approvalData.rejectedPercentage}%)`}
+                  className="bg-slate-300 h-full rounded-r-full transition-all duration-500" 
+                  style={{ width: `${Math.max(0, ((overviewData.suspendedClients || 0) / Math.max(1, overviewData.totalClients || 1)) * 100)}%` }} 
+                  title={`Suspended: ${overviewData.suspendedClients || 0}`}
                 />
               </div>
             </div>
 
-            {/* Clickable Filter Tiles */}
+            {/* Clickable Status Tiles */}
             <div className="grid grid-cols-3 gap-1.5 sm:gap-3">
-              {/* Approved */}
+              {/* Active */}
               <Link
-                href="/admin/clients?approval=APPROVED"
+                href="/admin/clients?status=ACTIVE"
                 className="p-2 sm:p-3 rounded-xl bg-emerald-50/70 hover:bg-emerald-100/70 border border-emerald-200/60 transition-all flex items-center justify-between group min-w-0"
               >
                 <div className="min-w-0">
                   <div className="flex items-center gap-1 sm:gap-1.5 text-[9px] sm:text-xs font-bold text-emerald-800 truncate">
                     <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-emerald-500 shrink-0" />
-                    <span className="truncate">Approved</span>
+                    <span className="truncate">Active</span>
                   </div>
-                  <div className="text-base sm:text-2xl font-extrabold text-emerald-950 mt-0.5 sm:mt-1">{approvalData.approved}</div>
+                  <div className="text-base sm:text-2xl font-extrabold text-emerald-950 mt-0.5 sm:mt-1">{overviewData.activeClients}</div>
                 </div>
                 <ChevronRight size={15} className="text-emerald-500 opacity-0 group-hover:opacity-100 transition-opacity shrink-0 hidden sm:block" />
               </Link>
 
-              {/* Pending */}
+              {/* Trial */}
               <Link
-                href="/admin/clients?approval=PENDING"
-                className="p-2 sm:p-3 rounded-xl bg-amber-50/70 hover:bg-amber-100/70 border border-amber-200/60 transition-all flex items-center justify-between group min-w-0"
+                href="/admin/clients?status=TRIAL"
+                className="p-2 sm:p-3 rounded-xl bg-teal-50/70 hover:bg-teal-100/70 border border-teal-200/60 transition-all flex items-center justify-between group min-w-0"
               >
                 <div className="min-w-0">
-                  <div className="flex items-center gap-1 sm:gap-1.5 text-[9px] sm:text-xs font-bold text-amber-800 truncate">
-                    <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-amber-400 shrink-0 animate-ping" />
-                    <span className="truncate">Pending</span>
+                  <div className="flex items-center gap-1 sm:gap-1.5 text-[9px] sm:text-xs font-bold text-teal-800 truncate">
+                    <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-teal-500 shrink-0" />
+                    <span className="truncate">Trial</span>
                   </div>
-                  <div className="text-base sm:text-2xl font-extrabold text-amber-950 mt-0.5 sm:mt-1">{approvalData.pending}</div>
+                  <div className="text-base sm:text-2xl font-extrabold text-teal-950 mt-0.5 sm:mt-1">{overviewData.trialClients || 0}</div>
                 </div>
-                <ChevronRight size={15} className="text-amber-500 opacity-0 group-hover:opacity-100 transition-opacity shrink-0 hidden sm:block" />
+                <ChevronRight size={15} className="text-teal-500 opacity-0 group-hover:opacity-100 transition-opacity shrink-0 hidden sm:block" />
               </Link>
 
-              {/* Rejected */}
+              {/* Suspended */}
               <Link
-                href="/admin/clients?approval=REJECTED"
-                className="p-2 sm:p-3 rounded-xl bg-rose-50/70 hover:bg-rose-100/70 border border-rose-200/60 transition-all flex items-center justify-between group min-w-0"
+                href="/admin/clients?status=SUSPENDED"
+                className="p-2 sm:p-3 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 transition-all flex items-center justify-between group min-w-0"
               >
                 <div className="min-w-0">
-                  <div className="flex items-center gap-1 sm:gap-1.5 text-[9px] sm:text-xs font-bold text-rose-800 truncate">
-                    <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-rose-500 shrink-0" />
-                    <span className="truncate">Rejected</span>
+                  <div className="flex items-center gap-1 sm:gap-1.5 text-[9px] sm:text-xs font-bold text-slate-700 truncate">
+                    <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-slate-400 shrink-0" />
+                    <span className="truncate">Suspended</span>
                   </div>
-                  <div className="text-base sm:text-2xl font-extrabold text-rose-950 mt-0.5 sm:mt-1">{approvalData.rejected}</div>
+                  <div className="text-base sm:text-2xl font-extrabold text-slate-900 mt-0.5 sm:mt-1">{overviewData.suspendedClients || 0}</div>
                 </div>
-                <ChevronRight size={15} className="text-rose-500 opacity-0 group-hover:opacity-100 transition-opacity shrink-0 hidden sm:block" />
+                <ChevronRight size={15} className="text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity shrink-0 hidden sm:block" />
               </Link>
             </div>
           </div>

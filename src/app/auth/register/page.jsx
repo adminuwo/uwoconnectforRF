@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Loader2, Clock, Eye, EyeOff, ShieldCheck, User, Building2, Mail, Lock, AlertCircle, ArrowRight, CheckCircle2, Phone, Briefcase, Layers } from 'lucide-react';
+import { Loader2, Clock, Eye, EyeOff, ShieldCheck, User, Building2, Mail, Lock, AlertCircle, ArrowRight, CheckCircle2, Phone, Briefcase, Layers, XCircle } from 'lucide-react';
 import axios from 'axios';
 import TermsModal from '@/components/TermsModal';
 import UWOLoginModal from '@/components/UWOLoginModal';
@@ -23,6 +23,9 @@ const RegisterPage = () => {
   const searchParams = useSearchParams();
   const inviteToken = searchParams?.get('invite_token');
 
+  // Meta Portfolio Gate: null = unanswered, 'yes' = has portfolio, 'no' = no portfolio
+  const [portfolioGate, setPortfolioGate] = useState(null);
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -30,6 +33,7 @@ const RegisterPage = () => {
     designation: '',
     department: 'Sales',
     businessName: '',
+    portfolioName: '',
     password: '',
     invite_token: inviteToken || ''
   });
@@ -65,6 +69,7 @@ const RegisterPage = () => {
       id_token: idToken,
       name: extraData.name || firebaseUser.displayName || '',
       business_name: extraData.businessName || '',
+      meta_portfolio_name: extraData.portfolioName || '',
       phone_number: extraData.phone || '',
       designation: extraData.designation || 'Team Member',
       department: extraData.department || 'General',
@@ -120,6 +125,9 @@ const RegisterPage = () => {
       const result = await signInWithPopup(auth, googleProvider);
       await handleBackendAuth(result.user, formData);
     } catch (err) {
+      if (err?.code === 'auth/popup-closed-by-user' || err?.code === 'auth/cancelled-popup-request') {
+        return;
+      }
       console.error('Google registration error:', err);
       setError(parseAuthError(err, 'Google'));
     } finally {
@@ -139,6 +147,9 @@ const RegisterPage = () => {
       const result = await signInWithPopup(auth, facebookProvider);
       await handleBackendAuth(result.user, formData);
     } catch (err) {
+      if (err?.code === 'auth/popup-closed-by-user' || err?.code === 'auth/cancelled-popup-request') {
+        return;
+      }
       console.error('Facebook registration error:', err);
       setError(parseAuthError(err, 'Facebook'));
     } finally {
@@ -158,6 +169,9 @@ const RegisterPage = () => {
       const result = await signInWithPopup(auth, githubProvider);
       await handleBackendAuth(result.user, formData);
     } catch (err) {
+      if (err?.code === 'auth/popup-closed-by-user' || err?.code === 'auth/cancelled-popup-request') {
+        return;
+      }
       console.error('Github registration error:', err);
       setError(parseAuthError(err, 'GitHub'));
     } finally {
@@ -171,18 +185,26 @@ const RegisterPage = () => {
       setError('Please accept the Terms & Conditions and Privacy Policy to continue.');
       return;
     }
+    if (!inviteToken && !formData.portfolioName.trim()) {
+      setError('Please enter your Meta Portfolio name.');
+      return;
+    }
     setLoading(true);
     setError('');
     try {
       const res = await axios.post(`${API_URL}/api/auth/register`, {
         name: formData.name.trim(),
         businessName: formData.businessName.trim(),
+        meta_portfolio_name: formData.portfolioName.trim(),
+        portfolio_name: formData.portfolioName.trim(),
         email: formData.email.trim(),
         phone_number: formData.phone.trim(),
         designation: formData.designation.trim(),
         department: formData.department.trim(),
         password: formData.password,
         termsAccepted: true,
+        meta_portfolio_eligible: true,
+        metaPortfolioEligible: true,
         invite_token: inviteToken || '',
         brand_domain: brand?.custom_domain || (typeof window !== 'undefined' ? window.location.hostname : '')
       });
@@ -231,18 +253,18 @@ const RegisterPage = () => {
 
         <div className="bg-white/95 backdrop-blur-2xl border border-white/80 p-8 sm:p-10 rounded-[32px] shadow-[0_25px_60px_-15px_rgba(5,150,105,0.2)] max-w-md w-full text-center z-10 animate-in fade-in zoom-in-95 duration-300">
           <div className="w-16 h-16 bg-emerald-100/80 text-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-inner">
-            <Clock size={32} />
+            <CheckCircle2 size={32} />
           </div>
-          <h2 className="text-2xl font-extrabold text-slate-900 mb-2">Registration Submitted</h2>
+          <h2 className="text-2xl font-extrabold text-slate-900 mb-2">Registration Successful</h2>
           <p className="text-slate-600 mb-8 leading-relaxed text-sm font-medium">
-            Your account is currently pending review by {brand?.brand_name || 'our administrator'}. You will receive access once approved.
+            Your {brand?.brand_name || 'UwoConnect'} account has been created and activated. You can now log in to access your business workspace.
           </p>
           <Link 
             href={brand?.custom_domain ? `/auth/login?brand_domain=${brand.custom_domain}` : '/auth/login'} 
             style={{ backgroundColor: brand?.primary_color || '#059669' }}
             className="w-full py-3.5 text-white rounded-2xl font-bold text-sm tracking-wide shadow-lg flex items-center justify-center gap-2 transition-all hover:brightness-110"
           >
-            <span>Return to Login</span>
+            <span>Proceed to Login</span>
             <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
@@ -279,8 +301,181 @@ const RegisterPage = () => {
           />
         </div>
 
-        {/* Title Section */}
-        <div className="text-center mb-4 w-full">
+        {/* ── STEP 1: Meta Portfolio Eligibility Gate ── */}
+        {portfolioGate !== 'yes' ? (
+          portfolioGate === 'enter_name' ? (
+            /* Step 1 - Enter Meta Portfolio Name */
+            <div className="w-full text-center py-2 animate-in fade-in zoom-in-95 duration-200">
+              <div className="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-xs border border-emerald-100">
+                <Briefcase size={26} />
+              </div>
+              <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 mb-2 font-serif">
+                Enter Meta Portfolio Name
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-500 mb-6 leading-relaxed">
+                Please enter the exact name of your Meta Business Portfolio / Business Account to connect your channels.
+              </p>
+
+              <div className="space-y-3 mb-6 text-left">
+                <div className="space-y-1">
+                  <label className="block text-xs font-bold text-slate-700 ml-1">
+                    Meta Portfolio Name <span className="text-emerald-600">*</span>
+                  </label>
+                  <div className="relative">
+                    <Briefcase className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                    <input
+                      type="text"
+                      autoFocus
+                      id="input-meta-portfolio-name-gate"
+                      value={formData.portfolioName}
+                      onChange={(e) => setFormData({ ...formData, portfolioName: e.target.value })}
+                      placeholder="e.g. Acme Meta Business Portfolio"
+                      className="w-full bg-slate-50/90 text-slate-900 placeholder:text-slate-400 outline-none rounded-2xl py-3 pl-10 pr-4 font-medium text-sm border border-slate-200/80 focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 transition-all shadow-sm"
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && formData.portfolioName.trim()) {
+                          e.preventDefault();
+                          setPortfolioGate('yes');
+                        }
+                      }}
+                    />
+                  </div>
+                  <p className="text-[11px] text-slate-500 ml-1">
+                    This can also be reviewed in the form below before submitting.
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-2.5">
+                <button
+                  type="button"
+                  id="btn-continue-portfolio-name"
+                  disabled={!formData.portfolioName.trim()}
+                  onClick={() => setPortfolioGate('yes')}
+                  className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-2xl font-bold text-xs shadow-md shadow-emerald-600/20 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <span>Continue to Registration</span>
+                  <ArrowRight size={14} />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPortfolioGate(null)}
+                  className="w-full py-2.5 text-slate-500 hover:text-slate-800 text-xs font-semibold transition-colors cursor-pointer"
+                >
+                  ← Back to Selection
+                </button>
+              </div>
+            </div>
+          ) : portfolioGate === 'no' ? (
+            /* Step 1 - NO State (Blocked) */
+            <div className="w-full text-center py-2 animate-in fade-in zoom-in-95 duration-200">
+              <div className="w-14 h-14 bg-rose-100/90 text-rose-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-inner border border-rose-200">
+                <XCircle size={28} />
+              </div>
+              <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 mb-2 font-serif">
+                Meta Portfolio Required
+              </h2>
+              <div className="p-4 bg-rose-50/90 border border-rose-200 rounded-2xl mb-4 text-left">
+                <p className="text-xs sm:text-sm font-bold text-rose-900 mb-1 flex items-center gap-1.5">
+                  <AlertCircle size={15} className="shrink-0 text-rose-600" />
+                  Meta Portfolio is required to register for Uwo Connect.
+                </p>
+                <p className="text-[12px] text-rose-800 leading-relaxed mt-1">
+                  To connect WhatsApp Business, Instagram Direct, and Facebook Messenger automations, an active Meta Portfolio (Business Account) is required.
+                </p>
+              </div>
+              <p className="text-xs text-slate-500 mb-6 leading-relaxed">
+                Once you have set up a Meta Portfolio for your business, you can return and continue your registration.
+              </p>
+              <div className="space-y-2.5">
+                <button
+                  type="button"
+                  id="btn-reconsider-meta-yes"
+                  onClick={() => setPortfolioGate('enter_name')}
+                  className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-bold text-xs shadow-md shadow-emerald-600/20 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <span>I Have a Meta Portfolio Now</span>
+                  <ArrowRight size={14} />
+                </button>
+                <Link
+                  href="/auth/login"
+                  className="w-full py-3 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 rounded-2xl font-bold text-xs transition-all flex items-center justify-center cursor-pointer block"
+                >
+                  Return to Login
+                </Link>
+              </div>
+            </div>
+          ) : (
+            /* Step 1 - Initial Question */
+            <div className="w-full text-center py-2 animate-in fade-in duration-200">
+              <div className="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-xs border border-emerald-100">
+                <Briefcase size={26} />
+              </div>
+              <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 mb-2 font-serif">
+                Do you have a Meta Portfolio?
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-500 mb-6 leading-relaxed">
+                Uwo Connect syncs official WhatsApp Business, Instagram Direct, and Facebook Messenger channels using your Meta Portfolio (Business Account).
+              </p>
+
+              <div className="grid grid-cols-2 gap-3 mb-6">
+                {/* Option: YES */}
+                <button
+                  type="button"
+                  id="btn-meta-portfolio-yes"
+                  onClick={() => setPortfolioGate('enter_name')}
+                  className="p-4 rounded-2xl border-2 border-emerald-500/80 bg-emerald-50/50 hover:bg-emerald-100/60 transition-all flex flex-col items-center justify-center gap-2 group cursor-pointer shadow-xs hover:shadow-md"
+                >
+                  <div className="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform">
+                    <CheckCircle2 size={20} />
+                  </div>
+                  <div className="font-extrabold text-sm text-emerald-950">Yes</div>
+                  <div className="text-[11px] text-emerald-700 font-medium">I have a Meta Portfolio</div>
+                </button>
+
+                {/* Option: NO */}
+                <button
+                  type="button"
+                  id="btn-meta-portfolio-no"
+                  onClick={() => setPortfolioGate('no')}
+                  className="p-4 rounded-2xl border-2 border-slate-200 bg-white hover:bg-rose-50/40 hover:border-rose-300 transition-all flex flex-col items-center justify-center gap-2 group cursor-pointer shadow-xs hover:shadow-md"
+                >
+                  <div className="w-9 h-9 rounded-xl bg-slate-100 text-slate-500 group-hover:bg-rose-100 group-hover:text-rose-600 flex items-center justify-center shadow-2xs group-hover:scale-105 transition-all">
+                    <XCircle size={20} />
+                  </div>
+                  <div className="font-extrabold text-sm text-slate-800 group-hover:text-rose-950">No</div>
+                  <div className="text-[11px] text-slate-500 group-hover:text-rose-700 font-medium">I don't have one</div>
+                </button>
+              </div>
+
+              <div className="text-center pt-2 border-t border-slate-100">
+                <Link 
+                  href="/auth/login" 
+                  className="text-xs font-semibold text-slate-500 hover:text-slate-700 transition-colors"
+                >
+                  Already have an account? <span className="text-emerald-700 font-bold">Sign In</span>
+                </Link>
+              </div>
+            </div>
+          )
+        ) : (
+          <>
+            {/* Meta Portfolio Confirmed Badge */}
+            <div className="w-full mb-3 px-3.5 py-2.5 bg-emerald-50/80 border border-emerald-200/80 rounded-xl flex items-center justify-between">
+              <div className="flex items-center gap-2 text-xs font-bold text-emerald-800">
+                <CheckCircle2 size={14} className="text-emerald-600 shrink-0" />
+                <span>Meta Portfolio: <strong>{formData.portfolioName ? `${formData.portfolioName} (Confirmed)` : 'Confirmed (Yes)'}</strong></span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setPortfolioGate('enter_name')}
+                className="text-[11px] font-semibold text-emerald-700 hover:text-emerald-900 underline cursor-pointer"
+              >
+                Edit
+              </button>
+            </div>
+
+            {/* Title Section */}
+            <div className="text-center mb-4 w-full">
           <h1
             className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight mb-1 font-serif"
             style={{ fontFamily: "'Times New Roman', Times, serif" }}
@@ -352,6 +547,35 @@ const RegisterPage = () => {
                   className="w-full bg-slate-50/90 text-slate-900 placeholder:text-slate-400 outline-none rounded-2xl py-2.5 pl-10 pr-4 font-medium text-sm border border-slate-200/80 focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 transition-all shadow-sm"
                 />
               </div>
+            </div>
+          )}
+
+          {/* 3. Meta Portfolio Name (Only if NOT joining via invite) */}
+          {!inviteToken && (
+            <div className="space-y-1">
+              <div className="flex items-center justify-between">
+                <label className="block text-xs font-bold text-slate-700 ml-1">
+                  Meta Portfolio Name <span className="text-emerald-600">*</span>
+                </label>
+                <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200/60">
+                  Meta Verified
+                </span>
+              </div>
+              <div className="relative">
+                <Briefcase className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <input
+                  type="text"
+                  required
+                  id="input-meta-portfolio-name-form"
+                  value={formData.portfolioName}
+                  onChange={(e) => setFormData({ ...formData, portfolioName: e.target.value })}
+                  placeholder="e.g. Acme Meta Business Portfolio"
+                  className="w-full bg-slate-50/90 text-slate-900 placeholder:text-slate-400 outline-none rounded-2xl py-2.5 pl-10 pr-4 font-medium text-sm border border-slate-200/80 focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 transition-all shadow-sm"
+                />
+              </div>
+              <p className="text-[11px] text-slate-500 ml-1">
+                The official name of your Meta Business Account / Portfolio
+              </p>
             </div>
           )}
 
@@ -594,9 +818,11 @@ const RegisterPage = () => {
             >
               Log In
             </Link>
-          </p>
-        </div>
-      </div>
+            </p>
+          </div>
+        </>
+      )}
+    </div>
 
       <TermsModal isOpen={showTerms} onClose={() => setShowTerms(false)} />
       <UWOLoginModal
