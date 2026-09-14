@@ -21,7 +21,7 @@ const STAGES = [
   { id: 'LOST', label: 'Closed Lost', color: 'bg-red-100 text-red-700 border-red-200' }
 ];
 
-export const getContactChannel = (contact) => {
+const getContactChannel = (contact) => {
   const pid = (contact.platform_id || '').toLowerCase();
   const name = (contact.name || '').toLowerCase();
   if (pid.startsWith('ig_') || pid.includes('instagram') || name.includes('instagram') || (contact.name || '').startsWith('@')) {
