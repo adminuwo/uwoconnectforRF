@@ -176,6 +176,11 @@ const Sidebar = ({ role, isOpen, onClose, onToggle }) => {
       }
     }
 
+    // Advanced, Enterprise, or Agency plans have all features unlocked by default (unless explicitly removed above)
+    if (activePlanRank >= 3 || isAgencyUser) {
+      return true;
+    }
+
     // 3. Check evaluated status from backend (accounts for plan config + overrides)
     if (entitlements) {
       for (const variant of keyVariants) {
