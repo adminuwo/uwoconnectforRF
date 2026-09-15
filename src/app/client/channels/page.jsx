@@ -184,7 +184,7 @@ const ClientChannelsPage = () => {
   const fetchClient = async (isManualRefresh = false) => {
     if (isManualRefresh) setRefreshing(true);
     try {
-      const token = localStorage.getItem('uwo_token');
+      const token = typeof window !== 'undefined' ? (localStorage.getItem('uwo_token') || localStorage.getItem('token')) : null;
       if (!token) {
         setLoading(false);
         setRefreshing(false);
@@ -508,7 +508,7 @@ const ClientChannelsPage = () => {
         setToast({ msg: 'Connecting Instagram...', type: 'success' });
         const connectInstagram = async () => {
           try {
-            const token = localStorage.getItem('uwo_token');
+            const token = typeof window !== 'undefined' ? (localStorage.getItem('uwo_token') || localStorage.getItem('token')) : null;
             await axios.post(`${API_BASE_URL}/api/auth/instagram/embedded-signup`,
               { code: code },
               { headers: { Authorization: `Bearer ${token}` } }
