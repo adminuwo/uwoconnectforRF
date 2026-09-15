@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Settings, Webhook, Copy, Check } from 'lucide-react';
+import Link from 'next/link';
+import { Settings, Webhook, Copy, Check, Scale, FileText, ChevronRight, ShieldCheck } from 'lucide-react';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 
 const AdminSettingsPage = () => {
@@ -86,6 +87,38 @@ const AdminSettingsPage = () => {
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+
+          {/* Legal Policies & Agreements Section */}
+          <div className="space-y-1">
+            <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-4 ml-1 flex items-center gap-2">
+              <Scale size={14} /> Legal & Compliance
+            </h3>
+            <div className="bg-white border border-slate-100 rounded-[24px] sm:rounded-[32px] p-6 sm:p-8 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-6 hover:border-emerald-500/30 transition-all">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-[#059669] flex items-center justify-center shrink-0 shadow-inner">
+                  <Scale size={24} />
+                </div>
+                <div className="space-y-1">
+                  <h4 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                    Terms of Service & Privacy Policy
+                    <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-extrabold uppercase tracking-wide">
+                      Live Editable
+                    </span>
+                  </h4>
+                  <p className="text-xs text-slate-500 max-w-xl leading-relaxed">
+                    Edit official Terms & Conditions and Privacy Policy HTML text, or upload official PDF/DOCX policy documents. Changes reflect instantly on web legal routes and mobile app legal screens.
+                  </p>
+                </div>
+              </div>
+              <Link
+                href="/admin/settings/legal"
+                className="px-6 py-3.5 bg-[#059669] hover:bg-[#047857] text-white rounded-2xl font-bold text-xs uppercase tracking-wider transition-all flex items-center gap-2 shadow-lg shadow-emerald-700/20 shrink-0 cursor-pointer active:scale-95"
+              >
+                <span>Manage Legal Policies</span>
+                <ChevronRight size={16} />
+              </Link>
             </div>
           </div>
         </div>

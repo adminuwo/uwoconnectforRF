@@ -17,7 +17,11 @@ export default function TermsClient() {
       <TermsModal
         isOpen={true}
         onClose={() => {
-          router.push('/');
+          if (typeof window !== 'undefined' && window.history.length > 1) {
+            router.back();
+          } else {
+            router.push('/');
+          }
         }}
       />
     </main>

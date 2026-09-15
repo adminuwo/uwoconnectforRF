@@ -37,7 +37,8 @@ import {
   Lock,
   Globe,
   Building2,
-  Wallet
+  Wallet,
+  LayoutTemplate
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useEntitlement } from '@/context/EntitlementContext';
@@ -208,6 +209,8 @@ const Sidebar = ({ role, isOpen, onClose, onToggle }) => {
   const adminLinks = [
     { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
     { name: 'Clients', href: '/admin/clients', icon: Users },
+    { name: 'Content Management', href: '/admin/content', icon: LayoutTemplate },
+    { name: 'Legal Policies', href: '/admin/settings/legal', icon: Scale },
     { name: 'White-Label Hub', href: '/admin/whitelabel', icon: Globe },
     { name: 'Global Search', href: '/admin/search', icon: Search },
     { name: 'Team', href: '/admin/team', icon: ShieldCheck },

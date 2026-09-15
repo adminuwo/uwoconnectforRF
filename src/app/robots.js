@@ -12,9 +12,11 @@ export default function robots() {
           '/about',
           '/contact',
           '/terms',
+          '/terms-and-conditions',
           '/privacy',
           '/refund-policy',
           '/cookie-policy',
+          '/cookies',
           '/book/',
         ],
         disallow: [

@@ -33,6 +33,26 @@ const nextConfig = {
         destination: '/client/invoices',
       },
       {
+        source: '/terms-and-condition',
+        destination: '/terms-and-conditions',
+      },
+      {
+        source: '/terms-conditions',
+        destination: '/terms-and-conditions',
+      },
+      {
+        source: '/terms-of-service',
+        destination: '/terms-and-conditions',
+      },
+      {
+        source: '/cookie',
+        destination: '/cookie-policy',
+      },
+      {
+        source: '/privacy-policy',
+        destination: '/privacy',
+      },
+      {
         source: '/api/:path*',
         destination: `${backendUrl}/api/:path*`,
       },
