@@ -2643,8 +2643,8 @@ export default function UwoLandingPage() {
               Unified Communication & Business Automation Platform. Connect channels, tools, and workflows seamlessly.
             </p>
 
-            {/* Social Media Icons (Single Row) */}
-            <div className="flex flex-wrap sm:flex-nowrap items-center justify-center gap-1.5 sm:gap-2 pt-1 mx-auto max-w-full">
+            {/* Social Media Icons (Responsive Wrapping) */}
+            <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 pt-1 mx-auto max-w-xs sm:max-w-sm">
               {[
                 { href: "https://www.instagram.com/aimall.global/", title: "Instagram", icon: <InstagramLogo size={18} /> },
                 { href: "https://www.linkedin.com/in/aimall-global/", title: "LinkedIn", icon: <LinkedInLogo size={18} /> },
@@ -2685,11 +2685,11 @@ export default function UwoLandingPage() {
               Legal
             </h5>
             <ul className={cn("space-y-2 font-bold text-center", isDarkMode ? "text-slate-300" : "text-slate-900")}>
-              <li><button onClick={() => setIsTermsModalOpen(true)} className="hover:text-emerald-500 transition-colors cursor-pointer text-center mx-auto block">Terms &amp; Conditions</button></li>
+              <li><Link href="/terms-and-conditions" className="hover:text-emerald-500 transition-colors cursor-pointer text-center mx-auto block">Terms &amp; Conditions</Link></li>
               <li><Link href="/privacy" className="hover:text-emerald-500 transition-colors cursor-pointer text-center mx-auto block">Privacy Policy</Link></li>
               <li><Link href="/cookie-policy" className="hover:text-emerald-500 transition-colors cursor-pointer text-center mx-auto block">Cookie Policy</Link></li>
               <li><button onClick={() => typeof window !== 'undefined' && window.dispatchEvent(new CustomEvent('open_cookie_settings'))} className="hover:text-emerald-500 transition-colors cursor-pointer text-center mx-auto block">Cookie Settings</button></li>
-              <li><button onClick={() => setIsTermsModalOpen(true)} className="hover:text-emerald-500 transition-colors cursor-pointer text-center mx-auto block">Refund Policy</button></li>
+              <li><Link href="/refund-policy" className="hover:text-emerald-500 transition-colors cursor-pointer text-center mx-auto block">Refund Policy</Link></li>
             </ul>
           </div>
 

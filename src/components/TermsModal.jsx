@@ -27,13 +27,30 @@ export default function TermsModal({ isOpen, onClose }) {
     fetchTerms();
   }, [isOpen]);
 
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        onClose?.();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   const serifStyle = { fontFamily: "'Times New Roman', Times, serif" };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-6 bg-slate-950/70 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="bg-white/95 backdrop-blur-2xl border border-white/60 rounded-[32px] w-full max-w-3xl max-h-[92vh] flex flex-col shadow-2xl shadow-emerald-950/20 overflow-hidden animate-in zoom-in-95 duration-200">
+    <div 
+      onClick={onClose}
+      className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-6 bg-slate-950/70 backdrop-blur-md animate-in fade-in duration-200 cursor-pointer"
+    >
+      <div 
+        onClick={(e) => e.stopPropagation()}
+        className="bg-white/95 backdrop-blur-2xl border border-white/60 rounded-[32px] w-full max-w-3xl max-h-[92vh] flex flex-col shadow-2xl shadow-emerald-950/20 overflow-hidden animate-in zoom-in-95 duration-200 cursor-default"
+      >
         
         {/* Modal Header */}
         <div className="p-6 sm:p-7 bg-gradient-to-r from-slate-900 via-slate-800 to-emerald-950 text-white relative flex items-center justify-between border-b border-slate-800">

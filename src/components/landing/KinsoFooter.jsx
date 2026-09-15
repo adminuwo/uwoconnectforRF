@@ -42,7 +42,8 @@ export default function KinsoFooter({ isDark }) {
         { name: 'Pricing', href: '#' },
         { name: 'Security & Compliance', href: '#security' },
         { name: 'Privacy Policy', href: '/privacy' },
-        { name: 'Terms of Service', href: '/terms' },
+        { name: 'Terms & Conditions', href: '/terms-and-conditions' },
+        { name: 'Cookie Policy', href: '/cookie-policy' },
         { name: 'Contact Support', href: '/contact' },
       ],
     },
@@ -123,7 +124,7 @@ export default function KinsoFooter({ isDark }) {
           <p>© {new Date().getFullYear()} UWO Connect Inc. All rights reserved.</p>
           <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-[11px] sm:text-xs">
             <Link href="/privacy" className="hover:text-[#00AB56] transition-colors">Privacy Policy</Link>
-            <Link href="/terms" className="hover:text-[#00AB56] transition-colors">Terms &amp; Conditions</Link>
+            <Link href="/terms-and-conditions" className="hover:text-[#00AB56] transition-colors">Terms &amp; Conditions</Link>
             <Link href="/cookie-policy" className="hover:text-[#00AB56] transition-colors">Cookie Policy</Link>
             <button onClick={() => typeof window !== 'undefined' && window.dispatchEvent(new CustomEvent('open_cookie_settings'))} className="hover:text-[#00AB56] transition-colors cursor-pointer">Cookie Settings</button>
             <Link href="/security" className="hover:text-[#00AB56] transition-colors">Security Portal</Link>
