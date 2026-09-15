@@ -140,7 +140,8 @@ export default function AdminContentManagementPage() {
         setDraftChangesCount(res.data.draft_changes_count || 0);
         if (res.data.sections) setSections(res.data.sections);
         if (res.data.languages && res.data.languages.length > 0) {
-          setLanguages(res.data.languages);
+          const uniqueLangs = Array.from(new Set(res.data.languages.filter(Boolean)));
+          setLanguages(uniqueLangs);
         }
       }
     } catch (err) {
@@ -685,7 +686,7 @@ export default function AdminContentManagementPage() {
               <div className="flex items-center gap-2">
                 <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Language:</span>
                 <div className="flex rounded-xl bg-gray-100 p-1">
-                  {languages.map((lang) => (
+                  {Array.from(new Set(languages)).map((lang) => (
                     <button
                       key={lang}
                       onClick={() => setSelectedLang(lang)}
@@ -758,7 +759,7 @@ export default function AdminContentManagementPage() {
                       filteredItems.map((item) => {
                         const isModified = item.draft_value !== item.published_value;
                         return (
-                          <tr key={item.id || item.key} className="hover:bg-gray-50/60 transition-colors">
+                          <tr key={item.id ? `item-${item.id}` : `content-${item.key}-${item.language}`} className="hover:bg-gray-50/60 transition-colors">
                             <td className="py-4 px-5">
                               <p className="font-bold text-gray-900 text-sm">{item.label || item.key}</p>
                               <p className="font-mono text-[11px] text-gray-400">{item.key}</p>
