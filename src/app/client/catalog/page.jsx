@@ -23,7 +23,9 @@ export default function CatalogPage() {
   const [editingId, setEditingId] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
   const [importing, setImporting] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
   const fileInputRef = useRef(null);
+  const imageInputRef = useRef(null);
 
   // Detail Drawer State
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -179,6 +181,52 @@ export default function CatalogPage() {
     });
     setModalTab('basic');
     setModalOpen(true);
+  };
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 10 * 1024 * 1024) {
+      alert("Image size should be under 10MB.");
+      return;
+    }
+
+    // Set immediate preview right away so it is always visible instantly
+    const reader = new FileReader();
+    reader.onload = () => {
+      setFormData(prev => ({ ...prev, image_url: reader.result }));
+    };
+    reader.readAsDataURL(file);
+
+    try {
+      setUploadingImage(true);
+      const token = localStorage.getItem('uwo_token') || localStorage.getItem('token');
+      const uploadData = new FormData();
+      uploadData.append('image', file);
+
+      const res = await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/products/upload_image/`,
+        uploadData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'multipart/form-data',
+          }
+        }
+      );
+
+      if (res.data?.image_url) {
+        setFormData(prev => ({ ...prev, image_url: res.data.image_url }));
+      }
+    } catch (err) {
+      console.warn("Backend upload failed, local preview retained:", err);
+    } finally {
+      setUploadingImage(false);
+      if (imageInputRef.current) {
+        imageInputRef.current.value = '';
+      }
+    }
   };
 
   const handleSaveProduct = async (e) => {
@@ -960,6 +1008,14 @@ export default function CatalogPage() {
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <div onClick={() => setModalOpen(false)} className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" />
             <form onSubmit={handleSaveProduct} className="relative bg-white border border-slate-200 w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
+              {/* Hidden file input for browsing catalog image from any tab */}
+              <input 
+                type="file" 
+                ref={imageInputRef} 
+                onChange={handleImageUpload} 
+                accept="image/*" 
+                className="hidden" 
+              />
               
               {/* Modal Header */}
               <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
@@ -989,9 +1045,10 @@ export default function CatalogPage() {
                 <button 
                   type="button"
                   onClick={() => setModalTab('media')}
-                  className={`pb-3 text-xs font-black transition-all border-b-2 cursor-pointer ${modalTab === 'media' ? 'border-emerald-600 text-emerald-600' : 'border-transparent text-slate-500 hover:text-slate-800'}`}
+                  className={`pb-3 text-xs font-black transition-all border-b-2 cursor-pointer flex items-center gap-1.5 ${modalTab === 'media' ? 'border-emerald-600 text-emerald-600' : 'border-transparent text-slate-500 hover:text-slate-800'}`}
                 >
                   Media & Assets
+                  {formData.image_url && <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />}
                 </button>
                 <button 
                   type="button"
@@ -1015,6 +1072,34 @@ export default function CatalogPage() {
                 {/* --- TAB 1: BASIC INFO --- */}
                 {modalTab === 'basic' && (
                   <div className="space-y-4">
+                    {/* Quick Image Browse Banner */}
+                    <div className="flex items-center gap-3 p-3 bg-slate-50/80 rounded-2xl border border-slate-200/80">
+                      <div className="w-14 h-14 rounded-xl border border-slate-200 overflow-hidden bg-white shrink-0 flex items-center justify-center">
+                        {formData.image_url ? (
+                          <img src={formData.image_url} alt="Product" className="w-full h-full object-cover" />
+                        ) : (
+                          <ImageIcon className="text-slate-300" size={22} />
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-bold text-slate-800">
+                          {formData.image_url ? 'Catalog Image Selected' : 'Product Image'}
+                        </p>
+                        <p className="text-[10px] text-slate-400 truncate">
+                          {formData.image_url ? 'Attached to this product' : 'Browse from computer or configure in Media tab'}
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        disabled={uploadingImage}
+                        onClick={() => imageInputRef.current?.click()}
+                        className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs transition-all cursor-pointer flex items-center gap-1.5 shadow-xs disabled:opacity-50 shrink-0"
+                      >
+                        {uploadingImage ? <Loader2 size={12} className="animate-spin" /> : <Upload size={12} />}
+                        {formData.image_url ? 'Change Image' : 'Browse Image'}
+                      </button>
+                    </div>
+
                     <div>
                       <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block">Product Name *</label>
                       <input 
@@ -1108,23 +1193,101 @@ export default function CatalogPage() {
 
                 {/* --- TAB 2: MEDIA & ASSETS --- */}
                 {modalTab === 'media' && (
-                  <div className="space-y-4">
+                  <div className="space-y-5">
                     <div>
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block">Main Image URL</label>
-                      <input 
-                        type="url" 
-                        value={formData.image_url}
-                        onChange={e => setFormData({...formData, image_url: e.target.value})}
-                        placeholder="https://example.com/image.jpg"
-                        className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-xs font-semibold text-slate-800 outline-none focus:border-emerald-500 transition-all"
-                      />
-                    </div>
-
-                    {formData.image_url && (
-                      <div className="w-32 h-32 rounded-2xl border border-slate-200 overflow-hidden bg-slate-100">
-                        <img src={formData.image_url} alt="Preview" className="w-full h-full object-cover" />
+                      <div className="flex items-center justify-between mb-1.5">
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">
+                          Main Product Image
+                        </label>
+                        {formData.image_url && (
+                          <button
+                            type="button"
+                            onClick={() => setFormData({ ...formData, image_url: '' })}
+                            className="text-[10px] font-bold text-rose-600 hover:text-rose-700 flex items-center gap-1 cursor-pointer transition-colors"
+                          >
+                            <Trash2 size={11} /> Remove Image
+                          </button>
+                        )}
                       </div>
-                    )}
+
+                      {/* Image Preview or Upload/Browse Area */}
+                      {formData.image_url ? (
+                        <div className="flex items-center gap-4 p-4 rounded-2xl bg-emerald-50/40 border border-emerald-200/80">
+                          <div className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-xl overflow-hidden border border-emerald-200 bg-white shadow-xs shrink-0">
+                            <img 
+                              src={formData.image_url} 
+                              alt="Catalog Preview" 
+                              className="w-full h-full object-cover" 
+                            />
+                          </div>
+                          <div className="flex-1 min-w-0 space-y-2">
+                            <div className="flex items-center gap-1.5 text-emerald-700 font-bold text-xs">
+                              <CheckCircle2 size={15} className="text-emerald-600 shrink-0" />
+                              <span>Catalog Image Selected</span>
+                            </div>
+                            <p className="text-[11px] text-slate-500 line-clamp-1 break-all">
+                              {formData.image_url.startsWith('data:') ? 'Custom uploaded image attached' : formData.image_url}
+                            </p>
+                            <div className="flex items-center gap-2 pt-1">
+                              <button
+                                type="button"
+                                disabled={uploadingImage}
+                                onClick={() => imageInputRef.current?.click()}
+                                className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs transition-all cursor-pointer flex items-center gap-1.5 shadow-xs disabled:opacity-50"
+                              >
+                                {uploadingImage ? <Loader2 size={12} className="animate-spin" /> : <Upload size={12} />}
+                                Browse / Change Image
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      ) : (
+                        <div
+                          onClick={() => !uploadingImage && imageInputRef.current?.click()}
+                          className={`border-2 border-dashed border-slate-300 hover:border-emerald-500 rounded-2xl p-6 text-center cursor-pointer transition-all bg-slate-50/60 hover:bg-emerald-50/20 group ${uploadingImage ? 'opacity-60 pointer-events-none' : ''}`}
+                        >
+                          {uploadingImage ? (
+                            <div className="flex flex-col items-center justify-center py-2 space-y-2">
+                              <Loader2 size={28} className="animate-spin text-emerald-600" />
+                              <p className="text-xs font-bold text-slate-700">Uploading image to catalog...</p>
+                            </div>
+                          ) : (
+                            <div className="flex flex-col items-center justify-center space-y-2">
+                              <div className="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform">
+                                <Upload size={20} />
+                              </div>
+                              <div>
+                                <p className="text-xs font-bold text-slate-800">
+                                  Click to <span className="text-emerald-600 underline underline-offset-2">Browse Image</span> from your computer
+                                </p>
+                                <p className="text-[10px] text-slate-400 font-medium mt-0.5">
+                                  PNG, JPG, WEBP, GIF, SVG (Up to 10MB)
+                                </p>
+                              </div>
+                              <button
+                                type="button"
+                                className="mt-1 px-4 py-1.5 bg-white border border-slate-200 group-hover:border-emerald-500 text-slate-700 group-hover:text-emerald-700 font-bold text-xs rounded-xl shadow-2xs cursor-pointer flex items-center gap-1.5 transition-all"
+                              >
+                                <ImageIcon size={13} className="text-emerald-600" />
+                                Browse Files
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Optional direct URL input */}
+                      <div className="mt-3">
+                        <label className="text-[10px] font-bold text-slate-400 block mb-1">Or enter image URL directly</label>
+                        <input 
+                          type="url" 
+                          value={formData.image_url}
+                          onChange={e => setFormData({...formData, image_url: e.target.value})}
+                          placeholder="https://example.com/image.jpg"
+                          className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-2.5 text-xs font-semibold text-slate-800 outline-none focus:border-emerald-500 transition-all"
+                        />
+                      </div>
+                    </div>
 
                     <div>
                       <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block">Video Demo URL (YouTube / Vimeo / MP4)</label>

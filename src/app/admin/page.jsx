@@ -100,7 +100,7 @@ export default function SuperAdminOverview() {
     { name: 'Total Team Members', value: rowMetrics.totalTeamMembers ?? (kpis.totalTeamMembers ?? 0), sub: 'Across workspaces', icon: Users, href: '/admin/team' },
     { name: 'Channels Active', value: kpis.activeChannels ?? 0, sub: `${kpis.totalChannels ?? 0} configured`, icon: Globe, href: '/admin/channels' },
     { name: 'Total Messages', value: (kpis.totalMessages ?? 0).toLocaleString(), sub: `${kpis.botMessages ?? 0} bot handled`, icon: MessageSquare, href: '/admin/inbox' },
-    { name: 'Active AI Bots', value: kpis.activeBots ?? 0, sub: `${kpis.humanTakeoverCount ?? 0} handoffs`, icon: Bot, href: '/admin/ai' },
+    { name: 'Active AI Bots', value: kpis.activeBots ?? 0, sub: `${kpis.humanTakeoverCount ?? 0} handoffs`, icon: Bot, href: '/admin/knowledge' },
     { name: 'Total Invoices', value: kpis.totalInvoices ?? (rowMetrics.totalInvoices ?? 0), sub: `₹${(kpis.totalInvoiceValue || rowMetrics.totalRevenue || 0).toLocaleString()}`, icon: Receipt, href: '/admin/invoices' },
     { name: 'Active Projects', value: rowMetrics.activeProjects ?? (kpis.activeProjects ?? 0), sub: `${rowMetrics.totalProjects ?? (kpis.totalProjects ?? 0)} total`, icon: Layers, href: '/admin/team' },
   ];

@@ -19,7 +19,6 @@ import {
   Users,
   Megaphone,
   LifeBuoy,
-  Activity,
   ShoppingBag,
   Receipt,
   MessagesSquare,
@@ -30,7 +29,6 @@ import {
   PhoneCall,
   CreditCard,
   FileText,
-  Search,
   Bot,
   Layers,
   X,
@@ -209,12 +207,10 @@ const Sidebar = ({ role, isOpen, onClose, onToggle }) => {
     { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
     { name: 'Clients', href: '/admin/clients', icon: Users },
     { name: 'White-Label Hub', href: '/admin/whitelabel', icon: Globe },
-    { name: 'Global Search', href: '/admin/search', icon: Search },
     { name: 'Team', href: '/admin/team', icon: ShieldCheck },
     { name: 'Channels', href: '/admin/channels', icon: Link2 },
     { name: 'Plans', href: '/admin/plans', icon: Layers },
     { name: 'Live Messages', href: '/admin/inbox', icon: MessageSquare },
-    { name: 'AI & Bots', href: '/admin/ai', icon: Bot },
     { name: 'Knowledge Base', href: '/admin/knowledge', icon: Brain },
     { name: 'Emails', href: '/admin/emails', icon: Mail },
     { name: 'Products', href: '/admin/products', icon: ShoppingBag },
@@ -224,7 +220,6 @@ const Sidebar = ({ role, isOpen, onClose, onToggle }) => {
     { name: 'Proposals', href: '/admin/proposals', icon: FileText },
     { name: 'Invoices', href: '/admin/invoices', icon: Receipt },
     { name: 'Work Reports', href: '/admin/reports', icon: FileCheck },
-    { name: 'Audit Logs', href: '/admin/audit-logs', icon: Activity },
     { name: 'Settings', href: '/admin/settings', icon: Settings },
     { name: 'Support', href: '/admin/support', icon: LifeBuoy },
   ];
@@ -243,10 +238,10 @@ const Sidebar = ({ role, isOpen, onClose, onToggle }) => {
     { name: 'Dashboard', href: '/client', icon: LayoutDashboard },
     { name: 'Learning Center', href: '/client/guides', icon: BookOpen },
     { name: 'Channels', href: '/client/channels', icon: Link2, requiredPlan: 'Starter', featureKey: 'feature_channels' },
-    { name: 'Outlook', href: '/client/email', icon: Mail, requiredPlan: 'Starter', featureKey: 'connector_outlook' },
-    { name: 'Gmail', href: '/client/gmail', icon: Mail, requiredPlan: 'Starter', featureKey: 'connector_gmail' },
+    // { name: 'Outlook', href: '/client/email', icon: Mail, requiredPlan: 'Starter', featureKey: 'connector_outlook' },
+    // { name: 'Gmail', href: '/client/gmail', icon: Mail, requiredPlan: 'Starter', featureKey: 'connector_gmail' },
     { name: 'Voice & Video Calls', href: '/client/calls', icon: PhoneCall, requiredPlan: 'Starter', featureKey: 'feature_voice_video_call' },
-    { name: 'YouTube', href: '/client/youtube', icon: YoutubeIcon, requiredPlan: 'Starter', featureKey: 'channel_youtube' },
+    // { name: 'YouTube', href: '/client/youtube', icon: YoutubeIcon, requiredPlan: 'Starter', featureKey: 'channel_youtube' },
     { name: 'Google News', href: '/client/google-news', icon: Newspaper, requiredPlan: 'Starter', featureKey: 'connector_google_news' },
     { name: 'Auto Replies', href: '/client/automations', icon: Zap, requiredPlan: 'Starter', featureKey: 'feature_autoreply' },
     { name: 'Workflows', href: '/client/workflows', icon: GitBranch, requiredPlan: 'Starter', featureKey: 'feature_workflow' },
@@ -329,8 +324,8 @@ const Sidebar = ({ role, isOpen, onClose, onToggle }) => {
       >
         {/* ── Brand Header ── */}
         <div className={cn(
-          'flex items-center border-b border-slate-100/80 shrink-0 transition-all duration-300',
-          isOpen ? 'px-3.5 sm:px-4 py-3 justify-between gap-2' : 'px-0 py-3 justify-center'
+          'flex border-b border-slate-100/80 shrink-0 transition-all duration-300',
+          isOpen ? 'items-center px-3.5 sm:px-4 py-3 justify-between gap-2 flex-row' : 'flex-col items-center px-0 py-2 gap-1'
         )}>
           {(() => {
             const displayBrandName = "UWO Connect";
@@ -357,11 +352,11 @@ const Sidebar = ({ role, isOpen, onClose, onToggle }) => {
                 </div>
               </div>
             ) : (
-              <div className="flex items-center justify-center">
+              <div className="flex items-center justify-center w-full py-1">
                 <img
                   src={displayBrandLogo}
                   alt={displayBrandName}
-                  className="w-7 h-7 rounded-lg object-contain bg-white"
+                  className="w-8 h-8 rounded-xl object-contain bg-white"
                   onError={(e) => { e.currentTarget.src = "/download (3).gif"; }}
                 />
               </div>
@@ -375,7 +370,7 @@ const Sidebar = ({ role, isOpen, onClose, onToggle }) => {
             className={cn(
               'hidden lg:flex items-center justify-center rounded-xl transition-all duration-200 cursor-pointer shrink-0',
               'text-slate-400 hover:text-[#059669] hover:bg-emerald-50',
-              isOpen ? 'p-1.5' : 'w-9 h-9'
+              isOpen ? 'p-1.5' : 'w-8 h-6'
             )}
           >
             {isOpen

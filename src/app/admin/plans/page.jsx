@@ -685,9 +685,10 @@ export default function AdminPlansPage() {
               const yP = p.yearly_price || meta.yearly_price || Math.round(mP * 12 * 0.85);
               const price = cycleName === 'monthly' ? mP : yP;
 
+              const isStarterPlan = (p.slug === 'starter' || (p.name && p.name.toLowerCase().includes('starter')));
               return {
                 price: price.toString(),
-                max_channels: (p.max_channels || (p.name?.toLowerCase().includes('starter') ? 1 : p.name?.toLowerCase().includes('growth') ? 2 : 3)).toString(),
+                max_channels: isStarterPlan ? '1' : (p.max_channels || (p.name?.toLowerCase().includes('growth') ? 2 : 3)).toString(),
                 selected_feature_keys: p.feature_keys || [],
                 // Limits
                 custom_fields_limit: (legacyWA.limits?.custom_fields?.value || 15).toString(),
@@ -927,9 +928,10 @@ export default function AdminPlansPage() {
         });
       }
 
+      const isStarterPlan = (plan.slug === 'starter' || (plan.name && plan.name.toLowerCase().includes('starter')));
       return {
         price: (savedConfig?.price || targetPrice).toString(),
-        max_channels: (savedConfig?.max_channels || plan.max_channels || (plan.name?.toLowerCase().includes('starter') ? 1 : plan.name?.toLowerCase().includes('growth') ? 2 : 3)).toString(),
+        max_channels: isStarterPlan ? '1' : (savedConfig?.max_channels || plan.max_channels || (plan.name?.toLowerCase().includes('growth') ? 2 : 3)).toString(),
         selected_feature_keys: savedConfig?.selected_feature_keys || plan.feature_keys || [],
 
         // General limits
@@ -1207,18 +1209,19 @@ export default function AdminPlansPage() {
       price: mPrice,
       monthly_price: mPrice,
       yearly_price: yPrice,
-      max_channels: Number(mConfig.max_channels) || 1,
+      max_channels: (editingPlan.slug === 'starter' || editingPlan.name?.toLowerCase().includes('starter')) ? 1 : (Number(mConfig.max_channels) || 1),
       currency: planForm.currency,
       feature_keys: mConfig.selected_feature_keys || [],
       monthlyConfig: mConfig,
       yearlyConfig: yConfig,
       monthly_channel_details: monthlyChannelDetails,
       yearly_channel_details: yearlyChannelDetails,
-      channel_count: Number(mConfig.max_channels) || 1,
+      channel_count: (editingPlan.slug === 'starter' || editingPlan.name?.toLowerCase().includes('starter')) ? 1 : (Number(mConfig.max_channels) || 1),
       connector_count: (mConfig.selected_feature_keys || []).filter(k => k.startsWith('connector_')).length || 1,
       channel_details: monthlyChannelDetails,
       metadata: {
         ...(editingPlan.metadata || {}),
+        max_channels: (editingPlan.slug === 'starter' || editingPlan.name?.toLowerCase().includes('starter')) ? 1 : (Number(mConfig.max_channels) || 1),
         monthlyConfig: mConfig,
         yearlyConfig: yConfig,
         monthly_price: mPrice,
@@ -1253,6 +1256,7 @@ export default function AdminPlansPage() {
         badge_text: updatedPlanObj.badge_text,
         max_channels: updatedPlanObj.max_channels,
         currency: updatedPlanObj.currency,
+        status: updatedPlanObj.status,
         is_active: updatedPlanObj.status === 'ACTIVE',
         feature_keys: updatedPlanObj.feature_keys,
         monthlyConfig: mConfig,
@@ -1268,6 +1272,7 @@ export default function AdminPlansPage() {
     setIsEditPlanModalOpen(false);
     setEditingPlan(null);
     showToast(`Plan "${updatedPlanObj.name}" updated with independent Monthly & Yearly configurations!`);
+    fetchBackendData();
   };
 
 

@@ -477,6 +477,7 @@ export default function ClientPlansPage() {
         setShowSandboxPaymentGateway(false);
         setIsUpgradeModalOpen(false);
         setToast({ msg: `Payment Successful (Test Sandbox)! Upgraded to ${sandboxPaymentData.plan?.name}.`, type: 'success' });
+        fetchPlansAndProfile();
       } else {
         setToast({ msg: 'Sandbox payment verification failed.', type: 'error' });
       }

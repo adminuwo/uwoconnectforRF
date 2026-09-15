@@ -412,11 +412,12 @@ export default function PricingComparisonTable({ plansData, onSelectPlan, isAdmi
     if (Array.isArray(plansData) && plansData.length > 0) {
       const normalized = plansData.map(p => {
         const meta = p.metadata || {};
-        const monthlyPrice = Number(p.monthly_price || p.price || meta.monthly_price || 499);
-        const yearlyPrice = Number(p.yearly_price || meta.yearly_price || Math.round(monthlyPrice * 12 * 0.85));
-        const maxChannels = p.max_channels || meta.max_channels || (p.name.toLowerCase().includes('starter') ? 1 : (p.name.toLowerCase().includes('growth') ? 2 : 3));
-
+        const monthlyPrice = Number(p.monthly_price || meta.monthly_price || meta.monthlyConfig?.price || p.price || 499);
+        const yearlyPrice = Number(p.yearly_price || meta.yearly_price || meta.yearlyConfig?.price || Math.round(monthlyPrice * 12 * 0.85));
         const slug = p.slug || p.name.toLowerCase();
+        const isStarter = slug === 'starter' || (p.name && p.name.toLowerCase().includes('starter'));
+        const maxChannels = isStarter ? 1 : (p.max_channels || meta.max_channels || (p.name.toLowerCase().includes('growth') ? 2 : 3));
+
         const fallbackObj = SEEDED_FALLBACK_PLANS.find(f => f.slug === slug) || SEEDED_FALLBACK_PLANS[0];
 
         return {
@@ -427,7 +428,7 @@ export default function PricingComparisonTable({ plansData, onSelectPlan, isAdmi
           description: p.description || meta.description || fallbackObj.description,
           monthly_price: monthlyPrice,
           yearly_price: yearlyPrice,
-          yearly_discount_percent: meta.yearly_discount_percent || 15.0,
+          yearly_discount_percent: Number(meta.yearly_discount_percent) || 15.0,
           currency: p.currency || '₹',
           tax_info: meta.tax_info || '(+taxes)',
           max_channels: maxChannels,
@@ -448,11 +449,12 @@ export default function PricingComparisonTable({ plansData, onSelectPlan, isAdmi
         if (Array.isArray(res.data) && res.data.length > 0) {
           const normalized = res.data.map(p => {
             const meta = p.metadata || {};
-            const monthlyPrice = p.monthly_price || meta.monthly_price || parseFloat(p.price) || 499;
-            const yearlyPrice = p.yearly_price || meta.yearly_price || (monthlyPrice * 10);
-            const maxChannels = p.max_channels || meta.max_channels || (p.name.toLowerCase().includes('starter') ? 1 : (p.name.toLowerCase().includes('growth') ? 2 : 3));
-
+            const monthlyPrice = Number(p.monthly_price || meta.monthly_price || meta.monthlyConfig?.price || p.price || 499);
+            const yearlyPrice = Number(p.yearly_price || meta.yearly_price || meta.yearlyConfig?.price || Math.round(monthlyPrice * 12 * 0.85));
             const slug = p.slug || p.name.toLowerCase();
+            const isStarter = slug === 'starter' || (p.name && p.name.toLowerCase().includes('starter'));
+            const maxChannels = isStarter ? 1 : (p.max_channels || meta.max_channels || (p.name.toLowerCase().includes('growth') ? 2 : 3));
+
             const fallbackObj = SEEDED_FALLBACK_PLANS.find(f => f.slug === slug) || SEEDED_FALLBACK_PLANS[0];
 
             return {
@@ -463,7 +465,7 @@ export default function PricingComparisonTable({ plansData, onSelectPlan, isAdmi
               description: p.description || meta.description || fallbackObj.description,
               monthly_price: monthlyPrice,
               yearly_price: yearlyPrice,
-              yearly_discount_percent: meta.yearly_discount_percent || 15.0,
+              yearly_discount_percent: Number(meta.yearly_discount_percent) || 15.0,
               currency: p.currency || '₹',
               tax_info: meta.tax_info || '(+taxes)',
               max_channels: maxChannels,
@@ -487,7 +489,8 @@ export default function PricingComparisonTable({ plansData, onSelectPlan, isAdmi
   // Handle clicking a channel pill for a specific plan column
   const handleToggleChannelPill = (plan, channelKey) => {
     const planSlug = plan.slug;
-    const maxAllowed = plan.max_channels;
+    const isStarter = planSlug === 'starter' || (plan.name && plan.name.toLowerCase().includes('starter'));
+    const maxAllowed = isStarter ? 1 : plan.max_channels;
     const currentSelected = selectedChannels[planSlug] || ['whatsapp'];
     const isAlreadySelected = currentSelected.includes(channelKey);
 
@@ -724,7 +727,13 @@ export default function PricingComparisonTable({ plansData, onSelectPlan, isAdmi
 
           const planSlug = plan.slug;
           const hasAuthToken = typeof window !== 'undefined' && Boolean(localStorage.getItem('token') || localStorage.getItem('uwo_token') || localStorage.getItem('access'));
-          const isCurrent = hasAuthToken && (entitlements?.plan?.slug === planSlug);
+          const activePlanSlug = (entitlements?.plan?.slug || entitlements?.plan?.name || '').toString().toLowerCase();
+          const isCurrent = hasAuthToken && (
+            activePlanSlug === planSlug.toLowerCase() ||
+            (activePlanSlug.includes('starter') && planSlug === 'starter') ||
+            ((activePlanSlug.includes('growth') || activePlanSlug.includes('pro')) && planSlug === 'growth') ||
+            ((activePlanSlug.includes('advanced') || activePlanSlug.includes('enterprise')) && planSlug === 'advanced')
+          );
           const isGrowth = plan.name.toLowerCase().includes('growth');
 
           const displayPrice = billingPeriod === 'YEARLY'
@@ -994,7 +1003,13 @@ export default function PricingComparisonTable({ plansData, onSelectPlan, isAdmi
               {plans.map((plan) => {
                 const planSlug = plan.slug;
                 const hasAuthToken = typeof window !== 'undefined' && Boolean(localStorage.getItem('token') || localStorage.getItem('uwo_token') || localStorage.getItem('access'));
-                const isCurrent = hasAuthToken && (entitlements?.plan?.slug === planSlug);
+                const activePlanSlug = (entitlements?.plan?.slug || entitlements?.plan?.name || '').toString().toLowerCase();
+                const isCurrent = hasAuthToken && (
+                  activePlanSlug === planSlug.toLowerCase() ||
+                  (activePlanSlug.includes('starter') && planSlug === 'starter') ||
+                  ((activePlanSlug.includes('growth') || activePlanSlug.includes('pro')) && planSlug === 'growth') ||
+                  ((activePlanSlug.includes('advanced') || activePlanSlug.includes('enterprise')) && planSlug === 'advanced')
+                );
                 const isGrowth = plan.name.toLowerCase().includes('growth');
 
                 const displayPrice = billingPeriod === 'YEARLY'

@@ -20,7 +20,6 @@ const PAGE_TITLES = {
   '/admin': 'Control Center',
   '/admin/clients': 'Client Management Directory',
   '/admin/whitelabel': 'White-Label & Reseller Command Center',
-  '/admin/search': 'Global Platform Search',
   '/admin/team': 'Team & Projects',
   '/admin/channels': 'Channel & Integration Center',
   '/admin/inbox': 'Live Message & Chat Explorer',

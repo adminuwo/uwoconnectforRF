@@ -5,7 +5,7 @@ import {
   MessageSquare, Search, Loader2, Globe, Filter,
   ArrowDownLeft, ArrowUpRight, CheckCircle2, Clock,
   Building2, Sparkles, Bot, User, RefreshCw, ChevronDown,
-  ChevronRight, Mail, Send, Eye, Shield, Check, AlertCircle,
+  ChevronRight, Mail, Send, Shield, Check, AlertCircle,
   Layers, X, ExternalLink, Activity, Phone, ArrowRight, Maximize2
 } from 'lucide-react';
 import axios from 'axios';
@@ -101,7 +101,6 @@ const AdminInboxPage = () => {
 
   // Filters
   const [searchTerm, setSearchTerm] = useState('');
-  const [viewMode, setViewMode] = useState('CLIENT_TABLE'); // 'CLIENT_TABLE' | 'ALL_MESSAGES'
 
   // Selected Client Center Modal State
   const [selectedClientModal, setSelectedClientModal] = useState(null);
@@ -211,43 +210,14 @@ const AdminInboxPage = () => {
             </p>
           </div>
 
-          {/* View Mode Toggle & Refresh */}
-          <div className="flex items-center gap-2">
-            <div className="bg-slate-100 p-1 rounded-xl flex items-center gap-1 border border-slate-200/80">
-              <button
-                type="button"
-                onClick={() => setViewMode('CLIENT_TABLE')}
-                className={cn(
-                  "px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer",
-                  viewMode === 'CLIENT_TABLE'
-                    ? "bg-white text-emerald-700 shadow-2xs border border-emerald-100"
-                    : "text-slate-600 hover:text-slate-900"
-                )}
-              >
-                Client Overview Table
-              </button>
-              <button
-                type="button"
-                onClick={() => setViewMode('ALL_MESSAGES')}
-                className={cn(
-                  "px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer",
-                  viewMode === 'ALL_MESSAGES'
-                    ? "bg-white text-emerald-700 shadow-2xs border border-emerald-100"
-                    : "text-slate-600 hover:text-slate-900"
-                )}
-              >
-                All Messages Stream
-              </button>
-            </div>
-
-            <button
-              onClick={() => fetchMessages(true)}
-              disabled={refreshing}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 rounded-xl font-bold text-xs shadow-2xs transition-all cursor-pointer"
-            >
-              <RefreshCw size={12} className={cn(refreshing && "animate-spin text-emerald-600")} /> Refresh
-            </button>
-          </div>
+          {/* Refresh */}
+          <button
+            onClick={() => fetchMessages(true)}
+            disabled={refreshing}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 rounded-xl font-bold text-xs shadow-2xs transition-all cursor-pointer"
+          >
+            <RefreshCw size={12} className={cn(refreshing && "animate-spin text-emerald-600")} /> Refresh
+          </button>
         </div>
 
         {/* ── 2. Top Summary KPI Row (With Authentic Brand Colors) ── */}
@@ -322,7 +292,7 @@ const AdminInboxPage = () => {
         </div>
 
         {/* ── 3. MAIN TABLE: CLIENT MESSAGE MATRIX ── */}
-        {viewMode === 'CLIENT_TABLE' && (
+        {(
           <div className="bg-white border border-slate-200/90 rounded-2xl overflow-hidden shadow-2xs">
             {/* Search Header */}
             <div className="p-4 border-b border-slate-100 flex items-center justify-between gap-3 flex-wrap">
@@ -362,8 +332,7 @@ const AdminInboxPage = () => {
                       <th className="py-3.5 px-4 text-center">Instagram</th>
                       <th className="py-3.5 px-4 text-center">Facebook</th>
                       <th className="py-3.5 px-4 text-center">Gmail</th>
-                      <th className="py-3.5 px-4 text-center">Status</th>
-                      <th className="py-3.5 px-6 text-right">Actions</th>
+                      <th className="py-3.5 px-6 text-right">Status</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 font-sans">
@@ -483,9 +452,9 @@ const AdminInboxPage = () => {
                           </td>
 
                           {/* Status */}
-                          <td className="py-4 px-4 text-center">
+                          <td className="py-4 px-6 text-right">
                             <span className={cn(
-                              "px-2 py-0.5 rounded text-[10px] font-semibold border",
+                              "px-2.5 py-1 rounded text-[10px] font-semibold border inline-block",
                               client.status === 'ACTIVE' 
                                 ? "bg-emerald-50 text-emerald-700 border-emerald-200" 
                                 : "bg-slate-100 text-slate-500 border-slate-200"
@@ -493,18 +462,6 @@ const AdminInboxPage = () => {
                               {client.status || 'ACTIVE'}
                             </span>
                           </td>
-
-                          {/* Actions */}
-                          <td className="py-4 px-6 text-right">
-                            <button
-                              type="button"
-                              onClick={(e) => { e.stopPropagation(); openClientModal(client, 'ALL'); }}
-                              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all cursor-pointer shadow-2xs"
-                            >
-                              <Eye size={12} />
-                              <span>View Chats ({client.total_messages})</span>
-                            </button>
-                          </td>
                         </tr>
                       );
                     })}
@@ -515,98 +472,6 @@ const AdminInboxPage = () => {
           </div>
         )}
 
-        {/* ── 4. ALL MESSAGES UNIFIED STREAM (Alternative View) ── */}
-        {viewMode === 'ALL_MESSAGES' && (
-          <div className="bg-white border border-slate-200/90 rounded-2xl overflow-hidden shadow-2xs">
-            {loading ? (
-              <div className="py-28 flex flex-col items-center justify-center gap-3">
-                <Loader2 className="animate-spin text-emerald-600" size={28} />
-                <p className="text-xs font-semibold text-slate-500">Retrieving Live Messages...</p>
-              </div>
-            ) : messages.length === 0 ? (
-              <div className="py-24 text-center text-slate-400 text-xs font-medium italic">
-                No messages found matching search criteria.
-              </div>
-            ) : (
-              <div className="overflow-x-auto custom-scrollbar">
-                <table className="w-full text-left border-collapse text-xs">
-                  <thead>
-                    <tr className="bg-slate-50 border-b border-slate-200 text-slate-500 text-[10px] uppercase font-bold tracking-wider">
-                      <th className="py-3 px-6">Client Workspace</th>
-                      <th className="py-3 px-4">Channel</th>
-                      <th className="py-3 px-4">From / Sender</th>
-                      <th className="py-3 px-4">To / Recipient</th>
-                      <th className="py-3 px-6">Message Body</th>
-                      <th className="py-3 px-4 text-center">Direction</th>
-                      <th className="py-3 px-6 text-right">Timestamp</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100 font-sans">
-                    {messages.map((msg) => {
-                      const channelConf = CHANNELS_CONFIG[msg.channel] || CHANNELS_CONFIG.WHATSAPP;
-                      const ChannelIcon = channelConf.icon;
-
-                      return (
-                        <tr key={msg.id} className="hover:bg-slate-50/60 transition-colors">
-                          <td className="py-3.5 px-6 font-bold text-slate-800 whitespace-nowrap">
-                            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200 font-semibold">
-                              <Building2 size={12} className="text-emerald-700" />
-                              {msg.client_name}
-                            </span>
-                          </td>
-
-                          <td className="py-3.5 px-4 whitespace-nowrap">
-                            <span className={cn(
-                              "inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-medium border",
-                              channelConf.badgeBg
-                            )}>
-                              <ChannelIcon size={11} />
-                              {channelConf.label}
-                            </span>
-                          </td>
-
-                          <td className="py-3.5 px-4 min-w-[140px]">
-                            <p className="font-bold text-slate-800">{msg.sender_name || msg.from_address}</p>
-                            <p className="text-[10px] font-mono text-slate-400 truncate max-w-[130px]">{msg.from_address}</p>
-                          </td>
-
-                          <td className="py-3.5 px-4 min-w-[140px]">
-                            <p className="font-mono font-bold text-slate-800 truncate max-w-[130px]">{msg.to_address}</p>
-                          </td>
-
-                          <td className="py-3.5 px-6 max-w-md">
-                            <p className="text-slate-700 font-medium line-clamp-2">{msg.body}</p>
-                          </td>
-
-                          <td className="py-3.5 px-4 text-center whitespace-nowrap">
-                            <span className={cn(
-                              "px-2 py-0.5 rounded text-[9px] font-bold uppercase inline-flex items-center gap-1 border",
-                              msg.message_type === 'INCOMING'
-                                ? "bg-emerald-50 text-emerald-800 border-emerald-200"
-                                : "bg-blue-50 text-blue-800 border-blue-200"
-                            )}>
-                              {msg.message_type === 'INCOMING' ? <ArrowDownLeft size={11} /> : <ArrowUpRight size={11} />}
-                              {msg.message_type === 'INCOMING' ? 'IN' : 'OUT'}
-                            </span>
-                          </td>
-
-                          <td className="py-3.5 px-6 text-right whitespace-nowrap">
-                            <p className="text-[11px] font-bold text-slate-800">
-                              {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                            </p>
-                            <p className="text-[10px] text-slate-400">
-                              {new Date(msg.created_at).toLocaleDateString()}
-                            </p>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-        )}
 
       </div>
 
