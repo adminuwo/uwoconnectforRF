@@ -28,6 +28,7 @@ export default function SuperAdminOverview() {
   const [compSortOrder, setCompSortOrder] = useState('desc');
 
   const [intelStats, setIntelStats] = useState(null);
+  const [appAnalytics, setAppAnalytics] = useState(null);
 
   const fetchData = async (isManualRefresh = false) => {
     try {
@@ -41,11 +42,14 @@ export default function SuperAdminOverview() {
         return;
       }
 
-      const [resOverview, resIntel] = await Promise.allSettled([
+      const [resOverview, resIntel, resApp] = await Promise.allSettled([
         axios.get(`${API_BASE_URL}/api/admin/overview/`, {
           headers: { Authorization: `Bearer ${token}` }
         }),
         axios.get(`${API_BASE_URL}/api/admin/client-intelligence/stats/`, {
+          headers: { Authorization: `Bearer ${token}` }
+        }),
+        axios.get(`${API_BASE_URL}/api/admin/app-analytics/`, {
           headers: { Authorization: `Bearer ${token}` }
         })
       ]);
@@ -65,6 +69,12 @@ export default function SuperAdminOverview() {
         setIntelStats(resIntel.value.data);
       } else {
         console.error('Intel Stats API failed:', resIntel.reason);
+      }
+
+      if (resApp.status === 'fulfilled') {
+        setAppAnalytics(resApp.value.data);
+      } else {
+        console.error('App Analytics API failed:', resApp.reason);
       }
     } catch (err) {
       if (err.response?.status === 401) {
@@ -98,11 +108,11 @@ export default function SuperAdminOverview() {
 
   const mainKpis = [
     { name: 'Total Team Members', value: rowMetrics.totalTeamMembers ?? (kpis.totalTeamMembers ?? 0), sub: 'Across workspaces', icon: Users, href: '/admin/team' },
+    { name: 'Mobile App Installs', value: (appAnalytics?.kpis?.total_installs ?? kpis.totalAppInstalls ?? 0).toLocaleString(), sub: `${appAnalytics?.platforms?.android ?? kpis.androidInstalls ?? 0} Android · ${appAnalytics?.platforms?.ios ?? kpis.iosInstalls ?? 0} iOS`, icon: Smartphone, href: '#app-telemetry' },
     { name: 'Channels Active', value: kpis.activeChannels ?? 0, sub: `${kpis.totalChannels ?? 0} configured`, icon: Globe, href: '/admin/channels' },
     { name: 'Total Messages', value: (kpis.totalMessages ?? 0).toLocaleString(), sub: `${kpis.botMessages ?? 0} bot handled`, icon: MessageSquare, href: '/admin/inbox' },
     { name: 'Active AI Bots', value: kpis.activeBots ?? 0, sub: `${kpis.humanTakeoverCount ?? 0} handoffs`, icon: Bot, href: '/admin/knowledge' },
     { name: 'Total Invoices', value: kpis.totalInvoices ?? (rowMetrics.totalInvoices ?? 0), sub: `₹${(kpis.totalInvoiceValue || rowMetrics.totalRevenue || 0).toLocaleString()}`, icon: Receipt, href: '/admin/invoices' },
-    { name: 'Active Projects', value: rowMetrics.activeProjects ?? (kpis.activeProjects ?? 0), sub: `${rowMetrics.totalProjects ?? (kpis.totalProjects ?? 0)} total`, icon: Layers, href: '/admin/team' },
   ];
 
   const handleSort = (key) => {
@@ -342,6 +352,191 @@ export default function SuperAdminOverview() {
               </Link>
             );
           })}
+        </div>
+
+        {/* ── Mobile App Telemetry & Installations Section ── */}
+        <div id="app-telemetry" className="bg-white rounded-2xl border border-slate-200/80 shadow-2xs overflow-hidden mb-6 sm:mb-8 p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100/50 shrink-0">
+                <Smartphone size={18} />
+              </div>
+              <div>
+                <h3 className="text-sm sm:text-base font-extrabold text-slate-900 tracking-tight">Mobile App Telemetry & Installations</h3>
+                <p className="text-xs text-slate-500">Live device installations, active platform split, and version adoption from UWO Connect Mobile.</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 self-start sm:self-center">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                Live Telemetry Active
+              </span>
+              <button
+                onClick={() => fetchData(true)}
+                disabled={refreshing}
+                className="px-2.5 py-1 text-xs font-semibold text-slate-600 hover:text-slate-900 rounded-lg hover:bg-slate-100 transition-all flex items-center gap-1"
+                title="Refresh Telemetry"
+              >
+                <RefreshCw size={12} className={cn(refreshing && "animate-spin text-emerald-600")} /> Refresh
+              </button>
+            </div>
+          </div>
+
+          {/* Quick Metrics Cards */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3 my-4 sm:my-5">
+            <div className="p-3.5 sm:p-4 rounded-xl bg-slate-50 border border-slate-100">
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Installs</span>
+              <p className="text-xl sm:text-2xl font-black text-slate-900 mt-0.5">{appAnalytics?.kpis?.total_installs ?? (kpis.totalAppInstalls ?? 0)}</p>
+              <span className="text-[10px] text-emerald-600 font-semibold">Unique Devices</span>
+            </div>
+            <div className="p-3.5 sm:p-4 rounded-xl bg-slate-50 border border-slate-100">
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Today's Installs</span>
+              <p className="text-xl sm:text-2xl font-black text-emerald-600 mt-0.5">+{appAnalytics?.kpis?.today_installs ?? 0}</p>
+              <span className="text-[10px] text-slate-500 font-medium">New registrations today</span>
+            </div>
+            <div className="p-3.5 sm:p-4 rounded-xl bg-slate-50 border border-slate-100">
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Past 7 Days</span>
+              <p className="text-xl sm:text-2xl font-black text-slate-900 mt-0.5">{appAnalytics?.kpis?.week_installs ?? 0}</p>
+              <span className="text-[10px] text-slate-500 font-medium">Weekly new installs</span>
+            </div>
+            <div className="p-3.5 sm:p-4 rounded-xl bg-slate-50 border border-slate-100">
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Active Devices (30d)</span>
+              <p className="text-xl sm:text-2xl font-black text-teal-600 mt-0.5">{appAnalytics?.kpis?.active_devices_30d ?? 0}</p>
+              <span className="text-[10px] text-slate-500 font-medium">{appAnalytics?.kpis?.active_devices_24h ?? 0} active in 24h</span>
+            </div>
+          </div>
+
+          {/* Platform Share & Versions Split */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 mb-5">
+            {/* Platform Progress */}
+            <div className="md:col-span-2 p-3.5 sm:p-4 rounded-xl bg-slate-50/70 border border-slate-100">
+              <div className="flex items-center justify-between text-xs font-bold text-slate-700 mb-2">
+                <span>Platform Distribution</span>
+                <span className="text-slate-500 font-normal">
+                  Android: <strong>{appAnalytics?.platforms?.android ?? 0}</strong> ({Math.round(((appAnalytics?.platforms?.android || 0) / Math.max(1, appAnalytics?.kpis?.total_installs || 1)) * 100)}%)
+                  &nbsp;·&nbsp;
+                  iOS: <strong>{appAnalytics?.platforms?.ios ?? 0}</strong> ({Math.round(((appAnalytics?.platforms?.ios || 0) / Math.max(1, appAnalytics?.kpis?.total_installs || 1)) * 100)}%)
+                </span>
+              </div>
+              {/* Progress bar */}
+              <div className="w-full bg-slate-200 h-2.5 rounded-full overflow-hidden flex gap-0.5 p-0.5">
+                <div 
+                  className="bg-emerald-500 h-full rounded-l-full transition-all duration-500" 
+                  style={{ width: `${Math.max(appAnalytics?.platforms?.android ? 5 : 0, ((appAnalytics?.platforms?.android || 0) / Math.max(1, appAnalytics?.kpis?.total_installs || 1)) * 100)}%` }} 
+                  title={`Android: ${appAnalytics?.platforms?.android || 0}`}
+                />
+                <div 
+                  className="bg-blue-500 h-full transition-all duration-500" 
+                  style={{ width: `${Math.max(appAnalytics?.platforms?.ios ? 5 : 0, ((appAnalytics?.platforms?.ios || 0) / Math.max(1, appAnalytics?.kpis?.total_installs || 1)) * 100)}%` }} 
+                  title={`iOS: ${appAnalytics?.platforms?.ios || 0}`}
+                />
+                <div 
+                  className="bg-slate-400 h-full rounded-r-full transition-all duration-500" 
+                  style={{ width: `${Math.max(0, ((appAnalytics?.platforms?.web || 0) / Math.max(1, appAnalytics?.kpis?.total_installs || 1)) * 100)}%` }} 
+                  title={`Other: ${appAnalytics?.platforms?.web || 0}`}
+                />
+              </div>
+              <div className="flex items-center gap-4 text-[11px] text-slate-500 mt-2.5 flex-wrap">
+                <div className="flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
+                  <span>Android ({appAnalytics?.platforms?.android ?? 0})</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-full bg-blue-500" />
+                  <span>iOS ({appAnalytics?.platforms?.ios ?? 0})</span>
+                </div>
+                {(appAnalytics?.platforms?.web || 0) > 0 && (
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2.5 h-2.5 rounded-full bg-slate-400" />
+                    <span>Web/PWA ({appAnalytics?.platforms?.web ?? 0})</span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* App Versions */}
+            <div className="p-3.5 sm:p-4 rounded-xl bg-slate-50/70 border border-slate-100 flex flex-col justify-between">
+              <span className="text-xs font-bold text-slate-700 mb-2">App Versions In Use</span>
+              <div className="space-y-1.5">
+                {(appAnalytics?.versions || []).slice(0, 3).map((v, i) => (
+                  <div key={i} className="flex items-center justify-between text-xs py-1 border-b border-slate-200/50 last:border-0">
+                    <span className="font-mono text-slate-600 font-semibold">v{v.version}</span>
+                    <span className="px-2 py-0.5 rounded-md bg-white border border-slate-200 text-slate-700 font-bold text-[10px]">
+                      {v.count} devices
+                    </span>
+                  </div>
+                ))}
+                {(!appAnalytics?.versions || appAnalytics.versions.length === 0) && (
+                  <p className="text-xs text-slate-400 italic py-2">v1.0.0 (Initial release)</p>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Recent Device Installations Table */}
+          <div>
+            <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2.5">Recent Device Installations</h4>
+            <div className="overflow-x-auto rounded-xl border border-slate-200/80">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-slate-50 text-slate-500 font-bold uppercase tracking-wider text-[10px] border-b border-slate-200/70">
+                  <tr>
+                    <th className="py-2.5 px-3">Platform & Device</th>
+                    <th className="py-2.5 px-3">App Version</th>
+                    <th className="py-2.5 px-3">OS Version</th>
+                    <th className="py-2.5 px-3">User / Workspace</th>
+                    <th className="py-2.5 px-3 text-center">Sessions</th>
+                    <th className="py-2.5 px-3">Installed Date</th>
+                    <th className="py-2.5 px-3 text-right">Last Active</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {(appAnalytics?.recent_installations || []).map((inst) => (
+                    <tr key={inst.id} className="hover:bg-slate-50/80 transition-colors">
+                      <td className="py-2.5 px-3">
+                        <div className="flex items-center gap-2">
+                          <span className={cn(
+                            "px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider shrink-0",
+                            inst.platform === 'android' ? "bg-emerald-50 text-emerald-700 border border-emerald-200" :
+                            inst.platform === 'ios' ? "bg-blue-50 text-blue-700 border border-blue-200" :
+                            "bg-slate-100 text-slate-700"
+                          )}>
+                            {inst.platform}
+                          </span>
+                          <span className="font-semibold text-slate-800 truncate max-w-[150px]">{inst.device_model}</span>
+                        </div>
+                      </td>
+                      <td className="py-2.5 px-3 font-mono text-[11px] text-slate-600">v{inst.app_version}</td>
+                      <td className="py-2.5 px-3 text-slate-600 text-[11px]">{inst.os_version || '—'}</td>
+                      <td className="py-2.5 px-3">
+                        {inst.user_name ? (
+                          <div>
+                            <p className="font-semibold text-slate-900">{inst.user_name}</p>
+                            {inst.client_name && <p className="text-[10px] text-slate-400">{inst.client_name}</p>}
+                          </div>
+                        ) : (
+                          <span className="text-[11px] text-slate-400 italic">Device Guest</span>
+                        )}
+                      </td>
+                      <td className="py-2.5 px-3 text-center font-bold text-slate-700">{inst.open_count}</td>
+                      <td className="py-2.5 px-3 text-slate-500 text-[11px] whitespace-nowrap">
+                        {new Date(inst.first_installed_at).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' })}
+                      </td>
+                      <td className="py-2.5 px-3 text-right text-slate-500 text-[11px] whitespace-nowrap">
+                        {new Date(inst.last_active_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </td>
+                    </tr>
+                  ))}
+                  {(!appAnalytics?.recent_installations || appAnalytics.recent_installations.length === 0) && (
+                    <tr>
+                      <td colSpan={7} className="py-8 text-center text-slate-400 italic">
+                        No mobile installations reported yet. Installs will appear here automatically when users open the app.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
 
         {/* ── Clean Client Comparison Table ── */}
