@@ -11,6 +11,7 @@ import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { templateData } from './templateData';
+import { API_BASE_URL } from '@/config/apiConfig';
 
 const FacebookIcon = ({ size = 14, className }) => (
   <svg
@@ -99,10 +100,9 @@ const ClientWorkflowsPage = () => {
       setIsRenaming(true);
       setRenameError('');
       const token = localStorage.getItem('uwo_token');
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app';
       
       await axios.patch(
-        `${apiUrl}/api/workflows/${workflowToRename.id}/`,
+        `${API_BASE_URL}/api/workflows/${workflowToRename.id}/`,
         { name: renameValue.trim() },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -111,7 +111,7 @@ const ClientWorkflowsPage = () => {
       setIsRenameModalOpen(false);
       setWorkflowToRename(null);
     } catch (err) {
-      console.error('Rename failed:', err);
+      console.warn('Rename failed:', err);
       setRenameError(err.response?.data?.name?.[0] || err.response?.data?.detail || 'Failed to rename workflow.');
     } finally {
       setIsRenaming(false);
@@ -132,13 +132,19 @@ const ClientWorkflowsPage = () => {
     try {
       setLoading(true);
       const token = localStorage.getItem('uwo_token');
-      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/workflows/`, {
+      if (!token) {
+        setWorkflows([]);
+        setLoading(false);
+        return;
+      }
+      const res = await axios.get(`${API_BASE_URL}/api/workflows/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const workflowsData = Array.isArray(res.data) ? res.data : (res.data?.results || []);
       setWorkflows(workflowsData);
     } catch (err) {
-      console.error('Failed to fetch workflows');
+      console.warn('Could not fetch workflows:', err?.message || err);
+      setWorkflows([]);
     } finally {
       setLoading(false);
     }
@@ -194,21 +200,21 @@ const ClientWorkflowsPage = () => {
   const handleToggle = async (id, currentStatus) => {
     try {
       const token = localStorage.getItem('uwo_token');
-      await axios.patch(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/workflows/${id}/`, {
+      await axios.patch(`${API_BASE_URL}/api/workflows/${id}/`, {
         enabled: !currentStatus
       }, {
         headers: { Authorization: `Bearer ${token}` }
       });
       fetchWorkflows();
     } catch (err) {
-      console.error('Toggle failed');
+      console.warn('Toggle failed:', err);
     }
   };
 
   const handleDuplicate = async (flow) => {
     try {
       const token = localStorage.getItem('uwo_token');
-      await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/workflows/`, {
+      await axios.post(`${API_BASE_URL}/api/workflows/`, {
         name: `${flow.name} (Copy)`,
         category: flow.category,
         industry: flow.industry,
@@ -225,7 +231,7 @@ const ClientWorkflowsPage = () => {
       fetchWorkflows();
       setActiveDropdownId(null);
     } catch (err) {
-      console.error('Duplication failed');
+      console.warn('Duplication failed:', err);
     }
   };
 
@@ -233,13 +239,13 @@ const ClientWorkflowsPage = () => {
     if (!confirm('Are you sure you want to delete this workflow? This action is permanent.')) return;
     try {
       const token = localStorage.getItem('uwo_token');
-      await axios.delete(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/workflows/${id}/`, {
+      await axios.delete(`${API_BASE_URL}/api/workflows/${id}/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       fetchWorkflows();
       setActiveDropdownId(null);
     } catch (err) {
-      console.error('Delete failed');
+      console.warn('Delete failed:', err);
     }
   };
 

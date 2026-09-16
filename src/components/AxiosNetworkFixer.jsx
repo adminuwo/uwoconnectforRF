@@ -51,9 +51,9 @@ export default function AxiosNetworkFixer() {
           }
         }
       } else if (isExternalHost(host)) {
-        // For production Cloud Run domain, redirect to production backend
-        const rewriteBase = (host.includes('run.app') || host.includes('uwoconnectforrf'))
-          ? 'https://uwoconnectforrb-743928421487.asia-south1.run.app'
+        // For production domain, redirect to live Azure backend
+        const rewriteBase = (host.includes('run.app') || host.includes('uwoconnectforrf') || host.includes('aisa24.com') || host.includes('azurewebsites.net'))
+          ? 'https://aisaconnectback-anaqbuapb6c6apgy.centralindia-01.azurewebsites.net'
           : ''; // ngrok / vercel / other → relative path (Next.js rewrites proxy)
 
         if (PRIVATE_ORIGIN_RE.test(url)) {

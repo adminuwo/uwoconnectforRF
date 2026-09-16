@@ -16,13 +16,17 @@ const getApiBaseUrl = () => {
   if (typeof window !== 'undefined' && window.location) {
     const currentHost = window.location.hostname;
     if (currentHost === 'localhost' || currentHost === '127.0.0.1') {
-      return 'http://127.0.0.1:8000';
+      return 'http://127.0.0.1:8080';
     }
     if (PRIVATE_IP_REGEX.test(currentHost)) {
-      return `http://${currentHost}:8000`;
+      return `http://${currentHost}:8080`;
     }
+    // Live / Production external host
+    return 'https://aisaconnectback-anaqbuapb6c6apgy.centralindia-01.azurewebsites.net';
   }
-  return 'http://127.0.0.1:8000';
+  return process.env.NODE_ENV === 'production'
+    ? 'https://aisaconnectback-anaqbuapb6c6apgy.centralindia-01.azurewebsites.net'
+    : 'http://127.0.0.1:8080';
 };
 
 export const getUnifiedApiBaseUrl = () => {
@@ -54,7 +58,7 @@ export const PUBLIC_APP_URL = (function () {
   if (typeof window !== 'undefined') {
     return window.location.origin;
   }
-  return 'https://uwoconnectforrf-743928421487.asia-south1.run.app';
+  return 'https://uwoconnect.aisa24.com';
 })();
 
 export const getPublicDocumentUrl = (type, token, customDomain = null) => {

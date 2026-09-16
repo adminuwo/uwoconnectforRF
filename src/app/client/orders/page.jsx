@@ -5,6 +5,8 @@ import { Receipt, Loader2, DollarSign, User, Calendar, Tag, ShieldAlert } from '
 import axios from 'axios';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 
+import { API_BASE_URL } from '@/config/apiConfig';
+
 export default function OrdersPage() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -13,12 +15,12 @@ export default function OrdersPage() {
     try {
       setLoading(true);
       const token = localStorage.getItem('uwo_token');
-      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/orders/`, {
+      const res = await axios.get(`${API_BASE_URL}/api/orders/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setOrders(Array.isArray(res.data) ? res.data : (res.data?.results || []));
     } catch (err) {
-      console.error('Failed to fetch orders');
+      console.warn('Failed to fetch orders:', err);
     } finally {
       setLoading(false);
     }

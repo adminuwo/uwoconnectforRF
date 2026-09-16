@@ -19,7 +19,7 @@ import 'reactflow/dist/style.css';
 import {
   Save, MessageSquare, Clock, Zap, Loader2,
   ChevronDown, Image as ImageIcon, Video, List, FileText, Webhook, Tag, BarChart3,
-  MousePointer2, ArrowLeft, CheckCircle2, XCircle, Play, X, Plus, Trash2, Edit3, User, ShoppingBag, ExternalLink, Check
+  MousePointer2, ArrowLeft, CheckCircle2, XCircle, Play, X, Plus, Trash2, Edit3, User, ShoppingBag, ExternalLink, Check, Sparkles, Bot
 } from 'lucide-react';
 import axios from 'axios';
 import { useParams, useRouter } from 'next/navigation';
@@ -204,9 +204,14 @@ const GoogleMeetNode = ({ id, data = {} }) => (
 const CatalogProductNode = ({ id, data = {} }) => (
   <NodeContainer id={id} title="Send Catalog Product" icon={ShoppingBag} color="bg-emerald-600">
     <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-100 mb-2">
+      {data.mediaUrl && (
+        <div className="w-full h-24 mb-2 rounded-lg overflow-hidden border border-slate-200 relative bg-slate-100">
+          <img src={data.mediaUrl} alt={data.productName || 'Product'} className="w-full h-full object-cover" />
+        </div>
+      )}
       <div className="flex items-center justify-between mb-1">
         <span className="text-[9px] font-black text-emerald-600 uppercase tracking-widest">🛍️ Catalog Item</span>
-        <span className="text-xs font-black text-slate-900">${data.productPrice || '29.99'}</span>
+        <span className="text-xs font-black text-slate-900">${data.productPrice || '20.00'}</span>
       </div>
       <p className="text-xs font-bold text-slate-800 truncate mb-1">"{data.productName || 'Select Product...'}"</p>
       <div className="bg-emerald-50 text-emerald-800 p-1.5 rounded text-[10px] font-semibold flex items-center justify-between">
@@ -216,6 +221,30 @@ const CatalogProductNode = ({ id, data = {} }) => (
     </div>
     <Handle type="target" position={Position.Top} className="w-2.5 h-2.5 bg-slate-400 border-2 border-white -top-1" />
     <Handle type="source" position={Position.Bottom} className="w-2.5 h-2.5 bg-emerald-600 border-2 border-white -bottom-1" />
+  </NodeContainer>
+);
+
+const AIChatNode = ({ id, data = {} }) => (
+  <NodeContainer id={id} title="Talk to AI (RAG)" icon={Sparkles} color="bg-indigo-600">
+    <div className="bg-indigo-50/60 p-2.5 rounded-lg border border-indigo-100 mb-2">
+      <div className="flex items-center justify-between mb-1.5">
+        <span className="text-[9px] font-black text-indigo-600 uppercase tracking-widest flex items-center gap-1">
+          <Sparkles size={11} className="text-indigo-600" /> AI Assistant
+        </span>
+        <span className="text-[8px] font-bold text-indigo-700 bg-white px-1.5 py-0.5 rounded border border-indigo-200">
+          ⏱️ 2 Min Auto-Cycle
+        </span>
+      </div>
+      <p className="text-xs font-semibold text-slate-700 leading-relaxed line-clamp-2">
+        "{data.message || 'I am your 24/7 AI Assistant. Ask me anything about our services!'}"
+      </p>
+      <div className="mt-2 pt-2 border-t border-indigo-100/80 flex items-center justify-between text-[9px] font-bold text-slate-500">
+        <span>Knowledge Base RAG</span>
+        <span className="text-indigo-600 flex items-center gap-1"><Zap size={10} /> Active</span>
+      </div>
+    </div>
+    <Handle type="target" position={Position.Top} className="w-2.5 h-2.5 bg-slate-400 border-2 border-white -top-1" />
+    <Handle type="source" position={Position.Bottom} className="w-2.5 h-2.5 bg-indigo-600 border-2 border-white -bottom-1" />
   </NodeContainer>
 );
 
@@ -289,6 +318,7 @@ const WorkflowBuilderInner = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [loading, setLoading] = useState(true);
   const [selectedNode, setSelectedNode] = useState(null);
+  const [availableProducts, setAvailableProducts] = useState([]);
   const [deploymentChannels, setDeploymentChannels] = useState(['WHATSAPP']); // WHATSAPP, INSTAGRAM, FACEBOOK
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isEditingName, setIsEditingName] = useState(false);
@@ -349,6 +379,7 @@ const WorkflowBuilderInner = () => {
     google_meet: GoogleMeetNode,
     calendar: GoogleMeetNode,
     catalog_product: CatalogProductNode,
+    ai_chat: AIChatNode,
   }), []);
 
   const edgeTypes = useMemo(() => ({
@@ -400,6 +431,18 @@ const WorkflowBuilderInner = () => {
         } else {
           setNodes([{ id: 'start', type: 'trigger', position: { x: 250, y: 50 }, data: { keyword: 'Any Keyword' } }]);
         }
+      }
+
+      // Fetch available products from Catalog for dropdown selection
+      try {
+        const token = localStorage.getItem('uwo_token');
+        const prodRes = await axios.get(`${API_BASE_URL}/api/products/`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const prods = Array.isArray(prodRes.data) ? prodRes.data : (prodRes.data?.results || []);
+        setAvailableProducts(prods);
+      } catch (pErr) {
+        console.warn('Failed to load products for catalog node selector:', pErr);
       }
     } catch (err) { console.error(err); } finally { setLoading(false); }
   };
@@ -694,6 +737,9 @@ const WorkflowBuilderInner = () => {
               <SidebarItem icon={Video} label="Google Meet & Calendar" onDragStart={(e) => onDragStart(e, 'google_meet')} onClick={() => { handleAddNodeDirectly('google_meet'); setIsSidebarOpen(false); }} color="blue" />
             </SidebarCategory>
             <div className="px-4 py-2 mt-4">
+              <SidebarItem icon={Sparkles} label="Talk to AI Assistant" onDragStart={(e) => onDragStart(e, 'ai_chat')} onClick={() => { handleAddNodeDirectly('ai_chat'); setIsSidebarOpen(false); }} color="indigo" />
+            </div>
+            <div className="px-4 py-2">
               <SidebarItem icon={Zap} label="Set a Condition" onDragStart={(e) => onDragStart(e, 'condition')} onClick={() => { handleAddNodeDirectly('condition'); setIsSidebarOpen(false); }} color="amber" />
             </div>
             <div className="px-4 py-2">
@@ -736,6 +782,7 @@ const WorkflowBuilderInner = () => {
                   key={selectedNode.id}
                   data={selectedNode.data}
                   type={selectedNode.type}
+                  availableProducts={availableProducts}
                   onSave={(d) => updateNodeData(selectedNode.id, d)}
                   onDelete={() => {
                     setNodes(nds => nds.filter(n => n.id !== selectedNode.id));
@@ -753,17 +800,29 @@ const WorkflowBuilderInner = () => {
 };
 
 // --- FORM COMPONENT ---
-const MessageForm = ({ data, type, onSave, onDelete }) => {
-  const [msg, setMsg] = useState(data.message || '');
-  const [title, setTitle] = useState(data.title || 'Product Demo Call');
+const MessageForm = ({ data, type, onSave, onDelete, availableProducts = [] }) => {
+  const [selectedProductId, setSelectedProductId] = useState(data.productId || '');
+  const [msg, setMsg] = useState(data.message || data.productName || '');
+  const [title, setTitle] = useState(data.title || data.productPrice || 'Product Demo Call');
   const [duration, setDuration] = useState(data.duration || '30');
   const [buttons, setButtons] = useState(data.buttons || ['Option 1']);
   const [mediaUrl, setMediaUrl] = useState(data.mediaUrl || null);
-  const [keyword, setKeyword] = useState(data.keyword || '');
+  const [keyword, setKeyword] = useState(data.keyword || data.ctaText || '');
   const [conditionField, setConditionField] = useState(data.conditionField || 'tag');
   const [conditionOperator, setConditionOperator] = useState(data.conditionOperator || '=');
   const [conditionValue, setConditionValue] = useState(data.conditionValue || '');
   const [condition, setCondition] = useState(data.condition || '');
+
+  const handleProductSelect = (prodId) => {
+    setSelectedProductId(prodId);
+    const prod = availableProducts.find(p => String(p.id) === String(prodId));
+    if (prod) {
+      setMsg(prod.name || '');
+      setTitle(String(prod.price || ''));
+      setMediaUrl(prod.image_url || null);
+      if (prod.cta_text) setKeyword(prod.cta_text);
+    }
+  };
 
   const [triggerMode, setTriggerMode] = useState(data.triggerMode || (data.keyword === '*' ? 'ALL' : 'KEYWORDS'));
 
@@ -934,6 +993,16 @@ const MessageForm = ({ data, type, onSave, onDelete }) => {
           ))}
           {buttons.length === 0 && <p className="text-xs text-slate-400 font-semibold italic">No buttons added.</p>}
         </div>
+        {buttons.length < 3 && !buttons.some(b => b.toLowerCase().includes('ai')) && (
+          <button
+            type="button"
+            onClick={() => setButtons([...buttons, '🤖 Talk to AI'])}
+            className="w-full mt-2 py-2 px-3 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-700 rounded-xl text-[11px] font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+          >
+            <Sparkles size={13} />
+            <span>+ Add "🤖 Talk to AI" Button</span>
+          </button>
+        )}
       </div>
     )}
 
@@ -991,20 +1060,92 @@ const MessageForm = ({ data, type, onSave, onDelete }) => {
           <p className="text-xs text-blue-800 font-medium">When a customer reaches this step, Google Meet will generate a video link and schedule it on Google Calendar with automated reminders!</p>
         </div>
       </div>
+    ) : type === 'ai_chat' ? (
+      <div className="space-y-4">
+        <div className="p-3.5 bg-indigo-50 border border-indigo-200 rounded-xl">
+          <div className="flex items-center gap-2 text-indigo-700 font-bold text-xs mb-1">
+            <Sparkles size={16} />
+            <span>AI Assistant Hybrid Handoff</span>
+          </div>
+          <p className="text-xs text-indigo-900 leading-relaxed font-medium">
+            When customer reaches this step, conversation hands off to your <strong>Automations AI Smart Assistant</strong> and answers queries dynamically using your <strong>RAG Knowledge Base</strong>.
+          </p>
+        </div>
+
+        <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl">
+          <p className="text-[10px] font-bold text-amber-800 uppercase tracking-widest mb-0.5">⏱️ 2-Minute Inactivity Auto-Cycle</p>
+          <p className="text-xs text-amber-900 font-medium">
+            If the customer does not send any message for <strong>2 minutes</strong>, the AI session automatically closes and returns the customer back to the Workflow / Main Menu!
+          </p>
+        </div>
+
+        <div>
+          <label className="text-[10px] font-black uppercase text-slate-400 mb-2 block">AI Welcome Message</label>
+          <textarea
+            value={msg || ''}
+            onChange={e => setMsg(e.target.value)}
+            rows={4}
+            className="w-full bg-slate-50 border border-slate-200 p-3 rounded-xl text-xs font-semibold focus:border-indigo-500 outline-none text-slate-800 leading-relaxed"
+            placeholder="e.g. 🤖 AI Assistant Connected! Ask me anything about our products, pricing, or services..."
+          />
+        </div>
+
+        <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-1.5">
+          <p className="text-[10px] font-black uppercase text-slate-500 tracking-wider">Quick Exit Buttons (Always Attached):</p>
+          <div className="flex gap-2">
+            <span className="px-2.5 py-1 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-700">📋 Main Menu</span>
+            <span className="px-2.5 py-1 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-700">👤 Talk to Human</span>
+          </div>
+        </div>
+      </div>
     ) : type === 'catalog_product' ? (
       <div className="space-y-4">
         <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl">
           <p className="text-[10px] font-bold text-emerald-700 uppercase tracking-widest mb-1">🛍️ Send Catalog Product</p>
-          <p className="text-xs text-emerald-900 font-medium">Select product from your UWOConnect Catalog to send directly to customer on WhatsApp.</p>
+          <p className="text-xs text-emerald-900 font-medium">Select a product from your Catalog to send its photo, price, and Buy Now button directly to the customer on WhatsApp.</p>
         </div>
 
         <div>
-          <label className="text-[10px] font-black uppercase text-slate-400 mb-2 block">Product Name *</label>
+          <label className="text-[10px] font-black uppercase text-slate-400 mb-2 flex items-center justify-between">
+            <span>Select Product from Catalog *</span>
+            <span className="text-emerald-600 font-semibold lowercase">
+              {availableProducts.length} {availableProducts.length === 1 ? 'item' : 'items'} available
+            </span>
+          </label>
+          <select
+            value={selectedProductId}
+            onChange={e => handleProductSelect(e.target.value)}
+            className="w-full bg-slate-50 border border-slate-200 p-3 rounded-xl text-sm font-bold focus:border-emerald-500 outline-none text-slate-800"
+          >
+            <option value="">-- Choose from Catalog --</option>
+            {availableProducts.map(p => (
+              <option key={p.id} value={p.id}>
+                {p.name} — ${p.price || '0.00'} {p.sku ? `(SKU: ${p.sku})` : ''}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {mediaUrl && (
+          <div className="flex items-center gap-3 p-3 bg-slate-50 border border-slate-200 rounded-xl">
+            <img src={mediaUrl} alt="Product Preview" className="w-16 h-16 rounded-lg object-cover border border-slate-200 bg-white" />
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-bold text-slate-800 truncate">{msg || 'Selected Product'}</p>
+              <p className="text-xs font-bold text-emerald-600">${title || '0.00'}</p>
+              <span className="text-[9px] font-semibold text-slate-400 flex items-center gap-1 mt-0.5">
+                <CheckCircle2 size={10} className="text-emerald-500" /> Photo attached for WhatsApp
+              </span>
+            </div>
+          </div>
+        )}
+
+        <div>
+          <label className="text-[10px] font-black uppercase text-slate-400 mb-2 block">Product Display Name</label>
           <input
-            value={msg || data.productName || ''}
+            value={msg || ''}
             onChange={e => setMsg(e.target.value)}
             className="w-full bg-slate-50 border p-3 rounded-xl text-sm font-bold focus:border-emerald-500 outline-none text-slate-800"
-            placeholder="e.g. AI Automation Book"
+            placeholder="e.g. Books"
           />
         </div>
 
@@ -1012,17 +1153,17 @@ const MessageForm = ({ data, type, onSave, onDelete }) => {
           <div>
             <label className="text-[10px] font-black uppercase text-slate-400 mb-2 block">Price ($)</label>
             <input
-              value={title || data.productPrice || '29.99'}
+              value={title || ''}
               onChange={e => setTitle(e.target.value)}
               className="w-full bg-slate-50 border p-3 rounded-xl text-sm font-bold focus:border-emerald-500 outline-none text-slate-800"
-              placeholder="29.99"
+              placeholder="20.00"
             />
           </div>
 
           <div>
             <label className="text-[10px] font-black uppercase text-slate-400 mb-2 block">CTA Button Text</label>
             <input
-              value={keyword || data.ctaText || 'View Product'}
+              value={keyword || 'View Product'}
               onChange={e => setKeyword(e.target.value)}
               className="w-full bg-slate-50 border p-3 rounded-xl text-sm font-bold focus:border-emerald-500 outline-none text-slate-800"
               placeholder="View Product"
@@ -1030,17 +1171,20 @@ const MessageForm = ({ data, type, onSave, onDelete }) => {
           </div>
         </div>
 
-        <div className="space-y-2 pt-2 border-t border-slate-100">
-          <p className="text-[10px] font-black uppercase text-slate-400 mb-1">Send Included Elements:</p>
-          <label className="flex items-center gap-2 text-xs font-bold text-slate-700 cursor-pointer">
-            <input type="checkbox" defaultChecked className="accent-emerald-600 rounded" /> ☑ Image
-          </label>
-          <label className="flex items-center gap-2 text-xs font-bold text-slate-700 cursor-pointer">
-            <input type="checkbox" defaultChecked className="accent-emerald-600 rounded" /> ☑ Product Link
-          </label>
-          <label className="flex items-center gap-2 text-xs font-bold text-slate-700 cursor-pointer">
-            <input type="checkbox" defaultChecked className="accent-emerald-600 rounded" /> ☑ CTA Button [ View Product ]
-          </label>
+        <div className="p-3 bg-emerald-50/50 border border-emerald-100 rounded-xl space-y-1.5">
+          <p className="text-[10px] font-black uppercase text-emerald-700 tracking-wider">WhatsApp Output Elements:</p>
+          <p className="text-[11px] text-slate-600 font-medium flex items-center gap-1.5">
+            <CheckCircle2 size={12} className="text-emerald-600 shrink-0" />
+            <span>Product Photo Card (Header)</span>
+          </p>
+          <p className="text-[11px] text-slate-600 font-medium flex items-center gap-1.5">
+            <CheckCircle2 size={12} className="text-emerald-600 shrink-0" />
+            <span>Product Title, Price & Link</span>
+          </p>
+          <p className="text-[11px] text-slate-600 font-medium flex items-center gap-1.5">
+            <CheckCircle2 size={12} className="text-emerald-600 shrink-0" />
+            <span>Interactive <strong>[ 🛒 Buy Now ]</strong> and <strong>[ View Product ]</strong> Buttons</span>
+          </p>
         </div>
       </div>
     ) : null}
@@ -1052,6 +1196,7 @@ const MessageForm = ({ data, type, onSave, onDelete }) => {
         duration,
         buttons,
         mediaUrl,
+        productId: selectedProductId,
         productName: msg,
         productPrice: title,
         ctaText: keyword,
