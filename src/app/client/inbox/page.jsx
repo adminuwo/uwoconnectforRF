@@ -1325,6 +1325,58 @@ export default function ClientInboxPage() {
                             </div>
                           )}
 
+                          {/* ── MEDIA PREVIEW (image / document / video) ── */}
+                          {msg.media_url && msg.media_type === 'image' && (
+                            <div className="mb-2 rounded-xl overflow-hidden border border-slate-200/60">
+                              <img
+                                src={msg.media_url}
+                                alt="Customer photo"
+                                className="w-full max-h-72 object-contain bg-slate-100 cursor-pointer hover:opacity-90 transition-opacity"
+                                onClick={() => window.open(msg.media_url, '_blank')}
+                                onError={(e) => { e.target.style.display = 'none'; }}
+                              />
+                              {msg.body && msg.body !== '📷 [Photo]' && (
+                                <p className="text-[11px] px-2 py-1 text-slate-500 italic">{msg.body.replace('📷 ', '')}</p>
+                              )}
+                            </div>
+                          )}
+
+                          {msg.media_url && msg.media_type === 'document' && (
+                            <a
+                              href={msg.media_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className={`flex items-center gap-2.5 p-2.5 rounded-xl border mb-2 no-underline transition-all ${
+                                isIncoming
+                                  ? 'bg-blue-50 border-blue-200 text-blue-800 hover:bg-blue-100'
+                                  : 'bg-white/20 border-white/30 text-white hover:bg-white/30'
+                              }`}
+                            >
+                              <div className={`p-1.5 rounded-lg ${isIncoming ? 'bg-blue-100' : 'bg-white/20'}`}>
+                                <FileText className="w-4 h-4" />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="font-bold text-[11px] truncate">{msg.media_filename || 'Document'}</p>
+                                <p className={`text-[9px] ${isIncoming ? 'text-blue-500' : 'text-white/70'}`}>
+                                  {msg.media_mime_type || 'File'} • Tap to open
+                                </p>
+                              </div>
+                              <Download className="w-3.5 h-3.5 shrink-0 opacity-70" />
+                            </a>
+                          )}
+
+                          {msg.media_url && msg.media_type === 'video' && (
+                            <div className="mb-2 rounded-xl overflow-hidden border border-slate-200/60 bg-black">
+                              <video
+                                src={msg.media_url}
+                                controls
+                                className="w-full max-h-60"
+                                preload="metadata"
+                              />
+                            </div>
+                          )}
+                          {/* ── END MEDIA PREVIEW ── */}
+
                           <div className={`whitespace-pre-wrap font-normal leading-relaxed ${isEmail ? 'max-h-72 overflow-y-auto pr-1 text-slate-800' : ''}`}>
                             {emailBodyText}
                           </div>

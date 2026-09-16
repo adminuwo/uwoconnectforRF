@@ -207,7 +207,6 @@ const Sidebar = ({ role, isOpen, onClose, onToggle }) => {
   const adminLinks = [
     { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
     { name: 'Clients', href: '/admin/clients', icon: Users },
-    { name: 'Content Management', href: '/admin/content', icon: LayoutTemplate },
     { name: 'Legal Policies', href: '/admin/settings/legal', icon: Scale },
     { name: 'White-Label Hub', href: '/admin/whitelabel', icon: Globe },
     { name: 'Team', href: '/admin/team', icon: ShieldCheck },
@@ -215,7 +214,6 @@ const Sidebar = ({ role, isOpen, onClose, onToggle }) => {
     { name: 'Plans', href: '/admin/plans', icon: Layers },
     { name: 'Live Messages', href: '/admin/inbox', icon: MessageSquare },
     { name: 'Knowledge Base', href: '/admin/knowledge', icon: Brain },
-    { name: 'Emails', href: '/admin/emails', icon: Mail },
     { name: 'Products', href: '/admin/products', icon: ShoppingBag },
     { name: 'Sales & Orders', href: '/admin/sales', icon: CreditCard },
     { name: 'Wallet & Rates', href: '/admin/billing', icon: Wallet },

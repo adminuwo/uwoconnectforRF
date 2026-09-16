@@ -1089,14 +1089,6 @@ const MessageForm = ({ data, type, onSave, onDelete, availableProducts = [] }) =
             placeholder="e.g. 🤖 AI Assistant Connected! Ask me anything about our products, pricing, or services..."
           />
         </div>
-
-        <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-1.5">
-          <p className="text-[10px] font-black uppercase text-slate-500 tracking-wider">Quick Exit Buttons (Always Attached):</p>
-          <div className="flex gap-2">
-            <span className="px-2.5 py-1 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-700">📋 Main Menu</span>
-            <span className="px-2.5 py-1 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-700">👤 Talk to Human</span>
-          </div>
-        </div>
       </div>
     ) : type === 'catalog_product' ? (
       <div className="space-y-4">
