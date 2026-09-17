@@ -144,9 +144,68 @@ const Sidebar = ({ role, isOpen, onClose, onToggle }) => {
   const rawUserPlan = entitlements?.plan?.name || userObj?.client?.plan || userObj?.plan || '';
   const activePlanRank = getPlanRank(entitlements?.plan, rawUserPlan);
 
+  const isItemComingSoon = (link) => {
+    if (role === 'ADMIN') return false;
+    if (!mounted) return false;
+    const baseKey = (link.featureKey || link.name || '').toLowerCase().trim();
+    const cleanKey = baseKey.replace(/^feature_/, '').replace(/^connector_/, '').replace(/^channel_/, '').replace(/\s+/g, '_');
+    
+    // Normalization mapping
+    const CANONICAL_MAP = {
+      'voice_video_call': 'calls',
+      'autoreply': 'automations',
+      'workflow': 'workflows',
+      'quotation': 'quotations',
+      'proposal': 'proposals',
+      'invoice': 'invoices',
+      'broadcast': 'broadcasts',
+      'knowledge_base': 'knowledge',
+      'order': 'orders',
+      'team_dashboard': 'team',
+      'payment': 'razorpay'
+    };
+    const canonicalKey = CANONICAL_MAP[cleanKey] || cleanKey;
+    const variants = [canonicalKey, cleanKey, baseKey, `feature_${cleanKey}`, `connector_${cleanKey}`];
+    
+    // Check global admin master toggles
+    const gConnectors = entitlements?.global_connectors || userObj?.client?.global_connectors || userObj?.global_connectors;
+    if (gConnectors) {
+      for (const v of variants) {
+        if (v && gConnectors[v] === false) return true;
+      }
+    }
+    
+    // Check effective connectors from backend
+    const effConnectors = userObj?.client?.effective_connectors || userObj?.effective_connectors;
+    if (effConnectors) {
+      for (const v of variants) {
+        if (v && effConnectors[v]) {
+          const effMatch = effConnectors[v];
+          if (effMatch.global_active === false || effMatch.effective_status === 'COMING_SOON' || effMatch.is_coming_soon === true) {
+            return true;
+          }
+        }
+      }
+    }
+    
+    // Check evaluated status from entitlement service
+    if (entitlements) {
+      for (const variant of variants) {
+        const featStatus = entitlements?.features?.[variant]?.status || 
+                           entitlements?.connectors?.[variant]?.status ||
+                           entitlements?.channels?.[variant]?.status;
+        if (featStatus === 'COMING_SOON') {
+          return true;
+        }
+      }
+    }
+    return false;
+  };
+
   const isFeatureUnlocked = (link) => {
     if (role === 'ADMIN') return true;
     if (!mounted) return false;
+    if (isItemComingSoon(link)) return false;
     if (!link.requiredPlan) return true;
 
     const baseKey = (link.featureKey || link.name || '').toLowerCase().trim();
@@ -186,7 +245,7 @@ const Sidebar = ({ role, isOpen, onClose, onToggle }) => {
         const featStatus = entitlements?.features?.[variant]?.status || 
                            entitlements?.connectors?.[variant]?.status ||
                            entitlements?.channels?.[variant]?.status;
-        if (featStatus === 'UPGRADE_REQUIRED' || featStatus === 'LOCKED') {
+        if (featStatus === 'UPGRADE_REQUIRED' || featStatus === 'LOCKED' || featStatus === 'COMING_SOON') {
           return false;
         }
         if (featStatus === 'AVAILABLE' || featStatus === 'CONNECTED' || featStatus === 'ENABLED') {
@@ -405,7 +464,38 @@ const Sidebar = ({ role, isOpen, onClose, onToggle }) => {
             const Icon = link.icon;
             const tourId = TOUR_IDS[link.name];
 
+            const itemComingSoon = isItemComingSoon(link);
             const isLocked = !isFeatureUnlocked(link);
+
+            if (itemComingSoon) {
+              return (
+                <div
+                  key={link.href}
+                  data-tour={tourId}
+                  onClick={() => {
+                    alert(`${link.name} is Coming Soon! This feature is temporarily deactivated or scheduled for rollout by the platform administrator.`);
+                  }}
+                  title={`${link.name} (Coming Soon)`}
+                  className={cn(
+                    'group flex items-center rounded-xl transition-all duration-200 relative overflow-hidden cursor-pointer',
+                    isOpen ? 'gap-2 px-2 py-2' : 'justify-center px-0 py-2',
+                    'text-amber-700/80 bg-amber-50/40 hover:bg-amber-100/50 border border-amber-200/40'
+                  )}
+                >
+                  <Icon size={isOpen ? 16 : 18} className="text-amber-600 shrink-0 opacity-80" />
+                  {isOpen && (
+                    <div className="flex-1 flex items-center justify-between min-w-0">
+                      <span className="text-[12px] tracking-tight font-bold text-amber-900 truncate">
+                        {link.name}
+                      </span>
+                      <span className="text-[8.5px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-md bg-amber-200/80 text-amber-950 ml-1">
+                        Soon
+                      </span>
+                    </div>
+                  )}
+                </div>
+              );
+            }
 
             if (isLocked) {
               return (

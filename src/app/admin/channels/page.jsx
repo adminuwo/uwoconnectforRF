@@ -1,9 +1,13 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { 
   RefreshCw, CheckCircle2, Users, AlertCircle, Power, Radio,
-  LayoutGrid, List, Clock, X, CalendarClock, ChevronRight
+  LayoutGrid, List, Clock, X, CalendarClock, ChevronRight,
+  Phone, Send, Megaphone, GitBranch, Zap, Brain, FileText,
+  Calculator, Receipt, ShoppingBag, ShoppingCart, BarChart3,
+  ShieldCheck, Search, Filter, Sparkles, SlidersHorizontal,
+  ExternalLink, Layers, MessageSquare, Database
 } from 'lucide-react';
 import axios from 'axios';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
@@ -12,30 +16,38 @@ import { API_BASE_URL } from '@/config/apiConfig';
 import { CHANNEL_DEFINITIONS } from '@/config/channelsConfig';
 
 // ═════════════════════════════════════════════════════════════════════════════════
-// ── OFFICIAL AUTHENTIC BRAND VECTOR LOGOS ──
+// ── OFFICIAL AUTHENTIC BRAND VECTOR LOGOS & FEATURE ICONS ──
 // ═════════════════════════════════════════════════════════════════════════════════
 
 // 1. WhatsApp
-const WhatsAppLogo = ({ size = 28 }) => (
+const WhatsAppLogo = ({ size = 44 }) => (
   <svg width={size} height={size} viewBox="0 0 48 48" fill="none">
     <circle cx="24" cy="24" r="24" fill="#25D366" />
-    <path fillRule="evenodd" clipRule="evenodd" d="M35.2 12.8C32.3 9.9 28.3 8.3 24.1 8.3C15.4 8.3 8.4 15.3 8.4 24C8.4 26.8 9.1 29.5 10.5 31.9L8.4 39.6L16.3 37.5C18.6 38.8 21.3 39.5 24.1 39.5C32.8 39.5 39.8 32.5 39.8 23.8C39.8 19.6 38.1 15.6 35.2 12.8ZM24.1 36.8C21.7 36.8 19.4 36.1 17.4 35L16.9 34.7L12.2 35.9L13.5 31.3L13.2 30.8C12 28.7 11.3 26.4 11.3 24C11.3 17 17 11.3 24.1 11.3C27.5 11.3 30.7 12.6 33.1 15C35.5 17.4 36.8 20.6 36.8 24C36.8 31 31.1 36.8 24.1 36.8ZM31 27.2C30.6 27 28.7 26.1 28.4 26C28 25.8 27.8 25.7 27.5 26.1C27.2 26.5 26.5 27.4 26.3 27.6C26.1 27.9 25.8 27.9 25.4 27.7C25 27.5 23.7 27.1 22.2 25.7C21 24.7 20.2 23.4 20 23C19.8 22.6 20 22.4 20.2 22.2C20.4 22 20.6 21.7 20.8 21.5C21 21.3 21.1 21.1 21.2 20.9C21.3 20.7 21.3 20.5 21.2 20.3C21.1 20.1 20.3 18.2 20 17.4C19.7 16.6 19.4 16.7 19.1 16.7H18.4C18.1 16.7 17.7 16.8 17.3 17.2C16.9 17.6 16 18.5 16 20.3C16 22.1 17.3 23.9 17.5 24.1C17.7 24.3 20.1 28 23.7 29.6C24.6 30 25.2 30.2 25.8 30.4C26.7 30.7 27.5 30.6 28.2 30.5C28.9 30.4 30.5 29.5 30.8 28.6C31.1 27.8 31.1 27.1 31 27.2Z" fill="white"/>
+    <path
+      fillRule="evenodd"
+      clipRule="evenodd"
+      d="M35.2 12.8C32.3 9.9 28.3 8.3 24.1 8.3C15.4 8.3 8.4 15.3 8.4 24C8.4 26.8 9.1 29.5 10.5 31.9L8.4 39.6L16.3 37.5C18.6 38.8 21.3 39.5 24.1 39.5C32.8 39.5 39.8 32.5 39.8 23.8C39.8 19.6 38.1 15.6 35.2 12.8ZM24.1 36.8C21.7 36.8 19.4 36.1 17.4 35L16.9 34.7L12.2 35.9L13.5 31.3L13.2 30.8C12 28.7 11.3 26.4 11.3 24C11.3 17 17 11.3 24.1 11.3C27.5 11.3 30.7 12.6 33.1 15C35.5 17.4 36.8 20.6 36.8 24C36.8 31 31.1 36.8 24.1 36.8ZM31 27.2C30.6 27 28.7 26.1 28.4 26C28 25.8 27.8 25.7 27.5 26.1C27.2 26.5 26.5 27.4 26.3 27.6C26.1 27.9 25.8 27.9 25.4 27.7C25 27.5 23.7 27.1 22.2 25.7C21 24.7 20.2 23.4 20 23C19.8 22.6 20 22.4 20.2 22.2C20.4 22 20.6 21.7 20.8 21.5C21 21.3 21.1 21.1 21.2 20.9C21.3 20.7 21.3 20.5 21.2 20.3C21.1 20.1 20.3 18.2 20 17.4C19.7 16.6 19.4 16.7 19.1 16.7H18.4C18.1 16.7 17.7 16.8 17.3 17.2C16.9 17.6 16 18.5 16 20.3C16 22.1 17.3 23.9 17.5 24.1C17.7 24.3 20.1 28 23.7 29.6C24.6 30 25.2 30.2 25.8 30.4C26.7 30.7 27.5 30.6 28.2 30.5C28.9 30.4 30.5 29.5 30.8 28.6C31.1 27.8 31.1 27.1 31 27.2Z"
+      fill="white"
+    />
   </svg>
 );
 
 // 2. Facebook
-const FacebookLogo = ({ size = 28 }) => (
+const FacebookLogo = ({ size = 44 }) => (
   <svg width={size} height={size} viewBox="0 0 48 48" fill="none">
-    <circle cx="24" cy="24" r="24" fill="#1877F2"/>
-    <path d="M29.5 25.1L30.3 19.9H25.3V16.5C25.3 15.1 26 13.7 28.2 13.7H30.5V9.3C30.5 9.3 28.4 9 26.4 9C22.3 9 19.6 11.5 19.6 16V19.9H15V25.1H19.6V37.7C20.5 37.9 21.5 38 22.5 38C23.5 38 24.4 37.9 25.3 37.7V25.1H29.5Z" fill="white"/>
+    <circle cx="24" cy="24" r="24" fill="#1877F2" />
+    <path
+      d="M29.5 25.1L30.3 19.9H25.3V16.5C25.3 15.1 26 13.7 28.2 13.7H30.5V9.3C30.5 9.3 28.4 9 26.4 9C22.3 9 19.6 11.5 19.6 16V19.9H15V25.1H19.6V37.7C20.5 37.9 21.5 38 22.5 38C23.5 38 24.4 37.9 25.3 37.7V25.1H29.5Z"
+      fill="white"
+    />
   </svg>
 );
 
 // 3. Instagram
-const InstagramLogo = ({ size = 28 }) => (
+const InstagramLogo = ({ size = 44 }) => (
   <svg width={size} height={size} viewBox="0 0 48 48" fill="none">
     <defs>
-      <linearGradient id="igFinalGrad2" x1="0%" y1="100%" x2="100%" y2="0%">
+      <linearGradient id="igFinalGradAdmin" x1="0%" y1="100%" x2="100%" y2="0%">
         <stop offset="0%" stopColor="#FFD600" />
         <stop offset="25%" stopColor="#FF7A00" />
         <stop offset="50%" stopColor="#FF0069" />
@@ -43,122 +55,157 @@ const InstagramLogo = ({ size = 28 }) => (
         <stop offset="100%" stopColor="#7638FA" />
       </linearGradient>
     </defs>
-    <rect width="48" height="48" rx="12" fill="url(#igFinalGrad2)"/>
-    <rect x="11" y="11" width="26" height="26" rx="7" stroke="white" strokeWidth="3" fill="none"/>
-    <circle cx="24" cy="24" r="6" stroke="white" strokeWidth="3" fill="none"/>
-    <circle cx="31.5" cy="16.5" r="1.75" fill="white"/>
+    <rect width="48" height="48" rx="12" fill="url(#igFinalGradAdmin)" />
+    <rect x="11" y="11" width="26" height="26" rx="7" stroke="white" strokeWidth="3" fill="none" />
+    <circle cx="24" cy="24" r="6" stroke="white" strokeWidth="3" fill="none" />
+    <circle cx="31.5" cy="16.5" r="1.75" fill="white" />
   </svg>
 );
 
-// 4. Gmail
-const GmailLogo = ({ size = 28 }) => (
+// 4. Voice & Video Calling
+const CallsLogo = ({ size = 44 }) => (
   <svg width={size} height={size} viewBox="0 0 48 48" fill="none">
-    <path d="M10 38V18.8L3 13.5V35C3 36.6 4.3 38 6 38H10Z" fill="#4285F4"/>
-    <path d="M38 38V18.8L45 13.5V35C45 36.6 43.7 38 42 38H38Z" fill="#34A853"/>
-    <path d="M38 18.8V10L24 20.5L10 10V18.8L24 29.3L38 18.8Z" fill="#EA4335"/>
-    <path d="M10 10L3 13.5L10 18.8V10Z" fill="#C5221F"/>
-    <path d="M38 10L45 13.5L38 18.8V10Z" fill="#FBBC04"/>
+    <rect width="48" height="48" rx="12" fill="#0D9488" />
+    <path d="M14 18C14 15.8 15.8 14 18 14H24C26.2 14 28 15.8 28 18V30C28 32.2 26.2 34 24 34H18C15.8 34 14 32.2 14 30V18Z" fill="white" />
+    <path d="M28 20L35 16V32L28 28V20Z" fill="white" opacity="0.9" />
   </svg>
 );
 
-// 5. Outlook
-const OutlookLogo = ({ size = 28 }) => (
+// 5. Google News Feed
+const GoogleNewsLogo = ({ size = 44 }) => (
   <svg width={size} height={size} viewBox="0 0 48 48" fill="none">
-    <rect x="4" y="8" width="24" height="32" rx="3" fill="#0078D4" />
-    <rect x="6" y="10" width="20" height="28" rx="2" fill="#28A8E8" />
-    <path d="M16 16 C12 16 9 19 9 23 C9 27 12 30 16 30 C20 30 23 27 23 23 C23 19 20 16 16 16Z" fill="white" />
-    <path d="M28 14 L44 20 L44 28 L28 34 Z" fill="#0078D4" />
-    <path d="M28 14 L44 20 L44 28 L28 34 L28 14Z" fill="#106EBE" />
-    <path d="M28 14 L44 20 L36 24 Z" fill="#28A8E8" />
+    <rect width="48" height="48" rx="12" fill="#4285F4" />
+    <rect x="12" y="12" width="24" height="24" rx="4" fill="white" />
+    <path d="M16 16H32V20H16V16Z" fill="#EA4335" />
+    <path d="M16 23H25V26H16V23Z" fill="#34A853" />
+    <path d="M16 28H28V30H16V28Z" fill="#FBBC04" />
+    <rect x="27" y="22" width="5" height="5" rx="1" fill="#4285F4" />
   </svg>
 );
 
-// 6. OneDrive
-const OneDriveLogo = ({ size = 28 }) => (
+// 6. Telegram
+const TelegramLogo = ({ size = 44 }) => (
   <svg width={size} height={size} viewBox="0 0 48 48" fill="none">
-    <path d="M34.5 35H12C7.6 35 4 31.4 4 27C4 23 7 19.7 11 19.1C11.5 13.4 16.3 9 22 9C27.2 9 31.6 12.6 32.7 17.6C33.3 17.4 33.9 17.3 34.5 17.3C38.6 17.3 42 20.7 42 24.8C42 28.9 38.6 35 34.5 35Z" fill="#0078D4"/>
-    <path d="M34.5 35H18C14.7 35 12 32.3 12 29C12 26 14.2 23.5 17.2 23.1C17.6 18.8 21.2 15.5 25.5 15.5C29.4 15.5 32.7 18.2 33.5 22C33.8 21.9 34.2 21.8 34.5 21.8C37.5 21.8 40 24.3 40 27.3C40 30.3 37.5 35 34.5 35Z" fill="#28A8E8"/>
+    <circle cx="24" cy="24" r="24" fill="#229ED9" />
+    <path d="M10 23.5L34 14L28.5 35L22 28.5L18 31.5L17.5 26.5L30 17L14.5 25.5L10 23.5Z" fill="white" />
   </svg>
 );
 
-// 7. Google Calendar
-const GoogleCalendarLogo = ({ size = 28 }) => (
+// 7. Gmail
+const GmailLogo = ({ size = 44 }) => (
   <svg width={size} height={size} viewBox="0 0 48 48" fill="none">
-    <rect x="6" y="8" width="36" height="34" rx="4" fill="white" stroke="#4285F4" strokeWidth="3"/>
-    <path d="M6 16H42V10C42 7.8 40.2 6 38 6H10C7.8 6 6 7.8 6 10V16Z" fill="#4285F4"/>
-    <path d="M14 2V8" stroke="#EA4335" strokeWidth="3" strokeLinecap="round"/>
-    <path d="M34 2V8" stroke="#34A853" strokeWidth="3" strokeLinecap="round"/>
-    <rect x="13" y="22" width="6" height="5" rx="1" fill="#EA4335"/>
-    <rect x="29" y="22" width="6" height="5" rx="1" fill="#FBBC04"/>
-    <rect x="13" y="30" width="6" height="5" rx="1" fill="#34A853"/>
-    <rect x="29" y="30" width="6" height="5" rx="1" fill="#4285F4"/>
+    <rect width="48" height="48" rx="12" fill="#F8FAFC" stroke="#E2E8F0" strokeWidth="1.5" />
+    <path d="M12 36V19.5L6 15V33C6 34.6 7.3 36 9 36H12Z" fill="#4285F4" />
+    <path d="M36 36V19.5L42 15V33C42 34.6 40.7 36 39 36H36Z" fill="#34A853" />
+    <path d="M36 19.5V12L24 21L12 12V19.5L24 28.5L36 19.5Z" fill="#EA4335" />
+    <path d="M12 12L6 15L12 19.5V12Z" fill="#C5221F" />
+    <path d="M36 12L42 15L36 19.5V12Z" fill="#FBBC04" />
   </svg>
 );
 
-// 8. Google Sheets
-const GoogleSheetsLogo = ({ size = 28 }) => (
+// 8. Outlook
+const OutlookLogo = ({ size = 44 }) => (
   <svg width={size} height={size} viewBox="0 0 48 48" fill="none">
-    <path d="M38 6H16C13.8 6 12 7.8 12 10V38C12 40.2 13.8 42 16 42H38C40.2 42 42 40.2 42 38V10C42 7.8 40.2 6 38 6Z" fill="#0F9D58"/>
-    <path d="M20 14H34V18H20V14Z" fill="white"/>
-    <path d="M20 22H26V26H20V22Z" fill="white"/>
-    <path d="M28 22H34V26H28V22Z" fill="white"/>
-    <path d="M20 30H26V34H20V30Z" fill="white"/>
-    <path d="M28 30H34V34H28V30Z" fill="white"/>
+    <rect width="48" height="48" rx="12" fill="#0078D4" />
+    <circle cx="24" cy="24" r="10" stroke="white" strokeWidth="3" fill="none" />
+    <path d="M17 19H31V29H17V19Z" fill="white" opacity="0.3" />
+    <path d="M17 19L24 24L31 19" stroke="white" strokeWidth="2.5" fill="none" />
   </svg>
 );
 
-// 9. Google Docs
-const GoogleDocsLogo = ({ size = 28 }) => (
+// 9. OneDrive
+const OneDriveLogo = ({ size = 44 }) => (
   <svg width={size} height={size} viewBox="0 0 48 48" fill="none">
-    <path d="M38 6H16C13.8 6 12 7.8 12 10V38C12 40.2 13.8 42 16 42H38C40.2 42 42 40.2 42 38V10C42 7.8 40.2 6 38 6Z" fill="#4285F4"/>
-    <path d="M20 16H34V19H20V16Z" fill="white"/>
-    <path d="M20 23H34V26H20V23Z" fill="white"/>
-    <path d="M20 30H28V33H20V30Z" fill="white"/>
+    <rect width="48" height="48" rx="12" fill="#0078D4" />
+    <path
+      d="M17.5 32C14.5 32 12 29.5 12 26.5C12 23.8 13.9 21.6 16.5 21.1C17.3 17.6 20.4 15 24 15C28.2 15 31.7 18.2 32 22.4C34.3 22.8 36 24.8 36 27.2C36 30 33.7 32 31 32H17.5Z"
+      fill="white"
+    />
   </svg>
 );
 
-// 10. Google Slides
-const GoogleSlidesLogo = ({ size = 28 }) => (
+// 10. Google Calendar
+const GoogleCalendarLogo = ({ size = 44 }) => (
   <svg width={size} height={size} viewBox="0 0 48 48" fill="none">
-    <path d="M38 6H16C13.8 6 12 7.8 12 10V38C12 40.2 13.8 42 16 42H38C40.2 42 42 40.2 42 38V10C42 7.8 40.2 6 38 6Z" fill="#F4B400"/>
-    <rect x="19" y="17" width="16" height="12" rx="2" fill="white"/>
+    <rect width="48" height="48" rx="12" fill="#4285F4" />
+    <rect x="12" y="14" width="24" height="22" rx="4" fill="white" />
+    <path d="M12 14H36V20H12V14Z" fill="#EA4335" />
+    <circle cx="18" cy="11" r="2" fill="white" />
+    <circle cx="30" cy="11" r="2" fill="white" />
+    <text x="24" y="31" fill="#4285F4" fontSize="11" fontWeight="bold" textAnchor="middle" fontFamily="sans-serif">31</text>
   </svg>
 );
 
-// 11. Zoho CRM
-const ZohoLogo = ({ size = 28 }) => (
+// 11. Google Sheets
+const GoogleSheetsLogo = ({ size = 44 }) => (
   <svg width={size} height={size} viewBox="0 0 48 48" fill="none">
-    <rect x="4" y="4" width="18" height="18" rx="4" fill="#E62C2D"/>
-    <rect x="26" y="4" width="18" height="18" rx="4" fill="#009345"/>
-    <rect x="4" y="26" width="18" height="18" rx="4" fill="#0072BC"/>
-    <rect x="26" y="26" width="18" height="18" rx="4" fill="#F47B20"/>
+    <rect width="48" height="48" rx="12" fill="#0F9D58" />
+    <rect x="13" y="11" width="22" height="26" rx="3" fill="white" />
+    <path d="M17 17H31M17 23H31M17 29H31" stroke="#0F9D58" strokeWidth="2.5" strokeLinecap="round" />
+    <path d="M24 17V29" stroke="#0F9D58" strokeWidth="2" />
   </svg>
 );
 
-// 12. YouTube
-const YouTubeLogo = ({ size = 28 }) => (
+// 12. Google Docs
+const GoogleDocsLogo = ({ size = 44 }) => (
   <svg width={size} height={size} viewBox="0 0 48 48" fill="none">
-    <rect width="48" height="48" rx="10" fill="#FF0000"/>
-    <path d="M33.6 18.2C33.2 16.8 32 15.6 30.6 15.2C28 14.5 17.5 14.5 17.5 14.5C17.5 14.5 7 14.5 4.4 15.2C3 15.6 1.8 16.8 1.4 18.2C0.7 20.8 0.7 24 0.7 24C0.7 24 0.7 27.2 1.4 29.8C1.8 31.2 3 32.4 4.4 32.8C7 33.5 17.5 33.5 17.5 33.5C17.5 33.5 28 33.5 30.6 32.8C32 32.4 33.2 31.2 33.6 29.8C34.3 27.2 34.3 24 34.3 24C34.3 24 34.3 20.8 33.6 18.2ZM14.1 28V20L21.1 24L14.1 28Z" transform="translate(6.5, 0)" fill="white"/>
+    <rect width="48" height="48" rx="12" fill="#4285F4" />
+    <rect x="13" y="11" width="22" height="26" rx="3" fill="white" />
+    <path d="M17 17H31M17 23H31M17 29H26" stroke="#4285F4" strokeWidth="2.5" strokeLinecap="round" />
   </svg>
 );
 
-// 13. Google News
-const GoogleNewsLogo = ({ size = 28 }) => (
+// 13. Google Slides
+const GoogleSlidesLogo = ({ size = 44 }) => (
   <svg width={size} height={size} viewBox="0 0 48 48" fill="none">
-    <rect x="8" y="8" width="32" height="32" rx="6" fill="#4285F4"/>
-    <rect x="14" y="14" width="20" height="8" rx="2" fill="white"/>
-    <path d="M14 26H34" stroke="#EA4335" strokeWidth="3" strokeLinecap="round"/>
-    <path d="M14 32H26" stroke="#FBBC04" strokeWidth="3" strokeLinecap="round"/>
+    <rect width="48" height="48" rx="12" fill="#F4B400" />
+    <rect x="13" y="12" width="22" height="24" rx="3" fill="white" />
+    <rect x="17" y="16" width="14" height="10" rx="1" fill="#F4B400" />
+    <path d="M17 29H31" stroke="#F4B400" strokeWidth="2" strokeLinecap="round" />
   </svg>
 );
 
-// Helper to render official authentic logo
-const renderRealBrandLogo = (key, size = 28) => {
+// 14. Zoho CRM
+const ZohoLogo = ({ size = 44 }) => (
+  <svg width={size} height={size} viewBox="0 0 48 48" fill="none">
+    <rect width="48" height="48" rx="12" fill="#FFFFFF" stroke="#E2E8F0" strokeWidth="1.5" />
+    <rect x="10" y="10" width="13" height="13" rx="3" fill="#E62C2D"/>
+    <rect x="25" y="10" width="13" height="13" rx="3" fill="#009345"/>
+    <rect x="10" y="25" width="13" height="13" rx="3" fill="#0072BC"/>
+    <rect x="25" y="25" width="13" height="13" rx="3" fill="#F47B20"/>
+  </svg>
+);
+
+// 15. YouTube
+const YouTubeLogo = ({ size = 44 }) => (
+  <svg width={size} height={size} viewBox="0 0 48 48" fill="none">
+    <rect width="48" height="48" rx="12" fill="#FF0000" />
+    <path d="M33.2 24.1L18.8 32.4V15.8L33.2 24.1Z" fill="white" />
+  </svg>
+);
+
+// Feature Module Badges (12)
+const FeatureBadge = ({ color, children, size = 44 }) => (
+  <div
+    style={{ width: size, height: size, backgroundColor: color }}
+    className="rounded-2xl flex items-center justify-center text-white shadow-xs shrink-0"
+  >
+    {children}
+  </div>
+);
+
+// Helper to render official authentic logo or feature icon
+const renderItemIcon = (key, size = 44) => {
   switch (key) {
+    // Channels
     case 'whatsapp': return <WhatsAppLogo size={size} />;
     case 'facebook': return <FacebookLogo size={size} />;
     case 'instagram': return <InstagramLogo size={size} />;
+    case 'calls': return <CallsLogo size={size} />;
+    case 'google_news': return <GoogleNewsLogo size={size} />;
+    case 'telegram': return <TelegramLogo size={size} />;
+
+    // Connectors
     case 'gmail': return <GmailLogo size={size} />;
     case 'outlook': return <OutlookLogo size={size} />;
     case 'onedrive': return <OneDriveLogo size={size} />;
@@ -168,57 +215,104 @@ const renderRealBrandLogo = (key, size = 28) => {
     case 'google_slides': return <GoogleSlidesLogo size={size} />;
     case 'zoho': return <ZohoLogo size={size} />;
     case 'youtube': return <YouTubeLogo size={size} />;
-    case 'google_news': return <GoogleNewsLogo size={size} />;
-    default: return <Radio size={size} className="text-emerald-600" />;
-  }
-};
 
-// Core Channels (Section 1)
-const CORE_CHANNEL_KEYS = ['whatsapp', 'facebook', 'instagram'];
-
-// Supported Connectors (Section 2)
-const SUPPORTED_CONNECTOR_KEYS = [
-  'gmail', 'outlook', 'onedrive', 'google_calendar', 
-  'google_sheets', 'google_docs', 'google_slides', 
-  'zoho', 'youtube', 'google_news'
-];
-
-const ALL_ALLOWED_KEYS = [...CORE_CHANNEL_KEYS, ...SUPPORTED_CONNECTOR_KEYS];
-
-// Format date helper for scheduled badge
-const formatScheduleDisplay = (dateString) => {
-  if (!dateString) return null;
-  try {
-    const d = new Date(dateString);
-    if (isNaN(d.getTime())) return null;
-    return d.toLocaleString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true
-    });
-  } catch (e) {
-    return null;
+    // Core Features
+    case 'broadcasts':
+      return (
+        <FeatureBadge color="#7C3AED" size={size}>
+          <Megaphone size={22} className="text-white" />
+        </FeatureBadge>
+      );
+    case 'workflows':
+      return (
+        <FeatureBadge color="#4F46E5" size={size}>
+          <GitBranch size={22} className="text-white" />
+        </FeatureBadge>
+      );
+    case 'automations':
+      return (
+        <FeatureBadge color="#059669" size={size}>
+          <Zap size={22} className="text-white" />
+        </FeatureBadge>
+      );
+    case 'knowledge':
+      return (
+        <FeatureBadge color="#9333EA" size={size}>
+          <Brain size={22} className="text-white" />
+        </FeatureBadge>
+      );
+    case 'crm':
+      return (
+        <FeatureBadge color="#2563EB" size={size}>
+          <Users size={22} className="text-white" />
+        </FeatureBadge>
+      );
+    case 'proposals':
+      return (
+        <FeatureBadge color="#6366F1" size={size}>
+          <FileText size={22} className="text-white" />
+        </FeatureBadge>
+      );
+    case 'quotations':
+      return (
+        <FeatureBadge color="#0284C7" size={size}>
+          <Calculator size={22} className="text-white" />
+        </FeatureBadge>
+      );
+    case 'invoices':
+      return (
+        <FeatureBadge color="#10B981" size={size}>
+          <Receipt size={22} className="text-white" />
+        </FeatureBadge>
+      );
+    case 'catalog':
+      return (
+        <FeatureBadge color="#F59E0B" size={size}>
+          <ShoppingBag size={22} className="text-white" />
+        </FeatureBadge>
+      );
+    case 'orders':
+      return (
+        <FeatureBadge color="#EA580C" size={size}>
+          <ShoppingCart size={22} className="text-white" />
+        </FeatureBadge>
+      );
+    case 'reports':
+      return (
+        <FeatureBadge color="#8B5CF6" size={size}>
+          <BarChart3 size={22} className="text-white" />
+        </FeatureBadge>
+      );
+    case 'team':
+      return (
+        <FeatureBadge color="#EC4899" size={size}>
+          <ShieldCheck size={22} className="text-white" />
+        </FeatureBadge>
+      );
+    default:
+      return (
+        <FeatureBadge color="#64748B" size={size}>
+          <Layers size={22} className="text-white" />
+        </FeatureBadge>
+      );
   }
 };
 
 export default function AdminChannelsPage() {
   const [items, setItems] = useState([]);
+  const [counts, setCounts] = useState({ channels: 6, connectors: 9, features: 12, total: 27, active: 0, inactive: 0 });
   const [loading, setLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [togglingKey, setTogglingKey] = useState(null);
+  
+  // Segmented Tabs: 'all' | 'channels' | 'connectors' | 'features'
+  const [activeTab, setActiveTab] = useState('all');
+  
+  // Filter & Search State
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('ALL'); // 'ALL' | 'ACTIVE' | 'COMING_SOON'
   const [viewMode, setViewMode] = useState('cards'); // 'cards' | 'list'
   const [toastMessage, setToastMessage] = useState(null);
-
-  // Scheduling Modal State
-  const [scheduleModal, setScheduleModal] = useState({
-    isOpen: false,
-    item: null,
-    date: '',
-    time: '09:00',
-    saving: false
-  });
 
   // Load view mode preference from localStorage
   useEffect(() => {
@@ -242,7 +336,7 @@ export default function AdminChannelsPage() {
     setTimeout(() => setToastMessage(null), 3500);
   };
 
-  // Fetch Global Connectors from Backend
+  // Fetch Global Channels, Connectors, & Features from Backend
   const fetchItems = async (isManual = false) => {
     try {
       if (isManual) setIsRefreshing(true);
@@ -255,53 +349,52 @@ export default function AdminChannelsPage() {
         headers
       });
 
-      const serverConnectors = (res.data?.connectors || []).filter(c => ALL_ALLOWED_KEYS.includes(c.key));
+      const serverItems = res.data?.items || res.data?.connectors || [];
+      if (res.data?.counts) {
+        setCounts(res.data.counts);
+      }
 
-      // Filter only allowed channel definitions
-      const allowedDefs = CHANNEL_DEFINITIONS.filter(def => ALL_ALLOWED_KEYS.includes(def.key));
+      // Merge server items with CHANNEL_DEFINITIONS for rich colors, taglines, and descriptions
+      const defMap = new Map();
+      CHANNEL_DEFINITIONS.forEach(def => defMap.set(def.key, def));
 
-      const merged = allowedDefs.map(def => {
-        const match = serverConnectors.find(c => c.key === def.key);
+      const merged = serverItems.map(si => {
+        const def = defMap.get(si.key) || {};
         return {
-          ...def,
-          is_active: match ? match.is_active : true,
-          scheduled_live_at: match ? match.scheduled_live_at : null,
-          clients_using_count: match ? (match.clients_using_count ?? 0) : 0,
-          is_core_channel: CORE_CHANNEL_KEYS.includes(def.key)
+          key: si.key,
+          name: si.name || def.name || si.key,
+          shortName: def.shortName || si.name || si.key,
+          category: si.category || def.category || 'MESSAGING',
+          item_type: (si.item_type || def.item_type || 'CHANNEL').toUpperCase(),
+          description: def.description || `${si.name} integration and feature controls.`,
+          tagline: def.tagline || (si.item_type === 'FEATURE' ? 'Core Platform Feature' : 'Integration & API'),
+          color: def.color || '#0284c7',
+          is_active: si.is_active,
+          clients_using_count: si.clients_using_count ?? 0,
+          is_core_channel: si.item_type === 'CHANNEL' && ['whatsapp', 'facebook', 'instagram'].includes(si.key)
         };
-      });
-
-      // Add any additional backend connectors if in allowed list
-      serverConnectors.forEach(sc => {
-        if (!merged.some(m => m.key === sc.key)) {
-          merged.push({
-            key: sc.key,
-            name: sc.name,
-            shortName: sc.short_name || sc.name,
-            category: sc.category || 'MESSAGING',
-            color: '#0284c7',
-            is_active: sc.is_active,
-            scheduled_live_at: sc.scheduled_live_at || null,
-            clients_using_count: sc.clients_using_count ?? 0,
-            is_core_channel: CORE_CHANNEL_KEYS.includes(sc.key)
-          });
-        }
       });
 
       setItems(merged);
     } catch (err) {
       console.warn('[AdminChannels] Error loading items, using fallback:', err);
-      // Clean fallback with only allowed definitions
+      // Fallback with all definitions
       setItems(
-        CHANNEL_DEFINITIONS
-          .filter(def => ALL_ALLOWED_KEYS.includes(def.key))
-          .map(def => ({
+        CHANNEL_DEFINITIONS.map(def => {
+          let item_type = 'CONNECTOR';
+          if (['whatsapp', 'facebook', 'instagram', 'calls', 'google_news', 'telegram'].includes(def.key)) {
+            item_type = 'CHANNEL';
+          } else if (['broadcasts', 'workflows', 'automations', 'knowledge', 'crm', 'proposals', 'quotations', 'invoices', 'catalog', 'orders', 'reports', 'team'].includes(def.key)) {
+            item_type = 'FEATURE';
+          }
+          return {
             ...def,
+            item_type,
             is_active: true,
-            scheduled_live_at: null,
             clients_using_count: 0,
-            is_core_channel: CORE_CHANNEL_KEYS.includes(def.key)
-          }))
+            is_core_channel: ['whatsapp', 'facebook', 'instagram'].includes(def.key)
+          };
+        })
       );
     } finally {
       setLoading(false);
@@ -313,35 +406,47 @@ export default function AdminChannelsPage() {
     fetchItems();
   }, []);
 
-  // Handle Immediate Toggle Active/Deactive
-  const handleToggle = async (item) => {
-    const nextState = !item.is_active;
+  // Handle Direct Status Change (Active vs Coming Soon)
+  const handleSetStatus = async (item, targetActive) => {
+    if (item.is_active === targetActive) return;
     setTogglingKey(item.key);
 
     // Optimistic UI update
     setItems(prev =>
-      prev.map(i => (i.key === item.key ? { ...i, is_active: nextState, scheduled_live_at: nextState ? null : i.scheduled_live_at } : i))
+      prev.map(i => (i.key === item.key ? { ...i, is_active: targetActive } : i))
     );
 
     try {
       const token = localStorage.getItem('token');
       await axios.patch(`${API_BASE_URL}/api/admin/channel-access/global/${item.key}/`, {
-        is_active: nextState
+        is_active: targetActive,
+        scheduled_live_at: null
       }, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
+      // Clear cached client permissions
+      try {
+        localStorage.removeItem('cached_client_channels');
+      } catch (e) {}
+
       showToast(
-        nextState 
-          ? `🟢 ${item.name} activated` 
-          : `⏸️ ${item.name} deactivated`,
-        nextState ? 'success' : 'info'
+        targetActive 
+          ? `🟢 ${item.name} activated across workspaces & mobile` 
+          : `⏳ ${item.name} set to Coming Soon across workspaces & mobile`,
+        targetActive ? 'success' : 'info'
       );
+      
+      // Dispatch events for all tabs, windows, and mobile polling
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('storage'));
+        window.dispatchEvent(new CustomEvent('channelsUpdated', { detail: { key: item.key, is_active: targetActive } }));
+      }
     } catch (err) {
-      console.error('Failed to toggle status:', err);
+      console.error('Failed to update status:', err);
       // Revert optimistic update
       setItems(prev =>
-        prev.map(i => (i.key === item.key ? { ...i, is_active: !nextState } : i))
+        prev.map(i => (i.key === item.key ? { ...i, is_active: !targetActive } : i))
       );
       showToast(err?.response?.data?.error || `Failed to update ${item.name}.`, 'error');
     } finally {
@@ -349,223 +454,148 @@ export default function AdminChannelsPage() {
     }
   };
 
-  // Open Schedule Modal
-  const openScheduleModal = (item) => {
-    let initialDate = '';
-    let initialTime = '09:00';
-
-    if (item.scheduled_live_at) {
-      const d = new Date(item.scheduled_live_at);
-      if (!isNaN(d.getTime())) {
-        initialDate = d.toISOString().split('T')[0];
-        initialTime = d.toTimeString().slice(0, 5);
+  // Filter and Category segmentation
+  const filteredItems = useMemo(() => {
+    return items.filter(item => {
+      // 1. Search Query
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase().trim();
+        const matchName = item.name.toLowerCase().includes(q);
+        const matchKey = item.key.toLowerCase().includes(q);
+        const matchCategory = item.category.toLowerCase().includes(q);
+        if (!matchName && !matchKey && !matchCategory) return false;
       }
-    } else {
-      const tomorrow = new Date();
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      initialDate = tomorrow.toISOString().split('T')[0];
-    }
 
-    setScheduleModal({
-      isOpen: true,
-      item,
-      date: initialDate,
-      time: initialTime,
-      saving: false
+      // 2. Status Filter
+      if (statusFilter === 'ACTIVE' && !item.is_active) return false;
+      if (statusFilter === 'COMING_SOON' && item.is_active) return false;
+
+      // 3. Tab Filter
+      if (activeTab === 'channels' && item.item_type !== 'CHANNEL') return false;
+      if (activeTab === 'connectors' && item.item_type !== 'CONNECTOR') return false;
+      if (activeTab === 'features' && item.item_type !== 'FEATURE') return false;
+
+      return true;
     });
-  };
+  }, [items, searchQuery, statusFilter, activeTab]);
 
-  // Quick Preset Selector
-  const applyPreset = (preset) => {
-    const now = new Date();
-    if (preset === '1h') {
-      now.setHours(now.getHours() + 1);
-    } else if (preset === 'tomorrow') {
-      now.setDate(now.getDate() + 1);
-      now.setHours(9, 0, 0, 0);
-    } else if (preset === '3days') {
-      now.setDate(now.getDate() + 3);
-      now.setHours(9, 0, 0, 0);
-    } else if (preset === 'monday') {
-      const day = now.getDay();
-      const diff = (8 - day) % 7 || 7;
-      now.setDate(now.getDate() + diff);
-      now.setHours(9, 0, 0, 0);
-    }
+  // Breakdown lists for display
+  const channelsList = useMemo(() => filteredItems.filter(i => i.item_type === 'CHANNEL'), [filteredItems]);
+  const connectorsList = useMemo(() => filteredItems.filter(i => i.item_type === 'CONNECTOR'), [filteredItems]);
+  const featuresList = useMemo(() => filteredItems.filter(i => i.item_type === 'FEATURE'), [filteredItems]);
 
-    setScheduleModal(prev => ({
-      ...prev,
-      date: now.toISOString().split('T')[0],
-      time: now.toTimeString().slice(0, 5)
-    }));
-  };
-
-  // Save Schedule
-  const handleSaveSchedule = async () => {
-    const { item, date, time } = scheduleModal;
-    if (!item || !date || !time) {
-      showToast('Please select a valid date and time.', 'error');
-      return;
-    }
-
-    const scheduledIso = new Date(`${date}T${time}:00`).toISOString();
-
-    setScheduleModal(prev => ({ ...prev, saving: true }));
-
-    // Optimistic update
-    setItems(prev =>
-      prev.map(i => (i.key === item.key ? { ...i, is_active: false, scheduled_live_at: scheduledIso } : i))
-    );
-
-    try {
-      const token = localStorage.getItem('token');
-      await axios.patch(`${API_BASE_URL}/api/admin/channel-access/global/${item.key}/`, {
-        scheduled_live_at: scheduledIso,
-        is_active: false
-      }, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-
-      const displayDate = formatScheduleDisplay(scheduledIso);
-      showToast(`⏰ ${item.name} scheduled to go live on ${displayDate}`);
-      setScheduleModal({ isOpen: false, item: null, date: '', time: '09:00', saving: false });
-    } catch (err) {
-      console.error('Failed to schedule live activation:', err);
-      showToast(err?.response?.data?.error || 'Failed to save schedule.', 'error');
-      setScheduleModal(prev => ({ ...prev, saving: false }));
-      fetchItems();
-    }
-  };
-
-  // Cancel / Remove Schedule
-  const handleRemoveSchedule = async () => {
-    const { item } = scheduleModal;
-    if (!item) return;
-
-    setScheduleModal(prev => ({ ...prev, saving: true }));
-
-    // Optimistic update
-    setItems(prev =>
-      prev.map(i => (i.key === item.key ? { ...i, scheduled_live_at: null } : i))
-    );
-
-    try {
-      const token = localStorage.getItem('token');
-      await axios.patch(`${API_BASE_URL}/api/admin/channel-access/global/${item.key}/`, {
-        scheduled_live_at: null
-      }, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-
-      showToast(`Schedule removed for ${item.name}.`, 'info');
-      setScheduleModal({ isOpen: false, item: null, date: '', time: '09:00', saving: false });
-    } catch (err) {
-      console.error('Failed to remove schedule:', err);
-      showToast('Failed to remove schedule.', 'error');
-      setScheduleModal(prev => ({ ...prev, saving: false }));
-      fetchItems();
-    }
-  };
-
-  const channelsList = items.filter(i => i.is_core_channel);
-  const connectorsList = items.filter(i => !i.is_core_channel);
+  // Dynamic counts for tab badges
+  const totalChannels = useMemo(() => items.filter(i => i.item_type === 'CHANNEL').length, [items]);
+  const totalConnectors = useMemo(() => items.filter(i => i.item_type === 'CONNECTOR').length, [items]);
+  const totalFeatures = useMemo(() => items.filter(i => i.item_type === 'FEATURE').length, [items]);
+  const activeCount = useMemo(() => items.filter(i => i.is_active).length, [items]);
+  const inactiveCount = useMemo(() => items.filter(i => !i.is_active).length, [items]);
 
   // ── Render Card Item (Grid View) ──
   const renderCard = (item) => {
     const isToggling = togglingKey === item.key;
     const isActive = item.is_active;
-    const isScheduled = Boolean(item.scheduled_live_at);
-    const scheduleText = formatScheduleDisplay(item.scheduled_live_at);
+
+    const typeBadgeColor = 
+      item.item_type === 'CHANNEL' 
+        ? "bg-emerald-50 text-emerald-700 border-emerald-200/80" 
+        : item.item_type === 'CONNECTOR' 
+        ? "bg-blue-50 text-blue-700 border-blue-200/80" 
+        : "bg-purple-50 text-purple-700 border-purple-200/80";
 
     return (
       <div
         key={item.key}
         className={cn(
-          "bg-white rounded-3xl p-6 border transition-all duration-200 flex flex-col justify-between gap-5 shadow-xs hover:shadow-md relative group",
+          "bg-white rounded-3xl p-5 sm:p-6 border transition-all duration-200 flex flex-col justify-between gap-5 shadow-xs hover:shadow-md relative group",
           isActive 
             ? "border-slate-200/90 hover:border-emerald-300" 
-            : isScheduled
-            ? "border-amber-300 bg-amber-50/30"
-            : "border-slate-200/80 bg-slate-50/60"
+            : "border-amber-200/90 bg-amber-50/15"
         )}
       >
-        {/* Top: Real Brand Logo & Channel Info */}
-        <div className="flex items-start justify-between gap-3.5">
+        {/* Top: Brand/Feature Icon & Header */}
+        <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-3.5 min-w-0 flex-1">
-            <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-slate-50 border border-slate-100/80 shadow-2xs shrink-0">
-              {renderRealBrandLogo(item.key, 32)}
+            <div className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 shadow-xs overflow-hidden">
+              {renderItemIcon(item.key, 48)}
             </div>
             <div className="min-w-0 flex-1">
-              <h3 className="font-extrabold text-base text-slate-900 leading-tight truncate">
+              <div className="flex items-center gap-1.5 mb-1">
+                <span className={cn("text-[9px] font-extrabold uppercase px-2 py-0.5 rounded-md border tracking-wider", typeBadgeColor)}>
+                  {item.item_type}
+                </span>
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                  {item.category}
+                </span>
+              </div>
+              <h3 className="font-extrabold text-base text-slate-900 leading-tight truncate" title={item.name}>
                 {item.name}
               </h3>
-              <div className="flex items-center gap-1.5 mt-1 text-xs text-slate-500">
-                <Users size={13} className="text-slate-400 shrink-0" />
-                <span className="font-bold text-slate-800">
-                  {item.clients_using_count}
-                </span>
-                <span>{item.clients_using_count === 1 ? 'client using' : 'clients using'}</span>
-              </div>
             </div>
           </div>
         </div>
 
-        {/* Middle: Scheduled Badge (if scheduled) */}
-        {isScheduled && (
-          <button
-            onClick={() => openScheduleModal(item)}
-            title="Click to edit schedule"
-            className="w-full px-3.5 py-2 rounded-xl bg-amber-100/90 text-amber-950 border border-amber-300 text-xs font-bold flex items-center justify-between transition hover:bg-amber-100 shadow-2xs"
-          >
-            <span className="flex items-center gap-1.5 truncate">
-              <Clock size={13} className="text-amber-700 shrink-0" />
-              <span>Goes live: <strong>{scheduleText}</strong></span>
-            </span>
-            <ChevronRight size={13} className="text-amber-700 shrink-0" />
-          </button>
-        )}
+        {/* Tagline / Description */}
+        <p className="text-xs text-slate-500 font-medium line-clamp-2 leading-relaxed">
+          {item.description || item.tagline}
+        </p>
 
-        {/* Bottom Row: Actions (Schedule Button + Active Toggle) */}
-        <div className="flex items-center justify-between gap-2.5 pt-3.5 border-t border-slate-100">
+        {/* Live Client Usage & Coming Soon Banner */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between text-xs text-slate-500 pt-2 border-t border-slate-100">
+            <div className="flex items-center gap-1.5">
+              <Users size={13} className="text-slate-400 shrink-0" />
+              <span className="font-bold text-slate-800">{item.clients_using_count}</span>
+              <span>{item.clients_using_count === 1 ? 'client using' : 'clients using'}</span>
+            </div>
+            {!isActive && (
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-100 text-amber-900 border border-amber-200">
+                Coming Soon
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* Bottom Row: ONLY 2-Option Control: Active vs Coming Soon */}
+        <div className="pt-3.5 border-t border-slate-100 flex items-center justify-between gap-2">
+          <span className="text-[11px] font-bold text-slate-400">Status:</span>
           
-          {/* Schedule Button */}
-          <button
-            onClick={() => openScheduleModal(item)}
-            title="Schedule Go-Live Date & Time"
-            className={cn(
-              "inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition border cursor-pointer",
-              isScheduled
-                ? "bg-amber-50 text-amber-800 border-amber-200 shadow-2xs hover:bg-amber-100"
-                : "bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200"
-            )}
-          >
-            <CalendarClock size={13} className={isScheduled ? "text-amber-600" : "text-slate-500"} />
-            <span>{isScheduled ? 'Scheduled' : 'Schedule'}</span>
-          </button>
-
-          {/* Active / Deactive Toggle Button */}
-          <button
-            onClick={() => handleToggle(item)}
-            disabled={isToggling}
-            title={isActive ? "Click to Deactivate" : "Click to Activate"}
-            className={cn(
-              "inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-black transition-all duration-200 border cursor-pointer select-none shrink-0 shadow-2xs",
-              isActive
-                ? "bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border-emerald-200"
-                : "bg-slate-100 hover:bg-slate-200 text-slate-600 border-slate-200",
-              isToggling && "opacity-60 cursor-not-allowed"
-            )}
-          >
-            {isToggling ? (
-              <RefreshCw size={13} className="animate-spin text-slate-500" />
-            ) : (
+          <div className="inline-flex items-center p-1 rounded-2xl bg-slate-100 border border-slate-200 shadow-2xs">
+            <button
+              type="button"
+              onClick={() => handleSetStatus(item, true)}
+              disabled={isToggling}
+              title="Click to Activate across Web & Mobile"
+              className={cn(
+                "flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black transition-all duration-200 cursor-pointer select-none",
+                isActive
+                  ? "bg-emerald-600 text-white shadow-xs"
+                  : "text-slate-500 hover:text-slate-800 hover:bg-slate-200/60"
+              )}
+            >
               <span className={cn(
                 "w-2 h-2 rounded-full",
-                isActive ? "bg-emerald-500 animate-pulse" : "bg-slate-400"
+                isActive ? "bg-white animate-pulse" : "bg-slate-400"
               )} />
-            )}
-            <span>{isActive ? 'Active' : 'Deactive'}</span>
-          </button>
+              <span>Active</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleSetStatus(item, false)}
+              disabled={isToggling}
+              title="Click to set to Coming Soon across Web & Mobile"
+              className={cn(
+                "flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black transition-all duration-200 cursor-pointer select-none",
+                !isActive
+                  ? "bg-amber-500 text-white shadow-xs"
+                  : "text-slate-500 hover:text-slate-800 hover:bg-slate-200/60"
+              )}
+            >
+              <Clock size={12} className={!isActive ? "text-white" : "text-slate-400"} />
+              <span>Coming Soon</span>
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -575,38 +605,51 @@ export default function AdminChannelsPage() {
   const renderListItem = (item) => {
     const isToggling = togglingKey === item.key;
     const isActive = item.is_active;
-    const isScheduled = Boolean(item.scheduled_live_at);
-    const scheduleText = formatScheduleDisplay(item.scheduled_live_at);
+
+    const typeBadgeColor = 
+      item.item_type === 'CHANNEL' 
+        ? "bg-emerald-50 text-emerald-700 border-emerald-200/80" 
+        : item.item_type === 'CONNECTOR' 
+        ? "bg-blue-50 text-blue-700 border-blue-200/80" 
+        : "bg-purple-50 text-purple-700 border-purple-200/80";
 
     return (
       <div
         key={item.key}
         className={cn(
-          "bg-white rounded-2xl px-6 py-4 border transition-all duration-150 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xs hover:border-slate-300 w-full",
+          "bg-white rounded-2xl px-5 py-4 border transition-all duration-150 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-xs hover:border-slate-300 w-full",
           isActive 
             ? "border-slate-200/90" 
-            : isScheduled
-            ? "border-amber-300 bg-amber-50/20"
-            : "border-slate-200 bg-slate-50/60"
+            : "border-amber-200 bg-amber-50/15"
         )}
       >
-        {/* Left: Real Brand Logo & Details */}
+        {/* Left: Icon, Name & Details */}
         <div className="flex items-center gap-4 min-w-0 flex-1">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-slate-50 border border-slate-100 shadow-2xs shrink-0">
-            {renderRealBrandLogo(item.key, 28)}
+          <div className="w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 shadow-xs overflow-hidden">
+            {renderItemIcon(item.key, 44)}
           </div>
-          <div className="min-w-0">
-            <h3 className="font-extrabold text-sm text-slate-900 truncate">
-              {item.name}
-            </h3>
-            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-              {item.category}
-            </span>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2">
+              <h3 className="font-extrabold text-sm text-slate-900 truncate">
+                {item.name}
+              </h3>
+              <span className={cn("text-[9px] font-extrabold uppercase px-2 py-0.5 rounded-md border tracking-wider", typeBadgeColor)}>
+                {item.item_type}
+              </span>
+              {!isActive && (
+                <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-200">
+                  Coming Soon
+                </span>
+              )}
+            </div>
+            <p className="text-xs text-slate-400 font-medium truncate mt-0.5">
+              {item.description || item.tagline}
+            </p>
           </div>
         </div>
 
         {/* Center: Live Client Usage */}
-        <div className="flex items-center gap-2 text-xs text-slate-500 sm:w-44 shrink-0">
+        <div className="flex items-center gap-2 text-xs text-slate-500 md:w-44 shrink-0">
           <Users size={14} className="text-slate-400 shrink-0" />
           <span className="font-bold text-slate-800">
             {item.clients_using_count}
@@ -614,44 +657,44 @@ export default function AdminChannelsPage() {
           <span>{item.clients_using_count === 1 ? 'client using' : 'clients using'}</span>
         </div>
 
-        {/* Right: Schedule & Toggle */}
+        {/* Right: ONLY 2-Option Control: Active vs Coming Soon */}
         <div className="flex items-center gap-3 shrink-0">
-          <button
-            onClick={() => openScheduleModal(item)}
-            title="Schedule Go-Live Date & Time"
-            className={cn(
-              "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition border cursor-pointer",
-              isScheduled
-                ? "bg-amber-50 text-amber-800 border-amber-200 shadow-2xs hover:bg-amber-100"
-                : "bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200"
-            )}
-          >
-            <CalendarClock size={13} className={isScheduled ? "text-amber-600" : "text-slate-500"} />
-            <span>{isScheduled ? `Live: ${scheduleText}` : 'Schedule'}</span>
-          </button>
-
-          <button
-            onClick={() => handleToggle(item)}
-            disabled={isToggling}
-            title={isActive ? "Click to Deactivate" : "Click to Activate"}
-            className={cn(
-              "inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-black transition-all duration-200 border cursor-pointer select-none shrink-0 min-w-[100px] justify-center shadow-2xs",
-              isActive
-                ? "bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border-emerald-200"
-                : "bg-slate-100 hover:bg-slate-200 text-slate-600 border-slate-200",
-              isToggling && "opacity-60 cursor-not-allowed"
-            )}
-          >
-            {isToggling ? (
-              <RefreshCw size={13} className="animate-spin text-slate-500" />
-            ) : (
+          <div className="inline-flex items-center p-1 rounded-2xl bg-slate-100 border border-slate-200 shadow-2xs">
+            <button
+              type="button"
+              onClick={() => handleSetStatus(item, true)}
+              disabled={isToggling}
+              title="Click to Activate across Web & Mobile"
+              className={cn(
+                "flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black transition-all duration-200 cursor-pointer select-none",
+                isActive
+                  ? "bg-emerald-600 text-white shadow-xs"
+                  : "text-slate-500 hover:text-slate-800 hover:bg-slate-200/60"
+              )}
+            >
               <span className={cn(
                 "w-2 h-2 rounded-full",
-                isActive ? "bg-emerald-500 animate-pulse" : "bg-slate-400"
+                isActive ? "bg-white animate-pulse" : "bg-slate-400"
               )} />
-            )}
-            <span>{isActive ? 'Active' : 'Deactive'}</span>
-          </button>
+              <span>Active</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleSetStatus(item, false)}
+              disabled={isToggling}
+              title="Click to set to Coming Soon across Web & Mobile"
+              className={cn(
+                "flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black transition-all duration-200 cursor-pointer select-none",
+                !isActive
+                  ? "bg-amber-500 text-white shadow-xs"
+                  : "text-slate-500 hover:text-slate-800 hover:bg-slate-200/60"
+              )}
+            >
+              <Clock size={12} className={!isActive ? "text-white" : "text-slate-400"} />
+              <span>Coming Soon</span>
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -659,7 +702,7 @@ export default function AdminChannelsPage() {
 
   return (
     <DashboardLayout role="ADMIN">
-      <div className="w-full px-6 md:px-10 py-6 space-y-8 min-h-screen font-sans bg-transparent">
+      <div className="w-full px-4 sm:px-8 md:px-10 py-6 space-y-8 min-h-screen font-sans bg-transparent">
         
         {/* Toast Notification */}
         {toastMessage && (
@@ -678,158 +721,19 @@ export default function AdminChannelsPage() {
           </div>
         )}
 
-        {/* Schedule Modal */}
-        {scheduleModal.isOpen && scheduleModal.item && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
-            <div className="bg-white rounded-3xl p-6 sm:p-7 max-w-md w-full border border-slate-200 shadow-2xl space-y-5 animate-in zoom-in-95 duration-200">
-              
-              {/* Modal Header */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3.5">
-                  <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-slate-50 border border-slate-100 shrink-0">
-                    {renderRealBrandLogo(scheduleModal.item.key, 32)}
-                  </div>
-                  <div>
-                    <h3 className="font-extrabold text-lg text-slate-900">
-                      Schedule Go-Live
-                    </h3>
-                    <p className="text-xs text-slate-500 font-medium">
-                      {scheduleModal.item.name}
-                    </p>
-                  </div>
-                </div>
-
-                <button
-                  onClick={() => setScheduleModal({ isOpen: false, item: null, date: '', time: '09:00', saving: false })}
-                  className="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-600 bg-slate-100 transition cursor-pointer"
-                >
-                  <X size={16} />
-                </button>
-              </div>
-
-              {/* Instructions */}
-              <p className="text-xs text-slate-500 leading-relaxed">
-                Set a specific date & time when this channel will automatically go live across all client workspaces.
-              </p>
-
-              {/* Quick Presets */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-700">
-                  Quick Presets
-                </label>
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => applyPreset('1h')}
-                    className="px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 transition text-left cursor-pointer"
-                  >
-                    🕒 In 1 Hour
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => applyPreset('tomorrow')}
-                    className="px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 transition text-left cursor-pointer"
-                  >
-                    🌅 Tomorrow 9:00 AM
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => applyPreset('3days')}
-                    className="px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 transition text-left cursor-pointer"
-                  >
-                    📅 In 3 Days
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => applyPreset('monday')}
-                    className="px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 transition text-left cursor-pointer"
-                  >
-                    🗓️ Next Monday
-                  </button>
-                </div>
-              </div>
-
-              {/* Date & Time Inputs */}
-              <div className="space-y-3 pt-1">
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    Select Date
-                  </label>
-                  <input
-                    type="date"
-                    value={scheduleModal.date}
-                    min={new Date().toISOString().split('T')[0]}
-                    onChange={(e) => setScheduleModal(prev => ({ ...prev, date: e.target.value }))}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    Select Time
-                  </label>
-                  <input
-                    type="time"
-                    value={scheduleModal.time}
-                    onChange={(e) => setScheduleModal(prev => ({ ...prev, time: e.target.value }))}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
-                  />
-                </div>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex items-center justify-between gap-3 pt-3 border-t border-slate-100">
-                {scheduleModal.item.scheduled_live_at ? (
-                  <button
-                    type="button"
-                    onClick={handleRemoveSchedule}
-                    disabled={scheduleModal.saving}
-                    className="px-4 py-2.5 rounded-xl text-xs font-bold text-rose-600 hover:text-rose-700 hover:bg-rose-50 transition cursor-pointer"
-                  >
-                    Cancel Schedule
-                  </button>
-                ) : (
-                  <div />
-                )}
-
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setScheduleModal({ isOpen: false, item: null, date: '', time: '09:00', saving: false })}
-                    className="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-800 bg-slate-100 hover:bg-slate-200 transition cursor-pointer"
-                  >
-                    Close
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={handleSaveSchedule}
-                    disabled={scheduleModal.saving || !scheduleModal.date || !scheduleModal.time}
-                    className="px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 shadow-md shadow-emerald-600/20 transition flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
-                  >
-                    {scheduleModal.saving && <RefreshCw size={13} className="animate-spin" />}
-                    <span>Save Schedule</span>
-                  </button>
-                </div>
-              </div>
-
-            </div>
-          </div>
-        )}
-
-        {/* Header with View Toggle (Cards / List) & Refresh */}
+        {/* ── Page Header ── */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 w-full border-b border-slate-200/80 pb-5">
           <div>
-            <div className="flex items-center gap-2.5 mb-1">
+            <div className="flex items-center gap-2.5 mb-1 flex-wrap">
               <h1 className="text-2xl font-black text-slate-900 tracking-tight">
-                Channels & Connectors
+                Channels, Connectors & Features
               </h1>
               <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200">
-                Master Governance
+                Global Platform Governance
               </span>
             </div>
-            <p className="text-xs text-slate-500 font-normal">
-              Activate or deactivate channels and connectors, schedule go-live dates, and monitor live client usage.
+            <p className="text-xs text-slate-500 font-normal max-w-3xl">
+              Control the availability of Channels, External Connectors, and Core Platform Features. When an item is deactivated, it automatically switches to <strong>Coming Soon</strong> across all client web workspaces and mobile apps.
             </p>
           </div>
 
@@ -840,28 +744,28 @@ export default function AdminChannelsPage() {
                 onClick={() => changeViewMode('cards')}
                 title="Cards View"
                 className={cn(
-                  "inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer",
+                  "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer",
                   viewMode === 'cards'
                     ? "bg-white text-slate-900 shadow-xs"
                     : "text-slate-600 hover:text-slate-900"
                 )}
               >
                 <LayoutGrid size={14} />
-                <span>Cards</span>
+                <span className="hidden sm:inline">Cards</span>
               </button>
 
               <button
                 onClick={() => changeViewMode('list')}
                 title="List View"
                 className={cn(
-                  "inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer",
+                  "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer",
                   viewMode === 'list'
                     ? "bg-white text-slate-900 shadow-xs"
                     : "text-slate-600 hover:text-slate-900"
                 )}
               >
                 <List size={14} />
-                <span>List</span>
+                <span className="hidden sm:inline">List</span>
               </button>
             </div>
 
@@ -877,74 +781,308 @@ export default function AdminChannelsPage() {
           </div>
         </div>
 
-        {/* Loading state */}
+        {/* ── KPI Stat Overview Cards ── */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div 
+            onClick={() => setActiveTab('channels')}
+            className={cn(
+              "p-4 rounded-2xl border transition cursor-pointer flex flex-col justify-between gap-2",
+              activeTab === 'channels' ? "bg-emerald-50/50 border-emerald-300 ring-2 ring-emerald-400/20" : "bg-white border-slate-200/80 hover:border-slate-300"
+            )}
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-extrabold text-slate-500 uppercase tracking-wider">Channels</span>
+              <span className="w-8 h-8 rounded-xl bg-emerald-100/80 text-emerald-700 flex items-center justify-center">
+                <MessageSquare size={16} />
+              </span>
+            </div>
+            <div>
+              <div className="text-2xl font-black text-slate-900">{totalChannels}</div>
+              <p className="text-[11px] font-semibold text-emerald-700 mt-0.5">
+                Meta, Calls, News, Telegram
+              </p>
+            </div>
+          </div>
+
+          <div 
+            onClick={() => setActiveTab('connectors')}
+            className={cn(
+              "p-4 rounded-2xl border transition cursor-pointer flex flex-col justify-between gap-2",
+              activeTab === 'connectors' ? "bg-blue-50/50 border-blue-300 ring-2 ring-blue-400/20" : "bg-white border-slate-200/80 hover:border-slate-300"
+            )}
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-extrabold text-slate-500 uppercase tracking-wider">Connectors</span>
+              <span className="w-8 h-8 rounded-xl bg-blue-100/80 text-blue-700 flex items-center justify-center">
+                <Layers size={16} />
+              </span>
+            </div>
+            <div>
+              <div className="text-2xl font-black text-slate-900">{totalConnectors}</div>
+              <p className="text-[11px] font-semibold text-blue-700 mt-0.5">
+                Google, Microsoft, Zoho, YouTube
+              </p>
+            </div>
+          </div>
+
+          <div 
+            onClick={() => setActiveTab('features')}
+            className={cn(
+              "p-4 rounded-2xl border transition cursor-pointer flex flex-col justify-between gap-2",
+              activeTab === 'features' ? "bg-purple-50/50 border-purple-300 ring-2 ring-purple-400/20" : "bg-white border-slate-200/80 hover:border-slate-300"
+            )}
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-extrabold text-slate-500 uppercase tracking-wider">Features</span>
+              <span className="w-8 h-8 rounded-xl bg-purple-100/80 text-purple-700 flex items-center justify-center">
+                <Zap size={16} />
+              </span>
+            </div>
+            <div>
+              <div className="text-2xl font-black text-slate-900">{totalFeatures}</div>
+              <p className="text-[11px] font-semibold text-purple-700 mt-0.5">
+                CRM, Bots, Invoices, Team, AI
+              </p>
+            </div>
+          </div>
+
+          <div className="p-4 rounded-2xl bg-white border border-slate-200/80 flex flex-col justify-between gap-2">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-extrabold text-slate-500 uppercase tracking-wider">Status Summary</span>
+              <span className="w-8 h-8 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center">
+                <SlidersHorizontal size={16} />
+              </span>
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-2xl font-black text-slate-900">{items.length}</span>
+                <span className="text-xs font-bold text-slate-400">Total</span>
+              </div>
+              <div className="flex items-center gap-3 text-[11px] font-bold mt-0.5">
+                <span className="text-emerald-600">🟢 {activeCount} Active</span>
+                <span className="text-slate-500">⏸️ {inactiveCount} Inactive</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ── Segmented Navigation Tabs & Search Toolbar ── */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 w-full bg-white p-2.5 rounded-2xl border border-slate-200 shadow-2xs">
+          
+          {/* Segmented Categories Tabs: Channels, Connectors, Features */}
+          <div className="inline-flex p-1 bg-slate-100 rounded-xl border border-slate-200/80 overflow-x-auto">
+            <button
+              onClick={() => setActiveTab('all')}
+              className={cn(
+                "inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-black transition whitespace-nowrap cursor-pointer",
+                activeTab === 'all'
+                  ? "bg-white text-slate-900 shadow-xs"
+                  : "text-slate-600 hover:text-slate-900"
+              )}
+            >
+              <span>All Items</span>
+              <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-slate-200/80 text-slate-700">
+                {items.length}
+              </span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('channels')}
+              className={cn(
+                "inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-black transition whitespace-nowrap cursor-pointer",
+                activeTab === 'channels'
+                  ? "bg-white text-emerald-700 shadow-xs"
+                  : "text-slate-600 hover:text-slate-900"
+              )}
+            >
+              <span>💬 Channels</span>
+              <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-emerald-100 text-emerald-800">
+                {totalChannels}
+              </span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('connectors')}
+              className={cn(
+                "inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-black transition whitespace-nowrap cursor-pointer",
+                activeTab === 'connectors'
+                  ? "bg-white text-blue-700 shadow-xs"
+                  : "text-slate-600 hover:text-slate-900"
+              )}
+            >
+              <span>🔌 Connectors</span>
+              <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-blue-100 text-blue-800">
+                {totalConnectors}
+              </span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('features')}
+              className={cn(
+                "inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-black transition whitespace-nowrap cursor-pointer",
+                activeTab === 'features'
+                  ? "bg-white text-purple-700 shadow-xs"
+                  : "text-slate-600 hover:text-slate-900"
+              )}
+            >
+              <span>⚡ Features</span>
+              <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-purple-100 text-purple-800">
+                {totalFeatures}
+              </span>
+            </button>
+          </div>
+
+          {/* Search and Status Filters */}
+          <div className="flex items-center gap-2.5 flex-1 md:justify-end">
+            <div className="relative flex-1 max-w-xs">
+              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input
+                type="text"
+                placeholder="Search items, categories..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-9 pr-3.5 py-1.5 bg-slate-50 rounded-xl border border-slate-200 text-xs font-semibold text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs"
+                >
+                  <X size={13} />
+                </button>
+              )}
+            </div>
+
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="px-3 py-1.5 bg-slate-50 rounded-xl border border-slate-200 text-xs font-bold text-slate-700 focus:outline-none cursor-pointer"
+            >
+              <option value="ALL">All Statuses</option>
+              <option value="ACTIVE">🟢 Active Only</option>
+              <option value="COMING_SOON">⏳ Coming Soon Only</option>
+            </select>
+          </div>
+        </div>
+
+        {/* ── Main Content Area ── */}
         {loading ? (
           <div className="space-y-6 w-full">
             <div className="h-6 w-32 bg-slate-200 rounded animate-pulse" />
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
-                <div key={i} className="bg-white rounded-3xl p-5 border border-slate-200 animate-pulse h-28" />
+                <div key={i} className="bg-white rounded-3xl p-5 border border-slate-200 animate-pulse h-36" />
               ))}
             </div>
           </div>
+        ) : filteredItems.length === 0 ? (
+          <div className="bg-white rounded-3xl p-12 text-center border border-slate-200 space-y-3">
+            <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto text-slate-400">
+              <Search size={22} />
+            </div>
+            <h3 className="font-extrabold text-base text-slate-800">No items match your filter</h3>
+            <p className="text-xs text-slate-500 max-w-sm mx-auto">
+              Try adjusting your search keywords or resetting the status filter to view channels, connectors, and features.
+            </p>
+            <button
+              onClick={() => { setSearchQuery(''); setStatusFilter('ALL'); setActiveTab('all'); }}
+              className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-xs font-bold text-slate-700 transition"
+            >
+              Reset Filters
+            </button>
+          </div>
         ) : (
-          <div className="space-y-10 w-full">
+          <div className="space-y-12 w-full">
             
-            {/* ── Section 1: Channels (WhatsApp, Facebook, Instagram) ── */}
-            <div className="space-y-4 w-full">
-              <div className="flex items-center justify-between pb-1 border-b border-slate-100">
-                <div className="flex items-center gap-2.5">
-                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-xs shadow-emerald-500/50" />
-                  <h2 className="text-sm font-extrabold uppercase tracking-wider text-slate-800">
-                    Channels
-                  </h2>
-                  <span className="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                    {channelsList.length}
+            {/* ── SECTION 1: CHANNELS ── */}
+            {(activeTab === 'all' || activeTab === 'channels') && channelsList.length > 0 && (
+              <div className="space-y-4 w-full">
+                <div className="flex items-center justify-between pb-2 border-b border-slate-200">
+                  <div className="flex items-center gap-2.5">
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-xs shadow-emerald-500/50" />
+                    <h2 className="text-sm font-extrabold uppercase tracking-wider text-slate-800">
+                      Communication Channels
+                    </h2>
+                    <span className="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                      {channelsList.length}
+                    </span>
+                  </div>
+                  <span className="text-xs text-slate-400 font-medium hidden sm:inline">
+                    Meta Messaging, Audio/Video Calling, Telegram & News
                   </span>
                 </div>
-                <span className="text-xs text-slate-400 font-medium hidden sm:inline">
-                  Core Meta Messaging Channels
-                </span>
+
+                {viewMode === 'cards' ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                    {channelsList.map(renderCard)}
+                  </div>
+                ) : (
+                  <div className="space-y-2.5 w-full">
+                    {channelsList.map(renderListItem)}
+                  </div>
+                )}
               </div>
+            )}
 
-              {viewMode === 'cards' ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {channelsList.map(renderCard)}
-                </div>
-              ) : (
-                <div className="space-y-3 w-full">
-                  {channelsList.map(renderListItem)}
-                </div>
-              )}
-            </div>
-
-            {/* ── Section 2: Real Supported Connectors ── */}
-            <div className="space-y-4 w-full pt-2">
-              <div className="flex items-center justify-between pb-1 border-b border-slate-100">
-                <div className="flex items-center gap-2.5">
-                  <span className="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-xs shadow-blue-500/50" />
-                  <h2 className="text-sm font-extrabold uppercase tracking-wider text-slate-800">
-                    Connectors & Productivity Suite
-                  </h2>
-                  <span className="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-blue-50 text-blue-700 border border-blue-200">
-                    {connectorsList.length}
+            {/* ── SECTION 2: CONNECTORS ── */}
+            {(activeTab === 'all' || activeTab === 'connectors') && connectorsList.length > 0 && (
+              <div className="space-y-4 w-full">
+                <div className="flex items-center justify-between pb-2 border-b border-slate-200">
+                  <div className="flex items-center gap-2.5">
+                    <span className="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-xs shadow-blue-500/50" />
+                    <h2 className="text-sm font-extrabold uppercase tracking-wider text-slate-800">
+                      Connectors & Productivity Suite
+                    </h2>
+                    <span className="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-blue-50 text-blue-700 border border-blue-200">
+                      {connectorsList.length}
+                    </span>
+                  </div>
+                  <span className="text-xs text-slate-400 font-medium hidden sm:inline">
+                    Google Workspace, Microsoft 365, Zoho CRM & YouTube
                   </span>
                 </div>
-                <span className="text-xs text-slate-400 font-medium hidden sm:inline">
-                  Email, Storage, CRM & Media
-                </span>
-              </div>
 
-              {viewMode === 'cards' ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
-                  {connectorsList.map(renderCard)}
+                {viewMode === 'cards' ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-5">
+                    {connectorsList.map(renderCard)}
+                  </div>
+                ) : (
+                  <div className="space-y-2.5 w-full">
+                    {connectorsList.map(renderListItem)}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* ── SECTION 3: FEATURES ── */}
+            {(activeTab === 'all' || activeTab === 'features') && featuresList.length > 0 && (
+              <div className="space-y-4 w-full">
+                <div className="flex items-center justify-between pb-2 border-b border-slate-200">
+                  <div className="flex items-center gap-2.5">
+                    <span className="w-2.5 h-2.5 rounded-full bg-purple-500 shadow-xs shadow-purple-500/50" />
+                    <h2 className="text-sm font-extrabold uppercase tracking-wider text-slate-800">
+                      Core Platform Features
+                    </h2>
+                    <span className="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-purple-50 text-purple-700 border border-purple-200">
+                      {featuresList.length}
+                    </span>
+                  </div>
+                  <span className="text-xs text-slate-400 font-medium hidden sm:inline">
+                    CRM, Automations, Proposals, Invoices, AI Knowledge & Team RBAC
+                  </span>
                 </div>
-              ) : (
-                <div className="space-y-2.5 w-full">
-                  {connectorsList.map(renderListItem)}
-                </div>
-              )}
-            </div>
+
+                {viewMode === 'cards' ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+                    {featuresList.map(renderCard)}
+                  </div>
+                ) : (
+                  <div className="space-y-2.5 w-full">
+                    {featuresList.map(renderListItem)}
+                  </div>
+                )}
+              </div>
+            )}
 
           </div>
         )}
