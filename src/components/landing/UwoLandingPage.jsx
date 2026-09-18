@@ -16,6 +16,7 @@ import HeroWorkflowAnimation from './HeroWorkflowAnimation';
 import UWOLoginModal from '@/components/UWOLoginModal';
 import TermsModal from '@/components/TermsModal';
 import PricingComparisonTable from '@/components/pricing/PricingComparisonTable';
+import CustomPlanSection from './CustomPlanSection';
 import { useBrand } from '@/context/BrandContext';
 
 // ── AUTHENTIC SVG BRAND LOGOS ──
@@ -1006,32 +1007,6 @@ export default function UwoLandingPage() {
             ))}
           </div>
 
-          <div className="mt-12 text-center flex items-center justify-center">
-            <div className="relative inline-flex items-center justify-center">
-              {/* Outer soft blinking green glow */}
-              <div className="absolute -inset-1 rounded-full bg-emerald-500/25 blur-md animate-pulse pointer-events-none" />
-
-              {/* Oval Pill Badge with gentle green blink */}
-              <div
-                className={cn(
-                  "relative inline-flex items-center justify-center px-8 py-2 sm:px-10 sm:py-2.5 rounded-full border-2 transition-all duration-700 animate-pulse",
-                  isDarkMode
-                    ? "border-emerald-500/80 bg-emerald-950/40 shadow-[0_0_25px_rgba(16,185,129,0.25)]"
-                    : "border-emerald-600 bg-emerald-50/70 shadow-[0_0_20px_rgba(5,150,105,0.2)]"
-                )}
-              >
-                <span
-                  className={cn(
-                    "text-xl sm:text-2xl font-bold italic tracking-wide font-serif",
-                    isDarkMode ? "text-emerald-400" : "text-[#059669]"
-                  )}
-                  style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
-                >
-                  Coming Soon
-                </span>
-              </div>
-            </div>
-          </div>
         </div>
       </section>
 
@@ -1944,8 +1919,13 @@ export default function UwoLandingPage() {
         <div className="absolute -bottom-32 -right-32 w-80 h-80 bg-teal-500/10 rounded-full blur-[100px] pointer-events-none" />
         <div className="absolute inset-0 bg-[radial-gradient(#059669_1px,transparent_1px)] [background-size:28px_28px] opacity-10 pointer-events-none" />
 
-        <div className="relative z-10">
+        <div className="relative z-10 space-y-8">
           <PricingComparisonTable onSelectPlan={() => router.push('/auth/login')} dark={isDarkMode} />
+          
+          {/* Custom Plan (Display-Only Tier for High Scale & Enterprise) */}
+          <ScrollReveal>
+            <CustomPlanSection isDarkMode={isDarkMode} />
+          </ScrollReveal>
         </div>
       </section>
 

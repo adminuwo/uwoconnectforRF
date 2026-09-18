@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   env: {
-    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000',
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080',
   },
   reactStrictMode: false,
   eslint: {
@@ -14,7 +14,10 @@ const nextConfig = {
     optimizePackageImports: ['lucide-react'],
   },
   async rewrites() {
-    const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
+    let backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080';
+    if (!backendUrl.startsWith('http://') && !backendUrl.startsWith('https://')) {
+      backendUrl = `https://${backendUrl}`;
+    }
     return [
       {
         source: '/sales/quotations',
