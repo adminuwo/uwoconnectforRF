@@ -146,7 +146,7 @@ export default function GoogleNewsPage() {
   };
 
   const [sendingNewsAlert, setSendingNewsAlert] = useState({});
-  const [sendChannels, setSendChannels] = useState({ WHATSAPP: true, FACEBOOK: true, INSTAGRAM: true });
+  const [sendChannels, setSendChannels] = useState({ WHATSAPP: true, FACEBOOK: false, INSTAGRAM: false });
 
   const toggleChannel = (ch) => setSendChannels(prev => ({ ...prev, [ch]: !prev[ch] }));
   const selectedChannelsList = Object.keys(sendChannels).filter(k => sendChannels[k]);
@@ -447,23 +447,14 @@ export default function GoogleNewsPage() {
                       <div className="flex items-center gap-1.5">
                         <span className="text-[9px] font-extrabold text-slate-400 uppercase">Send to:</span>
                         {[
-                          { id: 'WHATSAPP', label: '📱 WA', color: 'emerald' },
-                          { id: 'FACEBOOK', label: '💙 FB', color: 'blue' },
-                          { id: 'INSTAGRAM', label: '📸 IG', color: 'pink' },
-                        ].map(({ id, label, color }) => (
-                          <button
+                          { id: 'WHATSAPP', label: '📱 WhatsApp (Meta Cloud API)', color: 'emerald' },
+                        ].map(({ id, label }) => (
+                          <div
                             key={id}
-                            onClick={() => toggleChannel(id)}
-                            className={`px-2 py-1 rounded-lg text-[9px] font-extrabold border transition-all ${
-                              sendChannels[id]
-                                ? color === 'emerald' ? 'bg-emerald-100 text-emerald-700 border-emerald-300'
-                                  : color === 'blue' ? 'bg-blue-100 text-blue-700 border-blue-300'
-                                  : 'bg-pink-100 text-pink-700 border-pink-300'
-                                : 'bg-slate-100 text-slate-400 border-slate-200 opacity-60'
-                            }`}
+                            className="px-2.5 py-1 rounded-lg text-[10px] font-extrabold border bg-emerald-100 text-emerald-700 border-emerald-300"
                           >
                             {label}
-                          </button>
+                          </div>
                         ))}
                       </div>
 

@@ -42,12 +42,12 @@ export default function AxiosNetworkFixer() {
         // When developing locally, redirect Cloud Run / Azure backend requests to local Django backend
         if ((url.includes('uwoconnectforrb-743928421487.asia-south1.run.app') || url.includes('azurewebsites.net')) && !config._retried) {
           config.url = url
-            .replace('https://uwoconnectforrb-743928421487.asia-south1.run.app', 'http://127.0.0.1:8080')
-            .replace(/https:\/\/[^/]+\.azurewebsites\.net/, 'http://127.0.0.1:8080');
+            .replace('https://uwoconnectforrb-743928421487.asia-south1.run.app', 'http://127.0.0.1:8000')
+            .replace(/https:\/\/[^/]+\.azurewebsites\.net/, 'http://127.0.0.1:8000');
         } else if (host === 'localhost' || host === '127.0.0.1') {
           // Map LAN IP to 127.0.0.1
-          if (/^https?:\/\/(192\.168\.[0-9.]+|10\.[0-9.]+|172\.(1[6-9]|2[0-9]|3[01])\.[0-9.]+):8080/.test(url)) {
-            config.url = url.replace(/^https?:\/\/[^/]+/, 'http://127.0.0.1:8080');
+          if (/^https?:\/\/(192\.168\.[0-9.]+|10\.[0-9.]+|172\.(1[6-9]|2[0-9]|3[01])\.[0-9.]+):8000/.test(url)) {
+            config.url = url.replace(/^https?:\/\/[^/]+/, 'http://127.0.0.1:8000');
           }
         }
       } else if (isExternalHost(host)) {

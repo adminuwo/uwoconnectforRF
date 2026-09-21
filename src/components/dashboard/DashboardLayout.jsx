@@ -19,6 +19,8 @@ const PAGE_TITLES = {
   '/client/agency': 'Agency & Reseller Command Hub',
   '/admin': 'Control Center',
   '/admin/clients': 'Client Management Directory',
+  '/admin/platform-overview': 'Client Platform Overview',
+  '/admin/installations': 'Installation & Uninstallation Analytics',
   '/admin/whitelabel': 'White-Label & Reseller Command Center',
   '/admin/team': 'Team & Projects',
   '/admin/channels': 'Channel & Integration Center',

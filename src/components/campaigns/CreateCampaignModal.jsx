@@ -21,13 +21,7 @@ const STAGES = [
 ];
 
 const PLATFORMS = [
-  { id: 'WHATSAPP', name: 'WhatsApp', color: 'text-[#00AB56]' },
-  { id: 'INSTAGRAM', name: 'Instagram Direct', color: 'text-pink-500' },
-  { id: 'FACEBOOK', name: 'Facebook Messenger', color: 'text-blue-600' },
-  { id: 'GMAIL', name: 'Email (Gmail & Outlook)', color: 'text-red-500' },
-  { id: 'SMS', name: 'SMS Gateway', color: 'text-blue-500' },
-  { id: 'TELEGRAM', name: 'Telegram Bot', color: 'text-sky-500' },
-  { id: 'LINKEDIN', name: 'LinkedIn InMail', color: 'text-indigo-600' },
+  { id: 'WHATSAPP', name: 'WhatsApp (Meta Cloud API)', color: 'text-[#00AB56]' },
 ];
 
 const VARIABLE_TAGS = [
@@ -478,24 +472,24 @@ export default function CreateCampaignModal({ isOpen, onClose, onCreated }) {
 
               <div>
                 <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
-                  Target Channels
+                  Broadcast Channel
                 </label>
-                <div className="grid grid-cols-2 gap-2">
-                  {PLATFORMS.map((p) => {
-                    const isSel = selectedPlatforms.includes(p.id);
-                    return (
-                      <div
-                        key={p.id}
-                        onClick={() => togglePlatform(p.id)}
-                        className={`p-3 rounded-2xl border flex items-center justify-between cursor-pointer transition-all ${
-                          isSel ? 'border-[#00AB56] bg-emerald-50/40 text-slate-900 shadow-xs' : 'border-slate-200 text-slate-500 hover:bg-slate-50'
-                        }`}
-                      >
-                        <span className={`text-xs font-bold ${isSel ? p.color : ''}`}>{p.name}</span>
-                        {isSel && <Check size={14} className="text-[#00AB56]" />}
-                      </div>
-                    );
-                  })}
+                <div className="p-3.5 rounded-2xl border border-[#00AB56] bg-emerald-50/50 flex items-center justify-between shadow-xs">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-xl bg-[#00AB56]/15 flex items-center justify-center text-[#00AB56] font-black text-sm">
+                      WA
+                    </div>
+                    <div>
+                      <span className="text-xs font-bold text-slate-900 block">WhatsApp Cloud API</span>
+                      <span className="text-[11px] text-slate-500 font-medium block">
+                        Meta Policy: Outbound marketing broadcasts are delivered exclusively via WhatsApp
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-100/80 text-[#00AB56] text-[11px] font-extrabold">
+                    <Check size={13} strokeWidth={3} />
+                    <span>Official</span>
+                  </div>
                 </div>
               </div>
             </div>
