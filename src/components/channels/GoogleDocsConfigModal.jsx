@@ -212,7 +212,7 @@ export default function GoogleDocsConfigModal({ client, isOpen, onClose, onSaved
                 </div>
                 <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/80 flex items-center gap-2.5">
                   <CheckCircle2 size={16} className="text-blue-500 shrink-0" />
-                  <span>Auto-creates &quot;UWOConnect Documents&quot; in Google Drive</span>
+                  <span>Auto-creates &quot;UWO Connect Documents&quot; in Google Drive</span>
                 </div>
                 <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/80 flex items-center gap-2.5">
                   <CheckCircle2 size={16} className="text-blue-500 shrink-0" />
@@ -271,7 +271,7 @@ export default function GoogleDocsConfigModal({ client, isOpen, onClose, onSaved
                     </div>
                     <div className="p-4 bg-blue-50/60 border border-blue-100 rounded-xl">
                       <span className="text-[10px] text-blue-500 font-bold uppercase tracking-wider">Default Document</span>
-                      <p className="text-xs font-semibold text-blue-700 mt-1 truncate">{config.default_doc_name || 'UWOConnect Documents'}</p>
+                      <p className="text-xs font-semibold text-blue-700 mt-1 truncate">{config.default_doc_name || 'UWO Connect Documents'}</p>
                     </div>
                     <div className="p-4 bg-slate-50/70 border border-slate-200/70 rounded-xl">
                       <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Total Documents</span>

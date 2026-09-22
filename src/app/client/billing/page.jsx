@@ -23,7 +23,7 @@ export default function ClientBillingPage() {
     is_zero_balance: false,
     usage_this_month_inr: 0,
     subscription: {
-      plan_name: 'UwoConnect Pro',
+      plan_name: 'UWO Connect Pro',
       price_monthly: '499.00',
       status: 'ACTIVE',
       current_period_end: null
@@ -89,7 +89,7 @@ export default function ClientBillingPage() {
               Account Billing & Usage Wallet
             </h1>
             <p className="text-slate-500 text-xs sm:text-sm">
-              Manage your fixed UwoConnect subscription and prepaid usage wallet for metered services.
+              Manage your fixed UWO Connect subscription and prepaid usage wallet for metered services.
             </p>
           </div>
 

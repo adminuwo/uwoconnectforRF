@@ -5,7 +5,7 @@ export async function GET() {
 
   return Response.json({
     status: 'healthy',
-    service: 'UWOConnect Frontend',
+    service: 'UWO Connect Frontend',
     environment: process.env.NODE_ENV || 'production',
     uptimeSeconds: Math.floor(process.uptime()),
     timestamp: new Date().toISOString(),

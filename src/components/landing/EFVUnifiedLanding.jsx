@@ -86,7 +86,7 @@ export default function EFVUnifiedLanding() {
               </svg>
             </div>
             <span className={`font-bold text-lg tracking-tight transition-colors duration-300 ${isDark ? 'text-white' : 'text-[#000000]'}`}>
-              Uwo Connect
+              UWO Connect
             </span>
           </Link>
 
@@ -540,7 +540,7 @@ export default function EFVUnifiedLanding() {
           </div>
           
           <footer className="mt-24 pt-8 border-t border-white/[0.08] flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-500">
-            <div>© 2026 Uwo Connect Platform (Aisa Technologies). All rights reserved.</div>
+            <div>© 2026 UWO Connect Platform (Aisa Technologies). All rights reserved.</div>
             <div className="flex flex-wrap gap-6">
               <Link href="/about" className="hover:text-white transition-colors">About Us</Link>
               <Link href="/contact" className="hover:text-white transition-colors">Contact Us</Link>

@@ -72,7 +72,7 @@ export default function InstallationsAnalyticsPage() {
 
     try {
       if (manual) setIsRefreshing(true);
-      else if (loading) setLoading(true);
+      else setLoading(true);
 
       setError(null);
       const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
@@ -88,6 +88,7 @@ export default function InstallationsAnalyticsPage() {
           page,
           page_size: pageSize,
         },
+        timeout: 10000,
         signal: controller.signal,
       });
 
@@ -100,7 +101,8 @@ export default function InstallationsAnalyticsPage() {
         return;
       }
       console.error('[InstallationsAnalytics] Fetch error:', err);
-      setError(err.response?.data?.error || 'Unable to load installation details. Please try again.');
+      const msg = err.response?.data?.error || err.response?.data?.detail || err.message || 'Unable to load installation details.';
+      setError(msg);
     } finally {
       setLoading(false);
       setIsRefreshing(false);
@@ -252,6 +254,29 @@ export default function InstallationsAnalyticsPage() {
 
   const hasActiveFilters = searchInput !== '' || platformFilter !== 'ALL' || statusFilter !== 'ALL' || dateRangeFilter !== 'ALL';
 
+  const getStatusCounts = () => {
+    const web = data.summary.web || { total: 0, active: 0, uninstalled: 0 };
+    const android = data.summary.android || { total: 0, active: 0, uninstalled: 0 };
+    const ios = data.summary.ios || { total: 0, active: 0, uninstalled: 0 };
+
+    if (platformFilter === 'WEB') {
+      return { all: web.total, active: web.active, uninstalled: web.uninstalled };
+    }
+    if (platformFilter === 'ANDROID') {
+      return { all: android.total, active: android.active, uninstalled: android.uninstalled };
+    }
+    if (platformFilter === 'IOS') {
+      return { all: ios.total, active: ios.active, uninstalled: ios.uninstalled };
+    }
+    return {
+      all: data.summary.total_installations || 0,
+      active: data.summary.active_installations || 0,
+      uninstalled: data.summary.uninstalled_count || 0,
+    };
+  };
+
+  const statusCounts = getStatusCounts();
+
   return (
     <DashboardLayout>
       <div className="p-4 sm:p-6 lg:p-8 space-y-5 max-w-[1600px] mx-auto min-h-screen">
@@ -328,7 +353,14 @@ export default function InstallationsAnalyticsPage() {
         {/* ── 1. Summary Cards (6 KPIs) ── */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-3.5">
           {/* Total Installations */}
-          <div className="bg-white p-3.5 rounded-xl border border-slate-200/80 shadow-2xs hover:border-slate-300 transition-all flex flex-col justify-between">
+          <div
+            onClick={() => { setPlatformFilter('ALL'); setStatusFilter('ALL'); setPage(1); }}
+            className={cn(
+              "bg-white p-3.5 rounded-xl border border-slate-200/80 shadow-2xs hover:border-indigo-400 cursor-pointer select-none transition-all hover:scale-[1.01] flex flex-col justify-between",
+              platformFilter === 'ALL' && statusFilter === 'ALL' && !searchInput && dateRangeFilter === 'ALL' && "ring-2 ring-indigo-500/80 bg-indigo-50/20"
+            )}
+            title="Click to view all installations"
+          >
             <div className="flex items-center justify-between mb-1.5">
               <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Total Installs</span>
               <div className="w-7 h-7 rounded-md bg-indigo-50 text-indigo-600 flex items-center justify-center">
@@ -344,7 +376,14 @@ export default function InstallationsAnalyticsPage() {
           </div>
 
           {/* Active Installations */}
-          <div className="bg-white p-3.5 rounded-xl border border-slate-200/80 shadow-2xs hover:border-emerald-300 transition-all flex flex-col justify-between">
+          <div
+            onClick={() => { setStatusFilter('ACTIVE'); setPage(1); }}
+            className={cn(
+              "bg-white p-3.5 rounded-xl border border-slate-200/80 shadow-2xs hover:border-emerald-400 cursor-pointer select-none transition-all hover:scale-[1.01] flex flex-col justify-between",
+              statusFilter === 'ACTIVE' && "ring-2 ring-emerald-500/80 bg-emerald-50/20"
+            )}
+            title="Click to filter active devices"
+          >
             <div className="flex items-center justify-between mb-1.5">
               <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700">Active Installed</span>
               <div className="w-7 h-7 rounded-md bg-emerald-50 text-emerald-600 flex items-center justify-center">
@@ -360,7 +399,14 @@ export default function InstallationsAnalyticsPage() {
           </div>
 
           {/* Total Uninstalled */}
-          <div className="bg-white p-3.5 rounded-xl border border-slate-200/80 shadow-2xs hover:border-red-300 transition-all flex flex-col justify-between">
+          <div
+            onClick={() => { setStatusFilter('UNINSTALLED'); setPlatformFilter('ALL'); setPage(1); }}
+            className={cn(
+              "bg-white p-3.5 rounded-xl border border-slate-200/80 shadow-2xs hover:border-red-400 cursor-pointer select-none transition-all hover:scale-[1.01] flex flex-col justify-between",
+              statusFilter === 'UNINSTALLED' && "ring-2 ring-red-500/80 bg-red-50/20"
+            )}
+            title="Click to filter uninstalled devices across all platforms"
+          >
             <div className="flex items-center justify-between mb-1.5">
               <span className="text-[10px] font-bold uppercase tracking-wider text-red-700">Total Uninstalled</span>
               <div className="w-7 h-7 rounded-md bg-red-50 text-red-600 flex items-center justify-center">
@@ -376,7 +422,14 @@ export default function InstallationsAnalyticsPage() {
           </div>
 
           {/* Web Deployments */}
-          <div className="bg-white p-3.5 rounded-xl border border-slate-200/80 shadow-2xs hover:border-blue-300 transition-all flex flex-col justify-between">
+          <div
+            onClick={() => { setPlatformFilter('WEB'); setStatusFilter('ALL'); setPage(1); }}
+            className={cn(
+              "bg-white p-3.5 rounded-xl border border-slate-200/80 shadow-2xs hover:border-blue-400 cursor-pointer select-none transition-all hover:scale-[1.01] flex flex-col justify-between",
+              platformFilter === 'WEB' && statusFilter === 'ALL' && "ring-2 ring-blue-500/80 bg-blue-50/20"
+            )}
+            title="Click to filter Web portal sessions"
+          >
             <div className="flex items-center justify-between mb-1.5">
               <span className="text-[10px] font-bold uppercase tracking-wider text-blue-700">Web Portal</span>
               <div className="w-7 h-7 rounded-md bg-blue-50 text-blue-600 flex items-center justify-center">
@@ -397,7 +450,14 @@ export default function InstallationsAnalyticsPage() {
           </div>
 
           {/* Android App Installs */}
-          <div className="bg-white p-3.5 rounded-xl border border-slate-200/80 shadow-2xs hover:border-emerald-300 transition-all flex flex-col justify-between">
+          <div
+            onClick={() => { setPlatformFilter('ANDROID'); setStatusFilter('ALL'); setPage(1); }}
+            className={cn(
+              "bg-white p-3.5 rounded-xl border border-slate-200/80 shadow-2xs hover:border-emerald-400 cursor-pointer select-none transition-all hover:scale-[1.01] flex flex-col justify-between",
+              platformFilter === 'ANDROID' && statusFilter === 'ALL' && "ring-2 ring-emerald-500/80 bg-emerald-50/20"
+            )}
+            title="Click to filter Android app devices"
+          >
             <div className="flex items-center justify-between mb-1.5">
               <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700">Android Installs</span>
               <div className="w-7 h-7 rounded-md bg-emerald-50 text-emerald-600 flex items-center justify-center">
@@ -422,7 +482,14 @@ export default function InstallationsAnalyticsPage() {
           </div>
 
           {/* iOS Installs */}
-          <div className="bg-white p-3.5 rounded-xl border border-slate-200/80 shadow-2xs hover:border-sky-300 transition-all flex flex-col justify-between">
+          <div
+            onClick={() => { setPlatformFilter('IOS'); setStatusFilter('ALL'); setPage(1); }}
+            className={cn(
+              "bg-white p-3.5 rounded-xl border border-slate-200/80 shadow-2xs hover:border-sky-400 cursor-pointer select-none transition-all hover:scale-[1.01] flex flex-col justify-between",
+              platformFilter === 'IOS' && statusFilter === 'ALL' && "ring-2 ring-sky-500/80 bg-sky-50/20"
+            )}
+            title="Click to filter iOS iPhone app devices"
+          >
             <div className="flex items-center justify-between mb-1.5">
               <span className="text-[10px] font-bold uppercase tracking-wider text-sky-700">iOS Installs</span>
               <div className="w-7 h-7 rounded-md bg-sky-50 text-sky-600 flex items-center justify-center">
@@ -463,7 +530,14 @@ export default function InstallationsAnalyticsPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
             {/* Web Stats */}
-            <div className="p-3.5 rounded-lg border border-blue-100 bg-blue-50/40 space-y-2">
+            <div
+              onClick={() => { setPlatformFilter('WEB'); setPage(1); }}
+              className={cn(
+                "p-3.5 rounded-lg border border-blue-100 bg-blue-50/40 space-y-2 cursor-pointer select-none hover:border-blue-300 hover:shadow-xs transition-all",
+                platformFilter === 'WEB' && "ring-2 ring-blue-500/80 bg-blue-100/40"
+              )}
+              title="Click to filter Web devices"
+            >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 font-bold text-blue-900 text-xs">
                   <Globe className="w-3.5 h-3.5 text-blue-600" />
@@ -487,7 +561,14 @@ export default function InstallationsAnalyticsPage() {
             </div>
 
             {/* Android Stats */}
-            <div className="p-3.5 rounded-lg border border-emerald-100 bg-emerald-50/40 space-y-2">
+            <div
+              onClick={() => { setPlatformFilter('ANDROID'); setPage(1); }}
+              className={cn(
+                "p-3.5 rounded-lg border border-emerald-100 bg-emerald-50/40 space-y-2 cursor-pointer select-none hover:border-emerald-300 hover:shadow-xs transition-all",
+                platformFilter === 'ANDROID' && "ring-2 ring-emerald-500/80 bg-emerald-100/40"
+              )}
+              title="Click to filter Android devices"
+            >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 font-bold text-emerald-900 text-xs">
                   <Smartphone className="w-3.5 h-3.5 text-emerald-600" />
@@ -511,7 +592,14 @@ export default function InstallationsAnalyticsPage() {
             </div>
 
             {/* iOS Stats */}
-            <div className="p-3.5 rounded-lg border border-sky-100 bg-sky-50/40 space-y-2">
+            <div
+              onClick={() => { setPlatformFilter('IOS'); setPage(1); }}
+              className={cn(
+                "p-3.5 rounded-lg border border-sky-100 bg-sky-50/40 space-y-2 cursor-pointer select-none hover:border-sky-300 hover:shadow-xs transition-all",
+                platformFilter === 'IOS' && "ring-2 ring-sky-500/80 bg-sky-100/40"
+              )}
+              title="Click to filter iOS devices"
+            >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 font-bold text-sky-900 text-xs">
                   <Apple className="w-3.5 h-3.5 text-sky-600" />
@@ -537,7 +625,7 @@ export default function InstallationsAnalyticsPage() {
         </div>
 
         {/* ── 3. Filters & Search Toolbar (Redesigned Compact Row) ── */}
-        <div className="bg-white p-3.5 sm:p-4 rounded-xl border border-slate-200/80 shadow-2xs">
+        <div className="bg-white p-3.5 sm:p-4 rounded-xl border border-slate-200/80 shadow-2xs space-y-3">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             {/* Search Bar */}
             <div className="relative flex-1 max-w-md">
@@ -565,22 +653,28 @@ export default function InstallationsAnalyticsPage() {
               {/* Platform Segmented Control */}
               <div className="inline-flex items-center bg-slate-100/80 p-0.5 rounded-lg border border-slate-200/60 text-xs">
                 {[
-                  { key: 'ALL', label: 'All' },
-                  { key: 'WEB', label: 'Web' },
-                  { key: 'ANDROID', label: 'Android' },
-                  { key: 'IOS', label: 'iOS' },
+                  { key: 'ALL', label: 'All', count: data.summary.total_installations },
+                  { key: 'WEB', label: 'Web', count: data.summary.web?.total ?? 0 },
+                  { key: 'ANDROID', label: 'Android', count: data.summary.android?.total ?? 0 },
+                  { key: 'IOS', label: 'iOS', count: data.summary.ios?.total ?? 0 },
                 ].map((tab) => (
                   <button
                     key={tab.key}
                     onClick={() => { setPlatformFilter(tab.key); setPage(1); }}
                     className={cn(
-                      "px-2.5 py-1 rounded-md text-xs transition-all font-medium",
+                      "px-2.5 py-1 rounded-md text-xs transition-all font-medium inline-flex items-center gap-1.5",
                       platformFilter === tab.key
                         ? "bg-white text-slate-900 shadow-2xs font-semibold"
                         : "text-slate-500 hover:text-slate-800"
                     )}
                   >
-                    {tab.label}
+                    <span>{tab.label}</span>
+                    <span className={cn(
+                      "text-[10px] px-1.5 py-0.2 rounded-full font-bold",
+                      platformFilter === tab.key ? "bg-slate-100 text-slate-700" : "bg-slate-200/60 text-slate-500"
+                    )}>
+                      {tab.count}
+                    </span>
                   </button>
                 ))}
               </div>
@@ -588,21 +682,29 @@ export default function InstallationsAnalyticsPage() {
               {/* Status Segmented Control */}
               <div className="inline-flex items-center bg-slate-100/80 p-0.5 rounded-lg border border-slate-200/60 text-xs">
                 {[
-                  { key: 'ALL', label: 'All' },
-                  { key: 'ACTIVE', label: 'Active' },
-                  { key: 'UNINSTALLED', label: 'Uninstalled' },
+                  { key: 'ALL', label: 'All', count: statusCounts.all },
+                  { key: 'ACTIVE', label: 'Active', count: statusCounts.active },
+                  { key: 'UNINSTALLED', label: 'Uninstalled', count: statusCounts.uninstalled },
                 ].map((tab) => (
                   <button
                     key={tab.key}
                     onClick={() => { setStatusFilter(tab.key); setPage(1); }}
                     className={cn(
-                      "px-2.5 py-1 rounded-md text-xs transition-all font-medium",
+                      "px-2.5 py-1 rounded-md text-xs transition-all font-medium inline-flex items-center gap-1.5",
                       statusFilter === tab.key
                         ? "bg-white text-slate-900 shadow-2xs font-semibold"
                         : "text-slate-500 hover:text-slate-800"
                     )}
                   >
-                    {tab.label}
+                    <span>{tab.label}</span>
+                    <span className={cn(
+                      "text-[10px] px-1.5 py-0.2 rounded-full font-bold",
+                      statusFilter === tab.key
+                        ? tab.key === 'UNINSTALLED' && tab.count > 0 ? "bg-red-100 text-red-700" : "bg-slate-100 text-slate-700"
+                        : tab.key === 'UNINSTALLED' && tab.count > 0 ? "bg-red-50 text-red-600 font-semibold" : "bg-slate-200/60 text-slate-500"
+                    )}>
+                      {tab.count}
+                    </span>
                   </button>
                 ))}
               </div>
@@ -638,6 +740,51 @@ export default function InstallationsAnalyticsPage() {
               )}
             </div>
           </div>
+
+          {/* Active Filter Tags Row */}
+          {hasActiveFilters && (
+            <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-slate-100 text-xs">
+              <span className="text-slate-400 text-[11px] font-medium">Applied filters:</span>
+              {platformFilter !== 'ALL' && (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-indigo-50 border border-indigo-200/70 text-indigo-700 font-medium text-[11px]">
+                  Platform: <strong className="font-semibold">{platformFilter === 'IOS' ? 'iOS' : platformFilter === 'ANDROID' ? 'Android' : 'Web'}</strong>
+                  <button onClick={() => { setPlatformFilter('ALL'); setPage(1); }} className="hover:text-indigo-900 p-0.5">
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              )}
+              {statusFilter !== 'ALL' && (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-purple-50 border border-purple-200/70 text-purple-700 font-medium text-[11px]">
+                  Status: <strong className="font-semibold">{statusFilter === 'ACTIVE' ? 'Active Installed' : 'Uninstalled'}</strong>
+                  <button onClick={() => { setStatusFilter('ALL'); setPage(1); }} className="hover:text-purple-900 p-0.5">
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              )}
+              {dateRangeFilter !== 'ALL' && (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-100 border border-slate-200 text-slate-700 font-medium text-[11px]">
+                  Date: <strong className="font-semibold">{dateRangeFilter === 'TODAY' ? 'Today' : dateRangeFilter === '7D' ? 'Last 7 Days' : 'Last 30 Days'}</strong>
+                  <button onClick={() => { setDateRangeFilter('ALL'); setPage(1); }} className="hover:text-slate-900 p-0.5">
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              )}
+              {searchInput && (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-50 border border-amber-200 text-amber-700 font-medium text-[11px]">
+                  Search: <strong className="font-semibold">&quot;{searchInput}&quot;</strong>
+                  <button onClick={() => setSearchInput('')} className="hover:text-amber-900 p-0.5">
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              )}
+              <button
+                onClick={handleResetFilters}
+                className="text-[11px] text-slate-500 hover:text-indigo-600 underline font-medium ml-auto"
+              >
+                Clear all filters
+              </button>
+            </div>
+          )}
         </div>
 
         {/* ── 4. Installation & Uninstallation Details Table ── */}
@@ -683,23 +830,72 @@ export default function InstallationsAnalyticsPage() {
                 ) : data.installations.length === 0 ? (
                   <tr>
                     <td colSpan={9} className="py-12 px-4 text-center">
-                      <div className="max-w-sm mx-auto space-y-3">
+                      <div className="max-w-md mx-auto space-y-3">
                         <div className="w-11 h-11 rounded-xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto">
                           <HardDriveDownload className="w-5 h-5" />
                         </div>
                         <h3 className="text-sm font-bold text-slate-800">No installation records found</h3>
                         <p className="text-xs text-slate-500">
                           {hasActiveFilters
-                            ? "No installation records match your selected filters. Try clearing your filters."
+                            ? "No installation records match your selected filters. Try clearing or changing your filters."
                             : "No device installations have been registered yet."}
                         </p>
+
+                        {/* Smart Suggestion if user searched for uninstalled on a platform with 0 uninstalls */}
+                        {statusFilter === 'UNINSTALLED' && data.summary.uninstalled_count > 0 && (
+                          <div className="p-3 bg-amber-50/90 border border-amber-200 rounded-xl text-xs text-amber-900 text-left space-y-2 mt-3 shadow-xs">
+                            <div className="font-bold flex items-center gap-1.5 text-amber-900">
+                              <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
+                              {platformFilter !== 'ALL' ? (
+                                <span>No uninstalled devices found on {platformFilter === 'ANDROID' ? 'Android' : platformFilter === 'WEB' ? 'Web' : 'iOS'}.</span>
+                              ) : (
+                                <span>No uninstalled devices found matching your current filters.</span>
+                              )}
+                            </div>
+                            <p className="text-[11px] text-amber-800 leading-relaxed">
+                              However, there are <strong>{data.summary.uninstalled_count} uninstalled device</strong> records registered:
+                              {data.summary.ios?.uninstalled > 0 && ` iOS / iPhone (${data.summary.ios.uninstalled})`}
+                              {data.summary.android?.uninstalled > 0 && ` Android (${data.summary.android.uninstalled})`}
+                              {data.summary.web?.uninstalled > 0 && ` Web (${data.summary.web.uninstalled})`}.
+                            </p>
+                            <div className="flex flex-wrap items-center gap-2 pt-1">
+                              {data.summary.ios?.uninstalled > 0 && platformFilter !== 'IOS' && (
+                                <button
+                                  onClick={() => { setPlatformFilter('IOS'); setPage(1); }}
+                                  className="px-2.5 py-1 bg-sky-600 hover:bg-sky-700 text-white font-semibold rounded-lg text-[11px] transition-colors inline-flex items-center gap-1 shadow-xs"
+                                >
+                                  <Apple className="w-3 h-3" />
+                                  View iOS ({data.summary.ios.uninstalled} uninstalled)
+                                </button>
+                              )}
+                              {data.summary.android?.uninstalled > 0 && platformFilter !== 'ANDROID' && (
+                                <button
+                                  onClick={() => { setPlatformFilter('ANDROID'); setPage(1); }}
+                                  className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg text-[11px] transition-colors inline-flex items-center gap-1 shadow-xs"
+                                >
+                                  <Smartphone className="w-3 h-3" />
+                                  View Android ({data.summary.android.uninstalled} uninstalled)
+                                </button>
+                              )}
+                              <button
+                                onClick={() => { setPlatformFilter('ALL'); setPage(1); }}
+                                className="px-2.5 py-1 bg-slate-200 hover:bg-slate-300 text-slate-800 font-semibold rounded-lg text-[11px] transition-colors inline-flex items-center gap-1"
+                              >
+                                View All ({data.summary.uninstalled_count})
+                              </button>
+                            </div>
+                          </div>
+                        )}
+
                         {hasActiveFilters && (
-                          <button
-                            onClick={handleResetFilters}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-all"
-                          >
-                            Clear all filters
-                          </button>
+                          <div className="pt-2">
+                            <button
+                              onClick={handleResetFilters}
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-all"
+                            >
+                              Clear all filters
+                            </button>
+                          </div>
                         )}
                       </div>
                     </td>

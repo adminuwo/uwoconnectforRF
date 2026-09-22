@@ -68,7 +68,7 @@ export default function TermsModal({ isOpen, onClose }) {
             <div className="flex items-center gap-3 text-[11px] text-slate-300 font-medium pt-0.5">
               <span>Effective Date: Sept 1, 2026</span>
               <span>•</span>
-              <span>Uwo Connect Platform</span>
+              <span>UWO Connect Platform</span>
             </div>
           </div>
 
@@ -96,7 +96,7 @@ export default function TermsModal({ isOpen, onClose }) {
             <div className="space-y-6">
               
               <div className="p-4.5 rounded-2xl bg-emerald-50/80 border border-emerald-200/80 text-emerald-950 font-medium text-xs leading-relaxed">
-                Welcome to <strong>UwoConnect</strong>, a unified business automation and customer communication platform. By accessing or using our platform, you acknowledge that you have read, understood, and agreed to these Terms &amp; Conditions.
+                Welcome to <strong>UWO Connect</strong>, a unified business automation and customer communication platform. By accessing or using our platform, you acknowledge that you have read, understood, and agreed to these Terms &amp; Conditions.
               </div>
 
               <hr className="border-slate-200" />
@@ -163,7 +163,7 @@ export default function TermsModal({ isOpen, onClose }) {
                   White-Label Agency Program
                 </h3>
                 <p className="text-slate-600 text-xs leading-relaxed">
-                  White-Label access grants custom CNAME domain mapping (`app.youragency.com`) and custom branding permissions. White-Label licensing does not transfer ownership of UwoConnect's underlying software codebase or intellectual property.
+                  White-Label access grants custom CNAME domain mapping (`app.youragency.com`) and custom branding permissions. White-Label licensing does not transfer ownership of UWO Connect's underlying software codebase or intellectual property.
                 </p>
               </section>
 

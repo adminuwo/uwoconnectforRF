@@ -156,11 +156,28 @@ export default function ClientInboxPage() {
 
       setHasMoreConvos(rawConvos.length >= limit);
 
+      const formatDisplayName = (name, phone, platformId) => {
+        let val = (name || '').trim();
+        const genericList = ['UNKNOWN', 'UNKNOWN USER', 'USER', 'CUSTOMER', 'NONE', 'NULL'];
+        if (!val || genericList.includes(val.toUpperCase())) {
+          val = (phone || platformId || '').trim();
+        }
+        const digits = val.replace(/\D/g, '');
+        if (digits.length === 12 && digits.startsWith('91')) {
+          return `+91 ${digits.slice(2, 7)} ${digits.slice(7)}`;
+        } else if (digits.length === 10) {
+          return `+91 ${digits.slice(0, 5)} ${digits.slice(5)}`;
+        } else if (digits.length >= 8 && digits.length <= 15 && (val.startsWith('+') || /^\d+$/.test(val))) {
+          return val.startsWith('+') ? val : `+${val}`;
+        }
+        return val || 'Customer';
+      };
+
       const formatted = rawConvos.map(c => {
         const rawAddr = c.contact_platform_id || c.contact_phone || c.id;
         return {
           id: c.id || rawAddr,
-          name: c.contact_name || c.contact_platform_id || c.contact_phone || 'Customer',
+          name: formatDisplayName(c.contact_name, c.contact_phone, c.contact_platform_id),
           rawAddress: rawAddr,
           lastMessage: c.last_message_summary || 'Recent conversation',
           time: c.last_message_at || c.updated_at || c.created_at || new Date().toISOString(),

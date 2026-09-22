@@ -118,7 +118,7 @@ export default function PaymentModal({ isOpen, onClose, selectedPlan = 'PROFESSI
         orderId: razorpay_order_id,
         amount: amount_paise,
         currency: 'INR',
-        name: 'Uwo Connect',
+        name: 'UWO Connect',
         description: `${planInfo.name} (${billingCycle})`,
         customerName: customer_name,
         customerEmail: customer_email,

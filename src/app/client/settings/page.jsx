@@ -796,7 +796,7 @@ const ClientSettingsPage = () => {
                     />
                   ) : (
                     <p className="text-base font-bold text-slate-900">
-                      {editData.white_label_name || 'UwoConnect (Default)'}
+                      {editData.white_label_name || 'UWO Connect (Default)'}
                     </p>
                   )}
                   <span className="text-[11px] text-slate-400 mt-1 block">Replaces all system header titles, emails, and modal banners.</span>
@@ -934,15 +934,18 @@ const ClientSettingsPage = () => {
                   {/* Mock Sidebar Header */}
                   <div className="bg-slate-800/90 rounded-2xl p-3.5 border border-slate-700/60 flex items-center justify-between gap-3">
                     <div className="flex items-center gap-2.5 min-w-0">
-                      <div className="w-8 h-8 rounded-xl bg-white p-1 flex items-center justify-center shrink-0 shadow-xs">
+                      <div className="w-8 h-8 rounded-xl bg-white p-1 flex items-center justify-center shrink-0 shadow-xs overflow-hidden">
                         <img
                           src={displayLogo || "/download (3).gif"}
                           alt="Brand Preview"
+                          width={32}
+                          height={32}
+                          style={{ width: '100%', height: '100%', maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
                           className="w-full h-full object-contain rounded-lg"
                         />
                       </div>
                       <div className="min-w-0">
-                        <p className="text-xs font-black text-white truncate">{editData.white_label_name || editData.business_name || 'UwoConnect'}</p>
+                        <p className="text-xs font-black text-white truncate">{editData.white_label_name || editData.business_name || 'UWO Connect'}</p>
                         <p className="text-[9px] font-bold uppercase tracking-wider" style={{ color: editData.primary_color || '#10B981' }}>
                           V1.0 CLIENT PORTAL
                         </p>

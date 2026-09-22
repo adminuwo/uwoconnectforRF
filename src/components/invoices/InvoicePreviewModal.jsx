@@ -188,7 +188,7 @@ export default function InvoicePreviewModal({ invoice, isOpen, onClose, onRegene
 
   <div class="footer-section">
     <div class="thanks">Thank you for your business!</div>
-    <div>All payments are securely processed and verified via UWOConnect Multi-Channel Integration.</div>
+    <div>All payments are securely processed and verified via UWO Connect Multi-Channel Integration.</div>
   </div>
 </div>
 </body>
@@ -220,7 +220,7 @@ export default function InvoicePreviewModal({ invoice, isOpen, onClose, onRegene
 
   const handleWhatsAppShare = () => {
     const seller = invoice.seller_details || {};
-    const companyName = seller.company_name || seller.business_name || 'UWOConnect';
+    const companyName = seller.company_name || seller.business_name || 'UWO Connect';
     const total = Number(invoice.total || 0).toLocaleString(undefined, { minimumFractionDigits: 2 });
     const curSymbol = invoice.currency_symbol || '$';
 
@@ -473,7 +473,7 @@ export default function InvoicePreviewModal({ invoice, isOpen, onClose, onRegene
             {/* Footer / Notes */}
             <div className="pt-6 border-t border-slate-200 text-[11px] text-slate-500 space-y-1">
               <p className="font-bold text-slate-700">Thank you for your business!</p>
-              <p>All payments are securely processed and verified via UWOConnect Multi-Channel Integration.</p>
+              <p>All payments are securely processed and verified via UWO Connect Multi-Channel Integration.</p>
             </div>
 
           </div>

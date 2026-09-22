@@ -11,9 +11,9 @@ import {
 } from '@/lib/seo';
 
 export const metadata = buildPageMetadata({
-  title: `${SITE_CONFIG.name} — AI-Powered Multi-Channel Business Automation & CRM Platform`,
+  title: `${SITE_CONFIG.name} — AI Multi-Channel Automation & CRM Platform`,
   description:
-    'Scale customer conversations and sales across WhatsApp Business API, Instagram, Facebook, Gmail, and Outlook. Automated visual workflows, AI agents, CRM pipelines, and instant payment links.',
+    'Automate customer conversations across WhatsApp, Instagram, and Facebook with AI agents, unified team inbox, CRM pipelines, and instant payments.',
   path: '/',
 });
 

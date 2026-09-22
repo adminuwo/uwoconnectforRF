@@ -219,7 +219,7 @@ export default function EnterpriseCallsPage() {
                 setActiveCall({
                   name: pending.callerName || data2.caller || 'Caller',
                   role: pending.role || 'Client',
-                  dept: pending.dept || 'UWOConnect',
+                  dept: pending.dept || 'UWO Connect',
                   isVideo: pending.isVideo || data2.is_video,
                   callState: 'CONNECTED',
                   sessionId: pending.sessionId
@@ -243,7 +243,7 @@ export default function EnterpriseCallsPage() {
             setActiveCall({
               name: data.is_caller ? (data.recipient || 'Team Member') : (data.caller || 'Caller'),
               role: data.is_caller ? 'Team Member' : 'Caller',
-              dept: 'UWOConnect',
+              dept: 'UWO Connect',
               isVideo: data.is_video,
               callState: data.status || 'CONNECTED',
               sessionId: data.session_id
@@ -271,25 +271,29 @@ export default function EnterpriseCallsPage() {
       const protocol = isSecureBackend ? 'wss:' : (window.location.protocol === 'https:' ? 'wss:' : 'ws:');
       const backendHost = new URL(backendUrlStr).host;
       const wsUrl = `${protocol}//${backendHost}/ws/webrtc/?token=${token}`;
-      wsRef.current = new WebSocket(wsUrl);
-      
-      wsRef.current.onmessage = async (event) => {
-        try {
-          const data = JSON.parse(event.data);
-          if (data.type === 'answer') {
-            if (pcRef.current) {
-              await pcRef.current.setRemoteDescription(new RTCSessionDescription(data.sdp_answer));
-              setActiveCall(prev => prev ? { ...prev, callState: 'CONNECTED' } : prev);
+      try {
+        wsRef.current = new WebSocket(wsUrl);
+        wsRef.current.onerror = () => {};
+        wsRef.current.onclose = () => {};
+        
+        wsRef.current.onmessage = async (event) => {
+          try {
+            const data = JSON.parse(event.data);
+            if (data.type === 'answer') {
+              if (pcRef.current) {
+                await pcRef.current.setRemoteDescription(new RTCSessionDescription(data.sdp_answer));
+                setActiveCall(prev => prev ? { ...prev, callState: 'CONNECTED' } : prev);
+              }
+            } else if (data.type === 'ice_candidate') {
+              if (pcRef.current) {
+                await pcRef.current.addIceCandidate(new RTCIceCandidate(data.candidate));
+              }
+            } else if (data.type === 'call_ended') {
+              handleRemoteEndCall();
             }
-          } else if (data.type === 'ice_candidate') {
-            if (pcRef.current) {
-              await pcRef.current.addIceCandidate(new RTCIceCandidate(data.candidate));
-            }
-          } else if (data.type === 'call_ended') {
-            handleRemoteEndCall();
-          }
-        } catch (e) {}
-      };
+          } catch (e) {}
+        };
+      } catch (err) {}
     }
 
     // Check if we arrived here by accepting a call globally
@@ -540,7 +544,7 @@ export default function EnterpriseCallsPage() {
   };
 
   const initiateCall = async (target, isVideo = false) => {
-    const callTarget = target.name ? target : { name: String(target), role: 'Team Member', dept: 'UWOConnect' };
+    const callTarget = target.name ? target : { name: String(target), role: 'Team Member', dept: 'UWO Connect' };
 
     if (callTarget.is_in_call) {
       showNotification(`⚠️ ${callTarget.name} is currently in another call.`);

@@ -67,7 +67,7 @@ export default function GlobalIncomingCallListener() {
         setIncomingCall({
           callerName: data.callerName || 'Client / Team Member',
           role: data.role || 'Member',
-          dept: data.dept || 'UWOConnect',
+          dept: data.dept || 'UWO Connect',
           isVideo: data.isVideo,
           sessionId: data.sessionId
         });
@@ -80,29 +80,42 @@ export default function GlobalIncomingCallListener() {
       }
     };
 
-    wsRef.current = new WebSocket(wsUrl);
+    try {
+      wsRef.current = new WebSocket(wsUrl);
 
-    wsRef.current.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data);
-        
-        if (data.type === 'offer') {
-          pendingOfferRef.current = data;
-          setIncomingCall({
-            callerName: data.caller || 'Client / Team Member',
-            role: 'Team Member',
-            dept: 'Workspace',
-            isVideo: data.isVideo,
-            callerEmail: data.callerEmail
-          });
-          startRingtone();
-        } else if (data.type === 'call_ended') {
-          stopRingtone();
-          setIncomingCall(null);
-          pendingOfferRef.current = null;
-        }
-      } catch (e) {}
-    };
+      wsRef.current.onerror = () => {
+        // Silently catch WebSocket connection failures (e.g. in local HTTP development)
+        // Active HTTP Call Poller seamlessly takes over
+      };
+
+      wsRef.current.onclose = () => {
+        // Clean disconnect
+      };
+
+      wsRef.current.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          
+          if (data.type === 'offer') {
+            pendingOfferRef.current = data;
+            setIncomingCall({
+              callerName: data.caller || 'Client / Team Member',
+              role: 'Team Member',
+              dept: 'Workspace',
+              isVideo: data.isVideo,
+              callerEmail: data.callerEmail
+            });
+            startRingtone();
+          } else if (data.type === 'call_ended') {
+            stopRingtone();
+            setIncomingCall(null);
+            pendingOfferRef.current = null;
+          }
+        } catch (e) {}
+      };
+    } catch (err) {
+      // WebSocket creation error caught safely
+    }
 
     // 4. Backend Active Call Poller (Cross-Device & Cross-Browser)
     let isPollingCall = false;
@@ -148,7 +161,7 @@ export default function GlobalIncomingCallListener() {
               type: 'CALL_INITIATED',
               callerName: data.caller || 'Abha (Client)',
               role: 'Client',
-              dept: 'UWOConnect',
+              dept: 'UWO Connect',
               isVideo: data.is_video,
               sessionId: data.session_id
             });

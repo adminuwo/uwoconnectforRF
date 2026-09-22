@@ -37,7 +37,7 @@ export const initiateRazorpayCheckout = async ({
   orderId,
   amount,
   currency = 'INR',
-  name = 'Uwo Connect',
+  name = 'UWO Connect',
   description = 'Workspace Plan Subscription',
   customerName = '',
   customerEmail = '',

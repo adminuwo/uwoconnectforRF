@@ -59,13 +59,13 @@ const LearningCenterPage = () => {
           <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-400/20 rounded-full blur-3xl pointer-events-none" />
           <div className="relative z-10 max-w-2xl space-y-3">
             <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-600/10 text-emerald-700 rounded-xl border border-emerald-600/20 text-xs font-black uppercase tracking-widest">
-              <Sparkles size={13} /> UWOConnect Learning Academy
+              <Sparkles size={13} /> UWO Connect Learning Academy
             </div>
             <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-slate-900">
               Interactive Learning Center & Step-by-Step Guides
             </h1>
             <p className="text-slate-600 text-xs sm:text-sm leading-relaxed font-medium">
-              Explore interactive tutorials, architecture blueprints, code snippets, and step-by-step setup walkthroughs for every UWOConnect feature.
+              Explore interactive tutorials, architecture blueprints, code snippets, and step-by-step setup walkthroughs for every UWO Connect feature.
             </p>
           </div>
         </div>

@@ -71,7 +71,7 @@ const Pill = ({ children, color = 'slate' }) => {
 const GRAD = 'linear-gradient(135deg, #059669, #10b981)';
 const GRAD2 = 'linear-gradient(135deg, #064e3b 0%, #047857 100%)';
 
-const mockAccount = { connected: true, name: 'Abha Jatav', email: 'abha@uwo24.com', org: 'UWOConnect Inc.', connectedDate: 'August 1, 2026' };
+const mockAccount = { connected: true, name: 'Abha Jatav', email: 'abha@uwo24.com', org: 'UWO Connect Inc.', connectedDate: 'August 1, 2026' };
 
 const mockChats = [
   { id: 1, name: 'Sarah Mitchell', color: 'blue', status: 'available', lastMsg: 'Can you review the Q3 report?', time: '10:42 AM', unread: 2,
@@ -113,7 +113,7 @@ const mockTeams = [
 const mockMeetings = [
   { id: 1, title: 'Q3 Review Board', rawDate: '7', date: 'Today', time: '3:00 PM', tz: 'IST', participants: ['Sarah M.', 'James W.', 'Priya S.'], status: 'upcoming', agenda: 'Review quarterly KPIs and finalize Q4 OKRs.' },
   { id: 2, title: 'Engineering Standup', rawDate: '7', date: 'Today', time: '10:00 AM', tz: 'IST', participants: ['Raj K.', 'Priya S.'], status: 'past', agenda: 'Daily standup and blocker discussion.' },
-  { id: 3, title: 'Client Onboarding Call', rawDate: '8', date: 'Tomorrow', time: '11:00 AM', tz: 'IST', participants: ['Emma T.', 'James W.'], status: 'upcoming', agenda: 'Walk through UWOConnect with client.' },
+  { id: 3, title: 'Client Onboarding Call', rawDate: '8', date: 'Tomorrow', time: '11:00 AM', tz: 'IST', participants: ['Emma T.', 'James W.'], status: 'upcoming', agenda: 'Walk through UWO Connect with client.' },
   { id: 4, title: 'Marketing Strategy Q4', rawDate: '10', date: 'Aug 10', time: '2:00 PM', tz: 'IST', participants: ['Anika P.', 'Sarah M.'], status: 'upcoming', agenda: 'Plan Q4 marketing campaigns.' },
 ];
 

@@ -9,9 +9,9 @@ import {
 } from '@/lib/seo';
 
 export const metadata = buildPageMetadata({
-  title: 'Cookie Policy & Preferences — UwoConnect',
+  title: 'Cookie Policy & Preferences — UWO Connect',
   description:
-    'Learn how UwoConnect uses essential, analytical, and functional cookies to improve workspace performance and provide secure user authentication.',
+    'Learn how UWO Connect uses essential, analytical, and functional cookies to improve workspace performance and provide secure user authentication.',
   path: '/cookies',
   keywords: ['Cookie Policy', 'cookies', 'cookie preferences', 'session cookies', 'tracking settings'],
 });
@@ -26,8 +26,8 @@ export default function CookiesPage() {
     '@type': 'WebPage',
     '@id': `${getBaseUrl()}/cookies#webpage`,
     url: `${getBaseUrl()}/cookies`,
-    name: 'Cookie Policy — UwoConnect',
-    description: 'Cookie policy and consent settings for UwoConnect platform users.',
+    name: 'Cookie Policy — UWO Connect',
+    description: 'Cookie policy and consent settings for UWO Connect platform users.',
     publisher: {
       '@type': 'Organization',
       name: SITE_CONFIG.name,

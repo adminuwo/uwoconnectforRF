@@ -12,9 +12,9 @@ export default function CustomPlanSection({ isDarkMode = false }) {
   const handleEmailClick = (e) => {
     e?.preventDefault();
     const recipient = 'admin@uwo24.com';
-    const subject = encodeURIComponent('Custom Plan Request - UwoConnect');
+    const subject = encodeURIComponent('Custom Plan Request - UWO Connect');
     const body = encodeURIComponent(
-      'Hello UwoConnect Team,\n\nI am interested in a Custom Plan for my business.\n\nBusiness Name: \nRequirements / Features Needed: \nExpected Volume / Channels: \nContact Number: \n\nThank you!'
+      'Hello UWO Connect Team,\n\nI am interested in a Custom Plan for my business.\n\nBusiness Name: \nRequirements / Features Needed: \nExpected Volume / Channels: \nContact Number: \n\nThank you!'
     );
 
     const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${recipient}&su=${subject}&body=${body}`;

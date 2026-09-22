@@ -13,8 +13,8 @@ export async function generateMetadata({ params }) {
   const clientId = resolvedParams?.clientId || 'Booking';
 
   return buildPageMetadata({
-    title: `Schedule an Appointment | ${clientId} — UwoConnect`,
-    description: `Book an appointment directly with ${clientId} through UwoConnect’s real-time automated calendar booking system.`,
+    title: `Schedule an Appointment | ${clientId} — UWO Connect`,
+    description: `Book an appointment directly with ${clientId} through UWO Connect’s real-time automated calendar booking system.`,
     path: `/book/${clientId}`,
     robots: { index: true, follow: true },
   });

@@ -494,7 +494,7 @@ export default function SalesDocumentPreviewModal({ doc, isOpen, onClose, onSend
                   <div>
                     <h2 className="text-xl font-black text-emerald-600 tracking-tight flex items-center gap-2">
                       <Building2 className="w-6 h-6" />
-                      {doc.client?.business_name || 'UWOConnect Partner'}
+                      {doc.client?.business_name || 'UWO Connect Partner'}
                     </h2>
                     <p className="text-xs text-slate-500 mt-1 max-w-xs">{doc.client?.address || 'HQ Address'}</p>
                     {doc.tax_number && (

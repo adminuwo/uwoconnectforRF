@@ -210,7 +210,7 @@ const LoginPage = () => {
             className="w-5 h-5 rounded-full object-contain"
           />
           <span className="text-slate-900 font-extrabold text-xs tracking-wider uppercase">
-            {brand?.brand_name || "UwoConnect"}
+            {brand?.brand_name || "UWO Connect"}
           </span>
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" style={{ backgroundColor: brand?.primary_color || '#059669' }} />
         </div>
@@ -239,7 +239,7 @@ const LoginPage = () => {
             </div>
             <div className="text-left">
               <h4 className="text-xs font-bold text-slate-900 group-hover:text-emerald-800 transition-colors">
-                Login with Uwo Connect Mobile
+                Login with UWO Connect Mobile
               </h4>
               <p className="text-[11px] text-emerald-700 font-medium">Scan QR code for instant passwordless entry</p>
             </div>
@@ -460,7 +460,7 @@ const LoginPage = () => {
           
           <div className="border-t border-slate-100/90 pt-3 px-1">
             <p className="text-[11px] font-medium text-slate-400 leading-relaxed max-w-sm mx-auto">
-              By continuing to use {brand?.brand_name || 'UwoConnect'}, you agree to our{' '}
+              By continuing to use {brand?.brand_name || 'UWO Connect'}, you agree to our{' '}
               <span
                 role="button"
                 tabIndex={0}

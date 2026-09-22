@@ -118,11 +118,14 @@ const ForgotPasswordPage = () => {
         <div className="flex items-center gap-2.5 mb-6 px-4 py-1.5 rounded-full bg-emerald-50/80 border border-emerald-200/60 shadow-sm">
           <img 
             src="/download (3).gif" 
-            alt="UwoConnect Logo" 
-            className="w-5 h-5 rounded-full object-contain"
+            alt="UWO Connect Logo" 
+            width={20}
+            height={20}
+            style={{ width: '20px', height: '20px' }}
+            className="w-5 h-5 rounded-full object-contain shrink-0"
           />
           <span className="text-emerald-900 font-bold text-xs tracking-wider uppercase">
-            UwoConnect
+            UWO Connect
           </span>
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
         </div>

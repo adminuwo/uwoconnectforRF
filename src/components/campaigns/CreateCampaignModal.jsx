@@ -41,7 +41,7 @@ export default function CreateCampaignModal({ isOpen, onClose, onCreated }) {
   const [audienceFilter, setAudienceFilter] = useState('ALL');
   const [composeMode, setComposeMode] = useState('TEMPLATE'); // 'TEMPLATE' or 'CUSTOM'
   const [templateId, setTemplateId] = useState('');
-  const [messageBody, setMessageBody] = useState('Hello {{first_name}},\n\nWe have an exclusive offer for you on UWOConnect today! Reply YES to claim now.');
+  const [messageBody, setMessageBody] = useState('Hello {{first_name}},\n\nWe have an exclusive offer for you on UWO Connect today! Reply YES to claim now.');
   const [templates, setTemplates] = useState([]);
   const [selectedPlatforms, setSelectedPlatforms] = useState(['WHATSAPP']);
   const [contacts, setContacts] = useState([]);
@@ -72,7 +72,7 @@ export default function CreateCampaignModal({ isOpen, onClose, onCreated }) {
       setName('');
       setAudienceFilter('ALL');
       setComposeMode('TEMPLATE');
-      setMessageBody('Hello {{first_name}},\n\nWe have an exclusive offer for you on UWOConnect today! Reply YES to claim now.');
+      setMessageBody('Hello {{first_name}},\n\nWe have an exclusive offer for you on UWO Connect today! Reply YES to claim now.');
       setSelectedPlatforms(['WHATSAPP']);
       setSelectedContacts([]);
       setContactSearch('');
@@ -144,7 +144,7 @@ export default function CreateCampaignModal({ isOpen, onClose, onCreated }) {
         setMessageBody(res.data.result);
       }
     } catch (err) {
-      const clean = (messageBody || "We have an exclusive offer for you on UWOConnect today!")
+      const clean = (messageBody || "We have an exclusive offer for you on UWO Connect today!")
         .replace(/Hello {{first_name}},?/gi, '')
         .trim();
       setMessageBody(`Hello {{first_name}},\n\n${clean}\n\nReply YES to claim your instant offer today!`);
@@ -616,7 +616,7 @@ export default function CreateCampaignModal({ isOpen, onClose, onCreated }) {
                     </span>
                     <div className="flex justify-end">
                       <div className="bg-[#E7FFDB] text-slate-900 border border-emerald-200/60 p-3 rounded-2xl rounded-tr-xs max-w-sm text-xs shadow-xs font-normal leading-relaxed whitespace-pre-line">
-                        {messageBody.replace("{{first_name}}", "Rahul").replace("{{name}}", "Rahul Sharma").replace("{{company}}", "UWOConnect")}
+                        {messageBody.replace("{{first_name}}", "Rahul").replace("{{name}}", "Rahul Sharma").replace("{{company}}", "UWO Connect")}
                         <div className="flex items-center justify-end gap-1 mt-1.5 text-[9px] text-slate-400">
                           <span>12:00 PM</span>
                           <span className="text-emerald-600 font-bold">✓✓</span>

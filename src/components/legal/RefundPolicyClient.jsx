@@ -11,7 +11,7 @@ export default function RefundPolicyClient() {
           <Link href="/" className="text-[#10B981] font-bold text-sm hover:underline flex items-center gap-2">
             ← Back to Home
           </Link>
-          <div className="text-xl font-extrabold text-white">Uwo Connect.</div>
+          <div className="text-xl font-extrabold text-white">UWO Connect.</div>
         </header>
 
         <main>
@@ -23,7 +23,7 @@ export default function RefundPolicyClient() {
           <div className="bg-[#0B0D11] border border-white/10 rounded-3xl p-8 md:p-12 space-y-6 text-slate-300 text-sm leading-relaxed">
             <h2 className="text-xl font-bold text-white">1. Subscription Cancellation</h2>
             <p>
-              You can cancel your Uwo Connect subscription plan at any time from your Account Settings page or by submitting a written request to our support team at <a href="mailto:support@uwo24.com" className="text-[#10B981] underline">support@uwo24.com</a>.
+              You can cancel your UWO Connect subscription plan at any time from your Account Settings page or by submitting a written request to our support team at <a href="mailto:support@uwo24.com" className="text-[#10B981] underline">support@uwo24.com</a>.
             </p>
             <p>
               Upon cancellation, your subscription will remain active until the end of your current paid billing cycle (monthly or annual). You will not be charged for subsequent billing periods after cancellation.
@@ -36,7 +36,7 @@ export default function RefundPolicyClient() {
             <ul className="list-disc pl-5 space-y-2 text-slate-400">
               <li>Refund requests must be made within 7 days of subscription activation.</li>
               <li>Refunds apply to initial subscription sign-ups and do not apply to recurring renewals after 7 days unless there is a duplicate charge or billing error.</li>
-              <li>Add-on services or third-party WhatsApp Meta conversation API charges billed directly by Meta are non-refundable through Uwo Connect.</li>
+              <li>Add-on services or third-party WhatsApp Meta conversation API charges billed directly by Meta are non-refundable through UWO Connect.</li>
             </ul>
 
             <h2 className="text-xl font-bold text-white pt-4">3. Refund Processing Timeline</h2>
@@ -47,7 +47,7 @@ export default function RefundPolicyClient() {
         </main>
 
         <footer className="mt-12 text-center text-xs text-slate-500">
-          © {new Date().getFullYear()} Uwo Connect Platform. All rights reserved.
+          © {new Date().getFullYear()} UWO Connect Platform. All rights reserved.
         </footer>
       </div>
     </div>

@@ -113,7 +113,7 @@ const ClientEmailPage = () => {
   // Auto-Reply Personalization Config State
   const [autoReplyActive, setAutoReplyActive] = useState(true);
   const [autoReplySubject, setAutoReplySubject] = useState('Thank you for emailing us, {{first_name}}!');
-  const [autoReplyBody, setAutoReplyBody] = useState(`Hi {{first_name}},\n\nThank you for reaching out to UWOConnect. We have received your email and will respond to you shortly.\n\nBest regards,\nAbha Jatav\nUWOConnect Team`);
+  const [autoReplyBody, setAutoReplyBody] = useState(`Hi {{first_name}},\n\nThank you for reaching out to UWO Connect. We have received your email and will respond to you shortly.\n\nBest regards,\nAbha Jatav\nUWO Connect Team`);
   const [savingAutoReply, setSavingAutoReply] = useState(false);
 
 
@@ -376,7 +376,7 @@ const ClientEmailPage = () => {
       );
       if (res.data?.result) setMessageBody(res.data.result);
     } catch (err) {
-      setMessageBody(`Hello,\n\n${(messageBody || "Thank you for reaching out.").trim()}\n\nBest regards,\nAbha Jatav\nUWOConnect`);
+      setMessageBody(`Hello,\n\n${(messageBody || "Thank you for reaching out.").trim()}\n\nBest regards,\nAbha Jatav\nUWO Connect`);
     } finally {
       setAiLoading(false);
     }
@@ -870,7 +870,7 @@ const ClientEmailPage = () => {
               <div className="text-xs">
                 <h4 className="font-semibold text-slate-800">How it works</h4>
                 <p className="text-slate-500 mt-0.5 leading-relaxed">
-                  When someone emails your connected Gmail or Outlook account, UWOConnect automatically sends a personalized reply using their name.
+                  When someone emails your connected Gmail or Outlook account, UWO Connect automatically sends a personalized reply using their name.
                 </p>
               </div>
             </div>

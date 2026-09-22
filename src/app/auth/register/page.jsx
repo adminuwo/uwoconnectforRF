@@ -257,7 +257,7 @@ const RegisterPage = () => {
           </div>
           <h2 className="text-2xl font-extrabold text-slate-900 mb-2">Registration Successful</h2>
           <p className="text-slate-600 mb-8 leading-relaxed text-sm font-medium">
-            Your {brand?.brand_name || 'UwoConnect'} account has been created and activated. You can now log in to access your business workspace.
+            Your {brand?.brand_name || 'UWO Connect'} account has been created and activated. You can now log in to access your business workspace.
           </p>
           <Link 
             href={brand?.custom_domain ? `/auth/login?brand_domain=${brand.custom_domain}` : '/auth/login'} 
@@ -290,10 +290,13 @@ const RegisterPage = () => {
           <img 
             src={brand?.logo_url || "/download (3).gif"} 
             alt={brand?.brand_name || "Brand Logo"} 
-            className="w-5 h-5 rounded-full object-contain"
+            width={20}
+            height={20}
+            style={{ width: '20px', height: '20px' }}
+            className="w-5 h-5 rounded-full object-contain shrink-0"
           />
           <span className="text-slate-800 font-bold text-xs tracking-wider uppercase">
-            {brand?.brand_name || "UwoConnect"}
+            {brand?.brand_name || "UWO Connect"}
           </span>
           <span 
             className="w-1.5 h-1.5 rounded-full animate-pulse" 
@@ -377,7 +380,7 @@ const RegisterPage = () => {
               <div className="p-4 bg-rose-50/90 border border-rose-200 rounded-2xl mb-4 text-left">
                 <p className="text-xs sm:text-sm font-bold text-rose-900 mb-1 flex items-center gap-1.5">
                   <AlertCircle size={15} className="shrink-0 text-rose-600" />
-                  Meta Portfolio is required to register for Uwo Connect.
+                  Meta Portfolio is required to register for UWO Connect.
                 </p>
                 <p className="text-[12px] text-rose-800 leading-relaxed mt-1">
                   To connect WhatsApp Business, Instagram Direct, and Facebook Messenger automations, an active Meta Portfolio (Business Account) is required.
@@ -414,7 +417,7 @@ const RegisterPage = () => {
                 Do you have a Meta Portfolio?
               </h2>
               <p className="text-xs sm:text-sm text-slate-500 mb-6 leading-relaxed">
-                Uwo Connect syncs official WhatsApp Business, Instagram Direct, and Facebook Messenger channels using your Meta Portfolio (Business Account).
+                UWO Connect syncs official WhatsApp Business, Instagram Direct, and Facebook Messenger channels using your Meta Portfolio (Business Account).
               </p>
 
               <div className="grid grid-cols-2 gap-3 mb-6">

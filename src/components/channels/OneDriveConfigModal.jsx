@@ -186,7 +186,7 @@ export default function OneDriveConfigModal({ isOpen, onClose, client, onSaved }
                   <OneDriveIcon size={42} className="text-[#00AB56]" />
                 </div>
                 <span className="text-[10px] font-extrabold px-3 py-1 rounded-full bg-[#00AB56]/10 text-[#00AB56] border border-[#00AB56]/20 uppercase tracking-wider mb-2">
-                  UWOConnect Cloud Storage
+                  UWO Connect Cloud Storage
                 </span>
                 <h3 className="text-xl font-extrabold text-slate-900 mb-2">Connect Microsoft OneDrive</h3>
                 <p className="text-xs text-slate-500 text-center max-w-md mb-6 leading-relaxed font-medium">
@@ -351,7 +351,7 @@ export default function OneDriveConfigModal({ isOpen, onClose, client, onSaved }
                         Folder Structure
                       </h4>
                       <div className="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm text-xs font-mono text-slate-600 space-y-1 max-h-[250px] overflow-y-auto">
-                        <p className="font-bold text-[#00AB56]">UWOConnect/</p>
+                        <p className="font-bold text-[#00AB56]">UWO Connect/</p>
                         {[
                           '├── WhatsApp/ (Images, Documents, Audio, Video)',
                           '├── Facebook/ (Images, Documents, Attachments)',
@@ -496,7 +496,7 @@ export default function OneDriveConfigModal({ isOpen, onClose, client, onSaved }
                 <div className="bg-white border border-slate-200/80 rounded-2xl p-4 space-y-4 text-xs shadow-sm">
                   {[
                     { step: '1', text: 'Connect your Microsoft account via OAuth' },
-                    { step: '2', text: 'UWOConnect creates organized folders automatically' },
+                    { step: '2', text: 'UWO Connect creates organized folders automatically' },
                     { step: '3', text: 'Documents sync in the background to the correct folder' },
                   ].map(({ step, text }) => (
                     <div key={step} className="flex items-start gap-3">

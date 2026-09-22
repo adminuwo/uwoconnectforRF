@@ -9,7 +9,7 @@ const tourSteps = [
     id: 'welcome',
     page: '/client',
     selector: '[data-tour="dashboard-welcome"]',
-    title: '👋 Welcome to UwoConnect!',
+    title: '👋 Welcome to UWO Connect!',
     description: 'This is your AI & Omnichannel Automation Command Center. Let us take you on a quick guided tour of all your powerful workspace tools.',
     why: 'Helps you set up, understand, and master all platform features in minutes.',
     tip: 'Press ESC anytime to pause, or use Next / Prev buttons below.',

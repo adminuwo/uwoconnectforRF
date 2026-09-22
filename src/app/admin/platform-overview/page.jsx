@@ -24,8 +24,11 @@ export default function ClientPlatformOverviewPage() {
       web_clients: 0,
       android_clients: 0,
       ios_clients: 0,
+      mobile_clients: 0,
+      mobile_adoption_pct: 0,
       active_clients: 0,
       inactive_clients: 0,
+      uninstalled_clients: 0,
     },
     distribution: {
       web: { count: 0, percentage: 0, label: 'Web Clients' },
@@ -59,12 +62,12 @@ export default function ClientPlatformOverviewPage() {
 
   const abortControllerRef = useRef(null);
 
-  // Debounce search
+  // Debounce search with snappy 150ms interval
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSearch(searchInput.trim());
       setPage(1);
-    }, 300);
+    }, 150);
     return () => clearTimeout(handler);
   }, [searchInput]);
 
@@ -93,6 +96,7 @@ export default function ClientPlatformOverviewPage() {
           sort_by: sortBy,
           page,
           page_size: pageSize,
+          refresh: manual ? 'true' : undefined,
         },
         signal: controller.signal,
       });
@@ -128,7 +132,7 @@ export default function ClientPlatformOverviewPage() {
   // Export visible data to CSV
   const handleExportCSV = () => {
     if (!data.clients || data.clients.length === 0) return;
-    const headers = ['Business Name', 'Owner Name', 'Owner Email', 'Platforms', 'Primary Platform', 'Device Model', 'OS Version', 'App Version', 'Last Active', 'Account Status'];
+    const headers = ['Business Name', 'Owner Name', 'Owner Email', 'Platforms', 'Primary Platform', 'Device Model', 'OS Version', 'App Version', 'Last Active', 'Account Status', 'Is Uninstalled', 'Uninstalled At'];
     const rows = data.clients.map(c => [
       `"${c.business_name || ''}"`,
       `"${c.owner_name || ''}"`,
@@ -140,6 +144,8 @@ export default function ClientPlatformOverviewPage() {
       `"${c.app_version || ''}"`,
       `"${c.last_active_at || ''}"`,
       `"${c.status || ''}"`,
+      `"${c.is_uninstalled ? 'Yes' : 'No'}"`,
+      `"${c.uninstalled_at || ''}"`,
     ]);
 
     const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
@@ -247,13 +253,13 @@ export default function ClientPlatformOverviewPage() {
           </div>
         )}
 
-        {/* ── 1. Platform Summary Cards (6 Cards) ── */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5 sm:gap-4">
-          {/* Card 1: Total Clients */}
-          <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs hover:border-slate-300 transition-all flex flex-col justify-between">
-            <div className="flex items-center justify-between mb-2">
+        {/* ── 1. KPI Summary Cards (4 Cards) ── */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
+          {/* Card 1: Total Registered Clients */}
+          <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-xs hover:border-indigo-200 transition-all flex flex-col justify-between">
+            <div className="flex items-center justify-between mb-3">
               <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Total Clients</span>
-              <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
+              <div className="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shadow-2xs">
                 <Users className="w-4 h-4" />
               </div>
             </div>
@@ -261,78 +267,15 @@ export default function ClientPlatformOverviewPage() {
               <span className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
                 {loading ? '...' : data.summary.total_clients}
               </span>
-              <p className="text-[11px] text-slate-500 mt-0.5 font-medium">Registered unique clients</p>
+              <p className="text-[11px] text-slate-500 mt-1 font-medium">Registered unique organizations</p>
             </div>
           </div>
 
-          {/* Card 2: Web Clients */}
-          <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs hover:border-blue-300 transition-all flex flex-col justify-between group">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-blue-700">Web Clients</span>
-              <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center group-hover:bg-blue-100 transition-all">
-                <Globe className="w-4 h-4" />
-              </div>
-            </div>
-            <div>
-              <div className="flex items-baseline gap-2">
-                <span className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-                  {loading ? '...' : data.summary.web_clients}
-                </span>
-                <span className="text-xs font-bold text-blue-600">
-                  ({data.distribution.web.percentage}%)
-                </span>
-              </div>
-              <p className="text-[11px] text-slate-500 mt-0.5 font-medium">Web / Desktop Portal</p>
-            </div>
-          </div>
-
-          {/* Card 3: Android Clients */}
-          <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs hover:border-emerald-300 transition-all flex flex-col justify-between group">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-700">Android Clients</span>
-              <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:bg-emerald-100 transition-all">
-                <Smartphone className="w-4 h-4" />
-              </div>
-            </div>
-            <div>
-              <div className="flex items-baseline gap-2">
-                <span className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-                  {loading ? '...' : data.summary.android_clients}
-                </span>
-                <span className="text-xs font-bold text-emerald-600">
-                  ({data.distribution.android.percentage}%)
-                </span>
-              </div>
-              <p className="text-[11px] text-slate-500 mt-0.5 font-medium">Android Native App</p>
-            </div>
-          </div>
-
-          {/* Card 4: iOS Clients */}
-          <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs hover:border-sky-300 transition-all flex flex-col justify-between group">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-sky-700">iOS Clients</span>
-              <div className="w-8 h-8 rounded-lg bg-sky-50 text-sky-600 flex items-center justify-center group-hover:bg-sky-100 transition-all">
-                <Apple className="w-4 h-4" />
-              </div>
-            </div>
-            <div>
-              <div className="flex items-baseline gap-2">
-                <span className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-                  {loading ? '...' : data.summary.ios_clients}
-                </span>
-                <span className="text-xs font-bold text-sky-600">
-                  ({data.distribution.ios.percentage}%)
-                </span>
-              </div>
-              <p className="text-[11px] text-slate-500 mt-0.5 font-medium">Apple iPhone & iPad</p>
-            </div>
-          </div>
-
-          {/* Card 5: Active Clients */}
-          <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs hover:border-emerald-300 transition-all flex flex-col justify-between">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-700">Active Clients</span>
-              <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+          {/* Card 2: Active Accounts */}
+          <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-xs hover:border-emerald-200 transition-all flex flex-col justify-between">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-700">Active Accounts</span>
+              <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shadow-2xs">
                 <CheckCircle2 className="w-4 h-4" />
               </div>
             </div>
@@ -340,15 +283,15 @@ export default function ClientPlatformOverviewPage() {
               <span className="text-2xl sm:text-3xl font-black text-emerald-600 tracking-tight">
                 {loading ? '...' : data.summary.active_clients}
               </span>
-              <p className="text-[11px] text-slate-500 mt-0.5 font-medium">Active account status</p>
+              <p className="text-[11px] text-slate-500 mt-1 font-medium">Active operational status</p>
             </div>
           </div>
 
-          {/* Card 6: Inactive Clients */}
-          <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs hover:border-amber-300 transition-all flex flex-col justify-between">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Inactive Clients</span>
-              <div className="w-8 h-8 rounded-lg bg-slate-100 text-slate-500 flex items-center justify-center">
+          {/* Card 3: Inactive / Suspended */}
+          <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-xs hover:border-amber-200 transition-all flex flex-col justify-between">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Inactive Accounts</span>
+              <div className="w-8 h-8 rounded-xl bg-slate-100 text-slate-500 flex items-center justify-center shadow-2xs">
                 <XCircle className="w-4 h-4" />
               </div>
             </div>
@@ -356,7 +299,28 @@ export default function ClientPlatformOverviewPage() {
               <span className="text-2xl sm:text-3xl font-black text-slate-600 tracking-tight">
                 {loading ? '...' : data.summary.inactive_clients}
               </span>
-              <p className="text-[11px] text-slate-500 mt-0.5 font-medium">Pending or suspended</p>
+              <p className="text-[11px] text-slate-500 mt-1 font-medium">Pending, suspended or inactive</p>
+            </div>
+          </div>
+
+          {/* Card 4: Mobile App Adoption */}
+          <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-xs hover:border-violet-200 transition-all flex flex-col justify-between">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-violet-700">Mobile Adoption</span>
+              <div className="w-8 h-8 rounded-xl bg-violet-50 text-violet-600 flex items-center justify-center shadow-2xs">
+                <Smartphone className="w-4 h-4" />
+              </div>
+            </div>
+            <div>
+              <div className="flex items-baseline gap-2">
+                <span className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+                  {loading ? '...' : (data.summary.mobile_clients ?? (data.summary.android_clients + data.summary.ios_clients))}
+                </span>
+                <span className="text-xs font-bold text-violet-600">
+                  ({data.summary.mobile_adoption_pct || 0}%)
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-500 mt-1 font-medium">Clients with Android / iOS mobile</p>
             </div>
           </div>
         </div>
@@ -370,7 +334,7 @@ export default function ClientPlatformOverviewPage() {
                 Platform Distribution & User Footprint
               </h2>
               <p className="text-xs text-slate-500">
-                Exact counts and real-time usage share across Web, Android, and iOS clients.
+                Exact counts and real-time usage share across Web, Android, and iOS clients. Click any card below to filter table.
               </p>
             </div>
             <div className="flex items-center gap-4 text-xs font-semibold">
@@ -391,75 +355,129 @@ export default function ClientPlatformOverviewPage() {
 
           {/* Stacked Proportional Distribution Bar */}
           <div className="w-full h-4 bg-slate-100 rounded-full overflow-hidden flex shadow-inner">
-            {data.distribution.web.percentage > 0 && (
+            {data.distribution.web.count > 0 && (
               <div
-                style={{ width: `${Math.max(5, data.distribution.web.percentage)}%` }}
+                style={{ width: `${data.distribution.web.share_pct || data.distribution.web.percentage}%` }}
                 className="bg-gradient-to-r from-blue-500 to-blue-600 h-full transition-all duration-500 relative group cursor-pointer"
-                title={`Web: ${data.distribution.web.count} clients (${data.distribution.web.percentage}%)`}
+                title={`Web: ${data.distribution.web.count} clients (${data.distribution.web.percentage}% adoption)`}
               />
             )}
-            {data.distribution.android.percentage > 0 && (
+            {data.distribution.android.count > 0 && (
               <div
-                style={{ width: `${Math.max(5, data.distribution.android.percentage)}%` }}
+                style={{ width: `${data.distribution.android.share_pct || data.distribution.android.percentage}%` }}
                 className="bg-gradient-to-r from-emerald-500 to-teal-500 h-full transition-all duration-500 relative group cursor-pointer"
-                title={`Android: ${data.distribution.android.count} clients (${data.distribution.android.percentage}%)`}
+                title={`Android: ${data.distribution.android.count} clients (${data.distribution.android.percentage}% adoption)`}
               />
             )}
-            {data.distribution.ios.percentage > 0 && (
+            {data.distribution.ios.count > 0 && (
               <div
-                style={{ width: `${Math.max(5, data.distribution.ios.percentage)}%` }}
+                style={{ width: `${data.distribution.ios.share_pct || data.distribution.ios.percentage}%` }}
                 className="bg-gradient-to-r from-sky-400 to-indigo-500 h-full transition-all duration-500 relative group cursor-pointer"
-                title={`iOS: ${data.distribution.ios.count} clients (${data.distribution.ios.percentage}%)`}
+                title={`iOS: ${data.distribution.ios.count} clients (${data.distribution.ios.percentage}% adoption)`}
               />
             )}
           </div>
 
-          {/* Detailed Platform Cards Grid */}
+          {/* Detailed Platform Cards Grid (Interactive Filters) */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
-            <div className="p-3.5 rounded-xl border border-blue-100 bg-blue-50/40 flex items-center justify-between">
+            {/* Web Card */}
+            <div
+              onClick={() => {
+                setPlatformFilter(prev => prev === 'WEB' ? 'ALL' : 'WEB');
+                setPage(1);
+              }}
+              className={cn(
+                "p-4 rounded-xl border transition-all cursor-pointer flex items-center justify-between select-none group",
+                platformFilter === 'WEB'
+                  ? "border-blue-500 bg-blue-50/90 ring-2 ring-blue-400/40 shadow-sm"
+                  : "border-blue-100 bg-blue-50/40 hover:bg-blue-50/70 hover:border-blue-300"
+              )}
+              title="Click to filter clients by Web platform"
+            >
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center font-bold">
+                <div className="w-10 h-10 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center font-bold group-hover:scale-105 transition-transform shadow-2xs">
                   <Monitor className="w-5 h-5" />
                 </div>
                 <div>
-                  <div className="text-xs font-bold text-blue-900">Web Portal & PWA</div>
-                  <div className="text-xs text-blue-700/80">Desktop, Chrome, Safari, Edge</div>
+                  <div className="text-xs font-bold text-blue-950 flex items-center gap-1.5">
+                    Web Portal & PWA
+                    {platformFilter === 'WEB' && (
+                      <span className="text-[10px] px-1.5 py-0.2 bg-blue-600 text-white rounded-md font-semibold">Filtered</span>
+                    )}
+                  </div>
+                  <div className="text-[11px] text-blue-700/80">Desktop, Chrome, Safari, Edge</div>
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-lg font-black text-blue-900">{data.distribution.web.count}</div>
+                <div className="text-xl font-black text-blue-900">{data.distribution.web.count}</div>
                 <div className="text-[11px] font-bold text-blue-600">{data.distribution.web.percentage}% of clients</div>
               </div>
             </div>
 
-            <div className="p-3.5 rounded-xl border border-emerald-100 bg-emerald-50/40 flex items-center justify-between">
+            {/* Android Card */}
+            <div
+              onClick={() => {
+                setPlatformFilter(prev => prev === 'ANDROID' ? 'ALL' : 'ANDROID');
+                setPage(1);
+              }}
+              className={cn(
+                "p-4 rounded-xl border transition-all cursor-pointer flex items-center justify-between select-none group",
+                platformFilter === 'ANDROID'
+                  ? "border-emerald-500 bg-emerald-50/90 ring-2 ring-emerald-400/40 shadow-sm"
+                  : "border-emerald-100 bg-emerald-50/40 hover:bg-emerald-50/70 hover:border-emerald-300"
+              )}
+              title="Click to filter clients by Android platform"
+            >
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">
+                <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold group-hover:scale-105 transition-transform shadow-2xs">
                   <Smartphone className="w-5 h-5" />
                 </div>
                 <div>
-                  <div className="text-xs font-bold text-emerald-900">Android App</div>
-                  <div className="text-xs text-emerald-700/80">Google Play Store & APK</div>
+                  <div className="text-xs font-bold text-emerald-950 flex items-center gap-1.5">
+                    Android App
+                    {platformFilter === 'ANDROID' && (
+                      <span className="text-[10px] px-1.5 py-0.2 bg-emerald-600 text-white rounded-md font-semibold">Filtered</span>
+                    )}
+                  </div>
+                  <div className="text-[11px] text-emerald-700/80">Google Play Store & APK</div>
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-lg font-black text-emerald-900">{data.distribution.android.count}</div>
+                <div className="text-xl font-black text-emerald-900">{data.distribution.android.count}</div>
                 <div className="text-[11px] font-bold text-emerald-600">{data.distribution.android.percentage}% of clients</div>
               </div>
             </div>
 
-            <div className="p-3.5 rounded-xl border border-sky-100 bg-sky-50/40 flex items-center justify-between">
+            {/* iOS Card */}
+            <div
+              onClick={() => {
+                setPlatformFilter(prev => prev === 'IOS' ? 'ALL' : 'IOS');
+                setPage(1);
+              }}
+              className={cn(
+                "p-4 rounded-xl border transition-all cursor-pointer flex items-center justify-between select-none group",
+                platformFilter === 'IOS'
+                  ? "border-sky-500 bg-sky-50/90 ring-2 ring-sky-400/40 shadow-sm"
+                  : "border-sky-100 bg-sky-50/40 hover:bg-sky-50/70 hover:border-sky-300"
+              )}
+              title="Click to filter clients by iOS platform"
+            >
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-sky-100 text-sky-700 flex items-center justify-center font-bold">
+                <div className="w-10 h-10 rounded-xl bg-sky-100 text-sky-700 flex items-center justify-center font-bold group-hover:scale-105 transition-transform shadow-2xs">
                   <Apple className="w-5 h-5" />
                 </div>
                 <div>
-                  <div className="text-xs font-bold text-sky-900">iOS / iPhone App</div>
-                  <div className="text-xs text-sky-700/80">Apple App Store & TestFlight</div>
+                  <div className="text-xs font-bold text-sky-950 flex items-center gap-1.5">
+                    iOS / iPhone App
+                    {platformFilter === 'IOS' && (
+                      <span className="text-[10px] px-1.5 py-0.2 bg-sky-600 text-white rounded-md font-semibold">Filtered</span>
+                    )}
+                  </div>
+                  <div className="text-[11px] text-sky-700/80">Apple App Store & TestFlight</div>
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-lg font-black text-sky-900">{data.distribution.ios.count}</div>
+                <div className="text-xl font-black text-sky-900">{data.distribution.ios.count}</div>
                 <div className="text-[11px] font-bold text-sky-600">{data.distribution.ios.percentage}% of clients</div>
               </div>
             </div>
@@ -491,30 +509,6 @@ export default function ClientPlatformOverviewPage() {
 
             {/* Filter Pills */}
             <div className="flex flex-wrap items-center gap-2">
-              {/* Platform Filter */}
-              <div className="flex items-center bg-slate-100 p-1 rounded-xl text-xs font-semibold text-slate-600">
-                <span className="px-2 text-[11px] text-slate-400 uppercase tracking-wider font-bold">Platform:</span>
-                {[
-                  { key: 'ALL', label: 'All' },
-                  { key: 'WEB', label: 'Web' },
-                  { key: 'ANDROID', label: 'Android' },
-                  { key: 'IOS', label: 'iOS' },
-                ].map((tab) => (
-                  <button
-                    key={tab.key}
-                    onClick={() => { setPlatformFilter(tab.key); setPage(1); }}
-                    className={cn(
-                      "px-2.5 py-1 rounded-lg transition-all",
-                      platformFilter === tab.key
-                        ? "bg-white text-slate-900 shadow-xs font-bold"
-                        : "hover:text-slate-900"
-                    )}
-                  >
-                    {tab.label}
-                  </button>
-                ))}
-              </div>
-
               {/* Status Filter */}
               <div className="flex items-center bg-slate-100 p-1 rounded-xl text-xs font-semibold text-slate-600">
                 <span className="px-2 text-[11px] text-slate-400 uppercase tracking-wider font-bold">Status:</span>
@@ -522,21 +516,48 @@ export default function ClientPlatformOverviewPage() {
                   { key: 'ALL', label: 'All' },
                   { key: 'ACTIVE', label: 'Active' },
                   { key: 'INACTIVE', label: 'Inactive' },
+                  { key: 'UNINSTALLED', label: 'Uninstalled' },
                 ].map((tab) => (
                   <button
                     key={tab.key}
                     onClick={() => { setStatusFilter(tab.key); setPage(1); }}
                     className={cn(
-                      "px-2.5 py-1 rounded-lg transition-all",
+                      "px-2.5 py-1 rounded-lg transition-all flex items-center gap-1.5",
                       statusFilter === tab.key
-                        ? "bg-white text-slate-900 shadow-xs font-bold"
+                        ? tab.key === 'UNINSTALLED'
+                          ? "bg-rose-500 text-white shadow-xs font-bold"
+                          : "bg-white text-slate-900 shadow-xs font-bold"
                         : "hover:text-slate-900"
                     )}
                   >
-                    {tab.label}
+                    <span>{tab.label}</span>
+                    {tab.key === 'UNINSTALLED' && data.summary?.uninstalled_clients > 0 && (
+                      <span className={cn(
+                        "px-1.5 py-0.2 rounded-full text-[10px] font-black",
+                        statusFilter === 'UNINSTALLED'
+                          ? "bg-white text-rose-600"
+                          : "bg-rose-100 text-rose-700"
+                      )}>
+                        {data.summary.uninstalled_clients}
+                      </span>
+                    )}
                   </button>
                 ))}
               </div>
+
+              {/* Active Platform Filter indicator if filtered via top cards */}
+              {platformFilter !== 'ALL' && (
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-bold bg-slate-800 text-white shadow-xs">
+                  <span>Platform: {platformFilter === 'WEB' ? 'Web' : platformFilter === 'ANDROID' ? 'Android' : 'iOS'}</span>
+                  <button
+                    onClick={() => { setPlatformFilter('ALL'); setPage(1); }}
+                    className="hover:text-rose-300 ml-0.5 text-xs font-bold"
+                    title="Clear platform filter"
+                  >
+                    ✕
+                  </button>
+                </div>
+              )}
 
               {/* Date Activity Filter */}
               <select
@@ -745,24 +766,38 @@ export default function ClientPlatformOverviewPage() {
 
                         {/* 7. Account Status */}
                         <td className="py-3.5 px-4">
-                          <span
-                            className={cn(
-                              "inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold border",
-                              client.status === 'ACTIVE'
-                                ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                                : client.status === 'PENDING'
-                                ? "bg-amber-50 text-amber-700 border-amber-200"
-                                : "bg-red-50 text-red-700 border-red-200"
+                          <div className="flex flex-col gap-1 items-start">
+                            {client.is_uninstalled ? (
+                              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
+                                <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
+                                UNINSTALLED
+                              </span>
+                            ) : (
+                              <span
+                                className={cn(
+                                  "inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold border",
+                                  client.status === 'ACTIVE'
+                                    ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                                    : client.status === 'PENDING'
+                                    ? "bg-amber-50 text-amber-700 border-amber-200"
+                                    : "bg-red-50 text-red-700 border-red-200"
+                                )}
+                              >
+                                <span
+                                  className={cn(
+                                    "w-1.5 h-1.5 rounded-full",
+                                    client.status === 'ACTIVE' ? "bg-emerald-500" : client.status === 'PENDING' ? "bg-amber-500" : "bg-red-500"
+                                  )}
+                                />
+                                {client.status || 'UNKNOWN'}
+                              </span>
                             )}
-                          >
-                            <span
-                              className={cn(
-                                "w-1.5 h-1.5 rounded-full",
-                                client.status === 'ACTIVE' ? "bg-emerald-500" : client.status === 'PENDING' ? "bg-amber-500" : "bg-red-500"
-                              )}
-                            />
-                            {client.status || 'UNKNOWN'}
-                          </span>
+                            {client.is_uninstalled && client.uninstalled_at && (
+                              <span className="text-[10px] text-rose-600 font-medium">
+                                {new Date(client.uninstalled_at).toLocaleDateString([], { month: 'short', day: 'numeric' })}
+                              </span>
+                            )}
+                          </div>
                         </td>
 
                         {/* 8. Actions */}

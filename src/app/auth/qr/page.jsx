@@ -198,7 +198,7 @@ export default function QrLoginPage() {
             </div>
           </div>
           <span className="text-xl font-extrabold tracking-tight text-gray-900 group-hover:text-emerald-600 transition-colors">
-            {brand?.name || 'UwoConnect'}
+            {brand?.name || 'UWO Connect'}
           </span>
         </Link>
 
@@ -227,7 +227,7 @@ export default function QrLoginPage() {
                 Login with your Phone
               </h1>
               <p className="text-gray-500 text-sm font-medium leading-relaxed mb-8">
-                Scan this QR code from your Uwo Connect app to log in instantly.
+                Scan this QR code from your UWO Connect app to log in instantly.
               </p>
 
               {/* Numbered Steps */}
@@ -237,7 +237,7 @@ export default function QrLoginPage() {
                     1
                   </div>
                   <div>
-                    <h4 className="text-sm font-bold text-gray-800">Open your Uwo Connect app</h4>
+                    <h4 className="text-sm font-bold text-gray-800">Open your UWO Connect app</h4>
                     <p className="text-xs text-gray-400 mt-0.5">Make sure you&apos;re logged in.</p>
                   </div>
                 </div>
@@ -418,7 +418,7 @@ export default function QrLoginPage() {
       {/* Footer */}
       <footer className="relative z-10 w-full max-w-6xl mx-auto px-6 py-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-400 font-medium">
         <div>
-          &copy; {new Date().getFullYear()} {brand?.name || 'UwoConnect'} · All rights reserved.
+          &copy; {new Date().getFullYear()} {brand?.name || 'UWO Connect'} · All rights reserved.
         </div>
         <div className="flex items-center gap-6">
           <Link href="/privacy" className="hover:text-gray-600 transition-colors">Privacy Policy</Link>

@@ -27,23 +27,27 @@ const WhatsAppLogo = ({ size = 22 }) => (
   </svg>
 );
 
-const InstagramLogo = ({ size = 22 }) => (
-  <svg width={size} height={size} viewBox="0 0 48 48" fill="none" className="shrink-0">
-    <defs>
-      <linearGradient id="igGradLanding" x1="0%" y1="100%" x2="100%" y2="0%">
-        <stop offset="0%" stopColor="#FFD600" />
-        <stop offset="25%" stopColor="#FF7A00" />
-        <stop offset="50%" stopColor="#FF0069" />
-        <stop offset="75%" stopColor="#D300C5" />
-        <stop offset="100%" stopColor="#7638FA" />
-      </linearGradient>
-    </defs>
-    <rect width="48" height="48" rx="12" fill="url(#igGradLanding)" />
-    <rect x="11" y="11" width="26" height="26" rx="7" stroke="white" strokeWidth="3" fill="none" />
-    <circle cx="24" cy="24" r="6" stroke="white" strokeWidth="3" fill="none" />
-    <circle cx="31.5" cy="16.5" r="1.75" fill="white" />
-  </svg>
-);
+const InstagramLogo = ({ size = 22 }) => {
+  const uniqueId = React.useId ? React.useId().replace(/:/g, '') : 'landing';
+  const gradId = `igGradLanding_${uniqueId}`;
+  return (
+    <svg width={size} height={size} viewBox="0 0 48 48" fill="none" className="shrink-0">
+      <defs>
+        <linearGradient id={gradId} x1="0%" y1="100%" x2="100%" y2="0%">
+          <stop offset="0%" stopColor="#FFD600" />
+          <stop offset="25%" stopColor="#FF7A00" />
+          <stop offset="50%" stopColor="#FF0069" />
+          <stop offset="75%" stopColor="#D300C5" />
+          <stop offset="100%" stopColor="#7638FA" />
+        </linearGradient>
+      </defs>
+      <rect width="48" height="48" rx="12" fill={`url(#${gradId})`} />
+      <rect x="11" y="11" width="26" height="26" rx="7" stroke="white" strokeWidth="3" fill="none" />
+      <circle cx="24" cy="24" r="6" stroke="white" strokeWidth="3" fill="none" />
+      <circle cx="31.5" cy="16.5" r="1.75" fill="white" />
+    </svg>
+  );
+};
 
 const FacebookLogo = ({ size = 22 }) => (
   <svg width={size} height={size} viewBox="0 0 48 48" fill="none" className="shrink-0">
@@ -322,8 +326,10 @@ export default function UwoLandingPage() {
           {/* Logo (No Background Wrapper, Brand Name Only) */}
           <Link href="/" className="flex items-center gap-2 group cursor-pointer">
             <img
-              src={isWhiteLabel && logoUrl ? logoUrl : "/download (3).gif"}
+              src={isWhiteLabel && logoUrl ? logoUrl : "/favicon.png"}
               alt={brandName}
+              width={32}
+              height={32}
               className="w-8 h-8 object-contain group-hover:scale-105 transition-transform duration-300 shrink-0"
             />
             <span className={cn(
@@ -2373,7 +2379,7 @@ export default function UwoLandingPage() {
               Frequently Asked Questions
             </h2>
             <p className={cn("text-sm sm:text-base font-bold max-w-xl mx-auto", isDarkMode ? "text-slate-300" : "text-slate-700")}>
-              Everything you need to know about UwoConnect.
+              Everything you need to know about UWO Connect.
             </p>
           </div>
         </ScrollReveal>
@@ -2383,24 +2389,24 @@ export default function UwoLandingPage() {
           {(() => {
             const faqList = [
               {
-                q: 'What is UwoConnect?',
-                a: 'UwoConnect is a business automation platform that helps businesses manage customer conversations, leads, sales, payments and daily business activities from one place.'
+                q: 'What is UWO Connect?',
+                a: 'UWO Connect is a business automation platform that helps businesses manage customer conversations, leads, sales, payments and daily business activities from one place.'
               },
               {
-                q: 'Which channels can I connect with UwoConnect?',
-                a: 'UwoConnect supports supported channels such as WhatsApp Business, Instagram, Facebook and other available communication integrations. Channel availability may depend on the selected plan and third-party platform requirements.'
+                q: 'Which channels can I connect with UWO Connect?',
+                a: 'UWO Connect supports supported channels such as WhatsApp Business, Instagram, Facebook and other available communication integrations. Channel availability may depend on the selected plan and third-party platform requirements.'
               },
               {
-                q: 'What is included in my UwoConnect plan?',
+                q: 'What is included in my UWO Connect plan?',
                 a: 'Each plan includes a specific set of features, channels, connectors and usage limits. The exact features included in each plan are shown in the Pricing Plans section above.'
               },
               {
                 q: 'Are subscription and wallet charges separate?',
-                a: 'Yes. Your UwoConnect subscription and prepaid usage wallet are completely separate. Subscription pays for your platform plan, while the wallet covers usage-based services. Wallet balance is not used to pay the subscription.'
+                a: 'Yes. Your UWO Connect subscription and prepaid usage wallet are completely separate. Subscription pays for your platform plan, while the wallet covers usage-based services. Wallet balance is not used to pay the subscription.'
               },
               {
-                q: 'What is the UwoConnect wallet?',
-                a: 'The wallet is a prepaid balance that can be used for applicable usage-based UwoConnect services. You can add money to the wallet separately from your subscription.'
+                q: 'What is the UWO Connect wallet?',
+                a: 'The wallet is a prepaid balance that can be used for applicable usage-based UWO Connect services. You can add money to the wallet separately from your subscription.'
               },
               {
                 q: 'How can I add money to my wallet?',
@@ -2408,11 +2414,11 @@ export default function UwoLandingPage() {
               },
               {
                 q: 'What happens after I use all my included broadcasts?',
-                a: 'Once the broadcasts included in your plan have been used, additional broadcasts can be charged from your wallet if sufficient wallet balance is available. The applicable additional broadcast price will be shown in UwoConnect.'
+                a: 'Once the broadcasts included in your plan have been used, additional broadcasts can be charged from your wallet if sufficient wallet balance is available. The applicable additional broadcast price will be shown in UWO Connect.'
               },
               {
                 q: 'How much does an additional broadcast cost?',
-                a: 'The applicable additional broadcast charge is shown in the UwoConnect platform and may be updated according to the current pricing configuration.'
+                a: 'The applicable additional broadcast charge is shown in the UWO Connect platform and may be updated according to the current pricing configuration.'
               },
               {
                 q: 'Will my wallet be charged when I recharge it?',
@@ -2423,36 +2429,36 @@ export default function UwoLandingPage() {
                 a: 'Your subscription can remain active. However, usage-based services that require wallet balance may be restricted until you recharge your wallet.'
               },
               {
-                q: 'Can I use UwoConnect without coding?',
-                a: 'Yes. UwoConnect is designed to make common business automation workflows accessible without requiring coding for normal use.'
+                q: 'Can I use UWO Connect without coding?',
+                a: 'Yes. UWO Connect is designed to make common business automation workflows accessible without requiring coding for normal use.'
               },
               {
                 q: 'Can I use AI automation?',
-                a: 'Yes. UwoConnect provides AI-powered automation for supported customer conversations, FAQs, lead qualification and business workflows. AI-generated responses may not always be perfect, so important information should be reviewed.'
+                a: 'Yes. UWO Connect provides AI-powered automation for supported customer conversations, FAQs, lead qualification and business workflows. AI-generated responses may not always be perfect, so important information should be reviewed.'
               },
               {
                 q: 'Can I manage my leads and customers?',
-                a: 'Yes. UwoConnect provides CRM and lead-management capabilities to help businesses organize customer information and manage sales stages.'
+                a: 'Yes. UWO Connect provides CRM and lead-management capabilities to help businesses organize customer information and manage sales stages.'
               },
               {
                 q: 'Can I create quotations and invoices?',
-                a: 'Yes. Supported UwoConnect features allow businesses to create quotations, proposals and GST invoices. Businesses are responsible for checking their invoice and tax information.'
+                a: 'Yes. Supported UWO Connect features allow businesses to create quotations, proposals and GST invoices. Businesses are responsible for checking their invoice and tax information.'
               },
               {
                 q: 'Can I connect my existing business tools?',
-                a: 'UwoConnect provides connectors for supported services such as Google, Microsoft, payment services and other business tools. Available connectors depend on your plan and the current integration availability.'
+                a: 'UWO Connect provides connectors for supported services such as Google, Microsoft, payment services and other business tools. Available connectors depend on your plan and the current integration availability.'
               },
               {
                 q: 'Can I add team members?',
                 a: 'Yes. Depending on your plan, you can add team members and manage their access using supported roles and permissions.'
               },
               {
-                q: 'Does UwoConnect offer white-label solutions?',
-                a: 'Yes. UwoConnect provides white-label/agency capabilities for eligible partners. Availability and commercial terms may vary.'
+                q: 'Does UWO Connect offer white-label solutions?',
+                a: 'Yes. UWO Connect provides white-label/agency capabilities for eligible partners. Availability and commercial terms may vary.'
               },
               {
                 q: 'Is my payment information secure?',
-                a: 'Payments are processed through supported payment providers. UwoConnect does not ask users to share payment credentials directly through normal chat or support channels.'
+                a: 'Payments are processed through supported payment providers. UWO Connect does not ask users to share payment credentials directly through normal chat or support channels.'
               }
             ];
 
@@ -2523,6 +2529,16 @@ export default function UwoLandingPage() {
                     {showAllFaqs ? <ChevronUp size={16} /> : <ChevronDown size={16} className="group-hover:translate-y-0.5 transition-transform" />}
                   </button>
                 </div>
+
+                {/* FAQ Help Contact Link */}
+                <div className="text-center pt-4">
+                  <p className={cn("text-xs sm:text-sm font-semibold", isDarkMode ? "text-slate-400" : "text-slate-600")}>
+                    Still have questions?{' '}
+                    <Link href="/contact" className="text-[#059669] hover:underline font-bold">
+                      Contact our support &amp; sales team →
+                    </Link>
+                  </p>
+                </div>
               </>
             );
           })()}
@@ -2562,7 +2578,7 @@ export default function UwoLandingPage() {
             "text-sm font-medium max-w-lg mx-auto leading-relaxed",
             isDarkMode ? "text-slate-300" : "text-slate-600"
           )}>
-            Start managing your conversations, leads and automation with UwoConnect.
+            Start managing your conversations, leads and automation with UWO Connect.
           </p>
           <div className="pt-2">
             <button
@@ -2595,7 +2611,6 @@ export default function UwoLandingPage() {
               <li><Link href="/about" className="hover:text-emerald-500 transition-colors">About Us</Link></li>
               <li><Link href="/contact" className="hover:text-emerald-500 transition-colors">Contact</Link></li>
               <li><Link href="/book" className="hover:text-emerald-500 transition-colors">Book Demo</Link></li>
-              <li><Link href="/admin/whitelabel" className="hover:text-emerald-500 transition-colors">White Label</Link></li>
             </ul>
           </div>
 
@@ -2604,7 +2619,7 @@ export default function UwoLandingPage() {
             <div className="flex items-center justify-center gap-3">
               <div className="w-10 h-10 rounded-2xl overflow-hidden shadow-md shadow-emerald-600/20 flex items-center justify-center bg-white border border-emerald-500/30 p-0.5 shrink-0">
                 <img
-                  src="/download (3).gif"
+                  src="/favicon.png"
                   alt="UWO Connect Logo"
                   className="w-full h-full object-cover rounded-xl"
                   width={40}

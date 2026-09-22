@@ -759,6 +759,9 @@ export default function AgencyAdminDashboard() {
                 <img 
                   src={stats?.brand_logo || brand?.logo_url || "/download (3).gif"} 
                   alt="Brand Logo" 
+                  width={56}
+                  height={56}
+                  style={{ width: '100%', height: '100%', maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
                   className="w-full h-full object-contain"
                 />
               </div>

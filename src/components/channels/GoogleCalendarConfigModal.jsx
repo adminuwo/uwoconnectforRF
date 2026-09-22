@@ -308,7 +308,7 @@ export default function GoogleCalendarConfigModal({ client, isOpen, onClose, onS
                       <div className="flex items-center justify-between p-4 bg-blue-50/60 rounded-2xl border border-blue-100">
                         <div>
                           <h4 className="text-xs font-bold text-slate-900">Book New Appointment</h4>
-                          <p className="text-[11px] text-slate-500">Create a Google Calendar meeting directly from UWOConnect.</p>
+                          <p className="text-[11px] text-slate-500">Create a Google Calendar meeting directly from UWO Connect.</p>
                         </div>
                         <button
                           onClick={() => setShowAddEvent(!showAddEvent)}

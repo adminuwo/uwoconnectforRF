@@ -44,8 +44,10 @@ export function BrandProvider({ children }) {
 
     // 2. Update Page Title if custom brand name present
     if (brandData.is_whitelabel && brandData.brand_name) {
-      if (document.title.includes('UwoConnect')) {
-        document.title = document.title.replace('UwoConnect', brandData.brand_name);
+      if (document.title.includes('UWO Connect')) {
+        document.title = document.title.replace(/UWO Connect/g, brandData.brand_name);
+      } else if (document.title.includes('UwoConnect')) {
+        document.title = document.title.replace(/UwoConnect/g, brandData.brand_name);
       }
     }
 

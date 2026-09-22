@@ -377,19 +377,19 @@ const Sidebar = ({ role, isOpen, onClose, onToggle }) => {
       <aside
         data-tour="sidebar-nav"
         className={cn(
-          'bg-white border-r border-slate-100 flex flex-col font-sans transition-all duration-300 ease-in-out shrink-0 overflow-hidden',
+          'bg-white border-r border-slate-100 flex flex-col font-sans transition-all duration-300 ease-in-out shrink-0 overflow-hidden min-w-0',
           // Mobile View: Slide-over drawer
           'fixed inset-y-0 left-0 z-50 shadow-2xl lg:shadow-none h-full',
           isOpen ? 'translate-x-0 w-[260px] sm:w-[270px]' : '-translate-x-full',
           // Desktop View (lg >= 1024px): Regular docked sidebar
           'lg:relative lg:translate-x-0 lg:z-30',
-          isOpen ? 'lg:w-[220px]' : 'lg:w-14'
+          isOpen ? 'lg:w-[220px] lg:min-w-[220px] lg:max-w-[220px]' : 'lg:w-14 lg:min-w-[56px] lg:max-w-[56px]'
         )}
       >
         {/* ── Brand Header ── */}
         <div className={cn(
-          'flex border-b border-slate-100/80 shrink-0 transition-all duration-300',
-          isOpen ? 'items-center px-3.5 sm:px-4 py-3 justify-between gap-2 flex-row' : 'flex-col items-center px-0 py-2 gap-1'
+          'flex border-b border-slate-100/80 shrink-0 transition-all duration-300 w-full overflow-hidden',
+          isOpen ? 'items-center px-3.5 sm:px-4 py-3 justify-between gap-2 flex-row' : 'flex-col items-center px-0 py-2 gap-1 w-14 max-w-[56px]'
         )}>
           {(() => {
             const displayBrandName = "UWO Connect";
@@ -397,12 +397,20 @@ const Sidebar = ({ role, isOpen, onClose, onToggle }) => {
 
             return isOpen ? (
               <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                <img
-                  src={displayBrandLogo}
-                  alt={displayBrandName}
-                  className="w-8 h-8 rounded-xl object-contain shadow-xs shrink-0 bg-white"
-                  onError={(e) => { e.currentTarget.src = "/download (3).gif"; }}
-                />
+                <div className="w-8 h-8 min-w-[32px] max-w-[32px] min-h-[32px] max-h-[32px] rounded-xl overflow-hidden bg-white flex items-center justify-center shrink-0 shadow-xs border border-slate-100">
+                  <img
+                    src={displayBrandLogo}
+                    alt={displayBrandName}
+                    width={32}
+                    height={32}
+                    style={{ width: '32px', height: '32px', maxWidth: '32px', maxHeight: '32px', minWidth: '32px', minHeight: '32px', objectFit: 'contain' }}
+                    className="w-8 h-8 rounded-xl object-contain shrink-0"
+                    onError={(e) => {
+                      e.currentTarget.onerror = null;
+                      e.currentTarget.src = "/favicon.png";
+                    }}
+                  />
+                </div>
                 <div className="min-w-0 flex-1">
                   <h1 className="text-sm font-black text-slate-900 tracking-tight leading-tight whitespace-nowrap truncate" title={displayBrandName}>
                     {displayBrandName}
@@ -417,12 +425,20 @@ const Sidebar = ({ role, isOpen, onClose, onToggle }) => {
               </div>
             ) : (
               <div className="flex items-center justify-center w-full py-1">
-                <img
-                  src={displayBrandLogo}
-                  alt={displayBrandName}
-                  className="w-8 h-8 rounded-xl object-contain bg-white"
-                  onError={(e) => { e.currentTarget.src = "/download (3).gif"; }}
-                />
+                <div className="w-8 h-8 min-w-[32px] max-w-[32px] min-h-[32px] max-h-[32px] rounded-xl overflow-hidden bg-white flex items-center justify-center shrink-0 shadow-xs border border-slate-100">
+                  <img
+                    src={displayBrandLogo}
+                    alt={displayBrandName}
+                    width={32}
+                    height={32}
+                    style={{ width: '32px', height: '32px', maxWidth: '32px', maxHeight: '32px', minWidth: '32px', minHeight: '32px', objectFit: 'contain' }}
+                    className="w-8 h-8 rounded-xl object-contain shrink-0"
+                    onError={(e) => {
+                      e.currentTarget.onerror = null;
+                      e.currentTarget.src = "/favicon.png";
+                    }}
+                  />
+                </div>
               </div>
             );
           })()}

@@ -13,7 +13,7 @@ function CheckoutContent() {
   const planName = searchParams.get('plan') || 'Professional';
   const amountParam = searchParams.get('amount') || '2999';
   const redirectUrl = searchParams.get('redirect_url') || 'uwoconnect://payment-result';
-  const customerName = searchParams.get('name') || 'UwoConnect Customer';
+  const customerName = searchParams.get('name') || 'UWO Connect Customer';
   const customerEmail = searchParams.get('email') || 'admin@uwo24.com';
   const customerPhone = searchParams.get('phone') || '+918358990909';
 
@@ -54,7 +54,7 @@ function CheckoutContent() {
       key: keyId,
       amount: amountPaise,
       currency: 'INR',
-      name: 'UwoConnect',
+      name: 'UWO Connect',
       description: `Upgrade to ${planName} Plan`,
       order_id: razorpayOrderId || undefined,
       prefill: {

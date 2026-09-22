@@ -71,7 +71,7 @@ const featureData = [
     requirements: [
       'WhatsApp Business API Account', 'Meta Developer App Configured',
       'Verified Business Phone Number', 'Connected WhatsApp Connector',
-      'At Least One Approved Template', 'Active UwoConnect Subscription',
+      'At Least One Approved Template', 'Active UWO Connect Subscription',
     ],
     connectors: ['WhatsApp', 'Meta', 'Google Sheets', 'Webhook', 'CRM'],
     automations: [
@@ -143,7 +143,7 @@ const featureData = [
       { title: 'Description Length', detail: 'Max 2,000 characters per product description' },
     ],
     requirements: [
-      'Active UwoConnect Subscription', 'At Least One Connected Channel',
+      'Active UWO Connect Subscription', 'At Least One Connected Channel',
       'Product Images Ready', 'Pricing Information',
     ],
     connectors: ['WhatsApp', 'Instagram', 'Facebook', 'Google Sheets', 'Webhook'],
@@ -209,7 +209,7 @@ const featureData = [
       { title: 'YouTube OAuth Scopes', detail: 'Requires Google Cloud project with YouTube Data API v3 enabled' },
     ],
     requirements: [
-      'Active UwoConnect Subscription',
+      'Active UWO Connect Subscription',
       'Platform-Specific Business Accounts',
       'API Credentials / OAuth Tokens',
       'Verified Business Identity (for WhatsApp)',
@@ -278,7 +278,7 @@ const featureData = [
       { title: 'Webhook Timeout', detail: '10-second timeout for external webhook calls' },
     ],
     requirements: [
-      'Active UwoConnect Subscription', 'At Least One Connected Channel',
+      'Active UWO Connect Subscription', 'At Least One Connected Channel',
       'Understanding of Basic Flow Logic',
     ],
     connectors: ['WhatsApp', 'Instagram', 'Telegram', 'Facebook', 'Google Sheets', 'Webhook', 'CRM'],
@@ -344,7 +344,7 @@ const featureData = [
       { title: 'Audit Logs', detail: 'Retained for 90 days on Pro, 365 days on Enterprise' },
     ],
     requirements: [
-      'Active UwoConnect Subscription', 'Admin Role to Invite Members',
+      'Active UWO Connect Subscription', 'Admin Role to Invite Members',
       'Valid Email Addresses for Invitations',
     ],
     connectors: ['Email', 'Slack', 'Discord', 'Webhook'],
@@ -475,7 +475,7 @@ const featureData = [
       { title: 'Embedding Latency', detail: 'Large documents may take 1–3 minutes to process' },
     ],
     requirements: [
-      'Active UwoConnect Subscription', 'Documents in Supported Formats',
+      'Active UWO Connect Subscription', 'Documents in Supported Formats',
       'AI Configuration Enabled',
     ],
     connectors: ['Google Drive', 'OneDrive', 'Webhook'],
@@ -712,7 +712,7 @@ const featureData = [
     ],
     requirements: [
       'Google Account with YouTube Channel', 'Google Cloud Project with YouTube Data API v3',
-      'OAuth Consent Screen Configured', 'Active UwoConnect Subscription',
+      'OAuth Consent Screen Configured', 'Active UWO Connect Subscription',
     ],
     connectors: ['YouTube', 'WhatsApp', 'Google Sheets'],
     automations: [
