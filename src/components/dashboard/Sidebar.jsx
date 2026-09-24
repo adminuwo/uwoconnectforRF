@@ -53,12 +53,19 @@ const TOUR_IDS = {
   'Auto Replies': 'sidebar-automations',
   'Workflows': 'sidebar-workflows',
   'Leads (CRM)': 'sidebar-crm',
+  'Messages': 'sidebar-inbox',
   'Inbox': 'sidebar-inbox',
+  'Inbox / Messages': 'sidebar-inbox',
   'Broadcasts': 'sidebar-campaigns',
   'Knowledge Base': 'sidebar-knowledge',
+  'Catalog': 'sidebar-catalog',
+  'Payments': 'sidebar-payments',
+  'Orders': 'sidebar-orders',
   'Quotations': 'sidebar-quotations',
   'Proposals': 'sidebar-proposals',
   'Invoices': 'sidebar-invoices',
+  'Team': 'sidebar-team',
+  'Work Reports': 'sidebar-reports',
   'Settings': 'sidebar-settings',
   'Plans': 'sidebar-plans',
   'Support': 'sidebar-support',
@@ -296,10 +303,11 @@ const Sidebar = ({ role, isOpen, onClose, onToggle }) => {
     ] : []),
     { name: 'Dashboard', href: '/client', icon: LayoutDashboard },
     { name: 'Learning Center', href: '/client/guides', icon: BookOpen },
-    // ── Main Nav (approved list in exact order) ──
+
+    // ── Core Communication & Automation ──
     { name: 'Channels', href: '/client/channels', icon: Link2, requiredPlan: 'Starter', featureKey: 'feature_channels' },
     { name: 'Google News', href: '/client/google-news', icon: Newspaper, requiredPlan: 'Starter', featureKey: 'connector_google_news' },
-    { name: 'Inbox', href: '/client/inbox', icon: MessagesSquare, requiredPlan: 'Starter', featureKey: 'feature_shared_inbox' },
+    { name: 'Inbox / Messages', href: '/client/inbox', icon: MessageSquare, requiredPlan: 'Starter', featureKey: 'feature_shared_inbox' },
     { name: 'Auto Replies', href: '/client/automations', icon: Zap, requiredPlan: 'Starter', featureKey: 'feature_autoreply' },
     { name: 'Workflows', href: '/client/workflows', icon: GitBranch, requiredPlan: 'Starter', featureKey: 'feature_workflow' },
     { name: 'Broadcasts', href: '/client/campaigns', icon: Megaphone, requiredPlan: 'Starter', featureKey: 'feature_broadcast' },
@@ -308,17 +316,18 @@ const Sidebar = ({ role, isOpen, onClose, onToggle }) => {
     { name: 'Proposals', href: '/client/proposals', icon: FileText, requiredPlan: 'Starter', featureKey: 'feature_proposal' },
     { name: 'Quotations', href: '/client/quotations', icon: FileCheck, requiredPlan: 'Starter', featureKey: 'feature_quotation' },
     { name: 'Invoices', href: '/client/invoices', icon: Receipt, requiredPlan: 'Starter', featureKey: 'feature_invoice' },
-    // ── Hidden from CLIENT sidebar (routes/APIs intact) ──
-    // { name: 'Voice & Video Calls', href: '/client/calls', icon: PhoneCall, requiredPlan: 'Starter', featureKey: 'feature_voice_video_call' },
-    // { name: 'Catalog', href: '/client/catalog', icon: ShoppingBag, requiredPlan: 'Starter', featureKey: 'feature_catalog' },
-    // { name: 'Payments', href: '/client/payments', icon: CreditCard, requiredPlan: 'Starter', featureKey: 'feature_payment' },
-    // { name: 'Billing & Wallet', href: '/client/billing', icon: Wallet },
-    // { name: 'Orders', href: '/client/orders', icon: Receipt, requiredPlan: 'Starter', featureKey: 'feature_order' },
-    // { name: 'Team', href: '/client/team', icon: ShieldCheck, requiredPlan: 'Starter', featureKey: 'feature_team_dashboard' },
-    // { name: 'Work Reports', href: '/client/reports', icon: FileCheck, requiredPlan: 'Starter', featureKey: 'feature_reports' },
+
+    // ── Remaining Modules ──
+    { name: 'Catalog', href: '/client/catalog', icon: ShoppingBag, requiredPlan: 'Starter', featureKey: 'feature_catalog' },
+    { name: 'Payments', href: '/client/payments', icon: CreditCard, requiredPlan: 'Starter', featureKey: 'feature_payment' },
+    { name: 'Billing & Wallet', href: '/client/billing', icon: Wallet },
+    { name: 'Orders', href: '/client/orders', icon: Receipt, requiredPlan: 'Starter', featureKey: 'feature_order' },
+    { name: 'Voice & Video Calls', href: '/client/calls', icon: PhoneCall, requiredPlan: 'Starter', featureKey: 'feature_voice_video_call' },
     { name: 'Settings', href: '/client/settings', icon: Settings },
     { name: 'Plans', href: '/client/plans', icon: Layers },
     { name: 'Support', href: '/client/support', icon: LifeBuoy },
+    { name: 'Team', href: '/client/team', icon: ShieldCheck, requiredPlan: 'Starter', featureKey: 'feature_team_dashboard' },
+    { name: 'Work Reports', href: '/client/reports', icon: FileCheck, requiredPlan: 'Starter', featureKey: 'feature_reports' },
   ];
 
   const agentLinks = [
