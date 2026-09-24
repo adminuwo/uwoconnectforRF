@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Loader2, Clock, Eye, EyeOff, ShieldCheck, User, Building2, Mail, Lock, AlertCircle, ArrowRight, CheckCircle2, Phone, Briefcase, Layers, XCircle } from 'lucide-react';
+import { Loader2, Clock, Eye, EyeOff, ShieldCheck, User, Building2, Mail, Lock, AlertCircle, ArrowRight, CheckCircle2, Phone, Briefcase, Layers, XCircle, MapPin, Navigation } from 'lucide-react';
 import axios from 'axios';
 import TermsModal from '@/components/TermsModal';
 import UWOLoginModal from '@/components/UWOLoginModal';
@@ -30,6 +30,7 @@ const RegisterPage = () => {
     name: '',
     email: '',
     phone: '',
+    location: '',
     designation: '',
     department: 'Sales',
     businessName: '',
@@ -37,6 +38,7 @@ const RegisterPage = () => {
     password: '',
     invite_token: inviteToken || ''
   });
+  const [detectingLocation, setDetectingLocation] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -61,16 +63,82 @@ const RegisterPage = () => {
           console.error('Invalid or expired invite token:', err);
         });
     }
+
+    // Attempt silent background location pre-fill if empty
+    fetch('https://ipapi.co/json/')
+      .then(r => r.json())
+      .then(data => {
+        if (data && (data.city || data.country_name)) {
+          const locParts = [data.city, data.region, data.country_name].filter(Boolean);
+          setFormData(prev => prev.location ? prev : { ...prev, location: locParts.join(', ') });
+        }
+      })
+      .catch(() => {
+        // Silently fail if blocked or offline
+      });
   }, [inviteToken, API_URL]);
+
+  const handleDetectLocation = async () => {
+    setDetectingLocation(true);
+    if (typeof window !== 'undefined' && 'geolocation' in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        async (pos) => {
+          try {
+            const { latitude, longitude } = pos.coords;
+            const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`);
+            const data = await res.json();
+            const city = data.address?.city || data.address?.town || data.address?.village || data.address?.state_district || '';
+            const state = data.address?.state || '';
+            const country = data.address?.country || '';
+            const parts = [city, state, country].filter(Boolean);
+            if (parts.length > 0) {
+              setFormData(prev => ({ ...prev, location: parts.join(', ') }));
+              setDetectingLocation(false);
+              return;
+            }
+          } catch (e) {
+            // fallback to ip
+          }
+          fallbackIpDetect();
+        },
+        () => {
+          fallbackIpDetect();
+        },
+        { timeout: 6000 }
+      );
+    } else {
+      fallbackIpDetect();
+    }
+  };
+
+  const fallbackIpDetect = async () => {
+    try {
+      const res = await fetch('https://ipapi.co/json/');
+      const data = await res.json();
+      if (data && (data.city || data.country_name)) {
+        const parts = [data.city, data.region, data.country_name].filter(Boolean);
+        setFormData(prev => ({ ...prev, location: parts.join(', ') }));
+      }
+    } catch (e) {
+      console.debug('Location auto-detect fallback failed:', e);
+    } finally {
+      setDetectingLocation(false);
+    }
+  };
 
   const handleBackendAuth = async (firebaseUser, extraData = {}) => {
     const idToken = await firebaseUser.getIdToken();
+    const loc = extraData.location || formData.location || '';
+    const locParts = loc.split(',').map(p => p.trim()).filter(Boolean);
     const res = await axios.post(`${API_URL}/api/auth/firebase-login`, {
       id_token: idToken,
       name: extraData.name || firebaseUser.displayName || '',
       business_name: extraData.businessName || '',
       meta_portfolio_name: extraData.portfolioName || '',
       phone_number: extraData.phone || '',
+      location: loc,
+      city: locParts[0] || '',
+      country: locParts.length > 1 ? locParts[locParts.length - 1] : '',
       designation: extraData.designation || 'Team Member',
       department: extraData.department || 'General',
       invite_token: inviteToken || '',
@@ -192,6 +260,8 @@ const RegisterPage = () => {
     setLoading(true);
     setError('');
     try {
+      const loc = formData.location.trim();
+      const locParts = loc.split(',').map(p => p.trim()).filter(Boolean);
       const res = await axios.post(`${API_URL}/api/auth/register`, {
         name: formData.name.trim(),
         businessName: formData.businessName.trim(),
@@ -199,6 +269,9 @@ const RegisterPage = () => {
         portfolio_name: formData.portfolioName.trim(),
         email: formData.email.trim(),
         phone_number: formData.phone.trim(),
+        location: loc,
+        city: locParts[0] || '',
+        country: locParts.length > 1 ? locParts[locParts.length - 1] : '',
         designation: formData.designation.trim(),
         department: formData.department.trim(),
         password: formData.password,
@@ -206,7 +279,10 @@ const RegisterPage = () => {
         meta_portfolio_eligible: true,
         metaPortfolioEligible: true,
         invite_token: inviteToken || '',
-        brand_domain: brand?.custom_domain || (typeof window !== 'undefined' ? window.location.hostname : '')
+        brand_domain: brand?.custom_domain || (typeof window !== 'undefined' ? window.location.hostname : ''),
+        platform: 'web',
+        device_type: 'desktop',
+        registration_method: 'email'
       });
 
       if (res.status === 201 && res.data.token) {
@@ -616,6 +692,38 @@ const RegisterPage = () => {
                 className="w-full bg-slate-50/90 text-slate-900 placeholder:text-slate-400 outline-none rounded-2xl py-2.5 pl-10 pr-4 font-medium text-sm border border-slate-200/80 focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 transition-all shadow-sm"
               />
             </div>
+          </div>
+
+          {/* 5. Location / City */}
+          <div className="space-y-1">
+            <div className="flex items-center justify-between">
+              <label className="block text-xs font-bold text-slate-700 ml-1">
+                Location / City <span className="text-emerald-600">*</span>
+              </label>
+              <button
+                type="button"
+                onClick={handleDetectLocation}
+                className="text-[11px] text-emerald-700 hover:text-emerald-800 font-semibold flex items-center gap-1 cursor-pointer transition-colors"
+                title="Auto-detect location"
+              >
+                <Navigation className={`w-3 h-3 ${detectingLocation ? 'animate-spin' : ''}`} />
+                <span>{detectingLocation ? 'Detecting...' : 'Auto-detect'}</span>
+              </button>
+            </div>
+            <div className="relative">
+              <MapPin className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <input
+                type="text"
+                required
+                value={formData.location}
+                onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                placeholder="e.g. Mumbai, Maharashtra, India"
+                className="w-full bg-slate-50/90 text-slate-900 placeholder:text-slate-400 outline-none rounded-2xl py-2.5 pl-10 pr-4 font-medium text-sm border border-slate-200/80 focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 transition-all shadow-sm"
+              />
+            </div>
+            <p className="text-[11px] text-slate-400 ml-1">
+              Used for client analytics and regional compliance
+            </p>
           </div>
 
           {/* 5. Designation & Department (Side by Side on medium screens) */}

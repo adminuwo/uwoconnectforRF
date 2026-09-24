@@ -33,10 +33,7 @@ const ForgotPasswordPage = () => {
     try {
       const res = await axios.post(`${baseUrl}/api/auth/forgot-password/send-otp`, { email });
       setSuccessMsg(res.data?.message || 'OTP code sent to your email.');
-      if (res.data?.otp_debug) {
-        setDebugOtp(res.data.otp_debug);
-        setOtp(res.data.otp_debug);
-      }
+      // Dev mode auto-fill removed
       setStep(2);
     } catch (err) {
       console.error('Send OTP error:', err);
@@ -208,11 +205,7 @@ const ForgotPasswordPage = () => {
                 <p className="text-slate-500 text-xs sm:text-sm font-medium">
                   We sent a 6-digit code to <strong className="text-slate-800">{email}</strong>
                 </p>
-                {debugOtp && (
-                  <div className="mt-2.5 inline-flex items-center gap-1.5 px-3 py-1 bg-amber-50 border border-amber-200 text-amber-800 text-xs font-semibold rounded-full shadow-sm">
-                    <span>⚡ Dev Mode OTP: <strong>{debugOtp}</strong> (Auto-filled)</span>
-                  </div>
-                )}
+
               </div>
 
               <form onSubmit={handleVerifyOTP} className="space-y-4">

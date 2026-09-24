@@ -132,12 +132,12 @@ export default function ClientPlatformOverviewPage() {
   // Export visible data to CSV
   const handleExportCSV = () => {
     if (!data.clients || data.clients.length === 0) return;
-    const headers = ['Business Name', 'Owner Name', 'Owner Email', 'Platforms', 'Primary Platform', 'Device Model', 'OS Version', 'App Version', 'Last Active', 'Account Status', 'Is Uninstalled', 'Uninstalled At'];
+    const headers = ['Business Name', 'Owner Name', 'Owner Email', 'Registration Platform', 'Device Model', 'OS Version', 'App Version', 'Last Active', 'Account Status', 'Is Uninstalled', 'Uninstalled At'];
     const rows = data.clients.map(c => [
       `"${c.business_name || ''}"`,
       `"${c.owner_name || ''}"`,
       `"${c.owner_email || ''}"`,
-      `"${(c.platforms || []).join(', ')}"`,
+      `"${(c.registration_platform || c.primary_platform || 'web').toUpperCase()}"`,
       `"${c.primary_platform || ''}"`,
       `"${c.device_model || ''}"`,
       `"${c.os_version || ''}"`,
@@ -653,10 +653,10 @@ export default function ClientPlatformOverviewPage() {
                   </tr>
                 ) : (
                   data.clients.map((client) => {
-                    const platforms = client.platforms || [];
-                    const isIos = platforms.includes('ios');
-                    const isAndroid = platforms.includes('android');
-                    const isWeb = platforms.includes('web');
+                    const regPlatform = (client.registration_platform || client.primary_platform || (client.platforms && client.platforms[0]) || 'web').toLowerCase();
+                    const isIos = regPlatform === 'ios';
+                    const isAndroid = regPlatform === 'android';
+                    const isWeb = regPlatform === 'web';
 
                     return (
                       <tr

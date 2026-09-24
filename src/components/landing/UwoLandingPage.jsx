@@ -28,7 +28,8 @@ const WhatsAppLogo = ({ size = 22 }) => (
 );
 
 const InstagramLogo = ({ size = 22 }) => {
-  const uniqueId = React.useId ? React.useId().replace(/:/g, '') : 'landing';
+  const id = React.useId();
+  const uniqueId = id.replace(/:/g, '');
   const gradId = `igGradLanding_${uniqueId}`;
   return (
     <svg width={size} height={size} viewBox="0 0 48 48" fill="none" className="shrink-0">
@@ -237,7 +238,7 @@ export default function UwoLandingPage() {
       } else {
         setLoggedInUser(null);
       }
-    } catch (e) {}
+    } catch (e) { }
 
     try {
       const savedTheme = localStorage.getItem('uwo_landing_theme');
@@ -514,455 +515,517 @@ export default function UwoLandingPage() {
         {/* 2. HERO SECTION WITH PURE CODE WIRE CIRCUIT NETWORK (NO IMAGE) */}
         {/* ════════════════════════════════════════════════════════════════ */}
         <section className={cn(
-        "relative w-full pt-20 pb-28 px-4 sm:px-6 lg:px-8 text-center overflow-hidden min-h-[85vh] flex items-center justify-center border-b transition-colors duration-500",
-        isDarkMode ? "bg-gradient-to-b from-slate-950 via-slate-900 to-emerald-950/70 border-slate-800" : "bg-gradient-to-b from-[#ecfdf5]/80 via-white to-emerald-50/40 border-slate-200/70"
-      )}>
+          "relative w-full pt-20 pb-28 px-4 sm:px-6 lg:px-8 text-center overflow-hidden min-h-[85vh] flex items-center justify-center border-b transition-colors duration-500",
+          isDarkMode ? "bg-gradient-to-b from-slate-950 via-slate-900 to-emerald-950/70 border-slate-800" : "bg-gradient-to-b from-[#ecfdf5]/80 via-white to-emerald-50/40 border-slate-200/70"
+        )}>
 
-        {/* Pure SVG Animated Wire Circuit & Connection Nodes Background */}
-        <div className="absolute inset-0 w-full h-full pointer-events-none overflow-hidden">
+          {/* Pure SVG Animated Wire Circuit & Connection Nodes Background */}
+          <div className="absolute inset-0 w-full h-full pointer-events-none overflow-hidden">
 
-          {/* Ambient Radial Soft Spotlights */}
-          <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[450px] bg-emerald-400/20 rounded-full blur-[140px] animate-pulse" />
-          <div className="absolute top-10 left-10 w-96 h-96 bg-teal-300/20 rounded-full blur-[110px]" />
-          <div className="absolute top-10 right-10 w-96 h-96 bg-emerald-300/20 rounded-full blur-[110px]" />
+            {/* Ambient Radial Soft Spotlights */}
+            <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[450px] bg-emerald-400/20 rounded-full blur-[140px] animate-pulse" />
+            <div className="absolute top-10 left-10 w-96 h-96 bg-teal-300/20 rounded-full blur-[110px]" />
+            <div className="absolute top-10 right-10 w-96 h-96 bg-emerald-300/20 rounded-full blur-[110px]" />
 
-          {/* Dot Matrix Grid */}
-          <div className="absolute inset-0 bg-[radial-gradient(#059669_1.2px,transparent_1.2px)] [background-size:32px_32px] opacity-[0.14]" />
+            {/* Dot Matrix Grid */}
+            <div className="absolute inset-0 bg-[radial-gradient(#059669_1.2px,transparent_1.2px)] [background-size:32px_32px] opacity-[0.14]" />
 
-          {/* Pure SVG Circuit Wires & Glowing Nodes */}
-          <svg className="absolute inset-0 w-full h-full opacity-40" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <linearGradient id="emeraldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#059669" stopOpacity="0.8" />
-                <stop offset="50%" stopColor="#10B981" stopOpacity="0.5" />
-                <stop offset="100%" stopColor="#0D9488" stopOpacity="0.8" />
-              </linearGradient>
-            </defs>
+            {/* Pure SVG Circuit Wires & Glowing Nodes */}
+            <svg className="absolute inset-0 w-full h-full opacity-40" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="emeraldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#059669" stopOpacity="0.8" />
+                  <stop offset="50%" stopColor="#10B981" stopOpacity="0.5" />
+                  <stop offset="100%" stopColor="#0D9488" stopOpacity="0.8" />
+                </linearGradient>
+              </defs>
 
-            {/* Horizontal Circuit Wires */}
-            <path d="M 0 160 Q 300 200 600 160 T 1200 180 T 1920 160" fill="none" stroke="url(#emeraldGrad)" strokeWidth="1.5" strokeDasharray="8 6" />
-            <path d="M 0 320 Q 400 260 800 320 T 1600 280 T 1920 320" fill="none" stroke="url(#emeraldGrad)" strokeWidth="1.5" strokeDasharray="10 8" />
-            <path d="M 0 480 Q 500 520 1000 470 T 1800 500 T 1920 480" fill="none" stroke="url(#emeraldGrad)" strokeWidth="1.5" strokeDasharray="6 6" />
+              {/* Horizontal Circuit Wires */}
+              <path d="M 0 160 Q 300 200 600 160 T 1200 180 T 1920 160" fill="none" stroke="url(#emeraldGrad)" strokeWidth="1.5" strokeDasharray="8 6" />
+              <path d="M 0 320 Q 400 260 800 320 T 1600 280 T 1920 320" fill="none" stroke="url(#emeraldGrad)" strokeWidth="1.5" strokeDasharray="10 8" />
+              <path d="M 0 480 Q 500 520 1000 470 T 1800 500 T 1920 480" fill="none" stroke="url(#emeraldGrad)" strokeWidth="1.5" strokeDasharray="6 6" />
 
-            {/* Vertical Connecting Wires */}
-            <path d="M 250 0 L 250 800" fill="none" stroke="url(#emeraldGrad)" strokeWidth="1" strokeDasharray="4 6" opacity="0.6" />
-            <path d="M 500 0 L 500 800" fill="none" stroke="url(#emeraldGrad)" strokeWidth="1" strokeDasharray="4 6" opacity="0.4" />
-            <path d="M 1420 0 L 1420 800" fill="none" stroke="url(#emeraldGrad)" strokeWidth="1" strokeDasharray="4 6" opacity="0.4" />
-            <path d="M 1670 0 L 1670 800" fill="none" stroke="url(#emeraldGrad)" strokeWidth="1" strokeDasharray="4 6" opacity="0.6" />
+              {/* Vertical Connecting Wires */}
+              <path d="M 250 0 L 250 800" fill="none" stroke="url(#emeraldGrad)" strokeWidth="1" strokeDasharray="4 6" opacity="0.6" />
+              <path d="M 500 0 L 500 800" fill="none" stroke="url(#emeraldGrad)" strokeWidth="1" strokeDasharray="4 6" opacity="0.4" />
+              <path d="M 1420 0 L 1420 800" fill="none" stroke="url(#emeraldGrad)" strokeWidth="1" strokeDasharray="4 6" opacity="0.4" />
+              <path d="M 1670 0 L 1670 800" fill="none" stroke="url(#emeraldGrad)" strokeWidth="1" strokeDasharray="4 6" opacity="0.6" />
 
-            {/* Interconnected Glowing Junction Nodes */}
-            <circle cx="250" cy="170" r="5" fill="#059669" />
-            <circle cx="250" cy="170" r="10" fill="#059669" opacity="0.3" className="animate-ping" />
+              {/* Interconnected Glowing Junction Nodes */}
+              <circle cx="250" cy="170" r="5" fill="#059669" />
+              <circle cx="250" cy="170" r="10" fill="#059669" opacity="0.3" className="animate-ping" />
 
-            <circle cx="600" cy="160" r="6" fill="#10B981" />
-            <circle cx="600" cy="160" r="12" fill="#10B981" opacity="0.3" className="animate-ping" />
+              <circle cx="600" cy="160" r="6" fill="#10B981" />
+              <circle cx="600" cy="160" r="12" fill="#10B981" opacity="0.3" className="animate-ping" />
 
-            <circle cx="800" cy="320" r="5" fill="#059669" />
-            <circle cx="800" cy="320" r="10" fill="#059669" opacity="0.3" className="animate-ping" />
+              <circle cx="800" cy="320" r="5" fill="#059669" />
+              <circle cx="800" cy="320" r="10" fill="#059669" opacity="0.3" className="animate-ping" />
 
-            <circle cx="1420" cy="290" r="6" fill="#0D9488" />
-            <circle cx="1420" cy="290" r="12" fill="#0D9488" opacity="0.3" className="animate-ping" />
+              <circle cx="1420" cy="290" r="6" fill="#0D9488" />
+              <circle cx="1420" cy="290" r="12" fill="#0D9488" opacity="0.3" className="animate-ping" />
 
-            <circle cx="1670" cy="480" r="5" fill="#059669" />
-            <circle cx="1670" cy="480" r="10" fill="#059669" opacity="0.3" className="animate-ping" />
-          </svg>
-        </div>
-
-        {/* Main Content (relative z-10) */}
-        <div className="relative z-10 max-w-5xl mx-auto">
-
-          {/* Hero Pill Badge */}
-          <div className={cn(
-            "inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full text-xs font-extrabold mb-8 shadow-md hover:shadow-lg transition-all animate-bounce-subtle animate-border-pulse",
-            isDarkMode ? "bg-slate-900/90 border border-emerald-500/60 text-emerald-300 shadow-emerald-950/50" : "bg-white/95 border border-emerald-400/60 text-emerald-800"
-          )}>
-            <Sparkles size={15} className="text-emerald-500 animate-pulse" />
-            <span>Unified Communication + Business Automation Platform</span>
+              <circle cx="1670" cy="480" r="5" fill="#059669" />
+              <circle cx="1670" cy="480" r="10" fill="#059669" opacity="0.3" className="animate-ping" />
+            </svg>
           </div>
 
-          {/* Headline */}
-          <h1
-            className={cn(
-              "text-4xl sm:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.1] max-w-5xl mx-auto font-serif",
-              isDarkMode ? "text-emerald-400 drop-shadow-[0_0_35px_rgba(16,185,129,0.35)]" : "text-[#064e3b] drop-shadow-xs"
-            )}
-            style={{ fontFamily: "'Times New Roman', Times, serif" }}
-          >
-            <span>Connect Everything.</span> <br className="hidden sm:inline" />
-            <span className="pr-2">
-              Automate Anything.
-            </span>
-          </h1>
+          {/* Main Content (relative z-10) */}
+          <div className="relative z-10 max-w-5xl mx-auto">
 
-          {/* Supporting Copy */}
-          <p className={cn(
-            "text-base sm:text-xl font-bold max-w-2xl mx-auto mt-6 leading-relaxed",
-            isDarkMode ? "text-slate-300" : "text-slate-700"
-          )}>
-            {brandName} brings your communication channels, business tools, and automation into one intelligent workspace.
-          </p>
+            {/* Hero Pill Badge */}
+            <div className={cn(
+              "inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full text-xs font-extrabold mb-8 shadow-md hover:shadow-lg transition-all animate-bounce-subtle animate-border-pulse",
+              isDarkMode ? "bg-slate-900/90 border border-emerald-500/60 text-emerald-300 shadow-emerald-950/50" : "bg-white/95 border border-emerald-400/60 text-emerald-800"
+            )}>
+              <Sparkles size={15} className="text-emerald-500 animate-pulse" />
+              <span>Unified Communication + Business Automation Platform</span>
+            </div>
 
-          {/* Hero CTAs */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-10">
-            <button
-              onClick={handleStartFree}
-              className="landing-button-glow w-full sm:w-auto px-8 py-4 rounded-2xl bg-[#059669] hover:bg-[#047857] text-white text-sm font-extrabold shadow-xl shadow-emerald-700/25 transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer transform hover:-translate-y-1 hover:shadow-emerald-700/40 active:scale-95"
-              style={isWhiteLabel && primaryColor ? { backgroundColor: primaryColor } : undefined}
+            {/* Headline */}
+            <h1
+              className={cn(
+                "text-4xl sm:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.1] max-w-5xl mx-auto font-serif",
+                isDarkMode ? "text-emerald-400 drop-shadow-[0_0_35px_rgba(16,185,129,0.35)]" : "text-[#064e3b] drop-shadow-xs"
+              )}
+              style={{ fontFamily: "'Times New Roman', Times, serif" }}
             >
-              <span>Start Free</span>
-              <ArrowRight size={18} />
-            </button>
+              <span>Connect Everything.</span> <br className="hidden sm:inline" />
+              <span className="pr-2">
+                Automate Anything.
+              </span>
+            </h1>
 
-            <a
-              href="#platform"
-              className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-white border border-slate-200 hover:border-emerald-300 text-slate-800 hover:text-emerald-700 text-sm font-extrabold shadow-sm hover:shadow-md transition-all duration-300 flex items-center justify-center gap-2 transform hover:-translate-y-0.5 active:scale-95"
-            >
-              <span>Explore Platform</span>
-              <ChevronRight size={18} />
-            </a>
+            {/* Supporting Copy */}
+            <p className={cn(
+              "text-base sm:text-xl font-bold max-w-2xl mx-auto mt-6 leading-relaxed",
+              isDarkMode ? "text-slate-300" : "text-slate-700"
+            )}>
+              {brandName} brings your communication channels, business tools, and automation into one intelligent workspace.
+            </p>
+
+            {/* Hero CTAs */}
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-10">
+              <button
+                onClick={handleStartFree}
+                className="landing-button-glow w-full sm:w-auto px-8 py-4 rounded-2xl bg-[#059669] hover:bg-[#047857] text-white text-sm font-extrabold shadow-xl shadow-emerald-700/25 transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer transform hover:-translate-y-1 hover:shadow-emerald-700/40 active:scale-95"
+                style={isWhiteLabel && primaryColor ? { backgroundColor: primaryColor } : undefined}
+              >
+                <span>Start Free</span>
+                <ArrowRight size={18} />
+              </button>
+
+              <a
+                href="#platform"
+                className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-white border border-slate-200 hover:border-emerald-300 text-slate-800 hover:text-emerald-700 text-sm font-extrabold shadow-sm hover:shadow-md transition-all duration-300 flex items-center justify-center gap-2 transform hover:-translate-y-0.5 active:scale-95"
+              >
+                <span>Explore Platform</span>
+                <ChevronRight size={18} />
+              </a>
+            </div>
+
           </div>
+        </section>
 
-        </div>
-      </section>
+        {/* ════════════════════════════════════════════════════════════════ */}
+        {/* 4. ONE PLATFORM, THREE LAYERS */}
+        {/* ════════════════════════════════════════════════════════════════ */}
+        <section id="platform" className={cn(
+          "relative py-20 px-6 sm:px-12 lg:px-16 w-full max-w-[1700px] mx-auto my-12 rounded-[2.5rem] border transition-colors duration-300 shadow-xl overflow-hidden",
+          isDarkMode
+            ? "bg-slate-900/80 border-slate-800 shadow-2xl shadow-emerald-950/20"
+            : "bg-gradient-to-br from-emerald-50/60 via-white to-slate-50/70 border-slate-200/90"
+        )}>
 
-      {/* ════════════════════════════════════════════════════════════════ */}
-      {/* 4. ONE PLATFORM, THREE LAYERS */}
-      {/* ════════════════════════════════════════════════════════════════ */}
-      <section id="platform" className={cn(
-        "relative py-20 px-6 sm:px-12 lg:px-16 w-full max-w-[1700px] mx-auto my-12 rounded-[2.5rem] border transition-colors duration-300 shadow-xl overflow-hidden",
-        isDarkMode
-          ? "bg-slate-900/80 border-slate-800 shadow-2xl shadow-emerald-950/20"
-          : "bg-gradient-to-br from-emerald-50/60 via-white to-slate-50/70 border-slate-200/90"
-      )}>
+          {/* Ambient Subtle Glow & Pattern */}
+          <div className="absolute -top-32 -left-32 w-80 h-80 bg-emerald-500/10 rounded-full blur-[100px] pointer-events-none" />
+          <div className="absolute -bottom-32 -right-32 w-80 h-80 bg-teal-500/10 rounded-full blur-[100px] pointer-events-none" />
+          <div className="absolute inset-0 bg-[radial-gradient(#059669_1px,transparent_1px)] [background-size:28px_28px] opacity-10 pointer-events-none" />
 
-        {/* Ambient Subtle Glow & Pattern */}
-        <div className="absolute -top-32 -left-32 w-80 h-80 bg-emerald-500/10 rounded-full blur-[100px] pointer-events-none" />
-        <div className="absolute -bottom-32 -right-32 w-80 h-80 bg-teal-500/10 rounded-full blur-[100px] pointer-events-none" />
-        <div className="absolute inset-0 bg-[radial-gradient(#059669_1px,transparent_1px)] [background-size:28px_28px] opacity-10 pointer-events-none" />
+          <div className="relative z-10">
+            <div className="text-center space-y-3 mb-12">
+              <h2
+                className={cn(
+                  "text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight italic font-serif leading-tight",
+                  isDarkMode ? "text-white" : "text-slate-900"
+                )}
+                style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
+              >
+                Everything Your Business Needs. Connected in One Place.
+              </h2>
+              <p className={cn("text-sm sm:text-base font-medium max-w-xl mx-auto", isDarkMode ? "text-slate-400" : "text-slate-500")}>
+                UWO Connect brings communication, productivity tools, and business automation together.
+              </p>
+            </div>
 
-        <div className="relative z-10">
+            {/* 3 Interactive Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+
+              {/* CARD 1: CHANNELS */}
+              <ScrollReveal delay={100}>
+                <div className={cn(
+                  "p-8 rounded-3xl border landing-card-hover shadow-xs hover:shadow-xl flex flex-col justify-between group cursor-pointer h-full transition-all duration-300",
+                  isDarkMode
+                    ? "bg-slate-950/80 border-slate-800 hover:border-emerald-500/50"
+                    : "bg-white border-slate-200 hover:border-emerald-300"
+                )}>
+                  <div className="space-y-4">
+                    <div className={cn(
+                      "w-12 h-12 rounded-2xl border flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300",
+                      isDarkMode ? "bg-emerald-950/50 border-emerald-500/30 text-emerald-400" : "bg-emerald-50 border-emerald-200 text-emerald-600"
+                    )}>
+                      <MessageSquare size={24} />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <h3 className={cn(
+                        "text-xl font-black transition-colors",
+                        isDarkMode ? "text-white group-hover:text-emerald-400" : "text-slate-900 group-hover:text-emerald-700"
+                      )}>
+                        Channels
+                      </h3>
+                      <span className={cn(
+                        "px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase",
+                        isDarkMode ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30" : "bg-emerald-100 text-emerald-800"
+                      )}>
+                        4 Channels
+                      </span>
+                    </div>
+                    <p className={cn("text-xs font-medium leading-relaxed", isDarkMode ? "text-slate-400" : "text-slate-500")}>
+                      Connect with customers wherever they are. WhatsApp, Instagram, Facebook, and YouTube.
+                    </p>
+
+                    <div className="flex items-center gap-2 pt-2 group-hover:scale-105 transition-transform duration-300 origin-left">
+                      <WhatsAppLogo size={22} />
+                      <InstagramLogo size={22} />
+                      <FacebookLogo size={22} />
+                      <YouTubeLogo size={22} />
+                    </div>
+                  </div>
+
+                  <a href="#channels" className={cn(
+                    "mt-8 text-xs font-extrabold flex items-center gap-1.5 group-hover:translate-x-1.5 transition-transform",
+                    isDarkMode ? "text-emerald-400 hover:text-emerald-300" : "text-emerald-600 hover:text-emerald-700"
+                  )}>
+                    <span>Explore Channels</span>
+                    <ArrowRight size={14} />
+                  </a>
+                </div>
+              </ScrollReveal>
+
+              {/* CARD 2: CONNECTORS */}
+              <ScrollReveal delay={250}>
+                <div className={cn(
+                  "p-8 rounded-3xl border landing-card-hover shadow-xs hover:shadow-xl flex flex-col justify-between group cursor-pointer h-full transition-all duration-300",
+                  isDarkMode
+                    ? "bg-slate-950/80 border-slate-800 hover:border-blue-500/50"
+                    : "bg-white border-slate-200 hover:border-blue-300"
+                )}>
+                  <div className="space-y-4">
+                    <div className={cn(
+                      "w-12 h-12 rounded-2xl border flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300",
+                      isDarkMode ? "bg-blue-950/50 border-blue-500/30 text-blue-400" : "bg-blue-50 border-blue-200 text-blue-600"
+                    )}>
+                      <Share2 size={24} />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <h3 className={cn(
+                        "text-xl font-black transition-colors",
+                        isDarkMode ? "text-white group-hover:text-blue-400" : "text-slate-900 group-hover:text-blue-700"
+                      )}>
+                        Connectors
+                      </h3>
+                      <span className={cn(
+                        "px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase",
+                        isDarkMode ? "bg-blue-500/20 text-blue-300 border border-blue-500/30" : "bg-blue-100 text-blue-800"
+                      )}>
+                        8 Connectors
+                      </span>
+                    </div>
+                    <p className={cn("text-xs font-medium leading-relaxed", isDarkMode ? "text-slate-400" : "text-slate-500")}>
+                      Connect your everyday business tools, files, maps, spreadsheets, and data sources.
+                    </p>
+
+                    <div className="flex items-center gap-2 pt-2 group-hover:scale-105 transition-transform duration-300 origin-left">
+                      <GmailLogo size={20} />
+                      <OutlookLogo size={20} />
+                      <GoogleSheetsLogo size={20} />
+                      <GoogleDocsLogo size={20} />
+                    </div>
+                  </div>
+
+                  <a href="#connectors" className={cn(
+                    "mt-8 text-xs font-extrabold flex items-center gap-1.5 group-hover:translate-x-1.5 transition-transform",
+                    isDarkMode ? "text-blue-400 hover:text-blue-300" : "text-blue-600 hover:text-blue-700"
+                  )}>
+                    <span>Explore Connectors</span>
+                    <ArrowRight size={14} />
+                  </a>
+                </div>
+              </ScrollReveal>
+
+              {/* CARD 3: AUTOMATION MODULES */}
+              <ScrollReveal delay={400}>
+                <div className={cn(
+                  "p-8 rounded-3xl border landing-card-hover shadow-xs hover:shadow-xl flex flex-col justify-between group cursor-pointer h-full transition-all duration-300",
+                  isDarkMode
+                    ? "bg-slate-950/80 border-slate-800 hover:border-purple-500/50"
+                    : "bg-white border-slate-200 hover:border-purple-300"
+                )}>
+                  <div className="space-y-4">
+                    <div className={cn(
+                      "w-12 h-12 rounded-2xl border flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300",
+                      isDarkMode ? "bg-purple-950/50 border-purple-500/30 text-purple-400" : "bg-purple-50 border-purple-200 text-purple-600"
+                    )}>
+                      <Zap size={24} />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <h3 className={cn(
+                        "text-xl font-black transition-colors",
+                        isDarkMode ? "text-white group-hover:text-purple-400" : "text-slate-900 group-hover:text-purple-700"
+                      )}>
+                        Business Automation
+                      </h3>
+                      <span className={cn(
+                        "px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase",
+                        isDarkMode ? "bg-purple-500/20 text-purple-300 border border-purple-500/30" : "bg-purple-100 text-purple-800"
+                      )}>
+                        9 Modules
+                      </span>
+                    </div>
+                    <p className={cn("text-xs font-medium leading-relaxed", isDarkMode ? "text-slate-400" : "text-slate-500")}>
+                      Turn conversations and business data into automated lead creation, quotations, payments, and invoices.
+                    </p>
+
+                    <div className="flex flex-wrap items-center gap-1.5 pt-2">
+                      <span className={cn("px-2 py-0.5 text-[10px] font-bold rounded transition-colors", isDarkMode ? "bg-slate-800 text-slate-300 group-hover:text-purple-300" : "bg-slate-100 group-hover:bg-purple-50 text-slate-700 group-hover:text-purple-800")}>CRM</span>
+                      <span className={cn("px-2 py-0.5 text-[10px] font-bold rounded transition-colors", isDarkMode ? "bg-slate-800 text-slate-300 group-hover:text-purple-300" : "bg-slate-100 group-hover:bg-purple-50 text-slate-700 group-hover:text-purple-800")}>Auto Reply</span>
+                      <span className={cn("px-2 py-0.5 text-[10px] font-bold rounded transition-colors", isDarkMode ? "bg-slate-800 text-slate-300 group-hover:text-purple-300" : "bg-slate-100 group-hover:bg-purple-50 text-slate-700 group-hover:text-purple-800")}>Quotation</span>
+                      <span className={cn("px-2 py-0.5 text-[10px] font-bold rounded transition-colors", isDarkMode ? "bg-slate-800 text-slate-300 group-hover:text-purple-300" : "bg-slate-100 group-hover:bg-purple-50 text-slate-700 group-hover:text-purple-800")}>Invoice</span>
+                    </div>
+                  </div>
+
+                  <a href="#features" className={cn(
+                    "mt-8 text-xs font-extrabold flex items-center gap-1.5 group-hover:translate-x-1.5 transition-transform",
+                    isDarkMode ? "text-purple-400 hover:text-purple-300" : "text-purple-600 hover:text-purple-700"
+                  )}>
+                    <span>Explore Features</span>
+                    <ArrowRight size={14} />
+                  </a>
+                </div>
+              </ScrollReveal>
+
+            </div>
+          </div>
+        </section>
+
+        {/* ════════════════════════════════════════════════════════════════ */}
+        {/* 5. CHANNELS SECTION */}
+        {/* ════════════════════════════════════════════════════════════════ */}
+        <section id="channels" className={cn(
+          "py-20 px-6 sm:px-12 lg:px-16 w-full max-w-[1700px] mx-auto rounded-3xl border my-12 transition-colors duration-300",
+          isDarkMode ? "bg-slate-900/80 border-slate-800 shadow-2xl" : "bg-slate-50/50 border-slate-200/80"
+        )}>
           <div className="text-center space-y-3 mb-12">
             <h2
               className={cn(
-                "text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight italic font-serif leading-tight",
+                "text-3xl sm:text-4xl font-bold tracking-tight italic font-serif",
                 isDarkMode ? "text-white" : "text-slate-900"
               )}
               style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
             >
-              Everything Your Business Needs. Connected in One Place.
+              Meet Your Customers Where They Are
             </h2>
             <p className={cn("text-sm sm:text-base font-medium max-w-xl mx-auto", isDarkMode ? "text-slate-400" : "text-slate-500")}>
-              UWO Connect brings communication, productivity tools, and business automation together.
+              Manage conversations across your most important communication channels from one unified platform.
             </p>
           </div>
 
-          {/* 3 Interactive Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
 
-            {/* CARD 1: CHANNELS */}
+            {/* WHATSAPP */}
             <ScrollReveal delay={100}>
               <div className={cn(
-                "p-8 rounded-3xl border landing-card-hover shadow-xs hover:shadow-xl flex flex-col justify-between group cursor-pointer h-full transition-all duration-300",
-                isDarkMode
-                  ? "bg-slate-950/80 border-slate-800 hover:border-emerald-500/50"
-                  : "bg-white border-slate-200 hover:border-emerald-300"
+                "p-6 rounded-2xl border landing-card-hover space-y-3 shadow-2xs group cursor-pointer h-full transition-all duration-300",
+                isDarkMode ? "bg-slate-950/80 border-slate-800 hover:border-emerald-500/50" : "bg-white border-slate-200"
               )}>
-                <div className="space-y-4">
-                  <div className={cn(
-                    "w-12 h-12 rounded-2xl border flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300",
-                    isDarkMode ? "bg-emerald-950/50 border-emerald-500/30 text-emerald-400" : "bg-emerald-50 border-emerald-200 text-emerald-600"
+                <div className="flex items-center justify-between">
+                  <div className="group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
+                    <WhatsAppLogo size={28} />
+                  </div>
+                  <span className={cn(
+                    "px-2 py-0.5 text-[10px] font-bold border rounded-full flex items-center gap-1",
+                    isDarkMode ? "bg-emerald-950/60 text-emerald-300 border-emerald-500/30" : "bg-emerald-50 text-emerald-700 border-emerald-200"
                   )}>
-                    <MessageSquare size={24} />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <h3 className={cn(
-                      "text-xl font-black transition-colors",
-                      isDarkMode ? "text-white group-hover:text-emerald-400" : "text-slate-900 group-hover:text-emerald-700"
-                    )}>
-                      Channels
-                    </h3>
-                    <span className={cn(
-                      "px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase",
-                      isDarkMode ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30" : "bg-emerald-100 text-emerald-800"
-                    )}>
-                      4 Channels
-                    </span>
-                  </div>
-                  <p className={cn("text-xs font-medium leading-relaxed", isDarkMode ? "text-slate-400" : "text-slate-500")}>
-                    Connect with customers wherever they are. WhatsApp, Instagram, Facebook, and YouTube.
-                  </p>
-
-                  <div className="flex items-center gap-2 pt-2 group-hover:scale-105 transition-transform duration-300 origin-left">
-                    <WhatsAppLogo size={22} />
-                    <InstagramLogo size={22} />
-                    <FacebookLogo size={22} />
-                    <YouTubeLogo size={22} />
-                  </div>
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" /> Connected
+                  </span>
                 </div>
-
-                <a href="#channels" className={cn(
-                  "mt-8 text-xs font-extrabold flex items-center gap-1.5 group-hover:translate-x-1.5 transition-transform",
-                  isDarkMode ? "text-emerald-400 hover:text-emerald-300" : "text-emerald-600 hover:text-emerald-700"
-                )}>
-                  <span>Explore Channels</span>
-                  <ArrowRight size={14} />
-                </a>
+                <h4 className={cn("text-base font-black transition-colors", isDarkMode ? "text-white group-hover:text-emerald-400" : "text-slate-900 group-hover:text-emerald-700")}>
+                  WhatsApp
+                </h4>
+                <p className={cn("text-xs font-medium leading-relaxed", isDarkMode ? "text-slate-400" : "text-slate-500")}>
+                  Engage customers through automated conversations and official business messaging.
+                </p>
               </div>
             </ScrollReveal>
 
-            {/* CARD 2: CONNECTORS */}
-            <ScrollReveal delay={250}>
+            {/* INSTAGRAM */}
+            <ScrollReveal delay={200}>
               <div className={cn(
-                "p-8 rounded-3xl border landing-card-hover shadow-xs hover:shadow-xl flex flex-col justify-between group cursor-pointer h-full transition-all duration-300",
-                isDarkMode
-                  ? "bg-slate-950/80 border-slate-800 hover:border-blue-500/50"
-                  : "bg-white border-slate-200 hover:border-blue-300"
+                "p-6 rounded-2xl border landing-card-hover space-y-3 shadow-2xs group cursor-pointer h-full transition-all duration-300",
+                isDarkMode ? "bg-slate-950/80 border-slate-800 hover:border-pink-500/50" : "bg-white border-slate-200"
               )}>
-                <div className="space-y-4">
-                  <div className={cn(
-                    "w-12 h-12 rounded-2xl border flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300",
-                    isDarkMode ? "bg-blue-950/50 border-blue-500/30 text-blue-400" : "bg-blue-50 border-blue-200 text-blue-600"
+                <div className="flex items-center justify-between">
+                  <div className="group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
+                    <InstagramLogo size={28} />
+                  </div>
+                  <span className={cn(
+                    "px-2 py-0.5 text-[10px] font-bold border rounded-full flex items-center gap-1",
+                    isDarkMode ? "bg-emerald-950/60 text-emerald-300 border-emerald-500/30" : "bg-emerald-50 text-emerald-700 border-emerald-200"
                   )}>
-                    <Share2 size={24} />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <h3 className={cn(
-                      "text-xl font-black transition-colors",
-                      isDarkMode ? "text-white group-hover:text-blue-400" : "text-slate-900 group-hover:text-blue-700"
-                    )}>
-                      Connectors
-                    </h3>
-                    <span className={cn(
-                      "px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase",
-                      isDarkMode ? "bg-blue-500/20 text-blue-300 border border-blue-500/30" : "bg-blue-100 text-blue-800"
-                    )}>
-                      8 Connectors
-                    </span>
-                  </div>
-                  <p className={cn("text-xs font-medium leading-relaxed", isDarkMode ? "text-slate-400" : "text-slate-500")}>
-                    Connect your everyday business tools, files, maps, spreadsheets, and data sources.
-                  </p>
-
-                  <div className="flex items-center gap-2 pt-2 group-hover:scale-105 transition-transform duration-300 origin-left">
-                    <GmailLogo size={20} />
-                    <OutlookLogo size={20} />
-                    <GoogleSheetsLogo size={20} />
-                    <GoogleDocsLogo size={20} />
-                  </div>
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" /> Connected
+                  </span>
                 </div>
-
-                <a href="#connectors" className={cn(
-                  "mt-8 text-xs font-extrabold flex items-center gap-1.5 group-hover:translate-x-1.5 transition-transform",
-                  isDarkMode ? "text-blue-400 hover:text-blue-300" : "text-blue-600 hover:text-blue-700"
-                )}>
-                  <span>Explore Connectors</span>
-                  <ArrowRight size={14} />
-                </a>
+                <h4 className={cn("text-base font-black transition-colors", isDarkMode ? "text-white group-hover:text-pink-400" : "text-slate-900 group-hover:text-emerald-700")}>
+                  Instagram
+                </h4>
+                <p className={cn("text-xs font-medium leading-relaxed", isDarkMode ? "text-slate-400" : "text-slate-500")}>
+                  Manage customer interactions and social conversations from one unified workspace.
+                </p>
               </div>
             </ScrollReveal>
 
-            {/* CARD 3: AUTOMATION MODULES */}
+            {/* FACEBOOK */}
+            <ScrollReveal delay={300}>
+              <div className={cn(
+                "p-6 rounded-2xl border landing-card-hover space-y-3 shadow-2xs group cursor-pointer h-full transition-all duration-300",
+                isDarkMode ? "bg-slate-950/80 border-slate-800 hover:border-blue-500/50" : "bg-white border-slate-200"
+              )}>
+                <div className="flex items-center justify-between">
+                  <div className="group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
+                    <FacebookLogo size={28} />
+                  </div>
+                  <span className={cn(
+                    "px-2 py-0.5 text-[10px] font-bold border rounded-full flex items-center gap-1",
+                    isDarkMode ? "bg-emerald-950/60 text-emerald-300 border-emerald-500/30" : "bg-emerald-50 text-emerald-700 border-emerald-200"
+                  )}>
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" /> Connected
+                  </span>
+                </div>
+                <h4 className={cn("text-base font-black transition-colors", isDarkMode ? "text-white group-hover:text-blue-400" : "text-slate-900 group-hover:text-emerald-700")}>
+                  Facebook
+                </h4>
+                <p className={cn("text-xs font-medium leading-relaxed", isDarkMode ? "text-slate-400" : "text-slate-500")}>
+                  Bring Facebook Messenger conversations into your unified communication workflow.
+                </p>
+              </div>
+            </ScrollReveal>
+
+            {/* YOUTUBE */}
             <ScrollReveal delay={400}>
               <div className={cn(
-                "p-8 rounded-3xl border landing-card-hover shadow-xs hover:shadow-xl flex flex-col justify-between group cursor-pointer h-full transition-all duration-300",
-                isDarkMode
-                  ? "bg-slate-950/80 border-slate-800 hover:border-purple-500/50"
-                  : "bg-white border-slate-200 hover:border-purple-300"
+                "p-6 rounded-2xl border landing-card-hover space-y-3 shadow-2xs group cursor-pointer h-full transition-all duration-300",
+                isDarkMode ? "bg-slate-950/80 border-slate-800 hover:border-red-500/50" : "bg-white border-slate-200"
               )}>
-                <div className="space-y-4">
-                  <div className={cn(
-                    "w-12 h-12 rounded-2xl border flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300",
-                    isDarkMode ? "bg-purple-950/50 border-purple-500/30 text-purple-400" : "bg-purple-50 border-purple-200 text-purple-600"
+                <div className="flex items-center justify-between">
+                  <div className="group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
+                    <YouTubeLogo size={28} />
+                  </div>
+                  <span className={cn(
+                    "px-2 py-0.5 text-[10px] font-bold border rounded-full flex items-center gap-1",
+                    isDarkMode ? "bg-emerald-950/60 text-emerald-300 border-emerald-500/30" : "bg-emerald-50 text-emerald-700 border-emerald-200"
                   )}>
-                    <Zap size={24} />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <h3 className={cn(
-                      "text-xl font-black transition-colors",
-                      isDarkMode ? "text-white group-hover:text-purple-400" : "text-slate-900 group-hover:text-purple-700"
-                    )}>
-                      Business Automation
-                    </h3>
-                    <span className={cn(
-                      "px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase",
-                      isDarkMode ? "bg-purple-500/20 text-purple-300 border border-purple-500/30" : "bg-purple-100 text-purple-800"
-                    )}>
-                      9 Modules
-                    </span>
-                  </div>
-                  <p className={cn("text-xs font-medium leading-relaxed", isDarkMode ? "text-slate-400" : "text-slate-500")}>
-                    Turn conversations and business data into automated lead creation, quotations, payments, and invoices.
-                  </p>
-
-                  <div className="flex flex-wrap items-center gap-1.5 pt-2">
-                    <span className={cn("px-2 py-0.5 text-[10px] font-bold rounded transition-colors", isDarkMode ? "bg-slate-800 text-slate-300 group-hover:text-purple-300" : "bg-slate-100 group-hover:bg-purple-50 text-slate-700 group-hover:text-purple-800")}>CRM</span>
-                    <span className={cn("px-2 py-0.5 text-[10px] font-bold rounded transition-colors", isDarkMode ? "bg-slate-800 text-slate-300 group-hover:text-purple-300" : "bg-slate-100 group-hover:bg-purple-50 text-slate-700 group-hover:text-purple-800")}>Auto Reply</span>
-                    <span className={cn("px-2 py-0.5 text-[10px] font-bold rounded transition-colors", isDarkMode ? "bg-slate-800 text-slate-300 group-hover:text-purple-300" : "bg-slate-100 group-hover:bg-purple-50 text-slate-700 group-hover:text-purple-800")}>Quotation</span>
-                    <span className={cn("px-2 py-0.5 text-[10px] font-bold rounded transition-colors", isDarkMode ? "bg-slate-800 text-slate-300 group-hover:text-purple-300" : "bg-slate-100 group-hover:bg-purple-50 text-slate-700 group-hover:text-purple-800")}>Invoice</span>
-                  </div>
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" /> Connected
+                  </span>
                 </div>
-
-                <a href="#features" className={cn(
-                  "mt-8 text-xs font-extrabold flex items-center gap-1.5 group-hover:translate-x-1.5 transition-transform",
-                  isDarkMode ? "text-purple-400 hover:text-purple-300" : "text-purple-600 hover:text-purple-700"
-                )}>
-                  <span>Explore Features</span>
-                  <ArrowRight size={14} />
-                </a>
+                <h4 className={cn("text-base font-black transition-colors", isDarkMode ? "text-white group-hover:text-red-400" : "text-slate-900 group-hover:text-emerald-700")}>
+                  YouTube
+                </h4>
+                <p className={cn("text-xs font-medium leading-relaxed", isDarkMode ? "text-slate-400" : "text-slate-500")}>
+                  Connect your YouTube presence and keep communication within your workflow.
+                </p>
               </div>
             </ScrollReveal>
 
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* ════════════════════════════════════════════════════════════════ */}
-      {/* 5. CHANNELS SECTION */}
-      {/* ════════════════════════════════════════════════════════════════ */}
-      <section id="channels" className={cn(
-        "py-20 px-6 sm:px-12 lg:px-16 w-full max-w-[1700px] mx-auto rounded-3xl border my-12 transition-colors duration-300",
-        isDarkMode ? "bg-slate-900/80 border-slate-800 shadow-2xl" : "bg-slate-50/50 border-slate-200/80"
-      )}>
-        <div className="text-center space-y-3 mb-12">
-          <h2
-            className={cn(
-              "text-3xl sm:text-4xl font-bold tracking-tight italic font-serif",
-              isDarkMode ? "text-white" : "text-slate-900"
-            )}
-            style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
-          >
-            Meet Your Customers Where They Are
-          </h2>
-          <p className={cn("text-sm sm:text-base font-medium max-w-xl mx-auto", isDarkMode ? "text-slate-400" : "text-slate-500")}>
-            Manage conversations across your most important communication channels from one unified platform.
-          </p>
-        </div>
+        {/* ════════════════════════════════════════════════════════════════ */}
+        {/* 6. CONNECTORS SECTION */}
+        {/* ════════════════════════════════════════════════════════════════ */}
+        <section id="connectors" className={cn(
+          "relative py-20 px-6 sm:px-12 lg:px-16 w-full max-w-[1700px] mx-auto my-12 rounded-[2.5rem] border transition-colors duration-300 shadow-xl overflow-hidden",
+          isDarkMode
+            ? "bg-slate-900/80 border-slate-800 shadow-2xl shadow-emerald-950/20"
+            : "bg-gradient-to-br from-slate-50/90 via-white to-teal-50/60 border-slate-200/90"
+        )}>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {/* Ambient Glows */}
+          <div className="absolute -top-32 -right-32 w-80 h-80 bg-teal-500/10 rounded-full blur-[100px] pointer-events-none" />
+          <div className="absolute -bottom-32 -left-32 w-80 h-80 bg-emerald-500/10 rounded-full blur-[100px] pointer-events-none" />
+          <div className="absolute inset-0 bg-[radial-gradient(#0d9488_1px,transparent_1px)] [background-size:28px_28px] opacity-10 pointer-events-none" />
 
-          {/* WHATSAPP */}
-          <ScrollReveal delay={100}>
-            <div className={cn(
-              "p-6 rounded-2xl border landing-card-hover space-y-3 shadow-2xs group cursor-pointer h-full transition-all duration-300",
-              isDarkMode ? "bg-slate-950/80 border-slate-800 hover:border-emerald-500/50" : "bg-white border-slate-200"
-            )}>
-              <div className="flex items-center justify-between">
-                <div className="group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
-                  <WhatsAppLogo size={28} />
-                </div>
-                <span className={cn(
-                  "px-2 py-0.5 text-[10px] font-bold border rounded-full flex items-center gap-1",
-                  isDarkMode ? "bg-emerald-950/60 text-emerald-300 border-emerald-500/30" : "bg-emerald-50 text-emerald-700 border-emerald-200"
-                )}>
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" /> Connected
-                </span>
-              </div>
-              <h4 className={cn("text-base font-black transition-colors", isDarkMode ? "text-white group-hover:text-emerald-400" : "text-slate-900 group-hover:text-emerald-700")}>
-                WhatsApp
-              </h4>
-              <p className={cn("text-xs font-medium leading-relaxed", isDarkMode ? "text-slate-400" : "text-slate-500")}>
-                Engage customers through automated conversations and official business messaging.
+          <div className="relative z-10">
+            <div className="text-center space-y-4 mb-16">
+              <h2
+                className={cn(
+                  "text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight italic font-serif leading-tight",
+                  isDarkMode ? "text-white" : "text-slate-900"
+                )}
+                style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
+              >
+                Connect the Tools Your Business Already Uses
+              </h2>
+              <p className={cn("text-base sm:text-lg font-medium max-w-2xl mx-auto leading-relaxed", isDarkMode ? "text-slate-400" : "text-slate-500")}>
+                Bring your emails, documents, spreadsheets, maps, and business data into the same workflow.
               </p>
             </div>
-          </ScrollReveal>
 
-          {/* INSTAGRAM */}
-          <ScrollReveal delay={200}>
-            <div className={cn(
-              "p-6 rounded-2xl border landing-card-hover space-y-3 shadow-2xs group cursor-pointer h-full transition-all duration-300",
-              isDarkMode ? "bg-slate-950/80 border-slate-800 hover:border-pink-500/50" : "bg-white border-slate-200"
-            )}>
-              <div className="flex items-center justify-between">
-                <div className="group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
-                  <InstagramLogo size={28} />
-                </div>
-                <span className={cn(
-                  "px-2 py-0.5 text-[10px] font-bold border rounded-full flex items-center gap-1",
-                  isDarkMode ? "bg-emerald-950/60 text-emerald-300 border-emerald-500/30" : "bg-emerald-50 text-emerald-700 border-emerald-200"
-                )}>
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" /> Connected
-                </span>
-              </div>
-              <h4 className={cn("text-base font-black transition-colors", isDarkMode ? "text-white group-hover:text-pink-400" : "text-slate-900 group-hover:text-emerald-700")}>
-                Instagram
-              </h4>
-              <p className={cn("text-xs font-medium leading-relaxed", isDarkMode ? "text-slate-400" : "text-slate-500")}>
-                Manage customer interactions and social conversations from one unified workspace.
-              </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-7">
+              {[
+                { logo: <GmailLogo size={34} />, name: 'Gmail', desc: 'Email communication' },
+                { logo: <OutlookLogo size={34} />, name: 'Microsoft Outlook', desc: 'Business email' },
+                { logo: <Layers size={30} className="text-emerald-500" />, name: 'Google Maps', desc: 'Location intelligence' },
+                { logo: <GoogleDocsLogo size={34} />, name: 'Google Docs', desc: 'Documents & workflows' },
+                { logo: <Share2 size={30} className="text-blue-500" />, name: 'OneDrive', desc: 'Cloud files' },
+                { logo: <GoogleSheetsLogo size={34} />, name: 'Google Sheets', desc: 'Business data & records' },
+                { logo: <FileText size={30} className="text-amber-500" />, name: 'Google Slides', desc: 'Presentations' },
+                { logo: <MessageSquare size={30} className="text-cyan-500" />, name: 'Google News Feed', desc: 'News & information' },
+              ].map((item, idx) => (
+                <ScrollReveal key={idx} delay={idx * 80}>
+                  <div className={cn(
+                    "p-6 sm:p-7 rounded-3xl border flex items-center gap-4.5 shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 group cursor-pointer h-full",
+                    isDarkMode
+                      ? "bg-slate-950/80 border-slate-800 hover:border-emerald-500/50"
+                      : "bg-white border-slate-200/90 hover:border-emerald-500 hover:shadow-emerald-500/10"
+                  )}>
+                    <div className={cn(
+                      "w-14 h-14 rounded-2xl border flex items-center justify-center shrink-0 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300",
+                      isDarkMode ? "bg-slate-900 border-slate-800 group-hover:bg-slate-800" : "bg-slate-50 border-slate-100 group-hover:bg-emerald-50 group-hover:border-emerald-200"
+                    )}>
+                      {item.logo}
+                    </div>
+                    <div className="text-left overflow-hidden">
+                      <h5 className={cn("text-sm sm:text-base font-black transition-colors truncate", isDarkMode ? "text-white group-hover:text-emerald-400" : "text-slate-900 group-hover:text-emerald-700")}>
+                        {item.name}
+                      </h5>
+                      <p className={cn("text-xs font-medium mt-0.5 truncate", isDarkMode ? "text-slate-400" : "text-slate-500")}>{item.desc}</p>
+                    </div>
+                  </div>
+                </ScrollReveal>
+              ))}
             </div>
-          </ScrollReveal>
 
-          {/* FACEBOOK */}
-          <ScrollReveal delay={300}>
-            <div className={cn(
-              "p-6 rounded-2xl border landing-card-hover space-y-3 shadow-2xs group cursor-pointer h-full transition-all duration-300",
-              isDarkMode ? "bg-slate-950/80 border-slate-800 hover:border-blue-500/50" : "bg-white border-slate-200"
-            )}>
-              <div className="flex items-center justify-between">
-                <div className="group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
-                  <FacebookLogo size={28} />
-                </div>
-                <span className={cn(
-                  "px-2 py-0.5 text-[10px] font-bold border rounded-full flex items-center gap-1",
-                  isDarkMode ? "bg-emerald-950/60 text-emerald-300 border-emerald-500/30" : "bg-emerald-50 text-emerald-700 border-emerald-200"
-                )}>
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" /> Connected
-                </span>
-              </div>
-              <h4 className={cn("text-base font-black transition-colors", isDarkMode ? "text-white group-hover:text-blue-400" : "text-slate-900 group-hover:text-emerald-700")}>
-                Facebook
-              </h4>
-              <p className={cn("text-xs font-medium leading-relaxed", isDarkMode ? "text-slate-400" : "text-slate-500")}>
-                Bring Facebook Messenger conversations into your unified communication workflow.
-              </p>
-            </div>
-          </ScrollReveal>
+          </div>
+        </section>
 
-          {/* YOUTUBE */}
-          <ScrollReveal delay={400}>
-            <div className={cn(
-              "p-6 rounded-2xl border landing-card-hover space-y-3 shadow-2xs group cursor-pointer h-full transition-all duration-300",
-              isDarkMode ? "bg-slate-950/80 border-slate-800 hover:border-red-500/50" : "bg-white border-slate-200"
-            )}>
-              <div className="flex items-center justify-between">
-                <div className="group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
-                  <YouTubeLogo size={28} />
-                </div>
-                <span className={cn(
-                  "px-2 py-0.5 text-[10px] font-bold border rounded-full flex items-center gap-1",
-                  isDarkMode ? "bg-emerald-950/60 text-emerald-300 border-emerald-500/30" : "bg-emerald-50 text-emerald-700 border-emerald-200"
-                )}>
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" /> Connected
-                </span>
-              </div>
-              <h4 className={cn("text-base font-black transition-colors", isDarkMode ? "text-white group-hover:text-red-400" : "text-slate-900 group-hover:text-emerald-700")}>
-                YouTube
-              </h4>
-              <p className={cn("text-xs font-medium leading-relaxed", isDarkMode ? "text-slate-400" : "text-slate-500")}>
-                Connect your YouTube presence and keep communication within your workflow.
-              </p>
-            </div>
-          </ScrollReveal>
-
-        </div>
-      </section>
-
-      {/* ════════════════════════════════════════════════════════════════ */}
-      {/* 6. CONNECTORS SECTION */}
-      {/* ════════════════════════════════════════════════════════════════ */}
-      <section id="connectors" className={cn(
-        "relative py-20 px-6 sm:px-12 lg:px-16 w-full max-w-[1700px] mx-auto my-12 rounded-[2.5rem] border transition-colors duration-300 shadow-xl overflow-hidden",
-        isDarkMode
-          ? "bg-slate-900/80 border-slate-800 shadow-2xl shadow-emerald-950/20"
-          : "bg-gradient-to-br from-slate-50/90 via-white to-teal-50/60 border-slate-200/90"
-      )}>
-
-        {/* Ambient Glows */}
-        <div className="absolute -top-32 -right-32 w-80 h-80 bg-teal-500/10 rounded-full blur-[100px] pointer-events-none" />
-        <div className="absolute -bottom-32 -left-32 w-80 h-80 bg-emerald-500/10 rounded-full blur-[100px] pointer-events-none" />
-        <div className="absolute inset-0 bg-[radial-gradient(#0d9488_1px,transparent_1px)] [background-size:28px_28px] opacity-10 pointer-events-none" />
-
-        <div className="relative z-10">
+        {/* ════════════════════════════════════════════════════════════════ */}
+        {/* 7. AUTOMATION MODULES SECTION */}
+        {/* ════════════════════════════════════════════════════════════════ */}
+        <section id="features" className={cn(
+          "py-20 px-6 sm:px-12 lg:px-16 w-full max-w-[1700px] mx-auto rounded-[2.5rem] border my-16 shadow-xl transition-colors duration-300",
+          isDarkMode
+            ? "bg-slate-900/80 border-slate-800 shadow-2xl shadow-emerald-950/20"
+            : "bg-gradient-to-b from-emerald-50/80 via-white to-emerald-50/40 border-emerald-200/90"
+        )}>
           <div className="text-center space-y-4 mb-16">
             <h2
               className={cn(
@@ -971,1627 +1034,1565 @@ export default function UwoLandingPage() {
               )}
               style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
             >
-              Connect the Tools Your Business Already Uses
+              From Conversation to Completion — Automatically
             </h2>
-            <p className={cn("text-base sm:text-lg font-medium max-w-2xl mx-auto leading-relaxed", isDarkMode ? "text-slate-400" : "text-slate-500")}>
-              Bring your emails, documents, spreadsheets, maps, and business data into the same workflow.
+            <p className={cn("text-sm sm:text-base font-medium max-w-xl mx-auto", isDarkMode ? "text-slate-400" : "text-slate-500")}>
+              Turn everyday business activity into automated workflows.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-7">
+          {/* Interactive Automation Chain Workflow Cards Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-4.5 w-full mx-auto">
             {[
-              { logo: <GmailLogo size={34} />, name: 'Gmail', desc: 'Email communication' },
-              { logo: <OutlookLogo size={34} />, name: 'Microsoft Outlook', desc: 'Business email' },
-              { logo: <Layers size={30} className="text-emerald-500" />, name: 'Google Maps', desc: 'Location intelligence' },
-              { logo: <GoogleDocsLogo size={34} />, name: 'Google Docs', desc: 'Documents & workflows' },
-              { logo: <Share2 size={30} className="text-blue-500" />, name: 'OneDrive', desc: 'Cloud files' },
-              { logo: <GoogleSheetsLogo size={34} />, name: 'Google Sheets', desc: 'Business data & records' },
-              { logo: <FileText size={30} className="text-amber-500" />, name: 'Google Slides', desc: 'Presentations' },
-              { logo: <MessageSquare size={30} className="text-cyan-500" />, name: 'Google News Feed', desc: 'News & information' },
+              { step: 'STEP 01', icon: <MessageSquare size={22} />, label: 'Customer Message', desc: 'WhatsApp / DM query received', bg: 'bg-[#25D366]', border: 'hover:border-[#25D366]' },
+              { step: 'STEP 02', icon: <Users size={22} />, label: 'CRM Lead Created', desc: 'Auto-saved to sales pipeline', bg: 'bg-[#059669]', border: 'hover:border-emerald-600' },
+              { step: 'STEP 03', icon: <Bot size={22} />, label: 'AI Auto Reply', desc: 'Catalog & price bot dispatches', bg: 'bg-indigo-600', border: 'hover:border-indigo-600' },
+              { step: 'STEP 04', icon: <FileCheck size={22} />, label: 'Quotation Generated', desc: 'Instant GST quotation PDF', bg: 'bg-amber-600', border: 'hover:border-amber-600' },
+              { step: 'STEP 05', icon: <CreditCard size={22} />, label: 'Payment Link Sent', desc: 'Native Razorpay UPI link', bg: 'bg-rose-600', border: 'hover:border-rose-600' },
+              { step: 'STEP 06', icon: <Receipt size={22} />, label: 'Invoice Issued', desc: 'Synced to Google Sheets', bg: 'bg-emerald-600', border: 'hover:border-emerald-600' },
+              { step: 'STEP 07', icon: <CheckCircle2 size={22} />, label: 'Workflow Completed', desc: 'Closed deal in 0.2s', bg: 'bg-slate-900', border: 'hover:border-slate-900' }
             ].map((item, idx) => (
-              <ScrollReveal key={idx} delay={idx * 80}>
-                <div className={cn(
-                  "p-6 sm:p-7 rounded-3xl border flex items-center gap-4.5 shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 group cursor-pointer h-full",
-                  isDarkMode
-                    ? "bg-slate-950/80 border-slate-800 hover:border-emerald-500/50"
-                    : "bg-white border-slate-200/90 hover:border-emerald-500 hover:shadow-emerald-500/10"
-                )}>
-                  <div className={cn(
-                    "w-14 h-14 rounded-2xl border flex items-center justify-center shrink-0 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300",
-                    isDarkMode ? "bg-slate-900 border-slate-800 group-hover:bg-slate-800" : "bg-slate-50 border-slate-100 group-hover:bg-emerald-50 group-hover:border-emerald-200"
-                  )}>
-                    {item.logo}
+              <ScrollReveal key={idx} delay={idx * 90}>
+                <div
+                  className={cn(
+                    "p-5 sm:p-6 rounded-3xl border shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group cursor-pointer text-center flex flex-col items-center justify-between relative overflow-hidden h-full",
+                    isDarkMode ? "bg-slate-950/80 border-slate-800" : "bg-white border-slate-200/90",
+                    item.border
+                  )}
+                >
+                  {/* Subtle top indicator bar */}
+                  <div className={cn("absolute top-0 left-0 right-0 h-1.5 opacity-80 group-hover:opacity-100 transition-opacity", item.bg)} />
+
+                  <span className={cn("text-[10px] font-black tracking-widest uppercase mb-3", isDarkMode ? "text-slate-400" : "text-slate-400")}>
+                    {item.step}
+                  </span>
+
+                  <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center text-white mb-3 shadow-md group-hover:scale-110 group-hover:rotate-6 transition-all duration-300", item.bg)}>
+                    {item.icon}
                   </div>
-                  <div className="text-left overflow-hidden">
-                    <h5 className={cn("text-sm sm:text-base font-black transition-colors truncate", isDarkMode ? "text-white group-hover:text-emerald-400" : "text-slate-900 group-hover:text-emerald-700")}>
-                      {item.name}
-                    </h5>
-                    <p className={cn("text-xs font-medium mt-0.5 truncate", isDarkMode ? "text-slate-400" : "text-slate-500")}>{item.desc}</p>
-                  </div>
+
+                  <h5 className={cn("text-sm font-black transition-colors leading-tight mb-1", isDarkMode ? "text-white group-hover:text-emerald-400" : "text-slate-900 group-hover:text-emerald-700")}>
+                    {item.label}
+                  </h5>
+
+                  <p className={cn("text-[11px] font-medium leading-snug", isDarkMode ? "text-slate-400" : "text-slate-500")}>
+                    {item.desc}
+                  </p>
                 </div>
               </ScrollReveal>
             ))}
           </div>
+        </section>
 
-        </div>
-      </section>
+        {/* 8. HOW UWO CONNECT WORKS - CONNECTED PIPELINE */}
+        <section id="how-it-works" className={cn(
+          "relative py-20 px-6 sm:px-12 lg:px-16 w-full max-w-[1700px] mx-auto my-12 rounded-[2.5rem] border transition-colors duration-300 shadow-xl overflow-hidden",
+          isDarkMode
+            ? "bg-slate-900/80 border-slate-800 shadow-2xl shadow-emerald-950/20"
+            : "bg-gradient-to-br from-emerald-50/50 via-white to-indigo-50/40 border-slate-200/90"
+        )}>
 
-      {/* ════════════════════════════════════════════════════════════════ */}
-      {/* 7. AUTOMATION MODULES SECTION */}
-      {/* ════════════════════════════════════════════════════════════════ */}
-      <section id="features" className={cn(
-        "py-20 px-6 sm:px-12 lg:px-16 w-full max-w-[1700px] mx-auto rounded-[2.5rem] border my-16 shadow-xl transition-colors duration-300",
-        isDarkMode
-          ? "bg-slate-900/80 border-slate-800 shadow-2xl shadow-emerald-950/20"
-          : "bg-gradient-to-b from-emerald-50/80 via-white to-emerald-50/40 border-emerald-200/90"
-      )}>
-        <div className="text-center space-y-4 mb-16">
-          <h2
-            className={cn(
-              "text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight italic font-serif leading-tight",
-              isDarkMode ? "text-white" : "text-slate-900"
-            )}
-            style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
-          >
-            From Conversation to Completion — Automatically
-          </h2>
-          <p className={cn("text-sm sm:text-base font-medium max-w-xl mx-auto", isDarkMode ? "text-slate-400" : "text-slate-500")}>
-            Turn everyday business activity into automated workflows.
-          </p>
-        </div>
+          {/* Ambient Subtle Glow & Pattern */}
+          <div className="absolute -top-32 -left-32 w-80 h-80 bg-emerald-500/10 rounded-full blur-[100px] pointer-events-none" />
+          <div className="absolute -bottom-32 -right-32 w-80 h-80 bg-indigo-500/10 rounded-full blur-[100px] pointer-events-none" />
+          <div className="absolute inset-0 bg-[radial-gradient(#059669_1px,transparent_1px)] [background-size:28px_28px] opacity-10 pointer-events-none" />
 
-        {/* Interactive Automation Chain Workflow Cards Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-4.5 w-full mx-auto">
-          {[
-            { step: 'STEP 01', icon: <MessageSquare size={22} />, label: 'Customer Message', desc: 'WhatsApp / DM query received', bg: 'bg-[#25D366]', border: 'hover:border-[#25D366]' },
-            { step: 'STEP 02', icon: <Users size={22} />, label: 'CRM Lead Created', desc: 'Auto-saved to sales pipeline', bg: 'bg-[#059669]', border: 'hover:border-emerald-600' },
-            { step: 'STEP 03', icon: <Bot size={22} />, label: 'AI Auto Reply', desc: 'Catalog & price bot dispatches', bg: 'bg-indigo-600', border: 'hover:border-indigo-600' },
-            { step: 'STEP 04', icon: <FileCheck size={22} />, label: 'Quotation Generated', desc: 'Instant GST quotation PDF', bg: 'bg-amber-600', border: 'hover:border-amber-600' },
-            { step: 'STEP 05', icon: <CreditCard size={22} />, label: 'Payment Link Sent', desc: 'Native Razorpay UPI link', bg: 'bg-rose-600', border: 'hover:border-rose-600' },
-            { step: 'STEP 06', icon: <Receipt size={22} />, label: 'Invoice Issued', desc: 'Synced to Google Sheets', bg: 'bg-emerald-600', border: 'hover:border-emerald-600' },
-            { step: 'STEP 07', icon: <CheckCircle2 size={22} />, label: 'Workflow Completed', desc: 'Closed deal in 0.2s', bg: 'bg-slate-900', border: 'hover:border-slate-900' }
-          ].map((item, idx) => (
-            <ScrollReveal key={idx} delay={idx * 90}>
-              <div
+          <div className="relative z-10">
+            <div className="text-center space-y-4 mb-16">
+              <h2
                 className={cn(
-                  "p-5 sm:p-6 rounded-3xl border shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group cursor-pointer text-center flex flex-col items-center justify-between relative overflow-hidden h-full",
-                  isDarkMode ? "bg-slate-950/80 border-slate-800" : "bg-white border-slate-200/90",
-                  item.border
+                  "text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight italic font-serif leading-tight",
+                  isDarkMode ? "text-white" : "text-slate-900"
                 )}
+                style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
               >
-                {/* Subtle top indicator bar */}
-                <div className={cn("absolute top-0 left-0 right-0 h-1.5 opacity-80 group-hover:opacity-100 transition-opacity", item.bg)} />
-
-                <span className={cn("text-[10px] font-black tracking-widest uppercase mb-3", isDarkMode ? "text-slate-400" : "text-slate-400")}>
-                  {item.step}
-                </span>
-
-                <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center text-white mb-3 shadow-md group-hover:scale-110 group-hover:rotate-6 transition-all duration-300", item.bg)}>
-                  {item.icon}
-                </div>
-
-                <h5 className={cn("text-sm font-black transition-colors leading-tight mb-1", isDarkMode ? "text-white group-hover:text-emerald-400" : "text-slate-900 group-hover:text-emerald-700")}>
-                  {item.label}
-                </h5>
-
-                <p className={cn("text-[11px] font-medium leading-snug", isDarkMode ? "text-slate-400" : "text-slate-500")}>
-                  {item.desc}
-                </p>
-              </div>
-            </ScrollReveal>
-          ))}
-        </div>
-      </section>
-
-      {/* 8. HOW UWO CONNECT WORKS - CONNECTED PIPELINE */}
-      <section id="how-it-works" className={cn(
-        "relative py-20 px-6 sm:px-12 lg:px-16 w-full max-w-[1700px] mx-auto my-12 rounded-[2.5rem] border transition-colors duration-300 shadow-xl overflow-hidden",
-        isDarkMode
-          ? "bg-slate-900/80 border-slate-800 shadow-2xl shadow-emerald-950/20"
-          : "bg-gradient-to-br from-emerald-50/50 via-white to-indigo-50/40 border-slate-200/90"
-      )}>
-
-        {/* Ambient Subtle Glow & Pattern */}
-        <div className="absolute -top-32 -left-32 w-80 h-80 bg-emerald-500/10 rounded-full blur-[100px] pointer-events-none" />
-        <div className="absolute -bottom-32 -right-32 w-80 h-80 bg-indigo-500/10 rounded-full blur-[100px] pointer-events-none" />
-        <div className="absolute inset-0 bg-[radial-gradient(#059669_1px,transparent_1px)] [background-size:28px_28px] opacity-10 pointer-events-none" />
-
-        <div className="relative z-10">
-          <div className="text-center space-y-4 mb-16">
-            <h2
-              className={cn(
-                "text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight italic font-serif leading-tight",
-                isDarkMode ? "text-white" : "text-slate-900"
-              )}
-              style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
-            >
-              How UWO Connect Works
-            </h2>
-            <p className={cn("text-base sm:text-lg font-medium max-w-xl mx-auto", isDarkMode ? "text-slate-400" : "text-slate-500")}>
-              3 simple steps to transform manual customer tasks into automated revenue pipelines.
-            </p>
-          </div>
-
-          {/* Connected Pipeline Steps Container */}
-          <div className="relative">
-            {/* Connecting Glow Line (Desktop) */}
-            <div className="hidden md:block absolute top-1/2 left-[15%] right-[15%] h-1 bg-gradient-to-r from-emerald-400 via-emerald-600 to-indigo-600 -translate-y-1/2 z-0 rounded-full opacity-60 animate-pulse" />
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative z-10">
-
-              {/* Step 01 */}
-              <ScrollReveal delay={150}>
-                <div className={cn(
-                  "relative p-8 rounded-3xl border shadow-md hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group cursor-pointer text-left flex flex-col justify-between space-y-5 h-full",
-                  isDarkMode
-                    ? "bg-slate-950/80 border-slate-800 hover:border-emerald-500"
-                    : "bg-white border-slate-200/90 hover:border-emerald-500"
-                )}>
-                  <div className="flex items-center justify-between">
-                    <span className={cn(
-                      "text-sm font-extrabold uppercase tracking-widest px-3.5 py-1 rounded-full border",
-                      isDarkMode ? "text-emerald-400 bg-emerald-950/60 border-emerald-500/30" : "text-emerald-600 bg-emerald-50 border-emerald-200/80"
-                    )}>
-                      Step 01
-                    </span>
-                    <div className="w-12 h-12 rounded-2xl bg-emerald-500 text-white flex items-center justify-center shadow-lg shadow-emerald-500/20 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300">
-                      <Zap size={24} className="fill-white" />
-                    </div>
-                  </div>
-                  <div>
-                    <h3 className={cn("text-2xl font-black transition-colors mb-2", isDarkMode ? "text-white group-hover:text-emerald-400" : "text-slate-900 group-hover:text-emerald-700")}>
-                      CONNECT
-                    </h3>
-                    <p className={cn("text-sm font-medium leading-relaxed", isDarkMode ? "text-slate-400" : "text-slate-500")}>
-                      Connect your communication channels (WhatsApp, Instagram, Gmail) and business tools in minutes.
-                    </p>
-                  </div>
-
-                  {/* Connecting Pipeline Connector Arrow (Desktop) */}
-                  <div className={cn(
-                    "hidden md:flex absolute -right-6 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-emerald-600 text-white items-center justify-center shadow-lg shadow-emerald-600/30 group-hover:scale-125 transition-transform duration-300 border-2",
-                    isDarkMode ? "border-slate-900" : "border-white"
-                  )}>
-                    <ArrowRight size={18} />
-                  </div>
-                </div>
-              </ScrollReveal>
-
-              {/* Step 02 */}
-              <ScrollReveal delay={300}>
-                <div className={cn(
-                  "relative p-8 rounded-3xl border shadow-md hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group cursor-pointer text-left flex flex-col justify-between space-y-5 h-full",
-                  isDarkMode
-                    ? "bg-slate-950/80 border-slate-800 hover:border-indigo-500"
-                    : "bg-white border-slate-200/90 hover:border-indigo-500"
-                )}>
-                  <div className="flex items-center justify-between">
-                    <span className={cn(
-                      "text-sm font-extrabold uppercase tracking-widest px-3.5 py-1 rounded-full border",
-                      isDarkMode ? "text-indigo-400 bg-indigo-950/60 border-indigo-500/30" : "text-indigo-600 bg-indigo-50 border-indigo-200/80"
-                    )}>
-                      Step 02
-                    </span>
-                    <div className="w-12 h-12 rounded-2xl bg-indigo-600 text-white flex items-center justify-center shadow-lg shadow-indigo-600/20 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300">
-                      <Bot size={24} className="fill-white" />
-                    </div>
-                  </div>
-                  <div>
-                    <h3 className={cn("text-2xl font-black transition-colors mb-2", isDarkMode ? "text-white group-hover:text-indigo-400" : "text-slate-900 group-hover:text-emerald-700")}>
-                      AUTOMATE
-                    </h3>
-                    <p className={cn("text-sm font-medium leading-relaxed", isDarkMode ? "text-slate-400" : "text-slate-500")}>
-                      Create intelligent AI workflows that handle lead qualification, quotations, and repetitive replies automatically.
-                    </p>
-                  </div>
-
-                  {/* Connecting Pipeline Connector Arrow (Desktop) */}
-                  <div className={cn(
-                    "hidden md:flex absolute -right-6 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-indigo-600 text-white items-center justify-center shadow-lg shadow-indigo-600/30 group-hover:scale-125 transition-transform duration-300 border-2",
-                    isDarkMode ? "border-slate-900" : "border-white"
-                  )}>
-                    <ArrowRight size={18} />
-                  </div>
-                </div>
-              </ScrollReveal>
-
-              {/* Step 03 */}
-              <ScrollReveal delay={450}>
-                <div className={cn(
-                  "relative p-8 rounded-3xl border shadow-md hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group cursor-pointer text-left flex flex-col justify-between space-y-5 h-full",
-                  isDarkMode
-                    ? "bg-slate-950/80 border-slate-800 hover:border-emerald-500"
-                    : "bg-white border-slate-200/90 hover:border-emerald-500"
-                )}>
-                  <div className="flex items-center justify-between">
-                    <span className={cn(
-                      "text-sm font-extrabold uppercase tracking-widest px-3.5 py-1 rounded-full border",
-                      isDarkMode ? "text-emerald-400 bg-emerald-950/60 border-emerald-500/30" : "text-emerald-600 bg-emerald-50 border-emerald-200/80"
-                    )}>
-                      Step 03
-                    </span>
-                    <div className="w-12 h-12 rounded-2xl bg-emerald-600 text-white flex items-center justify-center shadow-lg shadow-emerald-600/20 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300">
-                      <Sparkles size={24} className="fill-white" />
-                    </div>
-                  </div>
-                  <div>
-                    <h3 className={cn("text-2xl font-black transition-colors mb-2", isDarkMode ? "text-white group-hover:text-emerald-400" : "text-slate-900 group-hover:text-emerald-700")}>
-                      GROW
-                    </h3>
-                    <p className={cn("text-sm font-medium leading-relaxed", isDarkMode ? "text-slate-400" : "text-slate-500")}>
-                      Spend zero time switching between disconnected tools and focus on scaling your business revenue.
-                    </p>
-                  </div>
-                </div>
-              </ScrollReveal>
-
+                How UWO Connect Works
+              </h2>
+              <p className={cn("text-base sm:text-lg font-medium max-w-xl mx-auto", isDarkMode ? "text-slate-400" : "text-slate-500")}>
+                3 simple steps to transform manual customer tasks into automated revenue pipelines.
+              </p>
             </div>
-          </div>
-        </div>
-      </section>
 
-      {/* ════════════════════════════════════════════════════════════════ */}
-      {/* 9. REAL-WORLD AUTOMATION EXAMPLE - DYNAMIC SHOWCASE CARD */}
-      {/* ════════════════════════════════════════════════════════════════ */}
-      <section className={cn(
-        "relative py-24 w-full max-w-[1700px] mx-auto px-6 sm:px-12 lg:px-16 rounded-[2.5rem] my-12 shadow-2xl transition-all duration-500 border overflow-hidden",
-        isDarkMode
-          ? "bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white border-slate-800/80 hover:shadow-emerald-950/70"
-          : "bg-gradient-to-br from-slate-50 via-white to-emerald-50/50 text-slate-900 border-slate-200/90 shadow-emerald-500/5 hover:shadow-emerald-500/10"
-      )}>
+            {/* Connected Pipeline Steps Container */}
+            <div className="relative">
+              {/* Connecting Glow Line (Desktop) */}
+              <div className="hidden md:block absolute top-1/2 left-[15%] right-[15%] h-1 bg-gradient-to-r from-emerald-400 via-emerald-600 to-indigo-600 -translate-y-1/2 z-0 rounded-full opacity-60 animate-pulse" />
 
-        {/* Ambient Glowing Gradient Orbs & Tech Dot Matrix Grid Background */}
-        <div className={cn(
-          "absolute -top-24 -left-24 w-96 h-96 rounded-full blur-[100px] pointer-events-none animate-pulse",
-          isDarkMode ? "bg-emerald-500/20" : "bg-emerald-500/10"
-        )} />
-        <div className={cn(
-          "absolute -bottom-24 -right-24 w-96 h-96 rounded-full blur-[100px] pointer-events-none animate-pulse",
-          isDarkMode ? "bg-indigo-500/20" : "bg-indigo-500/10"
-        )} />
-        <div className={cn(
-          "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full blur-[140px] pointer-events-none",
-          isDarkMode ? "bg-emerald-600/10" : "bg-emerald-500/5"
-        )} />
-        <div className={cn(
-          "absolute inset-0 bg-[radial-gradient(#059669_1px,transparent_1px)] [background-size:28px_28px] pointer-events-none",
-          isDarkMode ? "opacity-15" : "opacity-10"
-        )} />
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative z-10">
 
-        <div className="relative z-10">
-          <div className="text-center space-y-4 mb-16">
-            <h2
-              className={cn(
-                "text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight italic font-serif leading-tight drop-shadow-xs",
-                isDarkMode ? "text-white" : "text-slate-900"
-              )}
-              style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
-            >
-              See Automation in Action
-            </h2>
-            <p className={cn(
-              "text-base sm:text-lg font-medium max-w-xl mx-auto",
-              isDarkMode ? "text-slate-400" : "text-slate-600"
-            )}>
-              Click any step to see how UWO Connect handles customer conversations automatically.
-            </p>
-          </div>
-
-          {/* Step-by-Step Interactive Playback & Large Showcase Card */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch max-w-6xl mx-auto text-left">
-
-            {/* Left Side: 6 Interactive Step Options */}
-            <div className="lg:col-span-5 space-y-3 flex flex-col justify-center">
-              {[
-                { title: 'Customer sends WhatsApp message', desc: '"Hi! I want to know the price of your product."' },
-                { title: 'UWO Connect detects incoming conversation', desc: 'Channel message routed to Unified Engine' },
-                { title: 'CRM Lead Created Automatically', desc: 'New contact record saved to lead pipeline' },
-                { title: 'Auto Reply Dispatches Catalog', desc: 'Interactive catalog & PDF shared instantly' },
-                { title: 'Quotation Automatically Prepared', desc: 'Quotation #QT-9482 created' },
-                { title: 'Payment Link & Invoice Issued', desc: 'UPI payment link generated & GST Invoice saved' }
-              ].map((st, i) => (
-                <div
-                  key={i}
-                  onClick={() => setActiveWorkflowTab(i)}
-                  className={cn(
-                    "p-4 sm:p-4.5 rounded-2xl border transition-all duration-300 cursor-pointer transform hover:translate-x-1.5 flex items-center justify-between",
-                    activeWorkflowTab === i
-                      ? (isDarkMode
-                        ? "bg-emerald-950/80 border-emerald-500 text-white shadow-lg shadow-emerald-500/20 scale-[1.02]"
-                        : "bg-emerald-50/90 border-emerald-500 text-emerald-950 shadow-lg shadow-emerald-500/15 scale-[1.02]")
-                      : (isDarkMode
-                        ? "bg-slate-800/50 border-slate-700/60 text-slate-400 hover:text-white hover:border-slate-600 hover:bg-slate-800/80"
-                        : "bg-white border-slate-200/90 text-slate-600 hover:text-slate-900 hover:border-emerald-300 hover:bg-slate-50/80 shadow-xs")
-                  )}
-                >
-                  <div>
-                    <div className="flex items-center gap-2">
+                {/* Step 01 */}
+                <ScrollReveal delay={150}>
+                  <div className={cn(
+                    "relative p-8 rounded-3xl border shadow-md hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group cursor-pointer text-left flex flex-col justify-between space-y-5 h-full",
+                    isDarkMode
+                      ? "bg-slate-950/80 border-slate-800 hover:border-emerald-500"
+                      : "bg-white border-slate-200/90 hover:border-emerald-500"
+                  )}>
+                    <div className="flex items-center justify-between">
                       <span className={cn(
-                        "text-[10px] font-black px-2 py-0.5 rounded-md uppercase tracking-wider",
-                        activeWorkflowTab === i
-                          ? "bg-emerald-500 text-white"
-                          : (isDarkMode ? "bg-slate-700 text-slate-300" : "bg-slate-100 text-slate-700 border border-slate-200")
+                        "text-sm font-extrabold uppercase tracking-widest px-3.5 py-1 rounded-full border",
+                        isDarkMode ? "text-emerald-400 bg-emerald-950/60 border-emerald-500/30" : "text-emerald-600 bg-emerald-50 border-emerald-200/80"
                       )}>
-                        0{i + 1}
+                        Step 01
                       </span>
-                      <h5 className={cn(
-                        "text-xs sm:text-sm font-bold",
-                        activeWorkflowTab === i
-                          ? (isDarkMode ? "text-white" : "text-emerald-950")
-                          : (isDarkMode ? "text-slate-300" : "text-slate-800")
-                      )}>{st.title}</h5>
+                      <div className="w-12 h-12 rounded-2xl bg-emerald-500 text-white flex items-center justify-center shadow-lg shadow-emerald-500/20 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300">
+                        <Zap size={24} className="fill-white" />
+                      </div>
                     </div>
-                    <p className={cn(
-                      "text-[11px] mt-1 pl-7",
-                      activeWorkflowTab === i
-                        ? (isDarkMode ? "text-emerald-300" : "text-emerald-700")
-                        : (isDarkMode ? "text-slate-400" : "text-slate-500")
-                    )}>{st.desc}</p>
-                  </div>
+                    <div>
+                      <h3 className={cn("text-2xl font-black transition-colors mb-2", isDarkMode ? "text-white group-hover:text-emerald-400" : "text-slate-900 group-hover:text-emerald-700")}>
+                        CONNECT
+                      </h3>
+                      <p className={cn("text-sm font-medium leading-relaxed", isDarkMode ? "text-slate-400" : "text-slate-500")}>
+                        Connect your communication channels (WhatsApp, Instagram, Gmail) and business tools in minutes.
+                      </p>
+                    </div>
 
-                  {activeWorkflowTab === i && (
-                    <CheckCircle2 size={18} className="text-emerald-500 shrink-0 ml-2 animate-pulse" />
-                  )}
-                </div>
-              ))}
+                    {/* Connecting Pipeline Connector Arrow (Desktop) */}
+                    <div className={cn(
+                      "hidden md:flex absolute -right-6 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-emerald-600 text-white items-center justify-center shadow-lg shadow-emerald-600/30 group-hover:scale-125 transition-transform duration-300 border-2",
+                      isDarkMode ? "border-slate-900" : "border-white"
+                    )}>
+                      <ArrowRight size={18} />
+                    </div>
+                  </div>
+                </ScrollReveal>
+
+                {/* Step 02 */}
+                <ScrollReveal delay={300}>
+                  <div className={cn(
+                    "relative p-8 rounded-3xl border shadow-md hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group cursor-pointer text-left flex flex-col justify-between space-y-5 h-full",
+                    isDarkMode
+                      ? "bg-slate-950/80 border-slate-800 hover:border-indigo-500"
+                      : "bg-white border-slate-200/90 hover:border-indigo-500"
+                  )}>
+                    <div className="flex items-center justify-between">
+                      <span className={cn(
+                        "text-sm font-extrabold uppercase tracking-widest px-3.5 py-1 rounded-full border",
+                        isDarkMode ? "text-indigo-400 bg-indigo-950/60 border-indigo-500/30" : "text-indigo-600 bg-indigo-50 border-indigo-200/80"
+                      )}>
+                        Step 02
+                      </span>
+                      <div className="w-12 h-12 rounded-2xl bg-indigo-600 text-white flex items-center justify-center shadow-lg shadow-indigo-600/20 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300">
+                        <Bot size={24} className="fill-white" />
+                      </div>
+                    </div>
+                    <div>
+                      <h3 className={cn("text-2xl font-black transition-colors mb-2", isDarkMode ? "text-white group-hover:text-indigo-400" : "text-slate-900 group-hover:text-emerald-700")}>
+                        AUTOMATE
+                      </h3>
+                      <p className={cn("text-sm font-medium leading-relaxed", isDarkMode ? "text-slate-400" : "text-slate-500")}>
+                        Create intelligent AI workflows that handle lead qualification, quotations, and repetitive replies automatically.
+                      </p>
+                    </div>
+
+                    {/* Connecting Pipeline Connector Arrow (Desktop) */}
+                    <div className={cn(
+                      "hidden md:flex absolute -right-6 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-indigo-600 text-white items-center justify-center shadow-lg shadow-indigo-600/30 group-hover:scale-125 transition-transform duration-300 border-2",
+                      isDarkMode ? "border-slate-900" : "border-white"
+                    )}>
+                      <ArrowRight size={18} />
+                    </div>
+                  </div>
+                </ScrollReveal>
+
+                {/* Step 03 */}
+                <ScrollReveal delay={450}>
+                  <div className={cn(
+                    "relative p-8 rounded-3xl border shadow-md hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group cursor-pointer text-left flex flex-col justify-between space-y-5 h-full",
+                    isDarkMode
+                      ? "bg-slate-950/80 border-slate-800 hover:border-emerald-500"
+                      : "bg-white border-slate-200/90 hover:border-emerald-500"
+                  )}>
+                    <div className="flex items-center justify-between">
+                      <span className={cn(
+                        "text-sm font-extrabold uppercase tracking-widest px-3.5 py-1 rounded-full border",
+                        isDarkMode ? "text-emerald-400 bg-emerald-950/60 border-emerald-500/30" : "text-emerald-600 bg-emerald-50 border-emerald-200/80"
+                      )}>
+                        Step 03
+                      </span>
+                      <div className="w-12 h-12 rounded-2xl bg-emerald-600 text-white flex items-center justify-center shadow-lg shadow-emerald-600/20 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300">
+                        <Sparkles size={24} className="fill-white" />
+                      </div>
+                    </div>
+                    <div>
+                      <h3 className={cn("text-2xl font-black transition-colors mb-2", isDarkMode ? "text-white group-hover:text-emerald-400" : "text-slate-900 group-hover:text-emerald-700")}>
+                        GROW
+                      </h3>
+                      <p className={cn("text-sm font-medium leading-relaxed", isDarkMode ? "text-slate-400" : "text-slate-500")}>
+                        Spend zero time switching between disconnected tools and focus on scaling your business revenue.
+                      </p>
+                    </div>
+                  </div>
+                </ScrollReveal>
+
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ════════════════════════════════════════════════════════════════ */}
+        {/* 9. REAL-WORLD AUTOMATION EXAMPLE - DYNAMIC SHOWCASE CARD */}
+        {/* ════════════════════════════════════════════════════════════════ */}
+        <section className={cn(
+          "relative py-24 w-full max-w-[1700px] mx-auto px-6 sm:px-12 lg:px-16 rounded-[2.5rem] my-12 shadow-2xl transition-all duration-500 border overflow-hidden",
+          isDarkMode
+            ? "bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white border-slate-800/80 hover:shadow-emerald-950/70"
+            : "bg-gradient-to-br from-slate-50 via-white to-emerald-50/50 text-slate-900 border-slate-200/90 shadow-emerald-500/5 hover:shadow-emerald-500/10"
+        )}>
+
+          {/* Ambient Glowing Gradient Orbs & Tech Dot Matrix Grid Background */}
+          <div className={cn(
+            "absolute -top-24 -left-24 w-96 h-96 rounded-full blur-[100px] pointer-events-none animate-pulse",
+            isDarkMode ? "bg-emerald-500/20" : "bg-emerald-500/10"
+          )} />
+          <div className={cn(
+            "absolute -bottom-24 -right-24 w-96 h-96 rounded-full blur-[100px] pointer-events-none animate-pulse",
+            isDarkMode ? "bg-indigo-500/20" : "bg-indigo-500/10"
+          )} />
+          <div className={cn(
+            "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full blur-[140px] pointer-events-none",
+            isDarkMode ? "bg-emerald-600/10" : "bg-emerald-500/5"
+          )} />
+          <div className={cn(
+            "absolute inset-0 bg-[radial-gradient(#059669_1px,transparent_1px)] [background-size:28px_28px] pointer-events-none",
+            isDarkMode ? "opacity-15" : "opacity-10"
+          )} />
+
+          <div className="relative z-10">
+            <div className="text-center space-y-4 mb-16">
+              <h2
+                className={cn(
+                  "text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight italic font-serif leading-tight drop-shadow-xs",
+                  isDarkMode ? "text-white" : "text-slate-900"
+                )}
+                style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
+              >
+                See Automation in Action
+              </h2>
+              <p className={cn(
+                "text-base sm:text-lg font-medium max-w-xl mx-auto",
+                isDarkMode ? "text-slate-400" : "text-slate-600"
+              )}>
+                Click any step to see how UWO Connect handles customer conversations automatically.
+              </p>
             </div>
 
-            {/* Right Side: LARGE DESCRIPTIVE SHOWCASE CARD */}
-            <div className={cn(
-              "lg:col-span-7 p-6 sm:p-8 rounded-3xl border shadow-2xl flex flex-col justify-between relative overflow-hidden min-h-[420px] transition-colors duration-300",
-              isDarkMode
-                ? "bg-slate-950 border-slate-800"
-                : "bg-white border-slate-200/90 shadow-slate-200/60"
-            )}>
-              {/* Top Bar */}
-              <div className={cn("flex items-center justify-between pb-4 border-b mb-4", isDarkMode ? "border-slate-800" : "border-slate-100")}>
-                <span className={cn(
-                  "px-3 py-1 rounded-full text-[10px] font-extrabold tracking-widest uppercase border",
-                  activeWorkflowTab === 0 && (isDarkMode ? "bg-[#25D366]/15 text-[#25D366] border-[#25D366]/40" : "bg-emerald-50 text-emerald-700 border-emerald-200"),
-                  activeWorkflowTab === 1 && (isDarkMode ? "bg-indigo-500/15 text-indigo-400 border-indigo-500/40" : "bg-indigo-50 text-indigo-700 border-indigo-200"),
-                  activeWorkflowTab === 2 && (isDarkMode ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/40" : "bg-teal-50 text-teal-700 border-teal-200"),
-                  activeWorkflowTab === 3 && (isDarkMode ? "bg-purple-500/15 text-purple-400 border-purple-500/40" : "bg-purple-50 text-purple-700 border-purple-200"),
-                  activeWorkflowTab === 4 && (isDarkMode ? "bg-amber-500/15 text-amber-400 border-amber-500/40" : "bg-amber-50 text-amber-700 border-amber-200"),
-                  activeWorkflowTab === 5 && (isDarkMode ? "bg-rose-500/15 text-rose-400 border-rose-500/40" : "bg-rose-50 text-rose-700 border-rose-200")
-                )}>
-                  Step 0{activeWorkflowTab + 1} Workflow Node
-                </span>
+            {/* Step-by-Step Interactive Playback & Large Showcase Card */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch max-w-6xl mx-auto text-left">
 
-                <span className={cn("text-[10px] font-mono flex items-center gap-1.5", isDarkMode ? "text-slate-400" : "text-slate-500")}>
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" /> LIVE SHOWCASE
-                </span>
+              {/* Left Side: 6 Interactive Step Options */}
+              <div className="lg:col-span-5 space-y-3 flex flex-col justify-center">
+                {[
+                  { title: 'Customer sends WhatsApp message', desc: '"Hi! I want to know the price of your product."' },
+                  { title: 'UWO Connect detects incoming conversation', desc: 'Channel message routed to Unified Engine' },
+                  { title: 'CRM Lead Created Automatically', desc: 'New contact record saved to lead pipeline' },
+                  { title: 'Auto Reply Dispatches Catalog', desc: 'Interactive catalog & PDF shared instantly' },
+                  { title: 'Quotation Automatically Prepared', desc: 'Quotation #QT-9482 created' },
+                  { title: 'Payment Link & Invoice Issued', desc: 'UPI payment link generated & GST Invoice saved' }
+                ].map((st, i) => (
+                  <div
+                    key={i}
+                    onClick={() => setActiveWorkflowTab(i)}
+                    className={cn(
+                      "p-4 sm:p-4.5 rounded-2xl border transition-all duration-300 cursor-pointer transform hover:translate-x-1.5 flex items-center justify-between",
+                      activeWorkflowTab === i
+                        ? (isDarkMode
+                          ? "bg-emerald-950/80 border-emerald-500 text-white shadow-lg shadow-emerald-500/20 scale-[1.02]"
+                          : "bg-emerald-50/90 border-emerald-500 text-emerald-950 shadow-lg shadow-emerald-500/15 scale-[1.02]")
+                        : (isDarkMode
+                          ? "bg-slate-800/50 border-slate-700/60 text-slate-400 hover:text-white hover:border-slate-600 hover:bg-slate-800/80"
+                          : "bg-white border-slate-200/90 text-slate-600 hover:text-slate-900 hover:border-emerald-300 hover:bg-slate-50/80 shadow-xs")
+                    )}
+                  >
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className={cn(
+                          "text-[10px] font-black px-2 py-0.5 rounded-md uppercase tracking-wider",
+                          activeWorkflowTab === i
+                            ? "bg-emerald-500 text-white"
+                            : (isDarkMode ? "bg-slate-700 text-slate-300" : "bg-slate-100 text-slate-700 border border-slate-200")
+                        )}>
+                          0{i + 1}
+                        </span>
+                        <h5 className={cn(
+                          "text-xs sm:text-sm font-bold",
+                          activeWorkflowTab === i
+                            ? (isDarkMode ? "text-white" : "text-emerald-950")
+                            : (isDarkMode ? "text-slate-300" : "text-slate-800")
+                        )}>{st.title}</h5>
+                      </div>
+                      <p className={cn(
+                        "text-[11px] mt-1 pl-7",
+                        activeWorkflowTab === i
+                          ? (isDarkMode ? "text-emerald-300" : "text-emerald-700")
+                          : (isDarkMode ? "text-slate-400" : "text-slate-500")
+                      )}>{st.desc}</p>
+                    </div>
+
+                    {activeWorkflowTab === i && (
+                      <CheckCircle2 size={18} className="text-emerald-500 shrink-0 ml-2 animate-pulse" />
+                    )}
+                  </div>
+                ))}
               </div>
 
-              {/* Dynamic Step Description Header */}
-              <div className="space-y-2 mb-6">
-                <h3 className={cn("text-xl sm:text-2xl font-black leading-tight", isDarkMode ? "text-white" : "text-slate-900")}>
-                  {[
-                    'Customer Sends WhatsApp Message',
-                    'UWO Connect Detects & Routes Message',
-                    'CRM Lead Created Automatically',
-                    'Auto Reply Dispatches Interactive Catalog',
-                    'Quotation Automatically Prepared',
-                    'Payment Link & Invoice Issued'
-                  ][activeWorkflowTab]}
-                </h3>
-                <p className={cn("text-xs font-medium leading-relaxed", isDarkMode ? "text-slate-400" : "text-slate-600")}>
-                  {[
-                    'Inbound customer query arrives via official WhatsApp Business API.',
-                    'AI Orchestration Engine analyzes intent, sentiment, and routes payload in 0.02 seconds.',
-                    'New customer contact and deal record created instantly without manual data entry.',
-                    'Personalized catalog, PDF brochure, and quick links sent back to customer WhatsApp.',
-                    'System generates official GST quotation PDF with items, discount, and taxes.',
-                    'UPI Payment link generated, payment verified, and final GST Invoice synced to Google Sheets.'
-                  ][activeWorkflowTab]}
+              {/* Right Side: LARGE DESCRIPTIVE SHOWCASE CARD */}
+              <div className={cn(
+                "lg:col-span-7 p-6 sm:p-8 rounded-3xl border shadow-2xl flex flex-col justify-between relative overflow-hidden min-h-[420px] transition-colors duration-300",
+                isDarkMode
+                  ? "bg-slate-950 border-slate-800"
+                  : "bg-white border-slate-200/90 shadow-slate-200/60"
+              )}>
+                {/* Top Bar */}
+                <div className={cn("flex items-center justify-between pb-4 border-b mb-4", isDarkMode ? "border-slate-800" : "border-slate-100")}>
+                  <span className={cn(
+                    "px-3 py-1 rounded-full text-[10px] font-extrabold tracking-widest uppercase border",
+                    activeWorkflowTab === 0 && (isDarkMode ? "bg-[#25D366]/15 text-[#25D366] border-[#25D366]/40" : "bg-emerald-50 text-emerald-700 border-emerald-200"),
+                    activeWorkflowTab === 1 && (isDarkMode ? "bg-indigo-500/15 text-indigo-400 border-indigo-500/40" : "bg-indigo-50 text-indigo-700 border-indigo-200"),
+                    activeWorkflowTab === 2 && (isDarkMode ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/40" : "bg-teal-50 text-teal-700 border-teal-200"),
+                    activeWorkflowTab === 3 && (isDarkMode ? "bg-purple-500/15 text-purple-400 border-purple-500/40" : "bg-purple-50 text-purple-700 border-purple-200"),
+                    activeWorkflowTab === 4 && (isDarkMode ? "bg-amber-500/15 text-amber-400 border-amber-500/40" : "bg-amber-50 text-amber-700 border-amber-200"),
+                    activeWorkflowTab === 5 && (isDarkMode ? "bg-rose-500/15 text-rose-400 border-rose-500/40" : "bg-rose-50 text-rose-700 border-rose-200")
+                  )}>
+                    Step 0{activeWorkflowTab + 1} Workflow Node
+                  </span>
+
+                  <span className={cn("text-[10px] font-mono flex items-center gap-1.5", isDarkMode ? "text-slate-400" : "text-slate-500")}>
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" /> LIVE SHOWCASE
+                  </span>
+                </div>
+
+                {/* Dynamic Step Description Header */}
+                <div className="space-y-2 mb-6">
+                  <h3 className={cn("text-xl sm:text-2xl font-black leading-tight", isDarkMode ? "text-white" : "text-slate-900")}>
+                    {[
+                      'Customer Sends WhatsApp Message',
+                      'UWO Connect Detects & Routes Message',
+                      'CRM Lead Created Automatically',
+                      'Auto Reply Dispatches Interactive Catalog',
+                      'Quotation Automatically Prepared',
+                      'Payment Link & Invoice Issued'
+                    ][activeWorkflowTab]}
+                  </h3>
+                  <p className={cn("text-xs font-medium leading-relaxed", isDarkMode ? "text-slate-400" : "text-slate-600")}>
+                    {[
+                      'Inbound customer query arrives via official WhatsApp Business API.',
+                      'AI Orchestration Engine analyzes intent, sentiment, and routes payload in 0.02 seconds.',
+                      'New customer contact and deal record created instantly without manual data entry.',
+                      'Personalized catalog, PDF brochure, and quick links sent back to customer WhatsApp.',
+                      'System generates official GST quotation PDF with items, discount, and taxes.',
+                      'UPI Payment link generated, payment verified, and final GST Invoice synced to Google Sheets.'
+                    ][activeWorkflowTab]}
+                  </p>
+                </div>
+
+                {/* Dynamic Live Mockup Visual Preview */}
+                <div className="flex-1">
+                  {activeWorkflowTab === 0 && (
+                    <div className={cn("p-4 rounded-2xl border space-y-3 text-left", isDarkMode ? "bg-slate-900 border-slate-800" : "bg-slate-50 border-slate-200")}>
+                      <div className={cn("flex items-center justify-between text-[11px] font-mono", isDarkMode ? "text-slate-400" : "text-slate-500")}>
+                        <span className="flex items-center gap-1.5 text-emerald-600 font-bold">
+                          <WhatsAppLogo size={16} /> WhatsApp Business API
+                        </span>
+                        <span>14:02 PM • Just Now</span>
+                      </div>
+                      <div className={cn("p-3.5 rounded-xl border text-xs leading-relaxed", isDarkMode ? "bg-emerald-950/60 border-emerald-500/30 text-emerald-100" : "bg-emerald-50 border-emerald-200 text-emerald-900")}>
+                        "Hi! I want to know the pricing and features of your UWO Connect Pro Plan."
+                      </div>
+                      <div className="grid grid-cols-2 gap-3 text-[11px]">
+                        <div className={cn("p-3 rounded-xl border space-y-1", isDarkMode ? "bg-slate-950 border-slate-800" : "bg-white border-slate-200 shadow-xs")}>
+                          <span className={cn("font-medium", isDarkMode ? "text-slate-500" : "text-slate-400")}>Customer Name</span>
+                          <p className={cn("font-bold", isDarkMode ? "text-slate-200" : "text-slate-900")}>Rahul Sharma</p>
+                        </div>
+                        <div className={cn("p-3 rounded-xl border space-y-1", isDarkMode ? "bg-slate-950 border-slate-800" : "bg-white border-slate-200 shadow-xs")}>
+                          <span className={cn("font-medium", isDarkMode ? "text-slate-500" : "text-slate-400")}>Phone Number</span>
+                          <p className={cn("font-bold", isDarkMode ? "text-slate-200" : "text-slate-900")}>+91 98765 43210</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {activeWorkflowTab === 1 && (
+                    <div className={cn("p-4 rounded-2xl border space-y-3 text-left font-mono text-xs", isDarkMode ? "bg-slate-900 border-indigo-500/30" : "bg-indigo-50/40 border-indigo-200")}>
+                      <div className="flex items-center justify-between">
+                        <span className={cn("font-bold flex items-center gap-1.5", isDarkMode ? "text-indigo-400" : "text-indigo-700")}><Bot size={16} /> AI Intent Analysis</span>
+                        <span className={cn("px-2 py-0.5 rounded text-[10px] font-bold", isDarkMode ? "bg-indigo-500/20 text-indigo-300" : "bg-indigo-100 text-indigo-700")}>99.8% Confidence</span>
+                      </div>
+                      <div className={cn("p-3.5 rounded-xl border text-[11px] leading-relaxed space-y-1", isDarkMode ? "bg-indigo-950/40 border-indigo-500/20 text-indigo-200" : "bg-white border-indigo-100 text-indigo-950 shadow-xs")}>
+                        <p>Detected Intent: <span className={cn("font-bold", isDarkMode ? "text-white" : "text-indigo-900")}>Pricing_Inquiry</span></p>
+                        <p>Extracted Channel: <span className={cn("font-bold", isDarkMode ? "text-white" : "text-indigo-900")}>WhatsApp_Inbound</span></p>
+                        <p>Priority Score: <span className="text-emerald-600 font-bold">98/100 (Hot Lead)</span></p>
+                      </div>
+                      <div className={cn("p-3 rounded-xl border text-[11px] flex items-center justify-between", isDarkMode ? "bg-slate-950 border-slate-800 text-slate-300" : "bg-white border-slate-200 text-slate-700 shadow-xs")}>
+                        <span>Target Route</span>
+                        <span className="text-emerald-600 font-bold">Sales & Quotation Engine</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {activeWorkflowTab === 2 && (
+                    <div className={cn("p-4 rounded-2xl border space-y-3 text-left", isDarkMode ? "bg-slate-900 border-emerald-500/30" : "bg-emerald-50/40 border-emerald-200")}>
+                      <div className="flex items-center justify-between">
+                        <span className={cn("font-bold text-xs flex items-center gap-1.5", isDarkMode ? "text-emerald-400" : "text-emerald-700")}><Users size={16} /> Unified CRM Record</span>
+                        <span className={cn("px-2 py-0.5 rounded text-[10px] font-bold", isDarkMode ? "bg-emerald-500/20 text-emerald-300" : "bg-emerald-100 text-emerald-800")}>Deal Stage: New Lead</span>
+                      </div>
+                      <div className="grid grid-cols-2 gap-3 text-xs">
+                        <div className={cn("p-3 rounded-xl border", isDarkMode ? "bg-slate-950 border-slate-800" : "bg-white border-slate-200 shadow-xs")}>
+                          <span className={cn("text-[10px]", isDarkMode ? "text-slate-500" : "text-slate-400")}>Contact</span>
+                          <p className={cn("font-bold", isDarkMode ? "text-white" : "text-slate-900")}>Rahul Sharma</p>
+                        </div>
+                        <div className={cn("p-3 rounded-xl border", isDarkMode ? "bg-slate-950 border-slate-800" : "bg-white border-slate-200 shadow-xs")}>
+                          <span className={cn("text-[10px]", isDarkMode ? "text-slate-500" : "text-slate-400")}>Source</span>
+                          <p className="font-bold text-emerald-600">WhatsApp Direct</p>
+                        </div>
+                      </div>
+                      <div className={cn("p-3 rounded-xl border text-[11px] flex items-center justify-between", isDarkMode ? "bg-slate-950 border-slate-800 text-slate-300" : "bg-white border-slate-200 text-slate-700 shadow-xs")}>
+                        <span>Assigned Sales Agent</span>
+                        <span className={cn("font-bold", isDarkMode ? "text-indigo-400" : "text-indigo-600")}>AI Assistant Core</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {activeWorkflowTab === 3 && (
+                    <div className={cn("p-4 rounded-2xl border space-y-3 text-left text-xs", isDarkMode ? "bg-slate-900 border-purple-500/30" : "bg-purple-50/40 border-purple-200")}>
+                      <div className="flex items-center justify-between">
+                        <span className={cn("font-bold flex items-center gap-1.5", isDarkMode ? "text-purple-400" : "text-purple-700")}><MessageSquare size={16} /> Automated Bot Reply</span>
+                        <span className={cn("text-[10px]", isDarkMode ? "text-slate-500" : "text-slate-400")}>Dispatched in 0.4s</span>
+                      </div>
+                      <div className={cn("p-3.5 rounded-xl border leading-relaxed text-[11px]", isDarkMode ? "bg-slate-950 border-slate-800 text-slate-200" : "bg-white border-slate-200 text-slate-800 shadow-xs")}>
+                        "Hello Rahul! 👋 Thanks for reaching out to UWO Connect. Here is our official product catalog and plan details."
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className={cn("px-3 py-2 rounded-xl border text-[11px] font-bold flex items-center gap-1.5", isDarkMode ? "bg-purple-600/30 text-purple-200 border-purple-500/40" : "bg-purple-100 text-purple-800 border-purple-200")}>
+                          📄 UWO_Connect_Catalog.pdf
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
+                  {activeWorkflowTab === 4 && (
+                    <div className={cn("p-4 rounded-2xl border space-y-3 text-left text-xs", isDarkMode ? "bg-slate-900 border-amber-500/30" : "bg-amber-50/40 border-amber-200")}>
+                      <div className="flex items-center justify-between">
+                        <span className={cn("font-bold flex items-center gap-1.5", isDarkMode ? "text-amber-400" : "text-amber-700")}><FileCheck size={16} /> Official Quotation #QT-9482</span>
+                        <span className={cn("px-2 py-0.5 rounded text-[10px] font-bold", isDarkMode ? "bg-amber-500/20 text-amber-300" : "bg-amber-100 text-amber-800")}>Status: Active</span>
+                      </div>
+                      <div className={cn("p-3.5 rounded-xl border space-y-2 text-[11px]", isDarkMode ? "bg-slate-950 border-slate-800" : "bg-white border-slate-200 shadow-xs")}>
+                        <div className={cn("flex justify-between", isDarkMode ? "text-slate-300" : "text-slate-700")}>
+                          <span>UWO Connect Pro Plan (12 Mo)</span>
+                          <span className="font-bold">₹49,999.00</span>
+                        </div>
+                        <div className={cn("flex justify-between text-[10px]", isDarkMode ? "text-slate-400" : "text-slate-500")}>
+                          <span>GST (18%)</span>
+                          <span>₹8,999.82</span>
+                        </div>
+                        <div className={cn("pt-2 border-t flex justify-between font-bold text-xs", isDarkMode ? "border-slate-800 text-white" : "border-slate-100 text-slate-900")}>
+                          <span>Total Amount</span>
+                          <span className={cn(isDarkMode ? "text-amber-400" : "text-amber-600")}>₹58,998.82</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {activeWorkflowTab === 5 && (
+                    <div className={cn("p-4 rounded-2xl border space-y-3 text-left text-xs", isDarkMode ? "bg-slate-900 border-rose-500/30" : "bg-rose-50/40 border-rose-200")}>
+                      <div className="flex items-center justify-between">
+                        <span className={cn("font-bold flex items-center gap-1.5", isDarkMode ? "text-rose-400" : "text-rose-700")}><Receipt size={16} /> GST Invoice #INV-2026-8812</span>
+                        <span className="px-2.5 py-0.5 rounded bg-emerald-500/20 text-emerald-700 font-bold text-[10px]">Paid via UPI</span>
+                      </div>
+                      <div className={cn("p-3.5 rounded-xl border space-y-2 text-[11px]", isDarkMode ? "bg-slate-950 border-slate-800" : "bg-white border-slate-200 shadow-xs")}>
+                        <div className={cn("flex items-center justify-between", isDarkMode ? "text-slate-300" : "text-slate-700")}>
+                          <span>UPI Payment Link</span>
+                          <span className={cn("font-bold", isDarkMode ? "text-rose-400" : "text-rose-600")}>pay.uwoconnect.com/qt9482</span>
+                        </div>
+                        <div className={cn("flex items-center justify-between text-[10px] font-mono pt-1 border-t", isDarkMode ? "border-slate-800 text-emerald-400" : "border-slate-100 text-emerald-600")}>
+                          <span>✓ Synced to Google Sheets & Tally</span>
+                          <span>0.2s</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Bottom Status Progress Indicator */}
+                <div className={cn("pt-4 border-t flex items-center justify-between text-[11px] font-mono mt-4", isDarkMode ? "border-slate-800 text-slate-400" : "border-slate-100 text-slate-500")}>
+                  <span>Status: <strong className="text-emerald-600">Node Active</strong></span>
+                  <span>Workflow Progress: <strong className={isDarkMode ? "text-white" : "text-slate-900"}>{Math.round(((activeWorkflowTab + 1) / 6) * 100)}%</strong></span>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </section>
+
+        {/* ════════════════════════════════════════════════════════════════ */}
+        {/* 10. UNIFIED WORKSPACE SECTION (CHAOS VS CONNECTED) */}
+        {/* ════════════════════════════════════════════════════════════════ */}
+        <section className={cn(
+          "relative py-20 px-6 sm:px-12 lg:px-16 w-full max-w-[1700px] mx-auto my-12 rounded-[2.5rem] border transition-colors duration-300 shadow-xl overflow-hidden",
+          isDarkMode
+            ? "bg-slate-900/80 border-slate-800 shadow-2xl shadow-emerald-950/20"
+            : "bg-gradient-to-br from-slate-50 via-white to-emerald-50/40 border-slate-200/90"
+        )}>
+
+          {/* Ambient Subtle Glow & Pattern */}
+          <div className="absolute -top-32 -right-32 w-80 h-80 bg-rose-500/10 rounded-full blur-[100px] pointer-events-none" />
+          <div className="absolute -bottom-32 -left-32 w-80 h-80 bg-emerald-500/10 rounded-full blur-[100px] pointer-events-none" />
+          <div className="absolute inset-0 bg-[radial-gradient(#059669_1px,transparent_1px)] [background-size:28px_28px] opacity-10 pointer-events-none" />
+
+          <div className="relative z-10">
+            <div className="text-center space-y-3 mb-12">
+              <h2
+                className={cn(
+                  "text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight italic font-serif",
+                  isDarkMode ? "text-white" : "text-slate-900"
+                )}
+                style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
+              >
+                Stop Switching Between Tools
+              </h2>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+
+              {/* WITHOUT UWO CONNECT */}
+              <div className={cn(
+                "p-8 rounded-3xl text-left space-y-4 transition-all duration-300 border",
+                isDarkMode
+                  ? "bg-rose-950/20 border-rose-900/40 hover:border-rose-700/70"
+                  : "bg-rose-50/60 border-rose-200 hover:border-rose-300 hover:shadow-lg"
+              )}>
+                <span className={cn(
+                  "px-3 py-1 text-xs font-black rounded-full inline-block border",
+                  isDarkMode ? "bg-rose-950/60 text-rose-300 border-rose-800/60" : "bg-rose-100 text-rose-800 border-transparent"
+                )}>
+                  Without UWO Connect
+                </span>
+                <h4 className={cn("text-xl font-bold font-serif italic", isDarkMode ? "text-white" : "text-slate-900")}>
+                  Disconnected Chaos
+                </h4>
+                <p className={cn("text-sm font-normal leading-relaxed", isDarkMode ? "text-slate-400" : "text-slate-600")}>
+                  10 browser tabs, manual copy-pasting, lost leads, delayed replies, and chaotic manual invoicing.
                 </p>
               </div>
 
-              {/* Dynamic Live Mockup Visual Preview */}
-              <div className="flex-1">
-                {activeWorkflowTab === 0 && (
-                  <div className={cn("p-4 rounded-2xl border space-y-3 text-left", isDarkMode ? "bg-slate-900 border-slate-800" : "bg-slate-50 border-slate-200")}>
-                    <div className={cn("flex items-center justify-between text-[11px] font-mono", isDarkMode ? "text-slate-400" : "text-slate-500")}>
-                      <span className="flex items-center gap-1.5 text-emerald-600 font-bold">
-                        <WhatsAppLogo size={16} /> WhatsApp Business API
-                      </span>
-                      <span>14:02 PM • Just Now</span>
-                    </div>
-                    <div className={cn("p-3.5 rounded-xl border text-xs leading-relaxed", isDarkMode ? "bg-emerald-950/60 border-emerald-500/30 text-emerald-100" : "bg-emerald-50 border-emerald-200 text-emerald-900")}>
-                      "Hi! I want to know the pricing and features of your UWO Connect Pro Plan."
-                    </div>
-                    <div className="grid grid-cols-2 gap-3 text-[11px]">
-                      <div className={cn("p-3 rounded-xl border space-y-1", isDarkMode ? "bg-slate-950 border-slate-800" : "bg-white border-slate-200 shadow-xs")}>
-                        <span className={cn("font-medium", isDarkMode ? "text-slate-500" : "text-slate-400")}>Customer Name</span>
-                        <p className={cn("font-bold", isDarkMode ? "text-slate-200" : "text-slate-900")}>Rahul Sharma</p>
-                      </div>
-                      <div className={cn("p-3 rounded-xl border space-y-1", isDarkMode ? "bg-slate-950 border-slate-800" : "bg-white border-slate-200 shadow-xs")}>
-                        <span className={cn("font-medium", isDarkMode ? "text-slate-500" : "text-slate-400")}>Phone Number</span>
-                        <p className={cn("font-bold", isDarkMode ? "text-slate-200" : "text-slate-900")}>+91 98765 43210</p>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {activeWorkflowTab === 1 && (
-                  <div className={cn("p-4 rounded-2xl border space-y-3 text-left font-mono text-xs", isDarkMode ? "bg-slate-900 border-indigo-500/30" : "bg-indigo-50/40 border-indigo-200")}>
-                    <div className="flex items-center justify-between">
-                      <span className={cn("font-bold flex items-center gap-1.5", isDarkMode ? "text-indigo-400" : "text-indigo-700")}><Bot size={16} /> AI Intent Analysis</span>
-                      <span className={cn("px-2 py-0.5 rounded text-[10px] font-bold", isDarkMode ? "bg-indigo-500/20 text-indigo-300" : "bg-indigo-100 text-indigo-700")}>99.8% Confidence</span>
-                    </div>
-                    <div className={cn("p-3.5 rounded-xl border text-[11px] leading-relaxed space-y-1", isDarkMode ? "bg-indigo-950/40 border-indigo-500/20 text-indigo-200" : "bg-white border-indigo-100 text-indigo-950 shadow-xs")}>
-                      <p>Detected Intent: <span className={cn("font-bold", isDarkMode ? "text-white" : "text-indigo-900")}>Pricing_Inquiry</span></p>
-                      <p>Extracted Channel: <span className={cn("font-bold", isDarkMode ? "text-white" : "text-indigo-900")}>WhatsApp_Inbound</span></p>
-                      <p>Priority Score: <span className="text-emerald-600 font-bold">98/100 (Hot Lead)</span></p>
-                    </div>
-                    <div className={cn("p-3 rounded-xl border text-[11px] flex items-center justify-between", isDarkMode ? "bg-slate-950 border-slate-800 text-slate-300" : "bg-white border-slate-200 text-slate-700 shadow-xs")}>
-                      <span>Target Route</span>
-                      <span className="text-emerald-600 font-bold">Sales & Quotation Engine</span>
-                    </div>
-                  </div>
-                )}
-
-                {activeWorkflowTab === 2 && (
-                  <div className={cn("p-4 rounded-2xl border space-y-3 text-left", isDarkMode ? "bg-slate-900 border-emerald-500/30" : "bg-emerald-50/40 border-emerald-200")}>
-                    <div className="flex items-center justify-between">
-                      <span className={cn("font-bold text-xs flex items-center gap-1.5", isDarkMode ? "text-emerald-400" : "text-emerald-700")}><Users size={16} /> Unified CRM Record</span>
-                      <span className={cn("px-2 py-0.5 rounded text-[10px] font-bold", isDarkMode ? "bg-emerald-500/20 text-emerald-300" : "bg-emerald-100 text-emerald-800")}>Deal Stage: New Lead</span>
-                    </div>
-                    <div className="grid grid-cols-2 gap-3 text-xs">
-                      <div className={cn("p-3 rounded-xl border", isDarkMode ? "bg-slate-950 border-slate-800" : "bg-white border-slate-200 shadow-xs")}>
-                        <span className={cn("text-[10px]", isDarkMode ? "text-slate-500" : "text-slate-400")}>Contact</span>
-                        <p className={cn("font-bold", isDarkMode ? "text-white" : "text-slate-900")}>Rahul Sharma</p>
-                      </div>
-                      <div className={cn("p-3 rounded-xl border", isDarkMode ? "bg-slate-950 border-slate-800" : "bg-white border-slate-200 shadow-xs")}>
-                        <span className={cn("text-[10px]", isDarkMode ? "text-slate-500" : "text-slate-400")}>Source</span>
-                        <p className="font-bold text-emerald-600">WhatsApp Direct</p>
-                      </div>
-                    </div>
-                    <div className={cn("p-3 rounded-xl border text-[11px] flex items-center justify-between", isDarkMode ? "bg-slate-950 border-slate-800 text-slate-300" : "bg-white border-slate-200 text-slate-700 shadow-xs")}>
-                      <span>Assigned Sales Agent</span>
-                      <span className={cn("font-bold", isDarkMode ? "text-indigo-400" : "text-indigo-600")}>AI Assistant Core</span>
-                    </div>
-                  </div>
-                )}
-
-                {activeWorkflowTab === 3 && (
-                  <div className={cn("p-4 rounded-2xl border space-y-3 text-left text-xs", isDarkMode ? "bg-slate-900 border-purple-500/30" : "bg-purple-50/40 border-purple-200")}>
-                    <div className="flex items-center justify-between">
-                      <span className={cn("font-bold flex items-center gap-1.5", isDarkMode ? "text-purple-400" : "text-purple-700")}><MessageSquare size={16} /> Automated Bot Reply</span>
-                      <span className={cn("text-[10px]", isDarkMode ? "text-slate-500" : "text-slate-400")}>Dispatched in 0.4s</span>
-                    </div>
-                    <div className={cn("p-3.5 rounded-xl border leading-relaxed text-[11px]", isDarkMode ? "bg-slate-950 border-slate-800 text-slate-200" : "bg-white border-slate-200 text-slate-800 shadow-xs")}>
-                      "Hello Rahul! 👋 Thanks for reaching out to UWO Connect. Here is our official product catalog and plan details."
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className={cn("px-3 py-2 rounded-xl border text-[11px] font-bold flex items-center gap-1.5", isDarkMode ? "bg-purple-600/30 text-purple-200 border-purple-500/40" : "bg-purple-100 text-purple-800 border-purple-200")}>
-                        📄 UWO_Connect_Catalog.pdf
-                      </span>
-                    </div>
-                  </div>
-                )}
-
-                {activeWorkflowTab === 4 && (
-                  <div className={cn("p-4 rounded-2xl border space-y-3 text-left text-xs", isDarkMode ? "bg-slate-900 border-amber-500/30" : "bg-amber-50/40 border-amber-200")}>
-                    <div className="flex items-center justify-between">
-                      <span className={cn("font-bold flex items-center gap-1.5", isDarkMode ? "text-amber-400" : "text-amber-700")}><FileCheck size={16} /> Official Quotation #QT-9482</span>
-                      <span className={cn("px-2 py-0.5 rounded text-[10px] font-bold", isDarkMode ? "bg-amber-500/20 text-amber-300" : "bg-amber-100 text-amber-800")}>Status: Active</span>
-                    </div>
-                    <div className={cn("p-3.5 rounded-xl border space-y-2 text-[11px]", isDarkMode ? "bg-slate-950 border-slate-800" : "bg-white border-slate-200 shadow-xs")}>
-                      <div className={cn("flex justify-between", isDarkMode ? "text-slate-300" : "text-slate-700")}>
-                        <span>UWO Connect Pro Plan (12 Mo)</span>
-                        <span className="font-bold">₹49,999.00</span>
-                      </div>
-                      <div className={cn("flex justify-between text-[10px]", isDarkMode ? "text-slate-400" : "text-slate-500")}>
-                        <span>GST (18%)</span>
-                        <span>₹8,999.82</span>
-                      </div>
-                      <div className={cn("pt-2 border-t flex justify-between font-bold text-xs", isDarkMode ? "border-slate-800 text-white" : "border-slate-100 text-slate-900")}>
-                        <span>Total Amount</span>
-                        <span className={cn(isDarkMode ? "text-amber-400" : "text-amber-600")}>₹58,998.82</span>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {activeWorkflowTab === 5 && (
-                  <div className={cn("p-4 rounded-2xl border space-y-3 text-left text-xs", isDarkMode ? "bg-slate-900 border-rose-500/30" : "bg-rose-50/40 border-rose-200")}>
-                    <div className="flex items-center justify-between">
-                      <span className={cn("font-bold flex items-center gap-1.5", isDarkMode ? "text-rose-400" : "text-rose-700")}><Receipt size={16} /> GST Invoice #INV-2026-8812</span>
-                      <span className="px-2.5 py-0.5 rounded bg-emerald-500/20 text-emerald-700 font-bold text-[10px]">Paid via UPI</span>
-                    </div>
-                    <div className={cn("p-3.5 rounded-xl border space-y-2 text-[11px]", isDarkMode ? "bg-slate-950 border-slate-800" : "bg-white border-slate-200 shadow-xs")}>
-                      <div className={cn("flex items-center justify-between", isDarkMode ? "text-slate-300" : "text-slate-700")}>
-                        <span>UPI Payment Link</span>
-                        <span className={cn("font-bold", isDarkMode ? "text-rose-400" : "text-rose-600")}>pay.uwoconnect.com/qt9482</span>
-                      </div>
-                      <div className={cn("flex items-center justify-between text-[10px] font-mono pt-1 border-t", isDarkMode ? "border-slate-800 text-emerald-400" : "border-slate-100 text-emerald-600")}>
-                        <span>✓ Synced to Google Sheets & Tally</span>
-                        <span>0.2s</span>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Bottom Status Progress Indicator */}
-              <div className={cn("pt-4 border-t flex items-center justify-between text-[11px] font-mono mt-4", isDarkMode ? "border-slate-800 text-slate-400" : "border-slate-100 text-slate-500")}>
-                <span>Status: <strong className="text-emerald-600">Node Active</strong></span>
-                <span>Workflow Progress: <strong className={isDarkMode ? "text-white" : "text-slate-900"}>{Math.round(((activeWorkflowTab + 1) / 6) * 100)}%</strong></span>
-              </div>
-            </div>
-
-          </div>
-        </div>
-      </section>
-
-      {/* ════════════════════════════════════════════════════════════════ */}
-      {/* 10. UNIFIED WORKSPACE SECTION (CHAOS VS CONNECTED) */}
-      {/* ════════════════════════════════════════════════════════════════ */}
-      <section className={cn(
-        "relative py-20 px-6 sm:px-12 lg:px-16 w-full max-w-[1700px] mx-auto my-12 rounded-[2.5rem] border transition-colors duration-300 shadow-xl overflow-hidden",
-        isDarkMode
-          ? "bg-slate-900/80 border-slate-800 shadow-2xl shadow-emerald-950/20"
-          : "bg-gradient-to-br from-slate-50 via-white to-emerald-50/40 border-slate-200/90"
-      )}>
-
-        {/* Ambient Subtle Glow & Pattern */}
-        <div className="absolute -top-32 -right-32 w-80 h-80 bg-rose-500/10 rounded-full blur-[100px] pointer-events-none" />
-        <div className="absolute -bottom-32 -left-32 w-80 h-80 bg-emerald-500/10 rounded-full blur-[100px] pointer-events-none" />
-        <div className="absolute inset-0 bg-[radial-gradient(#059669_1px,transparent_1px)] [background-size:28px_28px] opacity-10 pointer-events-none" />
-
-        <div className="relative z-10">
-          <div className="text-center space-y-3 mb-12">
-            <h2
-              className={cn(
-                "text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight italic font-serif",
-                isDarkMode ? "text-white" : "text-slate-900"
-              )}
-              style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
-            >
-              Stop Switching Between Tools
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-
-            {/* WITHOUT UWO CONNECT */}
-            <div className={cn(
-              "p-8 rounded-3xl text-left space-y-4 transition-all duration-300 border",
-              isDarkMode
-                ? "bg-rose-950/20 border-rose-900/40 hover:border-rose-700/70"
-                : "bg-rose-50/60 border-rose-200 hover:border-rose-300 hover:shadow-lg"
-            )}>
-              <span className={cn(
-                "px-3 py-1 text-xs font-black rounded-full inline-block border",
-                isDarkMode ? "bg-rose-950/60 text-rose-300 border-rose-800/60" : "bg-rose-100 text-rose-800 border-transparent"
+              {/* WITH UWO CONNECT */}
+              <div className={cn(
+                "p-8 rounded-3xl text-left space-y-4 landing-card-hover transition-all duration-300 border",
+                isDarkMode
+                  ? "bg-emerald-950/20 border-emerald-900/40 hover:border-emerald-600/70"
+                  : "bg-emerald-50/60 border-emerald-200 hover:border-emerald-300 hover:shadow-lg"
               )}>
-                Without UWO Connect
-              </span>
-              <h4 className={cn("text-xl font-bold font-serif italic", isDarkMode ? "text-white" : "text-slate-900")}>
-                Disconnected Chaos
-              </h4>
-              <p className={cn("text-sm font-normal leading-relaxed", isDarkMode ? "text-slate-400" : "text-slate-600")}>
-                10 browser tabs, manual copy-pasting, lost leads, delayed replies, and chaotic manual invoicing.
-              </p>
-            </div>
-
-            {/* WITH UWO CONNECT */}
-            <div className={cn(
-              "p-8 rounded-3xl text-left space-y-4 landing-card-hover transition-all duration-300 border",
-              isDarkMode
-                ? "bg-emerald-950/20 border-emerald-900/40 hover:border-emerald-600/70"
-                : "bg-emerald-50/60 border-emerald-200 hover:border-emerald-300 hover:shadow-lg"
-            )}>
-              <span className={cn(
-                "px-3 py-1 text-xs font-black rounded-full inline-block border",
-                isDarkMode ? "bg-emerald-950/60 text-emerald-300 border-emerald-800/60" : "bg-emerald-100 text-emerald-800 border-transparent"
-              )}>
-                With UWO Connect
-              </span>
-              <h4 className={cn("text-xl font-bold font-serif italic", isDarkMode ? "text-white" : "text-slate-900")}>
-                One Clean Central Workspace
-              </h4>
-              <p className={cn("text-sm font-normal leading-relaxed", isDarkMode ? "text-slate-400" : "text-slate-600")}>
-                Messages, Leads, Documents, Quotations, Payments, and Invoices automatically synced in real time.
-              </p>
-            </div>
-
-          </div>
-        </div>
-      </section>
-
-      {/* ════════════════════════════════════════════════════════════════ */}
-      {/* 11. FEATURE SHOWCASE - SINGLE DYNAMIC CARD WITH ZERO WHITE SPACE GAP */}
-      {/* ════════════════════════════════════════════════════════════════ */}
-      <section
-        onWheel={(e) => {
-          if (e.deltaY > 0 && activeModuleIndex < 8) {
-            e.preventDefault();
-            setActiveModuleIndex(prev => Math.min(8, prev + 1));
-          } else if (e.deltaY < 0 && activeModuleIndex > 0) {
-            e.preventDefault();
-            setActiveModuleIndex(prev => Math.max(0, prev - 1));
-          }
-        }}
-        className="relative py-12 sm:py-16 px-6 sm:px-12 lg:px-16 w-full max-w-[1700px] mx-auto my-6"
-      >
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-stretch">
-
-          {/* Left Column: HEADING & 4-OPTION SLIDING WINDOW */}
-          <div className="lg:col-span-5 flex flex-col justify-between space-y-6 text-left h-full">
-            <div className="space-y-4">
-              <h2
-                className={cn("text-4xl sm:text-5xl font-bold tracking-tight italic font-serif leading-[1.15]", isDarkMode ? "text-white" : "text-slate-900")}
-                style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
-              >
-                Everything You Need to Run Smarter
-              </h2>
-
-              <p className={cn("text-sm sm:text-base font-medium leading-relaxed max-w-md", isDarkMode ? "text-slate-400" : "text-slate-600")}>
-                9 powerful business engines built natively into your unified workspace. Scroll down to explore each module.
-              </p>
-
-              {/* 4-Item Window Selector (Shows ONLY 4 OPTIONS AT A TIME) */}
-              <div className={cn("grid grid-cols-1 gap-2.5 pt-3 border-t max-w-xs transition-all duration-300", isDarkMode ? "border-slate-800" : "border-slate-200/80")}>
-                {(() => {
-                  const allOptions = [
-                    { num: '01', title: 'Team Dashboard', index: 0 },
-                    { num: '02', title: 'Unified CRM', index: 1 },
-                    { num: '03', title: 'Smart AI Auto Reply', index: 2 },
-                    { num: '04', title: 'Quotation Generator', index: 3 },
-                    { num: '05', title: 'GST Invoicing Engine', index: 4 },
-                    { num: '06', title: 'Proposal & Deals', index: 5 },
-                    { num: '07', title: 'Product Catalog', index: 6 },
-                    { num: '08', title: 'Payment Integration', index: 7 },
-                    { num: '09', title: 'Voice & Video Calling', index: 8 },
-                  ];
-
-                  const startIndex = Math.min(Math.max(0, activeModuleIndex - 1), 5);
-                  const visibleList = allOptions.slice(startIndex, startIndex + 4);
-
-                  return visibleList.map((item) => {
-                    const isActive = item.index === activeModuleIndex;
-
-                    return (
-                      <button
-                        key={item.index}
-                        onClick={() => setActiveModuleIndex(item.index)}
-                        className={cn(
-                          "flex items-center gap-2.5 text-xs font-bold transition-all duration-300 rounded-xl border px-3.5 py-2.5 text-left cursor-pointer",
-                          isActive
-                            ? "bg-[#059669] text-white border-emerald-600 shadow-lg shadow-emerald-600/25 translate-x-2 font-extrabold scale-[1.02]"
-                            : (isDarkMode
-                              ? "bg-slate-900/80 border-slate-800 text-slate-300 hover:text-white hover:bg-slate-800"
-                              : "bg-slate-50/80 border-slate-200/70 text-slate-600 hover:text-emerald-700 hover:bg-emerald-50/60")
-                        )}
-                      >
-                        <span className={cn("w-2 h-2 rounded-full shrink-0 transition-colors", isActive ? "bg-white animate-ping" : "bg-emerald-500/50")} />
-                        <span className="truncate">{item.num}. {item.title}</span>
-                      </button>
-                    );
-                  });
-                })()}
-              </div>
-            </div>
-
-            <div className="pt-2">
-              <button
-                onClick={() => router.push('/auth/login')}
-                className="landing-button-glow px-6 py-3.5 rounded-2xl bg-[#059669] hover:bg-[#047857] text-white text-xs font-extrabold shadow-lg shadow-emerald-700/20 flex items-center gap-2 transition-all cursor-pointer"
-              >
-                <span>Get Started Free</span>
-                <ArrowRight size={16} />
-              </button>
-            </div>
-          </div>
-
-          {/* Right Column: SINGLE DISPLAY CARD WITH EXACT SAME HEIGHT AS LEFT COLUMN */}
-          <div className="lg:col-span-7 flex">
-            {(() => {
-              const modulesList = [
-                {
-                  num: '01',
-                  icon: <LayoutDashboard size={26} />,
-                  title: 'Team Dashboard',
-                  desc: 'Keep team tasks, channel feeds, and automated business activity organized in one central hub with real-time updates and live activity monitoring.',
-                  tag: 'CORE ENGINE',
-                  tagStyle: 'bg-emerald-500/10 text-emerald-700 border-emerald-500/30',
-                  iconBg: 'bg-gradient-to-br from-emerald-500 to-teal-600 shadow-emerald-500/20',
-                  features: ['Multi-user Team Permissions', 'Real-time Feed Sync', 'Role-Based Access'],
-                  previewText: '🚀 Active Sessions: 14 Agents Online • 2,480 Automation Events Processed Today • 0 Pending Escalations'
-                },
-                {
-                  num: '02',
-                  icon: <Users size={26} />,
-                  title: 'Unified CRM',
-                  desc: 'Auto-capture customer leads from WhatsApp, Instagram DMs, and contact forms directly into visual sales pipeline stages with smart tags.',
-                  tag: 'SALES PIPELINE',
-                  tagStyle: 'bg-teal-500/10 text-teal-700 border-teal-500/30',
-                  iconBg: 'bg-gradient-to-br from-teal-500 to-emerald-600 shadow-teal-500/20',
-                  features: ['Automated Lead Scoring', 'Custom Deal Pipeline', 'Contact History Log'],
-                  previewText: '👤 New Lead Captured: Rohan Sharma (+91 98765-XXXX) → Tagged as "High Intent Enterprise" → Moved to Stage: Proposal Sent'
-                },
-                {
-                  num: '03',
-                  icon: <Bot size={26} />,
-                  title: 'Smart AI Auto Reply',
-                  desc: 'Instant 24/7 customer response bot with intelligent catalog lookup, FAQs resolution, and automated lead qualification without human delay.',
-                  tag: '24/7 AI AGENT',
-                  tagStyle: 'bg-indigo-500/10 text-indigo-700 border-indigo-500/30',
-                  iconBg: 'bg-gradient-to-br from-indigo-500 to-purple-600 shadow-indigo-500/20',
-                  features: ['0.2s Instant Dispatch', 'Multi-lingual Understanding', 'Human Handover Mode'],
-                  previewText: '💬 Customer: "Do you offer GST invoices for enterprise plans?" → AI Bot (0.2s): "Yes! GST tax invoices are generated automatically."'
-                },
-                {
-                  num: '04',
-                  icon: <FileCheck size={26} />,
-                  title: 'Quotation Generator',
-                  desc: 'Create, customize, and dispatch professional PDF GST quotations directly to customer chat conversations in seconds.',
-                  tag: 'INSTANT PDF',
-                  tagStyle: 'bg-amber-500/10 text-amber-800 border-amber-500/30',
-                  iconBg: 'bg-gradient-to-br from-amber-500 to-orange-600 shadow-amber-500/20',
-                  features: ['GST & HSN Tax Calculation', 'Dynamic Discounting', 'Instant WhatsApp Share'],
-                  previewText: '📄 Generated Quotation #QT-2026-8890 for ₹45,000 + 18% GST → Auto-dispatched as PDF to WhatsApp chat.'
-                },
-                {
-                  num: '05',
-                  icon: <Receipt size={26} />,
-                  title: 'GST Invoicing Engine',
-                  desc: 'Generate official GST tax invoices automatically upon successful payment and sync records directly to Google Sheets & Tally.',
-                  tag: 'TAX & ACCOUNTING',
-                  tagStyle: 'bg-emerald-500/10 text-emerald-700 border-emerald-500/30',
-                  iconBg: 'bg-gradient-to-br from-emerald-600 to-green-600 shadow-emerald-500/20',
-                  features: ['Automatic PDF Issuance', 'Google Sheets & Tally Sync', 'Tax Audit Compliance'],
-                  previewText: '🧾 Invoice #INV-8910 Issued • Amount: ₹53,100 Incl. GST • Auto-synced to Google Sheets Row #1,420 & Tally ERP'
-                },
-                {
-                  num: '06',
-                  icon: <FileText size={26} />,
-                  title: 'Proposal & Deals',
-                  desc: 'Design high-converting business proposals with custom pricing tables, e-signature links, and real-time open notifications.',
-                  tag: 'CONTRACTS',
-                  tagStyle: 'bg-purple-500/10 text-purple-700 border-purple-500/30',
-                  iconBg: 'bg-gradient-to-br from-purple-500 to-indigo-600 shadow-purple-500/20',
-                  features: ['Real-time View Tracking', 'E-Signature Ready', 'Interactive Pricing Tables'],
-                  previewText: '🔔 Notification: Client opened Proposal "Enterprise Automation Suite v2" (Spent 4 mins 12 secs viewing pricing section)'
-                },
-                {
-                  num: '07',
-                  icon: <ShoppingBag size={26} />,
-                  title: 'Product & Service Catalog',
-                  desc: 'Present digital product catalogs with rich images, descriptions, pricing, and 1-click WhatsApp order checkout links.',
-                  tag: 'E-COMMERCE',
-                  tagStyle: 'bg-cyan-500/10 text-cyan-700 border-cyan-500/30',
-                  iconBg: 'bg-gradient-to-br from-cyan-500 to-blue-600 shadow-cyan-500/20',
-                  features: ['Interactive Category Grid', '1-Click WhatsApp Cart', 'Live Stock Sync'],
-                  previewText: '🛍️ Catalog Link Dispatched → Customer selected 2 Items (Total ₹12,499) → Checkout initiated via WhatsApp'
-                },
-                {
-                  num: '08',
-                  icon: <CreditCard size={26} />,
-                  title: 'Payment Integration',
-                  desc: 'Connect Razorpay, PhonePe, and UPI payment actions directly into your business chat workflow for 0-friction sales.',
-                  tag: 'RAZORPAY UPI',
-                  tagStyle: 'bg-rose-500/10 text-rose-700 border-rose-500/30',
-                  iconBg: 'bg-gradient-to-br from-rose-500 to-red-600 shadow-rose-500/20',
-                  features: ['Native UPI Link Dispatch', 'Instant Payment Verification', 'Auto Webhook Triggers'],
-                  previewText: '💳 Payment Link Generated via Razorpay UPI → Webhook Received: Payment Verified ₹12,499 → Order Confirmed!'
-                },
-                {
-                  num: '09',
-                  icon: <Video size={26} />,
-                  title: 'Voice & Video Calling',
-                  desc: 'Engage high-intent customers through crystal-clear HD WebRTC voice and video calls directly inside the web browser without any download.',
-                  tag: 'LIVE MEDIA',
-                  tagStyle: 'bg-blue-500/10 text-blue-700 border-blue-500/30',
-                  iconBg: 'bg-gradient-to-br from-blue-500 to-indigo-600 shadow-blue-500/20',
-                  features: ['In-Browser HD Video', 'Call Recording Logs', 'Screen Share Support'],
-                  previewText: '📞 In-Browser WebRTC Call Connected • Duration: 12m 45s • Audio Quality: 1080p Crystal Clear • Call Log Saved to Lead Profile'
-                },
-              ];
-
-              const currentModule = modulesList[activeModuleIndex] || modulesList[0];
-
-              return (
-                <div key={activeModuleIndex} className={cn(
-                  "p-7 sm:p-8 rounded-[2.5rem] border shadow-2xl relative overflow-hidden text-left transition-all duration-500 flex flex-col justify-between w-full h-full",
-                  isDarkMode ? "bg-slate-900/90 border-slate-800 text-white shadow-emerald-950/20" : "bg-white border-slate-200/90 shadow-emerald-900/5 text-slate-900"
+                <span className={cn(
+                  "px-3 py-1 text-xs font-black rounded-full inline-block border",
+                  isDarkMode ? "bg-emerald-950/60 text-emerald-300 border-emerald-800/60" : "bg-emerald-100 text-emerald-800 border-transparent"
                 )}>
-
-                  {/* Top Accent Gradient Line */}
-                  <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600" />
-
-                  <div className="space-y-5">
-                    {/* Header Row */}
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3.5">
-                        <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-emerald-500/20", currentModule.iconBg)}>
-                          {currentModule.icon}
-                        </div>
-                        <div>
-                          <span className="text-[11px] font-black text-slate-400 tracking-widest uppercase">MODULE {currentModule.num} OF 09</span>
-                          <h3
-                            className={cn("text-2xl sm:text-3xl font-bold leading-tight italic font-serif", isDarkMode ? "text-white" : "text-slate-900")}
-                            style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
-                          >
-                            {currentModule.title}
-                          </h3>
-                        </div>
-                      </div>
-
-                      <span className={cn("px-3 py-1 rounded-full text-[11px] font-extrabold tracking-wider uppercase border hidden sm:inline-block", currentModule.tagStyle)}>
-                        {currentModule.tag}
-                      </span>
-                    </div>
-
-                    <p className={cn("text-sm font-medium leading-relaxed", isDarkMode ? "text-slate-300" : "text-slate-600")}>
-                      {currentModule.desc}
-                    </p>
-
-                    {/* Sub Features Grid */}
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-1">
-                      {currentModule.features.map((ft, fi) => (
-                        <div
-                          key={fi}
-                          className={cn(
-                            "p-2.5 rounded-xl border text-[11px] font-bold flex items-center gap-1.5",
-                            isDarkMode
-                              ? "bg-emerald-950/40 border-emerald-800/60 text-emerald-300"
-                              : "bg-emerald-50/70 border-emerald-200/80 text-emerald-900"
-                          )}
-                        >
-                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
-                          <span className="truncate">{ft}</span>
-                        </div>
-                      ))}
-                    </div>
-
-                    {/* Interactive Live Preview Mockup Box */}
-                    <div className="p-5 rounded-2xl bg-slate-950 text-white space-y-2.5 border border-slate-800 shadow-inner mt-2">
-                      <div className="flex items-center justify-between text-[11px] text-slate-400 font-mono border-b border-slate-800/80 pb-1.5">
-                        <span className="flex items-center gap-1.5 text-emerald-400 font-bold">
-                          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                          LIVE ENGINE LOG
-                        </span>
-                        <span>UWO CONNECT WORKSPACE</span>
-                      </div>
-                      <div className="text-xs font-medium text-slate-300 leading-relaxed font-mono">
-                        {currentModule.previewText}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Navigation Controls */}
-                  <div className={cn("pt-3 border-t flex items-center justify-between mt-4", isDarkMode ? "border-slate-800" : "border-slate-100")}>
-                    <div className="flex items-center gap-1.5">
-                      {modulesList.map((_, dotIdx) => (
-                        <button
-                          key={dotIdx}
-                          onClick={() => setActiveModuleIndex(dotIdx)}
-                          className={cn(
-                            "h-2 rounded-full transition-all duration-300 cursor-pointer",
-                            dotIdx === activeModuleIndex
-                              ? "w-8 bg-[#059669]"
-                              : (isDarkMode ? "w-2 bg-slate-700 hover:bg-slate-600" : "w-2 bg-slate-200 hover:bg-slate-300")
-                          )}
-                        />
-                      ))}
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => setActiveModuleIndex(prev => (prev > 0 ? prev - 1 : 8))}
-                        className={cn(
-                          "p-2 rounded-xl border transition-colors cursor-pointer",
-                          isDarkMode
-                            ? "border-slate-800 hover:bg-slate-800 text-slate-300"
-                            : "border-slate-200 hover:bg-slate-100 text-slate-700"
-                        )}
-                      >
-                        <ChevronLeft size={16} />
-                      </button>
-                      <button
-                        onClick={() => setActiveModuleIndex(prev => (prev < 8 ? prev + 1 : 0))}
-                        className={cn(
-                          "p-2 rounded-xl border transition-colors cursor-pointer",
-                          isDarkMode
-                            ? "border-slate-800 hover:bg-slate-800 text-slate-300"
-                            : "border-slate-200 hover:bg-slate-100 text-slate-700"
-                        )}
-                      >
-                        <ChevronRight size={16} />
-                      </button>
-                    </div>
-                  </div>
-
-                </div>
-              );
-            })()}
-          </div>
-
-        </div>
-      </section>
-
-      {/* ════════════════════════════════════════════════════════════════ */}
-      {/* 11.5 PRICING & SUBSCRIPTION PLANS */}
-      {/* ════════════════════════════════════════════════════════════════ */}
-      <section id="pricing" className={cn(
-        "relative py-20 px-6 sm:px-12 lg:px-16 w-full max-w-[1700px] mx-auto my-16 text-center rounded-[2.5rem] border transition-all duration-300 overflow-hidden",
-        isDarkMode ? "bg-slate-900/80 border-slate-800 text-white shadow-2xl" : "bg-gradient-to-br from-slate-50/90 via-white to-emerald-50/50 border-slate-200/90 shadow-xl"
-      )}>
-
-        {/* Ambient Glows */}
-        <div className="absolute -top-32 -left-32 w-80 h-80 bg-emerald-500/10 rounded-full blur-[100px] pointer-events-none" />
-        <div className="absolute -bottom-32 -right-32 w-80 h-80 bg-teal-500/10 rounded-full blur-[100px] pointer-events-none" />
-        <div className="absolute inset-0 bg-[radial-gradient(#059669_1px,transparent_1px)] [background-size:28px_28px] opacity-10 pointer-events-none" />
-
-        <div className="relative z-10 space-y-8">
-          <PricingComparisonTable onSelectPlan={() => router.push('/auth/login')} dark={isDarkMode} />
-          
-          {/* Custom Plan (Display-Only Tier for High Scale & Enterprise) */}
-          <ScrollReveal>
-            <CustomPlanSection isDarkMode={isDarkMode} />
-          </ScrollReveal>
-        </div>
-      </section>
-
-      {/* ════════════════════════════════════════════════════════════════ */}
-      {/* 12. WHITE-LABEL & AGENCY RESELLER PROGRAM - COMPACT & EXPANDABLE */}
-      {/* ════════════════════════════════════════════════════════════════ */}
-      <section id="white-label" className={cn(
-        "relative py-20 px-6 sm:px-12 lg:px-16 w-full max-w-[1700px] mx-auto my-16 rounded-[2.5rem] border overflow-hidden text-left transition-all duration-500",
-        isDarkMode ? "bg-slate-900/80 border-slate-800 text-white shadow-2xl" : "bg-gradient-to-br from-slate-50 via-white to-emerald-50/40 text-slate-900 border-slate-200/90 shadow-xl"
-      )}>
-
-        {/* Ambient Animated Glow & Pattern */}
-        <div className="absolute -top-32 -left-32 w-96 h-96 bg-emerald-500/10 rounded-full blur-[120px] pointer-events-none animate-pulse" />
-        <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-teal-500/10 rounded-full blur-[120px] pointer-events-none animate-pulse" />
-        <div className="absolute inset-0 bg-[radial-gradient(#059669_1px,transparent_1px)] [background-size:28px_28px] opacity-10 pointer-events-none" />
-
-        <div className="relative z-10 space-y-12">
-
-          {/* 1. HERO & MAIN HEADING (ALWAYS VISIBLE) */}
-          <ScrollReveal>
-            <div className="text-center max-w-4xl mx-auto space-y-6">
-              <span className="px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-800 text-xs font-black tracking-widest uppercase inline-block animate-pulse">
-                AGENCY RESELLER & WHITE-LABEL PARTNER PROGRAM
-              </span>
-
-              <h2
-                className={cn("text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight italic font-serif leading-tight", isDarkMode ? "text-white" : "text-slate-900")}
-                style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
-              >
-                Build & Scale Your Own White-Label Software Agency
-              </h2>
-
-              <p className={cn("text-base sm:text-lg font-medium leading-relaxed max-w-2xl mx-auto", isDarkMode ? "text-slate-300" : "text-slate-600")}>
-                Rebrand our enterprise automation platform under your own company name, custom domain, and logo. Sell omni-channel automation, CRM, and AI bots directly to your clients — and keep <span className="text-[#059669] font-bold">100% of the profits</span>.
-              </p>
-
-              {/* CTAs & Micro-Proof */}
-              <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-4">
-                <button
-                  onClick={() => window.open('https://docs.google.com/forms/d/e/1FAIpQLSeEVo1MoqqGLPZvBnUVpS3stqKzvr41V3qNLJ94zwQ3psRiNw/viewform?usp=dialog', '_blank')}
-                  className="landing-button-glow px-8 py-4 rounded-2xl bg-[#059669] hover:bg-[#047857] text-white text-sm font-extrabold shadow-lg shadow-emerald-700/25 flex items-center gap-2.5 transition-all hover:scale-105 active:scale-95 cursor-pointer"
-                >
-                  <span>🚀 Apply for Agency White-Label</span>
-                  <ArrowRight size={18} />
-                </button>
-
-                <button
-                  onClick={() => router.push('/book')}
-                  className={cn(
-                    "px-8 py-4 rounded-2xl border text-sm font-bold shadow-xs hover:border-emerald-500 hover:scale-105 transition-all cursor-pointer",
-                    isDarkMode ? "bg-slate-800 hover:bg-slate-700 text-slate-100 border-slate-700" : "bg-white hover:bg-slate-50 text-slate-700 border-slate-200/90"
-                  )}
-                >
-                  <span>📞 Book a Live Platform Demo</span>
-                </button>
+                  With UWO Connect
+                </span>
+                <h4 className={cn("text-xl font-bold font-serif italic", isDarkMode ? "text-white" : "text-slate-900")}>
+                  One Clean Central Workspace
+                </h4>
+                <p className={cn("text-sm font-normal leading-relaxed", isDarkMode ? "text-slate-400" : "text-slate-600")}>
+                  Messages, Leads, Documents, Quotations, Payments, and Invoices automatically synced in real time.
+                </p>
               </div>
-
-              <div className={cn("flex flex-wrap items-center justify-center gap-6 text-xs font-bold pt-2", isDarkMode ? "text-emerald-400" : "text-emerald-800")}>
-                <span className="flex items-center gap-1.5"><CheckCircle2 size={16} className="text-[#059669]" /> No Code Required</span>
-                <span className="flex items-center gap-1.5"><CheckCircle2 size={16} className="text-[#059669]" /> Keep 100% Revenue</span>
-                <span className="flex items-center gap-1.5"><CheckCircle2 size={16} className="text-[#059669]" /> Instant CNAME Setup</span>
-              </div>
-
-              {/* EXPLORE TOGGLE BUTTON */}
-              <div className="pt-4">
-                <button
-                  onClick={() => setShowWhiteLabelDetails(!showWhiteLabelDetails)}
-                  className="px-8 py-3.5 rounded-full bg-emerald-500/10 hover:bg-[#059669] border border-emerald-500/30 text-[#059669] hover:text-white text-xs font-black tracking-wider uppercase inline-flex items-center gap-2.5 transition-all hover:scale-105 shadow-md shadow-emerald-500/10 cursor-pointer group"
-                >
-                  <span>{showWhiteLabelDetails ? 'Hide Program Details' : 'Explore Program Details'}</span>
-                  {showWhiteLabelDetails ? (
-                    <ChevronUp size={18} />
-                  ) : (
-                    <ChevronDown size={18} className="animate-bounce text-[#059669] group-hover:text-white" />
-                  )}
-                </button>
-              </div>
-            </div>
-          </ScrollReveal>
-
-          {/* EXPANDABLE FULL DETAILS (SHOWN WHEN USER CLICKS EXPLORE PROGRAM DETAILS) */}
-          {showWhiteLabelDetails && (
-            <div className={cn("space-y-16 pt-8 border-t transition-all duration-500", isDarkMode ? "border-slate-800" : "border-slate-200/80")}>
-
-              {/* 2. HOW IT WORKS (4-STEP ONBOARDING JOURNEY) */}
-              <div className="space-y-8">
-                <ScrollReveal>
-                  <div className="text-center space-y-2">
-                    <span className="text-xs font-black tracking-widest text-[#059669] uppercase">4-STEP ONBOARDING JOURNEY</span>
-                    <h3
-                      className={cn("text-3xl sm:text-4xl font-bold italic font-serif", isDarkMode ? "text-white" : "text-slate-900")}
-                      style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
-                    >
-                      Launch Your SaaS Brand in 4 Simple Steps
-                    </h3>
-                  </div>
-                </ScrollReveal>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                  {[
-                    {
-                      step: 'Step 01',
-                      title: 'Get Your Agency License',
-                      desc: 'Choose an Agency White-Label license and get instant access to your master reseller command hub.'
-                    },
-                    {
-                      step: 'Step 02',
-                      title: 'Connect Custom Domain & Brand',
-                      desc: 'Point your subdomain (e.g., portal.yourbrand.com) via CNAME, upload your logo, and set your theme color palette.'
-                    },
-                    {
-                      step: 'Step 03',
-                      title: 'Connect Payment Gateway',
-                      desc: 'Plug in your own Razorpay account so that 100% of all client payments land directly into your own bank account.'
-                    },
-                    {
-                      step: 'Step 04',
-                      title: 'Invite & Bill Your Sub-Clients',
-                      desc: 'Provision isolated workspaces for your clients, approve signups, and charge your own custom subscription prices.'
-                    }
-                  ].map((item, i) => (
-                    <ScrollReveal key={i} delay={i * 120}>
-                      <div className={cn(
-                        "p-6 rounded-3xl border shadow-md hover:border-emerald-500 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 space-y-3 relative group cursor-pointer h-full flex flex-col justify-between",
-                        isDarkMode ? "bg-slate-950/80 border-slate-800 text-white" : "bg-white border-slate-200/90"
-                      )}>
-                        <div className="space-y-3">
-                          <div className="flex items-center justify-between">
-                            <span className={cn(
-                              "text-xs font-black px-3 py-1 rounded-full uppercase tracking-wider group-hover:bg-[#059669] group-hover:text-white transition-colors",
-                              isDarkMode ? "bg-emerald-950 text-emerald-300 border border-emerald-800/80" : "bg-emerald-50 text-emerald-800 border border-emerald-200/80"
-                            )}>
-                              {item.step}
-                            </span>
-                            <div className={cn(
-                              "w-8 h-8 rounded-full flex items-center justify-center group-hover:text-white group-hover:bg-[#059669] group-hover:scale-110 transition-all",
-                              isDarkMode ? "bg-slate-800 text-slate-400" : "bg-slate-100 text-slate-500"
-                            )}>
-                              <CheckCircle2 size={16} />
-                            </div>
-                          </div>
-                          <h4 className={cn("text-lg font-bold group-hover:text-emerald-400 transition-colors", isDarkMode ? "text-white" : "text-slate-900")}>{item.title}</h4>
-                          <p className={cn("text-xs leading-relaxed font-medium", isDarkMode ? "text-slate-400" : "text-slate-600")}>{item.desc}</p>
-                        </div>
-                      </div>
-                    </ScrollReveal>
-                  ))}
-                </div>
-              </div>
-
-              {/* 3. WHAT THE AGENCY GETS (DELIVERABLES & PLATFORM FEATURES) */}
-              <div className={cn("space-y-8 border-t pt-12", isDarkMode ? "border-slate-800" : "border-slate-200/80")}>
-                <ScrollReveal>
-                  <div className="text-center space-y-2">
-                    <span className="text-xs font-black tracking-widest text-[#059669] uppercase">AGENCY DELIVERABLES</span>
-                    <h3
-                      className={cn("text-3xl sm:text-4xl font-bold italic font-serif", isDarkMode ? "text-white" : "text-slate-900")}
-                      style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
-                    >
-                      Everything Included in Your White-Label Portal
-                    </h3>
-                  </div>
-                </ScrollReveal>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  {/* Feature Box A */}
-                  <ScrollReveal delay={100}>
-                    <div className={cn(
-                      "p-8 rounded-3xl border shadow-lg space-y-4 text-left hover:border-emerald-500 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 group cursor-pointer h-full",
-                      isDarkMode ? "bg-slate-950/80 border-slate-800 text-white" : "bg-white border-slate-200/90"
-                    )}>
-                      <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-[#059669] flex items-center justify-center group-hover:scale-110 transition-transform">
-                        <Layers size={24} />
-                      </div>
-                      <h4 className={cn("text-xl font-bold transition-colors", isDarkMode ? "text-white group-hover:text-emerald-400" : "text-slate-900 group-hover:text-[#059669]")}>100% Custom-Branded Software</h4>
-                      <ul className={cn("space-y-2.5 text-xs font-medium", isDarkMode ? "text-slate-400" : "text-slate-600")}>
-                        <li className="flex items-start gap-2">
-                          <span className="text-[#059669] font-bold shrink-0">•</span>
-                          <span><strong className={isDarkMode ? "text-slate-100" : "text-slate-900"}>Complete Whitelabeling:</strong> Your brand name, logo, favicon, and brand color theme.</span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <span className="text-[#059669] font-bold shrink-0">•</span>
-                          <span><strong className={isDarkMode ? "text-slate-100" : "text-slate-900"}>Custom Subdomain:</strong> portal.yourbrand.com with free automatic SSL certificate.</span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <span className="text-[#059669] font-bold shrink-0">•</span>
-                          <span><strong className={isDarkMode ? "text-slate-100" : "text-slate-900"}>Agency Admin Hub:</strong> Dedicated master dashboard (/client/agency) to approve, provision, and monitor sub-clients.</span>
-                        </li>
-                      </ul>
-                    </div>
-                  </ScrollReveal>
-
-                  {/* Feature Box B */}
-                  <ScrollReveal delay={200}>
-                    <div className={cn(
-                      "p-8 rounded-3xl border shadow-lg space-y-4 text-left hover:border-teal-500 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 group cursor-pointer h-full",
-                      isDarkMode ? "bg-slate-950/80 border-slate-800 text-white" : "bg-white border-slate-200/90"
-                    )}>
-                      <div className="w-12 h-12 rounded-2xl bg-teal-500/10 border border-teal-500/30 text-teal-700 flex items-center justify-center group-hover:scale-110 transition-transform">
-                        <CreditCard size={24} />
-                      </div>
-                      <h4 className={cn("text-xl font-bold transition-colors", isDarkMode ? "text-white group-hover:text-teal-400" : "text-slate-900 group-hover:text-teal-700")}>100% Direct Profit & Billing Control</h4>
-                      <ul className={cn("space-y-2.5 text-xs font-medium", isDarkMode ? "text-slate-400" : "text-slate-600")}>
-                        <li className="flex items-start gap-2">
-                          <span className="text-teal-600 font-bold shrink-0">•</span>
-                          <span><strong className={isDarkMode ? "text-slate-100" : "text-slate-900"}>Direct Gateway Integration:</strong> Connect your Razorpay; 0% platform revenue cut.</span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <span className="text-teal-600 font-bold shrink-0">•</span>
-                          <span><strong className={isDarkMode ? "text-slate-100" : "text-slate-900"}>Custom Pricing:</strong> You decide how much to charge your clients (e.g., ₹2,999/mo or ₹9,999/mo).</span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <span className="text-teal-600 font-bold shrink-0">•</span>
-                          <span><strong className={isDarkMode ? "text-slate-100" : "text-slate-900"}>Instant Payouts:</strong> Money goes directly from client to your connected bank account.</span>
-                        </li>
-                      </ul>
-                    </div>
-                  </ScrollReveal>
-
-                  {/* Feature Box C */}
-                  <ScrollReveal delay={300}>
-                    <div className={cn(
-                      "p-8 rounded-3xl border shadow-lg space-y-4 text-left hover:border-indigo-500 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 group cursor-pointer h-full",
-                      isDarkMode ? "bg-slate-950/80 border-slate-800 text-white" : "bg-white border-slate-200/90"
-                    )}>
-                      <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-700 flex items-center justify-center group-hover:scale-110 transition-transform">
-                        <Zap size={24} />
-                      </div>
-                      <h4 className={cn("text-xl font-bold transition-colors", isDarkMode ? "text-white group-hover:text-indigo-400" : "text-slate-900 group-hover:text-indigo-700")}>Full Enterprise Omni-Channel Suite</h4>
-                      <ul className={cn("space-y-2.5 text-xs font-medium", isDarkMode ? "text-slate-400" : "text-slate-600")}>
-                        <li className="flex items-start gap-2">
-                          <span className="text-indigo-600 font-bold shrink-0">•</span>
-                          <span>WhatsApp Cloud API Automation & Multi-Agent Team Inbox</span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <span className="text-indigo-600 font-bold shrink-0">•</span>
-                          <span>Instagram & Facebook DM Auto-Replies & Story Triggers</span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <span className="text-indigo-600 font-bold shrink-0">•</span>
-                          <span>Gmail & Outlook Two-Way Sync & Lead CRM Pipeline</span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <span className="text-indigo-600 font-bold shrink-0">•</span>
-                          <span>Quotations, Proposals & Invoices Builder with PDF Generation</span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <span className="text-indigo-600 font-bold shrink-0">•</span>
-                          <span>AI Knowledge Base Assistant trained on client documents</span>
-                        </li>
-                      </ul>
-                    </div>
-                  </ScrollReveal>
-
-                  {/* Feature Box D */}
-                  <ScrollReveal delay={400}>
-                    <div className={cn(
-                      "p-8 rounded-3xl border shadow-lg space-y-4 text-left hover:border-amber-500 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 group cursor-pointer h-full",
-                      isDarkMode ? "bg-slate-950/80 border-slate-800 text-white" : "bg-white border-slate-200/90"
-                    )}>
-                      <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-700 flex items-center justify-center group-hover:scale-110 transition-transform">
-                        <ShieldCheck size={24} />
-                      </div>
-                      <h4 className={cn("text-xl font-bold transition-colors", isDarkMode ? "text-white group-hover:text-amber-400" : "text-slate-900 group-hover:text-amber-700")}>Zero Server & Maintenance Hassle</h4>
-                      <ul className={cn("space-y-2.5 text-xs font-medium", isDarkMode ? "text-slate-400" : "text-slate-600")}>
-                        <li className="flex items-start gap-2">
-                          <span className="text-amber-600 font-bold shrink-0">•</span>
-                          <span><strong className={isDarkMode ? "text-slate-100" : "text-slate-900"}>Cloud Infrastructure Managed:</strong> 99.9% uptime, auto-scaling, and regular backups handled for you.</span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <span className="text-amber-600 font-bold shrink-0">•</span>
-                          <span><strong className={isDarkMode ? "text-slate-100" : "text-slate-900"}>Continuous Updates:</strong> All new connectors and feature updates automatically roll out to your brand.</span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <span className="text-amber-600 font-bold shrink-0">•</span>
-                          <span><strong className={isDarkMode ? "text-slate-100" : "text-slate-900"}>24/7 Agency Priority Support:</strong> Dedicated partner team to support your growth.</span>
-                        </li>
-                      </ul>
-                    </div>
-                  </ScrollReveal>
-                </div>
-              </div>
-
-              {/* 4. WHAT IS REQUIRED FROM THE AGENCY (PREREQUISITES CHECKLIST) */}
-              <ScrollReveal>
-                <div className={cn("p-8 rounded-3xl border space-y-6", isDarkMode ? "bg-slate-950/60 border-slate-800 text-white" : "bg-slate-50/80 border-slate-200/90")}>
-                  <div className="text-left space-y-2">
-                    <span className="text-xs font-black tracking-widest text-[#059669] uppercase">PREREQUISITES CHECKLIST</span>
-                    <h3
-                      className={cn("text-2xl sm:text-3xl font-bold italic font-serif", isDarkMode ? "text-white" : "text-slate-900")}
-                      style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
-                    >
-                      What is Required From Your Agency
-                    </h3>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-left">
-                    {[
-                      {
-                        title: '1. Brand Assets',
-                        items: ['Company Brand Name', 'High-Resolution Logo (PNG/SVG)', 'Primary Brand Color (Hex code)']
-                      },
-                      {
-                        title: '2. 1 Subdomain & DNS',
-                        items: ['Add 1 CNAME record:', 'Host: portal', 'Points To: aisa24.com']
-                      },
-                      {
-                        title: '3. Razorpay API Keys',
-                        items: ['Razorpay Key ID', 'Razorpay Key Secret', '(100% direct payouts)']
-                      },
-                      {
-                        title: '4. Agency License Fee',
-                        items: ['Active White-Label Agency', 'Subscription License', 'with the platform']
-                      }
-                    ].map((req, ri) => (
-                      <div
-                        key={ri}
-                        className={cn(
-                          "p-5 rounded-2xl border shadow-xs hover:border-[#059669] hover:shadow-md transition-all duration-300 space-y-2 cursor-pointer group",
-                          isDarkMode ? "bg-slate-900/90 border-slate-800 text-white" : "bg-white border-slate-200/90"
-                        )}
-                      >
-                        <span className="text-[#059669] font-black text-sm group-hover:scale-105 inline-block transition-transform">{req.title}</span>
-                        <p className={cn("text-xs leading-relaxed font-medium space-y-1", isDarkMode ? "text-slate-300" : "text-slate-600")}>
-                          {req.items.map((line, li) => (
-                            <span key={li} className="block">{line}</span>
-                          ))}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </ScrollReveal>
-
-              {/* 5. FREQUENTLY ASKED QUESTIONS (FAQ) */}
-              <div className={cn("space-y-6 border-t pt-12", isDarkMode ? "border-slate-800" : "border-slate-200/80")}>
-                <ScrollReveal>
-                  <div className="text-center space-y-2">
-                    <span className="text-xs font-black tracking-widest text-[#059669] uppercase">AGENCY PARTNER FAQS</span>
-                    <h3
-                      className={cn("text-3xl sm:text-4xl font-bold italic font-serif", isDarkMode ? "text-white" : "text-slate-900")}
-                      style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
-                    >
-                      Frequently Asked Questions
-                    </h3>
-                  </div>
-                </ScrollReveal>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left max-w-5xl mx-auto">
-                  {[
-                    {
-                      q: 'Will my clients know this is powered by another platform?',
-                      a: 'No. Your white-label portal is 100% unbranded. Your clients will only see your custom brand name, logo, theme colors, and custom domain.'
-                    },
-                    {
-                      q: 'Who collects the subscription payments from my clients?',
-                      a: 'You do! Sub-clients pay directly through your connected Razorpay gateway. 100% of the money goes straight to your bank account.'
-                    },
-                    {
-                      q: 'How do I approve new client signups?',
-                      a: "When a client registers on your custom domain, they appear in your Agency Command Hub under 'Pending Approvals'. You can review and approve them in 1 click."
-                    },
-                    {
-                      q: 'Do I need any coding knowledge or servers to run this?',
-                      a: 'Zero coding required. If you can copy-paste a DNS record and upload a logo, your SaaS agency is ready to go.'
-                    }
-                  ].map((faq, fi) => (
-                    <ScrollReveal key={fi} delay={fi * 100}>
-                      <div className={cn(
-                        "p-6 rounded-2xl border shadow-sm hover:shadow-md hover:border-emerald-400 transition-all duration-300 space-y-2 cursor-pointer h-full",
-                        isDarkMode ? "bg-slate-950/80 border-slate-800 text-white" : "bg-white border-slate-200/90"
-                      )}>
-                        <h4 className={cn("text-base font-bold flex items-center gap-2", isDarkMode ? "text-white" : "text-slate-900")}>
-                          <HelpCircle size={18} className="text-[#059669] shrink-0" />
-                          <span>{faq.q}</span>
-                        </h4>
-                        <p className={cn("text-xs font-medium leading-relaxed pl-6", isDarkMode ? "text-slate-400" : "text-slate-600")}>
-                          {faq.a}
-                        </p>
-                      </div>
-                    </ScrollReveal>
-                  ))}
-                </div>
-              </div>
-
-              {/* Bottom Banner CTA */}
-              <ScrollReveal>
-                <div className={cn(
-                  "p-8 sm:p-10 rounded-3xl border text-center space-y-4 shadow-sm hover:shadow-md transition-shadow",
-                  isDarkMode ? "bg-slate-950/80 border-slate-800 text-white" : "bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-emerald-50/80 border-emerald-200"
-                )}>
-                  <h3
-                    className={cn("text-3xl sm:text-4xl font-bold italic font-serif", isDarkMode ? "text-white" : "text-slate-900")}
-                    style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
-                  >
-                    Ready to Launch Your Software Agency Today?
-                  </h3>
-                  <p className={cn("text-sm font-medium max-w-xl mx-auto", isDarkMode ? "text-slate-300" : "text-slate-600")}>
-                    Get your custom white-label domain configured in minutes. Rebrand, sell, and keep 100% of the revenue.
-                  </p>
-                  <div className="pt-2">
-                    <button
-                      onClick={() => window.open('https://docs.google.com/forms/d/e/1FAIpQLSeEVo1MoqqGLPZvBnUVpS3stqKzvr41V3qNLJ94zwQ3psRiNw/viewform?usp=dialog', '_blank')}
-                      className="landing-button-glow px-8 py-4 rounded-2xl bg-[#059669] hover:bg-[#047857] text-white text-sm font-extrabold shadow-xl shadow-emerald-700/25 inline-flex items-center gap-2.5 transition-all hover:scale-105 active:scale-95 cursor-pointer"
-                    >
-                      <span>Apply for Agency White-Label License</span>
-                      <ArrowRight size={18} />
-                    </button>
-                  </div>
-                </div>
-              </ScrollReveal>
 
             </div>
-          )}
-
-        </div>
-      </section>
-
-      {/* ════════════════════════════════════════════════════════════════ */}
-      {/* 12.5 FREQUENTLY ASKED QUESTIONS (FAQ) */}
-      {/* ════════════════════════════════════════════════════════════════ */}
-      <section id="faq" className={cn(
-        "relative py-20 px-6 sm:px-12 lg:px-16 w-full max-w-[1700px] mx-auto my-20 rounded-[2.5rem] border-2 shadow-2xl overflow-hidden text-left transition-all duration-300",
-        isDarkMode ? "bg-slate-900/80 border-slate-800 text-white shadow-emerald-950/20" : "bg-gradient-to-br from-emerald-500/15 via-teal-500/10 to-emerald-100/40 border-emerald-500/30 shadow-emerald-600/15"
-      )}>
-        {/* Vibrant Glowing Ambient Light Spheres & Grid Pattern Background */}
-        <div className="absolute -top-32 -left-32 w-96 h-96 bg-emerald-400/35 rounded-full blur-[90px] pointer-events-none animate-pulse-glow" />
-        <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-teal-400/35 rounded-full blur-[90px] pointer-events-none animate-pulse-glow" />
-        <div className="absolute inset-0 bg-[radial-gradient(#059669_1.5px,transparent_1.5px)] [background-size:24px_24px] opacity-25 pointer-events-none" />
-
-        {/* Decorative Rotating Help Icon Watermark */}
-        <div className="absolute -right-12 -bottom-12 opacity-[0.12] text-[#059669] pointer-events-none">
-          <HelpCircle size={280} className="animate-spin-slow" />
-        </div>
-
-        <ScrollReveal>
-          <div className="relative z-10 text-center space-y-3 mb-12">
-            <span className="px-4 py-1.5 rounded-full bg-[#059669] text-white text-xs font-black tracking-widest uppercase inline-block shadow-md shadow-emerald-600/30">
-              STILL HAVE QUESTIONS?
-            </span>
-            <h2
-              className={cn("text-3xl sm:text-5xl font-bold font-serif leading-tight", isDarkMode ? "text-white" : "text-slate-900")}
-              style={{ fontFamily: "'Times New Roman', Times, serif" }}
-            >
-              Frequently Asked Questions
-            </h2>
-            <p className={cn("text-sm sm:text-base font-bold max-w-xl mx-auto", isDarkMode ? "text-slate-300" : "text-slate-700")}>
-              Everything you need to know about UWO Connect.
-            </p>
           </div>
-        </ScrollReveal>
+        </section>
 
-        {/* Accordion Questions List */}
-        <div className="relative z-10 space-y-3">
-          {(() => {
-            const faqList = [
-              {
-                q: 'What is UWO Connect?',
-                a: 'UWO Connect is a business automation platform that helps businesses manage customer conversations, leads, sales, payments and daily business activities from one place.'
-              },
-              {
-                q: 'Which channels can I connect with UWO Connect?',
-                a: 'UWO Connect supports supported channels such as WhatsApp Business, Instagram, Facebook and other available communication integrations. Channel availability may depend on the selected plan and third-party platform requirements.'
-              },
-              {
-                q: 'What is included in my UWO Connect plan?',
-                a: 'Each plan includes a specific set of features, channels, connectors and usage limits. The exact features included in each plan are shown in the Pricing Plans section above.'
-              },
-              {
-                q: 'Are subscription and wallet charges separate?',
-                a: 'Yes. Your UWO Connect subscription and prepaid usage wallet are completely separate. Subscription pays for your platform plan, while the wallet covers usage-based services. Wallet balance is not used to pay the subscription.'
-              },
-              {
-                q: 'What is the UWO Connect wallet?',
-                a: 'The wallet is a prepaid balance that can be used for applicable usage-based UWO Connect services. You can add money to the wallet separately from your subscription.'
-              },
-              {
-                q: 'How can I add money to my wallet?',
-                a: 'You can select an amount from the available recharge options or enter a custom amount. You will then complete the payment through the available payment gateway. The wallet is credited only after successful payment confirmation.'
-              },
-              {
-                q: 'What happens after I use all my included broadcasts?',
-                a: 'Once the broadcasts included in your plan have been used, additional broadcasts can be charged from your wallet if sufficient wallet balance is available. The applicable additional broadcast price will be shown in UWO Connect.'
-              },
-              {
-                q: 'How much does an additional broadcast cost?',
-                a: 'The applicable additional broadcast charge is shown in the UWO Connect platform and may be updated according to the current pricing configuration.'
-              },
-              {
-                q: 'Will my wallet be charged when I recharge it?',
-                a: 'No. When you recharge your wallet, the amount you pay is added to your wallet balance. Usage charges are deducted separately when a billable service is actually used.'
-              },
-              {
-                q: 'What happens if my wallet balance reaches zero?',
-                a: 'Your subscription can remain active. However, usage-based services that require wallet balance may be restricted until you recharge your wallet.'
-              },
-              {
-                q: 'Can I use UWO Connect without coding?',
-                a: 'Yes. UWO Connect is designed to make common business automation workflows accessible without requiring coding for normal use.'
-              },
-              {
-                q: 'Can I use AI automation?',
-                a: 'Yes. UWO Connect provides AI-powered automation for supported customer conversations, FAQs, lead qualification and business workflows. AI-generated responses may not always be perfect, so important information should be reviewed.'
-              },
-              {
-                q: 'Can I manage my leads and customers?',
-                a: 'Yes. UWO Connect provides CRM and lead-management capabilities to help businesses organize customer information and manage sales stages.'
-              },
-              {
-                q: 'Can I create quotations and invoices?',
-                a: 'Yes. Supported UWO Connect features allow businesses to create quotations, proposals and GST invoices. Businesses are responsible for checking their invoice and tax information.'
-              },
-              {
-                q: 'Can I connect my existing business tools?',
-                a: 'UWO Connect provides connectors for supported services such as Google, Microsoft, payment services and other business tools. Available connectors depend on your plan and the current integration availability.'
-              },
-              {
-                q: 'Can I add team members?',
-                a: 'Yes. Depending on your plan, you can add team members and manage their access using supported roles and permissions.'
-              },
-              {
-                q: 'Does UWO Connect offer white-label solutions?',
-                a: 'Yes. UWO Connect provides white-label/agency capabilities for eligible partners. Availability and commercial terms may vary.'
-              },
-              {
-                q: 'Is my payment information secure?',
-                a: 'Payments are processed through supported payment providers. UWO Connect does not ask users to share payment credentials directly through normal chat or support channels.'
-              }
-            ];
+        {/* ════════════════════════════════════════════════════════════════ */}
+        {/* 11. FEATURE SHOWCASE - SINGLE DYNAMIC CARD WITH ZERO WHITE SPACE GAP */}
+        {/* ════════════════════════════════════════════════════════════════ */}
+        <section
+          onWheel={(e) => {
+            if (e.deltaY > 0 && activeModuleIndex < 8) {
+              e.preventDefault();
+              setActiveModuleIndex(prev => Math.min(8, prev + 1));
+            } else if (e.deltaY < 0 && activeModuleIndex > 0) {
+              e.preventDefault();
+              setActiveModuleIndex(prev => Math.max(0, prev - 1));
+            }
+          }}
+          className="relative py-12 sm:py-16 px-6 sm:px-12 lg:px-16 w-full max-w-[1700px] mx-auto my-6"
+        >
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-stretch">
 
-            const displayedFaqs = showAllFaqs ? faqList : faqList.slice(0, 8);
+            {/* Left Column: HEADING & 4-OPTION SLIDING WINDOW */}
+            <div className="lg:col-span-5 flex flex-col justify-between space-y-6 text-left h-full">
+              <div className="space-y-4">
+                <h2
+                  className={cn("text-4xl sm:text-5xl font-bold tracking-tight italic font-serif leading-[1.15]", isDarkMode ? "text-white" : "text-slate-900")}
+                  style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
+                >
+                  Everything You Need to Run Smarter
+                </h2>
 
-            return (
-              <>
-                {displayedFaqs.map((faq, idx) => {
-                  const isOpen = openFaqIndex === idx;
-                  return (
-                    <ScrollReveal key={idx} delay={idx * 30}>
-                      <div className={cn(
-                        "backdrop-blur-md border rounded-2xl transition-all duration-300 overflow-hidden group",
-                        isDarkMode
-                          ? "bg-slate-950/90 border-slate-800 hover:border-emerald-500 hover:shadow-xl hover:shadow-emerald-950/20"
-                          : "bg-white/95 border-emerald-200/90 hover:border-[#059669] hover:shadow-xl hover:shadow-emerald-600/10"
-                      )}>
+                <p className={cn("text-sm sm:text-base font-medium leading-relaxed max-w-md", isDarkMode ? "text-slate-400" : "text-slate-600")}>
+                  9 powerful business engines built natively into your unified workspace. Scroll down to explore each module.
+                </p>
+
+                {/* 4-Item Window Selector (Shows ONLY 4 OPTIONS AT A TIME) */}
+                <div className={cn("grid grid-cols-1 gap-2.5 pt-3 border-t max-w-xs transition-all duration-300", isDarkMode ? "border-slate-800" : "border-slate-200/80")}>
+                  {(() => {
+                    const allOptions = [
+                      { num: '01', title: 'Team Dashboard', index: 0 },
+                      { num: '02', title: 'Unified CRM', index: 1 },
+                      { num: '03', title: 'Smart AI Auto Reply', index: 2 },
+                      { num: '04', title: 'Quotation Generator', index: 3 },
+                      { num: '05', title: 'GST Invoicing Engine', index: 4 },
+                      { num: '06', title: 'Proposal & Deals', index: 5 },
+                      { num: '07', title: 'Product Catalog', index: 6 },
+                      { num: '08', title: 'Payment Integration', index: 7 },
+                      { num: '09', title: 'Voice & Video Calling', index: 8 },
+                    ];
+
+                    const startIndex = Math.min(Math.max(0, activeModuleIndex - 1), 5);
+                    const visibleList = allOptions.slice(startIndex, startIndex + 4);
+
+                    return visibleList.map((item) => {
+                      const isActive = item.index === activeModuleIndex;
+
+                      return (
                         <button
-                          type="button"
-                          onClick={() => setOpenFaqIndex(isOpen ? null : idx)}
+                          key={item.index}
+                          onClick={() => setActiveModuleIndex(item.index)}
                           className={cn(
-                            "w-full p-5 sm:p-6 text-left flex items-center justify-between gap-4 cursor-pointer select-none font-extrabold text-sm sm:text-base transition-colors",
-                            isDarkMode ? "text-white hover:text-emerald-400" : "text-slate-900 hover:text-[#059669]"
-                          )}
-                        >
-                          <span className="leading-snug">{faq.q}</span>
-                          <span className={cn(
-                            "w-8 h-8 rounded-full flex items-center justify-center shrink-0 border transition-all duration-500 transform shadow-xs",
-                            isOpen
-                              ? "bg-[#059669] text-white border-[#059669] rotate-180"
+                            "flex items-center gap-2.5 text-xs font-bold transition-all duration-300 rounded-xl border px-3.5 py-2.5 text-left cursor-pointer",
+                            isActive
+                              ? "bg-[#059669] text-white border-emerald-600 shadow-lg shadow-emerald-600/25 translate-x-2 font-extrabold scale-[1.02]"
                               : (isDarkMode
-                                ? "bg-slate-800 text-emerald-400 border-slate-700 group-hover:bg-[#059669] group-hover:text-white group-hover:border-[#059669] rotate-0"
-                                : "bg-emerald-50 text-[#059669] border-emerald-200 group-hover:bg-[#059669] group-hover:text-white group-hover:border-[#059669] rotate-0")
-                          )}>
-                            {isOpen ? <Minus size={18} /> : <Plus size={18} />}
-                          </span>
-                        </button>
-
-                        <div
-                          className={cn(
-                            "grid transition-all duration-500 ease-in-out",
-                            isDarkMode ? "border-slate-800" : "border-emerald-100",
-                            isOpen
-                              ? "grid-rows-[1fr] opacity-100 pt-3 pb-6 px-5 sm:px-6 border-t"
-                              : "grid-rows-[0fr] opacity-0 py-0 px-5 sm:px-6 border-t-0"
+                                ? "bg-slate-900/80 border-slate-800 text-slate-300 hover:text-white hover:bg-slate-800"
+                                : "bg-slate-50/80 border-slate-200/70 text-slate-600 hover:text-emerald-700 hover:bg-emerald-50/60")
                           )}
                         >
-                          <div className={cn(
-                            "overflow-hidden text-xs sm:text-sm leading-relaxed font-medium",
-                            isDarkMode ? "text-slate-300" : "text-slate-700"
-                          )}>
-                            {faq.a}
+                          <span className={cn("w-2 h-2 rounded-full shrink-0 transition-colors", isActive ? "bg-white animate-ping" : "bg-emerald-500/50")} />
+                          <span className="truncate">{item.num}. {item.title}</span>
+                        </button>
+                      );
+                    });
+                  })()}
+                </div>
+              </div>
+
+              <div className="pt-2">
+                <button
+                  onClick={() => router.push('/auth/login')}
+                  className="landing-button-glow px-6 py-3.5 rounded-2xl bg-[#059669] hover:bg-[#047857] text-white text-xs font-extrabold shadow-lg shadow-emerald-700/20 flex items-center gap-2 transition-all cursor-pointer"
+                >
+                  <span>Get Started Free</span>
+                  <ArrowRight size={16} />
+                </button>
+              </div>
+            </div>
+
+            {/* Right Column: SINGLE DISPLAY CARD WITH EXACT SAME HEIGHT AS LEFT COLUMN */}
+            <div className="lg:col-span-7 flex">
+              {(() => {
+                const modulesList = [
+                  {
+                    num: '01',
+                    icon: <LayoutDashboard size={26} />,
+                    title: 'Team Dashboard',
+                    desc: 'Keep team tasks, channel feeds, and automated business activity organized in one central hub with real-time updates and live activity monitoring.',
+                    tag: 'CORE ENGINE',
+                    tagStyle: 'bg-emerald-500/10 text-emerald-700 border-emerald-500/30',
+                    iconBg: 'bg-gradient-to-br from-emerald-500 to-teal-600 shadow-emerald-500/20',
+                    features: ['Multi-user Team Permissions', 'Real-time Feed Sync', 'Role-Based Access'],
+                    previewText: '🚀 Active Sessions: 14 Agents Online • 2,480 Automation Events Processed Today • 0 Pending Escalations'
+                  },
+                  {
+                    num: '02',
+                    icon: <Users size={26} />,
+                    title: 'Unified CRM',
+                    desc: 'Auto-capture customer leads from WhatsApp, Instagram DMs, and contact forms directly into visual sales pipeline stages with smart tags.',
+                    tag: 'SALES PIPELINE',
+                    tagStyle: 'bg-teal-500/10 text-teal-700 border-teal-500/30',
+                    iconBg: 'bg-gradient-to-br from-teal-500 to-emerald-600 shadow-teal-500/20',
+                    features: ['Automated Lead Scoring', 'Custom Deal Pipeline', 'Contact History Log'],
+                    previewText: '👤 New Lead Captured: Rohan Sharma (+91 98765-XXXX) → Tagged as "High Intent Enterprise" → Moved to Stage: Proposal Sent'
+                  },
+                  {
+                    num: '03',
+                    icon: <Bot size={26} />,
+                    title: 'Smart AI Auto Reply',
+                    desc: 'Instant 24/7 customer response bot with intelligent catalog lookup, FAQs resolution, and automated lead qualification without human delay.',
+                    tag: '24/7 AI AGENT',
+                    tagStyle: 'bg-indigo-500/10 text-indigo-700 border-indigo-500/30',
+                    iconBg: 'bg-gradient-to-br from-indigo-500 to-purple-600 shadow-indigo-500/20',
+                    features: ['0.2s Instant Dispatch', 'Multi-lingual Understanding', 'Human Handover Mode'],
+                    previewText: '💬 Customer: "Do you offer GST invoices for enterprise plans?" → AI Bot (0.2s): "Yes! GST tax invoices are generated automatically."'
+                  },
+                  {
+                    num: '04',
+                    icon: <FileCheck size={26} />,
+                    title: 'Quotation Generator',
+                    desc: 'Create, customize, and dispatch professional PDF GST quotations directly to customer chat conversations in seconds.',
+                    tag: 'INSTANT PDF',
+                    tagStyle: 'bg-amber-500/10 text-amber-800 border-amber-500/30',
+                    iconBg: 'bg-gradient-to-br from-amber-500 to-orange-600 shadow-amber-500/20',
+                    features: ['GST & HSN Tax Calculation', 'Dynamic Discounting', 'Instant WhatsApp Share'],
+                    previewText: '📄 Generated Quotation #QT-2026-8890 for ₹45,000 + 18% GST → Auto-dispatched as PDF to WhatsApp chat.'
+                  },
+                  {
+                    num: '05',
+                    icon: <Receipt size={26} />,
+                    title: 'GST Invoicing Engine',
+                    desc: 'Generate official GST tax invoices automatically upon successful payment and sync records directly to Google Sheets & Tally.',
+                    tag: 'TAX & ACCOUNTING',
+                    tagStyle: 'bg-emerald-500/10 text-emerald-700 border-emerald-500/30',
+                    iconBg: 'bg-gradient-to-br from-emerald-600 to-green-600 shadow-emerald-500/20',
+                    features: ['Automatic PDF Issuance', 'Google Sheets & Tally Sync', 'Tax Audit Compliance'],
+                    previewText: '🧾 Invoice #INV-8910 Issued • Amount: ₹53,100 Incl. GST • Auto-synced to Google Sheets Row #1,420 & Tally ERP'
+                  },
+                  {
+                    num: '06',
+                    icon: <FileText size={26} />,
+                    title: 'Proposal & Deals',
+                    desc: 'Design high-converting business proposals with custom pricing tables, e-signature links, and real-time open notifications.',
+                    tag: 'CONTRACTS',
+                    tagStyle: 'bg-purple-500/10 text-purple-700 border-purple-500/30',
+                    iconBg: 'bg-gradient-to-br from-purple-500 to-indigo-600 shadow-purple-500/20',
+                    features: ['Real-time View Tracking', 'E-Signature Ready', 'Interactive Pricing Tables'],
+                    previewText: '🔔 Notification: Client opened Proposal "Enterprise Automation Suite v2" (Spent 4 mins 12 secs viewing pricing section)'
+                  },
+                  {
+                    num: '07',
+                    icon: <ShoppingBag size={26} />,
+                    title: 'Product & Service Catalog',
+                    desc: 'Present digital product catalogs with rich images, descriptions, pricing, and 1-click WhatsApp order checkout links.',
+                    tag: 'E-COMMERCE',
+                    tagStyle: 'bg-cyan-500/10 text-cyan-700 border-cyan-500/30',
+                    iconBg: 'bg-gradient-to-br from-cyan-500 to-blue-600 shadow-cyan-500/20',
+                    features: ['Interactive Category Grid', '1-Click WhatsApp Cart', 'Live Stock Sync'],
+                    previewText: '🛍️ Catalog Link Dispatched → Customer selected 2 Items (Total ₹12,499) → Checkout initiated via WhatsApp'
+                  },
+                  {
+                    num: '08',
+                    icon: <CreditCard size={26} />,
+                    title: 'Payment Integration',
+                    desc: 'Connect Razorpay, PhonePe, and UPI payment actions directly into your business chat workflow for 0-friction sales.',
+                    tag: 'RAZORPAY UPI',
+                    tagStyle: 'bg-rose-500/10 text-rose-700 border-rose-500/30',
+                    iconBg: 'bg-gradient-to-br from-rose-500 to-red-600 shadow-rose-500/20',
+                    features: ['Native UPI Link Dispatch', 'Instant Payment Verification', 'Auto Webhook Triggers'],
+                    previewText: '💳 Payment Link Generated via Razorpay UPI → Webhook Received: Payment Verified ₹12,499 → Order Confirmed!'
+                  },
+                  {
+                    num: '09',
+                    icon: <Video size={26} />,
+                    title: 'Voice & Video Calling',
+                    desc: 'Engage high-intent customers through crystal-clear HD WebRTC voice and video calls directly inside the web browser without any download.',
+                    tag: 'LIVE MEDIA',
+                    tagStyle: 'bg-blue-500/10 text-blue-700 border-blue-500/30',
+                    iconBg: 'bg-gradient-to-br from-blue-500 to-indigo-600 shadow-blue-500/20',
+                    features: ['In-Browser HD Video', 'Call Recording Logs', 'Screen Share Support'],
+                    previewText: '📞 In-Browser WebRTC Call Connected • Duration: 12m 45s • Audio Quality: 1080p Crystal Clear • Call Log Saved to Lead Profile'
+                  },
+                ];
+
+                const currentModule = modulesList[activeModuleIndex] || modulesList[0];
+
+                return (
+                  <div key={activeModuleIndex} className={cn(
+                    "p-7 sm:p-8 rounded-[2.5rem] border shadow-2xl relative overflow-hidden text-left transition-all duration-500 flex flex-col justify-between w-full h-full",
+                    isDarkMode ? "bg-slate-900/90 border-slate-800 text-white shadow-emerald-950/20" : "bg-white border-slate-200/90 shadow-emerald-900/5 text-slate-900"
+                  )}>
+
+                    {/* Top Accent Gradient Line */}
+                    <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600" />
+
+                    <div className="space-y-5">
+                      {/* Header Row */}
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3.5">
+                          <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-emerald-500/20", currentModule.iconBg)}>
+                            {currentModule.icon}
+                          </div>
+                          <div>
+                            <span className="text-[11px] font-black text-slate-400 tracking-widest uppercase">MODULE {currentModule.num} OF 09</span>
+                            <h3
+                              className={cn("text-2xl sm:text-3xl font-bold leading-tight italic font-serif", isDarkMode ? "text-white" : "text-slate-900")}
+                              style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
+                            >
+                              {currentModule.title}
+                            </h3>
                           </div>
                         </div>
-                      </div>
-                    </ScrollReveal>
-                  );
-                })}
 
-                {/* View More FAQs Toggle Button */}
-                <div className="text-center pt-8">
+                        <span className={cn("px-3 py-1 rounded-full text-[11px] font-extrabold tracking-wider uppercase border hidden sm:inline-block", currentModule.tagStyle)}>
+                          {currentModule.tag}
+                        </span>
+                      </div>
+
+                      <p className={cn("text-sm font-medium leading-relaxed", isDarkMode ? "text-slate-300" : "text-slate-600")}>
+                        {currentModule.desc}
+                      </p>
+
+                      {/* Sub Features Grid */}
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-1">
+                        {currentModule.features.map((ft, fi) => (
+                          <div
+                            key={fi}
+                            className={cn(
+                              "p-2.5 rounded-xl border text-[11px] font-bold flex items-center gap-1.5",
+                              isDarkMode
+                                ? "bg-emerald-950/40 border-emerald-800/60 text-emerald-300"
+                                : "bg-emerald-50/70 border-emerald-200/80 text-emerald-900"
+                            )}
+                          >
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
+                            <span className="truncate">{ft}</span>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Interactive Live Preview Mockup Box */}
+                      <div className="p-5 rounded-2xl bg-slate-950 text-white space-y-2.5 border border-slate-800 shadow-inner mt-2">
+                        <div className="flex items-center justify-between text-[11px] text-slate-400 font-mono border-b border-slate-800/80 pb-1.5">
+                          <span className="flex items-center gap-1.5 text-emerald-400 font-bold">
+                            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                            LIVE ENGINE LOG
+                          </span>
+                          <span>UWO CONNECT WORKSPACE</span>
+                        </div>
+                        <div className="text-xs font-medium text-slate-300 leading-relaxed font-mono">
+                          {currentModule.previewText}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Navigation Controls */}
+                    <div className={cn("pt-3 border-t flex items-center justify-between mt-4", isDarkMode ? "border-slate-800" : "border-slate-100")}>
+                      <div className="flex items-center gap-1.5">
+                        {modulesList.map((_, dotIdx) => (
+                          <button
+                            key={dotIdx}
+                            onClick={() => setActiveModuleIndex(dotIdx)}
+                            className={cn(
+                              "h-2 rounded-full transition-all duration-300 cursor-pointer",
+                              dotIdx === activeModuleIndex
+                                ? "w-8 bg-[#059669]"
+                                : (isDarkMode ? "w-2 bg-slate-700 hover:bg-slate-600" : "w-2 bg-slate-200 hover:bg-slate-300")
+                            )}
+                          />
+                        ))}
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => setActiveModuleIndex(prev => (prev > 0 ? prev - 1 : 8))}
+                          className={cn(
+                            "p-2 rounded-xl border transition-colors cursor-pointer",
+                            isDarkMode
+                              ? "border-slate-800 hover:bg-slate-800 text-slate-300"
+                              : "border-slate-200 hover:bg-slate-100 text-slate-700"
+                          )}
+                        >
+                          <ChevronLeft size={16} />
+                        </button>
+                        <button
+                          onClick={() => setActiveModuleIndex(prev => (prev < 8 ? prev + 1 : 0))}
+                          className={cn(
+                            "p-2 rounded-xl border transition-colors cursor-pointer",
+                            isDarkMode
+                              ? "border-slate-800 hover:bg-slate-800 text-slate-300"
+                              : "border-slate-200 hover:bg-slate-100 text-slate-700"
+                          )}
+                        >
+                          <ChevronRight size={16} />
+                        </button>
+                      </div>
+                    </div>
+
+                  </div>
+                );
+              })()}
+            </div>
+
+          </div>
+        </section>
+
+        {/* ════════════════════════════════════════════════════════════════ */}
+        {/* 11.5 PRICING & SUBSCRIPTION PLANS */}
+        {/* ════════════════════════════════════════════════════════════════ */}
+        <section id="pricing" className={cn(
+          "relative py-20 px-6 sm:px-12 lg:px-16 w-full max-w-[1700px] mx-auto my-16 text-center rounded-[2.5rem] border transition-all duration-300 overflow-hidden",
+          isDarkMode ? "bg-slate-900/80 border-slate-800 text-white shadow-2xl" : "bg-gradient-to-br from-slate-50/90 via-white to-emerald-50/50 border-slate-200/90 shadow-xl"
+        )}>
+
+          {/* Ambient Glows */}
+          <div className="absolute -top-32 -left-32 w-80 h-80 bg-emerald-500/10 rounded-full blur-[100px] pointer-events-none" />
+          <div className="absolute -bottom-32 -right-32 w-80 h-80 bg-teal-500/10 rounded-full blur-[100px] pointer-events-none" />
+          <div className="absolute inset-0 bg-[radial-gradient(#059669_1px,transparent_1px)] [background-size:28px_28px] opacity-10 pointer-events-none" />
+
+          <div className="relative z-10 space-y-8">
+            <PricingComparisonTable onSelectPlan={() => router.push('/auth/login')} dark={isDarkMode} />
+
+            {/* Custom Plan (Display-Only Tier for High Scale & Enterprise) */}
+            <ScrollReveal>
+              <CustomPlanSection isDarkMode={isDarkMode} />
+            </ScrollReveal>
+          </div>
+        </section>
+
+        {/* ════════════════════════════════════════════════════════════════ */}
+        {/* 12. WHITE-LABEL & AGENCY RESELLER PROGRAM - COMPACT & EXPANDABLE */}
+        {/* ════════════════════════════════════════════════════════════════ */}
+        <section id="white-label" className={cn(
+          "relative py-20 px-6 sm:px-12 lg:px-16 w-full max-w-[1700px] mx-auto my-16 rounded-[2.5rem] border overflow-hidden text-left transition-all duration-500",
+          isDarkMode ? "bg-slate-900/80 border-slate-800 text-white shadow-2xl" : "bg-gradient-to-br from-slate-50 via-white to-emerald-50/40 text-slate-900 border-slate-200/90 shadow-xl"
+        )}>
+
+          {/* Ambient Animated Glow & Pattern */}
+          <div className="absolute -top-32 -left-32 w-96 h-96 bg-emerald-500/10 rounded-full blur-[120px] pointer-events-none animate-pulse" />
+          <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-teal-500/10 rounded-full blur-[120px] pointer-events-none animate-pulse" />
+          <div className="absolute inset-0 bg-[radial-gradient(#059669_1px,transparent_1px)] [background-size:28px_28px] opacity-10 pointer-events-none" />
+
+          <div className="relative z-10 space-y-12">
+
+            {/* 1. HERO & MAIN HEADING (ALWAYS VISIBLE) */}
+            <ScrollReveal>
+              <div className="text-center max-w-4xl mx-auto space-y-6">
+                <span className="px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-800 text-xs font-black tracking-widest uppercase inline-block animate-pulse">
+                  AGENCY RESELLER & WHITE-LABEL PARTNER PROGRAM
+                </span>
+
+                <h2
+                  className={cn("text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight italic font-serif leading-tight", isDarkMode ? "text-white" : "text-slate-900")}
+                  style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
+                >
+                  Build & Scale Your Own White-Label Software Agency
+                </h2>
+
+                <p className={cn("text-base sm:text-lg font-medium leading-relaxed max-w-2xl mx-auto", isDarkMode ? "text-slate-300" : "text-slate-600")}>
+                  Rebrand our enterprise automation platform under your own company name, custom domain, and logo. Sell omni-channel automation, CRM, and AI bots directly to your clients — and keep <span className="text-[#059669] font-bold">100% of the profits</span>.
+                </p>
+
+                {/* CTAs & Micro-Proof */}
+                <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-4">
                   <button
-                    type="button"
-                    onClick={() => setShowAllFaqs(!showAllFaqs)}
-                    className="px-8 py-3.5 rounded-full bg-[#059669] hover:bg-[#047857] text-white text-xs font-black tracking-wider uppercase inline-flex items-center gap-2 transition-all hover:scale-105 shadow-lg shadow-emerald-700/25 cursor-pointer group"
+                    onClick={() => window.open('https://docs.google.com/forms/d/e/1FAIpQLSeEVo1MoqqGLPZvBnUVpS3stqKzvr41V3qNLJ94zwQ3psRiNw/viewform?usp=dialog', '_blank')}
+                    className="landing-button-glow px-8 py-4 rounded-2xl bg-[#059669] hover:bg-[#047857] text-white text-sm font-extrabold shadow-lg shadow-emerald-700/25 flex items-center gap-2.5 transition-all hover:scale-105 active:scale-95 cursor-pointer"
                   >
-                    <span>{showAllFaqs ? 'Show Fewer Questions' : 'View More FAQs'}</span>
-                    {showAllFaqs ? <ChevronUp size={16} /> : <ChevronDown size={16} className="group-hover:translate-y-0.5 transition-transform" />}
+                    <span>🚀 Apply for Agency White-Label</span>
+                    <ArrowRight size={18} />
+                  </button>
+
+                  <button
+                    onClick={() => router.push('/book')}
+                    className={cn(
+                      "px-8 py-4 rounded-2xl border text-sm font-bold shadow-xs hover:border-emerald-500 hover:scale-105 transition-all cursor-pointer",
+                      isDarkMode ? "bg-slate-800 hover:bg-slate-700 text-slate-100 border-slate-700" : "bg-white hover:bg-slate-50 text-slate-700 border-slate-200/90"
+                    )}
+                  >
+                    <span>📞 Book a Live Platform Demo</span>
                   </button>
                 </div>
 
-                {/* FAQ Help Contact Link */}
-                <div className="text-center pt-4">
-                  <p className={cn("text-xs sm:text-sm font-semibold", isDarkMode ? "text-slate-400" : "text-slate-600")}>
-                    Still have questions?{' '}
-                    <Link href="/contact" className="text-[#059669] hover:underline font-bold">
-                      Contact our support &amp; sales team →
-                    </Link>
-                  </p>
+                <div className={cn("flex flex-wrap items-center justify-center gap-6 text-xs font-bold pt-2", isDarkMode ? "text-emerald-400" : "text-emerald-800")}>
+                  <span className="flex items-center gap-1.5"><CheckCircle2 size={16} className="text-[#059669]" /> No Code Required</span>
+                  <span className="flex items-center gap-1.5"><CheckCircle2 size={16} className="text-[#059669]" /> Keep 100% Revenue</span>
+                  <span className="flex items-center gap-1.5"><CheckCircle2 size={16} className="text-[#059669]" /> Instant CNAME Setup</span>
                 </div>
-              </>
-            );
-          })()}
-        </div>
-      </section>
 
-      {/* ════════════════════════════════════════════════════════════════ */}
-      {/* 12.6 FINAL CTA SECTION */}
-      {/* ════════════════════════════════════════════════════════════════ */}
-      <section className={cn(
-        "relative py-16 px-6 sm:px-12 lg:px-16 w-full max-w-[1700px] mx-auto my-12 text-center rounded-3xl border transition-colors duration-300 shadow-xl overflow-hidden",
-        isDarkMode
-          ? "bg-gradient-to-r from-slate-900 via-slate-800 to-emerald-950 border-slate-800 text-white shadow-2xl shadow-emerald-950/30"
-          : "bg-gradient-to-br from-emerald-50/90 via-white to-teal-50/80 border-emerald-200/90 text-slate-900 shadow-emerald-600/10"
-      )}>
-        {/* Ambient background glows */}
-        <div className={cn(
-          "absolute -top-24 -right-24 w-72 h-72 rounded-full blur-[90px] pointer-events-none",
-          isDarkMode ? "bg-emerald-500/10" : "bg-emerald-400/20"
-        )} />
-        <div className={cn(
-          "absolute -bottom-24 -left-24 w-72 h-72 rounded-full blur-[90px] pointer-events-none",
-          isDarkMode ? "bg-teal-500/10" : "bg-teal-400/20"
-        )} />
+                {/* EXPLORE TOGGLE BUTTON */}
+                <div className="pt-4">
+                  <button
+                    onClick={() => setShowWhiteLabelDetails(!showWhiteLabelDetails)}
+                    className="px-8 py-3.5 rounded-full bg-emerald-500/10 hover:bg-[#059669] border border-emerald-500/30 text-[#059669] hover:text-white text-xs font-black tracking-wider uppercase inline-flex items-center gap-2.5 transition-all hover:scale-105 shadow-md shadow-emerald-500/10 cursor-pointer group"
+                  >
+                    <span>{showWhiteLabelDetails ? 'Hide Program Details' : 'Explore Program Details'}</span>
+                    {showWhiteLabelDetails ? (
+                      <ChevronUp size={18} />
+                    ) : (
+                      <ChevronDown size={18} className="animate-bounce text-[#059669] group-hover:text-white" />
+                    )}
+                  </button>
+                </div>
+              </div>
+            </ScrollReveal>
 
-        <div className="relative z-10 space-y-4">
-          <h3
-            className={cn(
-              "text-3xl sm:text-4xl font-bold font-serif leading-tight",
-              isDarkMode ? "text-white" : "text-slate-900"
+            {/* EXPANDABLE FULL DETAILS (SHOWN WHEN USER CLICKS EXPLORE PROGRAM DETAILS) */}
+            {showWhiteLabelDetails && (
+              <div className={cn("space-y-16 pt-8 border-t transition-all duration-500", isDarkMode ? "border-slate-800" : "border-slate-200/80")}>
+
+                {/* 2. HOW IT WORKS (4-STEP ONBOARDING JOURNEY) */}
+                <div className="space-y-8">
+                  <ScrollReveal>
+                    <div className="text-center space-y-2">
+                      <span className="text-xs font-black tracking-widest text-[#059669] uppercase">4-STEP ONBOARDING JOURNEY</span>
+                      <h3
+                        className={cn("text-3xl sm:text-4xl font-bold italic font-serif", isDarkMode ? "text-white" : "text-slate-900")}
+                        style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
+                      >
+                        Launch Your SaaS Brand in 4 Simple Steps
+                      </h3>
+                    </div>
+                  </ScrollReveal>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    {[
+                      {
+                        step: 'Step 01',
+                        title: 'Get Your Agency License',
+                        desc: 'Choose an Agency White-Label license and get instant access to your master reseller command hub.'
+                      },
+                      {
+                        step: 'Step 02',
+                        title: 'Connect Custom Domain & Brand',
+                        desc: 'Point your subdomain (e.g., portal.yourbrand.com) via CNAME, upload your logo, and set your theme color palette.'
+                      },
+                      {
+                        step: 'Step 03',
+                        title: 'Connect Payment Gateway',
+                        desc: 'Plug in your own Razorpay account so that 100% of all client payments land directly into your own bank account.'
+                      },
+                      {
+                        step: 'Step 04',
+                        title: 'Invite & Bill Your Sub-Clients',
+                        desc: 'Provision isolated workspaces for your clients, approve signups, and charge your own custom subscription prices.'
+                      }
+                    ].map((item, i) => (
+                      <ScrollReveal key={i} delay={i * 120}>
+                        <div className={cn(
+                          "p-6 rounded-3xl border shadow-md hover:border-emerald-500 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 space-y-3 relative group cursor-pointer h-full flex flex-col justify-between",
+                          isDarkMode ? "bg-slate-950/80 border-slate-800 text-white" : "bg-white border-slate-200/90"
+                        )}>
+                          <div className="space-y-3">
+                            <div className="flex items-center justify-between">
+                              <span className={cn(
+                                "text-xs font-black px-3 py-1 rounded-full uppercase tracking-wider group-hover:bg-[#059669] group-hover:text-white transition-colors",
+                                isDarkMode ? "bg-emerald-950 text-emerald-300 border border-emerald-800/80" : "bg-emerald-50 text-emerald-800 border border-emerald-200/80"
+                              )}>
+                                {item.step}
+                              </span>
+                              <div className={cn(
+                                "w-8 h-8 rounded-full flex items-center justify-center group-hover:text-white group-hover:bg-[#059669] group-hover:scale-110 transition-all",
+                                isDarkMode ? "bg-slate-800 text-slate-400" : "bg-slate-100 text-slate-500"
+                              )}>
+                                <CheckCircle2 size={16} />
+                              </div>
+                            </div>
+                            <h4 className={cn("text-lg font-bold group-hover:text-emerald-400 transition-colors", isDarkMode ? "text-white" : "text-slate-900")}>{item.title}</h4>
+                            <p className={cn("text-xs leading-relaxed font-medium", isDarkMode ? "text-slate-400" : "text-slate-600")}>{item.desc}</p>
+                          </div>
+                        </div>
+                      </ScrollReveal>
+                    ))}
+                  </div>
+                </div>
+
+                {/* 3. WHAT THE AGENCY GETS (DELIVERABLES & PLATFORM FEATURES) */}
+                <div className={cn("space-y-8 border-t pt-12", isDarkMode ? "border-slate-800" : "border-slate-200/80")}>
+                  <ScrollReveal>
+                    <div className="text-center space-y-2">
+                      <span className="text-xs font-black tracking-widest text-[#059669] uppercase">AGENCY DELIVERABLES</span>
+                      <h3
+                        className={cn("text-3xl sm:text-4xl font-bold italic font-serif", isDarkMode ? "text-white" : "text-slate-900")}
+                        style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
+                      >
+                        Everything Included in Your White-Label Portal
+                      </h3>
+                    </div>
+                  </ScrollReveal>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    {/* Feature Box A */}
+                    <ScrollReveal delay={100}>
+                      <div className={cn(
+                        "p-8 rounded-3xl border shadow-lg space-y-4 text-left hover:border-emerald-500 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 group cursor-pointer h-full",
+                        isDarkMode ? "bg-slate-950/80 border-slate-800 text-white" : "bg-white border-slate-200/90"
+                      )}>
+                        <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-[#059669] flex items-center justify-center group-hover:scale-110 transition-transform">
+                          <Layers size={24} />
+                        </div>
+                        <h4 className={cn("text-xl font-bold transition-colors", isDarkMode ? "text-white group-hover:text-emerald-400" : "text-slate-900 group-hover:text-[#059669]")}>100% Custom-Branded Software</h4>
+                        <ul className={cn("space-y-2.5 text-xs font-medium", isDarkMode ? "text-slate-400" : "text-slate-600")}>
+                          <li className="flex items-start gap-2">
+                            <span className="text-[#059669] font-bold shrink-0">•</span>
+                            <span><strong className={isDarkMode ? "text-slate-100" : "text-slate-900"}>Complete Whitelabeling:</strong> Your brand name, logo, favicon, and brand color theme.</span>
+                          </li>
+                          <li className="flex items-start gap-2">
+                            <span className="text-[#059669] font-bold shrink-0">•</span>
+                            <span><strong className={isDarkMode ? "text-slate-100" : "text-slate-900"}>Custom Subdomain:</strong> portal.yourbrand.com with free automatic SSL certificate.</span>
+                          </li>
+                          <li className="flex items-start gap-2">
+                            <span className="text-[#059669] font-bold shrink-0">•</span>
+                            <span><strong className={isDarkMode ? "text-slate-100" : "text-slate-900"}>Agency Admin Hub:</strong> Dedicated master dashboard (/client/agency) to approve, provision, and monitor sub-clients.</span>
+                          </li>
+                        </ul>
+                      </div>
+                    </ScrollReveal>
+
+                    {/* Feature Box B */}
+                    <ScrollReveal delay={200}>
+                      <div className={cn(
+                        "p-8 rounded-3xl border shadow-lg space-y-4 text-left hover:border-teal-500 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 group cursor-pointer h-full",
+                        isDarkMode ? "bg-slate-950/80 border-slate-800 text-white" : "bg-white border-slate-200/90"
+                      )}>
+                        <div className="w-12 h-12 rounded-2xl bg-teal-500/10 border border-teal-500/30 text-teal-700 flex items-center justify-center group-hover:scale-110 transition-transform">
+                          <CreditCard size={24} />
+                        </div>
+                        <h4 className={cn("text-xl font-bold transition-colors", isDarkMode ? "text-white group-hover:text-teal-400" : "text-slate-900 group-hover:text-teal-700")}>100% Direct Profit & Billing Control</h4>
+                        <ul className={cn("space-y-2.5 text-xs font-medium", isDarkMode ? "text-slate-400" : "text-slate-600")}>
+                          <li className="flex items-start gap-2">
+                            <span className="text-teal-600 font-bold shrink-0">•</span>
+                            <span><strong className={isDarkMode ? "text-slate-100" : "text-slate-900"}>Direct Gateway Integration:</strong> Connect your Razorpay; 0% platform revenue cut.</span>
+                          </li>
+                          <li className="flex items-start gap-2">
+                            <span className="text-teal-600 font-bold shrink-0">•</span>
+                            <span><strong className={isDarkMode ? "text-slate-100" : "text-slate-900"}>Custom Pricing:</strong> You decide how much to charge your clients (e.g., ₹2,999/mo or ₹9,999/mo).</span>
+                          </li>
+                          <li className="flex items-start gap-2">
+                            <span className="text-teal-600 font-bold shrink-0">•</span>
+                            <span><strong className={isDarkMode ? "text-slate-100" : "text-slate-900"}>Instant Payouts:</strong> Money goes directly from client to your connected bank account.</span>
+                          </li>
+                        </ul>
+                      </div>
+                    </ScrollReveal>
+
+                    {/* Feature Box C */}
+                    <ScrollReveal delay={300}>
+                      <div className={cn(
+                        "p-8 rounded-3xl border shadow-lg space-y-4 text-left hover:border-indigo-500 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 group cursor-pointer h-full",
+                        isDarkMode ? "bg-slate-950/80 border-slate-800 text-white" : "bg-white border-slate-200/90"
+                      )}>
+                        <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-700 flex items-center justify-center group-hover:scale-110 transition-transform">
+                          <Zap size={24} />
+                        </div>
+                        <h4 className={cn("text-xl font-bold transition-colors", isDarkMode ? "text-white group-hover:text-indigo-400" : "text-slate-900 group-hover:text-indigo-700")}>Full Enterprise Omni-Channel Suite</h4>
+                        <ul className={cn("space-y-2.5 text-xs font-medium", isDarkMode ? "text-slate-400" : "text-slate-600")}>
+                          <li className="flex items-start gap-2">
+                            <span className="text-indigo-600 font-bold shrink-0">•</span>
+                            <span>WhatsApp Cloud API Automation & Multi-Agent Team Inbox</span>
+                          </li>
+                          <li className="flex items-start gap-2">
+                            <span className="text-indigo-600 font-bold shrink-0">•</span>
+                            <span>Instagram & Facebook DM Auto-Replies & Story Triggers</span>
+                          </li>
+                          <li className="flex items-start gap-2">
+                            <span className="text-indigo-600 font-bold shrink-0">•</span>
+                            <span>Gmail & Outlook Two-Way Sync & Lead CRM Pipeline</span>
+                          </li>
+                          <li className="flex items-start gap-2">
+                            <span className="text-indigo-600 font-bold shrink-0">•</span>
+                            <span>Quotations, Proposals & Invoices Builder with PDF Generation</span>
+                          </li>
+                          <li className="flex items-start gap-2">
+                            <span className="text-indigo-600 font-bold shrink-0">•</span>
+                            <span>AI Knowledge Base Assistant trained on client documents</span>
+                          </li>
+                        </ul>
+                      </div>
+                    </ScrollReveal>
+
+                    {/* Feature Box D */}
+                    <ScrollReveal delay={400}>
+                      <div className={cn(
+                        "p-8 rounded-3xl border shadow-lg space-y-4 text-left hover:border-amber-500 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 group cursor-pointer h-full",
+                        isDarkMode ? "bg-slate-950/80 border-slate-800 text-white" : "bg-white border-slate-200/90"
+                      )}>
+                        <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-700 flex items-center justify-center group-hover:scale-110 transition-transform">
+                          <ShieldCheck size={24} />
+                        </div>
+                        <h4 className={cn("text-xl font-bold transition-colors", isDarkMode ? "text-white group-hover:text-amber-400" : "text-slate-900 group-hover:text-amber-700")}>Zero Server & Maintenance Hassle</h4>
+                        <ul className={cn("space-y-2.5 text-xs font-medium", isDarkMode ? "text-slate-400" : "text-slate-600")}>
+                          <li className="flex items-start gap-2">
+                            <span className="text-amber-600 font-bold shrink-0">•</span>
+                            <span><strong className={isDarkMode ? "text-slate-100" : "text-slate-900"}>Cloud Infrastructure Managed:</strong> 99.9% uptime, auto-scaling, and regular backups handled for you.</span>
+                          </li>
+                          <li className="flex items-start gap-2">
+                            <span className="text-amber-600 font-bold shrink-0">•</span>
+                            <span><strong className={isDarkMode ? "text-slate-100" : "text-slate-900"}>Continuous Updates:</strong> All new connectors and feature updates automatically roll out to your brand.</span>
+                          </li>
+                          <li className="flex items-start gap-2">
+                            <span className="text-amber-600 font-bold shrink-0">•</span>
+                            <span><strong className={isDarkMode ? "text-slate-100" : "text-slate-900"}>24/7 Agency Priority Support:</strong> Dedicated partner team to support your growth.</span>
+                          </li>
+                        </ul>
+                      </div>
+                    </ScrollReveal>
+                  </div>
+                </div>
+
+                {/* 4. WHAT IS REQUIRED FROM THE AGENCY (PREREQUISITES CHECKLIST) */}
+                <ScrollReveal>
+                  <div className={cn("p-8 rounded-3xl border space-y-6", isDarkMode ? "bg-slate-950/60 border-slate-800 text-white" : "bg-slate-50/80 border-slate-200/90")}>
+                    <div className="text-left space-y-2">
+                      <span className="text-xs font-black tracking-widest text-[#059669] uppercase">PREREQUISITES CHECKLIST</span>
+                      <h3
+                        className={cn("text-2xl sm:text-3xl font-bold italic font-serif", isDarkMode ? "text-white" : "text-slate-900")}
+                        style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
+                      >
+                        What is Required From Your Agency
+                      </h3>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-left">
+                      {[
+                        {
+                          title: '1. Brand Assets',
+                          items: ['Company Brand Name', 'High-Resolution Logo (PNG/SVG)', 'Primary Brand Color (Hex code)']
+                        },
+                        {
+                          title: '2. 1 Subdomain & DNS',
+                          items: ['Add 1 CNAME record:', 'Host: portal', 'Points To: aisa24.com']
+                        },
+                        {
+                          title: '3. Razorpay API Keys',
+                          items: ['Razorpay Key ID', 'Razorpay Key Secret', '(100% direct payouts)']
+                        },
+                        {
+                          title: '4. Agency License Fee',
+                          items: ['Active White-Label Agency', 'Subscription License', 'with the platform']
+                        }
+                      ].map((req, ri) => (
+                        <div
+                          key={ri}
+                          className={cn(
+                            "p-5 rounded-2xl border shadow-xs hover:border-[#059669] hover:shadow-md transition-all duration-300 space-y-2 cursor-pointer group",
+                            isDarkMode ? "bg-slate-900/90 border-slate-800 text-white" : "bg-white border-slate-200/90"
+                          )}
+                        >
+                          <span className="text-[#059669] font-black text-sm group-hover:scale-105 inline-block transition-transform">{req.title}</span>
+                          <p className={cn("text-xs leading-relaxed font-medium space-y-1", isDarkMode ? "text-slate-300" : "text-slate-600")}>
+                            {req.items.map((line, li) => (
+                              <span key={li} className="block">{line}</span>
+                            ))}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </ScrollReveal>
+
+                {/* 5. FREQUENTLY ASKED QUESTIONS (FAQ) */}
+                <div className={cn("space-y-6 border-t pt-12", isDarkMode ? "border-slate-800" : "border-slate-200/80")}>
+                  <ScrollReveal>
+                    <div className="text-center space-y-2">
+                      <span className="text-xs font-black tracking-widest text-[#059669] uppercase">AGENCY PARTNER FAQS</span>
+                      <h3
+                        className={cn("text-3xl sm:text-4xl font-bold italic font-serif", isDarkMode ? "text-white" : "text-slate-900")}
+                        style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
+                      >
+                        Frequently Asked Questions
+                      </h3>
+                    </div>
+                  </ScrollReveal>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left max-w-5xl mx-auto">
+                    {[
+                      {
+                        q: 'Will my clients know this is powered by another platform?',
+                        a: 'No. Your white-label portal is 100% unbranded. Your clients will only see your custom brand name, logo, theme colors, and custom domain.'
+                      },
+                      {
+                        q: 'Who collects the subscription payments from my clients?',
+                        a: 'You do! Sub-clients pay directly through your connected Razorpay gateway. 100% of the money goes straight to your bank account.'
+                      },
+                      {
+                        q: 'How do I approve new client signups?',
+                        a: "When a client registers on your custom domain, they appear in your Agency Command Hub under 'Pending Approvals'. You can review and approve them in 1 click."
+                      },
+                      {
+                        q: 'Do I need any coding knowledge or servers to run this?',
+                        a: 'Zero coding required. If you can copy-paste a DNS record and upload a logo, your SaaS agency is ready to go.'
+                      }
+                    ].map((faq, fi) => (
+                      <ScrollReveal key={fi} delay={fi * 100}>
+                        <div className={cn(
+                          "p-6 rounded-2xl border shadow-sm hover:shadow-md hover:border-emerald-400 transition-all duration-300 space-y-2 cursor-pointer h-full",
+                          isDarkMode ? "bg-slate-950/80 border-slate-800 text-white" : "bg-white border-slate-200/90"
+                        )}>
+                          <h4 className={cn("text-base font-bold flex items-center gap-2", isDarkMode ? "text-white" : "text-slate-900")}>
+                            <HelpCircle size={18} className="text-[#059669] shrink-0" />
+                            <span>{faq.q}</span>
+                          </h4>
+                          <p className={cn("text-xs font-medium leading-relaxed pl-6", isDarkMode ? "text-slate-400" : "text-slate-600")}>
+                            {faq.a}
+                          </p>
+                        </div>
+                      </ScrollReveal>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Bottom Banner CTA */}
+                <ScrollReveal>
+                  <div className={cn(
+                    "p-8 sm:p-10 rounded-3xl border text-center space-y-4 shadow-sm hover:shadow-md transition-shadow",
+                    isDarkMode ? "bg-slate-950/80 border-slate-800 text-white" : "bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-emerald-50/80 border-emerald-200"
+                  )}>
+                    <h3
+                      className={cn("text-3xl sm:text-4xl font-bold italic font-serif", isDarkMode ? "text-white" : "text-slate-900")}
+                      style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
+                    >
+                      Ready to Launch Your Software Agency Today?
+                    </h3>
+                    <p className={cn("text-sm font-medium max-w-xl mx-auto", isDarkMode ? "text-slate-300" : "text-slate-600")}>
+                      Get your custom white-label domain configured in minutes. Rebrand, sell, and keep 100% of the revenue.
+                    </p>
+                    <div className="pt-2">
+                      <button
+                        onClick={() => window.open('https://docs.google.com/forms/d/e/1FAIpQLSeEVo1MoqqGLPZvBnUVpS3stqKzvr41V3qNLJ94zwQ3psRiNw/viewform?usp=dialog', '_blank')}
+                        className="landing-button-glow px-8 py-4 rounded-2xl bg-[#059669] hover:bg-[#047857] text-white text-sm font-extrabold shadow-xl shadow-emerald-700/25 inline-flex items-center gap-2.5 transition-all hover:scale-105 active:scale-95 cursor-pointer"
+                      >
+                        <span>Apply for Agency White-Label License</span>
+                        <ArrowRight size={18} />
+                      </button>
+                    </div>
+                  </div>
+                </ScrollReveal>
+
+              </div>
             )}
-            style={{ fontFamily: "'Times New Roman', Times, serif" }}
-          >
-            Ready to simplify your business?
-          </h3>
-          <p className={cn(
-            "text-sm font-medium max-w-lg mx-auto leading-relaxed",
-            isDarkMode ? "text-slate-300" : "text-slate-600"
-          )}>
-            Start managing your conversations, leads and automation with UWO Connect.
-          </p>
-          <div className="pt-2">
-            <button
-              type="button"
-              onClick={() => router.push('/auth/register')}
-              className="landing-button-glow px-8 py-4 rounded-2xl bg-[#059669] hover:bg-[#047857] text-white text-sm font-extrabold shadow-xl shadow-emerald-700/25 inline-flex items-center gap-2.5 transition-all hover:scale-105 active:scale-95 cursor-pointer"
-            >
-              <span>Get Started</span>
-              <ArrowRight size={18} />
-            </button>
+
           </div>
-        </div>
-      </section>
+        </section>
+
+        {/* ════════════════════════════════════════════════════════════════ */}
+        {/* 12.5 FREQUENTLY ASKED QUESTIONS (FAQ) */}
+        {/* ════════════════════════════════════════════════════════════════ */}
+        <section id="faq" className={cn(
+          "relative py-20 px-6 sm:px-12 lg:px-16 w-full max-w-[1700px] mx-auto my-20 rounded-[2.5rem] border-2 shadow-2xl overflow-hidden text-left transition-all duration-300",
+          isDarkMode ? "bg-slate-900/80 border-slate-800 text-white shadow-emerald-950/20" : "bg-gradient-to-br from-emerald-500/15 via-teal-500/10 to-emerald-100/40 border-emerald-500/30 shadow-emerald-600/15"
+        )}>
+          {/* Vibrant Glowing Ambient Light Spheres & Grid Pattern Background */}
+          <div className="absolute -top-32 -left-32 w-96 h-96 bg-emerald-400/35 rounded-full blur-[90px] pointer-events-none animate-pulse-glow" />
+          <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-teal-400/35 rounded-full blur-[90px] pointer-events-none animate-pulse-glow" />
+          <div className="absolute inset-0 bg-[radial-gradient(#059669_1.5px,transparent_1.5px)] [background-size:24px_24px] opacity-25 pointer-events-none" />
+
+          {/* Decorative Rotating Help Icon Watermark */}
+          <div className="absolute -right-12 -bottom-12 opacity-[0.12] text-[#059669] pointer-events-none">
+            <HelpCircle size={280} className="animate-spin-slow" />
+          </div>
+
+          <ScrollReveal>
+            <div className="relative z-10 text-center space-y-3 mb-12">
+              <span className="px-4 py-1.5 rounded-full bg-[#059669] text-white text-xs font-black tracking-widest uppercase inline-block shadow-md shadow-emerald-600/30">
+                STILL HAVE QUESTIONS?
+              </span>
+              <h2
+                className={cn("text-3xl sm:text-5xl font-bold font-serif leading-tight", isDarkMode ? "text-white" : "text-slate-900")}
+                style={{ fontFamily: "'Times New Roman', Times, serif" }}
+              >
+                Frequently Asked Questions
+              </h2>
+              <p className={cn("text-sm sm:text-base font-bold max-w-xl mx-auto", isDarkMode ? "text-slate-300" : "text-slate-700")}>
+                Everything you need to know about UWO Connect.
+              </p>
+            </div>
+          </ScrollReveal>
+
+          {/* Accordion Questions List */}
+          <div className="relative z-10 space-y-3">
+            {(() => {
+              const faqList = [
+                {
+                  q: 'What is UWO Connect?',
+                  a: 'UWO Connect is a business automation platform that helps businesses manage customer conversations, leads, sales, payments and daily business activities from one place.'
+                },
+                {
+                  q: 'Which channels can I connect with UWO Connect?',
+                  a: 'UWO Connect supports supported channels such as WhatsApp Business, Instagram, Facebook and other available communication integrations. Channel availability may depend on the selected plan and third-party platform requirements.'
+                },
+                {
+                  q: 'What is included in my UWO Connect plan?',
+                  a: 'Each plan includes a specific set of features, channels, connectors and usage limits. The exact features included in each plan are shown in the Pricing Plans section above.'
+                },
+                {
+                  q: 'Are subscription and wallet charges separate?',
+                  a: 'Yes. Your UWO Connect subscription and prepaid usage wallet are completely separate. Subscription pays for your platform plan, while the wallet covers usage-based services. Wallet balance is not used to pay the subscription.'
+                },
+                {
+                  q: 'What is the UWO Connect wallet?',
+                  a: 'The wallet is a prepaid balance that can be used for applicable usage-based UWO Connect services. You can add money to the wallet separately from your subscription.'
+                },
+                {
+                  q: 'How can I add money to my wallet?',
+                  a: 'You can select an amount from the available recharge options or enter a custom amount. You will then complete the payment through the available payment gateway. The wallet is credited only after successful payment confirmation.'
+                },
+                {
+                  q: 'What happens after I use all my included broadcasts?',
+                  a: 'Once the broadcasts included in your plan have been used, additional broadcasts can be charged from your wallet if sufficient wallet balance is available. The applicable additional broadcast price will be shown in UWO Connect.'
+                },
+                {
+                  q: 'How much does an additional broadcast cost?',
+                  a: 'The applicable additional broadcast charge is shown in the UWO Connect platform and may be updated according to the current pricing configuration.'
+                },
+                {
+                  q: 'Will my wallet be charged when I recharge it?',
+                  a: 'No. When you recharge your wallet, the amount you pay is added to your wallet balance. Usage charges are deducted separately when a billable service is actually used.'
+                },
+                {
+                  q: 'What happens if my wallet balance reaches zero?',
+                  a: 'Your subscription can remain active. However, usage-based services that require wallet balance may be restricted until you recharge your wallet.'
+                },
+                {
+                  q: 'Can I use UWO Connect without coding?',
+                  a: 'Yes. UWO Connect is designed to make common business automation workflows accessible without requiring coding for normal use.'
+                },
+                {
+                  q: 'Can I use AI automation?',
+                  a: 'Yes. UWO Connect provides AI-powered automation for supported customer conversations, FAQs, lead qualification and business workflows. AI-generated responses may not always be perfect, so important information should be reviewed.'
+                },
+                {
+                  q: 'Can I manage my leads and customers?',
+                  a: 'Yes. UWO Connect provides CRM and lead-management capabilities to help businesses organize customer information and manage sales stages.'
+                },
+                {
+                  q: 'Can I create quotations and invoices?',
+                  a: 'Yes. Supported UWO Connect features allow businesses to create quotations, proposals and GST invoices. Businesses are responsible for checking their invoice and tax information.'
+                },
+                {
+                  q: 'Can I connect my existing business tools?',
+                  a: 'UWO Connect provides connectors for supported services such as Google, Microsoft, payment services and other business tools. Available connectors depend on your plan and the current integration availability.'
+                },
+                {
+                  q: 'Can I add team members?',
+                  a: 'Yes. Depending on your plan, you can add team members and manage their access using supported roles and permissions.'
+                },
+                {
+                  q: 'Does UWO Connect offer white-label solutions?',
+                  a: 'Yes. UWO Connect provides white-label/agency capabilities for eligible partners. Availability and commercial terms may vary.'
+                },
+                {
+                  q: 'Is my payment information secure?',
+                  a: 'Payments are processed through supported payment providers. UWO Connect does not ask users to share payment credentials directly through normal chat or support channels.'
+                }
+              ];
+
+              const displayedFaqs = showAllFaqs ? faqList : faqList.slice(0, 8);
+
+              return (
+                <>
+                  {displayedFaqs.map((faq, idx) => {
+                    const isOpen = openFaqIndex === idx;
+                    return (
+                      <ScrollReveal key={idx} delay={idx * 30}>
+                        <div className={cn(
+                          "backdrop-blur-md border rounded-2xl transition-all duration-300 overflow-hidden group",
+                          isDarkMode
+                            ? "bg-slate-950/90 border-slate-800 hover:border-emerald-500 hover:shadow-xl hover:shadow-emerald-950/20"
+                            : "bg-white/95 border-emerald-200/90 hover:border-[#059669] hover:shadow-xl hover:shadow-emerald-600/10"
+                        )}>
+                          <button
+                            type="button"
+                            onClick={() => setOpenFaqIndex(isOpen ? null : idx)}
+                            className={cn(
+                              "w-full p-5 sm:p-6 text-left flex items-center justify-between gap-4 cursor-pointer select-none font-extrabold text-sm sm:text-base transition-colors",
+                              isDarkMode ? "text-white hover:text-emerald-400" : "text-slate-900 hover:text-[#059669]"
+                            )}
+                          >
+                            <span className="leading-snug">{faq.q}</span>
+                            <span className={cn(
+                              "w-8 h-8 rounded-full flex items-center justify-center shrink-0 border transition-all duration-500 transform shadow-xs",
+                              isOpen
+                                ? "bg-[#059669] text-white border-[#059669] rotate-180"
+                                : (isDarkMode
+                                  ? "bg-slate-800 text-emerald-400 border-slate-700 group-hover:bg-[#059669] group-hover:text-white group-hover:border-[#059669] rotate-0"
+                                  : "bg-emerald-50 text-[#059669] border-emerald-200 group-hover:bg-[#059669] group-hover:text-white group-hover:border-[#059669] rotate-0")
+                            )}>
+                              {isOpen ? <Minus size={18} /> : <Plus size={18} />}
+                            </span>
+                          </button>
+
+                          <div
+                            className={cn(
+                              "grid transition-all duration-500 ease-in-out",
+                              isDarkMode ? "border-slate-800" : "border-emerald-100",
+                              isOpen
+                                ? "grid-rows-[1fr] opacity-100 pt-3 pb-6 px-5 sm:px-6 border-t"
+                                : "grid-rows-[0fr] opacity-0 py-0 px-5 sm:px-6 border-t-0"
+                            )}
+                          >
+                            <div className={cn(
+                              "overflow-hidden text-xs sm:text-sm leading-relaxed font-medium",
+                              isDarkMode ? "text-slate-300" : "text-slate-700"
+                            )}>
+                              {faq.a}
+                            </div>
+                          </div>
+                        </div>
+                      </ScrollReveal>
+                    );
+                  })}
+
+                  {/* View More FAQs Toggle Button */}
+                  <div className="text-center pt-8">
+                    <button
+                      type="button"
+                      onClick={() => setShowAllFaqs(!showAllFaqs)}
+                      className="px-8 py-3.5 rounded-full bg-[#059669] hover:bg-[#047857] text-white text-xs font-black tracking-wider uppercase inline-flex items-center gap-2 transition-all hover:scale-105 shadow-lg shadow-emerald-700/25 cursor-pointer group"
+                    >
+                      <span>{showAllFaqs ? 'Show Fewer Questions' : 'View More FAQs'}</span>
+                      {showAllFaqs ? <ChevronUp size={16} /> : <ChevronDown size={16} className="group-hover:translate-y-0.5 transition-transform" />}
+                    </button>
+                  </div>
+
+                  {/* FAQ Help Contact Link */}
+                  <div className="text-center pt-4">
+                    <p className={cn("text-xs sm:text-sm font-semibold", isDarkMode ? "text-slate-400" : "text-slate-600")}>
+                      Still have questions?{' '}
+                      <Link href="/contact" className="text-[#059669] hover:underline font-bold">
+                        Contact our support &amp; sales team →
+                      </Link>
+                    </p>
+                  </div>
+                </>
+              );
+            })()}
+          </div>
+        </section>
+
+        {/* ════════════════════════════════════════════════════════════════ */}
+        {/* 12.6 FINAL CTA SECTION */}
+        {/* ════════════════════════════════════════════════════════════════ */}
+        <section className={cn(
+          "relative py-16 px-6 sm:px-12 lg:px-16 w-full max-w-[1700px] mx-auto my-12 text-center rounded-3xl border transition-colors duration-300 shadow-xl overflow-hidden",
+          isDarkMode
+            ? "bg-gradient-to-r from-slate-900 via-slate-800 to-emerald-950 border-slate-800 text-white shadow-2xl shadow-emerald-950/30"
+            : "bg-gradient-to-br from-emerald-50/90 via-white to-teal-50/80 border-emerald-200/90 text-slate-900 shadow-emerald-600/10"
+        )}>
+          {/* Ambient background glows */}
+          <div className={cn(
+            "absolute -top-24 -right-24 w-72 h-72 rounded-full blur-[90px] pointer-events-none",
+            isDarkMode ? "bg-emerald-500/10" : "bg-emerald-400/20"
+          )} />
+          <div className={cn(
+            "absolute -bottom-24 -left-24 w-72 h-72 rounded-full blur-[90px] pointer-events-none",
+            isDarkMode ? "bg-teal-500/10" : "bg-teal-400/20"
+          )} />
+
+          <div className="relative z-10 space-y-4">
+            <h3
+              className={cn(
+                "text-3xl sm:text-4xl font-bold font-serif leading-tight",
+                isDarkMode ? "text-white" : "text-slate-900"
+              )}
+              style={{ fontFamily: "'Times New Roman', Times, serif" }}
+            >
+              Ready to simplify your business?
+            </h3>
+            <p className={cn(
+              "text-sm font-medium max-w-lg mx-auto leading-relaxed",
+              isDarkMode ? "text-slate-300" : "text-slate-600"
+            )}>
+              Start managing your conversations, leads and automation with UWO Connect.
+            </p>
+            <div className="pt-2">
+              <button
+                type="button"
+                onClick={() => router.push('/auth/register')}
+                className="landing-button-glow px-8 py-4 rounded-2xl bg-[#059669] hover:bg-[#047857] text-white text-sm font-extrabold shadow-xl shadow-emerald-700/25 inline-flex items-center gap-2.5 transition-all hover:scale-105 active:scale-95 cursor-pointer"
+              >
+                <span>Get Started</span>
+                <ArrowRight size={18} />
+              </button>
+            </div>
+          </div>
+        </section>
       </main>
       <footer className={cn(
         "border-t py-16 px-6 sm:px-12 lg:px-16 transition-colors duration-300",
