@@ -219,10 +219,23 @@ export default function CreateCampaignModal({ isOpen, onClose, onCreated }) {
 
   const handleSubmit = async (e) => {
     if (e && e.preventDefault) e.preventDefault();
-    if (!name) return;
+    if (!name.trim()) {
+      alert("Please enter a campaign name.");
+      return;
+    }
 
     if (audienceFilter === 'SPECIFIC' && selectedContacts.length === 0) {
       alert("Please select at least one contact to receive this broadcast.");
+      return;
+    }
+
+    if (composeMode === 'TEMPLATE' && !templateId) {
+      alert("Please select an approved Meta template, or switch to Custom Compose.");
+      return;
+    }
+
+    if (composeMode === 'CUSTOM' && !messageBody.trim()) {
+      alert("Please enter message content for your broadcast.");
       return;
     }
 
@@ -233,7 +246,7 @@ export default function CreateCampaignModal({ isOpen, onClose, onCreated }) {
 
       // 1. Consume Entitlement or Reserve Wallet Fund
       const broadcast_id = `brd_${Date.now()}`;
-      const idempotency_key = `key_${broadcast_id}_${name.replace(/\s+/g, '_')}`;
+      const idempotency_key = `key_${broadcast_id}_${name.trim().replace(/\s+/g, '_')}`;
 
       const cRes = await axios.post(`${API_BASE_URL}/api/broadcasts/consume/`, {
         broadcast_id,
@@ -252,16 +265,16 @@ export default function CreateCampaignModal({ isOpen, onClose, onCreated }) {
       }
 
       const payload = {
-        name,
+        name: name.trim(),
         channel: selectedPlatforms[0] || 'WHATSAPP',
-        message_body: composeMode === 'CUSTOM' ? messageBody : '',
-        template: composeMode === 'TEMPLATE' ? templateId : null,
+        message_body: composeMode === 'CUSTOM' ? messageBody.trim() : '',
+        template: composeMode === 'TEMPLATE' && templateId ? templateId : null,
         platforms: selectedPlatforms,
         audience_filter: audienceFilter,
         tags: audienceFilter === 'SPECIFIC' ? selectedContacts : [],
         scheduled_at,
         followup_delay_hours: isFollowUpEnabled ? parseInt(followupDelayHours, 10) : null,
-        followup_template_id: isFollowUpEnabled ? followupTemplateId : null,
+        followup_template_id: isFollowUpEnabled && followupTemplateId ? followupTemplateId : null,
         broadcast_usage_id: consumeRes?.broadcast_usage_id
       };
 
@@ -569,6 +582,14 @@ export default function CreateCampaignModal({ isOpen, onClose, onCreated }) {
                 </div>
               ) : (
                 <div className="space-y-4">
+                  <div className="p-3.5 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-[11px] flex items-start gap-2.5">
+                    <AlertCircle size={16} className="text-amber-600 shrink-0 mt-0.5" />
+                    <div>
+                      <span className="font-bold block">Meta WhatsApp Outbound Policy:</span>
+                      Custom text messages only deliver to contacts who interacted in the last 24 hours. For cold leads or recipients outside the 24h window, Meta requires using an <strong>Approved Meta Template</strong>.
+                    </div>
+                  </div>
+
                   <div className="flex items-center justify-between">
                     <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
                       Broadcast Message Text

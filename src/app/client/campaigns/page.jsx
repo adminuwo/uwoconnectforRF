@@ -27,8 +27,14 @@ export default function CampaignsPage() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isAddMoneyOpen, setIsAddMoneyOpen] = useState(false);
   const [selectedCampaign, setSelectedCampaign] = useState(null);
+  const [detailModalTab, setDetailModalTab] = useState('SENT');
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
+
+  const openDetailModal = (camp, tab = 'SENT') => {
+    setSelectedCampaign(camp);
+    setDetailModalTab(tab);
+  };
 
   const [entitlement, setEntitlement] = useState({
     included_quantity: 1,
@@ -312,7 +318,7 @@ export default function CampaignsPage() {
               return (
                 <div
                   key={campId}
-                  onClick={() => setSelectedCampaign(camp)}
+                  onClick={() => openDetailModal(camp, (camp.total_failed > 0 && (!camp.total_sent || camp.total_sent === 0)) ? 'FAILED' : 'SENT')}
                   className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-xs hover:border-[#00AB56]/50 hover:shadow-sm transition-all cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 group"
                 >
                   <div className="flex items-center gap-3 min-w-0 flex-1">
@@ -362,20 +368,41 @@ export default function CampaignsPage() {
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-5 text-xs pt-2.5 sm:pt-0 border-t sm:border-t-0 border-slate-100">
-                    <div className="flex gap-3 sm:gap-4 bg-slate-50 sm:bg-transparent px-3 py-1.5 sm:p-0 rounded-xl sm:rounded-none">
-                      <div className="text-center">
-                        <span className="text-[8px] sm:text-[9px] text-slate-400 font-bold uppercase block">Sent</span>
-                        <span className="font-bold text-slate-900 text-xs sm:text-sm">{camp.total_sent || 0}</span>
-                      </div>
-                      <div className="text-center">
-                        <span className="text-[8px] sm:text-[9px] text-slate-400 font-bold uppercase block">Delivered</span>
-                        <span className="font-bold text-emerald-600 text-xs sm:text-sm">{camp.total_delivered || 0}</span>
-                      </div>
-                      <div className="text-center">
-                        <span className="text-[8px] sm:text-[9px] text-slate-400 font-bold uppercase block">Failed</span>
-                        <span className="font-bold text-rose-600 text-xs sm:text-sm">{camp.total_failed || 0}</span>
-                      </div>
+                  <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-4 text-xs pt-2.5 sm:pt-0 border-t sm:border-t-0 border-slate-100">
+                    <div className="flex gap-2 sm:gap-2.5 bg-slate-50 sm:bg-transparent p-1.5 sm:p-0 rounded-xl sm:rounded-none">
+                      <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); openDetailModal(camp, 'SENT'); }}
+                        className="px-2.5 py-1.5 rounded-xl hover:bg-emerald-50 hover:border-emerald-200 border border-transparent transition-all text-center cursor-pointer group/stat"
+                        title="Click to view list of Sent contacts"
+                      >
+                        <span className="text-[8px] sm:text-[9px] text-slate-400 group-hover/stat:text-emerald-700 font-bold uppercase block">Sent</span>
+                        <span className="font-extrabold text-slate-900 group-hover/stat:text-emerald-700 text-xs sm:text-sm">{camp.total_sent || 0}</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); openDetailModal(camp, 'SENT'); }}
+                        className="px-2.5 py-1.5 rounded-xl hover:bg-emerald-50 hover:border-emerald-200 border border-transparent transition-all text-center cursor-pointer group/stat"
+                        title="Click to view list of Delivered contacts"
+                      >
+                        <span className="text-[8px] sm:text-[9px] text-emerald-600 font-bold uppercase block">Delivered</span>
+                        <span className="font-extrabold text-emerald-600 text-xs sm:text-sm">{camp.total_delivered || camp.total_sent || 0}</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); openDetailModal(camp, 'FAILED'); }}
+                        className={`px-2.5 py-1.5 rounded-xl border transition-all text-center cursor-pointer group/stat ${
+                          (camp.total_failed || 0) > 0 
+                            ? 'bg-rose-50/80 border-rose-200/90 hover:bg-rose-100 hover:border-rose-300' 
+                            : 'border-transparent hover:bg-slate-100'
+                        }`}
+                        title="Click to view list of Failed contacts & reasons"
+                      >
+                        <span className={`text-[8px] sm:text-[9px] font-bold uppercase block ${(camp.total_failed || 0) > 0 ? 'text-rose-600' : 'text-slate-400'}`}>Failed</span>
+                        <span className={`font-extrabold text-xs sm:text-sm ${(camp.total_failed || 0) > 0 ? 'text-rose-600' : 'text-slate-500'}`}>{camp.total_failed || 0}</span>
+                      </button>
                     </div>
 
                     <div className="flex items-center gap-1 sm:gap-2 shrink-0">
@@ -407,6 +434,7 @@ export default function CampaignsPage() {
       <CampaignDetailModal
         isOpen={!!selectedCampaign}
         campaign={selectedCampaign}
+        initialTab={detailModalTab}
         onClose={() => setSelectedCampaign(null)}
         onRefresh={fetchCampaigns}
       />

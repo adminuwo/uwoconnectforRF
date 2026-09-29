@@ -36,7 +36,14 @@ const LearningCenterPage = () => {
         setGuides(res.data.results);
       }
     } catch (err) {
-      console.error('Error fetching guides:', err);
+      if (err.response?.status === 401) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('uwo_token');
+        localStorage.removeItem('user');
+        window.location.href = '/auth/login';
+      } else {
+        console.warn('Could not fetch guides:', err.message);
+      }
     } finally {
       setLoading(false);
     }
