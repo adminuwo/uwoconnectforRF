@@ -43,13 +43,14 @@ export const YouTubeLogo = ({ size = 22, className = '' }) => (
 );
 
 export const GmailLogo = ({ size = 22, className = '' }) => (
-  <svg width={size} height={size} viewBox="0 0 48 48" fill="none" className={cn("shrink-0", className)}>
-    <path d="M10 38V18.8L3 13.5V35C3 36.6 4.3 38 6 38H10Z" fill="#4285F4" />
-    <path d="M38 38V18.8L45 13.5V35C45 36.6 43.7 38 42 38H38Z" fill="#34A853" />
-    <path d="M38 18.8V10L24 20.5L10 10V18.8L24 29.3L38 18.8Z" fill="#EA4335" />
-    <path d="M10 10L3 13.5L10 18.8V10Z" fill="#C5221F" />
-    <path d="M38 10L45 13.5L38 18.8V10Z" fill="#FBBC04" />
-  </svg>
+  <img
+    src="/Gmail.png"
+    alt="Gmail"
+    width={size}
+    height={size}
+    style={{ width: size, height: size }}
+    className={cn("shrink-0 object-contain", className)}
+  />
 );
 
 export const OutlookLogo = ({ size = 22, className = '' }) => (
@@ -64,31 +65,36 @@ export const OutlookLogo = ({ size = 22, className = '' }) => (
 );
 
 export const GoogleSheetsLogo = ({ size = 22, className = '' }) => (
-  <svg width={size} height={size} viewBox="0 0 48 48" fill="none" className={cn("shrink-0", className)}>
-    <rect x="8" y="4" width="32" height="40" rx="4" fill="#0F9D58" />
-    <path d="M30 4L40 14H32C30.9 14 30 13.1 30 12V4Z" fill="#87CEAC" />
-    <rect x="15" y="19" width="18" height="16" rx="1" fill="white" />
-    <line x1="15" y1="24.5" x2="33" y2="24.5" stroke="#0F9D58" strokeWidth="1.5" />
-    <line x1="15" y1="30" x2="33" y2="30" stroke="#0F9D58" strokeWidth="1.5" />
-    <line x1="24" y1="19" x2="24" y2="35" stroke="#0F9D58" strokeWidth="1.5" />
-  </svg>
+  <img
+    src="/Google Sheet.png"
+    alt="Google Sheets"
+    width={size}
+    height={size}
+    style={{ width: size, height: size }}
+    className={cn("shrink-0 object-contain", className)}
+  />
 );
 
 export const GoogleDocsLogo = ({ size = 22, className = '' }) => (
-  <svg width={size} height={size} viewBox="0 0 48 48" fill="none" className={cn("shrink-0", className)}>
-    <rect x="8" y="4" width="32" height="40" rx="4" fill="#4285F4" />
-    <path d="M30 4L40 14H32C30.9 14 30 13.1 30 12V4Z" fill="#A1C2FA" />
-    <rect x="15" y="20" width="18" height="2.5" rx="1.25" fill="white" />
-    <rect x="15" y="26" width="18" height="2.5" rx="1.25" fill="white" />
-    <rect x="15" y="32" width="11" height="2.5" rx="1.25" fill="white" />
-  </svg>
+  <img
+    src="/Google Docs.png"
+    alt="Google Docs"
+    width={size}
+    height={size}
+    style={{ width: size, height: size }}
+    className={cn("shrink-0 object-contain", className)}
+  />
 );
 
 export const GoogleMapsLogo = ({ size = 22, className = '' }) => (
-  <svg width={size} height={size} viewBox="0 0 48 48" fill="none" className={cn("shrink-0", className)}>
-    <path d="M24 4C15.16 4 8 11.16 8 20c0 12 16 24 16 24s16-12 16-24c0-8.84-7.16-16-16-16zm0 21.5c-3.04 0-5.5-2.46-5.5-5.5s2.46-5.5 5.5-5.5 5.5 2.46 5.5 5.5-2.46 5.5-5.5 5.5z" fill="#34A853" />
-    <circle cx="24" cy="20" r="5.5" fill="#4285F4" />
-  </svg>
+  <img
+    src="/Google Maps.png"
+    alt="Google Maps"
+    width={size}
+    height={size}
+    style={{ width: size, height: size }}
+    className={cn("shrink-0 object-contain", className)}
+  />
 );
 
 export const OneDriveLogo = ({ size = 22, className = '' }) => (
@@ -99,19 +105,25 @@ export const OneDriveLogo = ({ size = 22, className = '' }) => (
 );
 
 export const GoogleSlidesLogo = ({ size = 22, className = '' }) => (
-  <svg width={size} height={size} viewBox="0 0 48 48" fill="none" className={cn("shrink-0", className)}>
-    <rect x="8" y="4" width="32" height="40" rx="4" fill="#FBBC04" />
-    <path d="M30 4L40 14H32C30.9 14 30 13.1 30 12V4Z" fill="#FCE8B2" />
-    <rect x="15" y="19" width="18" height="12" rx="1.5" fill="white" />
-  </svg>
+  <img
+    src="/Google Slides.png"
+    alt="Google Slides"
+    width={size}
+    height={size}
+    style={{ width: size, height: size }}
+    className={cn("shrink-0 object-contain", className)}
+  />
 );
 
 export const GoogleNewsLogo = ({ size = 22, className = '' }) => (
-  <svg width={size} height={size} viewBox="0 0 48 48" fill="none" className={cn("shrink-0", className)}>
-    <rect x="6" y="8" width="36" height="32" rx="6" fill="#4285F4" />
-    <path d="M14 18h20v3H14zm0 6h20v3H14zm0 6h12v3H14z" fill="white" />
-    <rect x="29" y="30" width="5" height="3" rx="0.5" fill="#34A853" />
-  </svg>
+  <img
+    src="/Google News.png"
+    alt="Google News"
+    width={size}
+    height={size}
+    style={{ width: size, height: size }}
+    className={cn("shrink-0 object-contain", className)}
+  />
 );
 
 export const XLogo = ({ size = 18, className = '' }) => (

@@ -133,7 +133,7 @@ export default function PricingPage() {
                   className={cn(
                     'px-7 py-3.5 rounded-xl border text-sm font-bold flex items-center gap-2 transition-all hover:scale-105 active:scale-95',
                     isDarkMode
-                      ? 'bg-slate-900/80 border-slate-800 text-slate-200 hover:text-white'
+                      ? 'bg-transparent border-slate-800 text-slate-200 hover:text-white'
                       : 'bg-white border-slate-200 text-slate-700 hover:text-slate-900 shadow-xs'
                   )}
                 >
@@ -156,7 +156,7 @@ export default function PricingPage() {
                   whileHover={{ y: -4, scale: 1.03 }}
                   className={cn(
                     'p-4 rounded-2xl border text-center space-y-2 transition-all',
-                    isDarkMode ? 'bg-slate-900/60 border-slate-800' : 'bg-white border-slate-200 shadow-xs'
+                    isDarkMode ? 'bg-transparent border-slate-800' : 'bg-white border-slate-200 shadow-xs'
                   )}
                 >
                   <span className={cn('flex justify-center', t.color)}>{t.icon}</span>
@@ -237,7 +237,7 @@ export default function PricingPage() {
                     transition={{ duration: 0.3, delay: idx * 0.04 }}
                     className={cn(
                       'rounded-2xl border transition-all overflow-hidden',
-                      isDarkMode ? 'bg-slate-900/80 border-slate-800' : 'bg-white border-slate-200 shadow-xs'
+                      isDarkMode ? 'bg-transparent border-slate-800' : 'bg-white border-slate-200 shadow-xs'
                     )}
                   >
                     <button

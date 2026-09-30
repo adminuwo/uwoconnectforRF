@@ -12,6 +12,7 @@ import LandingLayout from '../LandingLayout';
 import {
   WhatsAppLogo, InstagramLogo, FacebookLogo, YouTubeLogo, GoogleNewsLogo
 } from '../LandingBrandLogos';
+import LiveUnifiedInboxWorkflow from '../channels/LiveUnifiedInboxWorkflow';
 import { motion } from 'framer-motion';
 
 export default function ChannelsPage() {
@@ -302,110 +303,8 @@ export default function ChannelsPage() {
                 </h2>
               </div>
 
-              {/* Visual Step Nodes - Connected Flow Design */}
-              <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-6 lg:gap-4 w-full">
-                
-                {/* Connecting Line for Desktop */}
-                <div className="hidden lg:block absolute top-1/2 left-[10%] right-[10%] h-1 bg-gradient-to-r from-emerald-500/0 via-blue-500/20 to-violet-500/0 -translate-y-1/2 z-0" />
-
-                {/* Step 1: Customer Message */}
-                <motion.div
-                  whileHover={{ y: -8, scale: 1.03 }}
-                  className="w-full lg:w-1/3 p-6 rounded-[2rem] bg-white/60 dark:bg-[#0A0D14]/80 backdrop-blur-2xl border border-slate-200/50 dark:border-white/5 shadow-2xl relative z-10 group transition-all"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-[2rem]" />
-                  <div className="flex items-center justify-between mb-6">
-                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-400 to-emerald-600 text-white flex items-center justify-center font-black text-lg shadow-lg shadow-emerald-500/30">
-                      1
-                    </div>
-                    <span className="text-[10px] font-black px-3 py-1.5 rounded-full bg-emerald-100 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 tracking-wider">INCOMING</span>
-                  </div>
-                  <h3 className="text-xl font-extrabold text-slate-900 dark:text-white mb-4">Customer Message</h3>
-                  
-                  {/* Chat Bubble Simulation */}
-                  <div className="relative p-4 rounded-2xl rounded-tl-sm bg-slate-100 dark:bg-[#131825] border border-slate-200/60 dark:border-white/5">
-                    <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-[10px] mb-2 font-semibold">
-                      <WhatsAppLogo size={14} />
-                      <span>WhatsApp • Rohan (+91 98200)</span>
-                    </div>
-                    <p className="text-sm text-slate-800 dark:text-slate-200 font-medium leading-snug">
-                      “Hi! Need a GST quotation for Growth Plan”
-                    </p>
-                    <div className="absolute -left-2 top-0 w-4 h-4 bg-slate-100 dark:bg-[#131825] border-t border-l border-slate-200/60 dark:border-white/5 rotate-45 transform origin-bottom-right" />
-                  </div>
-                </motion.div>
-
-                {/* Flow Arrow 1 */}
-                <div className="hidden lg:flex flex-col items-center justify-center z-10 px-2 text-slate-300 dark:text-slate-600">
-                  <div className="w-8 h-8 rounded-full bg-white dark:bg-[#0A0D14] border border-slate-200 dark:border-slate-800 flex items-center justify-center shadow-sm">
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
-                  </div>
-                </div>
-
-                {/* Step 2: UWO Connect Inbox */}
-                <motion.div
-                  whileHover={{ y: -8, scale: 1.03 }}
-                  className="w-full lg:w-1/3 p-6 rounded-[2rem] bg-white/80 dark:bg-[#0A0D14]/90 backdrop-blur-2xl border-2 border-blue-500/30 dark:border-blue-500/40 shadow-2xl shadow-blue-500/10 relative z-20 group transition-all"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent opacity-100 rounded-[2rem]" />
-                  <div className="flex items-center justify-between mb-6 relative">
-                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center font-black text-lg shadow-lg shadow-blue-500/30 ring-4 ring-blue-500/20">
-                      2
-                    </div>
-                    <span className="text-[10px] font-black px-3 py-1.5 rounded-full bg-blue-100 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-500/20 tracking-wider">DEV HUB</span>
-                  </div>
-                  <h3 className="text-xl font-extrabold text-slate-900 dark:text-white mb-4 relative">Unified Inbox</h3>
-
-                  {/* Processing UI Simulation */}
-                  <div className="relative p-4 rounded-2xl bg-slate-50 dark:bg-[#131825] border border-slate-200/60 dark:border-white/5 space-y-3">
-                    <div className="flex justify-between items-center text-[10px] uppercase font-bold tracking-wider">
-                      <span className="text-blue-600 dark:text-blue-400">Auto-Routing</span>
-                      <span className="text-slate-400">0.1s</span>
-                    </div>
-                    <div className="h-1.5 w-full bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
-                      <div className="h-full bg-blue-500 w-full animate-pulse rounded-full" />
-                    </div>
-                    <div className="flex items-center gap-2 pt-1">
-                      <span className="w-2 h-2 rounded-full bg-blue-500 animate-ping" />
-                      <span className="text-xs font-bold text-slate-700 dark:text-slate-300">Sales Team Assigned</span>
-                    </div>
-                  </div>
-                </motion.div>
-
-                {/* Flow Arrow 2 */}
-                <div className="hidden lg:flex flex-col items-center justify-center z-10 px-2 text-slate-300 dark:text-slate-600">
-                  <div className="w-8 h-8 rounded-full bg-white dark:bg-[#0A0D14] border border-slate-200 dark:border-slate-800 flex items-center justify-center shadow-sm">
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
-                  </div>
-                </div>
-
-                {/* Step 3: Team Response */}
-                <motion.div
-                  whileHover={{ y: -8, scale: 1.03 }}
-                  className="w-full lg:w-1/3 p-6 rounded-[2rem] bg-white/60 dark:bg-[#0A0D14]/80 backdrop-blur-2xl border border-slate-200/50 dark:border-white/5 shadow-2xl relative z-10 group transition-all"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-br from-violet-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-[2rem]" />
-                  <div className="flex items-center justify-between mb-6 relative">
-                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-violet-400 to-violet-600 text-white flex items-center justify-center font-black text-lg shadow-lg shadow-violet-500/30">
-                      3
-                    </div>
-                    <span className="text-[10px] font-black px-3 py-1.5 rounded-full bg-violet-100 dark:bg-violet-500/10 text-violet-700 dark:text-violet-400 border border-violet-200 dark:border-violet-500/20 tracking-wider">DISPATCH</span>
-                  </div>
-                  <h3 className="text-xl font-extrabold text-slate-900 dark:text-white mb-4 relative">Team Response</h3>
-
-                  {/* Outbound Chat Bubble Simulation */}
-                  <div className="relative p-4 rounded-2xl rounded-tr-sm bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-500/20">
-                    <div className="flex items-center justify-end gap-1.5 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold mb-2">
-                      <span>Dispatched via API</span>
-                      <CheckCircle2 size={13} />
-                    </div>
-                    <p className="text-sm text-slate-800 dark:text-slate-200 font-medium leading-snug text-right">
-                      “Quotation QT-8402 generated & sent as PDF.”
-                    </p>
-                    <div className="absolute -right-2 top-0 w-4 h-4 bg-emerald-50 dark:bg-[#07241A] border-t border-r border-emerald-200 dark:border-emerald-500/20 rotate-45 transform origin-bottom-left" />
-                  </div>
-                </motion.div>
-              </div>
+              {/* Visual Step Nodes - Connected Flow Design (Modern Live Animated Workflow) */}
+              <LiveUnifiedInboxWorkflow isDarkMode={isDarkMode} />
 
             </div>
           </motion.section>

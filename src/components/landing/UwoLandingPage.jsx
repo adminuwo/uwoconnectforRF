@@ -18,6 +18,7 @@ import TermsModal from '@/components/TermsModal';
 import PricingComparisonTable from '@/components/pricing/PricingComparisonTable';
 import CustomPlanSection from './CustomPlanSection';
 import { useBrand } from '@/context/BrandContext';
+import ScrollReveal from './ScrollReveal';
 
 // ── AUTHENTIC SVG BRAND LOGOS ──
 const WhatsAppLogo = ({ size = 22 }) => (
@@ -312,7 +313,7 @@ export default function UwoLandingPage() {
       sampleSender: 'Rohan Sharma (+91 98200-XXXX)',
       sampleMsg: '“Hi! Can you share the pricing catalog for enterprise CRM?”',
       sampleReply: '“Hello Rohan! Here is the latest 2026 catalog and GST quotation PDF.”',
-      screenshot: '/dashboard/dashboard_messages_live.png'
+      screenshot: '/inbox_preview_live.png'
     },
     {
       id: 'instagram',
@@ -360,23 +361,23 @@ export default function UwoLandingPage() {
     {
       id: 'gmail',
       name: 'Gmail',
-      logo: <GmailLogo size={26} />,
+      logo: <img src="/Gmail.png" alt="Gmail" className="w-[26px] h-[26px] object-contain" />,
       category: 'Email Intelligence',
       desc: 'Auto-syncs incoming client emails & triggers automated replies and CRM contact updates in real time.',
       stat: '0.1s Email Sync'
     },
     {
-      id: 'outlook',
-      name: 'Microsoft Outlook',
-      logo: <OutlookLogo size={26} />,
-      category: 'Enterprise Mail',
-      desc: 'Enterprise Outlook calendar meeting scheduling, email inbox routing, and executive thread sync.',
-      stat: 'Exchange Compliant'
+      id: 'zoho-crm',
+      name: 'Zoho CRM',
+      logo: <img src="/Zoho CRM.png" alt="Zoho CRM" className="w-[26px] h-[26px] object-contain" />,
+      category: 'Sales Automation',
+      desc: 'Seamlessly syncs your lead pipelines, automated triggers, and customer contact data with Zoho CRM.',
+      stat: 'Pipeline Sync'
     },
     {
       id: 'google-sheets',
       name: 'Google Sheets',
-      logo: <GoogleSheetsLogo size={26} />,
+      logo: <img src="/Google Sheet.png" alt="Google Sheets" className="w-[26px] h-[26px] object-contain" />,
       category: 'Real-time Database',
       desc: 'Automatically writes every qualified lead, issued quotation, and verified invoice directly as a new sheet row.',
       stat: 'Live 2-Way Sync'
@@ -384,23 +385,15 @@ export default function UwoLandingPage() {
     {
       id: 'google-docs',
       name: 'Google Docs',
-      logo: <GoogleDocsLogo size={26} />,
+      logo: <img src="/Google Docs.png" alt="Google Docs" className="w-[26px] h-[26px] object-contain" />,
       category: 'Document Automation',
       desc: 'Generates branded service contracts, customized agreements, and proposals from real-time customer data.',
       stat: 'Instant DOCX/PDF'
     },
     {
-      id: 'onedrive',
-      name: 'OneDrive',
-      logo: <OneDriveLogo size={26} />,
-      category: 'Cloud Storage',
-      desc: 'Secure cloud file storage for catalog assets, client KYC uploads, and encrypted GST tax records.',
-      stat: 'Cloud Encrypted'
-    },
-    {
       id: 'google-maps',
       name: 'Google Maps',
-      logo: <GoogleMapsLogo size={26} />,
+      logo: <img src="/Google Maps.png" alt="Google Maps" className="w-[26px] h-[26px] object-contain" />,
       category: 'Location Intelligence',
       desc: 'Automatically maps customer addresses, verifies store locations, and pinpoints branch coordinates.',
       stat: 'Geo-Routing'
@@ -408,7 +401,7 @@ export default function UwoLandingPage() {
     {
       id: 'google-slides',
       name: 'Google Slides',
-      logo: <GoogleSlidesLogo size={26} />,
+      logo: <img src="/Google Slides.png" alt="Google Slides" className="w-[26px] h-[26px] object-contain" />,
       category: 'Dynamic Presentations',
       desc: 'Creates personalized pitch decks and interactive enterprise solution overviews on the fly.',
       stat: 'Deck Automation'
@@ -416,7 +409,7 @@ export default function UwoLandingPage() {
     {
       id: 'google-news',
       name: 'Google News Feed',
-      logo: <GoogleNewsLogo size={26} />,
+      logo: <img src="/Google News.png" alt="Google News" className="w-[26px] h-[26px] object-contain" />,
       category: 'Market Intelligence',
       desc: 'Monitors brand press mentions, market movements, and competitor alerts right inside your dashboard feed.',
       stat: 'Real-time Alerts'
@@ -663,20 +656,20 @@ export default function UwoLandingPage() {
     <div
       style={{ fontFamily: "'Times New Roman', Times, serif" }}
       className={cn(
-        "min-h-screen transition-colors duration-300 selection:bg-emerald-500/20 selection:text-emerald-900",
+        "min-h-screen transition-colors duration-300 selection:bg-emerald-500/20 selection:text-emerald-900 pt-16",
         isDarkMode ? "bg-[#070B14] text-slate-100 dark" : "bg-[#F8FAFC] text-slate-900"
       )}
     >
 
       {/* ════════════════════════════════════════════════════════════════ */}
-      {/* 1. STICKY GLASSY NAVBAR                                         */}
+      {/* 1. FIXED GLASSY NAVBAR                                          */}
       {/* ════════════════════════════════════════════════════════════════ */}
       <header
         className={cn(
-          "sticky top-0 z-50 backdrop-blur-xl border-b transition-all duration-300",
+          "fixed top-0 left-0 right-0 w-full z-50 backdrop-blur-xl border-b transition-all duration-300",
           isDarkMode
-            ? "bg-[#070B14]/85 border-slate-800/80 text-slate-100"
-            : "bg-white/85 border-slate-200/80 text-slate-900"
+            ? "bg-[#070B14]/90 border-slate-800/80 text-slate-100"
+            : "bg-white/90 border-slate-200/80 text-slate-900"
         )}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
@@ -883,52 +876,59 @@ export default function UwoLandingPage() {
           <div className="relative z-10 max-w-7xl mx-auto text-center space-y-8">
 
             {/* Top Pill Badge */}
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 backdrop-blur-md shadow-xs">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-xs font-bold text-emerald-800 dark:text-emerald-300 tracking-wide">
-                Unified Communication & Business Automation
-              </span>
-            </div>
+            <ScrollReveal y={20} delay={0.05}>
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 backdrop-blur-md shadow-xs">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="text-xs font-bold text-emerald-800 dark:text-emerald-300 tracking-wide">
+                  Unified Communication &amp; Business Automation
+                </span>
+              </div>
+            </ScrollReveal>
 
             {/* Main Headline */}
-            <div className="space-y-4 max-w-4xl mx-auto">
-              <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight leading-[1.08]">
-                <span>Connect Everything. </span>
-                <span className="bg-gradient-to-r from-[#0B8F78] via-[#0F766E] to-[#2563EB] bg-clip-text text-transparent">
-                  Automate Anything.
-                </span>
-              </h1>
-              <p className={cn(
-                "text-base sm:text-lg lg:text-xl font-normal leading-relaxed max-w-2xl mx-auto",
-                isDarkMode ? "text-slate-300" : "text-slate-600"
-              )}>
-                UWO Connect brings your communication channels, business tools, and automation into one intelligent workspace.
-              </p>
-            </div>
+            <ScrollReveal y={25} delay={0.15}>
+              <div className="space-y-4 max-w-4xl mx-auto">
+                <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight leading-[1.08]">
+                  <span>Connect Everything. </span>
+                  <span className="bg-gradient-to-r from-[#0B8F78] via-[#0F766E] to-[#2563EB] bg-clip-text text-transparent">
+                    Automate Anything.
+                  </span>
+                </h1>
+                <p className={cn(
+                  "text-base sm:text-lg lg:text-xl font-normal leading-relaxed max-w-2xl mx-auto",
+                  isDarkMode ? "text-slate-300" : "text-slate-600"
+                )}>
+                  UWO Connect brings your communication channels, business tools, and automation into one intelligent workspace.
+                </p>
+              </div>
+            </ScrollReveal>
 
             {/* Action Buttons */}
-            <div className="flex flex-wrap items-center justify-center gap-3.5 pt-2">
-              <button
-                type="button"
-                onClick={handleStartFree}
-                className="px-8 py-3.5 rounded-xl bg-gradient-to-r from-[#0B8F78] to-[#0F766E] hover:from-[#097361] hover:to-[#0B8F78] text-white text-sm font-bold shadow-lg shadow-emerald-700/25 hover:scale-105 active:scale-95 transition-all cursor-pointer flex items-center gap-2"
-              >
-                <span>Start Free</span>
-                <ArrowRight size={16} />
-              </button>
-              <a
-                href="#platform"
-                className={cn(
-                  "px-7 py-3.5 rounded-xl border text-sm font-bold transition-all hover:scale-105 active:scale-95 cursor-pointer flex items-center gap-2",
-                  isDarkMode
-                    ? "bg-slate-900/80 border-slate-800 text-slate-200 hover:bg-slate-800 hover:border-slate-700"
-                    : "bg-white border-slate-200/90 text-slate-700 hover:bg-slate-50 hover:border-slate-300 shadow-xs"
-                )}
-              >
-                <span>Explore Platform</span>
-                <ChevronDown size={15} />
-              </a>
-            </div>
+            <ScrollReveal y={20} delay={0.25}>
+              <div className="flex flex-wrap items-center justify-center gap-3.5 pt-2">
+                <button
+                  type="button"
+                  onClick={handleStartFree}
+                  className="px-8 py-3.5 rounded-xl bg-gradient-to-r from-[#0B8F78] to-[#0F766E] hover:from-[#097361] hover:to-[#0B8F78] text-white text-sm font-bold shadow-lg shadow-emerald-700/25 hover:scale-105 active:scale-95 transition-all cursor-pointer flex items-center gap-2"
+                >
+                  <span>Start Free</span>
+                  <ArrowRight size={16} />
+                </button>
+                <a
+                  href="#platform"
+                  className={cn(
+                    "px-7 py-3.5 rounded-xl border text-sm font-bold transition-all hover:scale-105 active:scale-95 cursor-pointer flex items-center gap-2",
+                    isDarkMode
+                      ? "bg-slate-900/80 border-slate-800 text-slate-200 hover:bg-slate-800 hover:border-slate-700"
+                      : "bg-white border-slate-200/90 text-slate-700 hover:bg-slate-50 hover:border-slate-300 shadow-xs"
+                  )}
+                >
+                  <span>Explore Platform</span>
+                  <ChevronDown size={15} />
+                </a>
+              </div>
+            </ScrollReveal>
+
 
             {/* ══════════════════════════════════════════════════════════════ */}
             {/* HERO VISUAL COMPOSITION: ABHA (LEFT) + DASHBOARD (CENTER) + DEV (RIGHT) */}
@@ -937,10 +937,10 @@ export default function UwoLandingPage() {
 
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-4 items-center justify-center">
 
-                {/* ── LEFT: ABHA (AUTOMATION INTELLIGENCE) ── */}
+                {/* ── LEFT: DEV (CONNECTOR ECOSYSTEM) ── */}
                 <div
                   className={cn(
-                    "lg:col-span-3 flex flex-col items-center text-center order-1 lg:order-1 transition-all duration-700 ease-out",
+                    "hidden lg:flex lg:col-span-3 flex-col items-center text-center order-1 lg:order-1 transition-all duration-700 ease-out",
                     heroEntered
                       ? "opacity-100 translate-x-0 lg:translate-x-3.5"
                       : "opacity-0 -translate-x-8 lg:-translate-x-3"
@@ -952,23 +952,23 @@ export default function UwoLandingPage() {
                       transformOrigin: '50% 90%'
                     }}
                   >
-                    {/* Glowing subtle ambient backlight behind Abha */}
-                    <div className="absolute inset-0 bg-emerald-500/12 dark:bg-emerald-400/15 rounded-full blur-2xl transform scale-95 pointer-events-none" />
+                    {/* Glowing subtle ambient backlight behind Dev */}
+                    <div className="absolute inset-0 bg-blue-500/12 dark:bg-blue-400/15 rounded-full blur-2xl transform scale-95 pointer-events-none" />
 
-                    {/* Abha Character Image - enlarged ~25%, uncropped full body */}
+                    {/* Dev Character Image - enlarged ~25%, uncropped full body */}
                     <img
-                      src="/Abha_transparent.png"
-                      alt="Abha - UWO Connect Automation Intelligence"
+                      src="/Dev_transparent.png"
+                      alt="Dev - UWO Connect Connector Intelligence"
                       className="relative z-10 w-52 sm:w-64 lg:w-[285px] xl:w-[305px] h-auto object-contain drop-shadow-[0_12px_24px_rgba(0,0,0,0.08)] dark:drop-shadow-[0_16px_32px_rgba(0,0,0,0.28)] hover:scale-[1.02] transition-transform duration-300"
                     />
                   </div>
 
                   <div className="mt-4 space-y-1 text-center">
-                    <span className="text-[11px] font-black tracking-widest text-[#0B8F78] uppercase block">
-                      ABHA • AUTOMATION
+                    <span className="text-[11px] font-black tracking-widest text-[#2563EB] uppercase block">
+                      DEV • CONNECTORS
                     </span>
                     <p className="text-xs text-slate-500 dark:text-slate-400 font-medium max-w-[210px] mx-auto leading-relaxed">
-                      Drives instant AI replies, CRM lead scoring, GST quotes &amp; invoice dispatch.
+                      Orchestrates Google, Microsoft, maps, sheets &amp; external business integrations.
                     </p>
                   </div>
                 </div>
@@ -976,7 +976,7 @@ export default function UwoLandingPage() {
                 {/* ── CENTER: REAL UWO CONNECT DASHBOARD INTERFACE ── */}
                 <div
                   className={cn(
-                    "lg:col-span-6 relative order-2 lg:order-2 transition-all duration-700 delay-100 ease-out",
+                    "col-span-1 lg:col-span-6 relative order-2 lg:order-2 transition-all duration-700 delay-100 ease-out",
                     heroEntered
                       ? "opacity-100 scale-100"
                       : "opacity-0 scale-[0.98]"
@@ -1024,10 +1024,10 @@ export default function UwoLandingPage() {
                   </div>
                 </div>
 
-                {/* ── RIGHT: DEV (CONNECTOR ECOSYSTEM) ── */}
+                {/* ── RIGHT: ABHA (AUTOMATION INTELLIGENCE) ── */}
                 <div
                   className={cn(
-                    "lg:col-span-3 flex flex-col items-center text-center order-3 lg:order-3 transition-all duration-700 delay-150 ease-out",
+                    "hidden lg:flex lg:col-span-3 flex-col items-center text-center order-3 lg:order-3 transition-all duration-700 delay-150 ease-out",
                     heroEntered
                       ? "opacity-100 translate-x-0 lg:-translate-x-3.5"
                       : "opacity-0 translate-x-8 lg:translate-x-3"
@@ -1039,23 +1039,23 @@ export default function UwoLandingPage() {
                       transformOrigin: '50% 90%'
                     }}
                   >
-                    {/* Glowing subtle ambient backlight behind Dev */}
-                    <div className="absolute inset-0 bg-blue-500/12 dark:bg-blue-400/15 rounded-full blur-2xl transform scale-95 pointer-events-none" />
+                    {/* Glowing subtle ambient backlight behind Abha */}
+                    <div className="absolute inset-0 bg-emerald-500/12 dark:bg-emerald-400/15 rounded-full blur-2xl transform scale-95 pointer-events-none" />
 
-                    {/* Dev Character Image - enlarged ~25%, uncropped full body */}
+                    {/* Abha Character Image - enlarged ~25%, uncropped full body */}
                     <img
-                      src="/Dev_transparent.png"
-                      alt="Dev - UWO Connect Connector Intelligence"
+                      src="/Abha_transparent.png"
+                      alt="Abha - UWO Connect Automation Intelligence"
                       className="relative z-10 w-52 sm:w-64 lg:w-[285px] xl:w-[305px] h-auto object-contain drop-shadow-[0_12px_24px_rgba(0,0,0,0.08)] dark:drop-shadow-[0_16px_32px_rgba(0,0,0,0.28)] hover:scale-[1.02] transition-transform duration-300"
                     />
                   </div>
 
                   <div className="mt-4 space-y-1 text-center">
-                    <span className="text-[11px] font-black tracking-widest text-[#2563EB] uppercase block">
-                      DEV • CONNECTORS
+                    <span className="text-[11px] font-black tracking-widest text-[#0B8F78] uppercase block">
+                      ABHA • AUTOMATION
                     </span>
                     <p className="text-xs text-slate-500 dark:text-slate-400 font-medium max-w-[210px] mx-auto leading-relaxed">
-                      Orchestrates Google, Microsoft, maps, sheets &amp; external business integrations.
+                      Drives instant AI replies, CRM lead scoring, GST quotes &amp; invoice dispatch.
                     </p>
                   </div>
                 </div>
@@ -1080,25 +1080,29 @@ export default function UwoLandingPage() {
           <div className="max-w-7xl mx-auto space-y-14">
 
             {/* Editorial Header */}
-            <div className="text-center space-y-3 max-w-3xl mx-auto">
-              <span className="text-xs font-bold tracking-widest text-[#0B8F78] uppercase block">
-                THE UNIFIED ARCHITECTURE
-              </span>
-              <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight">
-                Everything Your Business Needs. Connected in One Place.
-              </h2>
-              <p className={cn("text-sm sm:text-base font-normal", isDarkMode ? "text-slate-300" : "text-slate-600")}>
-                UWO Connect brings communication, productivity tools, and business automation together.
-              </p>
-            </div>
+            <ScrollReveal y={30}>
+              <div className="text-center space-y-3 max-w-3xl mx-auto">
+                <span className="text-xs font-bold tracking-widest text-[#0B8F78] uppercase block">
+                  THE UNIFIED ARCHITECTURE
+                </span>
+                <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight">
+                  Everything Your Business Needs. Connected in One Place.
+                </h2>
+                <p className={cn("text-sm sm:text-base font-normal", isDarkMode ? "text-slate-300" : "text-slate-600")}>
+                  UWO Connect brings communication, productivity tools, and business automation together.
+                </p>
+              </div>
+            </ScrollReveal>
 
             {/* Central Ecosystem Diagram (No Repetitive Boxy Cards) */}
-            <div className={cn(
-              "p-8 sm:p-12 lg:p-16 rounded-3xl border relative overflow-hidden",
-              isDarkMode
-                ? "bg-slate-950/70 border-slate-800 shadow-2xl"
-                : "bg-[#F8FAFC]/90 border-slate-200/90 shadow-lg"
-            )}>
+            <ScrollReveal y={35} delay={0.15}>
+              <div className={cn(
+                "p-8 sm:p-12 lg:p-16 rounded-3xl border relative overflow-hidden",
+                isDarkMode
+                  ? "bg-slate-950/70 border-slate-800 shadow-2xl"
+                  : "bg-[#F8FAFC]/90 border-slate-200/90 shadow-lg"
+              )}>
+
               {/* Background Flow Lines */}
               <div className="absolute inset-0 pointer-events-none opacity-20">
                 <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
@@ -1209,11 +1213,10 @@ export default function UwoLandingPage() {
                 </div>
 
               </div>
-
             </div>
-
-          </div>
-        </section>
+          </ScrollReveal>
+        </div>
+      </section>
 
         {/* ════════════════════════════════════════════════════════════════ */}
         {/* 4. CHANNELS SECTION — UNIFIED COMMUNICATION WORKSPACE          */}
@@ -1228,20 +1231,24 @@ export default function UwoLandingPage() {
           <div className="max-w-7xl mx-auto space-y-12">
 
             {/* Section Header */}
-            <div className="text-center space-y-3 max-w-3xl mx-auto">
-              <span className="text-xs font-bold tracking-widest text-[#0B8F78] uppercase block">
-                MULTI-CHANNEL UNIFIED INBOX
-              </span>
-              <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight">
-                Meet Your Customers Where They Are
-              </h2>
-              <p className={cn("text-sm sm:text-base font-normal", isDarkMode ? "text-slate-300" : "text-slate-600")}>
-                Manage conversations across your most important communication channels from one unified platform.
-              </p>
-            </div>
+            <ScrollReveal y={30}>
+              <div className="text-center space-y-3 max-w-3xl mx-auto">
+                <span className="text-xs font-bold tracking-widest text-[#0B8F78] uppercase block">
+                  MULTI-CHANNEL UNIFIED INBOX
+                </span>
+                <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight">
+                  Meet Your Customers Where They Are
+                </h2>
+                <p className={cn("text-sm sm:text-base font-normal", isDarkMode ? "text-slate-300" : "text-slate-600")}>
+                  Manage conversations across your most important communication channels from one unified platform.
+                </p>
+              </div>
+            </ScrollReveal>
 
             {/* Interactive Channel Selector Tabs */}
-            <div className="flex flex-wrap items-center justify-center gap-2 max-w-2xl mx-auto">
+            <ScrollReveal y={25} delay={0.15}>
+              <div className="flex flex-wrap items-center justify-center gap-2 max-w-2xl mx-auto">
+
               {channelsList.map((ch) => (
                 <button
                   key={ch.id}
@@ -1264,6 +1271,7 @@ export default function UwoLandingPage() {
                 </button>
               ))}
             </div>
+            </ScrollReveal>
 
             {/* Realistic Unified Communication Interface Mockup */}
             {(() => {
@@ -1324,18 +1332,41 @@ export default function UwoLandingPage() {
                     )}
                   </div>
 
-                  {/* Right Column: Actual Dashboard Screenshot */}
+                  {/* Right Column: Actual Dashboard Screenshot OR Coming Soon Banner */}
                   <div className="lg:col-span-7 bg-slate-50 dark:bg-slate-950/40 p-4 sm:p-8 flex items-center justify-center">
-                    <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800 overflow-hidden shadow-xl w-full">
+                    <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800 overflow-hidden shadow-xl w-full bg-white dark:bg-slate-900">
                       <div className="px-3 py-2 bg-slate-100 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center gap-2 text-[10px] text-slate-400">
-                        <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                        <span>Unified Inbox View • {currentChannel.name} Feed Active</span>
+                        <span className={`w-2 h-2 rounded-full ${currentChannel.comingSoon ? 'bg-amber-500 animate-pulse' : 'bg-emerald-500'}`} />
+                        <span>Unified Inbox View • {currentChannel.name} {currentChannel.comingSoon ? 'Integration' : 'Feed Active'}</span>
                       </div>
-                      <img
-                        src={currentChannel.screenshot}
-                        alt={`${currentChannel.name} Dashboard Mockup`}
-                        className="w-full h-auto object-cover max-h-[460px]"
-                      />
+                      
+                      {currentChannel.comingSoon ? (
+                        <div className="p-10 sm:p-14 text-center space-y-4 flex flex-col items-center justify-center bg-gradient-to-b from-slate-50 to-slate-100/80 dark:from-slate-900 dark:to-slate-950 min-h-[350px]">
+                          <div className="w-16 h-16 rounded-3xl bg-red-500/10 text-red-500 flex items-center justify-center border border-red-500/20 shadow-sm animate-bounce">
+                            {currentChannel.logo}
+                          </div>
+                          <div className="space-y-1.5 max-w-sm">
+                            <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-red-500/10 text-red-600 border border-red-500/20 inline-block">
+                              🚀 Launching Soon
+                            </span>
+                            <h4 className="text-xl font-extrabold text-slate-900 dark:text-white">
+                              {currentChannel.name} Integration Coming Soon
+                            </h4>
+                            <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                              We are actively building native {currentChannel.name} community lead capture, comment auto-replies, and engagement synchronization.
+                            </p>
+                          </div>
+                          <div className="pt-2 flex items-center gap-2 text-[11px] font-bold text-slate-400 font-mono">
+                            <span>Status: In Active Engineering Development</span>
+                          </div>
+                        </div>
+                      ) : (
+                        <img
+                          src={currentChannel.screenshot}
+                          alt={`${currentChannel.name} Dashboard Mockup`}
+                          className="w-full h-auto object-cover max-h-[460px]"
+                        />
+                      )}
                     </div>
                   </div>
 
@@ -1362,20 +1393,24 @@ export default function UwoLandingPage() {
           <div className="max-w-7xl mx-auto space-y-14">
 
             {/* Section Header */}
-            <div className="text-center space-y-3 max-w-3xl mx-auto">
-              <span className="text-xs font-bold tracking-widest text-[#2563EB] uppercase block">
-                INTEGRATION NETWORK
-              </span>
-              <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight">
-                Connect the Tools Your Business Already Uses
-              </h2>
-              <p className={cn("text-sm sm:text-base font-normal", isDarkMode ? "text-slate-300" : "text-slate-600")}>
-                Bring your emails, documents, spreadsheets, maps, and business data into the same workflow.
-              </p>
-            </div>
+            <ScrollReveal y={30}>
+              <div className="text-center space-y-3 max-w-3xl mx-auto">
+                <span className="text-xs font-bold tracking-widest text-[#2563EB] uppercase block">
+                  INTEGRATION NETWORK
+                </span>
+                <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight">
+                  Connect the Tools Your Business Already Uses
+                </h2>
+                <p className={cn("text-sm sm:text-base font-normal", isDarkMode ? "text-slate-300" : "text-slate-600")}>
+                  Bring your emails, documents, spreadsheets, maps, and business data into the same workflow.
+                </p>
+              </div>
+            </ScrollReveal>
 
             {/* Connected Integration Ecosystem (Dev + Interactive Network) */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+            <ScrollReveal y={35} delay={0.15}>
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+
 
               {/* Dev Character Showcase */}
               <div className="lg:col-span-4 flex flex-col items-center lg:items-start text-center lg:text-left space-y-4">
@@ -1468,11 +1503,10 @@ export default function UwoLandingPage() {
                   </div>
                 </div>
               </div>
-
             </div>
-
-          </div>
-        </section>
+          </ScrollReveal>
+        </div>
+      </section>
 
         {/* ════════════════════════════════════════════════════════════════ */}
         {/* 6. AUTOMATION SECTION — ABHA & SEQUENTIAL WORKFLOW TIMELINE    */}
@@ -1489,20 +1523,24 @@ export default function UwoLandingPage() {
           <div className="max-w-7xl mx-auto space-y-14">
 
             {/* Section Header */}
-            <div className="text-center space-y-3 max-w-3xl mx-auto">
-              <span className="text-xs font-bold tracking-widest text-[#0B8F78] uppercase block">
-                END-TO-END AUTOMATION FLOW
-              </span>
-              <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight">
-                From Conversation to Completion — Automatically
-              </h2>
-              <p className={cn("text-sm sm:text-base font-normal", isDarkMode ? "text-slate-300" : "text-slate-600")}>
-                Turn everyday business activity into automated workflows.
-              </p>
-            </div>
+            <ScrollReveal y={30}>
+              <div className="text-center space-y-3 max-w-3xl mx-auto">
+                <span className="text-xs font-bold tracking-widest text-[#0B8F78] uppercase block">
+                  END-TO-END AUTOMATION FLOW
+                </span>
+                <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight">
+                  From Conversation to Completion — Automatically
+                </h2>
+                <p className={cn("text-sm sm:text-base font-normal", isDarkMode ? "text-slate-300" : "text-slate-600")}>
+                  Turn everyday business activity into automated workflows.
+                </p>
+              </div>
+            </ScrollReveal>
 
             {/* Abha + Connected Workflow Timeline */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+            <ScrollReveal y={35} delay={0.15}>
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+
 
               {/* Connected Timeline (No 7 repetitive cards) */}
               <div className="lg:col-span-8 order-2 lg:order-1">
@@ -1605,9 +1643,9 @@ export default function UwoLandingPage() {
               </div>
 
             </div>
-
-          </div>
-        </section>
+          </ScrollReveal>
+        </div>
+      </section>
 
         {/* ════════════════════════════════════════════════════════════════ */}
         {/* 7. "HOW UWO CONNECT WORKS" — CONNECT → AUTOMATE → GROW        */}
@@ -1622,92 +1660,101 @@ export default function UwoLandingPage() {
           <div className="max-w-7xl mx-auto space-y-14">
 
             {/* Section Header */}
-            <div className="text-center space-y-3 max-w-3xl mx-auto">
-              <span className="text-xs font-bold tracking-widest text-[#0B8F78] uppercase block">
-                THREE-STEP VALUE SYSTEM
-              </span>
-              <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight">
-                How UWO Connect Works
-              </h2>
-              <p className={cn("text-sm sm:text-base font-normal", isDarkMode ? "text-slate-300" : "text-slate-600")}>
-                3 simple steps to transform manual customer tasks into automated revenue pipelines.
-              </p>
-            </div>
+            <ScrollReveal y={30}>
+              <div className="text-center space-y-3 max-w-3xl mx-auto">
+                <span className="text-xs font-bold tracking-widest text-[#0B8F78] uppercase block">
+                  THREE-STEP VALUE SYSTEM
+                </span>
+                <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight">
+                  How UWO Connect Works
+                </h2>
+                <p className={cn("text-sm sm:text-base font-normal", isDarkMode ? "text-slate-300" : "text-slate-600")}>
+                  3 simple steps to transform manual customer tasks into automated revenue pipelines.
+                </p>
+              </div>
+            </ScrollReveal>
 
             {/* Horizontal Storytelling Experience */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-left relative">
 
+
               {/* 01. CONNECT (DEV) */}
-              <div className={cn(
-                "p-8 rounded-3xl border space-y-5 transition-all duration-300 relative group",
-                isDarkMode ? "bg-slate-950/80 border-slate-800 hover:border-blue-500/50" : "bg-[#F8FAFC] border-slate-200/90 hover:border-blue-300 shadow-sm"
-              )}>
-                <div className="flex items-center justify-between">
-                  <span className="text-2xl font-black text-blue-600 font-mono">01</span>
-                  <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 flex items-center justify-center text-blue-600">
-                    <Share2 size={20} />
+              <ScrollReveal y={30} delay={0.1}>
+                <div className={cn(
+                  "p-8 rounded-3xl border space-y-5 transition-all duration-300 relative group h-full",
+                  isDarkMode ? "bg-slate-950/80 border-slate-800 hover:border-blue-500/50" : "bg-[#F8FAFC] border-slate-200/90 hover:border-blue-300 shadow-sm"
+                )}>
+                  <div className="flex items-center justify-between">
+                    <span className="text-2xl font-black text-blue-600 font-mono">01</span>
+                    <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 flex items-center justify-center text-blue-600">
+                      <Share2 size={20} />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <span className="text-[10px] font-black uppercase tracking-wider text-blue-600">DEV ORCHESTRATION</span>
+                    <h3 className="text-xl font-bold">CONNECT</h3>
+                    <p className={cn("text-xs leading-relaxed", isDarkMode ? "text-slate-400" : "text-slate-600")}>
+                      Link your social channels (WhatsApp, Instagram, Facebook, YouTube) and business tools (Gmail, Sheets, Docs, OneDrive) in a few clicks.
+                    </p>
+                  </div>
+                  <div className="pt-2 flex items-center gap-2 text-[11px] font-bold text-blue-600">
+                    <CheckCircle2 size={14} />
+                    <span>Instant OAuth &amp; Webhooks</span>
                   </div>
                 </div>
-                <div className="space-y-2">
-                  <span className="text-[10px] font-black uppercase tracking-wider text-blue-600">DEV ORCHESTRATION</span>
-                  <h3 className="text-xl font-bold">CONNECT</h3>
-                  <p className={cn("text-xs leading-relaxed", isDarkMode ? "text-slate-400" : "text-slate-600")}>
-                    Link your social channels (WhatsApp, Instagram, Facebook, YouTube) and business tools (Gmail, Sheets, Docs, OneDrive) in a few clicks.
-                  </p>
-                </div>
-                <div className="pt-2 flex items-center gap-2 text-[11px] font-bold text-blue-600">
-                  <CheckCircle2 size={14} />
-                  <span>Instant OAuth &amp; Webhooks</span>
-                </div>
-              </div>
+              </ScrollReveal>
 
               {/* 02. AUTOMATE (ABHA) */}
-              <div className={cn(
-                "p-8 rounded-3xl border space-y-5 transition-all duration-300 relative group",
-                isDarkMode ? "bg-slate-950/80 border-slate-800 hover:border-emerald-500/50" : "bg-[#F8FAFC] border-slate-200/90 hover:border-emerald-300 shadow-sm"
-              )}>
-                <div className="flex items-center justify-between">
-                  <span className="text-2xl font-black text-[#0B8F78] font-mono">02</span>
-                  <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 flex items-center justify-center text-[#0B8F78]">
-                    <Bot size={20} />
+              <ScrollReveal y={30} delay={0.2}>
+                <div className={cn(
+                  "p-8 rounded-3xl border space-y-5 transition-all duration-300 relative group h-full",
+                  isDarkMode ? "bg-slate-950/80 border-slate-800 hover:border-emerald-500/50" : "bg-[#F8FAFC] border-slate-200/90 hover:border-emerald-300 shadow-sm"
+                )}>
+                  <div className="flex items-center justify-between">
+                    <span className="text-2xl font-black text-[#0B8F78] font-mono">02</span>
+                    <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 flex items-center justify-center text-[#0B8F78]">
+                      <Bot size={20} />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <span className="text-[10px] font-black uppercase tracking-wider text-[#0B8F78]">ABHA INTELLIGENCE</span>
+                    <h3 className="text-xl font-bold">AUTOMATE</h3>
+                    <p className={cn("text-xs leading-relaxed", isDarkMode ? "text-slate-400" : "text-slate-600")}>
+                      Abha triggers AI price catalogs, creates CRM pipeline deals, compiles GST quotation PDFs, and records closed invoices in under 0.2s.
+                    </p>
+                  </div>
+                  <div className="pt-2 flex items-center gap-2 text-[11px] font-bold text-emerald-600">
+                    <CheckCircle2 size={14} />
+                    <span>Autonomous 24/7 Dispatch</span>
                   </div>
                 </div>
-                <div className="space-y-2">
-                  <span className="text-[10px] font-black uppercase tracking-wider text-[#0B8F78]">ABHA INTELLIGENCE</span>
-                  <h3 className="text-xl font-bold">AUTOMATE</h3>
-                  <p className={cn("text-xs leading-relaxed", isDarkMode ? "text-slate-400" : "text-slate-600")}>
-                    Abha triggers AI price catalogs, creates CRM pipeline deals, compiles GST quotation PDFs, and records closed invoices in under 0.2s.
-                  </p>
-                </div>
-                <div className="pt-2 flex items-center gap-2 text-[11px] font-bold text-emerald-600">
-                  <CheckCircle2 size={14} />
-                  <span>Autonomous 24/7 Dispatch</span>
-                </div>
-              </div>
+              </ScrollReveal>
 
               {/* 03. GROW (UWO PLATFORM) */}
-              <div className={cn(
-                "p-8 rounded-3xl border space-y-5 transition-all duration-300 relative group",
-                isDarkMode ? "bg-slate-950/80 border-slate-800 hover:border-emerald-500/50" : "bg-[#F8FAFC] border-slate-200/90 hover:border-emerald-300 shadow-sm"
-              )}>
-                <div className="flex items-center justify-between">
-                  <span className="text-2xl font-black text-emerald-600 font-mono">03</span>
-                  <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 flex items-center justify-center text-emerald-600">
-                    <Activity size={20} />
+              <ScrollReveal y={30} delay={0.3}>
+                <div className={cn(
+                  "p-8 rounded-3xl border space-y-5 transition-all duration-300 relative group h-full",
+                  isDarkMode ? "bg-slate-950/80 border-slate-800 hover:border-emerald-500/50" : "bg-[#F8FAFC] border-slate-200/90 hover:border-emerald-300 shadow-sm"
+                )}>
+                  <div className="flex items-center justify-between">
+                    <span className="text-2xl font-black text-emerald-600 font-mono">03</span>
+                    <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 flex items-center justify-center text-emerald-600">
+                      <Activity size={20} />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <span className="text-[10px] font-black uppercase tracking-wider text-emerald-600">SCALE &amp; REVENUE</span>
+                    <h3 className="text-xl font-bold">GROW</h3>
+                    <p className={cn("text-xs leading-relaxed", isDarkMode ? "text-slate-400" : "text-slate-600")}>
+                      Monitor conversion velocity, team agent performance, and cash collections from your unified dashboard with zero manual drop-off.
+                    </p>
+                  </div>
+                  <div className="pt-2 flex items-center gap-2 text-[11px] font-bold text-emerald-600">
+                    <CheckCircle2 size={14} />
+                    <span>10x Deal Velocity</span>
                   </div>
                 </div>
-                <div className="space-y-2">
-                  <span className="text-[10px] font-black uppercase tracking-wider text-emerald-600">SCALE &amp; REVENUE</span>
-                  <h3 className="text-xl font-bold">GROW</h3>
-                  <p className={cn("text-xs leading-relaxed", isDarkMode ? "text-slate-400" : "text-slate-600")}>
-                    Monitor conversion velocity, team agent performance, and cash collections from your unified dashboard with zero manual drop-off.
-                  </p>
-                </div>
-                <div className="pt-2 flex items-center gap-2 text-[11px] font-bold text-emerald-600">
-                  <CheckCircle2 size={14} />
-                  <span>10x Deal Velocity</span>
-                </div>
-              </div>
+              </ScrollReveal>
 
             </div>
 
@@ -1729,20 +1776,24 @@ export default function UwoLandingPage() {
           <div className="max-w-6xl mx-auto space-y-10">
 
             {/* Section Header */}
-            <div className="text-center space-y-3 max-w-3xl mx-auto">
-              <span className="text-xs font-bold tracking-widest text-[#0B8F78] uppercase block">
-                INTERACTIVE PRODUCT DEMONSTRATION
-              </span>
-              <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight">
-                See Automation in Action
-              </h2>
-              <p className={cn("text-sm sm:text-base font-normal", isDarkMode ? "text-slate-300" : "text-slate-600")}>
-                Watch how UWO Connect handles customer inquiries, quotation generation, and payment settlement automatically.
-              </p>
-            </div>
+            <ScrollReveal y={30}>
+              <div className="text-center space-y-3 max-w-3xl mx-auto">
+                <span className="text-xs font-bold tracking-widest text-[#0B8F78] uppercase block">
+                  INTERACTIVE PRODUCT DEMONSTRATION
+                </span>
+                <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight">
+                  See Automation in Action
+                </h2>
+                <p className={cn("text-sm sm:text-base font-normal", isDarkMode ? "text-slate-300" : "text-slate-600")}>
+                  Watch how UWO Connect handles customer inquiries, quotation generation, and payment settlement automatically.
+                </p>
+              </div>
+            </ScrollReveal>
 
             {/* 16:9 Cinematic Video Frame with Real Poster and Interactive Player */}
-            <div className="rounded-2xl sm:rounded-3xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xl overflow-hidden backdrop-blur-xl">
+            <ScrollReveal y={35} delay={0.15}>
+              <div className="rounded-2xl sm:rounded-3xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xl overflow-hidden backdrop-blur-xl">
+
 
               {/* Browser-style Titlebar Header */}
               <div className="px-4 py-3 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-950/80">
@@ -1824,11 +1875,10 @@ export default function UwoLandingPage() {
                 </div>
 
               </div>
-
             </div>
-
-          </div>
-        </section>
+          </ScrollReveal>
+        </div>
+      </section>
 
         {/* ════════════════════════════════════════════════════════════════ */}
         {/* 9. "STOP SWITCHING BETWEEN TOOLS" — BEFORE VS AFTER             */}
@@ -1842,17 +1892,21 @@ export default function UwoLandingPage() {
           <div className="max-w-6xl mx-auto space-y-12">
 
             {/* Section Header */}
-            <div className="text-center space-y-3 max-w-3xl mx-auto">
-              <span className="text-xs font-bold tracking-widest text-rose-500 uppercase block">
-                THE WORKSPACE REVOLUTION
-              </span>
-              <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight">
-                Stop Switching Between Tools
-              </h2>
-            </div>
+            <ScrollReveal y={30}>
+              <div className="text-center space-y-3 max-w-3xl mx-auto">
+                <span className="text-xs font-bold tracking-widest text-rose-500 uppercase block">
+                  THE WORKSPACE REVOLUTION
+                </span>
+                <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight">
+                  Stop Switching Between Tools
+                </h2>
+              </div>
+            </ScrollReveal>
 
             {/* Visual Before → After Transition */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch text-left">
+            <ScrollReveal y={35} delay={0.15}>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch text-left">
+
 
               {/* BEFORE: DISCONNECTED CHAOS */}
               <div className={cn(
@@ -1941,6 +1995,7 @@ export default function UwoLandingPage() {
               </div>
 
             </div>
+            </ScrollReveal>
 
           </div>
         </section>
@@ -1958,20 +2013,24 @@ export default function UwoLandingPage() {
           <div className="max-w-7xl mx-auto space-y-12">
 
             {/* Section Header */}
-            <div className="text-center space-y-3 max-w-3xl mx-auto">
-              <span className="text-xs font-bold tracking-widest text-[#0B8F78] uppercase block">
-                COMPLETE SAAS CAPABILITIES
-              </span>
-              <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight">
-                Everything You Need to Run Smarter
-              </h2>
-              <p className={cn("text-sm sm:text-base font-normal", isDarkMode ? "text-slate-300" : "text-slate-600")}>
-                9 powerful business engines built natively into your unified workspace. Select any module to inspect.
-              </p>
-            </div>
+            <ScrollReveal y={30}>
+              <div className="text-center space-y-3 max-w-3xl mx-auto">
+                <span className="text-xs font-bold tracking-widest text-[#0B8F78] uppercase block">
+                  COMPLETE SAAS CAPABILITIES
+                </span>
+                <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight">
+                  Everything You Need to Run Smarter
+                </h2>
+                <p className={cn("text-sm sm:text-base font-normal", isDarkMode ? "text-slate-300" : "text-slate-600")}>
+                  9 powerful business engines built natively into your unified workspace. Select any module to inspect.
+                </p>
+              </div>
+            </ScrollReveal>
 
             {/* Interactive Product Explorer Layout */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch text-left">
+            <ScrollReveal y={35} delay={0.15}>
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch text-left">
+
 
               {/* Left Column: Vertical Feature Navigation */}
               <div className="lg:col-span-5 space-y-2 flex flex-col justify-between">
@@ -2072,6 +2131,7 @@ export default function UwoLandingPage() {
               })()}
 
             </div>
+            </ScrollReveal>
 
           </div>
         </section>
@@ -2089,13 +2149,17 @@ export default function UwoLandingPage() {
           <div className="max-w-7xl mx-auto space-y-12">
 
             {/* Existing Pricing Comparison Table Component with Preserved Plan Logic */}
-            <PricingComparisonTable
-              onSelectPlan={() => router.push('/auth/login')}
-              dark={isDarkMode}
-            />
+            <ScrollReveal y={30}>
+              <PricingComparisonTable
+                onSelectPlan={() => router.push('/auth/login')}
+                dark={isDarkMode}
+              />
+            </ScrollReveal>
 
             {/* Custom Plan Architect Section */}
-            <CustomPlanSection isDarkMode={isDarkMode} />
+            <ScrollReveal y={30} delay={0.15}>
+              <CustomPlanSection isDarkMode={isDarkMode} />
+            </ScrollReveal>
 
           </div>
         </section>
@@ -2116,20 +2180,24 @@ export default function UwoLandingPage() {
           <div className="max-w-6xl mx-auto space-y-10 text-left relative z-10">
 
             {/* White Label Banner Header */}
-            <div className="space-y-4 max-w-3xl">
-              <span className="text-xs font-bold tracking-widest text-[#0B8F78] uppercase block">
-                PARTNER &amp; AGENCY PROGRAM
-              </span>
-              <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight">
-                Build &amp; Scale Your Own White-Label Software Agency
-              </h2>
-              <p className={cn("text-sm sm:text-base font-normal leading-relaxed", isDarkMode ? "text-slate-300" : "text-slate-600")}>
-                Rebrand the entire UWO Connect platform under your own brand name, custom domain, and logo. Charge your clients directly and keep 100% of all subscription profits.
-              </p>
-            </div>
+            <ScrollReveal y={30}>
+              <div className="space-y-4 max-w-3xl">
+                <span className="text-xs font-bold tracking-widest text-[#0B8F78] uppercase block">
+                  PARTNER &amp; AGENCY PROGRAM
+                </span>
+                <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight">
+                  Build &amp; Scale Your Own White-Label Software Agency
+                </h2>
+                <p className={cn("text-sm sm:text-base font-normal leading-relaxed", isDarkMode ? "text-slate-300" : "text-slate-600")}>
+                  Rebrand the entire UWO Connect platform under your own brand name, custom domain, and logo. Charge your clients directly and keep 100% of all subscription profits.
+                </p>
+              </div>
+            </ScrollReveal>
 
             {/* 4 Pillars of White Label */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <ScrollReveal y={35} delay={0.15}>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+
               {[
                 { title: 'Custom Domain & Logo', desc: 'Point your subdomain (e.g. portal.youragency.com) with custom logo & palette.' },
                 { title: '100% Profit Retention', desc: 'Plug in your own payment gateway. Keep 100% of subscription fees directly.' },
@@ -2169,6 +2237,7 @@ export default function UwoLandingPage() {
                 <ExternalLink size={14} />
               </Link>
             </div>
+            </ScrollReveal>
 
           </div>
         </section>
@@ -2186,20 +2255,24 @@ export default function UwoLandingPage() {
           <div className="max-w-4xl mx-auto space-y-12 text-left">
 
             {/* Section Header */}
-            <div className="text-center space-y-3">
-              <span className="text-xs font-bold tracking-widest text-[#0B8F78] uppercase block">
-                CLEAR ANSWERS
-              </span>
-              <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight">
-                Frequently Asked Questions
-              </h2>
-              <p className={cn("text-sm sm:text-base font-normal", isDarkMode ? "text-slate-300" : "text-slate-600")}>
-                Everything you need to know about UWO Connect.
-              </p>
-            </div>
+            <ScrollReveal y={30}>
+              <div className="text-center space-y-3">
+                <span className="text-xs font-bold tracking-widest text-[#0B8F78] uppercase block">
+                  CLEAR ANSWERS
+                </span>
+                <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight">
+                  Frequently Asked Questions
+                </h2>
+                <p className={cn("text-sm sm:text-base font-normal", isDarkMode ? "text-slate-300" : "text-slate-600")}>
+                  Everything you need to know about UWO Connect.
+                </p>
+              </div>
+            </ScrollReveal>
 
             {/* Premium Minimal Accordion List */}
-            <div className="space-y-3">
+            <ScrollReveal y={35} delay={0.15}>
+              <div className="space-y-3">
+
               {displayedFaqs.map((faq, idx) => {
                 const isOpen = openFaqIndex === idx;
                 return (
@@ -2237,6 +2310,7 @@ export default function UwoLandingPage() {
                 );
               })}
             </div>
+            </ScrollReveal>
 
             {/* Show More Button */}
             <div className="text-center pt-2">
@@ -2275,54 +2349,56 @@ export default function UwoLandingPage() {
           {/* Subtle Ambient Radial Glow */}
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[400px] bg-gradient-to-r from-emerald-500/15 via-teal-500/10 to-blue-500/15 rounded-full blur-[140px] pointer-events-none" />
 
-          <div className="max-w-4xl mx-auto space-y-8 relative z-10">
+          <ScrollReveal y={35}>
+            <div className="max-w-4xl mx-auto space-y-8 relative z-10">
 
-            <div className="flex items-center justify-center gap-6">
-              <img
-                src="/Abha_transparent.png"
-                alt="Abha"
-                className="w-16 sm:w-20 object-contain drop-shadow-md hover:scale-105 transition-transform"
-              />
-              <div className="w-12 h-12 rounded-2xl bg-[#0B8F78] flex items-center justify-center text-white shadow-lg shadow-emerald-600/30">
-                <Zap size={24} className="fill-white" />
+              <div className="flex items-center justify-center gap-6">
+                <img
+                  src="/Abha_transparent.png"
+                  alt="Abha"
+                  className="w-16 sm:w-20 object-contain drop-shadow-md hover:scale-105 transition-transform"
+                />
+                <div className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-600/30 overflow-hidden">
+                  <img src="/uwo-icon.png" alt="UWO Connect Logo" className="w-full h-full object-cover" />
+                </div>
+                <img
+                  src="/Dev_transparent.png"
+                  alt="Dev"
+                  className="w-16 sm:w-20 object-contain drop-shadow-md hover:scale-105 transition-transform"
+                />
               </div>
-              <img
-                src="/Dev_transparent.png"
-                alt="Dev"
-                className="w-16 sm:w-20 object-contain drop-shadow-md hover:scale-105 transition-transform"
-              />
-            </div>
 
-            <div className="space-y-3">
-              <h2 className="text-3xl sm:text-5xl font-black tracking-tight">
-                Ready to simplify your business?
-              </h2>
-              <p className={cn("text-sm sm:text-base font-normal max-w-xl mx-auto", isDarkMode ? "text-slate-300" : "text-slate-600")}>
-                Start managing your conversations, leads and automation with UWO Connect.
-              </p>
-            </div>
+              <div className="space-y-3">
+                <h2 className="text-3xl sm:text-5xl font-black tracking-tight">
+                  Ready to simplify your business?
+                </h2>
+                <p className={cn("text-sm sm:text-base font-normal max-w-xl mx-auto", isDarkMode ? "text-slate-300" : "text-slate-600")}>
+                  Start managing your conversations, leads and automation with UWO Connect.
+                </p>
+              </div>
 
-            <div className="pt-2 flex flex-wrap items-center justify-center gap-3">
-              <button
-                type="button"
-                onClick={() => router.push('/auth/register')}
-                className="px-8 py-4 rounded-xl bg-[#0B8F78] hover:bg-[#097361] text-white text-sm font-bold shadow-xl shadow-emerald-700/25 hover:scale-105 active:scale-95 transition-all cursor-pointer flex items-center gap-2"
-              >
-                <span>Get Started</span>
-                <ArrowRight size={16} />
-              </button>
-              <Link
-                href="/book"
-                className={cn(
-                  "px-7 py-4 rounded-xl border text-sm font-bold transition-all hover:scale-105 active:scale-95 cursor-pointer",
-                  isDarkMode ? "bg-slate-900 border-slate-800 text-slate-200" : "bg-white border-slate-200 text-slate-700 shadow-xs"
-                )}
-              >
-                Schedule Demo
-              </Link>
-            </div>
+              <div className="pt-2 flex flex-wrap items-center justify-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => router.push('/auth/register')}
+                  className="px-8 py-4 rounded-xl bg-[#0B8F78] hover:bg-[#097361] text-white text-sm font-bold shadow-xl shadow-emerald-700/25 hover:scale-105 active:scale-95 transition-all cursor-pointer flex items-center gap-2"
+                >
+                  <span>Get Started</span>
+                  <ArrowRight size={16} />
+                </button>
+                <Link
+                  href="/book"
+                  className={cn(
+                    "px-7 py-4 rounded-xl border text-sm font-bold transition-all hover:scale-105 active:scale-95 cursor-pointer",
+                    isDarkMode ? "bg-slate-900 border-slate-800 text-slate-200" : "bg-white border-slate-200 text-slate-700 shadow-xs"
+                  )}
+                >
+                  Schedule Demo
+                </Link>
+              </div>
 
-          </div>
+            </div>
+          </ScrollReveal>
         </section>
 
       </main>

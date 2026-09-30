@@ -612,10 +612,10 @@ const ClientOverview = () => {
               </div>
 
               {/* Action Button */}
-              <div>
+              <div className="w-full sm:w-auto">
                 <button 
                   onClick={() => handleCardClick('/client/youtube')}
-                  className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-2xl text-xs uppercase tracking-wider transition-all shadow-sm hover:shadow-md"
+                  className="w-full sm:w-auto px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-2xl text-xs uppercase tracking-wider transition-all shadow-sm hover:shadow-md text-center"
                 >
                   Manage Videos & Comments
                 </button>
@@ -793,19 +793,19 @@ const ClientOverview = () => {
                       <Calendar size={15} />
                       <span>Select Date Range:</span>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
                       <input
                         type="date"
                         value={customStartDate}
                         onChange={(e) => setCustomStartDate(e.target.value)}
-                        className="px-3 py-1.5 text-xs rounded-xl border border-slate-200 bg-white font-medium focus:outline-none focus:border-emerald-500"
+                        className="px-3 py-1.5 text-xs rounded-xl border border-slate-200 bg-white font-medium focus:outline-none focus:border-emerald-500 w-full xs:w-auto"
                       />
                       <span className="text-xs font-bold text-slate-400">to</span>
                       <input
                         type="date"
                         value={customEndDate}
                         onChange={(e) => setCustomEndDate(e.target.value)}
-                        className="px-3 py-1.5 text-xs rounded-xl border border-slate-200 bg-white font-medium focus:outline-none focus:border-emerald-500"
+                        className="px-3 py-1.5 text-xs rounded-xl border border-slate-200 bg-white font-medium focus:outline-none focus:border-emerald-500 w-full xs:w-auto"
                       />
                     </div>
                   </div>

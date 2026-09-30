@@ -185,7 +185,7 @@ export default function AutomationShowcaseNew({ isDarkMode = false }) {
         {/* Right Column: Single Connected Workflow Timeline (Not 7 separate cards) */}
         <div className="lg:col-span-8">
           <ScrollReveal delay={200}>
-            <div className="relative p-6 sm:p-8 rounded-3xl border border-slate-200/90 dark:border-slate-800 bg-white/95 dark:bg-slate-950/90 backdrop-blur-xl shadow-2xl overflow-hidden">
+            <div className="relative p-6 sm:p-8 rounded-3xl border border-slate-200/90 dark:border-slate-800/80 bg-white/95 dark:bg-transparent backdrop-blur-xl shadow-2xl overflow-hidden">
               {/* Play / Pause & Controls Header */}
               <div className="flex items-center justify-between pb-6 border-b border-slate-100 dark:border-slate-800">
                 <div className="flex items-center gap-2">

@@ -359,25 +359,25 @@ const RegisterPage = () => {
 
       {/* Top Brand Header */}
       <header className="relative z-20 w-full max-w-6xl mx-auto pt-2 pb-2 px-2 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-3 group">
+        <Link href="/" className="flex items-center gap-2 sm:gap-3 group min-w-0">
           {brand?.logo_url && brand.logo_url !== "/download (3).gif" ? (
-            <img src={brand.logo_url} alt="Logo" className="w-11 h-11 object-contain rounded-full shadow-lg" />
+            <img src={brand.logo_url} alt="Logo" className="w-9 h-9 sm:w-11 sm:h-11 object-contain rounded-full shadow-lg shrink-0" />
           ) : (
-            <div className="w-12 h-12 rounded-full overflow-hidden flex items-center justify-center bg-white shadow-[0_4px_20px_rgba(16,185,129,0.25)] border-[1.5px] border-emerald-100 shrink-0">
-              <img src="/uwo-icon.png" alt="UWO Connect Logo" className="w-full h-full object-contain p-1.5" />
+            <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-full overflow-hidden flex items-center justify-center bg-white shadow-[0_4px_20px_rgba(16,185,129,0.25)] border-[1.5px] border-emerald-100 shrink-0">
+              <img src="/uwo-icon.png" alt="UWO Connect Logo" className="w-full h-full object-contain p-1 sm:p-1.5" />
             </div>
           )}
-          <span className="font-extrabold text-slate-900 tracking-tight text-xl drop-shadow-sm group-hover:text-emerald-700 transition-colors">
+          <span className="font-extrabold text-slate-900 tracking-tight text-base sm:text-xl drop-shadow-sm group-hover:text-emerald-700 transition-colors truncate">
             {brand?.brand_name || brand?.name || "UWO Connect"}
           </span>
         </Link>
 
         <Link
           href="/auth/login"
-          className="text-xs font-bold text-slate-600 hover:text-slate-900 bg-white hover:bg-slate-50 border border-slate-200/80 px-4 py-2.5 rounded-2xl flex items-center gap-2 transition-all shadow-xs hover:shadow-sm"
+          className="text-xs font-bold text-slate-600 hover:text-slate-900 bg-white hover:bg-slate-50 border border-slate-200/80 px-3 sm:px-4 py-2 sm:py-2.5 rounded-2xl flex items-center gap-1.5 sm:gap-2 transition-all shadow-xs hover:shadow-sm shrink-0"
         >
           <ArrowLeft size={14} />
-          <span>Back to Sign In</span>
+          <span><span className="hidden xs:inline">Back to </span>Sign In</span>
         </Link>
       </header>
 
@@ -981,7 +981,7 @@ const RegisterPage = () => {
         </div>
         <div className="flex items-center gap-5">
           <Link href="/privacy" className="hover:text-slate-600 transition-colors">Privacy Policy</Link>
-          <Link href="/terms" className="hover:text-slate-600 transition-colors">Terms of Service</Link>
+          <Link href="/terms" className="hover:text-slate-600 transition-colors">Terms of Use (EULA)</Link>
           <Link href="/contact" className="hover:text-slate-600 transition-colors">Support</Link>
         </div>
       </footer>

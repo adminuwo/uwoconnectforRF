@@ -4,7 +4,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { 
   X, Megaphone, Loader2, Sparkles, Check, ChevronRight, ChevronLeft,
   Users, Send, CheckCircle2, Calendar, Wallet, Lock, AlertCircle, Plus,
-  Search, CheckSquare, Square, Clock, MessageSquare, Phone, UserCheck, Eye
+  Search, CheckSquare, Square, Clock, MessageSquare, Phone, UserCheck, Eye,
+  FileSpreadsheet, Upload, Trash2, Info, ShieldAlert
 } from 'lucide-react';
 import axios from 'axios';
 import { API_BASE_URL } from '@/config/apiConfig';
@@ -62,6 +63,16 @@ export default function CreateCampaignModal({ isOpen, onClose, onCreated }) {
   const [entitlementData, setEntitlementData] = useState(null);
   const [isAddMoneyOpen, setIsAddMoneyOpen] = useState(false);
 
+  // Recipient Source & Excel Import State
+  const [recipientMode, setRecipientMode] = useState('CONTACTS'); // 'CONTACTS' or 'EXCEL'
+  const [excelFile, setExcelFile] = useState(null);
+  const [isParsingExcel, setIsParsingExcel] = useState(false);
+  const [excelError, setExcelError] = useState('');
+  const [excelPreviewRows, setExcelPreviewRows] = useState([]);
+  const [isExcelPreviewOpen, setIsExcelPreviewOpen] = useState(false);
+  const [importedRecipients, setImportedRecipients] = useState([]);
+  const fileInputRef = useRef(null);
+
   const textareaRef = useRef(null);
 
   useEffect(() => {
@@ -71,6 +82,13 @@ export default function CreateCampaignModal({ isOpen, onClose, onCreated }) {
       setStep(1);
       setName('');
       setAudienceFilter('ALL');
+      setRecipientMode('CONTACTS');
+      setExcelFile(null);
+      setIsParsingExcel(false);
+      setExcelError('');
+      setExcelPreviewRows([]);
+      setIsExcelPreviewOpen(false);
+      setImportedRecipients([]);
       setComposeMode('TEMPLATE');
       setMessageBody('Hello {{first_name}},\n\nWe have an exclusive offer for you on UWO Connect today! Reply YES to claim now.');
       setSelectedPlatforms(['WHATSAPP']);
@@ -217,6 +235,180 @@ export default function CreateCampaignModal({ isOpen, onClose, onCreated }) {
     return body?.text || tmpl.name;
   };
 
+  // ---------------------------------------------------------------------------
+  // EXCEL CONTACT IMPORT FOR WHATSAPP BROADCAST
+  // ---------------------------------------------------------------------------
+  const handleExcelFileChange = async (e) => {
+    const selectedFile = e.target.files?.[0];
+    if (!selectedFile) return;
+
+    const fileName = selectedFile.name.toLowerCase();
+    if (!fileName.endsWith('.xlsx') && !fileName.endsWith('.xls') && !fileName.endsWith('.csv')) {
+      setExcelError('Please select a valid Excel (.xlsx, .xls) or CSV file.');
+      return;
+    }
+
+    setExcelFile(selectedFile);
+    setExcelError('');
+    setIsParsingExcel(true);
+
+    try {
+      const formData = new FormData();
+      formData.append('file', selectedFile);
+      const token = localStorage.getItem('uwo_token') || localStorage.getItem('token');
+
+      const res = await axios.post(`${API_BASE_URL}/api/campaigns/parse_excel/`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      if (res.data && Array.isArray(res.data.recipients)) {
+        processParsedList(res.data.recipients, res.data.sample_invalid || []);
+      } else {
+        await parseCSVText(selectedFile);
+      }
+    } catch (err) {
+      console.warn("Backend excel parse fallback to client parser:", err);
+      await parseCSVText(selectedFile);
+    } finally {
+      setIsParsingExcel(false);
+    }
+  };
+
+  const parseCSVText = async (file) => {
+    try {
+      const text = await file.text();
+      const lines = text.split(/\r\n|\n/).filter(l => l.trim().length > 0);
+      if (lines.length <= 1) {
+        setExcelError('File is empty or contains only header row.');
+        return;
+      }
+
+      const headers = lines[0].split(',').map(h => h.trim().replace(/^["']|["']$/g, '').toLowerCase());
+      const phoneIdx = headers.findIndex(h => h.includes('phone') || h.includes('mobile') || h.includes('number') || h.includes('contact'));
+      const nameIdx = headers.findIndex(h => h.includes('name'));
+      const emailIdx = headers.findIndex(h => h.includes('email') || h.includes('mail'));
+      const tagsIdx = headers.findIndex(h => h.includes('tag'));
+
+      const rawRecipients = [];
+      for (let i = 1; i < lines.length; i++) {
+        const cols = lines[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.trim().replace(/^["']|["']$/g, ''));
+        const rawPhone = phoneIdx !== -1 ? cols[phoneIdx] : (cols[1] || cols[0]);
+        const rawName = nameIdx !== -1 ? cols[nameIdx] : cols[0];
+        const rawEmail = emailIdx !== -1 ? cols[emailIdx] : '';
+        const rawTags = tagsIdx !== -1 ? cols[tagsIdx] : '';
+
+        rawRecipients.push({
+          name: rawName,
+          phone: rawPhone,
+          email: rawEmail,
+          tags: rawTags
+        });
+      }
+
+      processParsedList(rawRecipients, []);
+    } catch (e) {
+      setExcelError('Failed to parse CSV file. Please upload a valid .csv or .xlsx file.');
+    }
+  };
+
+  const processParsedList = (rawList, rawInvalidList = []) => {
+    const seenNumbers = new Set();
+    const rows = [];
+
+    rawList.forEach((r, idx) => {
+      const rawPhone = String(r.phone || r.phone_number || r.raw_phone || '').trim();
+      const rawName = String(r.name || '').trim();
+      const digits = rawPhone.replace(/\D/g, '');
+
+      let status = 'VALID';
+      let reason = 'Ready to import';
+
+      if (!digits || digits.length < 10) {
+        status = 'INVALID';
+        reason = 'Missing or invalid phone number';
+      } else if (seenNumbers.has(digits)) {
+        status = 'DUPLICATE';
+        reason = 'Duplicate number detected';
+      } else {
+        seenNumbers.add(digits);
+      }
+
+      // Requirement 7: Match existing CRM contact by phone digits
+      let finalName = rawName;
+      const crmMatch = contacts.find(c => {
+        const cP = (c.phone_number || c.platform_id || '').replace(/\D/g, '');
+        return cP && cP.length >= 7 && (cP.endsWith(digits) || digits.endsWith(cP));
+      });
+
+      if (crmMatch && crmMatch.name) {
+        finalName = crmMatch.name;
+      }
+
+      if (!finalName) {
+        finalName = `Contact #${digits.slice(-4)}`;
+      }
+
+      let formattedPhone = rawPhone;
+      if (digits.length === 10) {
+        formattedPhone = `+91 ${digits}`;
+      } else if (!formattedPhone.startsWith('+')) {
+        formattedPhone = `+${digits}`;
+      }
+
+      rows.push({
+        id: `r_${idx}_${Date.now()}`,
+        name: finalName,
+        phone: formattedPhone,
+        cleanPhone: digits,
+        email: r.email || '',
+        tags: r.tags || '',
+        status,
+        reason
+      });
+    });
+
+    rawInvalidList.forEach((inv, idx) => {
+      rows.push({
+        id: `inv_${idx}_${Date.now()}`,
+        name: 'Invalid Row',
+        phone: inv.raw_phone || 'Missing',
+        cleanPhone: '',
+        status: 'INVALID',
+        reason: inv.reason || 'Invalid phone number'
+      });
+    });
+
+    setExcelPreviewRows(rows);
+    setIsExcelPreviewOpen(true);
+  };
+
+  const removePreviewRow = (rowId) => {
+    setExcelPreviewRows(prev => prev.filter(r => r.id !== rowId));
+  };
+
+  const confirmExcelImport = () => {
+    const validRows = excelPreviewRows
+      .filter(r => r.status === 'VALID')
+      .map(r => ({
+        name: r.name,
+        phone: r.cleanPhone.length === 10 ? `91${r.cleanPhone}` : r.cleanPhone,
+        displayPhone: r.phone,
+        email: r.email,
+        tags: r.tags
+      }));
+
+    if (validRows.length === 0) {
+      alert("No valid recipients found to import.");
+      return;
+    }
+
+    setImportedRecipients(validRows);
+    setIsExcelPreviewOpen(false);
+  };
+
   const handleSubmit = async (e) => {
     if (e && e.preventDefault) e.preventDefault();
     if (!name.trim()) {
@@ -224,8 +416,13 @@ export default function CreateCampaignModal({ isOpen, onClose, onCreated }) {
       return;
     }
 
-    if (audienceFilter === 'SPECIFIC' && selectedContacts.length === 0) {
+    if (recipientMode === 'CONTACTS' && audienceFilter === 'SPECIFIC' && selectedContacts.length === 0) {
       alert("Please select at least one contact to receive this broadcast.");
+      return;
+    }
+
+    if (recipientMode === 'EXCEL' && importedRecipients.length === 0) {
+      alert("Please upload and import valid recipients from Excel file first.");
       return;
     }
 
@@ -270,8 +467,9 @@ export default function CreateCampaignModal({ isOpen, onClose, onCreated }) {
         message_body: composeMode === 'CUSTOM' ? messageBody.trim() : '',
         template: composeMode === 'TEMPLATE' && templateId ? templateId : null,
         platforms: selectedPlatforms,
-        audience_filter: audienceFilter,
-        tags: audienceFilter === 'SPECIFIC' ? selectedContacts : [],
+        audience_filter: recipientMode === 'EXCEL' ? 'SPECIFIC' : audienceFilter,
+        tags: recipientMode === 'EXCEL' ? [] : (audienceFilter === 'SPECIFIC' ? selectedContacts : []),
+        imported_recipients: recipientMode === 'EXCEL' ? importedRecipients : [],
         scheduled_at,
         followup_delay_hours: isFollowUpEnabled ? parseInt(followupDelayHours, 10) : null,
         followup_template_id: isFollowUpEnabled && followupTemplateId ? followupTemplateId : null,
@@ -360,126 +558,394 @@ export default function CreateCampaignModal({ isOpen, onClose, onCreated }) {
                 />
               </div>
 
+              {/* Recipient Source & Selection */}
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
-                    Target Audience Stage
+                    Add Recipients
                   </label>
                   <span className="text-[11px] text-slate-400 font-medium">
-                    Total Contacts: {contacts.length}
+                    {recipientMode === 'CONTACTS' ? `CRM Contacts: ${contacts.length}` : `Imported: ${importedRecipients.length}`}
                   </span>
                 </div>
                 
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                  {STAGES.map((s) => (
-                    <button
-                      key={s.id}
-                      type="button"
-                      onClick={() => setAudienceFilter(s.id)}
-                      className={`p-3 rounded-2xl border text-xs font-bold text-left transition-all cursor-pointer ${
-                        audienceFilter === s.id
-                          ? 'border-[#00AB56] bg-emerald-50/80 text-[#00AB56] shadow-xs'
-                          : 'border-slate-200 text-slate-700 hover:border-slate-300 hover:bg-slate-50'
-                      }`}
-                    >
-                      <span className="block truncate">{s.label}</span>
-                      {s.id === 'SPECIFIC' && selectedContacts.length > 0 && (
-                        <span className="text-[10px] text-emerald-600 block mt-0.5 font-extrabold">
-                          ✓ {selectedContacts.length} selected
-                        </span>
-                      )}
-                    </button>
-                  ))}
+                {/* Recipient Source Selector */}
+                <div className="flex items-center gap-2 p-1.5 bg-slate-100/90 rounded-2xl border border-slate-200 mb-4">
+                  <button
+                    type="button"
+                    onClick={() => setRecipientMode('CONTACTS')}
+                    className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                      recipientMode === 'CONTACTS'
+                        ? 'bg-white text-slate-900 shadow-xs border border-slate-200/80 font-extrabold'
+                        : 'text-slate-500 hover:text-slate-900'
+                    }`}
+                  >
+                    <Users size={15} className={recipientMode === 'CONTACTS' ? 'text-emerald-600' : ''} />
+                    <span>Select from existing contacts</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setRecipientMode('EXCEL')}
+                    className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                      recipientMode === 'EXCEL'
+                        ? 'bg-white text-emerald-800 shadow-xs border border-slate-200/80 font-extrabold'
+                        : 'text-slate-500 hover:text-slate-900'
+                    }`}
+                  >
+                    <FileSpreadsheet size={15} className={recipientMode === 'EXCEL' ? 'text-emerald-600' : ''} />
+                    <span>Import from Excel</span>
+                    {importedRecipients.length > 0 && (
+                      <span className="bg-emerald-600 text-white text-[10px] font-mono px-2 py-0.5 rounded-full ml-1 font-bold">
+                        {importedRecipients.length}
+                      </span>
+                    )}
+                  </button>
                 </div>
               </div>
 
-              {/* SPECIFIC CONTACTS SELECTOR */}
-              {audienceFilter === 'SPECIFIC' && (
-                <div className="p-4 bg-slate-50/90 rounded-2xl border border-emerald-200/80 space-y-3 animate-in fade-in zoom-in-95 duration-200">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 pb-3">
-                    <div className="flex items-center gap-2">
-                      <UserCheck size={16} className="text-[#00AB56]" />
-                      <span className="text-xs font-extrabold text-slate-900">
-                        Select Recipients ({selectedContacts.length} of {contacts.length} chosen)
-                      </span>
+              {/* ════════════════════════════════════════════════════════════ */}
+              {/* MODE 1: SELECT FROM EXISTING CONTACTS                      */}
+              {/* ════════════════════════════════════════════════════════════ */}
+              {recipientMode === 'CONTACTS' && (
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+                      Target Audience Stage
+                    </label>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                      {STAGES.map((s) => (
+                        <button
+                          key={s.id}
+                          type="button"
+                          onClick={() => setAudienceFilter(s.id)}
+                          className={`p-3 rounded-2xl border text-xs font-bold text-left transition-all cursor-pointer ${
+                            audienceFilter === s.id
+                              ? 'border-[#00AB56] bg-emerald-50/80 text-[#00AB56] shadow-xs'
+                              : 'border-slate-200 text-slate-700 hover:border-slate-300 hover:bg-slate-50'
+                          }`}
+                        >
+                          <span className="block truncate">{s.label}</span>
+                          {s.id === 'SPECIFIC' && selectedContacts.length > 0 && (
+                            <span className="text-[10px] text-emerald-600 block mt-0.5 font-extrabold">
+                              ✓ {selectedContacts.length} selected
+                            </span>
+                          )}
+                        </button>
+                      ))}
                     </div>
-                    
-                    <button
-                      type="button"
-                      onClick={handleSelectAllFiltered}
-                      className="text-[11px] font-bold text-emerald-700 hover:text-emerald-900 cursor-pointer self-start sm:self-auto bg-emerald-100/60 px-2.5 py-1 rounded-lg transition-colors"
-                    >
-                      {filteredContacts.length > 0 && filteredContacts.every(c => selectedContacts.includes(String(c.id || c._id)))
-                        ? 'Deselect All Filtered'
-                        : `Select All Filtered (${filteredContacts.length})`}
-                    </button>
                   </div>
 
-                  {/* Search Contact Box */}
-                  <div className="relative">
-                    <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-                    <input
-                      type="text"
-                      placeholder="Search contacts by name or phone..."
-                      value={contactSearch}
-                      onChange={(e) => setContactSearch(e.target.value)}
-                      className="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-800 outline-none focus:ring-2 focus:ring-emerald-500"
-                    />
-                  </div>
-
-                  {/* Contact Checkbox List */}
-                  <div className="max-h-52 overflow-y-auto space-y-1.5 pr-1 divide-y divide-slate-100">
-                    {filteredContacts.length === 0 ? (
-                      <div className="text-center py-6 text-slate-400 text-xs font-medium">
-                        {contacts.length === 0 ? "No contacts found in CRM. Please import contacts first." : "No contacts match your search query."}
+                  {/* SPECIFIC CONTACTS SELECTOR */}
+                  {audienceFilter === 'SPECIFIC' && (
+                    <div className="p-4 bg-slate-50/90 rounded-2xl border border-emerald-200/80 space-y-3 animate-in fade-in zoom-in-95 duration-200">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 pb-3">
+                        <div className="flex items-center gap-2">
+                          <UserCheck size={16} className="text-[#00AB56]" />
+                          <span className="text-xs font-extrabold text-slate-900">
+                            Select Recipients ({selectedContacts.length} of {contacts.length} chosen)
+                          </span>
+                        </div>
+                        
+                        <button
+                          type="button"
+                          onClick={handleSelectAllFiltered}
+                          className="text-[11px] font-bold text-emerald-700 hover:text-emerald-900 cursor-pointer self-start sm:self-auto bg-emerald-100/60 px-2.5 py-1 rounded-lg transition-colors"
+                        >
+                          {filteredContacts.length > 0 && filteredContacts.every(c => selectedContacts.includes(String(c.id || c._id)))
+                            ? 'Deselect All Filtered'
+                            : `Select All Filtered (${filteredContacts.length})`}
+                        </button>
                       </div>
-                    ) : (
-                      filteredContacts.map((contact) => {
-                        const cId = String(contact.id || contact._id);
-                        const isChecked = selectedContacts.includes(cId);
-                        return (
-                          <div
-                            key={cId}
-                            onClick={() => toggleContactSelection(cId)}
-                            className={`p-2.5 rounded-xl border flex items-center justify-between gap-3 cursor-pointer transition-all ${
-                              isChecked
-                                ? 'bg-white border-[#00AB56] shadow-xs'
-                                : 'bg-white/60 border-slate-200 hover:bg-white hover:border-slate-300'
-                            }`}
-                          >
-                            <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                              <div className={`w-7 h-7 rounded-lg flex items-center justify-center font-bold text-xs shrink-0 ${
-                                isChecked ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-600'
-                              }`}>
-                                {(contact.name || 'C')[0].toUpperCase()}
-                              </div>
-                              <div className="min-w-0 flex-1">
-                                <span className="text-xs font-bold text-slate-900 block truncate">
-                                  {contact.name || 'Unnamed Contact'}
-                                </span>
-                                <span className="text-[11px] text-slate-500 font-mono block truncate">
-                                  {contact.phone_number || contact.email || 'No Phone'}
-                                </span>
-                              </div>
-                            </div>
 
-                            <div className="flex items-center gap-2 shrink-0">
-                              {contact.stage && (
-                                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 uppercase">
-                                  {contact.stage}
+                      {/* Search Contact Box */}
+                      <div className="relative">
+                        <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                        <input
+                          type="text"
+                          placeholder="Search contacts by name or phone..."
+                          value={contactSearch}
+                          onChange={(e) => setContactSearch(e.target.value)}
+                          className="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-800 outline-none focus:ring-2 focus:ring-emerald-500"
+                        />
+                      </div>
+
+                      {/* Contact Checkbox List */}
+                      <div className="max-h-52 overflow-y-auto space-y-1.5 pr-1 divide-y divide-slate-100">
+                        {filteredContacts.length === 0 ? (
+                          <div className="text-center py-6 text-slate-400 text-xs font-medium">
+                            {contacts.length === 0 ? "No contacts found in CRM. Please import contacts first." : "No contacts match your search query."}
+                          </div>
+                        ) : (
+                          filteredContacts.map((contact) => {
+                            const cId = String(contact.id || contact._id);
+                            const isChecked = selectedContacts.includes(cId);
+                            return (
+                              <div
+                                key={cId}
+                                onClick={() => toggleContactSelection(cId)}
+                                className={`p-2.5 rounded-xl border flex items-center justify-between gap-3 cursor-pointer transition-all ${
+                                  isChecked
+                                    ? 'bg-white border-[#00AB56] shadow-xs'
+                                    : 'bg-white/60 border-slate-200 hover:bg-white hover:border-slate-300'
+                                }`}
+                              >
+                                <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                                  <div className={`w-7 h-7 rounded-lg flex items-center justify-center font-bold text-xs shrink-0 ${
+                                    isChecked ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-600'
+                                  }`}>
+                                    {(contact.name || 'C')[0].toUpperCase()}
+                                  </div>
+                                  <div className="min-w-0 flex-1">
+                                    <span className="text-xs font-bold text-slate-900 block truncate">
+                                      {contact.name || 'Unnamed Contact'}
+                                    </span>
+                                    <span className="text-[11px] text-slate-500 font-mono block truncate">
+                                      {contact.phone_number || contact.email || 'No Phone'}
+                                    </span>
+                                  </div>
+                                </div>
+
+                                <div className="flex items-center gap-2 shrink-0">
+                                  {contact.stage && (
+                                    <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 uppercase">
+                                      {contact.stage}
+                                    </span>
+                                  )}
+                                  <div className={`w-5 h-5 rounded-md flex items-center justify-center transition-colors ${
+                                    isChecked ? 'bg-[#00AB56] text-white' : 'border border-slate-300'
+                                  }`}>
+                                    {isChecked && <Check size={13} strokeWidth={3} />}
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* ════════════════════════════════════════════════════════════ */}
+              {/* MODE 2: IMPORT FROM EXCEL                                   */}
+              {/* ════════════════════════════════════════════════════════════ */}
+              {recipientMode === 'EXCEL' && (
+                <div className="space-y-4 animate-in fade-in duration-200">
+                  
+                  {excelError && (
+                    <div className="p-3 bg-rose-50 border border-rose-200 rounded-2xl text-xs font-semibold text-rose-700 flex items-start gap-2">
+                      <ShieldAlert size={16} className="text-rose-600 shrink-0 mt-0.5" />
+                      <span>{excelError}</span>
+                    </div>
+                  )}
+
+                  {/* Excel Upload Zone if no confirmed recipients */}
+                  {importedRecipients.length === 0 && !isExcelPreviewOpen && (
+                    <div className="p-6 border-2 border-dashed border-slate-200 hover:border-emerald-500 rounded-3xl bg-slate-50/70 hover:bg-emerald-50/30 text-center transition-all">
+                      <input
+                        type="file"
+                        ref={fileInputRef}
+                        accept=".xlsx,.xls,.csv"
+                        onChange={handleExcelFileChange}
+                        className="hidden"
+                      />
+                      <div className="w-12 h-12 rounded-2xl bg-white border border-slate-200 text-emerald-600 flex items-center justify-center mx-auto mb-3 shadow-xs">
+                        <Upload size={22} />
+                      </div>
+                      <h4 className="text-xs font-extrabold text-slate-900 mb-1">
+                        Upload Excel or CSV File
+                      </h4>
+                      <p className="text-[11px] text-slate-500 mb-3 max-w-xs mx-auto leading-relaxed">
+                        Upload a file (.xlsx, .xls, .csv). Required column: <strong>Phone Number</strong>. Optional: Name, Email, Tags.
+                      </p>
+                      
+                      <button
+                        type="button"
+                        disabled={isParsingExcel}
+                        onClick={() => fileInputRef.current?.click()}
+                        className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs transition-all shadow-xs inline-flex items-center gap-2 cursor-pointer disabled:opacity-50"
+                      >
+                        {isParsingExcel ? (
+                          <>
+                            <Loader2 size={14} className="animate-spin" />
+                            <span>Parsing File...</span>
+                          </>
+                        ) : (
+                          <>
+                            <Upload size={14} />
+                            <span>Select Excel File</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  )}
+
+                  {/* ──────────────────────────────────────────────────────────── */}
+                  {/* IMPORT PREVIEW TABLE                                         */}
+                  {/* ──────────────────────────────────────────────────────────── */}
+                  {isExcelPreviewOpen && (
+                    <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3 animate-in fade-in">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <FileSpreadsheet size={18} className="text-emerald-600" />
+                          <div>
+                            <h4 className="text-xs font-black text-slate-900">Import Contacts Preview</h4>
+                            <p className="text-[10px] text-slate-500">{excelPreviewRows.length} contacts found in file</p>
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setIsExcelPreviewOpen(false);
+                            setExcelFile(null);
+                          }}
+                          className="text-[11px] font-bold text-slate-500 hover:underline cursor-pointer"
+                        >
+                          Change File
+                        </button>
+                      </div>
+
+                      {/* Stat Badges */}
+                      <div className="grid grid-cols-3 gap-2 py-1">
+                        <div className="p-2.5 bg-white rounded-xl border border-slate-200 text-center">
+                          <span className="text-[9px] text-slate-400 font-bold block uppercase">Total Found</span>
+                          <span className="text-sm font-black text-slate-900">{excelPreviewRows.length}</span>
+                        </div>
+                        <div className="p-2.5 bg-emerald-50 rounded-xl border border-emerald-200 text-center">
+                          <span className="text-[9px] text-emerald-700 font-extrabold block uppercase">✓ Valid</span>
+                          <span className="text-sm font-black text-emerald-700">
+                            {excelPreviewRows.filter(r => r.status === 'VALID').length}
+                          </span>
+                        </div>
+                        <div className="p-2.5 bg-amber-50 rounded-xl border border-amber-200 text-center">
+                          <span className="text-[9px] text-amber-700 font-extrabold block uppercase">⚠ Dupes / Invalid</span>
+                          <span className="text-sm font-black text-amber-700">
+                            {excelPreviewRows.filter(r => r.status !== 'VALID').length}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Preview Rows Table */}
+                      <div className="max-h-48 overflow-y-auto space-y-1 pr-1 custom-scrollbar border border-slate-200 rounded-xl bg-white">
+                        <div className="grid grid-cols-12 px-3 py-1.5 bg-slate-100 text-[10px] font-bold text-slate-600 uppercase border-b border-slate-200 sticky top-0 z-10">
+                          <span className="col-span-4">Name</span>
+                          <span className="col-span-4">Phone Number</span>
+                          <span className="col-span-3">Status</span>
+                          <span className="col-span-1 text-center">Action</span>
+                        </div>
+                        {excelPreviewRows.map((r) => (
+                          <div key={r.id} className="grid grid-cols-12 px-3 py-2 items-center border-b border-slate-100 text-xs text-slate-800">
+                            <span className="col-span-4 font-bold truncate pr-1">{r.name}</span>
+                            <span className="col-span-4 font-mono text-slate-600 truncate pr-1">{r.phone}</span>
+                            <span className="col-span-3 pr-1">
+                              {r.status === 'VALID' && (
+                                <span className="text-[9px] font-extrabold px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 border border-emerald-200 inline-block">
+                                  ✓ Valid
                                 </span>
                               )}
-                              <div className={`w-5 h-5 rounded-md flex items-center justify-center transition-colors ${
-                                isChecked ? 'bg-[#00AB56] text-white' : 'border border-slate-300'
-                              }`}>
-                                {isChecked && <Check size={13} strokeWidth={3} />}
-                              </div>
-                            </div>
+                              {r.status === 'DUPLICATE' && (
+                                <span className="text-[9px] font-extrabold px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 border border-amber-200 inline-block" title={r.reason}>
+                                  ⚠ Duplicate
+                                </span>
+                              )}
+                              {r.status === 'INVALID' && (
+                                <span className="text-[9px] font-extrabold px-1.5 py-0.5 rounded bg-rose-100 text-rose-800 border border-rose-200 inline-block" title={r.reason}>
+                                  ❌ Invalid
+                                </span>
+                              )}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => removePreviewRow(r.id)}
+                              className="col-span-1 p-1 text-slate-400 hover:text-rose-600 rounded flex justify-center cursor-pointer"
+                              title="Remove row"
+                            >
+                              <Trash2 size={13} />
+                            </button>
                           </div>
-                        );
-                      })
-                    )}
+                        ))}
+                      </div>
+
+                      <div className="flex items-center justify-end gap-2 pt-1">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setIsExcelPreviewOpen(false);
+                            setExcelFile(null);
+                          }}
+                          className="px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-100 cursor-pointer"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="button"
+                          onClick={confirmExcelImport}
+                          className="px-4 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
+                        >
+                          <Check size={14} />
+                          <span>Import Recipients ({excelPreviewRows.filter(r => r.status === 'VALID').length})</span>
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* ──────────────────────────────────────────────────────────── */}
+                  {/* BROADCAST RECIPIENT LIST (AFTER IMPORT)                      */}
+                  {/* ──────────────────────────────────────────────────────────── */}
+                  {importedRecipients.length > 0 && !isExcelPreviewOpen && (
+                    <div className="p-4 bg-emerald-50/80 rounded-2xl border border-emerald-200 space-y-3 animate-in fade-in">
+                      <div className="flex items-center justify-between border-b border-emerald-200/80 pb-2">
+                        <div className="flex items-center gap-2">
+                          <FileSpreadsheet className="text-emerald-700" size={18} />
+                          <div>
+                            <h4 className="text-xs font-black text-slate-900">
+                              Recipients ({importedRecipients.length} contacts)
+                            </h4>
+                            <p className="text-[10px] text-emerald-800 font-medium">
+                              Ready for this WhatsApp broadcast only
+                            </p>
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setImportedRecipients([]);
+                            setIsExcelPreviewOpen(false);
+                            setExcelFile(null);
+                          }}
+                          className="text-[11px] font-bold text-slate-500 hover:text-rose-600 underline cursor-pointer"
+                        >
+                          Clear / Re-import
+                        </button>
+                      </div>
+
+                      <div className="max-h-44 overflow-y-auto space-y-1 pr-1 custom-scrollbar bg-white p-2 rounded-xl border border-emerald-200/60 divide-y divide-slate-100">
+                        {importedRecipients.slice(0, 30).map((r, i) => (
+                          <div key={i} className="flex items-center justify-between py-1.5 px-2 text-xs">
+                            <span className="font-bold text-slate-800 truncate pr-2">{r.name}</span>
+                            <span className="font-mono text-slate-500 text-[11px] shrink-0">{r.displayPhone || r.phone}</span>
+                          </div>
+                        ))}
+                        {importedRecipients.length > 30 && (
+                          <div className="text-[10px] font-bold text-slate-400 text-center pt-2 italic">
+                            + {importedRecipients.length - 30} more contacts imported
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* ──────────────────────────────────────────────────────────── */}
+                  {/* IMPORTANT WHATSAPP NOTICE                                    */}
+                  {/* ──────────────────────────────────────────────────────────── */}
+                  <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200 text-[11px] text-slate-500 font-medium leading-relaxed flex items-start gap-2">
+                    <Info size={15} className="text-slate-400 shrink-0 mt-0.5" />
+                    <span>
+                      Numbers imported here are used for sending through UWO Connect. They are not automatically saved to the recipient’s phone or WhatsApp contact list.
+                    </span>
                   </div>
+
                 </div>
               )}
 

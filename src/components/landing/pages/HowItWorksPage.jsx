@@ -162,7 +162,7 @@ export default function HowItWorksPage() {
 
             {/* Character Duo Showcase */}
             <div className="flex flex-wrap items-center justify-center gap-8 pt-4">
-              <div className="flex items-center gap-3 p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-lg text-left">
+              <div className="flex items-center gap-3 p-4 rounded-2xl bg-white dark:bg-transparent border border-slate-200 dark:border-slate-800/60 shadow-lg text-left">
                 <img src="/Dev_transparent.png" alt="Dev" className="w-16 h-auto object-contain" />
                 <div>
                   <div className="text-xs font-black text-slate-900 dark:text-white">DEV</div>
@@ -172,7 +172,7 @@ export default function HowItWorksPage() {
 
               <div className="text-2xl font-black text-slate-300">+</div>
 
-              <div className="flex items-center gap-3 p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-lg text-left">
+              <div className="flex items-center gap-3 p-4 rounded-2xl bg-white dark:bg-transparent border border-slate-200 dark:border-slate-800/60 shadow-lg text-left">
                 <img src="/Abha_transparent.png" alt="Abha" className="w-16 h-auto object-contain" />
                 <div>
                   <div className="text-xs font-black text-slate-900 dark:text-white">ABHA</div>
@@ -222,7 +222,7 @@ export default function HowItWorksPage() {
                       "p-4 rounded-2xl text-left transition-all cursor-pointer border space-y-2",
                       isActive
                         ? "bg-[#0B8F78] text-white border-[#0B8F78] shadow-lg scale-105"
-                        : "bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800 hover:border-[#0B8F78]"
+                        : "bg-white dark:bg-transparent text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800 hover:border-[#0B8F78]"
                     )}
                   >
                     <div className="flex items-center justify-between text-xs font-black">
@@ -236,7 +236,7 @@ export default function HowItWorksPage() {
             </div>
 
             {/* Active Journey Showcase Card */}
-            <div className="p-8 sm:p-12 rounded-3xl bg-white dark:bg-slate-900 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 shadow-xl grid grid-cols-1 lg:grid-cols-12 gap-8 items-center text-left">
+            <div className="p-8 sm:p-12 rounded-3xl bg-white dark:bg-transparent text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800/80 shadow-xl grid grid-cols-1 lg:grid-cols-12 gap-8 items-center text-left">
               <div className="lg:col-span-6 space-y-5">
                 <span className={cn("text-[10px] font-extrabold px-3 py-1 rounded-full border uppercase", currentJourneyStep.color)}>
                   {currentJourneyStep.badge}
@@ -250,7 +250,7 @@ export default function HowItWorksPage() {
               </div>
 
               <div className="lg:col-span-6">
-                <div className="rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-xl bg-white dark:bg-slate-950">
+                <div className="rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-xl bg-white dark:bg-transparent">
                   <img
                     src={currentJourneyStep.screenshot || '/dashboard/dashboard_main.png'}
                     alt={currentJourneyStep.headline}

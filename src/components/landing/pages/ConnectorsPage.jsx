@@ -219,71 +219,74 @@ export default function ConnectorsPage() {
                 </div>
               </div>
 
-              {/* Orbital Connector Badges Around Dev */}
-              
-              {/* 1. Gmail - Top Left */}
-              <motion.div animate={{ y: [0, -6, 0] }} transition={{ duration: 4, repeat: Infinity }} className="absolute top-4 left-4 sm:left-12 z-20">
-                <div className="p-3.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl flex items-center gap-2.5 hover:scale-110 transition-transform">
-                  <GmailLogo size={24} />
-                  <span className="text-xs font-extrabold text-slate-900 dark:text-white hidden sm:inline">Gmail</span>
-                </div>
-              </motion.div>
+              {/* Orbital Connector Badges Around Dev (Shown in Light Mode only) */}
+              {!isDarkMode && (
+                <>
+                  {/* 1. Gmail - Top Left */}
+                  <motion.div animate={{ y: [0, -6, 0] }} transition={{ duration: 4, repeat: Infinity }} className="absolute top-4 left-4 sm:left-12 z-20">
+                    <div className="p-3.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl flex items-center gap-2.5 hover:scale-110 transition-transform">
+                      <GmailLogo size={24} />
+                      <span className="text-xs font-extrabold text-slate-900 dark:text-white hidden sm:inline">Gmail</span>
+                    </div>
+                  </motion.div>
 
-              {/* 2. Google Sheets - Top Center-Right */}
-              <motion.div animate={{ y: [0, 6, 0] }} transition={{ duration: 4.5, repeat: Infinity, delay: 0.3 }} className="absolute top-2 right-12 sm:right-24 z-20">
-                <div className="p-3.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl flex items-center gap-2.5 hover:scale-110 transition-transform">
-                  <GoogleSheetsLogo size={24} />
-                  <span className="text-xs font-extrabold text-slate-900 dark:text-white hidden sm:inline">Google Sheets</span>
-                </div>
-              </motion.div>
+                  {/* 2. Google Sheets - Top Center-Right */}
+                  <motion.div animate={{ y: [0, 6, 0] }} transition={{ duration: 4.5, repeat: Infinity, delay: 0.3 }} className="absolute top-2 right-12 sm:right-24 z-20">
+                    <div className="p-3.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl flex items-center gap-2.5 hover:scale-110 transition-transform">
+                      <GoogleSheetsLogo size={24} />
+                      <span className="text-xs font-extrabold text-slate-900 dark:text-white hidden sm:inline">Google Sheets</span>
+                    </div>
+                  </motion.div>
 
-              {/* 3. Google Docs - Top Far Right */}
-              <motion.div animate={{ y: [0, -8, 0] }} transition={{ duration: 5, repeat: Infinity, delay: 0.6 }} className="absolute top-20 right-2 sm:right-8 z-20">
-                <div className="p-3.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl flex items-center gap-2.5 hover:scale-110 transition-transform">
-                  <GoogleDocsLogo size={24} />
-                  <span className="text-xs font-extrabold text-slate-900 dark:text-white hidden sm:inline">Google Docs</span>
-                </div>
-              </motion.div>
+                  {/* 3. Google Docs - Top Far Right */}
+                  <motion.div animate={{ y: [0, -8, 0] }} transition={{ duration: 5, repeat: Infinity, delay: 0.6 }} className="absolute top-20 right-2 sm:right-8 z-20">
+                    <div className="p-3.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl flex items-center gap-2.5 hover:scale-110 transition-transform">
+                      <GoogleDocsLogo size={24} />
+                      <span className="text-xs font-extrabold text-slate-900 dark:text-white hidden sm:inline">Google Docs</span>
+                    </div>
+                  </motion.div>
 
-              {/* 4. Outlook - Middle Left */}
-              <motion.div animate={{ y: [0, 6, 0] }} transition={{ duration: 4.2, repeat: Infinity, delay: 0.9 }} className="absolute top-1/3 left-2 sm:left-6 z-20">
-                <div className="p-3.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl flex items-center gap-2.5 hover:scale-110 transition-transform">
-                  <OutlookLogo size={24} />
-                  <span className="text-xs font-extrabold text-slate-900 dark:text-white hidden sm:inline">Outlook</span>
-                </div>
-              </motion.div>
+                  {/* 4. Outlook - Middle Left */}
+                  <motion.div animate={{ y: [0, 6, 0] }} transition={{ duration: 4.2, repeat: Infinity, delay: 0.9 }} className="absolute top-1/3 left-2 sm:left-6 z-20">
+                    <div className="p-3.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl flex items-center gap-2.5 hover:scale-110 transition-transform">
+                      <OutlookLogo size={24} />
+                      <span className="text-xs font-extrabold text-slate-900 dark:text-white hidden sm:inline">Outlook</span>
+                    </div>
+                  </motion.div>
 
-              {/* 5. OneDrive - Bottom Left */}
-              <motion.div animate={{ y: [0, -6, 0] }} transition={{ duration: 4.8, repeat: Infinity, delay: 1.2 }} className="absolute bottom-10 left-6 sm:left-16 z-20">
-                <div className="p-3.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl flex items-center gap-2.5 hover:scale-110 transition-transform">
-                  <OneDriveLogo size={24} />
-                  <span className="text-xs font-extrabold text-slate-900 dark:text-white hidden sm:inline">OneDrive</span>
-                </div>
-              </motion.div>
+                  {/* 5. OneDrive - Bottom Left */}
+                  <motion.div animate={{ y: [0, -6, 0] }} transition={{ duration: 4.8, repeat: Infinity, delay: 1.2 }} className="absolute bottom-10 left-6 sm:left-16 z-20">
+                    <div className="p-3.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl flex items-center gap-2.5 hover:scale-110 transition-transform">
+                      <OneDriveLogo size={24} />
+                      <span className="text-xs font-extrabold text-slate-900 dark:text-white hidden sm:inline">OneDrive</span>
+                    </div>
+                  </motion.div>
 
-              {/* 6. Google Maps - Bottom Right */}
-              <motion.div animate={{ y: [0, 6, 0] }} transition={{ duration: 4.4, repeat: Infinity, delay: 1.5 }} className="absolute bottom-8 right-8 sm:right-20 z-20">
-                <div className="p-3.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl flex items-center gap-2.5 hover:scale-110 transition-transform">
-                  <GoogleMapsLogo size={24} />
-                  <span className="text-xs font-extrabold text-slate-900 dark:text-white hidden sm:inline">Google Maps</span>
-                </div>
-              </motion.div>
+                  {/* 6. Google Maps - Bottom Right */}
+                  <motion.div animate={{ y: [0, 6, 0] }} transition={{ duration: 4.4, repeat: Infinity, delay: 1.5 }} className="absolute bottom-8 right-8 sm:right-20 z-20">
+                    <div className="p-3.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl flex items-center gap-2.5 hover:scale-110 transition-transform">
+                      <GoogleMapsLogo size={24} />
+                      <span className="text-xs font-extrabold text-slate-900 dark:text-white hidden sm:inline">Google Maps</span>
+                    </div>
+                  </motion.div>
 
-              {/* 7. Google Slides - Top Left Center */}
-              <motion.div animate={{ y: [0, -5, 0] }} transition={{ duration: 3.8, repeat: Infinity, delay: 0.4 }} className="absolute top-16 left-28 sm:left-44 z-20">
-                <div className="p-3.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl flex items-center gap-2.5 hover:scale-110 transition-transform">
-                  <GoogleSlidesLogo size={24} />
-                  <span className="text-xs font-extrabold text-slate-900 dark:text-white hidden sm:inline">Google Slides</span>
-                </div>
-              </motion.div>
+                  {/* 7. Google Slides - Top Left Center */}
+                  <motion.div animate={{ y: [0, -5, 0] }} transition={{ duration: 3.8, repeat: Infinity, delay: 0.4 }} className="absolute top-16 left-28 sm:left-44 z-20">
+                    <div className="p-3.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl flex items-center gap-2.5 hover:scale-110 transition-transform">
+                      <GoogleSlidesLogo size={24} />
+                      <span className="text-xs font-extrabold text-slate-900 dark:text-white hidden sm:inline">Google Slides</span>
+                    </div>
+                  </motion.div>
 
-              {/* 8. Google News Feed - Bottom Center */}
-              <motion.div animate={{ scale: [1, 1.05, 1] }} transition={{ duration: 3, repeat: Infinity }} className="absolute -bottom-6 z-20">
-                <div className="px-4 py-2.5 rounded-2xl bg-white/95 dark:bg-slate-900/95 border border-slate-200 dark:border-slate-800 shadow-xl flex items-center gap-2.5">
-                  <GoogleNewsLogo size={24} />
-                  <span className="text-xs font-extrabold text-slate-900 dark:text-white">Google News Feed</span>
-                </div>
-              </motion.div>
+                  {/* 8. Google News Feed - Bottom Center */}
+                  <motion.div animate={{ scale: [1, 1.05, 1] }} transition={{ duration: 3, repeat: Infinity }} className="absolute -bottom-6 z-20">
+                    <div className="px-4 py-2.5 rounded-2xl bg-white/95 dark:bg-slate-900/95 border border-slate-200 dark:border-slate-800 shadow-xl flex items-center gap-2.5">
+                      <GoogleNewsLogo size={24} />
+                      <span className="text-xs font-extrabold text-slate-900 dark:text-white">Google News Feed</span>
+                    </div>
+                  </motion.div>
+                </>
+              )}
 
             </div>
 
@@ -331,7 +334,7 @@ export default function ConnectorsPage() {
                       "p-3.5 rounded-2xl text-center space-y-2 border transition-all cursor-pointer flex flex-col items-center justify-center relative group",
                       isActive
                         ? c.activeStyle
-                        : "bg-white dark:bg-slate-900 text-slate-900 dark:text-white border-slate-200 dark:border-slate-800 hover:border-[#0B8F78] shadow-xs"
+                        : "bg-white dark:bg-transparent text-slate-900 dark:text-white border-slate-200 dark:border-slate-800/60 hover:border-[#0B8F78] shadow-xs"
                     )}
                   >
                     <div>{c.logo}</div>
@@ -344,7 +347,7 @@ export default function ConnectorsPage() {
             {/* Active Visual Ecosystem Card (LIGHT THEME MATCHING CHANNELS) */}
             <div className={cn(
               "p-8 sm:p-12 rounded-3xl border transition-all text-left grid grid-cols-1 lg:grid-cols-12 gap-10 items-center shadow-xl",
-              activeItem.lightBg,
+              isDarkMode ? "bg-transparent border-slate-800/80" : activeItem.lightBg,
               activeItem.border
             )}>
               <div className="lg:col-span-5 space-y-6">
@@ -358,7 +361,7 @@ export default function ConnectorsPage() {
                 <h4 className="text-lg font-bold text-[#0B8F78] dark:text-emerald-400">{activeItem.label}</h4>
                 <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 leading-relaxed">{activeItem.tagline}</p>
 
-                <div className="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 text-xs font-mono text-slate-800 dark:text-emerald-300 shadow-xs leading-relaxed">
+                <div className="p-4 rounded-xl bg-white dark:bg-transparent border border-slate-200/80 dark:border-slate-800 text-xs font-mono text-slate-800 dark:text-emerald-300 shadow-xs leading-relaxed">
                   {activeItem.sampleUI}
                 </div>
 

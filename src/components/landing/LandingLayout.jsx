@@ -99,17 +99,17 @@ export default function LandingLayout({ children, activePage = '' }) {
   };
 
   return (
-    <div className={cn("min-h-screen font-sans landing-page-root selection:bg-[#0B8F78]/20 selection:text-[#0B8F78] transition-colors duration-300", isDarkMode ? "dark bg-[#070B14] text-slate-100" : "bg-white text-slate-900")}>
+    <div className={cn("min-h-screen font-sans landing-page-root selection:bg-[#0B8F78]/20 selection:text-[#0B8F78] transition-colors duration-300 pt-16", isDarkMode ? "dark bg-[#070B14] text-slate-100" : "bg-white text-slate-900")}>
 
       {/* ════════════════════════════════════════════════════════════════ */}
-      {/* STICKY GLASSY NAVBAR                                            */}
+      {/* FIXED GLASSY NAVBAR                                             */}
       {/* ════════════════════════════════════════════════════════════════ */}
       <header
         className={cn(
-          "sticky top-0 z-50 backdrop-blur-xl border-b transition-all duration-300",
+          "fixed top-0 left-0 right-0 w-full z-50 backdrop-blur-xl border-b transition-all duration-300",
           isDarkMode
-            ? "bg-[#070B14]/85 border-slate-800/80 text-slate-100"
-            : "bg-white/85 border-slate-200/80 text-slate-900"
+            ? "bg-[#070B14]/90 border-slate-800/80 text-slate-100"
+            : "bg-white/90 border-slate-200/80 text-slate-900"
         )}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">

@@ -148,7 +148,7 @@ const LoginPage = () => {
   const isAnyLoading = loadingProvider !== null;
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center p-4 bg-[#f8fafc] font-sans relative overflow-hidden selection:bg-emerald-500 selection:text-white">
+    <div className="min-h-screen w-full flex items-center justify-center pt-20 sm:pt-4 p-4 bg-[#f8fafc] font-sans relative overflow-hidden selection:bg-emerald-500 selection:text-white">
       
       {/* Subtle Background Elements */}
       <div className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] bg-emerald-400/10 rounded-full blur-[120px] pointer-events-none" />
@@ -156,15 +156,15 @@ const LoginPage = () => {
       <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMSIgY3k9IjEiIHI9IjEiIGZpbGw9InJnYmEoMCwwLDAsMC4wMykiLz48L3N2Zz4=')] opacity-50" />
 
       {/* Brand Header */}
-      <div className="absolute top-8 left-8 z-50 flex items-center gap-3">
+      <div className="absolute top-4 sm:top-8 left-4 sm:left-8 z-50 flex items-center gap-2 sm:gap-3">
         {brand?.logo_url && brand.logo_url !== "/download (3).gif" ? (
-          <img src={brand.logo_url} alt="Logo" className="w-11 h-11 object-contain rounded-full shadow-lg" />
+          <img src={brand.logo_url} alt="Logo" className="w-8 h-8 sm:w-11 sm:h-11 object-contain rounded-full shadow-lg" />
         ) : (
-          <div className="w-12 h-12 rounded-full overflow-hidden flex items-center justify-center bg-white shadow-[0_4px_20px_rgba(16,185,129,0.25)] border-[1.5px] border-emerald-100">
+          <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-full overflow-hidden flex items-center justify-center bg-white shadow-[0_4px_20px_rgba(16,185,129,0.25)] border-[1.5px] border-emerald-100">
             <img src="/uwo-icon.png" alt="UWO Connect Logo" className="w-full h-full object-contain p-1.5" />
           </div>
         )}
-        <span className="font-extrabold text-slate-900 tracking-tight text-xl drop-shadow-sm">
+        <span className="font-extrabold text-slate-900 tracking-tight text-base sm:text-xl drop-shadow-sm">
           {brand?.brand_name || "UWO Connect"}
         </span>
       </div>
@@ -381,7 +381,7 @@ const LoginPage = () => {
       <div className="absolute bottom-6 left-1/2 -translate-x-1/2 text-center w-full px-4">
         <p className="text-[10px] font-medium text-slate-400">
           By signing in, you agree to our{' '}
-          <span onClick={() => setShowTerms(true)} className="text-slate-500 font-bold hover:underline cursor-pointer">Terms</span> and{' '}
+          <span onClick={() => setShowTerms(true)} className="text-slate-500 font-bold hover:underline cursor-pointer">Terms of Use (EULA)</span> and{' '}
           <Link href="/privacy" className="text-slate-500 font-bold hover:underline">Privacy Policy</Link>.
         </p>
       </div>

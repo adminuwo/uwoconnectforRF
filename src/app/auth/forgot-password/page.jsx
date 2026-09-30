@@ -139,6 +139,7 @@ const ForgotPasswordPage = () => {
         >
           {/* Left Side: Abha & Dev Hero */}
           <AuthHeroSide
+            imageSrc="/Abha & Dev Forgot Password Page.png"
             title={<>Account recovery <br/> made simple & safe.</>}
             subtitle="Reset your password in a few quick steps with OTP verification and get back to automating your workflows."
             badgeText="Encrypted • Verified • Protected"
@@ -393,7 +394,7 @@ const ForgotPasswordPage = () => {
         </div>
         <div className="flex items-center gap-5">
           <Link href="/privacy" className="hover:text-slate-600 transition-colors">Privacy Policy</Link>
-          <Link href="/terms" className="hover:text-slate-600 transition-colors">Terms of Service</Link>
+          <Link href="/terms" className="hover:text-slate-600 transition-colors">Terms of Use (EULA)</Link>
           <Link href="/contact" className="hover:text-slate-600 transition-colors">Support</Link>
         </div>
       </footer>

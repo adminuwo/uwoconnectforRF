@@ -8,13 +8,14 @@ import {
   FileText, Download, Image as ImageIcon, Music, Film, Video, ExternalLink,
   Shield, ShieldAlert, ArrowRightLeft, History, BarChart3, Activity, Users, Eye, StickyNote,
   Clock, Tag, RefreshCw, AlertCircle, Bot, ChevronLeft, ChevronRight,
-  LayoutTemplate, X
+  LayoutTemplate, X, UserPlus
 } from 'lucide-react';
 import axios from 'axios';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import TransferModal from '@/components/inbox/TransferModal';
 import AuditLogDrawer from '@/components/inbox/AuditLogDrawer';
 import MonitoringAnalyticsModal from '@/components/inbox/MonitoringAnalyticsModal';
+import AddContactModal from '@/components/inbox/AddContactModal';
 import { cn } from '@/lib/utils';
 import { API_BASE_URL } from '@/config/apiConfig';
 
@@ -76,6 +77,7 @@ export default function ClientInboxPage() {
 
   // Modals & Drawers
   const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
+  const [isAddContactOpen, setIsAddContactOpen] = useState(false);
   const [isAuditDrawerOpen, setIsAuditDrawerOpen] = useState(false);
   const [isAnalyticsModalOpen, setIsAnalyticsModalOpen] = useState(false);
   const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
@@ -906,6 +908,40 @@ export default function ClientInboxPage() {
     setIsAnalyticsModalOpen(true);
   };
 
+  const handleContactSaved = (savedContact, targetConvoId) => {
+    if (!savedContact) return;
+
+    // Real-time conversation list update
+    setConversations((prev) =>
+      prev.map((c) => {
+        const cleanSavedPhone = (savedContact.phone_number || savedContact.platform_id || '').replace(/[^0-9]/g, '');
+        const cleanConvoPhone = (c.rawAddress || c.id || '').replace(/[^0-9]/g, '');
+
+        const isMatch =
+          c.id === targetConvoId ||
+          (cleanSavedPhone && cleanConvoPhone && (cleanSavedPhone.endsWith(cleanConvoPhone) || cleanConvoPhone.endsWith(cleanSavedPhone)));
+
+        if (isMatch) {
+          return {
+            ...c,
+            name: savedContact.name,
+            contactSaved: true,
+            contactDetails: savedContact
+          };
+        }
+        return c;
+      })
+    );
+
+    // Update active conversation name in state immediately
+    if (activeConvo && (activeConvo.id === targetConvoId || activeConvo.rawAddress === savedContact.phone_number)) {
+      activeConvo.name = savedContact.name;
+    }
+
+    // Add to local contacts pool
+    setContacts((prev) => [savedContact, ...prev.filter(c => c.id !== savedContact.id)]);
+  };
+
   const channelBadges = {
     WHATSAPP: { name: 'WhatsApp', bg: 'bg-emerald-500', text: 'text-white' },
     INSTAGRAM: { name: 'Instagram', bg: 'bg-gradient-to-r from-purple-500 to-pink-500', text: 'text-white' },
@@ -1187,6 +1223,15 @@ export default function ClientInboxPage() {
 
                   {/* Action Buttons Toolbar */}
                   <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
+                    {/* Add Contact Action Button */}
+                    <button
+                      onClick={() => setIsAddContactOpen(true)}
+                      className="px-2 sm:px-2.5 py-1 rounded-lg text-[10px] sm:text-[11px] font-extrabold bg-emerald-600 hover:bg-emerald-700 text-white transition-all flex items-center gap-1 cursor-pointer shadow-2xs shrink-0"
+                      title="Save customer contact to UWO Connect CRM & Inbox"
+                    >
+                      <UserPlus className="w-3.5 h-3.5 shrink-0" />
+                      <span>+ Add Contact</span>
+                    </button>
                     {activeConvo.botPaused ? (
                       <button
                         onClick={handleResumeBot}
@@ -1779,6 +1824,16 @@ export default function ClientInboxPage() {
       </div>
 
       {/* Modals & Drawers */}
+      <AddContactModal
+        isOpen={isAddContactOpen}
+        onClose={() => setIsAddContactOpen(false)}
+        prefilledPhone={activeConvo?.rawAddress || ''}
+        prefilledName={activeConvo?.name || ''}
+        convoId={selectedConvoId}
+        existingContacts={contacts}
+        onContactSaved={handleContactSaved}
+      />
+
       <TransferModal
         isOpen={isTransferModalOpen}
         onClose={() => setIsTransferModalOpen(false)}
