@@ -7,8 +7,10 @@ import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import { 
   Smartphone, RefreshCw, CheckCircle2, XCircle, Clock, 
-  ShieldCheck, ArrowLeft, Loader2, Laptop, Copy, Check
+  ShieldCheck, ArrowLeft, Loader2, Laptop, Copy, Check, QrCode
 } from 'lucide-react';
+import { motion } from 'framer-motion';
+import AuthHeroSide from '@/components/auth/AuthHeroSide';
 import { storeUserSession } from '@/features/auth/authHelpers';
 import { API_BASE_URL } from '@/config/apiConfig';
 import { useBrand } from '@/context/BrandContext';
@@ -185,245 +187,275 @@ export default function QrLoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-900 flex flex-col justify-between relative overflow-hidden font-sans selection:bg-emerald-500 selection:text-white">
-      {/* Soft background gradient */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-96 bg-emerald-100/60 blur-[130px] pointer-events-none" />
+    <div className="min-h-screen w-full flex flex-col justify-between items-center p-4 bg-[#f8fafc] font-sans relative overflow-hidden selection:bg-emerald-500 selection:text-white">
+      {/* Subtle Background Elements */}
+      <div className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] bg-emerald-400/10 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-[-20%] right-[-10%] w-[600px] h-[600px] bg-blue-400/10 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMSIgY3k9IjEiIHI9IjEiIGZpbGw9InJnYmEoMCwwLDAsMC4wMykiLz48L3N2Zz4=')] opacity-50" />
 
       {/* Top Navbar */}
-      <header className="relative z-10 w-full max-w-6xl mx-auto px-6 py-6 flex items-center justify-between">
+      <header className="relative z-20 w-full max-w-6xl mx-auto pt-4 pb-2 px-2 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-3 group">
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-400 p-[2px] shadow-lg shadow-emerald-500/20">
-            <div className="w-full h-full bg-white rounded-[14px] flex items-center justify-center">
-              <span className="text-xl font-black bg-gradient-to-r from-emerald-600 to-teal-500 bg-clip-text text-transparent">U</span>
+          {brand?.logo_url && brand.logo_url !== "/download (3).gif" ? (
+            <img src={brand.logo_url} alt="Logo" className="w-11 h-11 object-contain rounded-full shadow-lg" />
+          ) : (
+            <div className="w-12 h-12 rounded-full overflow-hidden flex items-center justify-center bg-white shadow-[0_4px_20px_rgba(16,185,129,0.25)] border-[1.5px] border-emerald-100 shrink-0">
+              <img src="/uwo-icon.png" alt="UWO Connect Logo" className="w-full h-full object-contain p-1.5" />
             </div>
-          </div>
-          <span className="text-xl font-extrabold tracking-tight text-gray-900 group-hover:text-emerald-600 transition-colors">
-            {brand?.name || 'UWO Connect™'}
+          )}
+          <span className="font-extrabold text-slate-900 tracking-tight text-xl drop-shadow-sm group-hover:text-emerald-700 transition-colors">
+            {brand?.brand_name || brand?.name || 'UWO Connect'}
           </span>
         </Link>
 
         <Link
           href="/auth/login"
-          className="text-xs font-bold text-gray-500 hover:text-gray-900 bg-white hover:bg-gray-100 border border-gray-200 px-4 py-2.5 rounded-xl flex items-center gap-2 transition-all shadow-sm"
+          className="text-xs font-bold text-slate-600 hover:text-slate-900 bg-white hover:bg-slate-50 border border-slate-200/80 px-4 py-2.5 rounded-2xl flex items-center gap-2 transition-all shadow-xs hover:shadow-sm"
         >
           <ArrowLeft size={14} />
           <span>Email & Password Login</span>
         </Link>
       </header>
 
-      {/* Main Content Center Card */}
-      <main className="relative z-10 flex-1 flex items-center justify-center p-4 sm:p-6">
-        <div className="w-full max-w-4xl bg-white border border-gray-200 rounded-[36px] shadow-xl overflow-hidden grid grid-cols-1 lg:grid-cols-12">
-          
-          {/* Left Column: Instructions */}
-          <div className="lg:col-span-7 p-8 sm:p-12 flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-gray-100">
+      {/* Main Split Card */}
+      <main className="relative z-10 w-full flex-1 flex items-center justify-center py-2 sm:py-4">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }} 
+          animate={{ opacity: 1, y: 0 }} 
+          transition={{ duration: 0.6, ease: "easeOut" }}
+          className="w-full max-w-[1000px] bg-white rounded-[32px] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.05)] border border-slate-100 flex flex-col md:flex-row overflow-hidden relative z-10 my-auto"
+        >
+          {/* Left Side: Abha & Dev Hero */}
+          <AuthHeroSide
+            imageSrc="/Abha & Dev QR Page.png"
+            title={<>Seamless mobile <br/> authentication.</>}
+            subtitle="Scan the QR code with your UWO Connect mobile app to log in securely without entering your password."
+            badgeText="Secure • Fast • Passwordless"
+          />
+
+          {/* Right Side: QR Flow */}
+          <div className="w-full md:w-3/5 p-6 sm:p-8 lg:p-10 flex flex-col justify-center bg-white relative">
             <div>
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-600 text-xs font-bold mb-6">
-                <Laptop size={14} />
-                <span>QR Login</span>
+              {/* Header */}
+              <div className="flex items-center justify-between gap-4 mb-4">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-bold">
+                  <Laptop size={14} />
+                  <span>QR Login</span>
+                </div>
+                <Link
+                  href="/auth/login"
+                  className="text-xs font-bold text-emerald-700 hover:text-emerald-800 hover:underline md:hidden"
+                >
+                  Password Login →
+                </Link>
               </div>
 
-              <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-gray-900 mb-3">
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight mb-2">
                 Login with your Phone
               </h1>
-              <p className="text-gray-500 text-sm font-medium leading-relaxed mb-8">
-                Scan this QR code from your Uwo Connect app to log in instantly.
+              <p className="text-slate-500 text-xs sm:text-sm font-medium leading-relaxed mb-6">
+                Scan this QR code from your UWO Connect app to log in instantly.
               </p>
 
-              {/* Numbered Steps */}
-              <div className="space-y-5">
-                <div className="flex items-start gap-4">
-                  <div className="w-7 h-7 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-200 flex items-center justify-center text-xs font-black shrink-0 mt-0.5">
-                    1
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-bold text-gray-800">Open your Uwo Connect app</h4>
-                    <p className="text-xs text-gray-400 mt-0.5">Make sure you&apos;re logged in.</p>
-                  </div>
-                </div>
+              {/* STATES */}
+              {(sessionStatus === 'WAITING' || sessionStatus === 'LOADING') && (
+                <div className="grid grid-cols-1 sm:grid-cols-12 gap-6 items-center">
+                  
+                  {/* Left sub-column: Numbered Steps */}
+                  <div className="sm:col-span-6 space-y-4">
+                    <div className="flex items-start gap-3">
+                      <div className="w-7 h-7 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-200 flex items-center justify-center text-xs font-black shrink-0 mt-0.5 shadow-2xs">
+                        1
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-bold text-slate-800">Open UWO Connect app</h4>
+                        <p className="text-[11px] text-slate-400 mt-0.5">Make sure you&apos;re logged in.</p>
+                      </div>
+                    </div>
 
-                <div className="flex items-start gap-4">
-                  <div className="w-7 h-7 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-200 flex items-center justify-center text-xs font-black shrink-0 mt-0.5">
-                    2
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-bold text-gray-800">Go to Settings → Linked Devices</h4>
-                    <p className="text-xs text-gray-400 mt-0.5">Tap <strong className="text-emerald-600 font-semibold">&quot;Link a New Device&quot;</strong></p>
-                  </div>
-                </div>
+                    <div className="flex items-start gap-3">
+                      <div className="w-7 h-7 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-200 flex items-center justify-center text-xs font-black shrink-0 mt-0.5 shadow-2xs">
+                        2
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-bold text-slate-800">Go to Settings → Linked Devices</h4>
+                        <p className="text-[11px] text-slate-400 mt-0.5">Tap <strong className="text-emerald-700 font-semibold">&quot;Link a New Device&quot;</strong></p>
+                      </div>
+                    </div>
 
-                <div className="flex items-start gap-4">
-                  <div className="w-7 h-7 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-200 flex items-center justify-center text-xs font-black shrink-0 mt-0.5">
-                    3
+                    <div className="flex items-start gap-3">
+                      <div className="w-7 h-7 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-200 flex items-center justify-center text-xs font-black shrink-0 mt-0.5 shadow-2xs">
+                        3
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-bold text-slate-800">Scan this QR code</h4>
+                        <p className="text-[11px] text-slate-400 mt-0.5">You&apos;ll be logged in automatically.</p>
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="text-sm font-bold text-gray-800">Scan this QR code</h4>
-                    <p className="text-xs text-gray-400 mt-0.5">You&apos;ll be logged in automatically.</p>
+
+                  {/* Right sub-column: QR Code Display */}
+                  <div className="sm:col-span-6 flex flex-col items-center justify-center p-4 bg-slate-50/80 rounded-2xl border border-slate-100 text-center">
+                    <div className="relative p-3 bg-white rounded-2xl shadow-md border border-slate-100">
+                      {sessionStatus === 'LOADING' ? (
+                        <div className="w-[170px] h-[170px] flex flex-col items-center justify-center">
+                          <Loader2 size={32} className="animate-spin text-emerald-600 mb-2" />
+                          <span className="text-xs font-bold text-slate-400">Generating QR...</span>
+                        </div>
+                      ) : (
+                        <QRCodeSVG
+                          value={qrPayload || 'uwoconnect'}
+                          size={170}
+                          level="M"
+                          includeMargin={false}
+                        />
+                      )}
+                    </div>
+
+                    {/* Countdown Timer */}
+                    <div className="mt-3 flex items-center gap-1.5 text-xs font-bold text-slate-500">
+                      <Clock size={13} className="text-emerald-500" />
+                      <span>Expires in:</span>
+                      <span className={`font-mono text-xs px-2 py-0.5 rounded-lg font-bold ${
+                        secondsRemaining < 30 ? 'bg-rose-50 text-rose-600 border border-rose-200' : 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                      }`}>
+                        {formatTimer(secondsRemaining)}
+                      </span>
+                    </div>
+
+                    {/* Short Code Display */}
+                    {shortCode && (
+                      <div className="mt-3 w-full max-w-[220px] bg-white border border-slate-200 rounded-xl p-2.5 flex items-center justify-between gap-2 shadow-2xs">
+                        <div className="flex flex-col text-left">
+                          <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Login Code</span>
+                          <span className="font-mono text-lg font-black text-slate-900 tracking-[0.25em]">{shortCode}</span>
+                        </div>
+                        <button
+                          onClick={() => {
+                            navigator.clipboard.writeText(shortCode);
+                            setCopied(true);
+                            setTimeout(() => setCopied(false), 2000);
+                          }}
+                          title="Copy code"
+                          className="px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-lg text-xs font-bold flex items-center gap-1 transition-all cursor-pointer shrink-0"
+                        >
+                          {copied ? <Check size={12} /> : <Copy size={12} />}
+                          <span>{copied ? 'Copied' : 'Copy'}</span>
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Refresh Action */}
+                    <button
+                      onClick={initQrSession}
+                      className="mt-3 text-xs font-bold text-slate-400 hover:text-emerald-600 flex items-center gap-1.5 transition-colors cursor-pointer"
+                    >
+                      <RefreshCw size={12} />
+                      <span>Refresh QR Code</span>
+                    </button>
+                  </div>
+
+                </div>
+              )}
+
+              {/* STATE 2: SCANNED */}
+              {sessionStatus === 'SCANNED' && (
+                <div className="flex flex-col items-center py-8 text-center animate-fade-in">
+                  <div className="w-16 h-16 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-600 mb-4 relative shadow-xs">
+                    <Smartphone size={32} className="animate-bounce" />
+                    <div className="absolute inset-0 rounded-2xl bg-emerald-100/50 animate-ping" />
+                  </div>
+                  <h3 className="text-xl font-extrabold text-slate-900 mb-1.5">QR Code Scanned!</h3>
+                  <p className="text-xs text-slate-500 max-w-xs leading-relaxed mb-5">
+                    Tap <strong className="text-emerald-700">&quot;Link Device&quot;</strong> on your phone to finish.
+                  </p>
+                  <div className="flex items-center gap-2 text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-4 py-2 rounded-xl">
+                    <Loader2 size={14} className="animate-spin" />
+                    <span>Waiting for confirmation...</span>
                   </div>
                 </div>
-              </div>
+              )}
+
+              {/* STATE 3: APPROVED */}
+              {sessionStatus === 'APPROVED' && (
+                <div className="flex flex-col items-center py-8 text-center animate-fade-in">
+                  <div className="w-16 h-16 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-600 mb-4 shadow-xs">
+                    <CheckCircle2 size={36} />
+                  </div>
+                  <h3 className="text-xl font-extrabold text-slate-900 mb-1.5">You&apos;re in!</h3>
+                  <p className="text-xs text-slate-500 max-w-xs leading-relaxed mb-4">
+                    Welcome{userProfile ? `, ${userProfile.name || userProfile.username}` : ''}. Redirecting...
+                  </p>
+                  <Loader2 size={24} className="animate-spin text-emerald-600 mt-2" />
+                </div>
+              )}
+
+              {/* STATE 4: EXPIRED */}
+              {sessionStatus === 'EXPIRED' && (
+                <div className="flex flex-col items-center py-8 text-center animate-fade-in">
+                  <div className="w-16 h-16 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-500 mb-4 shadow-xs">
+                    <Clock size={32} />
+                  </div>
+                  <h3 className="text-xl font-extrabold text-slate-900 mb-1.5">Code Expired</h3>
+                  <p className="text-xs text-slate-500 max-w-xs leading-relaxed mb-5">
+                    QR codes expire after 2 minutes for security.
+                  </p>
+                  <button
+                    onClick={initQrSession}
+                    className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-md shadow-emerald-600/20 flex items-center gap-2 transition-all cursor-pointer"
+                  >
+                    <RefreshCw size={14} />
+                    <span>Get New QR Code</span>
+                  </button>
+                </div>
+              )}
+
+              {/* STATE 5: CANCELLED */}
+              {sessionStatus === 'CANCELLED' && (
+                <div className="flex flex-col items-center py-8 text-center animate-fade-in">
+                  <div className="w-16 h-16 rounded-2xl bg-rose-50 border border-rose-200 flex items-center justify-center text-rose-500 mb-4 shadow-xs">
+                    <XCircle size={32} />
+                  </div>
+                  <h3 className="text-xl font-extrabold text-slate-900 mb-1.5">Cancelled</h3>
+                  <p className="text-xs text-slate-500 max-w-xs leading-relaxed mb-5">
+                    Login was cancelled from your phone.
+                  </p>
+                  <button
+                    onClick={initQrSession}
+                    className="px-6 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs rounded-xl border border-slate-200 flex items-center gap-2 transition-all cursor-pointer"
+                  >
+                    <RefreshCw size={14} />
+                    <span>Try Again</span>
+                  </button>
+                </div>
+              )}
+
             </div>
 
             {/* Bottom Security Note */}
-            <div className="mt-8 pt-6 border-t border-gray-100 flex items-center gap-3 text-xs text-gray-400 font-medium">
-              <ShieldCheck size={18} className="text-emerald-500 shrink-0" />
-              <span>Secure, single-use code. Expires in 2 minutes.</span>
+            <div className="mt-6 pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-400">
+              <div className="flex items-center gap-2 font-medium">
+                <ShieldCheck size={16} className="text-emerald-500 shrink-0" />
+                <span>Secure, single-use code. Expires in 2 minutes.</span>
+              </div>
+              <Link href="/auth/login" className="text-emerald-700 hover:underline font-bold text-[11px]">
+                Sign in with Password →
+              </Link>
             </div>
-          </div>
-
-          {/* Right Column: QR Code & Real-Time States */}
-          <div className="lg:col-span-5 p-8 sm:p-12 flex flex-col items-center justify-center text-center bg-gray-50/60 relative">
-            
-            {/* STATE 1: WAITING / LOADING */}
-            {(sessionStatus === 'WAITING' || sessionStatus === 'LOADING') && (
-              <div className="flex flex-col items-center">
-                {/* QR Canvas Box */}
-                <div className="relative p-5 bg-white rounded-3xl shadow-lg border border-gray-100">
-                  {sessionStatus === 'LOADING' ? (
-                    <div className="w-[210px] h-[210px] flex flex-col items-center justify-center">
-                      <Loader2 size={36} className="animate-spin text-emerald-600 mb-2" />
-                      <span className="text-xs font-bold text-gray-400">Generating QR...</span>
-                    </div>
-                  ) : (
-                    <QRCodeSVG
-                      value={qrPayload || 'uwoconnect'}
-                      size={210}
-                      level="M"
-                      includeMargin={false}
-                    />
-                  )}
-                </div>
-
-                {/* Countdown Timer */}
-                <div className="mt-6 flex items-center gap-2 text-xs font-bold text-gray-500">
-                  <Clock size={14} className="text-emerald-500" />
-                  <span>Expires in:</span>
-                  <span className={`font-mono text-sm px-2 py-0.5 rounded-lg ${
-                    secondsRemaining < 30 ? 'bg-rose-50 text-rose-500 border border-rose-200' : 'bg-emerald-50 text-emerald-600 border border-emerald-200'
-                  }`}>
-                    {formatTimer(secondsRemaining)}
-                  </span>
-                </div>
-
-                {/* Short Code Display */}
-                {shortCode && (
-                  <div className="mt-4 w-full max-w-[260px] bg-white border border-gray-200 rounded-2xl p-3 flex items-center justify-between gap-2 shadow-sm">
-                    <div className="flex flex-col text-left">
-                      <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Login Code</span>
-                      <span className="font-mono text-2xl font-black text-gray-900 tracking-[0.3em]">{shortCode}</span>
-                    </div>
-                    <button
-                      onClick={() => {
-                        navigator.clipboard.writeText(shortCode);
-                        setCopied(true);
-                        setTimeout(() => setCopied(false), 2000);
-                      }}
-                      title="Copy code"
-                      className="px-2.5 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-600 border border-emerald-200 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shrink-0"
-                    >
-                      {copied ? <Check size={12} /> : <Copy size={12} />}
-                      <span>{copied ? 'Copied' : 'Copy'}</span>
-                    </button>
-                  </div>
-                )}
-
-                {/* Refresh Action */}
-                <button
-                  onClick={initQrSession}
-                  className="mt-4 text-xs font-bold text-gray-400 hover:text-emerald-600 flex items-center gap-1.5 transition-colors cursor-pointer"
-                >
-                  <RefreshCw size={12} />
-                  <span>Refresh QR Code</span>
-                </button>
-              </div>
-            )}
-
-            {/* STATE 2: SCANNED */}
-            {sessionStatus === 'SCANNED' && (
-              <div className="flex flex-col items-center animate-fade-in py-4">
-                <div className="w-20 h-20 rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-500 mb-6 relative">
-                  <Smartphone size={38} className="animate-bounce" />
-                  <div className="absolute inset-0 rounded-full bg-emerald-100/50 animate-ping" />
-                </div>
-                <h3 className="text-xl font-extrabold text-gray-900 mb-2">QR Code Scanned!</h3>
-                <p className="text-xs text-gray-500 max-w-xs leading-relaxed mb-6">
-                  Tap <strong className="text-emerald-600">&quot;Link Device&quot;</strong> on your phone to finish.
-                </p>
-                <div className="flex items-center gap-2 text-xs font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 px-4 py-2 rounded-xl">
-                  <Loader2 size={14} className="animate-spin" />
-                  <span>Waiting for confirmation...</span>
-                </div>
-              </div>
-            )}
-
-            {/* STATE 3: APPROVED */}
-            {sessionStatus === 'APPROVED' && (
-              <div className="flex flex-col items-center animate-fade-in py-6">
-                <div className="w-20 h-20 rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-500 mb-6">
-                  <CheckCircle2 size={44} />
-                </div>
-                <h3 className="text-xl font-extrabold text-gray-900 mb-2">You&apos;re in!</h3>
-                <p className="text-xs text-gray-500 max-w-xs leading-relaxed mb-4">
-                  Welcome{userProfile ? `, ${userProfile.name || userProfile.username}` : ''}. Redirecting...
-                </p>
-                <Loader2 size={24} className="animate-spin text-emerald-500 mt-2" />
-              </div>
-            )}
-
-            {/* STATE 4: EXPIRED */}
-            {sessionStatus === 'EXPIRED' && (
-              <div className="flex flex-col items-center animate-fade-in py-4">
-                <div className="w-20 h-20 rounded-full bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-500 mb-6">
-                  <Clock size={40} />
-                </div>
-                <h3 className="text-xl font-extrabold text-gray-900 mb-2">Code Expired</h3>
-                <p className="text-xs text-gray-500 max-w-xs leading-relaxed mb-6">
-                  QR codes expire after 2 minutes. Tap below to get a new one.
-                </p>
-                <button
-                  onClick={initQrSession}
-                  className="px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-2xl shadow-lg shadow-emerald-600/20 flex items-center gap-2 transition-all cursor-pointer"
-                >
-                  <RefreshCw size={14} />
-                  <span>Get New QR Code</span>
-                </button>
-              </div>
-            )}
-
-            {/* STATE 5: CANCELLED */}
-            {sessionStatus === 'CANCELLED' && (
-              <div className="flex flex-col items-center animate-fade-in py-4">
-                <div className="w-20 h-20 rounded-full bg-rose-50 border border-rose-200 flex items-center justify-center text-rose-500 mb-6">
-                  <XCircle size={40} />
-                </div>
-                <h3 className="text-xl font-extrabold text-gray-900 mb-2">Cancelled</h3>
-                <p className="text-xs text-gray-500 max-w-xs leading-relaxed mb-6">
-                  Login was cancelled from your phone.
-                </p>
-                <button
-                  onClick={initQrSession}
-                  className="px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold text-xs rounded-2xl border border-gray-200 flex items-center gap-2 transition-all cursor-pointer"
-                >
-                  <RefreshCw size={14} />
-                  <span>Try Again</span>
-                </button>
-              </div>
-            )}
 
           </div>
-
-        </div>
+        </motion.div>
       </main>
 
       {/* Footer */}
-      <footer className="relative z-10 w-full max-w-6xl mx-auto px-6 py-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-400 font-medium">
+      <footer className="relative z-10 w-full max-w-6xl mx-auto py-4 px-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-slate-400 font-medium">
         <div>
-          &copy; {new Date().getFullYear()} {brand?.name || 'UWO Connect™'} · All rights reserved.
+          &copy; {new Date().getFullYear()} {brand?.name || brand?.brand_name || 'UWO Connect'} · All rights reserved.
         </div>
-        <div className="flex items-center gap-6">
-          <Link href="/privacy" className="hover:text-gray-600 transition-colors">Privacy Policy</Link>
-          <Link href="/terms" className="hover:text-gray-600 transition-colors">Terms of Service</Link>
-          <Link href="/contact" className="hover:text-gray-600 transition-colors">Support</Link>
+        <div className="flex items-center gap-5">
+          <Link href="/privacy" className="hover:text-slate-600 transition-colors">Privacy Policy</Link>
+          <Link href="/terms" className="hover:text-slate-600 transition-colors">Terms of Service</Link>
+          <Link href="/contact" className="hover:text-slate-600 transition-colors">Support</Link>
         </div>
       </footer>
     </div>

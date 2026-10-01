@@ -13,6 +13,60 @@ const nextConfig = {
   experimental: {
     optimizePackageImports: ['lucide-react'],
   },
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff',
+          },
+          {
+            key: 'X-Frame-Options',
+            value: 'SAMEORIGIN',
+          },
+          {
+            key: 'Referrer-Policy',
+            value: 'strict-origin-when-cross-origin',
+          },
+          {
+            key: 'Permissions-Policy',
+            value: 'camera=(), microphone=(), geolocation=(), browsing-topics=()',
+          },
+        ],
+      },
+    ];
+  },
+  async redirects() {
+    return [
+      {
+        source: '/terms',
+        destination: '/terms-and-conditions',
+        permanent: true,
+      },
+      {
+        source: '/cookies',
+        destination: '/cookie-policy',
+        permanent: true,
+      },
+      {
+        source: '/privacy',
+        destination: 'https://uwo24.com/privacy-policy',
+        permanent: true,
+      },
+      {
+        source: '/privacy-policy',
+        destination: 'https://uwo24.com/privacy-policy',
+        permanent: true,
+      },
+      {
+        source: '/book',
+        destination: '/contact',
+        permanent: false,
+      },
+    ];
+  },
   async rewrites() {
     let backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080';
     if (!backendUrl.startsWith('http://') && !backendUrl.startsWith('https://')) {
@@ -50,10 +104,6 @@ const nextConfig = {
       {
         source: '/cookie',
         destination: '/cookie-policy',
-      },
-      {
-        source: '/privacy-policy',
-        destination: '/privacy',
       },
       {
         source: '/api/:path*',

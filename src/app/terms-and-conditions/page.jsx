@@ -9,14 +9,14 @@ import {
 } from '@/lib/seo';
 
 export const metadata = buildPageMetadata({
-  title: 'Terms & Conditions — UWO Connect™ Platform',
+  title: 'Terms & Conditions — UWO Connect Platform',
   description:
-    'Review the official UWO Connect™ terms and conditions, platform service level agreement, user guidelines, and acceptable use policies.',
+    'Review the official UWO Connect terms and conditions, platform service level agreement, user guidelines, and acceptable use policies.',
   path: '/terms-and-conditions',
   keywords: [
     'Terms and Conditions',
     'Terms of Service',
-    'UWO Connect™ legal agreement',
+    'UWO Connect legal agreement',
     'acceptable use policy',
     'SaaS terms',
   ],
@@ -32,8 +32,8 @@ export default function TermsAndConditionsPage() {
     '@type': 'WebPage',
     '@id': `${getBaseUrl()}/terms-and-conditions#webpage`,
     url: `${getBaseUrl()}/terms-and-conditions`,
-    name: 'Terms & Conditions — UWO Connect™',
-    description: 'Official platform usage agreement and terms & conditions for UWO Connect™ services.',
+    name: 'Terms & Conditions — UWO Connect',
+    description: 'Official platform usage agreement and terms & conditions for UWO Connect services.',
     publisher: {
       '@type': 'Organization',
       name: SITE_CONFIG.name,

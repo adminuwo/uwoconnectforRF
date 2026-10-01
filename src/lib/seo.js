@@ -4,14 +4,14 @@
  */
 
 export const SITE_CONFIG = {
-  name: 'UWO Connect™',
-  legalName: 'UWO Connect™ / Aisa Technologies',
+  name: 'UWO Connect',
+  legalName: 'UWO Connect / Aisa Technologies',
   tagline: 'Connect Everything. Automate Anything.',
-  defaultTitle: 'UWO Connect™ — AI-Powered Multi-Channel Business Automation & CRM Platform',
-  titleTemplate: '%s | UWO Connect™',
+  defaultTitle: 'UWO Connect — AI-Powered Multi-Channel Business Automation & CRM Platform',
+  titleTemplate: '%s | UWO Connect',
   defaultDescription:
     'Enterprise multi-channel automation platform connecting WhatsApp Business API, Instagram, Facebook, Gmail, and Outlook with AI agents, automated workflow routing, CRM pipelines, and smart invoicing.',
-  domain: 'uwoconnect.com',
+  domain: process.env.NEXT_PUBLIC_DOMAIN || 'uwoconnect.aisa24.com',
   defaultLocale: 'en_US',
   themeColor: '#030712',
   brandColor: '#059669',
@@ -38,7 +38,7 @@ export const SITE_CONFIG = {
     'https://www.threads.net/@aimallglobal',
   ],
   keywords: [
-    'UwoConnect',
+    'UWO Connect',
     'WhatsApp Business API automation',
     'multi-channel business automation',
     'AI customer service agents',
@@ -61,7 +61,7 @@ export function getBaseUrl() {
     process.env.NEXT_PUBLIC_SITE_URL ||
     process.env.NEXT_PUBLIC_APP_URL ||
     process.env.NEXT_PUBLIC_FRONTEND_URL ||
-    'https://uwoconnect.com';
+    'https://uwoconnect.aisa24.com';
   return envUrl.replace(/\/+$/, '');
 }
 
@@ -151,7 +151,7 @@ export function getOrganizationSchema() {
     url: baseUrl,
     logo: {
       '@type': 'ImageObject',
-      url: `${baseUrl}/download%20(3).gif`,
+      url: `${baseUrl}/favicon.png`,
       caption: `${SITE_CONFIG.name} Brand Logo`,
     },
     description: SITE_CONFIG.defaultDescription,
@@ -280,36 +280,36 @@ export function getSoftwareApplicationSchema() {
 export function getFAQSchema(customFaqs = null) {
   const defaultFaqs = [
     {
-      q: 'What is UWO Connect™?',
-      a: 'UWO Connect™ is a unified business communication and automation platform that connects WhatsApp, Instagram, Facebook, Gmail, and Outlook with AI agents, workflow routing, CRM pipelines, and smart invoicing.',
+      q: 'What is UWO Connect?',
+      a: 'UWO Connect is a unified business communication and automation platform that connects WhatsApp, Instagram, Facebook, Gmail, and Outlook with AI agents, workflow routing, CRM pipelines, and smart invoicing.',
     },
     {
-      q: 'Which channels can I connect with UWO Connect™?',
-      a: 'UWO Connect™ supports official WhatsApp Business API, Instagram Direct DMs, Facebook Messenger, YouTube comments, Gmail, and Outlook integrations.',
+      q: 'Which channels can I connect with UWO Connect?',
+      a: 'UWO Connect supports official WhatsApp Business API, Instagram Direct DMs, Facebook Messenger, YouTube comments, Gmail, and Outlook integrations.',
     },
     {
-      q: 'What is included in my UWO Connect™ plan?',
+      q: 'What is included in my UWO Connect plan?',
       a: 'Each plan includes a specific allocation of connected channels, team members, automated workflows, knowledge base documents, and broadcast capabilities.',
     },
     {
-      q: 'Can I use UWO Connect™ without coding?',
-      a: 'Yes. UWO Connect™ provides a visual drag-and-drop workflow canvas and zero-code channel connectors designed for business owners and marketing teams.',
+      q: 'Can I use UWO Connect without coding?',
+      a: 'Yes. UWO Connect provides a visual drag-and-drop workflow canvas and zero-code channel connectors designed for business owners and marketing teams.',
     },
     {
       q: 'Can I use AI automation?',
-      a: 'Yes. UWO Connect™ includes intelligent AI Copilot agents trained on your uploaded business PDFs and documents for 24/7 automated lead qualification and customer support.',
+      a: 'Yes. UWO Connect includes intelligent AI Copilot agents trained on your uploaded business PDFs and documents for 24/7 automated lead qualification and customer support.',
     },
     {
       q: 'Can I manage leads and customer follow-ups?',
-      a: 'Yes. UWO Connect™ includes an industrial CRM pipeline with lead stages (New, Qualified, Hot Lead, Follow-Up, Won) and calendar-scheduled follow-up tasks.',
+      a: 'Yes. UWO Connect includes an industrial CRM pipeline with lead stages (New, Qualified, Hot Lead, Follow-Up, Won) and calendar-scheduled follow-up tasks.',
     },
     {
       q: 'Can I create quotations and GST invoices?',
       a: 'Yes. Businesses can generate branded quotations, proposals, and GST tax invoices with 1-click WhatsApp delivery and payment links.',
     },
     {
-      q: 'Does UWO Connect™ offer agency white-label solutions?',
-      a: 'Yes. UWO Connect™ provides multi-tenant white-label workspaces allowing agencies to provision custom branded client portals with dedicated domains and logos.',
+      q: 'Does UWO Connect offer agency white-label solutions?',
+      a: 'Yes. UWO Connect provides multi-tenant white-label workspaces allowing agencies to provision custom branded client portals with dedicated domains and logos.',
     },
   ];
 
@@ -366,8 +366,8 @@ export function getContactPageSchema() {
     '@type': 'ContactPage',
     '@id': `${baseUrl}/contact#webpage`,
     url: `${baseUrl}/contact`,
-    name: 'Contact Support & Sales — UWO Connect™',
-    description: 'Get in touch with UWO Connect™ for enterprise support, product onboarding, and WhatsApp Meta API setup.',
+    name: 'Contact Support & Sales — UWO Connect',
+    description: 'Get in touch with UWO Connect for enterprise support, product onboarding, and WhatsApp Meta API setup.',
     mainEntity: {
       '@id': `${baseUrl}/#organization`,
     },
@@ -384,8 +384,8 @@ export function getAboutPageSchema() {
     '@type': 'AboutPage',
     '@id': `${baseUrl}/about#webpage`,
     url: `${baseUrl}/about`,
-    name: 'About UWO Connect™ — Enterprise Multi-Channel Automation & AI Workflows',
-    description: 'Learn about UWO Connect™, our enterprise communication architecture, security compliance, and mission.',
+    name: 'About UWO Connect — Enterprise Multi-Channel Automation & AI Workflows',
+    description: 'Learn about UWO Connect, our enterprise communication architecture, security compliance, and mission.',
     mainEntity: {
       '@id': `${baseUrl}/#organization`,
     },

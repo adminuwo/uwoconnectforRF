@@ -9,11 +9,11 @@ import {
 } from '@/lib/seo';
 
 export const metadata = buildPageMetadata({
-  title: 'Cookie Policy & Preferences — UWO Connect™',
+  title: 'Cookie Policy & Preferences — UWO Connect',
   description:
-    'Learn how UWO Connect™ uses essential, analytical, and functional cookies to improve workspace performance and provide secure user authentication.',
+    'Learn how UWO Connect uses essential, analytical, and functional cookies to improve workspace performance and provide secure user authentication.',
   path: '/cookie-policy',
-  keywords: ['Cookie Policy', 'cookie preferences', 'session cookies', 'UWO Connect™ tracking settings'],
+  keywords: ['Cookie Policy', 'cookie preferences', 'session cookies', 'UWO Connect tracking settings'],
 });
 
 export default function CookiePolicyPage() {
@@ -26,8 +26,8 @@ export default function CookiePolicyPage() {
     '@type': 'WebPage',
     '@id': `${getBaseUrl()}/cookie-policy#webpage`,
     url: `${getBaseUrl()}/cookie-policy`,
-    name: 'Cookie Policy — UWO Connect™',
-    description: 'Cookie policy and consent settings for UWO Connect™ platform users.',
+    name: 'Cookie Policy — UWO Connect',
+    description: 'Cookie policy and consent settings for UWO Connect platform users.',
     publisher: {
       '@type': 'Organization',
       name: SITE_CONFIG.name,

@@ -22,7 +22,7 @@ export default function ContactClient() {
           <Link href="/" className="text-[#10B981] font-bold text-sm hover:underline flex items-center gap-2">
             ← Back to Home
           </Link>
-          <div className="text-xl font-extrabold text-white">Uwo Connect.</div>
+          <div className="text-xl font-extrabold text-white">UWO Connect.</div>
         </header>
 
         <main>
@@ -158,8 +158,17 @@ export default function ContactClient() {
           </div>
         </main>
 
-        <footer className="text-center text-xs text-slate-500">
-          © {new Date().getFullYear()} {SITE_CONFIG.legalName}. All rights reserved.
+        <footer className="text-center text-xs text-slate-500 space-y-2 mt-8">
+          <div className="flex flex-wrap items-center justify-center gap-4 text-slate-400 font-medium">
+            <Link href="/terms-and-conditions" className="hover:text-[#10B981] transition-colors">Terms &amp; Conditions</Link>
+            <span>•</span>
+            <Link href="/privacy" className="hover:text-[#10B981] transition-colors">Privacy Policy</Link>
+            <span>•</span>
+            <Link href="/refund-policy" className="hover:text-[#10B981] transition-colors">Refund Policy</Link>
+            <span>•</span>
+            <Link href="/cookie-policy" className="hover:text-[#10B981] transition-colors">Cookie Policy</Link>
+          </div>
+          <div>© {new Date().getFullYear()} {SITE_CONFIG.legalName}. All rights reserved.</div>
         </footer>
       </div>
     </div>

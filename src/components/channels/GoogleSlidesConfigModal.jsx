@@ -210,7 +210,7 @@ export default function GoogleSlidesConfigModal({ client, isOpen, onClose, onSav
                 </div>
                 <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/80 flex items-center gap-2.5">
                   <CheckCircle2 size={16} className="text-amber-500 shrink-0" />
-                  <span>Auto-creates &quot;UWOConnect Presentation&quot; in Google Drive</span>
+                  <span>Auto-creates &quot;UWO Connect Presentation&quot; in Google Drive</span>
                 </div>
                 <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/80 flex items-center gap-2.5">
                   <CheckCircle2 size={16} className="text-amber-500 shrink-0" />
@@ -269,7 +269,7 @@ export default function GoogleSlidesConfigModal({ client, isOpen, onClose, onSav
                     </div>
                     <div className="p-4 bg-amber-50/60 border border-amber-100 rounded-xl">
                       <span className="text-[10px] text-amber-600 font-bold uppercase tracking-wider">Default Deck</span>
-                      <p className="text-xs font-semibold text-amber-800 mt-1 truncate">{config.default_presentation_name || 'UWOConnect Presentation'}</p>
+                      <p className="text-xs font-semibold text-amber-800 mt-1 truncate">{config.default_presentation_name || 'UWO Connect Presentation'}</p>
                     </div>
                     <div className="p-4 bg-slate-50/70 border border-slate-200/70 rounded-xl">
                       <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Total Slide Decks</span>

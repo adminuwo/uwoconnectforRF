@@ -221,7 +221,7 @@ export default function GoogleSheetsConfigModal({ client, isOpen, onClose, onSav
                 </div>
                 <div className="p-3 bg-white rounded-xl border border-slate-200/80 flex items-center gap-2.5">
                   <CheckCircle2 size={16} className="text-emerald-500 shrink-0" />
-                  <span>Auto-creates &quot;UWOConnect Leads&quot; sheet</span>
+                  <span>Auto-creates &quot;UWO Connect Leads&quot; sheet</span>
                 </div>
                 <div className="p-3 bg-white rounded-xl border border-slate-200/80 flex items-center gap-2.5">
                   <CheckCircle2 size={16} className="text-emerald-500 shrink-0" />
@@ -297,7 +297,7 @@ export default function GoogleSheetsConfigModal({ client, isOpen, onClose, onSav
                           <p className="text-slate-400 font-semibold mb-1">Spreadsheet Title</p>
                           <p className="font-bold text-emerald-700 truncate flex items-center gap-1">
                             <FileSpreadsheet size={14} />
-                            {sheetsInfo?.spreadsheet_name || config.spreadsheet_name || 'UWOConnect Leads'}
+                            {sheetsInfo?.spreadsheet_name || config.spreadsheet_name || 'UWO Connect Leads'}
                           </p>
                         </div>
                         <div>

@@ -36,7 +36,7 @@ export default function AboutModal({ isOpen, onClose }) {
               className="text-3xl sm:text-4xl font-bold tracking-tight text-white italic font-serif leading-tight" 
               style={serifStyle}
             >
-              About Uwo Connect
+              About UWO Connect
             </h2>
             <div className="flex items-center gap-3 text-[11px] text-slate-300 font-medium">
               <span>Enterprise Business Communication &amp; AI Workflow Platform</span>
@@ -65,7 +65,7 @@ export default function AboutModal({ isOpen, onClose }) {
               </h3>
             </div>
             <p className="text-slate-600 text-xs sm:text-sm leading-relaxed pl-12">
-              <strong className="text-slate-900">Uwo Connect</strong> (operated by Aisa Technologies) is a premier enterprise SaaS platform providing official WhatsApp Business Meta API integration, multi-channel inbox unified messaging, AI assistant automation, and CRM workflow management.
+              <strong className="text-slate-900">UWO Connect</strong> (operated by Aisa Technologies) is a premier enterprise SaaS platform providing official WhatsApp Business Meta API integration, multi-channel inbox unified messaging, AI assistant automation, and CRM workflow management.
             </p>
           </section>
 
@@ -136,7 +136,7 @@ export default function AboutModal({ isOpen, onClose }) {
               </h3>
             </div>
             <p className="text-slate-600 text-xs sm:text-sm leading-relaxed pl-12">
-              Uwo Connect operates on a cloud subscription model offering tiered software plans (Starter, Growth, and Enterprise) billed monthly or annually. Subscriptions grant businesses full access to our cloud dashboard, API webhooks, team licenses, and automated message broadcasting.
+              UWO Connect operates on a cloud subscription model offering tiered software plans (Starter, Growth, and Enterprise) billed monthly or annually. Subscriptions grant businesses full access to our cloud dashboard, API webhooks, team licenses, and automated message broadcasting.
             </p>
           </section>
 
@@ -165,7 +165,7 @@ export default function AboutModal({ isOpen, onClose }) {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs text-slate-700 pt-1">
               <div>
                 <span className="text-slate-500 block font-bold">Registered Entity</span>
-                <span className="font-extrabold text-slate-900">Uwo Connect / Aisa Technologies</span>
+                <span className="font-extrabold text-slate-900">UWO Connect / Aisa Technologies</span>
               </div>
               <div>
                 <span className="text-slate-500 block font-bold">Official Website</span>
@@ -196,7 +196,7 @@ export default function AboutModal({ isOpen, onClose }) {
 
         {/* Modal Footer */}
         <div className="p-4 sm:p-5 bg-slate-50 border-t border-slate-200 flex items-center justify-between shrink-0">
-          <span className="text-xs text-slate-500 font-medium">© {new Date().getFullYear()} Uwo Connect</span>
+          <span className="text-xs text-slate-500 font-medium">© {new Date().getFullYear()} UWO Connect</span>
           <button
             type="button"
             onClick={onClose}

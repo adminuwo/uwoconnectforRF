@@ -7,16 +7,23 @@ import {
   Smile, Paperclip, Zap, ArrowLeft, Check, CheckCheck, Archive, Sparkles, Lock, Unlock,
   FileText, Download, Image as ImageIcon, Music, Film, Video, ExternalLink,
   Shield, ShieldAlert, ArrowRightLeft, History, BarChart3, Activity, Users, Eye, StickyNote,
-  Clock, Tag, RefreshCw, AlertCircle, Bot, ChevronLeft, ChevronRight
+  Clock, Tag, RefreshCw, AlertCircle, Bot, ChevronLeft, ChevronRight,
+  LayoutTemplate, X, UserPlus
 } from 'lucide-react';
 import axios from 'axios';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import TransferModal from '@/components/inbox/TransferModal';
 import AuditLogDrawer from '@/components/inbox/AuditLogDrawer';
 import MonitoringAnalyticsModal from '@/components/inbox/MonitoringAnalyticsModal';
+import AddContactModal from '@/components/inbox/AddContactModal';
 import { cn } from '@/lib/utils';
 import { API_BASE_URL } from '@/config/apiConfig';
 import { useBrand } from '@/context/BrandContext';
+
+const getAuthToken = () => {
+  if (typeof window === 'undefined') return '';
+  return localStorage.getItem('uwo_token') || localStorage.getItem('token') || localStorage.getItem('uwo_access_token') || '';
+};
 
 const WhatsAppIcon = ({ size = 14, className = '' }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
@@ -74,8 +81,13 @@ export default function ClientInboxPage() {
 
   // Modals & Drawers
   const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
+  const [isAddContactOpen, setIsAddContactOpen] = useState(false);
   const [isAuditDrawerOpen, setIsAuditDrawerOpen] = useState(false);
   const [isAnalyticsModalOpen, setIsAnalyticsModalOpen] = useState(false);
+  const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
+  const [metaTemplates, setMetaTemplates] = useState([]);
+  const [loadingTemplates, setLoadingTemplates] = useState(false);
+  const [selectedTemplateForSend, setSelectedTemplateForSend] = useState(null);
   const [auditLogs, setAuditLogs] = useState([]);
   const [statsData, setStatsData] = useState(null);
   const [analyticsData, setAnalyticsData] = useState([]);
@@ -87,6 +99,7 @@ export default function ClientInboxPage() {
   const selectedConvoIdRef = useRef(selectedConvoId);
   const selectedRawAddressRef = useRef(null); // Stores the rawAddress (phone/platform_id) of selected convo
   const activeChannelFilterRef = useRef(activeChannelFilter);
+  const conversationsRef = useRef(conversations);
   const [convoOffset, setConvoOffset] = useState(0);
   const [hasMoreConvos, setHasMoreConvos] = useState(true);
   const [isLoadingMoreContacts, setIsLoadingMoreContacts] = useState(false);
@@ -108,6 +121,10 @@ export default function ClientInboxPage() {
     selectedConvoIdRef.current = selectedConvoId;
   }, [selectedConvoId]);
 
+  useEffect(() => {
+    conversationsRef.current = conversations;
+  }, [conversations]);
+
   // Fast direct channel conversations fetcher
   const fetchConversations = async (channel = 'ALL', offset = 0, append = false) => {
     try {
@@ -117,7 +134,7 @@ export default function ClientInboxPage() {
         if (offset === 0) setLoading(true);
       }
 
-      const token = localStorage.getItem('uwo_token');
+      const token = getAuthToken();
       if (!token) {
         setLoading(false);
         return;
@@ -160,11 +177,28 @@ export default function ClientInboxPage() {
 
       setHasMoreConvos(rawConvos.length >= limit);
 
+      const formatDisplayName = (name, phone, platformId) => {
+        let val = (name || '').trim();
+        const genericList = ['UNKNOWN', 'UNKNOWN USER', 'USER', 'CUSTOMER', 'NONE', 'NULL'];
+        if (!val || genericList.includes(val.toUpperCase())) {
+          val = (phone || platformId || '').trim();
+        }
+        const digits = val.replace(/\D/g, '');
+        if (digits.length === 12 && digits.startsWith('91')) {
+          return `+91 ${digits.slice(2, 7)} ${digits.slice(7)}`;
+        } else if (digits.length === 10) {
+          return `+91 ${digits.slice(0, 5)} ${digits.slice(5)}`;
+        } else if (digits.length >= 8 && digits.length <= 15 && (val.startsWith('+') || /^\d+$/.test(val))) {
+          return val.startsWith('+') ? val : `+${val}`;
+        }
+        return val || 'Customer';
+      };
+
       const formatted = rawConvos.map(c => {
         const rawAddr = c.contact_platform_id || c.contact_phone || c.id;
         return {
           id: c.id || rawAddr,
-          name: c.contact_name || c.contact_platform_id || c.contact_phone || 'Customer',
+          name: formatDisplayName(c.contact_name, c.contact_phone, c.contact_platform_id),
           rawAddress: rawAddr,
           lastMessage: c.last_message_summary || 'Recent conversation',
           time: c.last_message_at || c.updated_at || c.created_at || new Date().toISOString(),
@@ -224,10 +258,32 @@ export default function ClientInboxPage() {
     fetchConversations(activeChannelFilter, nextOffset, true);
   };
 
+  const fetchTemplates = async () => {
+    try {
+      setLoadingTemplates(true);
+      const token = getAuthToken();
+      if (!token) return;
+      const apiUrl = API_BASE_URL;
+      const res = await axios.get(`${apiUrl}/api/templates/`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = Array.isArray(res.data) ? res.data : (res.data?.results || []);
+      const approved = data.filter(t => (t.status || '').toUpperCase() === 'APPROVED' || !t.status);
+      setMetaTemplates(approved);
+      if (approved.length > 0) {
+        setSelectedTemplateForSend(prev => prev || approved[0]);
+      }
+    } catch (err) {
+      console.warn('Failed to fetch templates:', err);
+    } finally {
+      setLoadingTemplates(false);
+    }
+  };
+
   // 1. Initial Data Fetching
   const fetchData = async () => {
     try {
-      const token = localStorage.getItem('uwo_token');
+      const token = getAuthToken();
       if (!token) return;
       
       const headers = { Authorization: `Bearer ${token}` };
@@ -239,6 +295,7 @@ export default function ClientInboxPage() {
         .catch(() => setCurrentUser({ username: 'Admin', role: 'ADMIN' }));
 
       await fetchConversations(activeChannelFilterRef.current || 'ALL', 0, false);
+      fetchTemplates();
 
       // Background loading of team and stats
       axios.get(`${apiUrl}/api/team/members/`, { headers }).then(res => setTeamMembers(Array.isArray(res.data) ? res.data : (res.data?.results || []))).catch(()=>{});
@@ -263,7 +320,7 @@ export default function ClientInboxPage() {
       } else {
         setIsLoadingMessages(true);
       }
-      const token = localStorage.getItem('uwo_token');
+      const token = getAuthToken();
       const apiUrl = API_BASE_URL;
       const res = await axios.get(`${apiUrl}/api/messages/?contact_id=${encodeURIComponent(contactId)}&limit=50&offset=${offset}`, {
         headers: { Authorization: `Bearer ${token}` }
@@ -309,12 +366,12 @@ export default function ClientInboxPage() {
   useEffect(() => {
     if (selectedConvoId) {
       setMessagesOffset(0);
-      const targetConvo = conversations.find(c => c.id === selectedConvoId);
+      const targetConvo = (conversationsRef.current || []).find(c => c.id === selectedConvoId) || conversations.find(c => c.id === selectedConvoId);
       const addressToFetch = targetConvo?.rawAddress || selectedRawAddressRef.current || selectedConvoId;
       selectedRawAddressRef.current = addressToFetch;
       fetchMessages(addressToFetch, 0, false);
     }
-  }, [selectedConvoId, conversations]);
+  }, [selectedConvoId]);
 
   // Instant reactive client-side filtered conversations
   const convoList = useMemo(() => {
@@ -338,18 +395,27 @@ export default function ClientInboxPage() {
 
   const activeConvo = convoList.find(c => c.id === selectedConvoId) || (convoList.length > 0 ? convoList[0] : null);
 
-  // When activeChannelFilter changes, auto-select first conversation of that channel
+  // Determine if the WhatsApp 24-hour customer window is open based on the latest incoming message
+  const is24hWindowActive = useMemo(() => {
+    if (!activeConvo || activeConvo.channel !== 'WHATSAPP') return true;
+    const lastIncoming = messages.slice().reverse().find(m => m.message_type === 'INCOMING');
+    if (!lastIncoming || !lastIncoming.created_at) return false;
+    const hoursSince = (Date.now() - new Date(lastIncoming.created_at).getTime()) / (1000 * 60 * 60);
+    return hoursSince < 24;
+  }, [activeConvo, messages]);
+
+  // When activeChannelFilter changes or conversations initially load, auto-select first conversation of that channel
   useEffect(() => {
     if (convoList.length > 0) {
-      const exists = convoList.some(c => c.id === selectedConvoId);
-      if (!exists) {
+      const exists = convoList.some(c => c.id === selectedConvoIdRef.current);
+      if (!selectedConvoIdRef.current || !exists) {
         selectedRawAddressRef.current = convoList[0].rawAddress || convoList[0].id;
         setSelectedConvoId(convoList[0].id);
       }
     } else {
       setSelectedConvoId(null);
     }
-  }, [activeChannelFilter, convoList]);
+  }, [activeChannelFilter, conversations.length]);
 
   // 2. Real-Time WebSocket Connection & Event Handlers with Auto-Reconnect
   useEffect(() => {
@@ -358,7 +424,7 @@ export default function ClientInboxPage() {
 
     const connectWebSocket = () => {
       if (isUnmounted) return;
-      const token = localStorage.getItem('uwo_token') || localStorage.getItem('token');
+      const token = getAuthToken();
       if (!token) return;
 
       let wsUrl = API_BASE_URL || 'https://aisaconnectback-anaqbuapb6c6apgy.centralindia-01.azurewebsites.net';
@@ -433,7 +499,7 @@ export default function ClientInboxPage() {
                 (data.message_id && m.id === data.message_id) ||
                 (data.whatsapp_message_id && m.whatsapp_message_id === data.whatsapp_message_id) ||
                 (data.whatsapp_message_id && m.metadata?.response?.messages?.[0]?.id === data.whatsapp_message_id);
-              return matches ? { ...m, status: data.status } : m;
+              return matches ? { ...m, status: data.status, error: data.error || m.error, error_code: data.error_code || m.error_code } : m;
             }));
           }
 
@@ -556,13 +622,14 @@ export default function ClientInboxPage() {
       sender_name: currentUser?.username || 'Team Member',
       sender_avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${currentUser?.username || 'User'}`,
       sender_department: currentUser?.department || 'Support',
+      status: 'PENDING',
       created_at: new Date().toISOString()
     };
 
     setMessages(prev => [...prev, optimisticMsg]);
 
     try {
-      const token = localStorage.getItem('uwo_token');
+      const token = getAuthToken();
       const apiUrl = API_BASE_URL;
 
       const res = await axios.post(`${apiUrl}/api/messages/`, {
@@ -575,15 +642,94 @@ export default function ClientInboxPage() {
       });
 
       if (res.data) {
+        if (res.data.status === 'FAILED') {
+          const errDetail = res.data.error || 'Message rejected by WhatsApp/Meta API.';
+          setMessages(prev => prev.map(m => m.id === optimisticMsg.id ? { ...res.data, status: 'FAILED', error: errDetail } : m));
+          if (activeConvo.channel === 'WHATSAPP') {
+            fetchTemplates();
+            setIsTemplateModalOpen(true);
+          }
+        } else {
+          setMessages(prev => {
+            const alreadyExists = prev.some(m => m.id === res.data.id);
+            if (alreadyExists) {
+              return prev.filter(m => m.id !== optimisticMsg.id);
+            }
+            const replaced = prev.map(m => m.id === optimisticMsg.id ? res.data : m);
+            if (!replaced.some(m => m.id === res.data.id)) {
+              replaced.push(res.data);
+            }
+            return replaced;
+          });
+          setConversations(prev => {
+            const activeIdx = prev.findIndex(c => c.id === activeConvo.id);
+            if (activeIdx !== -1) {
+              const updatedItem = {
+                ...prev[activeIdx],
+                lastMessage: res.data.body || textToSend,
+                time: new Date().toISOString()
+              };
+              const remaining = prev.filter((_, idx) => idx !== activeIdx);
+              return [updatedItem, ...remaining];
+            }
+            return prev;
+          });
+        }
+      }
+    } catch (err) {
+      console.warn('Failed to send message:', err);
+      const errMsg = err.response?.data?.detail || err.response?.data?.error || err.message;
+      setMessages(prev => prev.map(m => m.id === optimisticMsg.id ? { ...m, status: 'FAILED', error: errMsg } : m));
+      alert('Failed to send message: ' + errMsg);
+    } finally {
+      setIsSending(false);
+    }
+  };
+
+  // 3.1 Send Meta WhatsApp Approved Template
+  const handleSendTemplate = async (template) => {
+    if (!activeConvo || isSending) return;
+    setIsSending(true);
+    setIsTemplateModalOpen(false);
+
+    const nowTs = Date.now();
+    const targetAddress = activeConvo.contactObj?.phone_number || activeConvo.contactObj?.platform_id || activeConvo.rawAddress || activeConvo.id;
+    const optimisticMsg = {
+      id: `temp_${nowTs}`,
+      from_address: currentUser?.username || 'SYSTEM',
+      to_address: targetAddress,
+      body: `📄 [Template: ${template.name}]`,
+      channel: 'WHATSAPP',
+      message_type: 'OUTGOING',
+      sender_name: currentUser?.username || 'Team Member',
+      sender_avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${currentUser?.username || 'User'}`,
+      sender_department: currentUser?.department || 'Support',
+      status: 'PENDING',
+      created_at: new Date().toISOString()
+    };
+
+    setMessages(prev => [...prev, optimisticMsg]);
+
+    try {
+      const token = getAuthToken();
+      const apiUrl = API_BASE_URL;
+
+      const res = await axios.post(`${apiUrl}/api/messages/`, {
+        to_number: targetAddress,
+        template_id: template.id || template.name,
+        template_name: template.name,
+        channel: 'WHATSAPP',
+        message_type: 'OUTGOING'
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      if (res.data) {
         setMessages(prev => {
           const alreadyExists = prev.some(m => m.id === res.data.id);
-          if (alreadyExists) {
-            return prev.filter(m => m.id !== optimisticMsg.id);
-          }
+          if (alreadyExists) return prev.filter(m => m.id !== optimisticMsg.id);
           const replaced = prev.map(m => m.id === optimisticMsg.id ? res.data : m);
-          if (!replaced.some(m => m.id === res.data.id)) {
-            replaced.push(res.data);
-          }
+          if (!replaced.some(m => m.id === res.data.id)) replaced.push(res.data);
           return replaced;
         });
         setConversations(prev => {
@@ -591,7 +737,7 @@ export default function ClientInboxPage() {
           if (activeIdx !== -1) {
             const updatedItem = {
               ...prev[activeIdx],
-              lastMessage: res.data.body || textToSend,
+              lastMessage: `📄 [Template: ${template.name}]`,
               time: new Date().toISOString()
             };
             const remaining = prev.filter((_, idx) => idx !== activeIdx);
@@ -601,8 +747,10 @@ export default function ClientInboxPage() {
         });
       }
     } catch (err) {
-      console.warn('Failed to send message:', err);
-      alert('Failed to send message: ' + (err.response?.data?.detail || err.message));
+      console.warn('Failed to send template:', err);
+      const errMsg = err.response?.data?.detail || err.response?.data?.error || err.message;
+      setMessages(prev => prev.map(m => m.id === optimisticMsg.id ? { ...m, status: 'FAILED', error: errMsg } : m));
+      alert('Failed to send template: ' + errMsg);
     } finally {
       setIsSending(false);
     }
@@ -631,7 +779,7 @@ export default function ClientInboxPage() {
     }));
 
     try {
-      const token = localStorage.getItem('uwo_token');
+      const token = getAuthToken();
       const apiUrl = API_BASE_URL;
       const convoIdToUse = activeConvo.convoDbId || activeConvo.id;
       await axios.post(`${apiUrl}/api/conversations/${convoIdToUse}/takeover/`, {}, {
@@ -662,7 +810,7 @@ export default function ClientInboxPage() {
     }));
 
     try {
-      const token = localStorage.getItem('uwo_token') || localStorage.getItem('token');
+      const token = getAuthToken();
       const apiUrl = API_BASE_URL;
       const convoIdToUse = activeConvo.convoDbId || activeConvo.id;
       await axios.post(`${apiUrl}/api/conversations/${convoIdToUse}/resume_bot/`, {}, {
@@ -698,7 +846,7 @@ export default function ClientInboxPage() {
     }));
 
     try {
-      const token = localStorage.getItem('uwo_token') || localStorage.getItem('token');
+      const token = getAuthToken();
       const apiUrl = API_BASE_URL;
       const convoIdToUse = convo.convoDbId || convo.id;
       const endpoint = isCurrentlyPaused ? 'resume_bot' : 'takeover';
@@ -713,7 +861,7 @@ export default function ClientInboxPage() {
 
   const handleTransferSubmit = async (convoId, payload) => {
     try {
-      const token = localStorage.getItem('uwo_token');
+      const token = getAuthToken();
       const apiUrl = API_BASE_URL;
       await axios.post(`${apiUrl}/api/conversations/${convoId}/transfer/`, payload, {
         headers: { Authorization: `Bearer ${token}` }
@@ -731,7 +879,7 @@ export default function ClientInboxPage() {
       : currentUser?.name || currentUser?.username || 'Admin';
 
     try {
-      const token = localStorage.getItem('uwo_token');
+      const token = getAuthToken();
       const apiUrl = API_BASE_URL;
       const convoIdToUse = activeConvo.convoDbId || activeConvo.id;
       const res = await axios.get(`${apiUrl}/api/conversations/${convoIdToUse}/audit_logs/`, {
@@ -749,7 +897,7 @@ export default function ClientInboxPage() {
 
   const openAnalyticsModal = async () => {
     try {
-      const token = localStorage.getItem('uwo_token');
+      const token = getAuthToken();
       const apiUrl = API_BASE_URL;
       const res = await axios.get(`${apiUrl}/api/monitoring/analytics/`, {
         headers: { Authorization: `Bearer ${token}` }
@@ -762,6 +910,40 @@ export default function ClientInboxPage() {
       ]);
     }
     setIsAnalyticsModalOpen(true);
+  };
+
+  const handleContactSaved = (savedContact, targetConvoId) => {
+    if (!savedContact) return;
+
+    // Real-time conversation list update
+    setConversations((prev) =>
+      prev.map((c) => {
+        const cleanSavedPhone = (savedContact.phone_number || savedContact.platform_id || '').replace(/[^0-9]/g, '');
+        const cleanConvoPhone = (c.rawAddress || c.id || '').replace(/[^0-9]/g, '');
+
+        const isMatch =
+          c.id === targetConvoId ||
+          (cleanSavedPhone && cleanConvoPhone && (cleanSavedPhone.endsWith(cleanConvoPhone) || cleanConvoPhone.endsWith(cleanSavedPhone)));
+
+        if (isMatch) {
+          return {
+            ...c,
+            name: savedContact.name,
+            contactSaved: true,
+            contactDetails: savedContact
+          };
+        }
+        return c;
+      })
+    );
+
+    // Update active conversation name in state immediately
+    if (activeConvo && (activeConvo.id === targetConvoId || activeConvo.rawAddress === savedContact.phone_number)) {
+      activeConvo.name = savedContact.name;
+    }
+
+    // Add to local contacts pool
+    setContacts((prev) => [savedContact, ...prev.filter(c => c.id !== savedContact.id)]);
   };
 
   const channelBadges = {
@@ -1046,6 +1228,15 @@ export default function ClientInboxPage() {
 
                   {/* Action Buttons Toolbar */}
                   <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
+                    {/* Add Contact Action Button */}
+                    <button
+                      onClick={() => setIsAddContactOpen(true)}
+                      className="px-2 sm:px-2.5 py-1 rounded-lg text-[10px] sm:text-[11px] font-extrabold bg-emerald-600 hover:bg-emerald-700 text-white transition-all flex items-center gap-1 cursor-pointer shadow-2xs shrink-0"
+                      title="Save customer contact to UWO Connect CRM & Inbox"
+                    >
+                      <UserPlus className="w-3.5 h-3.5 shrink-0" />
+                      <span>+ Add Contact</span>
+                    </button>
                     {activeConvo.botPaused ? (
                       <button
                         onClick={handleResumeBot}
@@ -1145,6 +1336,28 @@ export default function ClientInboxPage() {
                   )}
                 </div>
               </div>
+
+              {/* WhatsApp 24-Hour Customer Window Alert Banner */}
+              {activeConvo?.channel === 'WHATSAPP' && !is24hWindowActive && (
+                <div className="bg-amber-50 border-b border-amber-200 px-3.5 py-2.5 flex flex-wrap items-center justify-between gap-2.5 text-xs shrink-0 animate-in fade-in duration-200">
+                  <div className="flex items-center gap-2 text-amber-900 min-w-0">
+                    <span className="p-1 rounded-md bg-amber-200/80 text-amber-900 font-bold shrink-0 text-xs">⏰</span>
+                    <div className="min-w-0">
+                      <span className="font-bold text-xs">24-Hour Customer Window Closed</span>
+                      <p className="text-[11px] text-amber-800 leading-tight">
+                        Customer hasn't replied in 24 hours. Meta requires an approved template to message this contact.
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => { fetchTemplates(); setIsTemplateModalOpen(true); }}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs shadow-xs transition-all cursor-pointer whitespace-nowrap ml-auto"
+                  >
+                    <LayoutTemplate className="w-3.5 h-3.5" />
+                    <span>Send Meta Template</span>
+                  </button>
+                </div>
+              )}
 
               {/* Timeline Messages View */}
               <div ref={scrollRef} className="flex-1 overflow-y-auto p-3 sm:p-6 space-y-3 sm:space-y-4">
@@ -1429,6 +1642,27 @@ export default function ClientInboxPage() {
                             </div>
                           )}
 
+                          {/* Error info on failed messages */}
+                          {msg.status === 'FAILED' && (
+                            <div className="mt-2.5 p-2 rounded-xl bg-rose-950/40 border border-rose-300/40 text-[10px] text-rose-100 flex items-start gap-2 shadow-xs">
+                              <span className="shrink-0 text-amber-300 font-bold">⚠️</span>
+                              <div className="flex-1 space-y-1">
+                                <span className="font-semibold block leading-tight">
+                                  {msg.error || (msg.metadata?.error) || 'Message rejected by WhatsApp (e.g. 24h window closed).'}
+                                </span>
+                                {activeConvo.channel === 'WHATSAPP' && (
+                                  <button
+                                    onClick={() => { fetchTemplates(); setIsTemplateModalOpen(true); }}
+                                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-white hover:bg-slate-100 text-slate-900 font-bold text-[10px] transition-colors cursor-pointer shadow-2xs mt-0.5"
+                                  >
+                                    <LayoutTemplate className="w-3 h-3 text-emerald-600" />
+                                    <span>Send Approved Template Instead</span>
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          )}
+
                           <div className={`mt-2 flex items-center justify-end gap-1.5 text-[9px] ${
                             isIncoming ? 'text-slate-400' : 'text-emerald-100'
                           }`}>
@@ -1440,7 +1674,7 @@ export default function ClientInboxPage() {
                                 ) : msg.status === 'DELIVERED' || msg.status === 'RECEIVED' ? (
                                   <CheckCheck className="w-3.5 h-3.5 text-emerald-200" title="Delivered" />
                                 ) : msg.status === 'FAILED' ? (
-                                  <span className="text-red-300 font-semibold text-[8px]">Failed</span>
+                                  <span className="text-red-200 font-bold text-[9px] bg-red-900/60 px-1.5 py-0.5 rounded">Failed</span>
                                 ) : (
                                   <Check className="w-3 h-3 text-emerald-200" title="Sent" />
                                 )}
@@ -1487,6 +1721,16 @@ export default function ClientInboxPage() {
                       <StickyNote className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" />
                       <span>Internal Private Note</span>
                     </button>
+                    {activeConvo?.channel === 'WHATSAPP' && (
+                      <button
+                        onClick={() => { fetchTemplates(); setIsTemplateModalOpen(true); }}
+                        className="px-2.5 sm:px-3 py-1 rounded-lg text-[10px] sm:text-xs font-bold transition-all flex items-center gap-1 whitespace-nowrap cursor-pointer text-emerald-700 hover:text-emerald-900 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 shadow-2xs"
+                        title="Send Meta WhatsApp Template (re-engage contact beyond 24h)"
+                      >
+                        <LayoutTemplate className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0 text-emerald-600" />
+                        <span>Send Template</span>
+                      </button>
+                    )}
                   </div>
                 </div>
 
@@ -1587,6 +1831,16 @@ export default function ClientInboxPage() {
       </div>
 
       {/* Modals & Drawers */}
+      <AddContactModal
+        isOpen={isAddContactOpen}
+        onClose={() => setIsAddContactOpen(false)}
+        prefilledPhone={activeConvo?.rawAddress || ''}
+        prefilledName={activeConvo?.name || ''}
+        convoId={selectedConvoId}
+        existingContacts={contacts}
+        onContactSaved={handleContactSaved}
+      />
+
       <TransferModal
         isOpen={isTransferModalOpen}
         onClose={() => setIsTransferModalOpen(false)}
@@ -1607,6 +1861,80 @@ export default function ClientInboxPage() {
         onClose={() => setIsAnalyticsModalOpen(false)}
         analyticsData={analyticsData}
       />
+
+      {/* Meta WhatsApp Template Picker Modal */}
+      {isTemplateModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl max-w-lg w-full shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[85vh]">
+            <div className="p-4 border-b border-slate-200 flex items-center justify-between bg-slate-50/80">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center shadow-2xs">
+                  <LayoutTemplate className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-extrabold text-slate-900 text-sm">Send WhatsApp Template</h3>
+                  <p className="text-[11px] text-slate-500">Bypasses the Meta 24-hour limit to message this contact</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setIsTemplateModalOpen(false)}
+                className="w-8 h-8 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-200 flex items-center justify-center cursor-pointer transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="p-4 overflow-y-auto space-y-3 flex-1 bg-slate-50/30">
+              {loadingTemplates ? (
+                <div className="text-center py-10 text-slate-400 text-xs flex flex-col items-center gap-2">
+                  <Loader2 className="w-6 h-6 animate-spin text-emerald-600" />
+                  <span>Loading approved Meta templates...</span>
+                </div>
+              ) : metaTemplates.length === 0 ? (
+                <div className="text-center py-10 text-slate-500 text-xs bg-white rounded-2xl border border-dashed border-slate-200 p-6">
+                  <LayoutTemplate className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+                  <p className="font-bold text-slate-700">No approved templates found</p>
+                  <p className="text-slate-400 mt-1">Please sync or create approved templates in Campaigns/Templates tab.</p>
+                </div>
+              ) : (
+                metaTemplates.map((t) => (
+                  <div
+                    key={t.id || t.name}
+                    className="p-4 rounded-2xl bg-white border border-slate-200 hover:border-emerald-500 hover:shadow-md transition-all flex flex-col justify-between gap-3 group"
+                  >
+                    <div>
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-xs text-slate-900 font-mono tracking-tight">{t.name}</span>
+                        <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200 shadow-2xs">
+                          {t.status || 'APPROVED'}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 text-[10px] text-slate-400 mt-1">
+                        <span>Language: <strong className="text-slate-600">{t.language || 'en_US'}</strong></span>
+                        <span>•</span>
+                        <span>Category: <strong className="text-slate-600">{t.category || 'UTILITY'}</strong></span>
+                      </div>
+                      {t.content && (
+                        <p className="text-xs text-slate-600 mt-2 bg-slate-50 p-2.5 rounded-xl border border-slate-100 leading-relaxed font-sans line-clamp-3">
+                          {t.content}
+                        </p>
+                      )}
+                    </div>
+                    <button
+                      onClick={() => handleSendTemplate(t)}
+                      disabled={isSending}
+                      className="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] disabled:opacity-50 text-white text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-xs"
+                    >
+                      {isSending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
+                      <span>Send This Template</span>
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </DashboardLayout>
   );
 }

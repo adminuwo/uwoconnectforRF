@@ -100,7 +100,7 @@ export default function ComingSoonChannelModal({ isOpen, onClose, channel }) {
         {/* Description Body */}
         <div className="my-5 p-4 rounded-2xl bg-slate-50 border border-slate-100 text-center space-y-2">
           <p className="text-xs text-slate-600 leading-relaxed font-medium">
-            This channel connector is currently under active engineering and will be available in a future UWO CONNECT platform update.
+            This channel connector is currently under active engineering and will be available in a future UWO Connect platform update.
           </p>
           <p className="text-[11px] text-slate-400 font-medium">
             Active production channels currently available for messaging and bots are <strong className="text-slate-700 font-bold">WhatsApp</strong>, <strong className="text-slate-700 font-bold">Facebook</strong>, and <strong className="text-slate-700 font-bold">Instagram</strong>.

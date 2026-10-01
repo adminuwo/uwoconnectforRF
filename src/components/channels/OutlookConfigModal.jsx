@@ -349,11 +349,11 @@ export default function OutlookConfigModal({ isOpen, onClose, client, onSaved })
               <OutlookIcon size={42} />
             </div>
             <span className="text-[10px] font-extrabold px-3 py-1 rounded-full bg-[#00AB56]/10 text-[#00AB56] border border-[#00AB56]/20 uppercase tracking-wider mb-2">
-              UWOConnect Channel Integration
+              UWO Connect Channel Integration
             </span>
             <h3 className="text-xl font-extrabold text-slate-900 mb-2">Connect Microsoft 365 Suite</h3>
             <p className="text-xs text-slate-500 text-center max-w-md mb-6 leading-relaxed font-medium">
-              Automate email workflows, schedule Teams & Outlook meetings, sync customer contacts, and update Excel Online spreadsheets — all seamlessly from UWOConnect.
+              Automate email workflows, schedule Teams & Outlook meetings, sync customer contacts, and update Excel Online spreadsheets — all seamlessly from UWO Connect.
             </p>
 
             <div className="grid grid-cols-2 gap-3 mb-8 w-full max-w-md">

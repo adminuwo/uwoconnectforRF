@@ -79,10 +79,10 @@ export default function AddMoneyModal({ isOpen, onClose, onSuccess }) {
         key: razorpayKey,
         amount: orderData.amount_paise || Math.round(currentAmount * 100),
         currency: 'INR',
-        name: 'UwoConnect Wallet Top-up',
+        name: 'UWO Connect Wallet Top-up',
         description: `Prepaid Usage Wallet Recharge (₹${currentAmount})`,
         prefill: {
-          name: 'UwoConnect Client',
+          name: 'UWO Connect Client',
           email: 'client@uwoconnect.com',
           contact: '9999999999'
         },
@@ -244,7 +244,7 @@ export default function AddMoneyModal({ isOpen, onClose, onSuccess }) {
               <span className="text-xs font-extrabold text-slate-700">+ ₹{(currentAmount || 0).toLocaleString('en-IN')}</span>
             </div>
             <p className="text-[11px] text-slate-500 pt-1">
-              * Note: The ₹499/mo UwoConnect subscription is managed separately and will not be deducted from this credit.
+              * Note: The ₹499/mo UWO Connect subscription is managed separately and will not be deducted from this credit.
             </p>
           </div>
 

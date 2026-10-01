@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Loader2, Clock, Eye, EyeOff, ShieldCheck, User, Building2, Mail, Lock, AlertCircle, ArrowRight, CheckCircle2, Phone, Briefcase, Layers, XCircle } from 'lucide-react';
+import { Loader2, Clock, Eye, EyeOff, ShieldCheck, User, Building2, Mail, Lock, AlertCircle, ArrowRight, ArrowLeft, CheckCircle2, Phone, Briefcase, Layers, XCircle, MapPin, Navigation } from 'lucide-react';
 import axios from 'axios';
 import TermsModal from '@/components/TermsModal';
 import UWOLoginModal from '@/components/UWOLoginModal';
@@ -17,6 +17,8 @@ import {
 import { storeUserSession } from '@/features/auth/authHelpers';
 import { API_BASE_URL } from '@/config/apiConfig';
 import { useBrand } from '@/context/BrandContext';
+import { motion } from 'framer-motion';
+import AuthHeroSide from '@/components/auth/AuthHeroSide';
 
 const RegisterPage = () => {
   const { brand } = useBrand();
@@ -30,6 +32,7 @@ const RegisterPage = () => {
     name: '',
     email: '',
     phone: '',
+    location: '',
     designation: '',
     department: 'Sales',
     businessName: '',
@@ -37,6 +40,7 @@ const RegisterPage = () => {
     password: '',
     invite_token: inviteToken || ''
   });
+  const [detectingLocation, setDetectingLocation] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -61,16 +65,82 @@ const RegisterPage = () => {
           console.error('Invalid or expired invite token:', err);
         });
     }
+
+    // Attempt silent background location pre-fill if empty
+    fetch('https://ipapi.co/json/')
+      .then(r => r.json())
+      .then(data => {
+        if (data && (data.city || data.country_name)) {
+          const locParts = [data.city, data.region, data.country_name].filter(Boolean);
+          setFormData(prev => prev.location ? prev : { ...prev, location: locParts.join(', ') });
+        }
+      })
+      .catch(() => {
+        // Silently fail if blocked or offline
+      });
   }, [inviteToken, API_URL]);
+
+  const handleDetectLocation = async () => {
+    setDetectingLocation(true);
+    if (typeof window !== 'undefined' && 'geolocation' in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        async (pos) => {
+          try {
+            const { latitude, longitude } = pos.coords;
+            const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`);
+            const data = await res.json();
+            const city = data.address?.city || data.address?.town || data.address?.village || data.address?.state_district || '';
+            const state = data.address?.state || '';
+            const country = data.address?.country || '';
+            const parts = [city, state, country].filter(Boolean);
+            if (parts.length > 0) {
+              setFormData(prev => ({ ...prev, location: parts.join(', ') }));
+              setDetectingLocation(false);
+              return;
+            }
+          } catch (e) {
+            // fallback to ip
+          }
+          fallbackIpDetect();
+        },
+        () => {
+          fallbackIpDetect();
+        },
+        { timeout: 6000 }
+      );
+    } else {
+      fallbackIpDetect();
+    }
+  };
+
+  const fallbackIpDetect = async () => {
+    try {
+      const res = await fetch('https://ipapi.co/json/');
+      const data = await res.json();
+      if (data && (data.city || data.country_name)) {
+        const parts = [data.city, data.region, data.country_name].filter(Boolean);
+        setFormData(prev => ({ ...prev, location: parts.join(', ') }));
+      }
+    } catch (e) {
+      console.debug('Location auto-detect fallback failed:', e);
+    } finally {
+      setDetectingLocation(false);
+    }
+  };
 
   const handleBackendAuth = async (firebaseUser, extraData = {}) => {
     const idToken = await firebaseUser.getIdToken();
+    const loc = extraData.location || formData.location || '';
+    const locParts = loc.split(',').map(p => p.trim()).filter(Boolean);
     const res = await axios.post(`${API_URL}/api/auth/firebase-login`, {
       id_token: idToken,
       name: extraData.name || firebaseUser.displayName || '',
       business_name: extraData.businessName || '',
       meta_portfolio_name: extraData.portfolioName || '',
       phone_number: extraData.phone || '',
+      location: loc,
+      city: locParts[0] || '',
+      country: locParts.length > 1 ? locParts[locParts.length - 1] : '',
       designation: extraData.designation || 'Team Member',
       department: extraData.department || 'General',
       invite_token: inviteToken || '',
@@ -192,6 +262,8 @@ const RegisterPage = () => {
     setLoading(true);
     setError('');
     try {
+      const loc = formData.location.trim();
+      const locParts = loc.split(',').map(p => p.trim()).filter(Boolean);
       const res = await axios.post(`${API_URL}/api/auth/register`, {
         name: formData.name.trim(),
         businessName: formData.businessName.trim(),
@@ -199,6 +271,9 @@ const RegisterPage = () => {
         portfolio_name: formData.portfolioName.trim(),
         email: formData.email.trim(),
         phone_number: formData.phone.trim(),
+        location: loc,
+        city: locParts[0] || '',
+        country: locParts.length > 1 ? locParts[locParts.length - 1] : '',
         designation: formData.designation.trim(),
         department: formData.department.trim(),
         password: formData.password,
@@ -206,7 +281,10 @@ const RegisterPage = () => {
         meta_portfolio_eligible: true,
         metaPortfolioEligible: true,
         invite_token: inviteToken || '',
-        brand_domain: brand?.custom_domain || (typeof window !== 'undefined' ? window.location.hostname : '')
+        brand_domain: brand?.custom_domain || (typeof window !== 'undefined' ? window.location.hostname : ''),
+        platform: 'web',
+        device_type: 'desktop',
+        registration_method: 'email'
       });
 
       if (res.status === 201 && res.data.token) {
@@ -257,7 +335,7 @@ const RegisterPage = () => {
           </div>
           <h2 className="text-2xl font-extrabold text-slate-900 mb-2">Registration Successful</h2>
           <p className="text-slate-600 mb-8 leading-relaxed text-sm font-medium">
-            Your {brand?.brand_name || 'UWO Connect™'} account has been created and activated. You can now log in to access your business workspace.
+            Your {brand?.brand_name || 'UWO Connect'} account has been created and activated. You can now log in to access your business workspace.
           </p>
           <Link 
             href={brand?.custom_domain ? `/auth/login?brand_domain=${brand.custom_domain}` : '/auth/login'} 
@@ -273,27 +351,65 @@ const RegisterPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans flex flex-col items-center justify-center p-4 sm:p-6 relative overflow-hidden py-10">
-      {/* Dynamic ambient background glow circles */}
-      <div 
-        className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full blur-[120px] pointer-events-none opacity-20"
-        style={{ backgroundColor: brand?.primary_color || '#059669' }}
-      />
-      <div 
-        className="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] rounded-full blur-[140px] pointer-events-none opacity-20"
-        style={{ backgroundColor: brand?.primary_color || '#059669' }}
-      />
+    <div className="min-h-screen w-full flex flex-col justify-between items-center p-4 bg-[#f8fafc] font-sans relative overflow-hidden selection:bg-emerald-500 selection:text-white py-6">
+      {/* Subtle Background Elements */}
+      <div className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] bg-emerald-400/10 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-[-20%] right-[-10%] w-[600px] h-[600px] bg-blue-400/10 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMSIgY3k9IjEiIHI9IjEiIGZpbGw9InJnYmEoMCwwLDAsMC4wMykiLz48L3N2Zz4=')] opacity-50" />
 
-      <div className="w-full max-w-[480px] z-10 bg-white/90 backdrop-blur-2xl border border-white/80 rounded-[32px] p-6 sm:p-8 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.1)] flex flex-col items-center transition-all">
+      {/* Top Brand Header */}
+      <header className="relative z-20 w-full max-w-6xl mx-auto pt-2 pb-2 px-2 flex items-center justify-between">
+        <Link href="/" className="flex items-center gap-2 sm:gap-3 group min-w-0">
+          {brand?.logo_url && brand.logo_url !== "/download (3).gif" ? (
+            <img src={brand.logo_url} alt="Logo" className="w-9 h-9 sm:w-11 sm:h-11 object-contain rounded-full shadow-lg shrink-0" />
+          ) : (
+            <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-full overflow-hidden flex items-center justify-center bg-white shadow-[0_4px_20px_rgba(16,185,129,0.25)] border-[1.5px] border-emerald-100 shrink-0">
+              <img src="/uwo-icon.png" alt="UWO Connect Logo" className="w-full h-full object-contain p-1 sm:p-1.5" />
+            </div>
+          )}
+          <span className="font-extrabold text-slate-900 tracking-tight text-base sm:text-xl drop-shadow-sm group-hover:text-emerald-700 transition-colors truncate">
+            {brand?.brand_name || brand?.name || "UWO Connect"}
+          </span>
+        </Link>
+
+        <Link
+          href="/auth/login"
+          className="text-xs font-bold text-slate-600 hover:text-slate-900 bg-white hover:bg-slate-50 border border-slate-200/80 px-3 sm:px-4 py-2 sm:py-2.5 rounded-2xl flex items-center gap-1.5 sm:gap-2 transition-all shadow-xs hover:shadow-sm shrink-0"
+        >
+          <ArrowLeft size={14} />
+          <span><span className="hidden xs:inline">Back to </span>Sign In</span>
+        </Link>
+      </header>
+
+      {/* Main Split Card */}
+      <main className="relative z-10 w-full flex-1 flex items-center justify-center py-4">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }} 
+          animate={{ opacity: 1, y: 0 }} 
+          transition={{ duration: 0.6, ease: "easeOut" }}
+          className="w-full max-w-[1050px] bg-white rounded-[32px] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.05)] border border-slate-100 flex flex-col md:flex-row overflow-hidden relative z-10 my-auto"
+        >
+          {/* Left Side: Abha & Dev Hero */}
+          <AuthHeroSide
+            title={<>Build your <br/> automation empire.</>}
+            subtitle="Connect all your tools in one seamless dashboard and let your workflows run on autopilot."
+            badgeText="Secure • Fast • Reliable"
+          />
+
+          {/* Right Side: Registration Flow */}
+          <div className="w-full md:w-3/5 p-6 sm:p-10 flex flex-col justify-center bg-white relative max-h-[85vh] overflow-y-auto">
         {/* Brand Header */}
         <div className="flex items-center gap-2.5 mb-4 px-4 py-1.5 rounded-full bg-slate-50 border border-slate-200/80 shadow-xs">
           <img 
             src={brand?.logo_url || "/download (3).gif"} 
             alt={brand?.brand_name || "Brand Logo"} 
-            className="w-5 h-5 rounded-full object-contain"
+            width={20}
+            height={20}
+            style={{ width: '20px', height: '20px' }}
+            className="w-5 h-5 rounded-full object-contain shrink-0"
           />
-          <span className="text-slate-800 font-bold text-xs tracking-wide">
-            {brand?.is_whitelabel && brand?.brand_name ? brand.brand_name : "UWO Connect™"}
+          <span className="text-slate-800 font-bold text-xs tracking-wider uppercase">
+            {brand?.brand_name || "UWO Connect"}
           </span>
           <span 
             className="w-1.5 h-1.5 rounded-full animate-pulse" 
@@ -377,7 +493,7 @@ const RegisterPage = () => {
               <div className="p-4 bg-rose-50/90 border border-rose-200 rounded-2xl mb-4 text-left">
                 <p className="text-xs sm:text-sm font-bold text-rose-900 mb-1 flex items-center gap-1.5">
                   <AlertCircle size={15} className="shrink-0 text-rose-600" />
-                  Meta Portfolio is required to register for Uwo Connect.
+                  Meta Portfolio is required to register for UWO Connect.
                 </p>
                 <p className="text-[12px] text-rose-800 leading-relaxed mt-1">
                   To connect WhatsApp Business, Instagram Direct, and Facebook Messenger automations, an active Meta Portfolio (Business Account) is required.
@@ -414,7 +530,7 @@ const RegisterPage = () => {
                 Do you have a Meta Portfolio?
               </h2>
               <p className="text-xs sm:text-sm text-slate-500 mb-6 leading-relaxed">
-                Uwo Connect syncs official WhatsApp Business, Instagram Direct, and Facebook Messenger channels using your Meta Portfolio (Business Account).
+                UWO Connect syncs official WhatsApp Business, Instagram Direct, and Facebook Messenger channels using your Meta Portfolio (Business Account).
               </p>
 
               <div className="grid grid-cols-2 gap-3 mb-6">
@@ -613,6 +729,38 @@ const RegisterPage = () => {
                 className="w-full bg-slate-50/90 text-slate-900 placeholder:text-slate-400 outline-none rounded-2xl py-2.5 pl-10 pr-4 font-medium text-sm border border-slate-200/80 focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 transition-all shadow-sm"
               />
             </div>
+          </div>
+
+          {/* 5. Location / City */}
+          <div className="space-y-1">
+            <div className="flex items-center justify-between">
+              <label className="block text-xs font-bold text-slate-700 ml-1">
+                Location / City <span className="text-emerald-600">*</span>
+              </label>
+              <button
+                type="button"
+                onClick={handleDetectLocation}
+                className="text-[11px] text-emerald-700 hover:text-emerald-800 font-semibold flex items-center gap-1 cursor-pointer transition-colors"
+                title="Auto-detect location"
+              >
+                <Navigation className={`w-3 h-3 ${detectingLocation ? 'animate-spin' : ''}`} />
+                <span>{detectingLocation ? 'Detecting...' : 'Auto-detect'}</span>
+              </button>
+            </div>
+            <div className="relative">
+              <MapPin className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <input
+                type="text"
+                required
+                value={formData.location}
+                onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                placeholder="e.g. Mumbai, Maharashtra, India"
+                className="w-full bg-slate-50/90 text-slate-900 placeholder:text-slate-400 outline-none rounded-2xl py-2.5 pl-10 pr-4 font-medium text-sm border border-slate-200/80 focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 transition-all shadow-sm"
+              />
+            </div>
+            <p className="text-[11px] text-slate-400 ml-1">
+              Used for client analytics and regional compliance
+            </p>
           </div>
 
           {/* 5. Designation & Department (Side by Side on medium screens) */}
@@ -822,7 +970,21 @@ const RegisterPage = () => {
           </div>
         </>
       )}
-    </div>
+          </div>
+        </motion.div>
+      </main>
+
+      {/* Footer */}
+      <footer className="relative z-10 w-full max-w-6xl mx-auto py-3 px-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-slate-400 font-medium">
+        <div>
+          &copy; {new Date().getFullYear()} {brand?.brand_name || brand?.name || 'UWO Connect'} · All rights reserved.
+        </div>
+        <div className="flex items-center gap-5">
+          <Link href="/privacy" className="hover:text-slate-600 transition-colors">Privacy Policy</Link>
+          <Link href="/terms" className="hover:text-slate-600 transition-colors">Terms of Use (EULA)</Link>
+          <Link href="/contact" className="hover:text-slate-600 transition-colors">Support</Link>
+        </div>
+      </footer>
 
       <TermsModal isOpen={showTerms} onClose={() => setShowTerms(false)} />
       <UWOLoginModal

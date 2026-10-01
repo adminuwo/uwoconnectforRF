@@ -7,7 +7,7 @@ export async function GET() {
 
   const payload = {
     status: 'healthy',
-    service: 'UWOConnect Frontend API',
+    service: 'UWO Connect Frontend API',
     environment: process.env.NODE_ENV || 'development',
     uptimeSeconds: Math.floor(uptime),
     timestamp: new Date().toISOString(),

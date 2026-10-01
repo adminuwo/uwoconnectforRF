@@ -23,6 +23,8 @@ const PAGE_TITLES = {
   '/client/agency': 'Agency & Reseller Command Hub',
   '/admin': 'Control Center',
   '/admin/clients': 'Client Management Directory',
+  '/admin/platform-overview': 'Client Platform Overview',
+  '/admin/installations': 'Installation & Uninstallation Analytics',
   '/admin/whitelabel': 'White-Label & Reseller Command Center',
   '/admin/team': 'Team & Projects',
   '/admin/channels': 'Channel & Integration Center',
@@ -204,7 +206,7 @@ const DashboardLayout = ({ children, role: initialRole }) => {
 
       const handleResize = () => {
         if (window.innerWidth >= 1024) {
-          // On desktop keep open
+          setSidebarOpen(true);
         } else {
           setSidebarOpen(false);
         }
@@ -213,6 +215,18 @@ const DashboardLayout = ({ children, role: initialRole }) => {
       return () => window.removeEventListener('resize', handleResize);
     }
   }, []);
+
+  // Lock body scroll when mobile sidebar drawer is open
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const isMobile = window.innerWidth < 1024;
+    if (isMobile && sidebarOpen) {
+      document.body.classList.add('sidebar-open');
+    } else {
+      document.body.classList.remove('sidebar-open');
+    }
+    return () => document.body.classList.remove('sidebar-open');
+  }, [sidebarOpen]);
 
   // Auto-close sidebar on mobile whenever page changes
   useEffect(() => {
@@ -472,18 +486,18 @@ const DashboardLayout = ({ children, role: initialRole }) => {
     >
       {/* ── Super Admin Impersonation Top Banner ── */}
       {impersonationData && (
-        <div className="bg-gradient-to-r from-amber-600 via-amber-500 to-orange-600 text-white px-4 py-2 text-xs font-bold flex items-center justify-between shadow-md z-50 shrink-0">
-          <div className="flex items-center gap-2">
-            <span className="bg-black/20 px-2 py-0.5 rounded text-[10px] uppercase tracking-widest font-black">Admin Mode</span>
-            <span>
-              Currently viewing client workspace: <strong>{impersonationData.client_name}</strong> (Client ID: #{impersonationData.client_id})
+        <div className="bg-gradient-to-r from-amber-600 via-amber-500 to-orange-600 text-white px-3 sm:px-4 py-2 text-xs font-bold flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 shadow-md z-50 shrink-0">
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="bg-black/20 px-2 py-0.5 rounded text-[10px] uppercase tracking-widest font-black shrink-0">Admin Mode</span>
+            <span className="truncate">
+              Viewing: <strong>{impersonationData.client_name}</strong> <span className="hidden sm:inline">(ID: #{impersonationData.client_id})</span>
             </span>
           </div>
           <button
             onClick={handleExitImpersonation}
-            className="bg-white text-amber-900 hover:bg-amber-50 px-3 py-1 rounded-lg text-xs font-black uppercase tracking-wider transition-all shadow-sm cursor-pointer"
+            className="bg-white text-amber-900 hover:bg-amber-50 px-3 py-1 rounded-lg text-xs font-black uppercase tracking-wider transition-all shadow-sm cursor-pointer shrink-0 self-start sm:self-auto"
           >
-            Exit Workspace & Return to Admin &rarr;
+            Exit Workspace →
           </button>
         </div>
       )}

@@ -9,11 +9,11 @@ import {
 } from '@/lib/seo';
 
 export const metadata = buildPageMetadata({
-  title: 'Terms of Service — UWO Connect™ Platform',
+  title: 'Terms of Service — UWO Connect Platform',
   description:
-    'Review the UWO Connect™ terms of service, platform usage guidelines, SaaS service level agreements, and acceptable use policies.',
+    'Review the UWO Connect terms of service, platform usage guidelines, SaaS service level agreements, and acceptable use policies.',
   path: '/terms',
-  keywords: ['Terms of Service', 'UWO Connect™ user agreement', 'acceptable use policy', 'SaaS terms'],
+  keywords: ['Terms of Service', 'UWO Connect user agreement', 'acceptable use policy', 'SaaS terms'],
 });
 
 export default function TermsPage() {
@@ -26,8 +26,8 @@ export default function TermsPage() {
     '@type': 'WebPage',
     '@id': `${getBaseUrl()}/terms#webpage`,
     url: `${getBaseUrl()}/terms`,
-    name: 'Terms of Service — UWO Connect™',
-    description: 'Platform usage agreement and terms for UWO Connect™ services.',
+    name: 'Terms of Service — UWO Connect',
+    description: 'Platform usage agreement and terms for UWO Connect services.',
     publisher: {
       '@type': 'Organization',
       name: SITE_CONFIG.name,

@@ -11,7 +11,7 @@ import {
   Layers, Bot, Receipt, FileText, Share2, Key, EyeOff, Download,
   Filter, ArrowUpDown, UserPlus, FolderPlus, DollarSign, Brain, ShoppingBag,
   Sliders, AlertCircle, Phone, Check, ArrowRight, RotateCcw, Copy,
-  UserCheck, Shield, Sparkles, Building2, Lock, User, Briefcase
+  UserCheck, Shield, Sparkles, Building2, Lock, User, Briefcase, MapPin, Monitor
 } from 'lucide-react';
 import axios from 'axios';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
@@ -37,6 +37,9 @@ function AdminClientsContent() {
   const [statusFilter, setStatusFilter] = useState(initialStatus);
   const [planFilter, setPlanFilter] = useState('ALL');
   const [agencyTypeFilter, setAgencyTypeFilter] = useState('ALL'); // ALL, AGENCIES, SUB_CLIENTS, DIRECT
+  const [platformFilter, setPlatformFilter] = useState('ALL'); // ALL, ios, android, web
+  const [countryFilter, setCountryFilter] = useState('ALL');
+  const [dateRangeFilter, setDateRangeFilter] = useState('ALL'); // ALL, TODAY, 7D, 30D
   const [dynamicPlans, setDynamicPlans] = useState(['Starter', 'Professional', 'Enterprise']);
   const [sortKey, setSortKey] = useState('created_at');
   const [sortOrder, setSortOrder] = useState('desc');
@@ -185,6 +188,9 @@ function AdminClientsContent() {
           status: statusFilter,
           plan: planFilter,
           agency_type: agencyTypeFilter,
+          platform: platformFilter,
+          country: countryFilter,
+          date_range: dateRangeFilter,
           sort_by: sortKey,
           sort_order: sortOrder,
           page: page,
@@ -211,11 +217,11 @@ function AdminClientsContent() {
       setLoading(false);
       setIsFetching(false);
     }
-  }, [debouncedSearch, statusFilter, planFilter, sortKey, sortOrder, page, pageSize, summary]);
+  }, [debouncedSearch, statusFilter, planFilter, agencyTypeFilter, platformFilter, countryFilter, dateRangeFilter, sortKey, sortOrder, page, pageSize]);
 
   useEffect(() => {
     fetchClientDirectory();
-  }, [debouncedSearch, statusFilter, planFilter, sortKey, sortOrder, page, pageSize]);
+  }, [debouncedSearch, statusFilter, planFilter, agencyTypeFilter, platformFilter, countryFilter, dateRangeFilter, sortKey, sortOrder, page, pageSize]);
 
   useEffect(() => {
     const fetchPlans = async () => {
@@ -634,7 +640,102 @@ function AdminClientsContent() {
           </div>
         </div>
 
-        {/* ── 2. Top Navigation Tabs: Workspaces ── */}
+        {/* ── 2. Registration Platform Analytics Ribbon ── */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5 mb-6">
+          {/* Card 1: Total Users */}
+          <button 
+            type="button"
+            onClick={() => { setPlatformFilter('ALL'); setPage(1); }}
+            className={cn(
+              "p-4 rounded-2xl border transition-all text-left cursor-pointer shadow-2xs group relative overflow-hidden",
+              platformFilter === 'ALL' 
+                ? "bg-gradient-to-br from-emerald-50/90 via-teal-50/40 to-white border-emerald-300 ring-2 ring-emerald-500/20" 
+                : "bg-white hover:bg-slate-50/80 border-slate-200/90"
+            )}
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">All Platforms</span>
+              <div className="w-8 h-8 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center group-hover:scale-105 transition-transform">
+                <Users size={16} />
+              </div>
+            </div>
+            <div className="text-2xl font-black text-slate-900 mt-2">
+              {summary?.platformCounts?.total ?? totalCount}
+            </div>
+            <p className="text-[10px] text-slate-400 font-medium mt-0.5">Total registered accounts</p>
+          </button>
+
+          {/* Card 2: iOS Users */}
+          <button 
+            type="button"
+            onClick={() => { setPlatformFilter(platformFilter === 'ios' ? 'ALL' : 'ios'); setPage(1); }}
+            className={cn(
+              "p-4 rounded-2xl border transition-all text-left cursor-pointer shadow-2xs group relative overflow-hidden",
+              platformFilter === 'ios' 
+                ? "bg-gradient-to-br from-blue-50/90 via-indigo-50/40 to-white border-blue-400 ring-2 ring-blue-500/20" 
+                : "bg-white hover:bg-slate-50/80 border-slate-200/90"
+            )}
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">iOS App</span>
+              <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center group-hover:scale-105 transition-transform">
+                <Smartphone size={16} />
+              </div>
+            </div>
+            <div className="text-2xl font-black text-blue-900 mt-2">
+              {summary?.platformCounts?.ios ?? 0}
+            </div>
+            <p className="text-[10px] text-slate-400 font-medium mt-0.5">Apple iPhone & iPad signups</p>
+          </button>
+
+          {/* Card 3: Android Users */}
+          <button 
+            type="button"
+            onClick={() => { setPlatformFilter(platformFilter === 'android' ? 'ALL' : 'android'); setPage(1); }}
+            className={cn(
+              "p-4 rounded-2xl border transition-all text-left cursor-pointer shadow-2xs group relative overflow-hidden",
+              platformFilter === 'android' 
+                ? "bg-gradient-to-br from-emerald-50/90 via-teal-50/40 to-white border-emerald-400 ring-2 ring-emerald-500/20" 
+                : "bg-white hover:bg-slate-50/80 border-slate-200/90"
+            )}
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Android App</span>
+              <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:scale-105 transition-transform">
+                <Smartphone size={16} />
+              </div>
+            </div>
+            <div className="text-2xl font-black text-emerald-900 mt-2">
+              {summary?.platformCounts?.android ?? 0}
+            </div>
+            <p className="text-[10px] text-slate-400 font-medium mt-0.5">Google Play & Android signups</p>
+          </button>
+
+          {/* Card 4: Web Users */}
+          <button 
+            type="button"
+            onClick={() => { setPlatformFilter(platformFilter === 'web' ? 'ALL' : 'web'); setPage(1); }}
+            className={cn(
+              "p-4 rounded-2xl border transition-all text-left cursor-pointer shadow-2xs group relative overflow-hidden",
+              platformFilter === 'web' 
+                ? "bg-gradient-to-br from-purple-50/90 via-violet-50/40 to-white border-purple-400 ring-2 ring-purple-500/20" 
+                : "bg-white hover:bg-slate-50/80 border-slate-200/90"
+            )}
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Web App</span>
+              <div className="w-8 h-8 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center group-hover:scale-105 transition-transform">
+                <Globe size={16} />
+              </div>
+            </div>
+            <div className="text-2xl font-black text-purple-900 mt-2">
+              {summary?.platformCounts?.web ?? 0}
+            </div>
+            <p className="text-[10px] text-slate-400 font-medium mt-0.5">Desktop & browser signups</p>
+          </button>
+        </div>
+
+        {/* ── 3. Top Navigation Tabs: Workspaces ── */}
         <div className="flex items-center gap-2 mb-6 overflow-x-auto pb-1">
           <button
             onClick={() => { setStatusFilter('ALL'); setPage(1); }}
@@ -681,7 +782,7 @@ function AdminClientsContent() {
           </button>
         </div>
 
-        {/* ── 3. Clean Search & Filter Bar ── */}
+        {/* ── 4. Clean Search & Filter Bar ── */}
         <div className="bg-white p-3.5 rounded-2xl border border-slate-200/80 shadow-2xs mb-6 flex flex-col md:flex-row items-center justify-between gap-3">
           {/* Search Input with Anti-Autofill Protection */}
           <form 
@@ -721,6 +822,30 @@ function AdminClientsContent() {
 
           {/* Filter Dropdowns */}
           <div className="flex items-center gap-2.5 w-full md:w-auto overflow-x-auto pb-1 md:pb-0">
+            {/* Platform Filter */}
+            <select
+              value={platformFilter}
+              onChange={(e) => { setPlatformFilter(e.target.value); setPage(1); }}
+              className="px-3 py-2 bg-slate-50/70 hover:bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 outline-none focus:border-emerald-500 transition-all cursor-pointer"
+            >
+              <option value="ALL">All Platforms</option>
+              <option value="ios">📱 iOS App</option>
+              <option value="android">🤖 Android App</option>
+              <option value="web">🌐 Web App</option>
+            </select>
+
+            {/* Registration Date Range Filter */}
+            <select
+              value={dateRangeFilter}
+              onChange={(e) => { setDateRangeFilter(e.target.value); setPage(1); }}
+              className="px-3 py-2 bg-slate-50/70 hover:bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 outline-none focus:border-emerald-500 transition-all cursor-pointer"
+            >
+              <option value="ALL">All Registration Time</option>
+              <option value="TODAY">📅 Registered Today</option>
+              <option value="7D">⚡ Last 7 Days</option>
+              <option value="30D">🗓️ Last 30 Days</option>
+            </select>
+
             {/* Status Filter */}
             <select
               value={statusFilter}
@@ -770,13 +895,16 @@ function AdminClientsContent() {
             </select>
 
             {/* Reset Filters */}
-            {(searchInput || statusFilter !== 'ALL' || planFilter !== 'ALL' || agencyTypeFilter !== 'ALL') && (
+            {(searchInput || statusFilter !== 'ALL' || planFilter !== 'ALL' || agencyTypeFilter !== 'ALL' || platformFilter !== 'ALL' || countryFilter !== 'ALL' || dateRangeFilter !== 'ALL') && (
               <button
                 onClick={() => {
                   setSearchInput('');
                   setStatusFilter('ALL');
                   setPlanFilter('ALL');
                   setAgencyTypeFilter('ALL');
+                  setPlatformFilter('ALL');
+                  setCountryFilter('ALL');
+                  setDateRangeFilter('ALL');
                   setPage(1);
                 }}
                 className="px-3 py-2 text-xs font-bold text-rose-600 hover:bg-rose-50 rounded-xl transition-all whitespace-nowrap cursor-pointer"
@@ -819,6 +947,16 @@ function AdminClientsContent() {
                         <ArrowUpDown size={11} className="text-slate-400" />
                       </div>
                     </th>
+                    <th className="py-3.5 px-6">
+                      <div className="flex items-center gap-1">
+                        Platform
+                      </div>
+                    </th>
+                    <th className="py-3.5 px-6">
+                      <div className="flex items-center gap-1">
+                        Location
+                      </div>
+                    </th>
                     <th className="py-3.5 px-6 cursor-pointer" onClick={() => handleSort('plan')}>
                       <div className="flex items-center gap-1">
                         Plan
@@ -827,7 +965,7 @@ function AdminClientsContent() {
                     </th>
                     <th className="py-3.5 px-6 cursor-pointer" onClick={() => handleSort('created_at')}>
                       <div className="flex items-center gap-1">
-                        Registered Date
+                        Registered & Method
                         <ArrowUpDown size={11} className="text-slate-400" />
                       </div>
                     </th>
@@ -842,7 +980,7 @@ function AdminClientsContent() {
                 <tbody className="divide-y divide-slate-100 font-sans">
                   {(loading || (isFetching && clients.length === 0)) ? (
                     <tr>
-                      <td colSpan={4} className="py-24 text-center">
+                      <td colSpan={6} className="py-24 text-center">
                         <div className="flex flex-col items-center justify-center gap-3.5">
                           <div className="relative flex items-center justify-center">
                             <div className="absolute w-14 h-14 rounded-2xl bg-emerald-500/15 animate-ping" />
@@ -861,12 +999,12 @@ function AdminClientsContent() {
                     </tr>
                   ) : clients.length === 0 ? (
                     <tr>
-                      <td colSpan={4} className="py-16 text-center text-slate-400">
+                      <td colSpan={6} className="py-16 text-center text-slate-400">
                         <div className="flex flex-col items-center justify-center gap-2">
                           <AlertCircle size={28} className="text-slate-300" />
                           <p className="text-xs font-bold text-slate-600">No clients match your filter criteria.</p>
                           <button
-                            onClick={() => { setSearchInput(''); setStatusFilter('ALL'); setPlanFilter('ALL'); }}
+                            onClick={() => { setSearchInput(''); setStatusFilter('ALL'); setPlanFilter('ALL'); setPlatformFilter('ALL'); setDateRangeFilter('ALL'); }}
                             className="text-xs text-emerald-600 font-semibold hover:underline cursor-pointer"
                           >
                             Clear filters
@@ -960,6 +1098,43 @@ function AdminClientsContent() {
                               </div>
                             </div>
                           </td>
+
+                          {/* 2. Platform Badge */}
+                          <td className="py-4 px-6 whitespace-nowrap">
+                            {client.registration_platform === 'ios' ? (
+                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-blue-50 text-blue-700 border border-blue-200 shadow-2xs">
+                                <Smartphone size={12} className="text-blue-600" />
+                                <span>iOS App</span>
+                              </span>
+                            ) : client.registration_platform === 'android' ? (
+                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-2xs">
+                                <Smartphone size={12} className="text-emerald-600" />
+                                <span>Android App</span>
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-purple-50 text-purple-700 border border-purple-200 shadow-2xs">
+                                <Globe size={12} className="text-purple-600" />
+                                <span>Web App</span>
+                              </span>
+                            )}
+                          </td>
+
+                          {/* 3. Location */}
+                          <td className="py-4 px-6 whitespace-nowrap">
+                            <div className="flex items-center gap-1.5">
+                              <MapPin size={13} className="text-slate-400 shrink-0" />
+                              <span className="font-semibold text-slate-800 text-xs">
+                                {client.registration_country || 'Unknown'}
+                              </span>
+                              {client.registration_city && client.registration_city !== 'Unknown' && (
+                                <span className="text-[11px] text-slate-400 font-medium">
+                                  ({client.registration_city})
+                                </span>
+                              )}
+                            </div>
+                          </td>
+
+                          {/* 4. Plan */}
                           <td className="py-4 px-6 whitespace-nowrap">
                             <button
                               type="button"
@@ -978,15 +1153,26 @@ function AdminClientsContent() {
                             </button>
                           </td>
 
-                          {/* 2. Registered Date */}
+                          {/* 5. Registered Date & Method */}
                           <td className="py-4 px-6 whitespace-nowrap text-slate-600 text-xs font-medium">
-                            <div className="flex items-center gap-1.5">
-                              <Clock size={13} className="text-slate-400" />
-                              <span>{client.created_date_formatted || client.last_activity_formatted || 'Recently'}</span>
+                            <div className="flex flex-col gap-0.5">
+                              <div className="flex items-center gap-1.5">
+                                <Clock size={12} className="text-slate-400" />
+                                <span className="font-semibold text-slate-800">{client.created_date_formatted || 'Recently'}</span>
+                              </div>
+                              <div className="text-[10px] text-slate-400 flex items-center gap-1">
+                                <span className="capitalize">{client.registration_method || 'email'}</span>
+                                {client.registration_device_model && client.registration_device_model !== 'Unknown' && (
+                                  <>
+                                    <span>•</span>
+                                    <span className="truncate max-w-[120px] font-mono text-[10px]">{client.registration_device_model}</span>
+                                  </>
+                                )}
+                              </div>
                             </div>
                           </td>
 
-                          {/* 4. Dedicated Actions Column: View Profile & Delete */}
+                          {/* 6. Dedicated Actions Column: View Profile & Delete */}
                           <td className="py-4 px-6 whitespace-nowrap text-right sticky right-0 bg-white border-l border-slate-100 z-10">
                             <div className="flex items-center justify-end gap-2">
                               <button
@@ -1149,6 +1335,63 @@ function AdminClientsContent() {
                         <Sparkles size={13} className="text-emerald-600" /> Manage Features
                       </button>
                     </div>
+                  </div>
+                </div>
+
+                {/* ── REGISTRATION ANALYTICS & DEVICE TRACKING ── */}
+                <div className="p-5 bg-gradient-to-r from-blue-50/70 via-indigo-50/30 to-white rounded-2xl border border-blue-200/80 shadow-2xs space-y-3.5">
+                  <div className="flex items-center justify-between pb-2.5 border-b border-blue-100">
+                    <div className="flex items-center gap-2 text-blue-900 font-extrabold text-[11px] uppercase tracking-wider">
+                      <Smartphone size={14} className="text-blue-600" />
+                      <span>Registration Analytics & Device Telemetry</span>
+                    </div>
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-blue-100 text-blue-800 border border-blue-300">
+                      {selectedProfileClient.registration_platform === 'ios' ? 'iOS' : selectedProfileClient.registration_platform === 'android' ? 'Android' : 'Web'}
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    <div className="p-2.5 bg-white rounded-xl border border-blue-100">
+                      <span className="text-[10px] font-bold uppercase text-slate-400 block">First Platform</span>
+                      <span className="text-xs font-bold text-slate-800 uppercase flex items-center gap-1 mt-0.5">
+                        {selectedProfileClient.registration_platform === 'ios' ? '📱 iOS' : selectedProfileClient.registration_platform === 'android' ? '🤖 Android' : '🌐 Web'}
+                      </span>
+                    </div>
+
+                    <div className="p-2.5 bg-white rounded-xl border border-blue-100">
+                      <span className="text-[10px] font-bold uppercase text-slate-400 block">Location</span>
+                      <span className="text-xs font-bold text-slate-800 truncate block mt-0.5" title={`${selectedProfileClient.registration_country || 'Unknown'}, ${selectedProfileClient.registration_city || 'Unknown'}`}>
+                        📍 {selectedProfileClient.registration_country || 'Unknown'} {selectedProfileClient.registration_city && selectedProfileClient.registration_city !== 'Unknown' ? `(${selectedProfileClient.registration_city})` : ''}
+                      </span>
+                    </div>
+
+                    <div className="p-2.5 bg-white rounded-xl border border-blue-100">
+                      <span className="text-[10px] font-bold uppercase text-slate-400 block">Method</span>
+                      <span className="text-xs font-bold text-slate-800 capitalize block mt-0.5">
+                        {selectedProfileClient.registration_method || 'email'}
+                      </span>
+                    </div>
+
+                    <div className="p-2.5 bg-white rounded-xl border border-blue-100">
+                      <span className="text-[10px] font-bold uppercase text-slate-400 block">Device / Model</span>
+                      <span className="text-xs font-bold text-slate-800 truncate block mt-0.5 font-mono text-[11px]" title={selectedProfileClient.registration_device_model || 'Unknown'}>
+                        {selectedProfileClient.registration_device_model || 'Unknown'}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Secondary Details Row */}
+                  <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-blue-100/70 text-[11px] text-slate-500">
+                    <div className="flex items-center gap-2">
+                      <span>OS: <strong className="text-slate-700">{selectedProfileClient.registration_os || 'Unknown'} {selectedProfileClient.registration_os_version && selectedProfileClient.registration_os_version !== 'Unknown' ? selectedProfileClient.registration_os_version : ''}</strong></span>
+                      <span>•</span>
+                      <span>App Version: <strong className="text-slate-700">{selectedProfileClient.registration_app_version || '1.0.0'}</strong></span>
+                    </div>
+                    {selectedProfileClient.last_login_at && (
+                      <div className="text-[10px] text-slate-400 font-medium">
+                        Last Active: <span className="text-slate-600 font-bold uppercase">{selectedProfileClient.last_login_platform || 'web'}</span> ({new Date(selectedProfileClient.last_login_at).toLocaleDateString()})
+                      </div>
+                    )}
                   </div>
                 </div>
                 

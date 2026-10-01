@@ -1,0 +1,792 @@
+{
+  "total": 98,
+  "passed": 98,
+  "failed": 0,
+  "timestamp": "2026-09-29T07:25:38.514Z",
+  "results": [
+    {
+      "num": 1,
+      "definedRoute": "/about",
+      "testUrl": "/about",
+      "status": 200,
+      "ok": true,
+      "duration": 330
+    },
+    {
+      "num": 2,
+      "definedRoute": "/admin/ai",
+      "testUrl": "/admin/ai",
+      "status": 200,
+      "ok": true,
+      "duration": 646
+    },
+    {
+      "num": 3,
+      "definedRoute": "/admin/approvals",
+      "testUrl": "/admin/approvals",
+      "status": 200,
+      "ok": true,
+      "duration": 122
+    },
+    {
+      "num": 4,
+      "definedRoute": "/admin/audit-logs",
+      "testUrl": "/admin/audit-logs",
+      "status": 200,
+      "ok": true,
+      "duration": 307
+    },
+    {
+      "num": 5,
+      "definedRoute": "/admin/automations",
+      "testUrl": "/admin/automations",
+      "status": 200,
+      "ok": true,
+      "duration": 315
+    },
+    {
+      "num": 6,
+      "definedRoute": "/admin/billing",
+      "testUrl": "/admin/billing",
+      "status": 200,
+      "ok": true,
+      "duration": 1149
+    },
+    {
+      "num": 7,
+      "definedRoute": "/admin/channels",
+      "testUrl": "/admin/channels",
+      "status": 200,
+      "ok": true,
+      "duration": 417
+    },
+    {
+      "num": 8,
+      "definedRoute": "/admin/clients/[id]",
+      "testUrl": "/admin/clients/6a5338debec6daea1165d2b3",
+      "status": 200,
+      "ok": true,
+      "duration": 703
+    },
+    {
+      "num": 9,
+      "definedRoute": "/admin/clients",
+      "testUrl": "/admin/clients",
+      "status": 200,
+      "ok": true,
+      "duration": 547
+    },
+    {
+      "num": 10,
+      "definedRoute": "/admin/content",
+      "testUrl": "/admin/content",
+      "status": 200,
+      "ok": true,
+      "duration": 504
+    },
+    {
+      "num": 11,
+      "definedRoute": "/admin/emails",
+      "testUrl": "/admin/emails",
+      "status": 200,
+      "ok": true,
+      "duration": 192
+    },
+    {
+      "num": 12,
+      "definedRoute": "/admin/guides",
+      "testUrl": "/admin/guides",
+      "status": 200,
+      "ok": true,
+      "duration": 183
+    },
+    {
+      "num": 13,
+      "definedRoute": "/admin/inbox",
+      "testUrl": "/admin/inbox",
+      "status": 200,
+      "ok": true,
+      "duration": 379
+    },
+    {
+      "num": 14,
+      "definedRoute": "/admin/installations",
+      "testUrl": "/admin/installations",
+      "status": 200,
+      "ok": true,
+      "duration": 528
+    },
+    {
+      "num": 15,
+      "definedRoute": "/admin/invoices",
+      "testUrl": "/admin/invoices",
+      "status": 200,
+      "ok": true,
+      "duration": 388
+    },
+    {
+      "num": 16,
+      "definedRoute": "/admin/knowledge",
+      "testUrl": "/admin/knowledge",
+      "status": 200,
+      "ok": true,
+      "duration": 523
+    },
+    {
+      "num": 17,
+      "definedRoute": "/admin/logs",
+      "testUrl": "/admin/logs",
+      "status": 200,
+      "ok": true,
+      "duration": 310
+    },
+    {
+      "num": 18,
+      "definedRoute": "/admin",
+      "testUrl": "/admin",
+      "status": 200,
+      "ok": true,
+      "duration": 219
+    },
+    {
+      "num": 19,
+      "definedRoute": "/admin/plans",
+      "testUrl": "/admin/plans",
+      "status": 200,
+      "ok": true,
+      "duration": 396
+    },
+    {
+      "num": 20,
+      "definedRoute": "/admin/platform-overview",
+      "testUrl": "/admin/platform-overview",
+      "status": 200,
+      "ok": true,
+      "duration": 526
+    },
+    {
+      "num": 21,
+      "definedRoute": "/admin/products",
+      "testUrl": "/admin/products",
+      "status": 200,
+      "ok": true,
+      "duration": 428
+    },
+    {
+      "num": 22,
+      "definedRoute": "/admin/proposals",
+      "testUrl": "/admin/proposals",
+      "status": 200,
+      "ok": true,
+      "duration": 501
+    },
+    {
+      "num": 23,
+      "definedRoute": "/admin/quotations",
+      "testUrl": "/admin/quotations",
+      "status": 200,
+      "ok": true,
+      "duration": 264
+    },
+    {
+      "num": 24,
+      "definedRoute": "/admin/reports",
+      "testUrl": "/admin/reports",
+      "status": 200,
+      "ok": true,
+      "duration": 3225
+    },
+    {
+      "num": 25,
+      "definedRoute": "/admin/sales",
+      "testUrl": "/admin/sales",
+      "status": 200,
+      "ok": true,
+      "duration": 601
+    },
+    {
+      "num": 26,
+      "definedRoute": "/admin/search",
+      "testUrl": "/admin/search",
+      "status": 200,
+      "ok": true,
+      "duration": 363
+    },
+    {
+      "num": 27,
+      "definedRoute": "/admin/settings/legal",
+      "testUrl": "/admin/settings/legal",
+      "status": 200,
+      "ok": true,
+      "duration": 599
+    },
+    {
+      "num": 28,
+      "definedRoute": "/admin/settings",
+      "testUrl": "/admin/settings",
+      "status": 200,
+      "ok": true,
+      "duration": 395
+    },
+    {
+      "num": 29,
+      "definedRoute": "/admin/stats",
+      "testUrl": "/admin/stats",
+      "status": 200,
+      "ok": true,
+      "duration": 564
+    },
+    {
+      "num": 30,
+      "definedRoute": "/admin/support",
+      "testUrl": "/admin/support",
+      "status": 200,
+      "ok": true,
+      "duration": 476
+    },
+    {
+      "num": 31,
+      "definedRoute": "/admin/team",
+      "testUrl": "/admin/team",
+      "status": 200,
+      "ok": true,
+      "duration": 590
+    },
+    {
+      "num": 32,
+      "definedRoute": "/admin/whitelabel",
+      "testUrl": "/admin/whitelabel",
+      "status": 200,
+      "ok": true,
+      "duration": 551
+    },
+    {
+      "num": 33,
+      "definedRoute": "/admin/workflows",
+      "testUrl": "/admin/workflows",
+      "status": 200,
+      "ok": true,
+      "duration": 460
+    },
+    {
+      "num": 34,
+      "definedRoute": "/auth/forgot-password",
+      "testUrl": "/auth/forgot-password",
+      "status": 200,
+      "ok": true,
+      "duration": 927
+    },
+    {
+      "num": 35,
+      "definedRoute": "/auth/login",
+      "testUrl": "/auth/login",
+      "status": 200,
+      "ok": true,
+      "duration": 739
+    },
+    {
+      "num": 36,
+      "definedRoute": "/auth/qr",
+      "testUrl": "/auth/qr",
+      "status": 200,
+      "ok": true,
+      "duration": 792
+    },
+    {
+      "num": 37,
+      "definedRoute": "/auth/register",
+      "testUrl": "/auth/register",
+      "status": 200,
+      "ok": true,
+      "duration": 714
+    },
+    {
+      "num": 38,
+      "definedRoute": "/automation",
+      "testUrl": "/automation",
+      "status": 200,
+      "ok": true,
+      "duration": 652
+    },
+    {
+      "num": 39,
+      "definedRoute": "/book/[clientId]",
+      "testUrl": "/book/6a5338debec6daea1165d2b3",
+      "status": 200,
+      "ok": true,
+      "duration": 608
+    },
+    {
+      "num": 40,
+      "definedRoute": "/channels",
+      "testUrl": "/channels",
+      "status": 200,
+      "ok": true,
+      "duration": 566
+    },
+    {
+      "num": 41,
+      "definedRoute": "/checkout/[productId]",
+      "testUrl": "/checkout/6aa2454732dedcadbd3ddef9",
+      "status": 200,
+      "ok": true,
+      "duration": 676
+    },
+    {
+      "num": 42,
+      "definedRoute": "/checkout/pay",
+      "testUrl": "/checkout/pay",
+      "status": 200,
+      "ok": true,
+      "duration": 392
+    },
+    {
+      "num": 43,
+      "definedRoute": "/client/agency",
+      "testUrl": "/client/agency",
+      "status": 200,
+      "ok": true,
+      "duration": 893
+    },
+    {
+      "num": 44,
+      "definedRoute": "/client/automations/builder/[id]",
+      "testUrl": "/client/automations/builder/6a5338debec6daea1165d2b3",
+      "status": 200,
+      "ok": true,
+      "duration": 1219
+    },
+    {
+      "num": 45,
+      "definedRoute": "/client/automations",
+      "testUrl": "/client/automations",
+      "status": 200,
+      "ok": true,
+      "duration": 767
+    },
+    {
+      "num": 46,
+      "definedRoute": "/client/billing",
+      "testUrl": "/client/billing",
+      "status": 200,
+      "ok": true,
+      "duration": 760
+    },
+    {
+      "num": 47,
+      "definedRoute": "/client/calls",
+      "testUrl": "/client/calls",
+      "status": 200,
+      "ok": true,
+      "duration": 782
+    },
+    {
+      "num": 48,
+      "definedRoute": "/client/campaigns",
+      "testUrl": "/client/campaigns",
+      "status": 200,
+      "ok": true,
+      "duration": 880
+    },
+    {
+      "num": 49,
+      "definedRoute": "/client/catalog",
+      "testUrl": "/client/catalog",
+      "status": 200,
+      "ok": true,
+      "duration": 765
+    },
+    {
+      "num": 50,
+      "definedRoute": "/client/channels",
+      "testUrl": "/client/channels",
+      "status": 200,
+      "ok": true,
+      "duration": 892
+    },
+    {
+      "num": 51,
+      "definedRoute": "/client/crm",
+      "testUrl": "/client/crm",
+      "status": 200,
+      "ok": true,
+      "duration": 750
+    },
+    {
+      "num": 52,
+      "definedRoute": "/client/email",
+      "testUrl": "/client/email",
+      "status": 200,
+      "ok": true,
+      "duration": 977
+    },
+    {
+      "num": 53,
+      "definedRoute": "/client/gmail",
+      "testUrl": "/client/gmail",
+      "status": 200,
+      "ok": true,
+      "duration": 727
+    },
+    {
+      "num": 54,
+      "definedRoute": "/client/google-news",
+      "testUrl": "/client/google-news",
+      "status": 200,
+      "ok": true,
+      "duration": 793
+    },
+    {
+      "num": 55,
+      "definedRoute": "/client/guides",
+      "testUrl": "/client/guides",
+      "status": 200,
+      "ok": true,
+      "duration": 973
+    },
+    {
+      "num": 56,
+      "definedRoute": "/client/inbox",
+      "testUrl": "/client/inbox",
+      "status": 200,
+      "ok": true,
+      "duration": 630
+    },
+    {
+      "num": 57,
+      "definedRoute": "/client/invoices",
+      "testUrl": "/client/invoices",
+      "status": 200,
+      "ok": true,
+      "duration": 589
+    },
+    {
+      "num": 58,
+      "definedRoute": "/client/knowledge",
+      "testUrl": "/client/knowledge",
+      "status": 200,
+      "ok": true,
+      "duration": 731
+    },
+    {
+      "num": 59,
+      "definedRoute": "/client/orders",
+      "testUrl": "/client/orders",
+      "status": 200,
+      "ok": true,
+      "duration": 832
+    },
+    {
+      "num": 60,
+      "definedRoute": "/client",
+      "testUrl": "/client",
+      "status": 200,
+      "ok": true,
+      "duration": 848
+    },
+    {
+      "num": 61,
+      "definedRoute": "/client/payments/callback",
+      "testUrl": "/client/payments/callback",
+      "status": 200,
+      "ok": true,
+      "duration": 885
+    },
+    {
+      "num": 62,
+      "definedRoute": "/client/payments/dashboard",
+      "testUrl": "/client/payments/dashboard",
+      "status": 200,
+      "ok": true,
+      "duration": 839
+    },
+    {
+      "num": 63,
+      "definedRoute": "/client/payments",
+      "testUrl": "/client/payments",
+      "status": 200,
+      "ok": true,
+      "duration": 845
+    },
+    {
+      "num": 64,
+      "definedRoute": "/client/plans",
+      "testUrl": "/client/plans",
+      "status": 200,
+      "ok": true,
+      "duration": 881
+    },
+    {
+      "num": 65,
+      "definedRoute": "/client/proposals",
+      "testUrl": "/client/proposals",
+      "status": 200,
+      "ok": true,
+      "duration": 827
+    },
+    {
+      "num": 66,
+      "definedRoute": "/client/proposals/templates",
+      "testUrl": "/client/proposals/templates",
+      "status": 200,
+      "ok": true,
+      "duration": 879
+    },
+    {
+      "num": 67,
+      "definedRoute": "/client/quotations/new",
+      "testUrl": "/client/quotations/new",
+      "status": 200,
+      "ok": true,
+      "duration": 588
+    },
+    {
+      "num": 68,
+      "definedRoute": "/client/quotations",
+      "testUrl": "/client/quotations",
+      "status": 200,
+      "ok": true,
+      "duration": 725
+    },
+    {
+      "num": 69,
+      "definedRoute": "/client/reports",
+      "testUrl": "/client/reports",
+      "status": 200,
+      "ok": true,
+      "duration": 1288
+    },
+    {
+      "num": 70,
+      "definedRoute": "/client/settings",
+      "testUrl": "/client/settings",
+      "status": 200,
+      "ok": true,
+      "duration": 932
+    },
+    {
+      "num": 71,
+      "definedRoute": "/client/support",
+      "testUrl": "/client/support",
+      "status": 200,
+      "ok": true,
+      "duration": 730
+    },
+    {
+      "num": 72,
+      "definedRoute": "/client/team",
+      "testUrl": "/client/team",
+      "status": 200,
+      "ok": true,
+      "duration": 984
+    },
+    {
+      "num": 73,
+      "definedRoute": "/client/team-chat",
+      "testUrl": "/client/team-chat",
+      "status": 200,
+      "ok": true,
+      "duration": 810
+    },
+    {
+      "num": 74,
+      "definedRoute": "/client/teams",
+      "testUrl": "/client/teams",
+      "status": 200,
+      "ok": true,
+      "duration": 1044
+    },
+    {
+      "num": 75,
+      "definedRoute": "/client/workflows/builder/[id]",
+      "testUrl": "/client/workflows/builder/6a5338debec6daea1165d2b3",
+      "status": 200,
+      "ok": true,
+      "duration": 2783
+    },
+    {
+      "num": 76,
+      "definedRoute": "/client/workflows",
+      "testUrl": "/client/workflows",
+      "status": 200,
+      "ok": true,
+      "duration": 480
+    },
+    {
+      "num": 77,
+      "definedRoute": "/client/youtube",
+      "testUrl": "/client/youtube",
+      "status": 200,
+      "ok": true,
+      "duration": 872
+    },
+    {
+      "num": 78,
+      "definedRoute": "/connectors",
+      "testUrl": "/connectors",
+      "status": 200,
+      "ok": true,
+      "duration": 650
+    },
+    {
+      "num": 79,
+      "definedRoute": "/contact",
+      "testUrl": "/contact",
+      "status": 200,
+      "ok": true,
+      "duration": 209
+    },
+    {
+      "num": 80,
+      "definedRoute": "/cookie-policy",
+      "testUrl": "/cookie-policy",
+      "status": 200,
+      "ok": true,
+      "duration": 263
+    },
+    {
+      "num": 81,
+      "definedRoute": "/cookies",
+      "testUrl": "/cookies",
+      "status": 200,
+      "ok": true,
+      "duration": 72
+    },
+    {
+      "num": 82,
+      "definedRoute": "/dashboard/automations",
+      "testUrl": "/dashboard/automations",
+      "status": 200,
+      "ok": true,
+      "duration": 308
+    },
+    {
+      "num": 83,
+      "definedRoute": "/dashboard/inbox",
+      "testUrl": "/dashboard/inbox",
+      "status": 200,
+      "ok": true,
+      "duration": 325
+    },
+    {
+      "num": 84,
+      "definedRoute": "/dashboard",
+      "testUrl": "/dashboard",
+      "status": 200,
+      "ok": true,
+      "duration": 1615
+    },
+    {
+      "num": 85,
+      "definedRoute": "/dashboard/settings",
+      "testUrl": "/dashboard/settings",
+      "status": 200,
+      "ok": true,
+      "duration": 241
+    },
+    {
+      "num": 86,
+      "definedRoute": "/dashboard/support",
+      "testUrl": "/dashboard/support",
+      "status": 200,
+      "ok": true,
+      "duration": 186
+    },
+    {
+      "num": 87,
+      "definedRoute": "/features",
+      "testUrl": "/features",
+      "status": 200,
+      "ok": true,
+      "duration": 629
+    },
+    {
+      "num": 88,
+      "definedRoute": "/how-it-works",
+      "testUrl": "/how-it-works",
+      "status": 200,
+      "ok": true,
+      "duration": 338
+    },
+    {
+      "num": 89,
+      "definedRoute": "/",
+      "testUrl": "/",
+      "status": 200,
+      "ok": true,
+      "duration": 485
+    },
+    {
+      "num": 90,
+      "definedRoute": "/pricing",
+      "testUrl": "/pricing",
+      "status": 200,
+      "ok": true,
+      "duration": 308
+    },
+    {
+      "num": 91,
+      "definedRoute": "/privacy",
+      "testUrl": "/privacy",
+      "status": 200,
+      "ok": true,
+      "duration": 831
+    },
+    {
+      "num": 92,
+      "definedRoute": "/public/invoice/[token]",
+      "testUrl": "/public/invoice/token_test_123",
+      "status": 200,
+      "ok": true,
+      "duration": 697
+    },
+    {
+      "num": 93,
+      "definedRoute": "/public/proposal/[token]",
+      "testUrl": "/public/proposal/token_test_123",
+      "status": 200,
+      "ok": true,
+      "duration": 732
+    },
+    {
+      "num": 94,
+      "definedRoute": "/public/quotation/[token]",
+      "testUrl": "/public/quotation/token_test_123",
+      "status": 200,
+      "ok": true,
+      "duration": 717
+    },
+    {
+      "num": 95,
+      "definedRoute": "/public/quote/[token]",
+      "testUrl": "/public/quote/token_test_123",
+      "status": 200,
+      "ok": true,
+      "duration": 803
+    },
+    {
+      "num": 96,
+      "definedRoute": "/refund-policy",
+      "testUrl": "/refund-policy",
+      "status": 200,
+      "ok": true,
+      "duration": 685
+    },
+    {
+      "num": 97,
+      "definedRoute": "/terms",
+      "testUrl": "/terms",
+      "status": 200,
+      "ok": true,
+      "duration": 291
+    },
+    {
+      "num": 98,
+      "definedRoute": "/terms-and-conditions",
+      "testUrl": "/terms-and-conditions",
+      "status": 200,
+      "ok": true,
+      "duration": 631
+    }
+  ]
+}

@@ -469,9 +469,9 @@ export default function PaymentsGatewayPage() {
                     <div>
                       <p className="text-sm font-black text-blue-800 mb-1">How it works</p>
                       <ul className="text-xs text-blue-700 space-y-1 list-disc list-inside">
-                        <li>You connect your own Razorpay account — not UWOConnect's</li>
+                        <li>You connect your own Razorpay account — not UWO Connect's</li>
                         <li>Customer payments go directly to your Razorpay account</li>
-                        <li>UWOConnect only records transactions — never touches your funds</li>
+                        <li>UWO Connect only records transactions — never touches your funds</li>
                         <li>Each workspace is fully isolated — no mixing of accounts</li>
                       </ul>
                     </div>

@@ -37,7 +37,9 @@ import {
   Building2,
   Wallet,
   LayoutTemplate,
-  Target
+  Target,
+  Smartphone,
+  HardDriveDownload
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useEntitlement } from '@/context/EntitlementContext';
@@ -54,6 +56,8 @@ const TOUR_IDS = {
   'Workflows': 'sidebar-workflows',
   'Leads (CRM)': 'sidebar-crm',
   'Messages': 'sidebar-inbox',
+  'Inbox': 'sidebar-inbox',
+  'Inbox / Messages': 'sidebar-inbox',
   'Broadcasts': 'sidebar-campaigns',
   'Knowledge Base': 'sidebar-knowledge',
   'Catalog': 'sidebar-catalog',
@@ -147,9 +151,68 @@ const Sidebar = ({ role, isOpen, onClose, onToggle }) => {
   const rawUserPlan = entitlements?.plan?.name || userObj?.client?.plan || userObj?.plan || '';
   const activePlanRank = getPlanRank(entitlements?.plan, rawUserPlan);
 
+  const isItemComingSoon = (link) => {
+    if (role === 'ADMIN') return false;
+    if (!mounted) return false;
+    const baseKey = (link.featureKey || link.name || '').toLowerCase().trim();
+    const cleanKey = baseKey.replace(/^feature_/, '').replace(/^connector_/, '').replace(/^channel_/, '').replace(/\s+/g, '_');
+    
+    // Normalization mapping
+    const CANONICAL_MAP = {
+      'voice_video_call': 'calls',
+      'autoreply': 'automations',
+      'workflow': 'workflows',
+      'quotation': 'quotations',
+      'proposal': 'proposals',
+      'invoice': 'invoices',
+      'broadcast': 'broadcasts',
+      'knowledge_base': 'knowledge',
+      'order': 'orders',
+      'team_dashboard': 'team',
+      'payment': 'razorpay'
+    };
+    const canonicalKey = CANONICAL_MAP[cleanKey] || cleanKey;
+    const variants = [canonicalKey, cleanKey, baseKey, `feature_${cleanKey}`, `connector_${cleanKey}`];
+    
+    // Check global admin master toggles
+    const gConnectors = entitlements?.global_connectors || userObj?.client?.global_connectors || userObj?.global_connectors;
+    if (gConnectors) {
+      for (const v of variants) {
+        if (v && gConnectors[v] === false) return true;
+      }
+    }
+    
+    // Check effective connectors from backend
+    const effConnectors = userObj?.client?.effective_connectors || userObj?.effective_connectors;
+    if (effConnectors) {
+      for (const v of variants) {
+        if (v && effConnectors[v]) {
+          const effMatch = effConnectors[v];
+          if (effMatch.global_active === false || effMatch.effective_status === 'COMING_SOON' || effMatch.is_coming_soon === true) {
+            return true;
+          }
+        }
+      }
+    }
+    
+    // Check evaluated status from entitlement service
+    if (entitlements) {
+      for (const variant of variants) {
+        const featStatus = entitlements?.features?.[variant]?.status || 
+                           entitlements?.connectors?.[variant]?.status ||
+                           entitlements?.channels?.[variant]?.status;
+        if (featStatus === 'COMING_SOON') {
+          return true;
+        }
+      }
+    }
+    return false;
+  };
+
   const isFeatureUnlocked = (link) => {
     if (role === 'ADMIN') return true;
     if (!mounted) return false;
+    if (isItemComingSoon(link)) return false;
     if (!link.requiredPlan) return true;
 
     const baseKey = (link.featureKey || link.name || '').toLowerCase().trim();
@@ -189,7 +252,7 @@ const Sidebar = ({ role, isOpen, onClose, onToggle }) => {
         const featStatus = entitlements?.features?.[variant]?.status || 
                            entitlements?.connectors?.[variant]?.status ||
                            entitlements?.channels?.[variant]?.status;
-        if (featStatus === 'UPGRADE_REQUIRED' || featStatus === 'LOCKED') {
+        if (featStatus === 'UPGRADE_REQUIRED' || featStatus === 'LOCKED' || featStatus === 'COMING_SOON') {
           return false;
         }
         if (featStatus === 'AVAILABLE' || featStatus === 'CONNECTED' || featStatus === 'ENABLED') {
@@ -210,6 +273,8 @@ const Sidebar = ({ role, isOpen, onClose, onToggle }) => {
   const adminLinks = [
     { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
     { name: 'Clients', href: '/admin/clients', icon: Users },
+    { name: 'Client Platform Overview', href: '/admin/platform-overview', icon: Smartphone },
+    { name: 'Installation Analytics', href: '/admin/installations', icon: HardDriveDownload },
     { name: 'Legal Policies', href: '/admin/settings/legal', icon: Scale },
     { name: 'White-Label Hub', href: '/admin/whitelabel', icon: Globe },
     { name: 'Team', href: '/admin/team', icon: ShieldCheck },
@@ -241,31 +306,32 @@ const Sidebar = ({ role, isOpen, onClose, onToggle }) => {
     ] : []),
     { name: 'Dashboard', href: '/client', icon: LayoutDashboard },
     { name: 'Learning Center', href: '/client/guides', icon: BookOpen },
+
+    // ── Core Communication & Automation ──
     { name: 'Channels', href: '/client/channels', icon: Link2, requiredPlan: 'Starter', featureKey: 'feature_channels' },
-    // { name: 'Outlook', href: '/client/email', icon: Mail, requiredPlan: 'Starter', featureKey: 'connector_outlook' },
-    // { name: 'Gmail', href: '/client/gmail', icon: Mail, requiredPlan: 'Starter', featureKey: 'connector_gmail' },
-    { name: 'Voice & Video Calls', href: '/client/calls', icon: PhoneCall, requiredPlan: 'Starter', featureKey: 'feature_voice_video_call' },
-    // { name: 'YouTube', href: '/client/youtube', icon: YoutubeIcon, requiredPlan: 'Starter', featureKey: 'channel_youtube' },
     { name: 'Google News', href: '/client/google-news', icon: Newspaper, requiredPlan: 'Starter', featureKey: 'connector_google_news' },
+    { name: 'Inbox / Messages', href: '/client/inbox', icon: MessageSquare, requiredPlan: 'Starter', featureKey: 'feature_shared_inbox' },
     { name: 'Auto Replies', href: '/client/automations', icon: Zap, requiredPlan: 'Starter', featureKey: 'feature_autoreply' },
     { name: 'Workflows', href: '/client/workflows', icon: GitBranch, requiredPlan: 'Starter', featureKey: 'feature_workflow' },
-    { name: 'Leads (CRM)', href: '/client/crm', icon: Users, requiredPlan: 'Starter', featureKey: 'feature_crm' },
-    // { name: 'Competitor Intelligence', href: '/client/competitor-analysis', icon: Target, requiredPlan: 'Starter', featureKey: 'feature_competitor_analysis' }, // Shifted to Topbar near + Topup
-    { name: 'Quotations', href: '/client/quotations', icon: FileCheck, requiredPlan: 'Starter', featureKey: 'feature_quotation' },
-    { name: 'Proposals', href: '/client/proposals', icon: FileText, requiredPlan: 'Starter', featureKey: 'feature_proposal' },
-    { name: 'Invoices', href: '/client/invoices', icon: Receipt, requiredPlan: 'Starter', featureKey: 'feature_invoice' },
-    { name: 'Messages', href: '/client/inbox', icon: MessageSquare, requiredPlan: 'Starter', featureKey: 'feature_shared_inbox' },
+
     { name: 'Broadcasts', href: '/client/campaigns', icon: Megaphone, requiredPlan: 'Starter', featureKey: 'feature_broadcast' },
+    { name: 'Leads (CRM)', href: '/client/crm', icon: Users, requiredPlan: 'Starter', featureKey: 'feature_crm' },
     { name: 'Knowledge Base', href: '/client/knowledge', icon: Brain, requiredPlan: 'Starter', featureKey: 'feature_knowledge_base' },
+    { name: 'Proposals', href: '/client/proposals', icon: FileText, requiredPlan: 'Starter', featureKey: 'feature_proposal' },
+    { name: 'Quotations', href: '/client/quotations', icon: FileCheck, requiredPlan: 'Starter', featureKey: 'feature_quotation' },
+    { name: 'Invoices', href: '/client/invoices', icon: Receipt, requiredPlan: 'Starter', featureKey: 'feature_invoice' },
+
+    // ── Remaining Modules ──
     { name: 'Catalog', href: '/client/catalog', icon: ShoppingBag, requiredPlan: 'Starter', featureKey: 'feature_catalog' },
     { name: 'Payments', href: '/client/payments', icon: CreditCard, requiredPlan: 'Starter', featureKey: 'feature_payment' },
     { name: 'Billing & Wallet', href: '/client/billing', icon: Wallet },
     { name: 'Orders', href: '/client/orders', icon: Receipt, requiredPlan: 'Starter', featureKey: 'feature_order' },
-    { name: 'Team', href: '/client/team', icon: ShieldCheck, requiredPlan: 'Starter', featureKey: 'feature_team_dashboard' },
-    { name: 'Work Reports', href: '/client/reports', icon: FileCheck, requiredPlan: 'Starter', featureKey: 'feature_reports' },
+    { name: 'Voice & Video Calls', href: '/client/calls', icon: PhoneCall, requiredPlan: 'Starter', featureKey: 'feature_voice_video_call' },
     { name: 'Settings', href: '/client/settings', icon: Settings },
     { name: 'Plans', href: '/client/plans', icon: Layers },
     { name: 'Support', href: '/client/support', icon: LifeBuoy },
+    { name: 'Team', href: '/client/team', icon: ShieldCheck, requiredPlan: 'Starter', featureKey: 'feature_team_dashboard' },
+    { name: 'Work Reports', href: '/client/reports', icon: FileCheck, requiredPlan: 'Starter', featureKey: 'feature_reports' },
   ];
 
   const agentLinks = [
@@ -318,7 +384,7 @@ const Sidebar = ({ role, isOpen, onClose, onToggle }) => {
       <aside
         data-tour="sidebar-nav"
         className={cn(
-          'flex flex-col font-sans transition-all duration-300 ease-in-out shrink-0 overflow-hidden',
+          'flex flex-col font-sans transition-all duration-300 ease-in-out shrink-0 overflow-hidden min-w-0',
           isDark 
             ? 'bg-[#0f172a] border-r border-slate-800/80 text-slate-200' 
             : 'bg-white border-r border-slate-100 text-slate-800',
@@ -327,14 +393,14 @@ const Sidebar = ({ role, isOpen, onClose, onToggle }) => {
           isOpen ? 'translate-x-0 w-[260px] sm:w-[270px]' : '-translate-x-full',
           // Desktop View (lg >= 1024px): Regular docked sidebar
           'lg:relative lg:translate-x-0 lg:z-30',
-          isOpen ? 'lg:w-[220px]' : 'lg:w-14'
+          isOpen ? 'lg:w-[220px] lg:min-w-[220px] lg:max-w-[220px]' : 'lg:w-14 lg:min-w-[56px] lg:max-w-[56px]'
         )}
       >
         {/* ── Brand Header ── */}
         <div className={cn(
-          'flex shrink-0 transition-all duration-300',
+          'flex shrink-0 transition-all duration-300 w-full overflow-hidden',
           isDark ? 'border-b border-slate-800/80' : 'border-b border-slate-100/80',
-          isOpen ? 'items-center px-3.5 sm:px-4 py-3 justify-between gap-2 flex-row' : 'flex-col items-center px-0 py-2 gap-1'
+          isOpen ? 'items-center px-3.5 sm:px-4 py-3 justify-between gap-2 flex-row' : 'flex-col items-center px-0 py-2 gap-1 w-14 max-w-[56px]'
         )}>
           {(() => {
             const displayBrandName = brand?.brand_name || "UWO Connect™";
@@ -342,12 +408,20 @@ const Sidebar = ({ role, isOpen, onClose, onToggle }) => {
 
             return isOpen ? (
               <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                <img
-                  src={displayBrandLogo}
-                  alt={displayBrandName}
-                  className="w-8 h-8 rounded-xl object-contain shadow-xs shrink-0 bg-white"
-                  onError={(e) => { e.currentTarget.src = "/download (3).gif"; }}
-                />
+                <div className="w-8 h-8 min-w-[32px] max-w-[32px] min-h-[32px] max-h-[32px] rounded-xl overflow-hidden bg-white flex items-center justify-center shrink-0 shadow-xs border border-slate-100">
+                  <img
+                    src={displayBrandLogo}
+                    alt={displayBrandName}
+                    width={32}
+                    height={32}
+                    style={{ width: '32px', height: '32px', maxWidth: '32px', maxHeight: '32px', minWidth: '32px', minHeight: '32px', objectFit: 'contain' }}
+                    className="w-8 h-8 rounded-xl object-contain shrink-0"
+                    onError={(e) => {
+                      e.currentTarget.onerror = null;
+                      e.currentTarget.src = "/favicon.png";
+                    }}
+                  />
+                </div>
                 <div className="min-w-0 flex-1">
                   <h1 className={cn("text-sm font-black tracking-tight leading-tight whitespace-nowrap truncate", isDark ? "text-white" : "text-slate-900")} title={displayBrandName}>
                     {displayBrandName}
@@ -362,12 +436,20 @@ const Sidebar = ({ role, isOpen, onClose, onToggle }) => {
               </div>
             ) : (
               <div className="flex items-center justify-center w-full py-1">
-                <img
-                  src={displayBrandLogo}
-                  alt={displayBrandName}
-                  className="w-8 h-8 rounded-xl object-contain bg-white"
-                  onError={(e) => { e.currentTarget.src = "/download (3).gif"; }}
-                />
+                <div className="w-8 h-8 min-w-[32px] max-w-[32px] min-h-[32px] max-h-[32px] rounded-xl overflow-hidden bg-white flex items-center justify-center shrink-0 shadow-xs border border-slate-100">
+                  <img
+                    src={displayBrandLogo}
+                    alt={displayBrandName}
+                    width={32}
+                    height={32}
+                    style={{ width: '32px', height: '32px', maxWidth: '32px', maxHeight: '32px', minWidth: '32px', minHeight: '32px', objectFit: 'contain' }}
+                    className="w-8 h-8 rounded-xl object-contain shrink-0"
+                    onError={(e) => {
+                      e.currentTarget.onerror = null;
+                      e.currentTarget.src = "/favicon.png";
+                    }}
+                  />
+                </div>
               </div>
             );
           })()}
@@ -416,7 +498,38 @@ const Sidebar = ({ role, isOpen, onClose, onToggle }) => {
             const Icon = link.icon;
             const tourId = TOUR_IDS[link.name];
 
+            const itemComingSoon = isItemComingSoon(link);
             const isLocked = !isFeatureUnlocked(link);
+
+            if (itemComingSoon) {
+              return (
+                <div
+                  key={link.href}
+                  data-tour={tourId}
+                  onClick={() => {
+                    alert(`${link.name} is Coming Soon! This feature is temporarily deactivated or scheduled for rollout by the platform administrator.`);
+                  }}
+                  title={`${link.name} (Coming Soon)`}
+                  className={cn(
+                    'group flex items-center rounded-xl transition-all duration-200 relative overflow-hidden cursor-pointer',
+                    isOpen ? 'gap-2 px-2 py-2' : 'justify-center px-0 py-2',
+                    'text-amber-700/80 bg-amber-50/40 hover:bg-amber-100/50 border border-amber-200/40'
+                  )}
+                >
+                  <Icon size={isOpen ? 16 : 18} className="text-amber-600 shrink-0 opacity-80" />
+                  {isOpen && (
+                    <div className="flex-1 flex items-center justify-between min-w-0">
+                      <span className="text-[12px] tracking-tight font-bold text-amber-900 truncate">
+                        {link.name}
+                      </span>
+                      <span className="text-[8.5px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-md bg-amber-200/80 text-amber-950 ml-1">
+                        Soon
+                      </span>
+                    </div>
+                  )}
+                </div>
+              );
+            }
 
             if (isLocked) {
               return (

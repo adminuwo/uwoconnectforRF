@@ -353,6 +353,25 @@ const ClientChannelsPage = () => {
     } catch (e) { }
 
     fetchClient();
+
+    // Real-time synchronization with Admin toggles
+    const handleSync = () => {
+      fetchClient();
+    };
+
+    window.addEventListener('storage', handleSync);
+    window.addEventListener('channelsUpdated', handleSync);
+
+    // Periodic live sync every 25 seconds
+    const interval = setInterval(() => {
+      fetchClient();
+    }, 25000);
+
+    return () => {
+      window.removeEventListener('storage', handleSync);
+      window.removeEventListener('channelsUpdated', handleSync);
+      clearInterval(interval);
+    };
   }, []);
 
   // Facebook JS SDK
@@ -2011,15 +2030,18 @@ const ClientChannelsPage = () => {
                       {allFeaturesList.map((item) => {
                         const state = getChannelAccessState(item.key, client, activePlans);
                         const isConn = item.isConnected;
+                        const isComingSoon = state.status === 'COMING_SOON';
 
                         return (
                           <div
                             key={item.key}
                             className={cn(
-                              "rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-7 flex flex-col justify-between transition-all duration-300 shadow-sm hover:shadow-md relative group border",
+                              "rounded-2xl sm:rounded-3xl border p-4 sm:p-6 lg:p-7 flex flex-col justify-between transition-all duration-300 shadow-sm hover:shadow-md relative group",
                               isDark
                                 ? "bg-[#0f172a] border-slate-800 hover:border-slate-700"
-                                : "bg-white border-slate-200/90 hover:border-slate-300"
+                                : isComingSoon
+                                  ? "border-amber-200/80 bg-amber-50/15"
+                                  : "bg-white border-slate-200/90 hover:border-slate-300"
                             )}
                           >
                             <div>
@@ -2045,13 +2067,23 @@ const ClientChannelsPage = () => {
                                 </div>
 
                                 <div className="shrink-0">
-                                  <span className={cn(
-                                    "inline-flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[9px] sm:text-[10px] font-bold whitespace-nowrap",
-                                    isDark ? "bg-emerald-950/60 text-emerald-400 border border-emerald-800/60" : "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                                  )}>
-                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                                    <span>Active</span>
-                                  </span>
+                                  {isComingSoon ? (
+                                    <span className={cn(
+                                      "inline-flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[9px] sm:text-[10px] font-bold whitespace-nowrap",
+                                      isDark ? "bg-amber-950/60 text-amber-400 border border-amber-800/60" : "bg-amber-50 text-amber-700 border border-amber-200"
+                                    )}>
+                                      <Clock size={10} className={isDark ? "text-amber-400" : "text-amber-600"} />
+                                      <span>Soon</span>
+                                    </span>
+                                  ) : (
+                                    <span className={cn(
+                                      "inline-flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[9px] sm:text-[10px] font-bold whitespace-nowrap",
+                                      isDark ? "bg-emerald-950/60 text-emerald-400 border border-emerald-800/60" : "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                                    )}>
+                                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                      <span>Active</span>
+                                    </span>
+                                  )}
                                 </div>
                               </div>
 
@@ -2061,7 +2093,16 @@ const ClientChannelsPage = () => {
                             </div>
 
                             <div className="pt-1 sm:pt-2">
-                              {item.href ? (
+                              {isComingSoon ? (
+                                <button
+                                  type="button"
+                                  onClick={() => setComingSoonModalChannel(item.name)}
+                                  className="w-full py-2 sm:py-2.5 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer shadow-sm bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200"
+                                >
+                                  <Clock size={13} className="text-amber-600" />
+                                  <span>Coming Soon</span>
+                                </button>
+                              ) : item.href ? (
                                 <Link
                                   href={item.href}
                                   className={cn(

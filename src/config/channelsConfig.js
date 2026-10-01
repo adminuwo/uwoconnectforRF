@@ -5,9 +5,11 @@
 export const GLOBAL_ACTIVE_CHANNELS = ['whatsapp', 'facebook', 'instagram'];
 
 export const GLOBAL_ALL_CHANNELS = [
-  'whatsapp', 'facebook', 'instagram', 'gmail', 'outlook', 'onedrive',
-  'google_calendar', 'google_sheets', 'google_docs', 'google_slides',
-  'zoho', 'youtube', 'google_news', 'razorpay'
+  'whatsapp', 'facebook', 'instagram', 'calls', 'google_news', 'telegram',
+  'gmail', 'outlook', 'onedrive', 'google_calendar', 'google_sheets',
+  'google_docs', 'google_slides', 'zoho', 'youtube', 'razorpay',
+  'broadcasts', 'workflows', 'automations', 'knowledge', 'crm',
+  'proposals', 'quotations', 'invoices', 'catalog', 'orders', 'reports', 'team'
 ];
 
 export const CHANNEL_DEFINITIONS = [
@@ -183,6 +185,30 @@ export const CHANNEL_DEFINITIONS = [
     iconColor: 'text-blue-600 bg-blue-50 border-blue-100',
   },
   {
+    key: 'calls',
+    name: 'Voice & Video Calls',
+    shortName: 'Calls',
+    category: 'CALLS',
+    tagline: 'WebRTC In-App Calling',
+    description: 'High definition audio and video calling directly from client chats and contact records.',
+    isCore: false,
+    color: '#059669',
+    badgeBg: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+    iconColor: 'text-emerald-600 bg-emerald-50 border-emerald-100',
+  },
+  {
+    key: 'telegram',
+    name: 'Telegram Messenger',
+    shortName: 'Telegram',
+    category: 'MESSAGING',
+    tagline: 'Bot & Channel Integration',
+    description: 'Connect Telegram bots for instant customer messaging, alert broadcasts, and support groups.',
+    isCore: false,
+    color: '#229ED9',
+    badgeBg: 'bg-sky-50 text-sky-700 border-sky-200',
+    iconColor: 'text-sky-600 bg-sky-50 border-sky-100',
+  },
+  {
     key: 'google_maps',
     name: 'Google Maps',
     shortName: 'G-Maps',
@@ -193,6 +219,152 @@ export const CHANNEL_DEFINITIONS = [
     color: '#EA4335',
     badgeBg: 'bg-red-50 text-red-700 border-red-200',
     iconColor: 'text-red-600 bg-red-50 border-red-100',
+  },
+
+  // ================= CORE PLATFORM FEATURES =================
+  {
+    key: 'broadcasts',
+    name: 'Broadcast Campaigns',
+    shortName: 'Broadcasts',
+    category: 'MARKETING',
+    tagline: 'Targeted Mass Messaging',
+    description: 'Send targeted promotional campaigns, announcements, and newsletters across messaging channels.',
+    isCore: false,
+    color: '#8b5cf6',
+    badgeBg: 'bg-purple-50 text-purple-700 border-purple-200',
+    iconColor: 'text-purple-600 bg-purple-50 border-purple-100',
+  },
+  {
+    key: 'workflows',
+    name: 'Automated Workflows',
+    shortName: 'Workflows',
+    category: 'AUTOMATION',
+    tagline: 'Multi-step Automation',
+    description: 'Build visual multi-step workflow automations, conditional logic, and webhooks.',
+    isCore: false,
+    color: '#3b82f6',
+    badgeBg: 'bg-blue-50 text-blue-700 border-blue-200',
+    iconColor: 'text-blue-600 bg-blue-50 border-blue-100',
+  },
+  {
+    key: 'automations',
+    name: 'Auto-Replies & Triggers',
+    shortName: 'Automations',
+    category: 'AUTOMATION',
+    tagline: 'Keyword & Event Triggers',
+    description: 'Set up keyword triggers, out-of-office autoreplies, and interactive chat flows.',
+    isCore: false,
+    color: '#f59e0b',
+    badgeBg: 'bg-amber-50 text-amber-700 border-amber-200',
+    iconColor: 'text-amber-600 bg-amber-50 border-amber-100',
+  },
+  {
+    key: 'knowledge',
+    name: 'Knowledge Base & AI',
+    shortName: 'Knowledge Base',
+    category: 'AI',
+    tagline: 'Vector Embeddings & RAG',
+    description: 'Train AI on documents and company knowledge to empower automated intelligent support.',
+    isCore: false,
+    color: '#10b981',
+    badgeBg: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+    iconColor: 'text-emerald-600 bg-emerald-50 border-emerald-100',
+  },
+  {
+    key: 'crm',
+    name: 'CRM & Leads Pipeline',
+    shortName: 'CRM / Leads',
+    category: 'SALES',
+    tagline: 'Contact & Deal Stages',
+    description: 'Manage customer profiles, lifecycle stages, deal pipelines, and custom fields.',
+    isCore: false,
+    color: '#6366f1',
+    badgeBg: 'bg-indigo-50 text-indigo-700 border-indigo-200',
+    iconColor: 'text-indigo-600 bg-indigo-50 border-indigo-100',
+  },
+  {
+    key: 'proposals',
+    name: 'Proposals Management',
+    shortName: 'Proposals',
+    category: 'COMMERCE',
+    tagline: 'Interactive Proposals',
+    description: 'Create, send, and track digital business proposals with e-signature capabilities.',
+    isCore: false,
+    color: '#0284c7',
+    badgeBg: 'bg-sky-50 text-sky-700 border-sky-200',
+    iconColor: 'text-sky-600 bg-sky-50 border-sky-100',
+  },
+  {
+    key: 'quotations',
+    name: 'Price Quotations',
+    shortName: 'Quotations',
+    category: 'COMMERCE',
+    tagline: 'Instant Quotes & Estimates',
+    description: 'Generate professional price estimates and convert them into accepted client deals.',
+    isCore: false,
+    color: '#06b6d4',
+    badgeBg: 'bg-cyan-50 text-cyan-700 border-cyan-200',
+    iconColor: 'text-cyan-600 bg-cyan-50 border-cyan-100',
+  },
+  {
+    key: 'invoices',
+    name: 'GST Invoices & Billing',
+    shortName: 'Invoices',
+    category: 'COMMERCE',
+    tagline: 'Tax Compliant Billing',
+    description: 'Automated invoice generation with GST compliance, tax breakdowns, and receipts.',
+    isCore: false,
+    color: '#059669',
+    badgeBg: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+    iconColor: 'text-emerald-600 bg-emerald-50 border-emerald-100',
+  },
+  {
+    key: 'catalog',
+    name: 'Product Catalog',
+    shortName: 'Catalog',
+    category: 'COMMERCE',
+    tagline: 'Products & Services',
+    description: 'Showcase inventory, prices, variants, and product media in interactive chats.',
+    isCore: false,
+    color: '#f43f5e',
+    badgeBg: 'bg-rose-50 text-rose-700 border-rose-200',
+    iconColor: 'text-rose-600 bg-rose-50 border-rose-100',
+  },
+  {
+    key: 'orders',
+    name: 'Orders & Transactions',
+    shortName: 'Orders',
+    category: 'COMMERCE',
+    tagline: 'Sales Order Processing',
+    description: 'Track customer purchase orders, fulfillment status, and payment receipts.',
+    isCore: false,
+    color: '#f97316',
+    badgeBg: 'bg-orange-50 text-orange-700 border-orange-200',
+    iconColor: 'text-orange-600 bg-orange-50 border-orange-100',
+  },
+  {
+    key: 'reports',
+    name: 'Analytics & Reports',
+    shortName: 'Reports',
+    category: 'REPORTING',
+    tagline: 'Performance Intelligence',
+    description: 'Deep conversation analytics, agent response times, and sales performance metrics.',
+    isCore: false,
+    color: '#4f46e5',
+    badgeBg: 'bg-indigo-50 text-indigo-700 border-indigo-200',
+    iconColor: 'text-indigo-600 bg-indigo-50 border-indigo-100',
+  },
+  {
+    key: 'team',
+    name: 'Team Collaboration',
+    shortName: 'Team',
+    category: 'MANAGEMENT',
+    tagline: 'Roles & RBAC Control',
+    description: 'Manage team members, agent permissions, department assignments, and queues.',
+    isCore: false,
+    color: '#d946ef',
+    badgeBg: 'bg-fuchsia-50 text-fuchsia-700 border-fuchsia-200',
+    iconColor: 'text-fuchsia-600 bg-fuchsia-50 border-fuchsia-100',
   }
 ];
 
@@ -203,6 +375,9 @@ export const FEATURE_KEY_MAP = {
   'whatsapp': 'channel_whatsapp',
   'instagram': 'channel_instagram',
   'facebook': 'channel_facebook',
+  'calls': 'feature_voice_video_call',
+  'voice_video_call': 'feature_voice_video_call',
+  'telegram': 'channel_telegram',
   'youtube': 'channel_youtube',
   'gmail': 'connector_gmail',
   'outlook': 'connector_outlook',
@@ -216,14 +391,112 @@ export const FEATURE_KEY_MAP = {
   'zoho': 'feature_crm',
   'razorpay': 'feature_payment',
   'team_dashboard': 'feature_team_dashboard',
+  'team': 'feature_team_dashboard',
   'quotation': 'feature_quotation',
+  'quotations': 'feature_quotation',
   'invoice': 'feature_invoice',
+  'invoices': 'feature_invoice',
   'proposal': 'feature_proposal',
+  'proposals': 'feature_proposal',
   'catalog': 'feature_catalog',
+  'order': 'feature_order',
+  'orders': 'feature_order',
   'payment': 'feature_payment',
   'crm': 'feature_crm',
   'autoreply': 'feature_autoreply',
-  'voice_video_call': 'feature_voice_video_call',
+  'automations': 'feature_autoreply',
+  'workflow': 'feature_workflow',
+  'workflows': 'feature_workflow',
+  'broadcast': 'feature_broadcast',
+  'broadcasts': 'feature_broadcast',
+  'knowledge': 'feature_knowledge_base',
+  'knowledge_base': 'feature_knowledge_base',
+  'reports': 'feature_reports',
+  'report': 'feature_reports',
+};
+
+// Canonical key mapping to unify all 27 database keys and their various aliases
+export const CANONICAL_CHANNEL_KEY = {
+  // Channels (6)
+  'whatsapp': 'whatsapp',
+  'facebook': 'facebook',
+  'instagram': 'instagram',
+  'calls': 'calls',
+  'call': 'calls',
+  'voice': 'calls',
+  'voice_video_call': 'calls',
+  'feature_voice_video_call': 'calls',
+  'google_news': 'google_news',
+  'connector_google_news': 'google_news',
+  'telegram': 'telegram',
+  'channel_telegram': 'telegram',
+
+  // Connectors (9)
+  'gmail': 'gmail',
+  'connector_gmail': 'gmail',
+  'outlook': 'outlook',
+  'connector_outlook': 'outlook',
+  'email': 'outlook',
+  'onedrive': 'onedrive',
+  'connector_onedrive': 'onedrive',
+  'google_calendar': 'google_calendar',
+  'connector_google_calendar': 'google_calendar',
+  'google_sheets': 'google_sheets',
+  'connector_google_sheets': 'google_sheets',
+  'google_docs': 'google_docs',
+  'connector_google_docs': 'google_docs',
+  'google_slides': 'google_slides',
+  'connector_google_slides': 'google_slides',
+  'zoho': 'zoho',
+  'zoho_crm': 'zoho',
+  'connector_zoho': 'zoho',
+  'youtube': 'youtube',
+  'channel_youtube': 'youtube',
+
+  // Features (12)
+  'broadcasts': 'broadcasts',
+  'broadcast': 'broadcasts',
+  'feature_broadcast': 'broadcasts',
+  'workflows': 'workflows',
+  'workflow': 'workflows',
+  'feature_workflow': 'workflows',
+  'automations': 'automations',
+  'automation': 'automations',
+  'autoreply': 'automations',
+  'feature_autoreply': 'automations',
+  'knowledge': 'knowledge',
+  'knowledge_base': 'knowledge',
+  'feature_knowledge_base': 'knowledge',
+  'crm': 'crm',
+  'leads': 'crm',
+  'feature_crm': 'crm',
+  'proposals': 'proposals',
+  'proposal': 'proposals',
+  'feature_proposal': 'proposals',
+  'quotations': 'quotations',
+  'quotation': 'quotations',
+  'quote': 'quotations',
+  'feature_quotation': 'quotations',
+  'invoices': 'invoices',
+  'invoice': 'invoices',
+  'feature_invoice': 'invoices',
+  'catalog': 'catalog',
+  'product': 'catalog',
+  'products': 'catalog',
+  'feature_catalog': 'catalog',
+  'orders': 'orders',
+  'order': 'orders',
+  'feature_order': 'orders',
+  'reports': 'reports',
+  'report': 'reports',
+  'feature_reports': 'reports',
+  'team': 'team',
+  'team_dashboard': 'team',
+  'feature_team_dashboard': 'team',
+  'payment': 'razorpay',
+  'payments': 'razorpay',
+  'razorpay': 'razorpay',
+  'feature_payment': 'razorpay',
 };
 
 /**
@@ -233,35 +506,49 @@ export const FEATURE_KEY_MAP = {
  * - 'NOT_CONNECTED': Channel is enabled and ready to connect (+ Connect Now)
  */
 export function getChannelAccessState(channelKey, clientData, activePlans = []) {
-  const key = String(channelKey).toLowerCase().trim();
-  const featureKey = FEATURE_KEY_MAP[key] || `connector_${key}`;
+  const key = String(channelKey || '').toLowerCase().trim();
+  const cleanKey = key.replace(/^feature_/, '').replace(/^connector_/, '').replace(/^channel_/, '').replace(/\s+/g, '_');
+  const canonicalKey = CANONICAL_CHANNEL_KEY[key] || CANONICAL_CHANNEL_KEY[cleanKey] || cleanKey;
+  const featureKey = FEATURE_KEY_MAP[key] || FEATURE_KEY_MAP[cleanKey] || `connector_${cleanKey}`;
 
-  // 0. Level 1: Global Admin Master Check
+  // 0. Level 1: Global Admin Master Check (Channels, Connectors, & Features)
   const gConnectors = clientData?.global_connectors;
   const effConnectors = clientData?.effective_connectors;
 
-  if (gConnectors && gConnectors[key] === false) {
-    return {
-      status: 'COMING_SOON',
-      label: 'Coming Soon',
-      reason: 'This integration is deactivated by the administrator.',
-      canConnect: false,
-      canConfigure: false,
-      isDisabled: true,
-      badgeColor: 'bg-amber-50 text-amber-700 border-amber-200'
-    };
+  // Check all key variations against global_connectors
+  const keysToCheck = [canonicalKey, key, cleanKey, featureKey];
+  if (gConnectors) {
+    for (const k of keysToCheck) {
+      if (k && gConnectors[k] === false) {
+        return {
+          status: 'COMING_SOON',
+          label: 'Coming Soon',
+          reason: 'This feature or channel is deactivated by the administrator.',
+          canConnect: false,
+          canConfigure: false,
+          isDisabled: true,
+          badgeColor: 'bg-amber-50 text-amber-700 border-amber-200'
+        };
+      }
+    }
   }
 
-  if (effConnectors && effConnectors[key] && effConnectors[key].global_active === false) {
-    return {
-      status: 'COMING_SOON',
-      label: 'Coming Soon',
-      reason: 'This integration is deactivated by the administrator.',
-      canConnect: false,
-      canConfigure: false,
-      isDisabled: true,
-      badgeColor: 'bg-amber-50 text-amber-700 border-amber-200'
-    };
+  // Check in effective_connectors
+  for (const k of keysToCheck) {
+    if (k && effConnectors && effConnectors[k]) {
+      const effMatch = effConnectors[k];
+      if (effMatch.global_active === false || effMatch.effective_status === 'COMING_SOON' || effMatch.is_coming_soon === true) {
+        return {
+          status: 'COMING_SOON',
+          label: 'Coming Soon',
+          reason: 'This feature or channel is deactivated by the administrator.',
+          canConnect: false,
+          canConfigure: false,
+          isDisabled: true,
+          badgeColor: 'bg-amber-50 text-amber-700 border-amber-200'
+        };
+      }
+    }
   }
 
   // 1. Level 2: Admin Permission Check on Client

@@ -45,10 +45,10 @@ export const metadata = {
   },
   icons: {
     icon: [
-      { url: '/download (3).gif', type: 'image/gif' },
+      { url: '/favicon.png', type: 'image/png' },
     ],
-    shortcut: '/download (3).gif',
-    apple: '/download (3).gif',
+    shortcut: '/favicon.png',
+    apple: '/favicon.png',
   },
   alternates: {
     canonical: getBaseUrl(),

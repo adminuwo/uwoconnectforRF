@@ -5,7 +5,7 @@ import React from 'react';
 export default function Testimonials() {
   const testimonials = [
     {
-      quote: "Uwo Connect simplified our tech stack completely. We cut down software costs by 40% and automated our complete client intake flow.",
+      quote: "UWO Connect simplified our tech stack completely. We cut down software costs by 40% and automated our complete client intake flow.",
       name: "Sarah Jenkins",
       role: "VP of Operations",
       company: "Retool"

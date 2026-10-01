@@ -198,7 +198,7 @@ const AdminGuidesManagementPage = () => {
               <BookOpen className="text-emerald-600" size={28} /> Interactive Guide Admin Center
             </h1>
             <p className="text-slate-500 font-medium text-xs mt-1">
-              Create, edit, reorder, and manage step-by-step documentation guides for all UWOConnect client modules.
+              Create, edit, reorder, and manage step-by-step documentation guides for all UWO Connect client modules.
             </p>
           </div>
 

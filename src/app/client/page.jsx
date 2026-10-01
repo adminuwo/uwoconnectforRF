@@ -666,10 +666,10 @@ const ClientOverview = () => {
               </div>
 
               {/* Action Button */}
-              <div>
+              <div className="w-full sm:w-auto">
                 <button 
                   onClick={() => handleCardClick('/client/youtube')}
-                  className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-2xl text-xs uppercase tracking-wider transition-all shadow-sm hover:shadow-md cursor-pointer"
+                  className="w-full sm:w-auto px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-2xl text-xs uppercase tracking-wider transition-all shadow-sm hover:shadow-md text-center cursor-pointer"
                 >
                   Manage Videos & Comments
                 </button>
@@ -866,13 +866,13 @@ const ClientOverview = () => {
                       <Calendar size={15} />
                       <span>Select Date Range:</span>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
                       <input
                         type="date"
                         value={customStartDate}
                         onChange={(e) => setCustomStartDate(e.target.value)}
                         className={cn(
-                          "px-3 py-1.5 text-xs rounded-xl border font-medium focus:outline-none focus:border-emerald-500",
+                          "px-3 py-1.5 text-xs rounded-xl border font-medium focus:outline-none focus:border-emerald-500 w-full xs:w-auto",
                           isDark ? "bg-slate-800 border-slate-700 text-white" : "bg-white border-slate-200 text-slate-900"
                         )}
                       />
@@ -882,7 +882,7 @@ const ClientOverview = () => {
                         value={customEndDate}
                         onChange={(e) => setCustomEndDate(e.target.value)}
                         className={cn(
-                          "px-3 py-1.5 text-xs rounded-xl border font-medium focus:outline-none focus:border-emerald-500",
+                          "px-3 py-1.5 text-xs rounded-xl border font-medium focus:outline-none focus:border-emerald-500 w-full xs:w-auto",
                           isDark ? "bg-slate-800 border-slate-700 text-white" : "bg-white border-slate-200 text-slate-900"
                         )}
                       />

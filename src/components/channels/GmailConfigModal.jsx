@@ -312,7 +312,7 @@ export default function GmailConfigModal({ client, isOpen, onClose, onSaved }) {
                   Granted Google OAuth Scopes
                 </h4>
                 <p className="text-slate-500 text-[11px]">
-                  UWOConnect requests official restricted scopes via Google Cloud OAuth Consent Screen:
+                  UWO Connect requests official restricted scopes via Google Cloud OAuth Consent Screen:
                 </p>
                 <div className="space-y-2 pt-2">
                   <div className="p-2.5 bg-white rounded-xl border border-slate-200/80 font-mono text-[11px] text-slate-800 flex items-center justify-between">
@@ -343,7 +343,7 @@ export default function GmailConfigModal({ client, isOpen, onClose, onSaved }) {
                   <label className="flex items-center justify-between p-3 bg-white rounded-xl border border-slate-200 cursor-pointer">
                     <div>
                       <strong className="block text-slate-900">Auto-sync incoming emails</strong>
-                      <span className="text-[11px] text-slate-500">Automatically pull customer emails into UWOConnect Inbox</span>
+                      <span className="text-[11px] text-slate-500">Automatically pull customer emails into UWO Connect Inbox</span>
                     </div>
                     <input type="checkbox" defaultChecked className="w-4 h-4 accent-emerald-600 rounded" />
                   </label>

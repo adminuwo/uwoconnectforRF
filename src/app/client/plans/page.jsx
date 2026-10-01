@@ -554,7 +554,7 @@ export default function ClientPlansPage() {
         order_id: razorpay_order_id,
         amount: (amount_paise || amount * 100).toString(),
         currency: "INR",
-        name: "UWOConnect",
+        name: "UWO Connect",
         description: `Upgrade to ${selectedPlanForUpgrade.name}`,
         handler: async function (response) {
           try {
@@ -911,7 +911,7 @@ export default function ClientPlansPage() {
                         Test Mode
                       </span>
                     </h3>
-                    <p className="text-[11px] text-slate-300 font-medium">UWOConnect Subscription Payment</p>
+                    <p className="text-[11px] text-slate-300 font-medium">UWO Connect Subscription Payment</p>
                   </div>
                 </div>
                 <button

@@ -1306,6 +1306,9 @@ export default function AdminWhiteLabelPage() {
                       <img
                         src={selectedAgency.white_label_logo || selectedAgency.company_logo_url || '/download (3).gif'}
                         alt="Logo"
+                        width={48}
+                        height={48}
+                        style={{ width: '100%', height: '100%', maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
                         className="w-full h-full object-contain rounded-xl"
                       />
                     </div>

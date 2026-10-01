@@ -1394,7 +1394,7 @@ export default function CatalogPage() {
                         <Zap size={14} className="text-emerald-600" /> WhatsApp Commerce & Direct Link Integration
                       </h4>
                       <p className="text-[11px] text-emerald-800 leading-relaxed">
-                        When users interact on WhatsApp or AI agents recommend this product, UWOConnect attaches this link & CTA button automatically.
+                        When users interact on WhatsApp or AI agents recommend this product, UWO Connect attaches this link & CTA button automatically.
                       </p>
                     </div>
 

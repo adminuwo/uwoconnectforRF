@@ -7,14 +7,14 @@ import { API_BASE_URL } from '@/config/apiConfig';
 const DEFAULT_BRAND = {
   is_whitelabel: false,
   client_id: null,
-  brand_name: 'UWO Connect™',
+  brand_name: 'UWO Connect',
   tagline: 'Multi-channel automation platform',
   logo_url: '/download (3).gif',
   favicon_url: '/download (3).gif',
   primary_color: '#059669',
   accent_color: '#10B981',
   support_email: 'support@uwoconnect.com',
-  copyright_text: '© UWO Connect™ Automation. All rights reserved.',
+  copyright_text: '© UWO Connect Automation. All rights reserved.',
   custom_domain: ''
 };
 
@@ -44,10 +44,10 @@ export function BrandProvider({ children }) {
 
     // 2. Update Page Title if custom brand name present
     if (brandData.is_whitelabel && brandData.brand_name) {
-      if (document.title.includes('UwoConnect')) {
-        document.title = document.title.replace('UwoConnect', brandData.brand_name);
-      } else if (document.title.includes('UWO Connect™')) {
-        document.title = document.title.replace('UWO Connect™', brandData.brand_name);
+      if (document.title.includes('UWO Connect')) {
+        document.title = document.title.replace(/UWO Connect/g, brandData.brand_name);
+      } else if (document.title.includes('UwoConnect')) {
+        document.title = document.title.replace(/UwoConnect/g, brandData.brand_name);
       }
     }
 

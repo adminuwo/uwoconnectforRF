@@ -9,11 +9,11 @@ import {
 } from '@/lib/seo';
 
 export const metadata = buildPageMetadata({
-  title: 'Cancellation & Refund Policy — UWO Connect™',
+  title: 'Cancellation & Refund Policy — UWO Connect',
   description:
-    'Read UWO Connect™’s 7-day money-back guarantee, subscription cancellation terms, and refund eligibility guidelines for all workspace plans.',
+    'Read UWO Connect’s 7-day money-back guarantee, subscription cancellation terms, and refund eligibility guidelines for all workspace plans.',
   path: '/refund-policy',
-  keywords: ['Refund Policy', 'money back guarantee', 'subscription cancellation', 'UWO Connect™ refund'],
+  keywords: ['Refund Policy', 'money back guarantee', 'subscription cancellation', 'UWO Connect refund'],
 });
 
 export default function RefundPolicyPage() {
@@ -26,8 +26,8 @@ export default function RefundPolicyPage() {
     '@type': 'WebPage',
     '@id': `${getBaseUrl()}/refund-policy#webpage`,
     url: `${getBaseUrl()}/refund-policy`,
-    name: 'Cancellation & Refund Policy — UWO Connect™',
-    description: '7-day money-back guarantee and subscription refund terms for UWO Connect™ customers.',
+    name: 'Cancellation & Refund Policy — UWO Connect',
+    description: '7-day money-back guarantee and subscription refund terms for UWO Connect customers.',
     publisher: {
       '@type': 'Organization',
       name: SITE_CONFIG.name,
