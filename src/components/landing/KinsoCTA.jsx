@@ -35,7 +35,7 @@ export default function KinsoCTA({ isDark }) {
           </h2>
 
           <p className={`text-sm sm:text-base md:text-lg max-w-2xl mx-auto ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-            Join enterprise support teams, revenue leaders, and fast-growing businesses scaling with UWO Connect today.
+            Join enterprise support teams, revenue leaders, and fast-growing businesses scaling with Uwo Connect today.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 pt-2 sm:pt-4 max-w-md sm:max-w-none mx-auto w-full">

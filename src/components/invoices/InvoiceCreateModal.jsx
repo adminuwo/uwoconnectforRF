@@ -76,8 +76,8 @@ export default function InvoiceCreateModal({ isOpen, onClose, onSuccess }) {
   useEffect(() => {
     const loadInitialData = async () => {
       setFetchingData(true);
-      const token = localStorage.getItem('token');
-      const headers = { Authorization: `Bearer ${token}` };
+      const token = typeof window !== 'undefined' ? (localStorage.getItem('uwo_token') || localStorage.getItem('token')) : null;
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
       try {
         // 1. Fetch Client Profile (Company Branding)
@@ -228,12 +228,16 @@ export default function InvoiceCreateModal({ isOpen, onClose, onSuccess }) {
     let subtotal = 0;
     let taxTotal = 0;
     items.forEach(item => {
-      const base = (Number(item.quantity) || 0) * (Number(item.unit_price) || 0);
+      const qty = Number(item.quantity) || 0;
+      const uPrice = Number(item.unit_price) || 0;
+      const base = qty * uPrice;
       const tax = base * ((Number(item.tax_rate) || 0) / 100);
       subtotal += base;
       taxTotal += tax;
     });
-    const total = subtotal + taxTotal;
+    subtotal = Math.round(subtotal * 100) / 100;
+    taxTotal = Math.round(taxTotal * 100) / 100;
+    const total = Math.round((subtotal + taxTotal) * 100) / 100;
     return { subtotal, taxTotal, total };
   };
 
@@ -256,24 +260,33 @@ export default function InvoiceCreateModal({ isOpen, onClose, onSuccess }) {
     }
 
     setLoading(true);
-    const token = localStorage.getItem('token');
+    const token = typeof window !== 'undefined' ? (localStorage.getItem('uwo_token') || localStorage.getItem('token')) : null;
+    if (!token) {
+      showToast('Authentication error: No session token found. Please re-login.', 'error');
+      setLoading(false);
+      return;
+    }
 
     const formattedItems = items.map(i => {
-      const base = (Number(i.quantity) || 1) * (Number(i.unit_price) || 0);
-      const gst = base * ((Number(i.tax_rate) || 0) / 100);
+      const qty = Number(i.quantity) || 1;
+      const uPrice = Math.round((Number(i.unit_price) || 0) * 100) / 100;
+      const base = Math.round(qty * uPrice * 100) / 100;
+      const gst = Math.round((base * ((Number(i.tax_rate) || 0) / 100)) * 100) / 100;
+      const itemTot = Math.round((base + gst) * 100) / 100;
       return {
+        item_name: i.name,
         name: i.name,
         sku: i.sku || '',
-        quantity: Number(i.quantity) || 1,
-        unit_price: Number(i.unit_price) || 0,
+        quantity: qty,
+        unit_price: uPrice,
         tax_rate: Number(i.tax_rate) || 0,
         tax: gst,
-        total: base + gst
+        total: itemTot
       };
     });
 
     const payload = {
-      order: selectedOrderId || null,
+      order: selectedOrderId ? selectedOrderId : null,
       order_reference: orderReference || null,
       transaction_id: transactionId || null,
       currency,
@@ -282,11 +295,11 @@ export default function InvoiceCreateModal({ isOpen, onClose, onSuccess }) {
       payment_method: paymentMethod,
       invoice_date: new Date(invoiceDate).toISOString(),
       due_date: new Date(dueDate).toISOString(),
-      subtotal,
-      tax: taxTotal,
-      total,
-      amount_paid: paymentStatus === 'PAID' ? total : 0,
-      balance_due: paymentStatus === 'PAID' ? 0 : total,
+      subtotal: Math.round(subtotal * 100) / 100,
+      tax: Math.round(taxTotal * 100) / 100,
+      total: Math.round(total * 100) / 100,
+      amount_paid: paymentStatus === 'PAID' ? Math.round(total * 100) / 100 : 0,
+      balance_due: paymentStatus === 'PAID' ? 0 : Math.round(total * 100) / 100,
       seller_details: {
         company_name: companyName,
         business_name: companyName,
@@ -315,10 +328,29 @@ export default function InvoiceCreateModal({ isOpen, onClose, onSuccess }) {
       if (onSuccess) onSuccess();
       onClose();
     } catch (err) {
-      console.error('Invoice creation error:', err.response?.data || err);
-      const errMsg = err.response?.data?.detail || 
-                     (typeof err.response?.data === 'object' ? JSON.stringify(err.response.data) : null) || 
-                     'Failed to create invoice';
+      const resData = err.response?.data;
+      let errMsg = 'Failed to create invoice';
+      if (resData) {
+        if (typeof resData === 'string') {
+          errMsg = resData;
+        } else if (resData.detail) {
+          errMsg = typeof resData.detail === 'string' ? resData.detail : JSON.stringify(resData.detail);
+        } else if (resData.error) {
+          errMsg = typeof resData.error === 'string' ? resData.error : JSON.stringify(resData.error);
+        } else if (resData.message) {
+          errMsg = resData.message;
+        } else if (typeof resData === 'object') {
+          const entries = Object.entries(resData);
+          if (entries.length > 0) {
+            errMsg = entries
+              .map(([k, v]) => `${k}: ${Array.isArray(v) ? v.join(', ') : (typeof v === 'object' ? JSON.stringify(v) : v)}`)
+              .join(' | ');
+          }
+        }
+      } else if (err.message) {
+        errMsg = err.message;
+      }
+      console.warn('Invoice creation error details:', errMsg, err);
       showToast(errMsg, 'error');
     } finally {
       setLoading(false);

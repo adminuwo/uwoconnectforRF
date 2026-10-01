@@ -226,7 +226,7 @@ export default function OutlookConfigModal({ isOpen, onClose, client, onSaved })
     setTeamsSuccess('');
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.post(`${apiUrl}/api/auth/outlook/teams/`, { action: 'create_meeting', subject: 'UWO Connect Client Meeting' }, {
+      const res = await axios.post(`${apiUrl}/api/auth/outlook/teams/`, { action: 'create_meeting', subject: 'Uwo Connect Client Meeting' }, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.data?.join_url) {

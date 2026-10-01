@@ -62,7 +62,7 @@ export default function WhyEFV({ isDark = true }) {
               <div className={`w-12 h-12 rounded-full flex items-center justify-center ${isDark ? 'bg-[#10B981]/20 text-[#20C997]' : 'bg-[#10B981]/20 text-[#059669]'}`}>
                 <CheckCircle2 size={24} />
               </div>
-              <h3 className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>UWO Connect changes that.</h3>
+              <h3 className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>UWO Connect™ changes that.</h3>
             </div>
             
             <p className={`text-xl leading-relaxed font-medium ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>

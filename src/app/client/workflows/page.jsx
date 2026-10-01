@@ -310,13 +310,13 @@ const ClientWorkflowsPage = () => {
         {/* FILTER BAR SECTION */}
         <div className="bg-white rounded-2xl border border-slate-200/60 p-4 sm:p-5 mb-8 shadow-sm space-y-5">
           {/* Tabs - Modern Segmented Tab Bar */}
-          <div className="flex flex-row gap-1.5 bg-slate-50 p-1.5 rounded-xl border border-slate-100 max-w-full overflow-x-auto whitespace-nowrap scrollbar-none">
+          <div className="flex flex-row gap-1.5 bg-slate-50 dark:bg-slate-950/70 p-1.5 rounded-xl border border-slate-100 dark:border-slate-800 max-w-full overflow-x-auto whitespace-nowrap scrollbar-none">
             {[
               { id: 'ALL', label: 'All Workflows', icon: <Layers size={14} /> },
               { id: 'WHATSAPP', label: 'WhatsApp', icon: <MessageCircle size={14} className="text-emerald-500" /> },
               { id: 'INSTAGRAM', label: 'Instagram', icon: <InstagramIcon size={14} className="text-purple-500" /> },
               { id: 'FACEBOOK', label: 'Facebook', icon: <FacebookIcon size={14} className="text-blue-500" /> },
-              { id: 'SHARED', label: 'Shared', icon: <Share2 size={14} className="text-slate-500" /> }
+              { id: 'SHARED', label: 'Shared', icon: <Share2 size={14} className="text-slate-500 dark:text-slate-400" /> }
             ].map(tab => {
               const isSelected = selectedTab === tab.id;
               return (
@@ -326,8 +326,8 @@ const ClientWorkflowsPage = () => {
                   className={cn(
                     "px-4 py-2.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap shrink-0",
                     isSelected 
-                      ? "bg-white text-slate-800 shadow-sm border border-slate-200/50" 
-                      : "text-slate-400 hover:bg-white/40 hover:text-slate-700"
+                      ? "workflow-tab-active bg-white text-slate-800 shadow-sm border border-slate-200/50 dark:bg-slate-800 dark:text-white dark:border-slate-700 dark:shadow-md" 
+                      : "text-slate-400 hover:bg-white/40 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-800/60 dark:hover:text-slate-200"
                   )}
                 >
                   {tab.icon}
@@ -337,10 +337,10 @@ const ClientWorkflowsPage = () => {
             })}
           </div>
 
-          {/* Search and Dropdowns */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          {/* Search and Status Filter */}
+          <div className="flex flex-col sm:flex-row gap-3">
             {/* Search Box */}
-            <div className="relative md:col-span-2">
+            <div className="relative flex-1">
               <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400 pointer-events-none">
                 <Search size={15} />
               </span>
@@ -348,56 +348,23 @@ const ClientWorkflowsPage = () => {
                 type="text"
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
-                placeholder="Search workflows by name or category..."
+                placeholder="Search workflows by name..."
                 className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-3 text-xs font-semibold text-slate-700 outline-none focus:border-emerald-600 focus:bg-white focus:ring-2 focus:ring-emerald-500/10 transition-all placeholder:text-slate-400 shadow-inner"
               />
             </div>
 
-            {/* Filter Group */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 md:col-span-2 gap-2.5">
-              {/* Status Selector */}
-              <div className="relative">
-                <select
-                  value={statusFilter}
-                  onChange={e => setStatusFilter(e.target.value)}
-                  className="w-full appearance-none bg-slate-50 hover:bg-slate-100/55 border border-slate-200 rounded-xl pl-3.5 pr-8 py-3 text-[10px] font-bold uppercase tracking-wider text-slate-500 outline-none focus:border-emerald-600 transition-all cursor-pointer"
-                >
-                  <option value="ALL">Status: All</option>
-                  <option value="ACTIVE">Active Only</option>
-                  <option value="PAUSED">Paused Only</option>
-                </select>
-                <ChevronDown size={12} className="absolute right-3 top-3.5 text-slate-400 pointer-events-none" />
-              </div>
-
-              {/* Category Selector */}
-              <div className="relative">
-                <select
-                  value={categoryFilter}
-                  onChange={e => setCategoryFilter(e.target.value)}
-                  className="w-full appearance-none bg-slate-50 hover:bg-slate-100/55 border border-slate-200 rounded-xl pl-3.5 pr-8 py-3 text-[10px] font-bold uppercase tracking-wider text-slate-500 outline-none focus:border-emerald-600 transition-all cursor-pointer"
-                >
-                  <option value="ALL">Category: All</option>
-                  <option value="General">General</option>
-                  <option value="Support">Support</option>
-                  <option value="Sales">Sales</option>
-                  <option value="Marketing">Marketing</option>
-                </select>
-                <ChevronDown size={12} className="absolute right-3 top-3.5 text-slate-400 pointer-events-none" />
-              </div>
-
-              {/* Created Date Selector */}
-              <div className="relative">
-                <select
-                  value={dateFilter}
-                  onChange={e => setDateFilter(e.target.value)}
-                  className="w-full appearance-none bg-slate-50 hover:bg-slate-100/55 border border-slate-200 rounded-xl pl-3.5 pr-8 py-3 text-[10px] font-bold uppercase tracking-wider text-slate-500 outline-none focus:border-emerald-600 transition-all cursor-pointer"
-                >
-                  <option value="ALL">Date: All</option>
-                  <option value="7DAYS">Last 7 Days</option>
-                  <option value="30DAYS">Last 30 Days</option>
-                </select>
-                <ChevronDown size={12} className="absolute right-3 top-3.5 text-slate-400 pointer-events-none" />
-              </div>
+            {/* Status Selector */}
+            <div className="relative w-full sm:w-48">
+              <select
+                value={statusFilter}
+                onChange={e => setStatusFilter(e.target.value)}
+                className="w-full appearance-none bg-slate-50 hover:bg-slate-100/55 border border-slate-200 rounded-xl pl-3.5 pr-8 py-3 text-[10px] font-bold uppercase tracking-wider text-slate-500 outline-none focus:border-emerald-600 transition-all cursor-pointer"
+              >
+                <option value="ALL">Status: All</option>
+                <option value="ACTIVE">Active Only</option>
+                <option value="PAUSED">Paused Only</option>
+              </select>
+              <ChevronDown size={12} className="absolute right-3 top-3.5 text-slate-400 pointer-events-none" />
             </div>
           </div>
         </div>
@@ -702,8 +669,8 @@ const ClientWorkflowsPage = () => {
                               className={cn(
                                 "p-3 rounded-xl border text-xs font-bold text-left flex flex-row sm:flex-col items-center sm:items-start justify-between sm:h-20 gap-3 sm:gap-0 transition-all cursor-pointer",
                                 isChecked 
-                                  ? "bg-slate-50 border-slate-900 text-slate-900" 
-                                  : "bg-white border-slate-150 text-slate-400 hover:border-slate-200"
+                                  ? "bg-slate-50 border-emerald-600 text-slate-900 dark:bg-emerald-950/40 dark:border-emerald-500 dark:text-emerald-300" 
+                                  : "bg-white border-slate-150 text-slate-400 hover:border-slate-200 dark:bg-slate-800/80 dark:border-slate-700 dark:text-slate-300"
                               )}
                             >
                               <span className="text-base">{channel.badge}</span>

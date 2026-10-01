@@ -46,7 +46,7 @@ export default function PrivacyModal({ isOpen, onClose }) {
 
         <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3 text-left">
           <p className="text-xs text-slate-600">
-            Clicking the button below will open the official UwoConnect Privacy Policy page in a secure browser tab.
+            Clicking the button below will open the official UWO Connect™ Privacy Policy page in a secure browser tab.
           </p>
           <a
             href="https://uwo24.com/privacy-policy"

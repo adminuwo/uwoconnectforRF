@@ -125,7 +125,7 @@ export default function AIAssistant() {
             AI That Understands Your Business.
           </h2>
           <p className="text-[#8E99A8] text-lg font-medium mb-4">
-            Unlike traditional automation platforms, UWO Connect uses AI throughout the customer journey. Your AI can:
+            Unlike traditional automation platforms, UwoConnect uses AI throughout the customer journey. Your AI can:
           </p>
           <ul className="grid grid-cols-2 gap-3 mb-8 select-none">
             {[

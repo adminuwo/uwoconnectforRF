@@ -87,7 +87,7 @@ const ClientSupportPage = () => {
                 Support Help Desk
               </h1>
               <p className="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-widest mt-0.5 truncate">
-                Talk to human admins of UwoConnect
+                Talk to human admins of UWO Connect™
               </p>
             </div>
           </div>
@@ -133,7 +133,7 @@ const ClientSupportPage = () => {
                         </div>
                         <div className="mt-1 flex items-center gap-1.5 px-1.5">
                           <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">
-                            {isAdmin ? 'UwoConnect Support' : 'You'} • {msg.created_at ? new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Now'}
+                            {isAdmin ? 'UWO Connect™ Support' : 'You'} • {msg.created_at ? new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Now'}
                           </span>
                           {!isAdmin && <CheckCheck size={11} className="text-emerald-500" />}
                         </div>

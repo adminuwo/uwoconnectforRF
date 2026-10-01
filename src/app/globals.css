@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @source "../**/*.{js,ts,jsx,tsx}";
+@variant dark (&:where(.dark, .dark *));
 
 @theme {
   --color-bg-base: var(--background);
@@ -307,6 +308,455 @@ svg * {
 .dark.landing-page-root footer li a:hover,
 .dark .landing-page-root footer li a:hover {
   color: #34d399 !important;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   GLOBAL DASHBOARD DARK MODE SYSTEM (/client/* & /admin/*)
+   ══════════════════════════════════════════════════════════════════════════════ */
+.dark {
+  color-scheme: dark;
+}
+
+/* Base text color inside dashboard */
+.dark .dashboard-main,
+.dark .dashboard-font-times {
+  color: #f1f5f9;
+}
+
+/* Dashboard Cards, Panels, Drawers, Surfaces */
+.dark .dashboard-main div.bg-white,
+.dark .dashboard-main aside.bg-white,
+.dark .dashboard-main section.bg-white,
+.dark .dashboard-main article.bg-white,
+.dark .dashboard-main [class*="bg-white"]:not(button):not(a):not(span):not(img),
+.dark div[role="dialog"] [class*="bg-white"]:not(button):not(a):not(span):not(img) {
+  background-color: #0f172a !important; /* slate-900 */
+  border-color: #334155 !important;      /* slate-700 */
+  color: #f1f5f9 !important;
+}
+
+/* Dashboard segmented tabs & white buttons in dark mode */
+.dark .dashboard-main button.bg-white,
+.dark .dashboard-main button[class*="bg-white"],
+.dark div[role="dialog"] button.bg-white,
+.dark div[role="dialog"] button[class*="bg-white"],
+.dark .workflow-tab-active,
+.dark .dashboard-main .workflow-tab-active,
+.dark .dashboard-main button.workflow-tab-active {
+  background-color: #334155 !important; /* slate-700 elevated pill */
+  border-color: #475569 !important;      /* slate-600 */
+  color: #f8fafc !important;            /* crisp white */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4) !important;
+}
+
+.dark .dashboard-main button.bg-white:hover,
+.dark .dashboard-main button[class*="bg-white"]:hover,
+.dark .workflow-tab-active:hover {
+  background-color: #3b4c63 !important;
+  color: #ffffff !important;
+}
+
+.dark .workflow-tab-active svg,
+.dark .dashboard-main .workflow-tab-active svg {
+  color: #f8fafc !important;
+}
+
+/* Secondary Backgrounds (slate-50, gray-50 and opacity variants like bg-slate-50/80) */
+.dark .dashboard-main .bg-slate-50,
+.dark .dashboard-main [class*="bg-slate-50"],
+.dark .dashboard-main .bg-gray-50,
+.dark .dashboard-main [class*="bg-gray-50"],
+.dark div[role="dialog"] .bg-slate-50,
+.dark div[role="dialog"] [class*="bg-slate-50"],
+.dark div[role="dialog"] .bg-gray-50,
+.dark div[role="dialog"] [class*="bg-gray-50"] {
+  background-color: #1e293b !important; /* slate-800 */
+  border-color: #334155 !important;
+  color: #f1f5f9 !important;
+}
+
+/* Tertiary & Neutral Backgrounds (slate-100, gray-100 and opacity variants) */
+.dark .dashboard-main .bg-slate-100,
+.dark .dashboard-main [class*="bg-slate-100"],
+.dark .dashboard-main .bg-gray-100,
+.dark .dashboard-main [class*="bg-gray-100"],
+.dark div[role="dialog"] .bg-slate-100,
+.dark div[role="dialog"] [class*="bg-slate-100"],
+.dark div[role="dialog"] .bg-gray-100,
+.dark div[role="dialog"] [class*="bg-gray-100"] {
+  background-color: #1e293b !important;
+  border-color: #475569 !important;
+  color: #f1f5f9 !important;
+}
+
+/* Hover surfaces inside dark dashboard */
+.dark .dashboard-main .hover\:bg-slate-50:hover,
+.dark .dashboard-main [class*="hover:bg-slate-50"]:hover,
+.dark .dashboard-main .hover\:bg-gray-50:hover,
+.dark div[role="dialog"] .hover\:bg-slate-50:hover {
+  background-color: #1e293b !important;
+}
+
+.dark .dashboard-main .hover\:bg-slate-100:hover,
+.dark .dashboard-main [class*="hover:bg-slate-100"]:hover,
+.dark .dashboard-main .hover\:bg-slate-200:hover,
+.dark .dashboard-main [class*="hover:bg-slate-200"]:hover,
+.dark .dashboard-main .hover\:bg-gray-100:hover {
+  background-color: #334155 !important;
+}
+
+/* Headings & Prominent Text */
+.dark .dashboard-main h1,
+.dark .dashboard-main h2,
+.dark .dashboard-main h3,
+.dark .dashboard-main h4,
+.dark .dashboard-main h5,
+.dark .dashboard-main h6,
+.dark .dashboard-main .text-slate-900,
+.dark .dashboard-main .text-slate-800,
+.dark .dashboard-main .text-gray-900,
+.dark .dashboard-main .text-gray-800,
+.dark div[role="dialog"] h1,
+.dark div[role="dialog"] h2,
+.dark div[role="dialog"] h3,
+.dark div[role="dialog"] .text-slate-900,
+.dark div[role="dialog"] .text-slate-800 {
+  color: #f8fafc !important;
+}
+
+/* Secondary & Body Text */
+.dark .dashboard-main p:not(.text-white):not([class*="text-emerald-"]):not([class*="text-red-"]):not([class*="text-amber-"]):not([class*="text-blue-"]),
+.dark .dashboard-main span.text-slate-600,
+.dark .dashboard-main span.text-slate-500,
+.dark .dashboard-main .text-slate-600,
+.dark .dashboard-main .text-slate-500,
+.dark .dashboard-main .text-gray-600,
+.dark .dashboard-main .text-gray-500,
+.dark div[role="dialog"] .text-slate-600,
+.dark div[role="dialog"] .text-slate-500 {
+  color: #cbd5e1 !important; /* high contrast bright readable slate-300 */
+}
+
+.dark .dashboard-main .text-slate-400,
+.dark .dashboard-main [class*="text-slate-400"],
+.dark div[role="dialog"] .text-slate-400 {
+  color: #94a3b8 !important; /* distinct clean slate-400 */
+}
+
+/* Colored Pills & Badges in Dark Mode */
+.dark .dashboard-main [class*="bg-emerald-50"],
+.dark .dashboard-main [class*="bg-green-50"] {
+  background-color: rgba(6, 78, 59, 0.45) !important;
+  border-color: rgba(5, 150, 105, 0.45) !important;
+  color: #34d399 !important;
+}
+
+.dark .dashboard-main [class*="bg-blue-50"] {
+  background-color: rgba(30, 58, 138, 0.45) !important;
+  border-color: rgba(37, 99, 235, 0.45) !important;
+  color: #60a5fa !important;
+}
+
+.dark .dashboard-main [class*="bg-pink-50"] {
+  background-color: rgba(131, 24, 67, 0.45) !important;
+  border-color: rgba(219, 39, 119, 0.45) !important;
+  color: #f472b6 !important;
+}
+
+.dark .dashboard-main [class*="bg-amber-50"],
+.dark .dashboard-main [class*="bg-yellow-50"] {
+  background-color: rgba(120, 53, 15, 0.45) !important;
+  border-color: rgba(217, 119, 6, 0.45) !important;
+  color: #fbbf24 !important;
+}
+
+.dark .dashboard-main [class*="bg-purple-50"] {
+  background-color: rgba(88, 28, 135, 0.45) !important;
+  border-color: rgba(147, 51, 234, 0.45) !important;
+  color: #c084fc !important;
+}
+
+.dark .dashboard-main [class*="bg-red-50"] {
+  background-color: rgba(127, 29, 29, 0.45) !important;
+  border-color: rgba(220, 38, 38, 0.45) !important;
+  color: #f87171 !important;
+}
+
+/* Borders & Dividers */
+.dark .dashboard-main .border-slate-100,
+.dark .dashboard-main .border-slate-200,
+.dark .dashboard-main .border-slate-300,
+.dark .dashboard-main .border-gray-100,
+.dark .dashboard-main .border-gray-200,
+.dark div[role="dialog"] .border-slate-100,
+.dark div[role="dialog"] .border-slate-200 {
+  border-color: #334155 !important;
+}
+
+.dark .dashboard-main .divide-slate-100 > * + *,
+.dark .dashboard-main .divide-slate-200 > * + *,
+.dark .dashboard-main .divide-gray-100 > * + *,
+.dark .dashboard-main .divide-gray-200 > * + *,
+.dark div[role="dialog"] .divide-slate-100 > * + *,
+.dark div[role="dialog"] .divide-slate-200 > * + * {
+  border-color: #334155 !important;
+}
+
+/* Form Inputs, Textareas, and Select Fields */
+.dark .dashboard-main input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="submit"]):not([type="button"]),
+.dark .dashboard-main textarea,
+.dark .dashboard-main select,
+.dark div[role="dialog"] input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="submit"]):not([type="button"]),
+.dark div[role="dialog"] textarea,
+.dark div[role="dialog"] select {
+  background-color: #1e293b !important;
+  border-color: #475569 !important;
+  color: #f8fafc !important;
+}
+
+.dark .dashboard-main input::placeholder,
+.dark .dashboard-main textarea::placeholder,
+.dark div[role="dialog"] input::placeholder,
+.dark div[role="dialog"] textarea::placeholder {
+  color: #64748b !important;
+}
+
+/* Tables & Grids */
+.dark .dashboard-main table {
+  border-color: #334155 !important;
+}
+
+.dark .dashboard-main table thead,
+.dark .dashboard-main table thead tr,
+.dark .dashboard-main table thead th {
+  background-color: #0b0f19 !important;
+  color: #94a3b8 !important;
+  border-color: #334155 !important;
+}
+
+.dark .dashboard-main table tbody tr {
+  border-color: #1e293b !important;
+  background-color: #0f172a !important;
+}
+
+.dark .dashboard-main table tbody tr:hover {
+  background-color: #1e293b !important;
+}
+
+.dark .dashboard-main table td {
+  color: #cbd5e1 !important;
+  border-color: #1e293b !important;
+}
+
+/* Modals & Dialog Drawers */
+.dark div[role="dialog"],
+.dark .modal-content,
+.dark [class*="Modal"] > div:not([class*="fixed"]),
+.dark div[class*="fixed"][class*="inset-0"] > div[class*="bg-white"],
+.dark div[class*="fixed"][class*="inset-0"] div[class*="bg-white"]:not(button):not(a):not(span):not(img) {
+  background-color: #0f172a !important;
+  border-color: #334155 !important;
+  color: #f8fafc !important;
+}
+
+.dark div[class*="fixed"][class*="inset-0"] [class*="bg-slate-50"],
+.dark div[class*="fixed"][class*="inset-0"] [class*="bg-gray-50"] {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+  color: #f1f5f9 !important;
+}
+
+.dark div[class*="fixed"][class*="inset-0"] .border-slate-100,
+.dark div[class*="fixed"][class*="inset-0"] .border-slate-200,
+.dark div[class*="fixed"][class*="inset-0"] [class*="border-slate-200"] {
+  border-color: #334155 !important;
+}
+
+/* Colored Status Badges & Pills in Dark Mode */
+.dark .dashboard-main .bg-emerald-50,
+.dark .dashboard-main .bg-emerald-100 {
+  background-color: rgba(6, 78, 59, 0.45) !important;
+  border-color: rgba(16, 185, 129, 0.3) !important;
+  color: #6ee7b7 !important;
+}
+
+.dark .dashboard-main .bg-amber-50,
+.dark .dashboard-main .bg-amber-100 {
+  background-color: rgba(120, 53, 15, 0.45) !important;
+  border-color: rgba(245, 158, 11, 0.3) !important;
+  color: #fcd34d !important;
+}
+
+.dark .dashboard-main .bg-blue-50,
+.dark .dashboard-main .bg-blue-100 {
+  background-color: rgba(30, 58, 138, 0.45) !important;
+  border-color: rgba(59, 130, 246, 0.3) !important;
+  color: #93c5fd !important;
+}
+
+.dark .dashboard-main .bg-red-50,
+.dark .dashboard-main .bg-red-100 {
+  background-color: rgba(127, 29, 29, 0.45) !important;
+  border-color: rgba(239, 68, 68, 0.3) !important;
+  color: #fca5a5 !important;
+}
+
+.dark .dashboard-main .bg-rose-50,
+.dark .dashboard-main .bg-rose-100,
+.dark .dashboard-main [class*="bg-rose-50"],
+.dark .dashboard-main [class*="bg-rose-100"] {
+  background-color: rgba(76, 5, 25, 0.65) !important;
+  border-color: rgba(244, 63, 94, 0.55) !important;
+  color: #fecdd3 !important;
+}
+
+.dark .dashboard-main [class*="text-rose-700"],
+.dark .dashboard-main [class*="text-rose-600"] {
+  color: #fecdd3 !important;
+}
+
+.dark .dashboard-main svg.text-rose-600,
+.dark .dashboard-main svg.text-rose-500 {
+  color: #fb7185 !important;
+}
+
+.dark .dashboard-main .bg-purple-50,
+.dark .dashboard-main .bg-purple-100 {
+  background-color: rgba(88, 28, 135, 0.45) !important;
+  border-color: rgba(168, 85, 247, 0.3) !important;
+  color: #d8b4fe !important;
+}
+
+/* Preserve solid colorful primary buttons */
+.dark .dashboard-main button.bg-emerald-600,
+.dark .dashboard-main button.bg-emerald-500,
+.dark .dashboard-main .bg-emerald-600,
+.dark .dashboard-main a.bg-emerald-600,
+.dark .dashboard-main .bg-\[\#059669\],
+.dark .dashboard-main button.bg-\[\#059669\] {
+  background-color: #059669 !important;
+  color: #ffffff !important;
+  border-color: #059669 !important;
+}
+
+.dark .dashboard-main button.bg-blue-600,
+.dark .dashboard-main button.bg-blue-500,
+.dark .dashboard-main .bg-blue-600,
+.dark .dashboard-main button.bg-red-600,
+.dark .dashboard-main button.bg-red-500,
+.dark .dashboard-main .bg-red-600 {
+  color: #ffffff !important;
+}
+
+/* Glass panel & Dashboard cards in dark mode */
+.dark .glass-panel,
+.dark.glass-panel,
+.dark .dashboard-main .glass-panel {
+  background: rgba(15, 23, 42, 0.92) !important;
+  backdrop-filter: blur(20px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+  border: 1px solid rgba(51, 65, 85, 0.8) !important;
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.6) !important;
+  color: #f1f5f9 !important;
+}
+
+.dark .glass-panel:hover,
+.dark.glass-panel:hover,
+.dark .dashboard-main .glass-panel:hover {
+  background: rgba(30, 41, 59, 0.95) !important;
+  border-color: rgba(16, 185, 129, 0.4) !important;
+  box-shadow: 0 14px 40px -10px rgba(16, 185, 129, 0.2) !important;
+}
+
+/* Teal badges */
+.dark .dashboard-main .bg-teal-50,
+.dark .dashboard-main .bg-teal-100 {
+  background-color: rgba(19, 78, 74, 0.45) !important;
+  border-color: rgba(20, 184, 166, 0.3) !important;
+  color: #2dd4bf !important;
+}
+
+/* Dashboard green accents & metrics contrast */
+.dark .dashboard-main .text-emerald-700,
+.dark .dashboard-main .text-emerald-800,
+.dark .dashboard-main .text-emerald-900 {
+  color: #34d399 !important; /* emerald-400 */
+}
+
+/* SVG Chart lines in dark mode */
+.dark .dashboard-main svg line[stroke="#F8FAFC"],
+.dark .dashboard-main svg line[stroke="#F1F5F9"] {
+  stroke: #1e293b !important;
+}
+.dark .dashboard-main svg line[stroke="#E2E8F0"] {
+  stroke: #334155 !important;
+}
+
+/* System Live & light gradient cards */
+.dark .dashboard-main [class*="from-\[\#f0fdf4\]"],
+.dark .dashboard-main [class*="from-emerald-50"] {
+  background-image: linear-gradient(135deg, rgba(6, 78, 59, 0.5), #0f172a) !important;
+  border-color: rgba(6, 95, 70, 0.8) !important;
+  color: #f1f5f9 !important;
+}
+
+/* Settings Page Header Banner & Dashboard Top Gradients in Dark Mode */
+.dark .settings-header-banner,
+.dark .dashboard-main .settings-header-banner {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, rgba(6, 78, 59, 0.25) 100%) !important;
+  border-bottom: 1px solid #334155 !important;
+}
+
+.dark .settings-header-banner h1 {
+  color: #f8fafc !important;
+}
+
+.dark .settings-header-banner p {
+  color: #94a3b8 !important;
+}
+
+/* Eliminate white/silver metallic gradient washes across dark dashboard and modals */
+.dark .dashboard-main [class*="via-white"],
+.dark div[role="dialog"] [class*="via-white"] {
+  background-image: linear-gradient(to right, #0f172a, #1e293b, #0f172a) !important;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   REACT FLOW & WORKFLOW BUILDER DARK MODE
+   ══════════════════════════════════════════════════════════════════════════════ */
+.dark .react-flow {
+  background-color: #090d16 !important;
+}
+
+.dark .react-flow__controls {
+  background-color: #0f172a !important;
+  border-color: #334155 !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6) !important;
+}
+
+.dark .react-flow__controls-button {
+  background-color: #0f172a !important;
+  border-bottom-color: #334155 !important;
+  fill: #cbd5e1 !important;
+  color: #cbd5e1 !important;
+}
+
+.dark .react-flow__controls-button:hover {
+  background-color: #1e293b !important;
+  fill: #ffffff !important;
+}
+
+.dark .react-flow__controls-button svg {
+  fill: #cbd5e1 !important;
+}
+
+.dark .react-flow__attribution {
+  background: rgba(15, 23, 42, 0.8) !important;
+  color: #64748b !important;
+}
+
+.dark .react-flow__attribution a {
+  color: #94a3b8 !important;
 }
 
 /* Premium Glass Cards in Dark Mode */
@@ -791,6 +1241,93 @@ svg * {
   color: #ef4444;
 }
 
+/* ── Tour Audio Narration Bar ── */
+.tour-audio-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 12px 20px 0 20px;
+  padding: 8px 12px;
+  background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  border-radius: 14px;
+  box-shadow: 0 1px 3px rgba(16, 185, 129, 0.08);
+}
+
+.tour-audio-eq {
+  display: flex;
+  align-items: flex-end;
+  gap: 2.5px;
+  height: 14px;
+}
+
+.tour-audio-eq .eq-bar {
+  width: 3px;
+  background: #10b981;
+  border-radius: 99px;
+  height: 4px;
+  transition: height 0.15s ease;
+}
+
+.tour-audio-eq.tour-audio-eq-active .eq-bar-1 {
+  animation: eq-pulse 0.7s infinite alternate ease-in-out;
+}
+.tour-audio-eq.tour-audio-eq-active .eq-bar-2 {
+  animation: eq-pulse 0.9s infinite alternate 0.15s ease-in-out;
+}
+.tour-audio-eq.tour-audio-eq-active .eq-bar-3 {
+  animation: eq-pulse 0.6s infinite alternate 0.3s ease-in-out;
+}
+.tour-audio-eq.tour-audio-eq-active .eq-bar-4 {
+  animation: eq-pulse 0.8s infinite alternate 0.2s ease-in-out;
+}
+
+@keyframes eq-pulse {
+  0% { height: 3px; }
+  50% { height: 14px; }
+  100% { height: 6px; }
+}
+
+.tour-audio-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 7px;
+  background: #ffffff;
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  border-radius: 8px;
+  color: #065f46;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.tour-audio-btn:hover {
+  background: #ecfdf5;
+  border-color: #059669;
+  color: #047857;
+  transform: scale(1.03);
+}
+
+.tour-audio-btn:active {
+  transform: scale(0.97);
+}
+
+.tour-audio-btn-muted {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  color: #64748b;
+}
+
+.tour-audio-lang-btn {
+  padding: 3px 7px;
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  font-weight: 800;
+}
+
 /* ── Body ── */
 .tour-tooltip-body {
   padding: 14px 20px 12px 20px;
@@ -1224,4 +1761,5 @@ svg * {
   animation: badgeShimmer 4s linear infinite;
 }
 
-
+
+

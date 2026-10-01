@@ -31,7 +31,7 @@ export default function KinsoNavbar({ isDark, setIsDark }) {
           <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl overflow-hidden shadow-md shadow-[#00AB56]/20 group-hover:scale-105 transition-transform duration-300 flex items-center justify-center bg-white p-0.5 border border-[#00AB56]/20 shrink-0">
             <img
               src="/download (3).gif"
-              alt="UWO Connect Logo"
+              alt="Uwo Connect Logo"
               className="w-full h-full object-cover rounded-lg"
               width={40}
               height={40}
@@ -39,7 +39,7 @@ export default function KinsoNavbar({ isDark, setIsDark }) {
           </div>
           <div className="flex flex-col">
             <span className="font-bold text-base sm:text-lg tracking-tight leading-none">
-              UWO <span className="text-[#00AB56]">Connect</span>
+              Uwo <span className="text-[#00AB56]">Connect</span>
             </span>
             <span className="text-[9px] sm:text-[10px] tracking-widest uppercase text-gray-400 font-semibold mt-0.5">
               AI Workspace

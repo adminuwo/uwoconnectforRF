@@ -6,7 +6,7 @@ import {
   X, Search, BookOpen, CheckCircle, Circle, ChevronRight, ChevronDown,
   Copy, Check, Play, FileText, AlertTriangle, Lightbulb, Code2, Layers,
   Bookmark, ArrowLeft, ArrowRight, Printer, Share2, Rocket, HelpCircle,
-  ExternalLink, Sparkles, Clock, Compass
+  ExternalLink, Sparkles, Clock, Compass, Volume2, VolumeX, Square
 } from 'lucide-react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
@@ -171,7 +171,16 @@ const LearningCenterModal = ({ guideSlug, isOpen, onClose }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [completedStepIds, setCompletedStepIds] = useState([]);
   const [bookmarkedSections, setBookmarkedSections] = useState([]);
+  const [isReadingChapter, setIsReadingChapter] = useState(false);
   const contentRef = useRef(null);
+
+  // Audio speech synthesis cleanup on section change or close
+  useEffect(() => {
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      setIsReadingChapter(false);
+    }
+  }, [activeSectionId, isOpen]);
 
   useEffect(() => {
     if (!isOpen || !guideSlug) return;
@@ -270,6 +279,33 @@ const LearningCenterModal = ({ guideSlug, isOpen, onClose }) => {
     } catch (err) {
       console.error('Error saving bookmark:', err);
     }
+  };
+
+  // Toggle audio narration for current chapter
+  const handleToggleReadChapter = () => {
+    if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
+
+    if (isReadingChapter) {
+      window.speechSynthesis.cancel();
+      setIsReadingChapter(false);
+      return;
+    }
+
+    if (!currentSection) return;
+
+    window.speechSynthesis.cancel();
+
+    const stepsText = currentSection.steps?.map((s, i) => `Step ${i + 1}: ${s.title || ''}. ${s.description || ''}`).join('. ') || '';
+    const fullText = `${currentSection.title}. ${stepsText}`;
+
+    const utterance = new SpeechSynthesisUtterance(fullText);
+    utterance.rate = 0.96;
+    utterance.pitch = 1.0;
+    utterance.onend = () => setIsReadingChapter(false);
+    utterance.onerror = () => setIsReadingChapter(false);
+
+    setIsReadingChapter(true);
+    window.speechSynthesis.speak(utterance);
   };
 
   if (!isOpen) return null;
@@ -452,16 +488,42 @@ const LearningCenterModal = ({ guideSlug, isOpen, onClose }) => {
                         </h1>
                       </div>
 
-                      <button
-                        onClick={() => handleToggleBookmark(currentSection.id)}
-                        className={`p-2.5 rounded-xl border transition-all cursor-pointer ${bookmarkedSections.includes(currentSection.id)
-                            ? 'bg-amber-50 border-amber-200 text-amber-600'
-                            : 'bg-slate-50 border-slate-200 text-slate-400 hover:text-slate-700'
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={handleToggleReadChapter}
+                          className={`px-3 py-2 rounded-xl border text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                            isReadingChapter
+                              ? 'bg-emerald-600 border-emerald-600 text-white shadow-sm shadow-emerald-500/20'
+                              : 'bg-emerald-50/80 border-emerald-200/80 text-emerald-800 hover:bg-emerald-100'
                           }`}
-                        title="Bookmark Chapter"
-                      >
-                        <Bookmark size={16} className={bookmarkedSections.includes(currentSection.id) ? 'fill-amber-500' : ''} />
-                      </button>
+                          title={isReadingChapter ? "Stop Audio Narration" : "Listen to this Tutorial Chapter"}
+                        >
+                          {isReadingChapter ? (
+                            <>
+                              <Square size={13} className="fill-current" />
+                              <span>Stop Audio</span>
+                            </>
+                          ) : (
+                            <>
+                              <Volume2 size={14} className="text-emerald-700" />
+                              <span>Listen Guide</span>
+                            </>
+                          )}
+                        </button>
+
+                        <button
+                          onClick={() => handleToggleBookmark(currentSection.id)}
+                          className={`p-2.5 rounded-xl border transition-all cursor-pointer ${
+                            bookmarkedSections.includes(currentSection.id)
+                              ? 'bg-amber-50 border-amber-200 text-amber-600'
+                              : 'bg-slate-50 border-slate-200 text-slate-400 hover:text-slate-700'
+                          }`}
+                          title="Bookmark Chapter"
+                        >
+                          <Bookmark size={16} className={bookmarkedSections.includes(currentSection.id) ? 'fill-amber-500' : ''} />
+                        </button>
+                      </div>
                     </div>
 
                     {/* Chapter Steps List */}

@@ -10,6 +10,7 @@ import { getBaseUrl, SITE_CONFIG } from "@/lib/seo";
 
 import CookieConsentBanner from "@/components/common/CookieConsentBanner";
 import RouteFontController from "@/components/common/RouteFontController";
+import { ThemeProvider } from "@/context/ThemeContext";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -99,15 +100,17 @@ export default function RootLayout({ children }) {
       <body className="min-h-full flex flex-col overflow-x-hidden font-sans" suppressHydrationWarning>
         <RouteFontController />
         <AxiosNetworkFixer />
-        <BrandProvider>
-          <EntitlementProvider>
-            <TourProvider>
-              {children}
-              <UpgradeModal />
-              <CookieConsentBanner />
-            </TourProvider>
-          </EntitlementProvider>
-        </BrandProvider>
+        <ThemeProvider>
+          <BrandProvider>
+            <EntitlementProvider>
+              <TourProvider>
+                {children}
+                <UpgradeModal />
+                <CookieConsentBanner />
+              </TourProvider>
+            </EntitlementProvider>
+          </BrandProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

@@ -1,6 +1,6 @@
 /**
  * heroVideoConfig.js
- * Full-Screen Background Video Storyboard Config & Scene Timestamps for UWO Connect
+ * Full-Screen Background Video Storyboard Config & Scene Timestamps for Uwo Connect
  */
 
 export const HERO_VIDEO_CONFIG = {
@@ -11,11 +11,11 @@ export const HERO_VIDEO_CONFIG = {
   },
   durationSeconds: 35,
   brand: {
-    name: "UWO Connect",
+    name: "Uwo Connect",
     tagline: "Everything Your Business Needs. Connected in One Place.",
     subtitle: "Manage conversations, clients, teams, projects and business operations from one connected workspace.",
     ctaPrimary: "Get Started",
-    ctaSecondary: "Explore UWO Connect"
+    ctaSecondary: "Explore Uwo Connect"
   },
   scenes: [
     {
@@ -62,9 +62,9 @@ export const HERO_VIDEO_CONFIG = {
       id: "solution",
       startTime: 20,
       endTime: 25,
-      title: "Meet UWO Connect.",
+      title: "Meet Uwo Connect.",
       subtitle: "One intelligent operating system for your entire business.",
-      badge: "UWO Connect"
+      badge: "Uwo Connect"
     },
     {
       id: "workspace",
@@ -78,7 +78,7 @@ export const HERO_VIDEO_CONFIG = {
       id: "final-brand",
       startTime: 30,
       endTime: 35,
-      title: "UWO Connect",
+      title: "Uwo Connect",
       subtitle: "Everything Your Business Needs. Connected in One Place.",
       badge: "Connect. Manage. Grow."
     }

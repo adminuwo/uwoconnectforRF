@@ -86,11 +86,12 @@ export default function PublicDocumentView({ token, documentTypeHint = 'proposal
   const handleWhatsAppShare = () => {
     const type = (doc?.document_type || documentTypeHint).toLowerCase();
     const publicUrl = getPublicDocumentUrl(type, token);
-    const companyName = doc?.client_details?.business_name || doc?.client?.business_name || "Company";
+    const comp = (doc?.company_details && (doc?.company_details?.business_name || doc?.company_details?.company_name)) ? doc.company_details : (doc?.client_details || doc?.client || {});
+    const companyName = comp.business_name || comp.company_name || doc?.client?.business_name || "Company";
     const customerName = doc?.customer_name || "Valued Customer";
     const docNum = doc?.document_number || "";
     const currency = doc?.currency_symbol || "₹";
-    const total = doc?.grand_total || "0.00";
+    const total = Number(doc?.grand_total || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     let messageText = "";
 
     if (type === 'proposal') {

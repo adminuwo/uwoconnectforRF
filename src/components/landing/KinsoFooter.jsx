@@ -63,14 +63,14 @@ export default function KinsoFooter({ isDark }) {
               <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl overflow-hidden shadow-md shadow-[#00AB56]/20 flex items-center justify-center bg-white p-0.5 border border-[#00AB56]/20 shrink-0">
                 <img
                   src="/download (3).gif"
-                  alt="UWO Connect Logo"
+                  alt="Uwo Connect Logo"
                   className="w-full h-full object-cover rounded-lg"
                   width={40}
                   height={40}
                 />
               </div>
               <span className="font-bold text-lg sm:text-xl tracking-tight">
-                UWO <span className="text-[#00AB56]">Connect</span>
+                Uwo <span className="text-[#00AB56]">Connect</span>
               </span>
             </Link>
 
@@ -121,7 +121,7 @@ export default function KinsoFooter({ isDark }) {
 
         {/* Bottom Bar */}
         <div className="pt-6 sm:pt-8 border-t border-gray-200 dark:border-white/10 flex flex-col sm:flex-row items-center justify-between text-xs text-gray-400 gap-4 text-center sm:text-left">
-          <p>© {new Date().getFullYear()} UWO Connect Inc. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} Uwo Connect Inc. All rights reserved.</p>
           <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-[11px] sm:text-xs">
             <Link href="/privacy" className="hover:text-[#00AB56] transition-colors">Privacy Policy</Link>
             <Link href="/terms-and-conditions" className="hover:text-[#00AB56] transition-colors">Terms &amp; Conditions</Link>

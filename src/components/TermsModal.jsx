@@ -96,7 +96,7 @@ export default function TermsModal({ isOpen, onClose }) {
             <div className="space-y-6">
               
               <div className="p-4.5 rounded-2xl bg-emerald-50/80 border border-emerald-200/80 text-emerald-950 font-medium text-xs leading-relaxed">
-                Welcome to <strong>UwoConnect</strong>, a unified business automation and customer communication platform. By accessing or using our platform, you acknowledge that you have read, understood, and agreed to these Terms &amp; Conditions.
+                Welcome to <strong>UWO Connect™</strong>, a unified business automation and customer communication platform. By accessing or using our platform, you acknowledge that you have read, understood, and agreed to these Terms &amp; Conditions.
               </div>
 
               <hr className="border-slate-200" />
@@ -163,7 +163,7 @@ export default function TermsModal({ isOpen, onClose }) {
                   White-Label Agency Program
                 </h3>
                 <p className="text-slate-600 text-xs leading-relaxed">
-                  White-Label access grants custom CNAME domain mapping (`app.youragency.com`) and custom branding permissions. White-Label licensing does not transfer ownership of UwoConnect's underlying software codebase or intellectual property.
+                  White-Label access grants custom CNAME domain mapping (`app.youragency.com`) and custom branding permissions. White-Label licensing does not transfer ownership of UWO Connect™'s underlying software codebase or intellectual property.
                 </p>
               </section>
 
@@ -185,7 +185,7 @@ export default function TermsModal({ isOpen, onClose }) {
         {/* Modal Footer */}
         <div className="p-4 sm:px-8 sm:py-5 border-t border-slate-200 bg-slate-50/90 flex items-center justify-between">
           <span className="text-[11px] font-semibold text-slate-500 flex items-center gap-1.5">
-            <CheckCircle2 size={15} className="text-[#059669]" /> UWO Connect Legal Agreement
+            <CheckCircle2 size={15} className="text-[#059669]" /> UWO Connect™ Legal Agreement
           </span>
           
           <div className="flex items-center gap-3">

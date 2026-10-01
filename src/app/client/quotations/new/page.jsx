@@ -76,6 +76,10 @@ const NewQuotationPage = () => {
     { title: 'Scope of Work', content: 'Outline details of work deliverables and timeline.' }
   ]);
 
+  // Proposal Templates
+  const [templates, setTemplates] = useState([]);
+  const [selectedTemplateId, setSelectedTemplateId] = useState('');
+
   // UI States
   const [loading, setLoading] = useState(false);
   const [salespeople, setSalespeople] = useState([]);
@@ -121,11 +125,67 @@ const NewQuotationPage = () => {
     }
   };
 
+  const fetchTemplates = async () => {
+    const token = localStorage.getItem('uwo_token');
+    try {
+      const res = await axios.get(`${API_BASE_URL}/api/sales-document-templates/`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = Array.isArray(res.data) ? res.data : res.data.results || [];
+      setTemplates(data);
+
+      if (typeof window !== 'undefined') {
+        const params = new URLSearchParams(window.location.search);
+        const tplId = params.get('template_id');
+        if (tplId) {
+          const found = data.find(t => String(t.id) === String(tplId));
+          if (found) {
+            applyTemplateData(found);
+          }
+        }
+      }
+    } catch (err) {
+      console.warn("Could not load proposal templates", err);
+    }
+  };
+
+  const applyTemplateData = (tpl) => {
+    if (!tpl) {
+      setSelectedTemplateId('');
+      return;
+    }
+    setSelectedTemplateId(tpl.id);
+    if (Array.isArray(tpl.sections) && tpl.sections.length > 0) {
+      setProposalSections(tpl.sections.map(s => ({
+        title: s.title || '',
+        content: s.content || ''
+      })));
+    }
+    if (tpl.terms) {
+      setTermsConditions(tpl.terms);
+    }
+    if (tpl.description && !customerNotes) {
+      setCustomerNotes(tpl.description);
+    }
+  };
+
+  const handleApplyTemplate = (tplId) => {
+    if (!tplId) {
+      setSelectedTemplateId('');
+      return;
+    }
+    const found = templates.find(t => String(t.id) === String(tplId));
+    if (found) {
+      applyTemplateData(found);
+    }
+  };
+
   useEffect(() => {
     fetchContacts();
     fetchProducts();
     fetchSalespeople();
     fetchClientProfile();
+    fetchTemplates();
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
       const type = params.get('type');
@@ -429,7 +489,8 @@ const NewQuotationPage = () => {
       internal_notes: internalNotes,
       terms_conditions: termsConditions,
       items: items,
-      proposal_sections: docType === 'PROPOSAL' ? proposalSections : []
+      proposal_sections: docType === 'PROPOSAL' ? proposalSections : [],
+      proposal_template: docType === 'PROPOSAL' ? (selectedTemplateId || null) : null
     };
 
     try {
@@ -823,6 +884,92 @@ const NewQuotationPage = () => {
               </div>
             </div>
 
+            {/* Proposal Scope & Pitch Sections (When Document Type is PROPOSAL) */}
+            {docType === 'PROPOSAL' && (
+              <div className="space-y-4 p-5 bg-gradient-to-br from-indigo-50/50 via-white to-indigo-50/30 border border-indigo-200/80 rounded-2xl shadow-xs">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <FileText className="w-4 h-4 text-indigo-600" />
+                      <h3 className="text-xs font-black text-slate-800 uppercase tracking-widest">
+                        Proposal Template & Scope Sections
+                      </h3>
+                    </div>
+                    <p className="text-[10px] text-slate-500 mt-0.5">
+                      Apply a saved template or customize your SOW, deliverables & project timeline.
+                    </p>
+                  </div>
+
+                  {/* Template Picker Dropdown */}
+                  <div className="flex items-center gap-2">
+                    <select
+                      value={selectedTemplateId}
+                      onChange={(e) => handleApplyTemplate(e.target.value)}
+                      className="px-3 py-1.5 bg-white text-slate-800 text-xs rounded-xl border border-indigo-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 font-bold"
+                    >
+                      <option value="">Choose Saved Template...</option>
+                      {templates.map(tpl => (
+                        <option key={tpl.id} value={tpl.id}>
+                          {tpl.name} ({tpl.sections?.length || 0} Sections)
+                        </option>
+                      ))}
+                    </select>
+
+                    <button
+                      type="button"
+                      onClick={() => router.push('/client/proposals/templates')}
+                      className="px-2.5 py-1.5 bg-white hover:bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-xl text-[10px] font-bold transition-all shadow-2xs whitespace-nowrap cursor-pointer"
+                    >
+                      Templates Library
+                    </button>
+                  </div>
+                </div>
+
+                {/* Sections List Editor */}
+                <div className="space-y-3 pt-2">
+                  {proposalSections.map((sec, sIdx) => (
+                    <div key={sIdx} className="p-3.5 bg-white border border-slate-200 rounded-xl space-y-2 relative group shadow-2xs">
+                      <div className="flex items-center justify-between gap-2">
+                        <input
+                          type="text"
+                          value={sec.title || ''}
+                          onChange={(e) => handleProposalSectionChange(sIdx, 'title', e.target.value)}
+                          placeholder={`Section ${sIdx + 1} Title (e.g. Scope of Work, Project Timeline)`}
+                          className="w-full text-xs font-bold text-slate-900 border-b border-transparent focus:border-indigo-500 pb-1 focus:outline-none placeholder-slate-400"
+                        />
+                        {proposalSections.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveProposalSection(sIdx)}
+                            className="p-1 text-slate-400 hover:text-red-600 rounded-lg hover:bg-red-50 transition cursor-pointer"
+                            title="Remove Section"
+                          >
+                            <Trash2 size={13} />
+                          </button>
+                        )}
+                      </div>
+                      <textarea
+                        rows={3}
+                        value={sec.content || ''}
+                        onChange={(e) => handleProposalSectionChange(sIdx, 'content', e.target.value)}
+                        placeholder="Write detailed deliverables, milestones, or objectives here..."
+                        className="w-full p-2 bg-slate-50 text-slate-700 text-xs rounded-lg border border-slate-200 focus:outline-none focus:border-indigo-500 leading-relaxed font-normal"
+                      />
+                    </div>
+                  ))}
+
+                  <button
+                    type="button"
+                    onClick={handleAddProposalSection}
+                    className="w-full py-2 bg-white hover:bg-indigo-50 border border-dashed border-indigo-300 text-indigo-700 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition cursor-pointer"
+                  >
+                    <Plus size={13} />
+                    <span>Add Another Section</span>
+                  </button>
+                </div>
+              </div>
+            )}
+
             {/* Line items dynamic pricing builder table */}
             <div className="space-y-4">
               <h3 className="text-xs font-black text-slate-800 uppercase tracking-widest">Products & Services Pricing</h3>
@@ -1111,7 +1258,7 @@ const NewQuotationPage = () => {
                     </div>
                     <div>
                       <span className="block font-bold text-slate-800">Prepared By:</span>
-                      <span className="block text-slate-500">UWO Connect Staff</span>
+                      <span className="block text-slate-500">UwoConnect Staff</span>
                     </div>
                   </div>
                 </div>

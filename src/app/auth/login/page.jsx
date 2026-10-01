@@ -144,8 +144,9 @@ const LoginPage = () => {
     setLoadingProvider('email');
     setError('');
     try {
+      const cleanEmail = email.trim().toLowerCase();
       const res = await axios.post(`${API_BASE_URL}/api/auth/login`, {
-        email,
+        email: cleanEmail,
         password,
       });
 
@@ -164,11 +165,8 @@ const LoginPage = () => {
       }
     } catch (err) {
       console.error('Login error:', err);
-      if (err.response?.data?.message) {
-        setError(err.response.data.message);
-      } else {
-        setError(err.message || 'Invalid email or password. Please check your credentials.');
-      }
+      const errMsg = err.response?.data?.error || err.response?.data?.message || err.message || 'Invalid email or password. Please check your credentials.';
+      setError(errMsg);
     } finally {
       setLoadingProvider(null);
     }
@@ -209,8 +207,8 @@ const LoginPage = () => {
             style={{ width: '20px', height: '20px' }}
             className="w-5 h-5 rounded-full object-contain"
           />
-          <span className="text-slate-900 font-extrabold text-xs tracking-wider uppercase">
-            {brand?.brand_name || "UwoConnect"}
+          <span className="text-slate-900 font-extrabold text-xs tracking-wide">
+            {brand?.is_whitelabel && brand?.brand_name ? brand.brand_name : "UWO Connect™"}
           </span>
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" style={{ backgroundColor: brand?.primary_color || '#059669' }} />
         </div>
@@ -239,7 +237,7 @@ const LoginPage = () => {
             </div>
             <div className="text-left">
               <h4 className="text-xs font-bold text-slate-900 group-hover:text-emerald-800 transition-colors">
-                Login with Uwo Connect Mobile
+                Login with UWO Connect Mobile
               </h4>
               <p className="text-[11px] text-emerald-700 font-medium">Scan QR code for instant passwordless entry</p>
             </div>
@@ -460,7 +458,7 @@ const LoginPage = () => {
           
           <div className="border-t border-slate-100/90 pt-3 px-1">
             <p className="text-[11px] font-medium text-slate-400 leading-relaxed max-w-sm mx-auto">
-              By continuing to use {brand?.brand_name || 'UwoConnect'}, you agree to our{' '}
+              By continuing to use {brand?.brand_name || 'UWO Connect™'}, you agree to our{' '}
               <span
                 role="button"
                 tabIndex={0}

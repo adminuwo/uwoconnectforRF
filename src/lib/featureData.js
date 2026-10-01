@@ -71,7 +71,7 @@ const featureData = [
     requirements: [
       'WhatsApp Business API Account', 'Meta Developer App Configured',
       'Verified Business Phone Number', 'Connected WhatsApp Connector',
-      'At Least One Approved Template', 'Active UwoConnect Subscription',
+      'At Least One Approved Template', 'Active UWO Connect™ Subscription',
     ],
     connectors: ['WhatsApp', 'Meta', 'Google Sheets', 'Webhook', 'CRM'],
     automations: [
@@ -143,7 +143,7 @@ const featureData = [
       { title: 'Description Length', detail: 'Max 2,000 characters per product description' },
     ],
     requirements: [
-      'Active UwoConnect Subscription', 'At Least One Connected Channel',
+      'Active UWO Connect™ Subscription', 'At Least One Connected Channel',
       'Product Images Ready', 'Pricing Information',
     ],
     connectors: ['WhatsApp', 'Instagram', 'Facebook', 'Google Sheets', 'Webhook'],
@@ -188,7 +188,7 @@ const featureData = [
     category: 'Integrations',
     status: 'active',
     path: '/client/channels',
-    description: 'Connect and manage your WhatsApp Business API, Instagram Direct, Facebook Messenger, Telegram, and YouTube accounts for omnichannel communication.',
+    description: 'Connect and manage your WhatsApp Business API, Instagram Direct, Facebook Messenger, and YouTube accounts for omnichannel communication.',
     overview: {
       what: 'The Channels module is your integration hub — connect all your customer communication platforms in one place. Messages from all channels flow into the unified inbox.',
       why: 'Customers reach out on different platforms. Connecting all channels ensures no message is missed and enables consistent AI-powered responses across every touchpoint.',
@@ -197,7 +197,7 @@ const featureData = [
     },
     features: [
       'WhatsApp Business API', 'Instagram Direct Messages', 'Facebook Messenger',
-      'Telegram Bot Integration', 'YouTube Comment Management',
+      'YouTube Comment Management', 'Email & Webhook Integration',
       'OAuth-Based Easy Setup', 'Channel Status Monitoring', 'Multi-Account Support',
       'Channel-Specific AI Config', 'Webhook Integrations', 'Google Sheets Sync',
       'Real-Time Message Sync', 'Auto-Reconnection', 'Channel Analytics',
@@ -205,16 +205,15 @@ const featureData = [
     limitations: [
       { title: 'WhatsApp Requires API', detail: 'Personal WhatsApp not supported — requires Business API' },
       { title: 'Instagram Business Only', detail: 'Requires Instagram Business/Creator account linked to Facebook Page' },
-      { title: 'Telegram Bot Token', detail: 'Must create a bot via @BotFather on Telegram' },
       { title: 'YouTube OAuth Scopes', detail: 'Requires Google Cloud project with YouTube Data API v3 enabled' },
     ],
     requirements: [
-      'Active UwoConnect Subscription',
+      'Active UWO Connect™ Subscription',
       'Platform-Specific Business Accounts',
       'API Credentials / OAuth Tokens',
       'Verified Business Identity (for WhatsApp)',
     ],
-    connectors: ['WhatsApp', 'Instagram', 'Facebook', 'Telegram', 'YouTube', 'Google Sheets', 'Webhook', 'Email'],
+    connectors: ['WhatsApp', 'Instagram', 'Facebook', 'YouTube', 'Google Sheets', 'Webhook', 'Email'],
     automations: [
       'New Channel Connected → Welcome Flow', 'Channel Disconnected → Admin Alert',
       'New Message → Route to AI or Agent', 'Cross-Channel Lead Sync',
@@ -278,10 +277,10 @@ const featureData = [
       { title: 'Webhook Timeout', detail: '10-second timeout for external webhook calls' },
     ],
     requirements: [
-      'Active UwoConnect Subscription', 'At Least One Connected Channel',
+      'Active UWO Connect™ Subscription', 'At Least One Connected Channel',
       'Understanding of Basic Flow Logic',
     ],
-    connectors: ['WhatsApp', 'Instagram', 'Telegram', 'Facebook', 'Google Sheets', 'Webhook', 'CRM'],
+    connectors: ['WhatsApp', 'Instagram', 'Facebook', 'Google Sheets', 'Webhook', 'CRM'],
     automations: [
       'Keyword → Trigger Flow', 'New Contact → Onboarding Flow',
       'Scheduled Time → Follow-Up Flow', 'Webhook → Custom Automation',
@@ -344,7 +343,7 @@ const featureData = [
       { title: 'Audit Logs', detail: 'Retained for 90 days on Pro, 365 days on Enterprise' },
     ],
     requirements: [
-      'Active UwoConnect Subscription', 'Admin Role to Invite Members',
+      'Active UWO Connect™ Subscription', 'Admin Role to Invite Members',
       'Valid Email Addresses for Invitations',
     ],
     connectors: ['Email', 'Slack', 'Discord', 'Webhook'],
@@ -388,7 +387,7 @@ const featureData = [
     category: 'Communication',
     status: 'active',
     path: '/client/inbox',
-    description: 'A single omnichannel chat workspace for human agents to manage conversations across WhatsApp, Instagram, Facebook, Telegram, and more.',
+    description: 'A single omnichannel chat workspace for human agents to manage conversations across WhatsApp, Instagram, Facebook, and more.',
     overview: {
       what: 'The Unified Inbox consolidates all incoming messages from every connected channel into one dashboard. Agents can reply, transfer, tag, and manage conversations without switching platforms.',
       why: 'Managing messages across 5+ platforms is chaotic. The inbox brings everything together, enabling faster responses and consistent customer experience.',
@@ -412,7 +411,7 @@ const featureData = [
       'At Least One Connected Channel', 'Active Subscription',
       'Team Members Invited (for multi-agent)',
     ],
-    connectors: ['WhatsApp', 'Instagram', 'Facebook', 'Telegram', 'Email', 'Web Chat'],
+    connectors: ['WhatsApp', 'Instagram', 'Facebook', 'Email', 'Web Chat'],
     automations: [
       'New Message → AI Auto-Reply', 'Unanswered 5min → Escalate to Agent',
       'Keyword Detected → Trigger Workflow', 'Conversation Closed → Send Survey',
@@ -475,7 +474,7 @@ const featureData = [
       { title: 'Embedding Latency', detail: 'Large documents may take 1–3 minutes to process' },
     ],
     requirements: [
-      'Active UwoConnect Subscription', 'Documents in Supported Formats',
+      'Active UWO Connect™ Subscription', 'Documents in Supported Formats',
       'AI Configuration Enabled',
     ],
     connectors: ['Google Drive', 'OneDrive', 'Webhook'],
@@ -540,7 +539,7 @@ const featureData = [
     requirements: [
       'Active Subscription', 'At Least One Connected Channel',
     ],
-    connectors: ['WhatsApp', 'Instagram', 'Telegram', 'Facebook', 'Web Chat'],
+    connectors: ['WhatsApp', 'Instagram', 'Facebook', 'Web Chat'],
     automations: [
       'Keyword Match → Send Reply', 'No Match → AI Fallback', 'New Rule → Log Event',
     ],
@@ -712,7 +711,7 @@ const featureData = [
     ],
     requirements: [
       'Google Account with YouTube Channel', 'Google Cloud Project with YouTube Data API v3',
-      'OAuth Consent Screen Configured', 'Active UwoConnect Subscription',
+      'OAuth Consent Screen Configured', 'Active UWO Connect™ Subscription',
     ],
     connectors: ['YouTube', 'WhatsApp', 'Google Sheets'],
     automations: [

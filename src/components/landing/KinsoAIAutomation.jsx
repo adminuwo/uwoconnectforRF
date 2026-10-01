@@ -80,7 +80,7 @@ export default function KinsoAIAutomation({ isDark }) {
             End-to-End AI Automation Pipeline
           </h2>
           <p className={`text-sm sm:text-base md:text-lg ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-            Watch how UWO Connect processes, routes, responds, and records every customer message in milliseconds.
+            Watch how Uwo Connect processes, routes, responds, and records every customer message in milliseconds.
           </p>
         </div>
 

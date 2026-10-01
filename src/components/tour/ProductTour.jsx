@@ -15,29 +15,25 @@ import {
   Info,
   CheckCircle2,
   BookOpen,
+  Volume2,
+  VolumeX,
+  RotateCcw,
 } from 'lucide-react';
 import LearningCenterModal from '@/components/guides/LearningCenterModal';
+import { useTourAudio } from '@/hooks/useTourAudio';
 
 const STEP_TO_GUIDE_MAP = {
   'welcome': 'dashboard',
-  'sidebar-nav': 'dashboard',
-  'dashboard-stats': 'dashboard',
-  'dashboard-launch-btn': 'workflows',
   'sidebar-channels': 'connectors',
-  'sidebar-youtube': 'youtube',
-  'sidebar-google-news': 'google-news',
-  'sidebar-automations': 'automations',
+  'sidebar-automations': 'workflows',
   'sidebar-workflows': 'workflows',
   'sidebar-crm': 'crm',
   'sidebar-inbox': 'inbox',
-  'sidebar-campaigns': 'broadcasts',
   'sidebar-knowledge': 'knowledge',
+  'sidebar-campaigns': 'broadcasts',
   'sidebar-catalog': 'catalog',
-  'sidebar-orders': 'orders',
-  'sidebar-team': 'team',
-  'sidebar-reports': 'reports',
-  'sidebar-settings': 'settings',
-  'sidebar-support': 'support',
+  'sidebar-invoices': 'connectors',
+  'sidebar-payments': 'connectors',
 };
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -118,7 +114,14 @@ const TooltipCard = ({
   onSkip,
   onFinish,
   visible,
-  onOpenGuide
+  onOpenGuide,
+  isSpeaking,
+  isMuted,
+  language,
+  voice,
+  onToggleMute,
+  onReplayAudio,
+  onSetLanguage,
 }) => {
   const isLast  = currentStep === totalSteps - 1;
   const isFirst = currentStep === 0;
@@ -142,7 +145,7 @@ const TooltipCard = ({
         <div className="tour-tooltip-icon">{step.icon}</div>
         <div className="tour-tooltip-meta">
           <span className="tour-step-badge">Step {currentStep + 1} of {totalSteps}</span>
-          <h3 className="tour-tooltip-title">{step.title}</h3>
+          <h3 className="tour-tooltip-title">{step.title?.replace(/^[\p{Emoji}\u200d\uFE0F\s]+/u, '') || step.title}</h3>
         </div>
         <button
           className="tour-skip-x"
@@ -152,6 +155,69 @@ const TooltipCard = ({
         >
           <X size={16} />
         </button>
+      </div>
+
+      {/* Synchronized Voice Audio Narration Bar */}
+      <div className="tour-audio-bar">
+        <div className="flex items-center gap-2">
+          {/* Animated Equalizer Waves */}
+          <div className={`tour-audio-eq ${isSpeaking ? 'tour-audio-eq-active' : ''}`} title={isSpeaking ? "Voice Guide: Speaking" : "Voice Guide: Ready"}>
+            <span className="eq-bar eq-bar-1" />
+            <span className="eq-bar eq-bar-2" />
+            <span className="eq-bar eq-bar-3" />
+            <span className="eq-bar eq-bar-4" />
+          </div>
+
+          <div className="flex flex-col">
+            <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-800 flex items-center gap-1">
+              {isSpeaking ? (
+                <>
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping inline-block" />
+                  <span>{voice === 'cedar' ? '👨 Cedar' : '👩 Nova'}: Speaking</span>
+                </>
+              ) : isMuted ? (
+                'Voice: Muted'
+              ) : (
+                <span>{voice === 'cedar' ? '👨 Cedar' : '👩 Nova'}: Ready</span>
+              )}
+            </span>
+          </div>
+        </div>
+
+        {/* Audio Controls */}
+        <div className="flex items-center gap-1.5">
+          {/* Language Switcher Button (HI / EN) */}
+          <button
+            type="button"
+            onClick={() => onSetLanguage(language === 'hi' ? 'en' : 'hi', step)}
+            className="tour-audio-btn tour-audio-lang-btn"
+            title={`Switch to ${language === 'hi' ? 'English' : 'हिन्दी'} narration`}
+          >
+            {language === 'hi' ? '🇮🇳 HI' : '🌐 EN'}
+          </button>
+
+          {/* Replay Audio Button */}
+          <button
+            type="button"
+            onClick={() => onReplayAudio(step)}
+            className="tour-audio-btn"
+            title="Replay Voice Narration"
+            aria-label="Replay voice narration"
+          >
+            <RotateCcw size={12} />
+          </button>
+
+          {/* Mute / Unmute Button */}
+          <button
+            type="button"
+            onClick={() => onToggleMute(step)}
+            className={`tour-audio-btn ${isMuted ? 'tour-audio-btn-muted' : ''}`}
+            title={isMuted ? "Unmute Voice Guide" : "Mute Voice Guide"}
+            aria-label={isMuted ? "Unmute voice guide" : "Mute voice guide"}
+          >
+            {isMuted ? <VolumeX size={13} /> : <Volume2 size={13} />}
+          </button>
+        </div>
       </div>
 
       {/* Body */}
@@ -228,6 +294,19 @@ const ProductTour = () => {
     finishTour,
   } = useTour();
 
+  const {
+    isSpeaking,
+    isMuted,
+    language,
+    voice,
+    speakStep,
+    stopAudio,
+    replayAudio,
+    toggleMute,
+    setLanguage,
+    setVoice,
+  } = useTourAudio();
+
   const [spotlightRect, setSpotlightRect] = useState(null);
   const [tooltipPos,    setTooltipPos]    = useState({ top: 0, left: 0 });
   const [placement,     setPlacement]     = useState('bottom');
@@ -238,8 +317,29 @@ const ProductTour = () => {
   const retryCount  = useRef(0);
 
   const handleOpenGuideFromStep = (stepId) => {
+    stopAudio();
     const slug = STEP_TO_GUIDE_MAP[stepId] || 'dashboard';
     setActiveGuideSlug(slug);
+  };
+
+  const handleNext = () => {
+    stopAudio();
+    nextStep();
+  };
+
+  const handlePrev = () => {
+    stopAudio();
+    prevStep();
+  };
+
+  const handleSkip = () => {
+    stopAudio();
+    skipTour();
+  };
+
+  const handleFinish = () => {
+    stopAudio();
+    finishTour();
   };
 
   const positionOnElement = useCallback(() => {
@@ -251,7 +351,7 @@ const ProductTour = () => {
         retryCount.current++;
         retryRef.current = setTimeout(positionOnElement, 200);
       } else {
-        nextStep();
+        handleNext();
       }
       return;
     }
@@ -282,12 +382,31 @@ const ProductTour = () => {
 
     if (!isActive || isNavigating) {
       setSpotlightRect(null);
+      stopAudio();
       return;
     }
 
     const t = setTimeout(positionOnElement, 150);
     return () => clearTimeout(t);
-  }, [isActive, isNavigating, currentStep, positionOnElement]);
+  }, [isActive, isNavigating, currentStep, positionOnElement, stopAudio]);
+
+  // Synchronized voice audio narration on step display
+  useEffect(() => {
+    if (!isActive || !step || isNavigating) {
+      stopAudio();
+      return;
+    }
+
+    // Trigger voice narration as soon as step element is active and spotlight is positioned
+    const speechTimer = setTimeout(() => {
+      speakStep(step);
+    }, 280);
+
+    return () => {
+      clearTimeout(speechTimer);
+      stopAudio();
+    };
+  }, [isActive, isNavigating, currentStep, step, speakStep, stopAudio]);
 
   useEffect(() => {
     if (!isActive) return;
@@ -302,13 +421,14 @@ const ProductTour = () => {
   useEffect(() => {
     if (!isActive) return;
     const handleKey = (e) => {
-      if (e.key === 'Escape')      { e.preventDefault(); skipTour(); }
-      if (e.key === 'ArrowRight')  { e.preventDefault(); nextStep(); }
-      if (e.key === 'ArrowLeft')   { e.preventDefault(); prevStep(); }
+      if (e.key === 'Escape')      { e.preventDefault(); handleSkip(); }
+      if (e.key === 'ArrowRight')  { e.preventDefault(); handleNext(); }
+      if (e.key === 'ArrowLeft')   { e.preventDefault(); handlePrev(); }
+      if (e.key === ' ')           { e.preventDefault(); replayAudio(step); }
     };
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
-  }, [isActive, nextStep, prevStep, skipTour]);
+  }, [isActive, handleNext, handlePrev, handleSkip, replayAudio, step]);
 
   if (!isActive && !activeGuideSlug) return null;
 
@@ -354,12 +474,19 @@ const ProductTour = () => {
               totalSteps={totalSteps}
               position={tooltipPos}
               placement={placement}
-              onNext={nextStep}
-              onPrev={prevStep}
-              onSkip={skipTour}
-              onFinish={finishTour}
+              onNext={handleNext}
+              onPrev={handlePrev}
+              onSkip={handleSkip}
+              onFinish={handleFinish}
               visible={tooltipVisible}
               onOpenGuide={handleOpenGuideFromStep}
+              isSpeaking={isSpeaking}
+              isMuted={isMuted}
+              language={language}
+              voice={voice}
+              onToggleMute={toggleMute}
+              onReplayAudio={replayAudio}
+              onSetLanguage={setLanguage}
             />
           )}
 

@@ -37,6 +37,7 @@ import { cn } from '@/lib/utils';
 import { CHANNEL_DEFINITIONS, getChannelAccessState } from '@/config/channelsConfig';
 import ComingSoonChannelModal from '@/components/channels/ComingSoonChannelModal';
 import ZohoConfigModal, { ZohoIcon } from '@/components/channels/ZohoConfigModal';
+import RazorpayConfigModal from '@/components/channels/RazorpayConfigModal';
 import WhatsAppConfigModal from '@/components/channels/WhatsAppConfigModal';
 import FacebookConfigModal from '@/components/channels/FacebookConfigModal';
 import InstagramConfigModal from '@/components/channels/InstagramConfigModal';
@@ -50,6 +51,7 @@ import OutlookConfigModal, { OutlookIcon } from '@/components/channels/OutlookCo
 import YouTubeConfigModal, { YouTubeBrandIcon } from '@/components/channels/YouTubeConfigModal';
 import GmailConfigModal from '@/components/channels/GmailConfigModal';
 import LearningCenterModal from '@/components/guides/LearningCenterModal';
+import { useTheme } from '@/context/ThemeContext';
 
 // ═════════════════════════════════════════════════════════════════════════════════
 // ── AUTHENTIC BRAND VECTOR ICONS ──
@@ -105,6 +107,30 @@ const GoogleMapsBrandIcon = ({ size = 24, className = "" }) => (
   </svg>
 );
 
+export const RazorpayBrandIcon = ({ size = 28, isDark = undefined, className = "" }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    className={className}
+    aria-label="Razorpay"
+  >
+    {/* Razorpay Brand Icon: Official two-tone slash */}
+    <path
+      d="M22.436 0L10.526 7.773L9.352 12.049L15.977 7.752L11.65 24H16.041L22.436 0Z"
+      fill={isDark === true ? "#60A5FA" : isDark === false ? "#0C2451" : undefined}
+      className={isDark === undefined ? "fill-[#0C2451] dark:fill-[#60A5FA]" : undefined}
+    />
+    <path
+      d="M14.26 10.098L3.389 17.166L1.564 24H10.572L14.26 10.098Z"
+      fill={isDark === true ? "#38BDF8" : isDark === false ? "#0C83FE" : undefined}
+      className={isDark === undefined ? "fill-[#0C83FE] dark:fill-[#38BDF8]" : undefined}
+    />
+  </svg>
+);
+
 const CopyButton = ({ text }) => {
   const [copied, setCopied] = useState(false);
 
@@ -129,6 +155,7 @@ const CopyButton = ({ text }) => {
 
 const ClientChannelsPage = () => {
   const router = useRouter();
+  const { isDark } = useTheme();
   const [client, setClient] = useState(null);
   const [activePlans, setActivePlans] = useState([]);
   const [razorpayConn, setRazorpayConn] = useState(null);
@@ -151,6 +178,7 @@ const ClientChannelsPage = () => {
   const [isOutlookConfigOpen, setIsOutlookConfigOpen] = useState(false);
   const [isGmailConfigModalOpen, setIsGmailConfigModalOpen] = useState(false);
   const [isRazorpayConfigModalOpen, setIsRazorpayConfigModalOpen] = useState(false);
+  const [razorpayGatewayStatus, setRazorpayGatewayStatus] = useState(null);
   const [isGuideOpen, setIsGuideOpen] = useState(false);
   const [comingSoonModalChannel, setComingSoonModalChannel] = useState(null);
 
@@ -210,6 +238,14 @@ const ClientChannelsPage = () => {
           timeout: 10000,
         })
       ]);
+
+      // Check client Razorpay Gateway Status
+      axios.get(`${API_BASE_URL}/api/razorpay/status`, {
+        headers: { Authorization: `Bearer ${token}` },
+        timeout: 8000,
+      }).then(res => {
+        if (res.data) setRazorpayGatewayStatus(res.data);
+      }).catch(() => {});
 
       if (plansRes.status === 'fulfilled' && plansRes.value?.data) {
         const plansData = plansRes.value.data.results || (Array.isArray(plansRes.value.data) ? plansRes.value.data : []);
@@ -677,7 +713,13 @@ const ClientChannelsPage = () => {
   const isGoogleMapsConnected = Boolean(client?.google_maps_enabled || client?.google_maps_config?.api_key || client?.google_maps_config?.place_id);
   const isYouTubeConnected = Boolean(client?.youtube_enabled || client?.youtube_config?.channel_id || client?.youtube_config?.access_token || client?.youtube_config?.channel_title);
   const isZohoConnected = Boolean(client?.zoho_enabled || client?.zoho_config?.access_token || client?.zoho_config?.refresh_token);
-  const isRazorpayConnected = Boolean(client?.razorpay_enabled || client?.razorpay_config?.api_key || client?.razorpay_config?.key_id);
+  const isRazorpayConnected = Boolean(
+    razorpayGatewayStatus?.connected ||
+    razorpayGatewayStatus?.connection_status === 'CONNECTED' ||
+    client?.razorpay_enabled ||
+    client?.razorpay_config?.api_key ||
+    client?.razorpay_config?.key_id
+  );
 
   // Connect actions
   const handleConnectGmail = async () => {
@@ -811,24 +853,35 @@ const ClientChannelsPage = () => {
         )}
 
         {/* ── Top Header Section ── */}
-        <div className="py-3 sm:py-4 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4">
+        <div className={cn(
+          "py-3 sm:py-4 border-b flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4 transition-colors",
+          isDark ? "border-slate-800" : "border-slate-100"
+        )}>
           <div>
             <div className="flex flex-wrap items-center gap-2 mb-1">
-              <h1 className="text-lg sm:text-2xl font-black text-slate-900 tracking-tight">Channels & Integrations</h1>
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0">
+              <h1 className={cn("text-lg sm:text-2xl font-black tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+                Channels & Integrations
+              </h1>
+              <span className={cn(
+                "px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider border shrink-0",
+                isDark ? "bg-emerald-950/70 text-emerald-300 border-emerald-800/60" : "bg-emerald-50 text-emerald-700 border-emerald-200"
+              )}>
                 Official APIs
               </span>
             </div>
-            <p className="text-slate-500 text-xs font-normal max-w-2xl">
+            <p className={cn("text-xs font-normal max-w-2xl", isDark ? "text-slate-400" : "text-slate-500")}>
               Connect official Meta messaging channels, automate inbound customer inquiries with AI, and manage team communication.
             </p>
           </div>
 
           <div className="flex items-center gap-2.5 self-start md:self-auto shrink-0">
-            <div className="px-3.5 py-1.5 rounded-xl bg-slate-100/80 border border-slate-200/80 flex items-center gap-2 text-xs">
+            <div className={cn(
+              "px-3.5 py-1.5 rounded-xl border flex items-center gap-2 text-xs",
+              isDark ? "bg-slate-800/80 border-slate-700 text-slate-300" : "bg-slate-100/80 border-slate-200/80 text-slate-600"
+            )}>
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-slate-600 font-semibold text-[11px]">
-                <strong className="text-slate-900 font-bold">
+              <span className={cn("font-semibold text-[11px]", isDark ? "text-slate-300" : "text-slate-600")}>
+                <strong className={cn("font-bold", isDark ? "text-white" : "text-slate-900")}>
                   {[
                     isWhatsAppConnected,
                     isFacebookConnected,
@@ -840,7 +893,10 @@ const ClientChannelsPage = () => {
 
             <button
               onClick={() => setIsGuideOpen(true)}
-              className="flex items-center gap-1.5 px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold text-xs transition-all shadow-sm cursor-pointer"
+              className={cn(
+                "flex items-center gap-1.5 px-3.5 py-2 rounded-xl font-bold text-xs transition-all shadow-sm cursor-pointer border",
+                isDark ? "bg-slate-800 hover:bg-slate-700 text-white border-slate-700" : "bg-slate-900 hover:bg-slate-800 text-white border-transparent"
+              )}
               title="Open Connectors & Integrations Master Guide"
             >
               <Sparkles size={13} className="text-amber-400" />
@@ -850,7 +906,12 @@ const ClientChannelsPage = () => {
             <button
               onClick={() => fetchClient(true)}
               disabled={refreshing}
-              className="p-2 text-slate-400 hover:text-slate-700 bg-white hover:bg-slate-50 border border-slate-200/80 rounded-xl transition-all cursor-pointer shadow-2xs disabled:opacity-50"
+              className={cn(
+                "p-2 rounded-xl transition-all cursor-pointer shadow-2xs disabled:opacity-50 border",
+                isDark
+                  ? "text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 border-slate-700"
+                  : "text-slate-400 hover:text-slate-700 bg-white hover:bg-slate-50 border-slate-200/80"
+              )}
               title="Refresh Status"
             >
               <RefreshCw size={14} className={cn(refreshing && "animate-spin text-emerald-600")} />
@@ -873,10 +934,13 @@ const ClientChannelsPage = () => {
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-xs shadow-emerald-500/50 shrink-0" />
-                  <h2 className="text-xs sm:text-sm font-extrabold uppercase tracking-wider text-slate-800">
+                  <h2 className={cn("text-xs sm:text-sm font-extrabold uppercase tracking-wider", isDark ? "text-white" : "text-slate-800")}>
                     Communication Channels
                   </h2>
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0">
+                  <span className={cn(
+                    "px-2 py-0.5 rounded-full text-[10px] font-extrabold border shrink-0",
+                    isDark ? "bg-emerald-950/70 text-emerald-300 border-emerald-800" : "bg-emerald-50 text-emerald-700 border-emerald-200"
+                  )}>
                     4 Channels
                   </span>
                 </div>
@@ -897,10 +961,10 @@ const ClientChannelsPage = () => {
 
                   return (
                     <div className={cn(
-                      "bg-white rounded-2xl sm:rounded-3xl border p-4 sm:p-6 lg:p-7 flex flex-col justify-between transition-all duration-300 shadow-sm hover:shadow-md relative overflow-hidden group",
+                      "rounded-2xl sm:rounded-3xl border p-4 sm:p-6 lg:p-7 flex flex-col justify-between transition-all duration-300 shadow-sm hover:shadow-md relative overflow-hidden group",
                       isComingSoon
-                        ? "border-amber-200/80 bg-amber-50/15"
-                        : "border-slate-200/90 hover:border-emerald-300"
+                        ? (isDark ? "border-amber-800/80 bg-amber-950/20" : "border-amber-200/80 bg-amber-50/15")
+                        : (isDark ? "bg-[#0f172a] border-slate-800 hover:border-emerald-500/40 shadow-xl" : "bg-white border-slate-200/90 hover:border-emerald-300")
                     )}>
                       <div>
                         {/* Top Header */}
@@ -910,10 +974,13 @@ const ClientChannelsPage = () => {
                               <WhatsAppBrandIcon size={30} />
                             </div>
                             <div className="min-w-0 flex-1">
-                              <h3 className="font-extrabold text-slate-900 text-sm sm:text-base leading-tight break-words">
+                              <h3 className={cn("font-extrabold text-sm sm:text-base leading-tight break-words", isDark ? "text-white" : "text-slate-900")}>
                                 WhatsApp Business
                               </h3>
-                              <span className="inline-block text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200/60 mt-0.5">
+                              <span className={cn(
+                                "inline-block text-[9px] sm:text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md border mt-0.5",
+                                isDark ? "bg-emerald-950/70 text-emerald-300 border-emerald-800/60" : "bg-emerald-50 text-emerald-700 border-emerald-200/60"
+                              )}>
                                 Cloud API
                               </span>
                             </div>
@@ -921,16 +988,25 @@ const ClientChannelsPage = () => {
 
                           <div className="shrink-0">
                             {isComingSoon ? (
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[9px] sm:text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200 whitespace-nowrap">
+                              <span className={cn(
+                                "inline-flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[9px] sm:text-[10px] font-bold border whitespace-nowrap",
+                                isDark ? "bg-amber-950/70 text-amber-300 border-amber-800" : "bg-amber-50 text-amber-700 border-amber-200"
+                              )}>
                                 <Sparkles size={10} /> Soon
                               </span>
                             ) : isConn ? (
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[9px] sm:text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 whitespace-nowrap">
+                              <span className={cn(
+                                "inline-flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[9px] sm:text-[10px] font-bold border whitespace-nowrap",
+                                isDark ? "bg-emerald-950/70 text-emerald-300 border-emerald-800" : "bg-emerald-50 text-emerald-700 border-emerald-200"
+                              )}>
                                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                                 <span>Connected</span>
                               </span>
                             ) : (
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[9px] sm:text-[10px] font-bold bg-slate-50 text-slate-500 border border-slate-200 whitespace-nowrap">
+                              <span className={cn(
+                                "inline-flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[9px] sm:text-[10px] font-bold border whitespace-nowrap",
+                                isDark ? "bg-slate-800/80 text-slate-400 border-slate-700" : "bg-slate-50 text-slate-500 border-slate-200"
+                              )}>
                                 <span className="w-1.5 h-1.5 rounded-full bg-slate-300" />
                                 <span>Offline</span>
                               </span>
@@ -938,62 +1014,74 @@ const ClientChannelsPage = () => {
                           </div>
                         </div>
 
-                        <p className="text-xs text-slate-500 leading-relaxed mb-3 sm:mb-4">
+                        <p className={cn("text-xs leading-relaxed mb-3 sm:mb-4", isDark ? "text-slate-400" : "text-slate-500")}>
                           Official Meta Cloud API. Connect your business phone number to send broadcast campaigns, auto-reply bots & live inbox support.
                         </p>
 
                         {/* Content Body */}
                         {isComingSoon ? (
-                          <div className="p-3 sm:p-3.5 rounded-xl sm:rounded-2xl bg-amber-50/70 border border-amber-200/60 text-amber-900 text-xs space-y-1 mb-3 sm:mb-4">
-                            <div className="font-bold flex items-center gap-1.5 text-amber-950 text-[11px]">
-                              <Clock size={12} className="text-amber-600 shrink-0" />
+                          <div className={cn(
+                            "p-3 sm:p-3.5 rounded-xl sm:rounded-2xl border text-xs space-y-1 mb-3 sm:mb-4",
+                            isDark ? "bg-amber-950/40 border-amber-800/60 text-amber-200" : "bg-amber-50/70 border-amber-200/60 text-amber-900"
+                          )}>
+                            <div className={cn("font-bold flex items-center gap-1.5 text-[11px]", isDark ? "text-amber-300" : "text-amber-950")}>
+                              <Clock size={12} className="text-amber-500 shrink-0" />
                               <span>Launching Soon</span>
                             </div>
-                            <p className="text-[10px] text-amber-800 leading-relaxed font-medium">
+                            <p className={cn("text-[10px] leading-relaxed font-medium", isDark ? "text-amber-300/80" : "text-amber-800")}>
                               {state.reason || 'This channel is deactivated by admin and will be enabled shortly.'}
                             </p>
                           </div>
                         ) : isConn ? (
-                          <div className="space-y-2 py-2.5 sm:py-3 px-3 sm:px-3.5 rounded-xl sm:rounded-2xl bg-slate-50/80 border border-slate-100 text-xs mb-3 sm:mb-4">
+                          <div className={cn(
+                            "space-y-2 py-2.5 sm:py-3 px-3 sm:px-3.5 rounded-xl sm:rounded-2xl text-xs mb-3 sm:mb-4 border transition-colors",
+                            isDark ? "bg-slate-800/60 border-slate-700/80 text-slate-200" : "bg-slate-50/80 border-slate-100 text-slate-700"
+                          )}>
                             <div className="flex justify-between items-center text-[11px]">
                               <span className="text-slate-400 font-bold uppercase tracking-wider text-[9px]">Number</span>
-                              <span className="font-bold text-slate-800">{client?.phone_number || client?.whatsapp_config?.display_phone_number || 'Live Connected'}</span>
+                              <span className={cn("font-bold", isDark ? "text-white" : "text-slate-800")}>{client?.phone_number || client?.whatsapp_config?.display_phone_number || 'Live Connected'}</span>
                             </div>
                             <div className="flex justify-between items-center text-[11px]">
                               <span className="text-slate-400 font-bold uppercase tracking-wider text-[9px]">Phone ID</span>
-                              <span className="font-mono font-semibold text-slate-700 flex items-center gap-1">
+                              <span className={cn("font-mono font-semibold flex items-center gap-1", isDark ? "text-slate-200" : "text-slate-700")}>
                                 <span>{client?.whatsapp_phone_number_id || 'Configured'}</span>
                                 {client?.whatsapp_phone_number_id && <CopyButton text={client.whatsapp_phone_number_id} />}
                               </span>
                             </div>
                             <div className="flex justify-between items-center text-[11px]">
                               <span className="text-slate-400 font-bold uppercase tracking-wider text-[9px]">WABA ID</span>
-                              <span className="font-mono font-semibold text-slate-700 flex items-center gap-1">
+                              <span className={cn("font-mono font-semibold flex items-center gap-1", isDark ? "text-slate-200" : "text-slate-700")}>
                                 <span>{client?.whatsapp_waba_id || 'Configured'}</span>
                                 {client?.whatsapp_waba_id && <CopyButton text={client.whatsapp_waba_id} />}
                               </span>
                             </div>
                             <div className="flex justify-between items-center text-[11px]">
                               <span className="text-slate-400 font-bold uppercase tracking-wider text-[9px]">Token</span>
-                              <span className="font-bold text-emerald-700 text-[10px] bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
+                              <span className={cn(
+                                "font-bold text-[10px] px-2 py-0.5 rounded-md border",
+                                isDark ? "bg-emerald-950/80 text-emerald-300 border-emerald-800" : "bg-emerald-50 text-emerald-700 border-emerald-200"
+                              )}>
                                 Permanent Token Active
                               </span>
                             </div>
                             <div className="flex justify-between items-center text-[11px]">
                               <span className="text-slate-400 font-bold uppercase tracking-wider text-[9px]">Status</span>
-                              <span className="font-bold text-emerald-600 flex items-center gap-1">
+                              <span className={cn("font-bold flex items-center gap-1", isDark ? "text-emerald-400" : "text-emerald-600")}>
                                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> Live Ready
                               </span>
                             </div>
                           </div>
                         ) : (
-                          <div className="space-y-1.5 py-2.5 sm:py-3 px-3 sm:px-3.5 rounded-xl sm:rounded-2xl bg-emerald-50/40 border border-emerald-100/60 mb-3 sm:mb-4 text-[11px] font-medium text-slate-600">
+                          <div className={cn(
+                            "space-y-1.5 py-2.5 sm:py-3 px-3 sm:px-3.5 rounded-xl sm:rounded-2xl mb-3 sm:mb-4 text-[11px] font-medium border",
+                            isDark ? "bg-slate-800/40 border-slate-700/80 text-slate-300" : "bg-emerald-50/40 border-emerald-100/60 text-slate-600"
+                          )}>
                             <div className="flex items-center gap-2">
-                              <CheckCircle2 size={13} className="text-emerald-600 shrink-0" />
+                              <CheckCircle2 size={13} className="text-emerald-500 shrink-0" />
                               <span>WhatsApp Cloud API Embedded Signup</span>
                             </div>
                             <div className="flex items-center gap-2">
-                              <CheckCircle2 size={13} className="text-emerald-600 shrink-0" />
+                              <CheckCircle2 size={13} className="text-emerald-500 shrink-0" />
                               <span>Instant Phone Number Verification</span>
                             </div>
                           </div>
@@ -1005,17 +1093,23 @@ const ClientChannelsPage = () => {
                         {isComingSoon ? (
                           <button
                             onClick={() => openComingSoon({ name: 'WhatsApp Business', key: 'whatsapp' })}
-                            className="w-full py-2 sm:py-2.5 px-3 sm:px-4 bg-amber-100 hover:bg-amber-200 text-amber-900 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 border border-amber-300 shadow-sm cursor-pointer"
+                            className={cn(
+                              "w-full py-2 sm:py-2.5 px-3 sm:px-4 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 border shadow-sm cursor-pointer",
+                              isDark ? "bg-amber-950/60 hover:bg-amber-900/60 text-amber-300 border-amber-800" : "bg-amber-100 hover:bg-amber-200 text-amber-900 border-amber-300"
+                            )}
                           >
-                            <Clock size={13} className="text-amber-700" />
+                            <Clock size={13} className={isDark ? "text-amber-400" : "text-amber-700"} />
                             <span>Coming Soon</span>
                           </button>
                         ) : isConn ? (
                           <button
                             onClick={() => setIsConfigModalOpen(true)}
-                            className="w-full py-2 sm:py-2.5 px-3 sm:px-4 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer border border-slate-200 shadow-sm"
+                            className={cn(
+                              "w-full py-2 sm:py-2.5 px-3 sm:px-4 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer border shadow-sm",
+                              isDark ? "bg-slate-800 hover:bg-slate-700 text-slate-200 border-slate-700" : "bg-slate-100 hover:bg-slate-200 text-slate-800 border-slate-200"
+                            )}
                           >
-                            <Settings size={13} className="text-slate-600" />
+                            <Settings size={13} className={isDark ? "text-slate-400" : "text-slate-600"} />
                             <span>Configure WhatsApp</span>
                           </button>
                         ) : (
@@ -1040,16 +1134,22 @@ const ClientChannelsPage = () => {
                             <button
                               onClick={() => setIsConfigModalOpen(true)}
                               title="Configure / Manual Credentials"
-                              className="py-2 sm:py-2.5 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition flex items-center justify-center cursor-pointer border border-slate-200"
+                              className={cn(
+                                "py-2 sm:py-2.5 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center cursor-pointer border",
+                                isDark ? "bg-slate-800 hover:bg-slate-700 text-slate-200 border-slate-700" : "bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200"
+                              )}
                             >
                               <Settings size={14} />
                             </button>
                             <Link
                               href="/client/plans"
                               title={`Included in ${state.requiredPlanName}`}
-                              className="flex-1 py-2 sm:py-2.5 px-2.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200/80 rounded-xl text-xs font-extrabold transition flex items-center justify-center gap-1 cursor-pointer shadow-2xs truncate"
+                              className={cn(
+                                "flex-1 py-2 sm:py-2.5 px-2.5 rounded-xl text-xs font-extrabold transition flex items-center justify-center gap-1 cursor-pointer shadow-2xs truncate border",
+                                isDark ? "bg-emerald-950/60 hover:bg-emerald-900/60 text-emerald-300 border-emerald-800/60" : "bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border-emerald-200/80"
+                              )}
                             >
-                              <Layers size={13} className="text-emerald-600 shrink-0" />
+                              <Layers size={13} className="text-emerald-500 shrink-0" />
                               <span className="truncate">{state.requiredPlanName || 'Plan'}</span>
                             </Link>
                           </div>
@@ -1067,10 +1167,10 @@ const ClientChannelsPage = () => {
 
                   return (
                     <div className={cn(
-                      "bg-white rounded-2xl sm:rounded-3xl border p-4 sm:p-6 lg:p-7 flex flex-col justify-between transition-all duration-300 shadow-sm hover:shadow-md relative overflow-hidden group",
+                      "rounded-2xl sm:rounded-3xl border p-4 sm:p-6 lg:p-7 flex flex-col justify-between transition-all duration-300 shadow-sm hover:shadow-md relative overflow-hidden group",
                       isComingSoon
-                        ? "border-amber-200/80 bg-amber-50/15"
-                        : "border-slate-200/90 hover:border-blue-300"
+                        ? (isDark ? "border-amber-800/80 bg-amber-950/20" : "border-amber-200/80 bg-amber-50/15")
+                        : (isDark ? "bg-[#0f172a] border-slate-800 hover:border-blue-400/50 shadow-xl" : "bg-white border-slate-200/90 hover:border-blue-300")
                     )}>
                       <div>
                         {/* Top Header */}
@@ -1080,10 +1180,13 @@ const ClientChannelsPage = () => {
                               <FacebookBrandIcon size={30} />
                             </div>
                             <div className="min-w-0 flex-1">
-                              <h3 className="font-extrabold text-slate-900 text-sm sm:text-base leading-tight break-words">
+                              <h3 className={cn("font-extrabold text-sm sm:text-base leading-tight break-words", isDark ? "text-white" : "text-slate-900")}>
                                 Facebook
                               </h3>
-                              <span className="inline-block text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-200/60 mt-0.5">
+                              <span className={cn(
+                                "inline-block text-[9px] sm:text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md border mt-0.5",
+                                isDark ? "bg-blue-950/70 text-blue-300 border-blue-800/60" : "bg-blue-50 text-blue-700 border-blue-200/60"
+                              )}>
                                 Page Messenger
                               </span>
                             </div>
@@ -1091,16 +1194,25 @@ const ClientChannelsPage = () => {
 
                           <div className="shrink-0">
                             {isComingSoon ? (
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[9px] sm:text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200 whitespace-nowrap">
+                              <span className={cn(
+                                "inline-flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[9px] sm:text-[10px] font-bold border whitespace-nowrap",
+                                isDark ? "bg-amber-950/70 text-amber-300 border-amber-800" : "bg-amber-50 text-amber-700 border-amber-200"
+                              )}>
                                 <Sparkles size={10} /> Soon
                               </span>
                             ) : isConn ? (
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[9px] sm:text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200 whitespace-nowrap">
+                              <span className={cn(
+                                "inline-flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[9px] sm:text-[10px] font-bold border whitespace-nowrap",
+                                isDark ? "bg-blue-950/70 text-blue-300 border-blue-800" : "bg-blue-50 text-blue-700 border-blue-200"
+                              )}>
                                 <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
                                 <span>Connected</span>
                               </span>
                             ) : (
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[9px] sm:text-[10px] font-bold bg-slate-50 text-slate-500 border border-slate-200 whitespace-nowrap">
+                              <span className={cn(
+                                "inline-flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[9px] sm:text-[10px] font-bold border whitespace-nowrap",
+                                isDark ? "bg-slate-800/80 text-slate-400 border-slate-700" : "bg-slate-50 text-slate-500 border-slate-200"
+                              )}>
                                 <span className="w-1.5 h-1.5 rounded-full bg-slate-300" />
                                 <span>Offline</span>
                               </span>
@@ -1108,42 +1220,51 @@ const ClientChannelsPage = () => {
                           </div>
                         </div>
 
-                        <p className="text-xs text-slate-500 leading-relaxed mb-3 sm:mb-4">
+                        <p className={cn("text-xs leading-relaxed mb-3 sm:mb-4", isDark ? "text-slate-400" : "text-slate-500")}>
                           Connect official Facebook Business Pages to automate Messenger interactions, capture inbound leads, and answer FAQs.
                         </p>
 
                         {/* Content Body */}
                         {isComingSoon ? (
-                          <div className="p-3 sm:p-3.5 rounded-xl sm:rounded-2xl bg-amber-50/70 border border-amber-200/60 text-amber-900 text-xs space-y-1 mb-3 sm:mb-4">
-                            <div className="font-bold flex items-center gap-1.5 text-amber-950 text-[11px]">
-                              <Clock size={12} className="text-amber-600 shrink-0" />
+                          <div className={cn(
+                            "p-3 sm:p-3.5 rounded-xl sm:rounded-2xl border text-xs space-y-1 mb-3 sm:mb-4",
+                            isDark ? "bg-amber-950/40 border-amber-800/60 text-amber-200" : "bg-amber-50/70 border-amber-200/60 text-amber-900"
+                          )}>
+                            <div className={cn("font-bold flex items-center gap-1.5 text-[11px]", isDark ? "text-amber-300" : "text-amber-950")}>
+                              <Clock size={12} className="text-amber-500 shrink-0" />
                               <span>Launching Soon</span>
                             </div>
-                            <p className="text-[10px] text-amber-800 leading-relaxed font-medium">
+                            <p className={cn("text-[10px] leading-relaxed font-medium", isDark ? "text-amber-300/80" : "text-amber-800")}>
                               {state.reason || 'This channel is deactivated by admin and will be enabled shortly.'}
                             </p>
                           </div>
                         ) : isConn ? (
-                          <div className="space-y-2 py-2.5 sm:py-3 px-3 sm:px-3.5 rounded-xl sm:rounded-2xl bg-slate-50/80 border border-slate-100 text-xs mb-3 sm:mb-4">
+                          <div className={cn(
+                            "space-y-2 py-2.5 sm:py-3 px-3 sm:px-3.5 rounded-xl sm:rounded-2xl text-xs mb-3 sm:mb-4 border transition-colors",
+                            isDark ? "bg-slate-800/60 border-slate-700/80 text-slate-200" : "bg-slate-50/80 border-slate-100 text-slate-700"
+                          )}>
                             <div className="flex justify-between items-center text-[11px]">
                               <span className="text-slate-400 font-bold uppercase tracking-wider text-[9px]">Page Name</span>
-                              <span className="font-bold text-slate-800 truncate max-w-[150px]">{client?.facebook_config?.page_name || 'Facebook Page'}</span>
+                              <span className={cn("font-bold truncate max-w-[150px]", isDark ? "text-white" : "text-slate-800")}>{client?.facebook_config?.page_name || 'Facebook Page'}</span>
                             </div>
                             <div className="flex justify-between items-center text-[11px]">
                               <span className="text-slate-400 font-bold uppercase tracking-wider text-[9px]">Status</span>
-                              <span className="font-bold text-emerald-600 flex items-center gap-1">
+                              <span className="font-bold text-emerald-400 flex items-center gap-1">
                                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> Active Sync
                               </span>
                             </div>
                           </div>
                         ) : (
-                          <div className="space-y-1.5 py-2.5 sm:py-3 px-3 sm:px-3.5 rounded-xl sm:rounded-2xl bg-blue-50/40 border border-blue-100/60 mb-3 sm:mb-4 text-[11px] font-medium text-slate-600">
+                          <div className={cn(
+                            "space-y-1.5 py-2.5 sm:py-3 px-3 sm:px-3.5 rounded-xl sm:rounded-2xl mb-3 sm:mb-4 text-[11px] font-medium border",
+                            isDark ? "bg-slate-800/40 border-slate-700/80 text-slate-300" : "bg-blue-50/40 border-blue-100/60 text-slate-600"
+                          )}>
                             <div className="flex items-center gap-2">
-                              <CheckCircle2 size={13} className="text-blue-600 shrink-0" />
+                              <CheckCircle2 size={13} className="text-blue-500 shrink-0" />
                               <span>Facebook Page Messenger Sync</span>
                             </div>
                             <div className="flex items-center gap-2">
-                              <CheckCircle2 size={13} className="text-blue-600 shrink-0" />
+                              <CheckCircle2 size={13} className="text-blue-500 shrink-0" />
                               <span>Instant Lead Capture & FAQ Bot</span>
                             </div>
                           </div>
@@ -1155,17 +1276,23 @@ const ClientChannelsPage = () => {
                         {isComingSoon ? (
                           <button
                             onClick={() => openComingSoon({ name: 'Facebook Messenger', key: 'facebook' })}
-                            className="w-full py-2 sm:py-2.5 px-3 sm:px-4 bg-amber-100 hover:bg-amber-200 text-amber-900 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 border border-amber-300 shadow-sm cursor-pointer"
+                            className={cn(
+                              "w-full py-2 sm:py-2.5 px-3 sm:px-4 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 border shadow-sm cursor-pointer",
+                              isDark ? "bg-amber-950/60 hover:bg-amber-900/60 text-amber-300 border-amber-800" : "bg-amber-100 hover:bg-amber-200 text-amber-900 border-amber-300"
+                            )}
                           >
-                            <Clock size={13} className="text-amber-700" />
+                            <Clock size={13} className={isDark ? "text-amber-400" : "text-amber-700"} />
                             <span>Coming Soon</span>
                           </button>
                         ) : isConn ? (
                           <button
                             onClick={() => setIsFacebookConfigModalOpen(true)}
-                            className="w-full py-2 sm:py-2.5 px-3 sm:px-4 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer border border-slate-200 shadow-sm"
+                            className={cn(
+                              "w-full py-2 sm:py-2.5 px-3 sm:px-4 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer border shadow-sm",
+                              isDark ? "bg-slate-800 hover:bg-slate-700 text-slate-200 border-slate-700" : "bg-slate-100 hover:bg-slate-200 text-slate-800 border-slate-200"
+                            )}
                           >
-                            <Settings size={13} className="text-slate-600" />
+                            <Settings size={13} className={isDark ? "text-slate-400" : "text-slate-600"} />
                             <span>Configure Facebook</span>
                           </button>
                         ) : (
@@ -1181,9 +1308,12 @@ const ClientChannelsPage = () => {
                             <Link
                               href="/client/plans"
                               title={`Included in ${state.requiredPlanName}`}
-                              className="flex-1 py-2 sm:py-2.5 px-2.5 bg-[#1877F2]/10 hover:bg-[#1877F2]/20 text-[#1877F2] border border-[#1877F2]/30 rounded-xl text-xs font-extrabold transition flex items-center justify-center gap-1 cursor-pointer shadow-2xs truncate"
+                              className={cn(
+                                "flex-1 py-2 sm:py-2.5 px-2.5 rounded-xl text-xs font-extrabold transition flex items-center justify-center gap-1 cursor-pointer shadow-2xs truncate border",
+                                isDark ? "bg-blue-950/60 hover:bg-blue-900/60 text-blue-300 border-blue-800/60" : "bg-[#1877F2]/10 hover:bg-[#1877F2]/20 text-[#1877F2] border border-[#1877F2]/30"
+                              )}
                             >
-                              <Layers size={13} className="text-[#1877F2] shrink-0" />
+                              <Layers size={13} className="text-blue-400 shrink-0" />
                               <span className="truncate">{state.requiredPlanName || 'Plan'}</span>
                             </Link>
                           </div>
@@ -1201,10 +1331,10 @@ const ClientChannelsPage = () => {
 
                   return (
                     <div className={cn(
-                      "bg-white rounded-2xl sm:rounded-3xl border p-4 sm:p-6 lg:p-7 flex flex-col justify-between transition-all duration-300 shadow-sm hover:shadow-md relative overflow-hidden group",
+                      "rounded-2xl sm:rounded-3xl border p-4 sm:p-6 lg:p-7 flex flex-col justify-between transition-all duration-300 shadow-sm hover:shadow-md relative overflow-hidden group",
                       isComingSoon
-                        ? "border-amber-200/80 bg-amber-50/15"
-                        : "border-slate-200/90 hover:border-pink-300"
+                        ? (isDark ? "border-amber-800/80 bg-amber-950/20" : "border-amber-200/80 bg-amber-50/15")
+                        : (isDark ? "bg-[#0f172a] border-slate-800 hover:border-pink-400/50 shadow-xl" : "bg-white border-slate-200/90 hover:border-pink-300")
                     )}>
                       <div>
                         {/* Top Header */}
@@ -1214,10 +1344,13 @@ const ClientChannelsPage = () => {
                               <InstagramBrandIcon size={30} />
                             </div>
                             <div className="min-w-0 flex-1">
-                              <h3 className="font-extrabold text-slate-900 text-sm sm:text-base leading-tight break-words">
+                              <h3 className={cn("font-extrabold text-sm sm:text-base leading-tight break-words", isDark ? "text-white" : "text-slate-900")}>
                                 Instagram Direct
                               </h3>
-                              <span className="inline-block text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-pink-700 bg-pink-50 px-2 py-0.5 rounded-md border border-pink-200/60 mt-0.5">
+                              <span className={cn(
+                                "inline-block text-[9px] sm:text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md border mt-0.5",
+                                isDark ? "bg-pink-950/70 text-pink-300 border-pink-800/60" : "bg-pink-50 text-pink-700 border-pink-200/60"
+                              )}>
                                 Business DMs
                               </span>
                             </div>
@@ -1225,16 +1358,25 @@ const ClientChannelsPage = () => {
 
                           <div className="shrink-0">
                             {isComingSoon ? (
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[9px] sm:text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200 whitespace-nowrap">
+                              <span className={cn(
+                                "inline-flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[9px] sm:text-[10px] font-bold border whitespace-nowrap",
+                                isDark ? "bg-amber-950/70 text-amber-300 border-amber-800" : "bg-amber-50 text-amber-700 border-amber-200"
+                              )}>
                                 <Sparkles size={10} /> Soon
                               </span>
                             ) : isConn ? (
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[9px] sm:text-[10px] font-bold bg-pink-50 text-pink-700 border border-pink-200 whitespace-nowrap">
+                              <span className={cn(
+                                "inline-flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[9px] sm:text-[10px] font-bold border whitespace-nowrap",
+                                isDark ? "bg-pink-950/70 text-pink-300 border-pink-800" : "bg-pink-50 text-pink-700 border-pink-200"
+                              )}>
                                 <span className="w-1.5 h-1.5 rounded-full bg-pink-500 animate-pulse" />
                                 <span>Connected</span>
                               </span>
                             ) : (
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[9px] sm:text-[10px] font-bold bg-slate-50 text-slate-500 border border-slate-200 whitespace-nowrap">
+                              <span className={cn(
+                                "inline-flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[9px] sm:text-[10px] font-bold border whitespace-nowrap",
+                                isDark ? "bg-slate-800/80 text-slate-400 border-slate-700" : "bg-slate-50 text-slate-500 border-slate-200"
+                              )}>
                                 <span className="w-1.5 h-1.5 rounded-full bg-slate-300" />
                                 <span>Offline</span>
                               </span>
@@ -1242,42 +1384,51 @@ const ClientChannelsPage = () => {
                           </div>
                         </div>
 
-                        <p className="text-xs text-slate-500 leading-relaxed mb-3 sm:mb-4">
+                        <p className={cn("text-xs leading-relaxed mb-3 sm:mb-4", isDark ? "text-slate-400" : "text-slate-500")}>
                           Automate Instagram Direct Messages, story replies, and comment triggers for active customer engagement.
                         </p>
 
                         {/* Content Body */}
                         {isComingSoon ? (
-                          <div className="p-3 sm:p-3.5 rounded-xl sm:rounded-2xl bg-amber-50/70 border border-amber-200/60 text-amber-900 text-xs space-y-1 mb-3 sm:mb-4">
-                            <div className="font-bold flex items-center gap-1.5 text-amber-950 text-[11px]">
-                              <Clock size={12} className="text-amber-600 shrink-0" />
+                          <div className={cn(
+                            "p-3 sm:p-3.5 rounded-xl sm:rounded-2xl border text-xs space-y-1 mb-3 sm:mb-4",
+                            isDark ? "bg-amber-950/40 border-amber-800/60 text-amber-200" : "bg-amber-50/70 border-amber-200/60 text-amber-900"
+                          )}>
+                            <div className={cn("font-bold flex items-center gap-1.5 text-[11px]", isDark ? "text-amber-300" : "text-amber-950")}>
+                              <Clock size={12} className="text-amber-500 shrink-0" />
                               <span>Launching Soon</span>
                             </div>
-                            <p className="text-[10px] text-amber-800 leading-relaxed font-medium">
+                            <p className={cn("text-[10px] leading-relaxed font-medium", isDark ? "text-amber-300/80" : "text-amber-800")}>
                               {state.reason || 'This channel is deactivated by admin and will be enabled shortly.'}
                             </p>
                           </div>
                         ) : isConn ? (
-                          <div className="space-y-2 py-2.5 sm:py-3 px-3 sm:px-3.5 rounded-xl sm:rounded-2xl bg-slate-50/80 border border-slate-100 text-xs mb-3 sm:mb-4">
+                          <div className={cn(
+                            "space-y-2 py-2.5 sm:py-3 px-3 sm:px-3.5 rounded-xl sm:rounded-2xl text-xs mb-3 sm:mb-4 border transition-colors",
+                            isDark ? "bg-slate-800/60 border-slate-700/80 text-slate-200" : "bg-slate-50/80 border-slate-100 text-slate-700"
+                          )}>
                             <div className="flex justify-between items-center text-[11px]">
                               <span className="text-slate-400 font-bold uppercase tracking-wider text-[9px]">Account ID</span>
-                              <span className="font-mono font-semibold text-slate-700 truncate max-w-[140px]">@{client?.instagram_config?.username || 'instagram_biz'}</span>
+                              <span className={cn("font-mono font-semibold truncate max-w-[140px]", isDark ? "text-slate-200" : "text-slate-700")}>@{client?.instagram_config?.username || 'instagram_biz'}</span>
                             </div>
                             <div className="flex justify-between items-center text-[11px]">
                               <span className="text-slate-400 font-bold uppercase tracking-wider text-[9px]">Status</span>
-                              <span className="font-bold text-pink-600 flex items-center gap-1">
+                              <span className="font-bold text-pink-400 flex items-center gap-1">
                                 <span className="w-1.5 h-1.5 rounded-full bg-pink-500" /> Auto DM Active
                               </span>
                             </div>
                           </div>
                         ) : (
-                          <div className="space-y-1.5 py-2.5 sm:py-3 px-3 sm:px-3.5 rounded-xl sm:rounded-2xl bg-pink-50/40 border border-pink-100/60 mb-3 sm:mb-4 text-[11px] font-medium text-slate-600">
+                          <div className={cn(
+                            "space-y-1.5 py-2.5 sm:py-3 px-3 sm:px-3.5 rounded-xl sm:rounded-2xl mb-3 sm:mb-4 text-[11px] font-medium border",
+                            isDark ? "bg-slate-800/40 border-slate-700/80 text-slate-300" : "bg-pink-50/40 border-pink-100/60 text-slate-600"
+                          )}>
                             <div className="flex items-center gap-2">
-                              <CheckCircle2 size={13} className="text-pink-600 shrink-0" />
+                              <CheckCircle2 size={13} className="text-pink-500 shrink-0" />
                               <span>Instagram Business OAuth Connect</span>
                             </div>
                             <div className="flex items-center gap-2">
-                              <CheckCircle2 size={13} className="text-pink-600 shrink-0" />
+                              <CheckCircle2 size={13} className="text-pink-500 shrink-0" />
                               <span>Comment-to-DM Auto Automation</span>
                             </div>
                           </div>
@@ -1289,17 +1440,23 @@ const ClientChannelsPage = () => {
                         {isComingSoon ? (
                           <button
                             onClick={() => openComingSoon({ name: 'Instagram Direct', key: 'instagram' })}
-                            className="w-full py-2 sm:py-2.5 px-3 sm:px-4 bg-amber-100 hover:bg-amber-200 text-amber-900 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 border border-amber-300 shadow-sm cursor-pointer"
+                            className={cn(
+                              "w-full py-2 sm:py-2.5 px-3 sm:px-4 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 border shadow-sm cursor-pointer",
+                              isDark ? "bg-amber-950/60 hover:bg-amber-900/60 text-amber-300 border-amber-800" : "bg-amber-100 hover:bg-amber-200 text-amber-900 border-amber-300"
+                            )}
                           >
-                            <Clock size={13} className="text-amber-700" />
+                            <Clock size={13} className={isDark ? "text-amber-400" : "text-amber-700"} />
                             <span>Coming Soon</span>
                           </button>
                         ) : isConn ? (
                           <button
                             onClick={() => setIsInstagramConfigModalOpen(true)}
-                            className="w-full py-2 sm:py-2.5 px-3 sm:px-4 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer border border-slate-200 shadow-sm"
+                            className={cn(
+                              "w-full py-2 sm:py-2.5 px-3 sm:px-4 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer border shadow-sm",
+                              isDark ? "bg-slate-800 hover:bg-slate-700 text-slate-200 border-slate-700" : "bg-slate-100 hover:bg-slate-200 text-slate-800 border-slate-200"
+                            )}
                           >
-                            <Settings size={13} className="text-slate-600" />
+                            <Settings size={13} className={isDark ? "text-slate-400" : "text-slate-600"} />
                             <span>Configure Instagram</span>
                           </button>
                         ) : (
@@ -1315,9 +1472,12 @@ const ClientChannelsPage = () => {
                             <Link
                               href="/client/plans"
                               title={`Included in ${state.requiredPlanName}`}
-                              className="flex-1 py-2 sm:py-2.5 px-2.5 bg-pink-50 hover:bg-pink-100 text-pink-800 border border-pink-200/80 rounded-xl text-xs font-extrabold transition flex items-center justify-center gap-1 cursor-pointer shadow-2xs truncate"
+                              className={cn(
+                                "flex-1 py-2 sm:py-2.5 px-2.5 rounded-xl text-xs font-extrabold transition flex items-center justify-center gap-1 cursor-pointer shadow-2xs truncate border",
+                                isDark ? "bg-pink-950/60 hover:bg-pink-900/60 text-pink-300 border-pink-800/60" : "bg-pink-50 hover:bg-pink-100 text-pink-800 border border-pink-200/80"
+                              )}
                             >
-                              <Layers size={13} className="text-pink-600 shrink-0" />
+                              <Layers size={13} className="text-pink-400 shrink-0" />
                               <span className="truncate">{state.requiredPlanName || 'Plan'}</span>
                             </Link>
                           </div>
@@ -1335,10 +1495,10 @@ const ClientChannelsPage = () => {
 
                   return (
                     <div className={cn(
-                      "bg-white rounded-2xl sm:rounded-3xl border p-4 sm:p-6 lg:p-7 flex flex-col justify-between transition-all duration-300 shadow-sm hover:shadow-md relative overflow-hidden group",
+                      "rounded-2xl sm:rounded-3xl border p-4 sm:p-6 lg:p-7 flex flex-col justify-between transition-all duration-300 shadow-sm hover:shadow-md relative overflow-hidden group",
                       isComingSoon
-                        ? "border-amber-200/80 bg-amber-50/15"
-                        : "border-slate-200/90 hover:border-red-300"
+                        ? (isDark ? "border-amber-800/80 bg-amber-950/20" : "border-amber-200/80 bg-amber-50/15")
+                        : (isDark ? "bg-[#0f172a] border-slate-800 hover:border-red-500/40 shadow-xl" : "bg-white border-slate-200/90 hover:border-red-300")
                     )}>
                       <div>
                         {/* Top Header */}
@@ -1348,10 +1508,13 @@ const ClientChannelsPage = () => {
                               <YouTubeBrandIcon size={30} />
                             </div>
                             <div className="min-w-0 flex-1">
-                              <h3 className="font-extrabold text-slate-900 text-sm sm:text-base leading-tight break-words">
+                              <h3 className={cn("font-extrabold text-sm sm:text-base leading-tight break-words", isDark ? "text-white" : "text-slate-900")}>
                                 YouTube Channel
                               </h3>
-                              <span className="inline-block text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-red-700 bg-red-50 px-2 py-0.5 rounded-md border border-red-200/60 mt-0.5">
+                              <span className={cn(
+                                "inline-block text-[9px] sm:text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md border mt-0.5",
+                                isDark ? "bg-red-950/70 text-red-300 border-red-800/60" : "bg-red-50 text-red-700 border border-red-200/60"
+                              )}>
                                 Video & Live
                               </span>
                             </div>
@@ -1359,16 +1522,25 @@ const ClientChannelsPage = () => {
 
                           <div className="shrink-0">
                             {isComingSoon ? (
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[9px] sm:text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200 whitespace-nowrap">
+                              <span className={cn(
+                                "inline-flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[9px] sm:text-[10px] font-bold border whitespace-nowrap",
+                                isDark ? "bg-amber-950/70 text-amber-300 border-amber-800" : "bg-amber-50 text-amber-700 border border-amber-200"
+                              )}>
                                 <Sparkles size={10} /> Soon
                               </span>
                             ) : isConn ? (
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[9px] sm:text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 whitespace-nowrap">
+                              <span className={cn(
+                                "inline-flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[9px] sm:text-[10px] font-bold border whitespace-nowrap",
+                                isDark ? "bg-emerald-950/70 text-emerald-300 border-emerald-800" : "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                              )}>
                                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                                 <span>Connected</span>
                               </span>
                             ) : (
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[9px] sm:text-[10px] font-bold bg-slate-50 text-slate-500 border border-slate-200 whitespace-nowrap">
+                              <span className={cn(
+                                "inline-flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[9px] sm:text-[10px] font-bold border whitespace-nowrap",
+                                isDark ? "bg-slate-800/80 text-slate-400 border-slate-700" : "bg-slate-50 text-slate-500 border border-slate-200"
+                              )}>
                                 <span className="w-1.5 h-1.5 rounded-full bg-slate-300" />
                                 <span>Offline</span>
                               </span>
@@ -1376,36 +1548,45 @@ const ClientChannelsPage = () => {
                           </div>
                         </div>
 
-                        <p className="text-xs text-slate-500 leading-relaxed mb-3 sm:mb-4">
+                        <p className={cn("text-xs leading-relaxed mb-3 sm:mb-4", isDark ? "text-slate-400" : "text-slate-500")}>
                           Sync YouTube video comments, community audience questions, and automated replies.
                         </p>
 
                         {/* Content Body */}
                         {isComingSoon ? (
-                          <div className="p-3 sm:p-3.5 rounded-xl sm:rounded-2xl bg-amber-50/70 border border-amber-200/60 text-amber-900 text-xs space-y-1 mb-3 sm:mb-4">
-                            <div className="font-bold flex items-center gap-1.5 text-amber-950 text-[11px]">
-                              <Clock size={12} className="text-amber-600 shrink-0" />
+                          <div className={cn(
+                            "p-3 sm:p-3.5 rounded-xl sm:rounded-2xl border text-xs space-y-1 mb-3 sm:mb-4",
+                            isDark ? "bg-amber-950/40 border-amber-800/60 text-amber-200" : "bg-amber-50/70 border border-amber-200/60 text-amber-900"
+                          )}>
+                            <div className={cn("font-bold flex items-center gap-1.5 text-[11px]", isDark ? "text-amber-300" : "text-amber-950")}>
+                              <Clock size={12} className="text-amber-500 shrink-0" />
                               <span>Launching Soon</span>
                             </div>
-                            <p className="text-[10px] text-amber-800 leading-relaxed font-medium">
+                            <p className={cn("text-[10px] leading-relaxed font-medium", isDark ? "text-amber-300/80" : "text-amber-800")}>
                               {state.reason || 'This channel is deactivated by admin and will be enabled shortly.'}
                             </p>
                           </div>
                         ) : isConn ? (
-                          <div className="space-y-2 py-2.5 sm:py-3 px-3 sm:px-3.5 rounded-xl sm:rounded-2xl bg-slate-50/80 border border-slate-100 text-xs mb-3 sm:mb-4">
+                          <div className={cn(
+                            "space-y-2 py-2.5 sm:py-3 px-3 sm:px-3.5 rounded-xl sm:rounded-2xl text-xs mb-3 sm:mb-4 border transition-colors",
+                            isDark ? "bg-slate-800/60 border-slate-700/80 text-slate-200" : "bg-slate-50/80 border border-slate-100"
+                          )}>
                             <div className="flex justify-between items-center text-[11px]">
                               <span className="text-slate-400 font-bold uppercase tracking-wider text-[9px]">Channel Title</span>
-                              <span className="font-bold text-slate-800 truncate max-w-[150px]">{client?.youtube_config?.channel_title || 'YouTube Channel'}</span>
+                              <span className={cn("font-bold truncate max-w-[150px]", isDark ? "text-white" : "text-slate-800")}>{client?.youtube_config?.channel_title || 'YouTube Channel'}</span>
                             </div>
                           </div>
                         ) : (
-                          <div className="space-y-1.5 py-2.5 sm:py-3 px-3 sm:px-3.5 rounded-xl sm:rounded-2xl bg-red-50/40 border border-red-100/60 mb-3 sm:mb-4 text-[11px] font-medium text-slate-600">
+                          <div className={cn(
+                            "space-y-1.5 py-2.5 sm:py-3 px-3 sm:px-3.5 rounded-xl sm:rounded-2xl mb-3 sm:mb-4 text-[11px] font-medium border",
+                            isDark ? "bg-slate-800/40 border-slate-700/80 text-slate-300" : "bg-red-50/40 border border-red-100/60 text-slate-600"
+                          )}>
                             <div className="flex items-center gap-2">
-                              <CheckCircle2 size={13} className="text-red-600 shrink-0" />
+                              <CheckCircle2 size={13} className="text-red-500 shrink-0" />
                               <span>YouTube OAuth Connect</span>
                             </div>
                             <div className="flex items-center gap-2">
-                              <CheckCircle2 size={13} className="text-red-600 shrink-0" />
+                              <CheckCircle2 size={13} className="text-red-500 shrink-0" />
                               <span>Comment & Live Chat Auto Moderation</span>
                             </div>
                           </div>
@@ -1417,17 +1598,23 @@ const ClientChannelsPage = () => {
                         {isComingSoon ? (
                           <button
                             onClick={() => openComingSoon({ name: 'YouTube Channel', key: 'youtube' })}
-                            className="w-full py-2 sm:py-2.5 px-3 sm:px-4 bg-amber-100 hover:bg-amber-200 text-amber-900 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 border border-amber-300 shadow-sm cursor-pointer"
+                            className={cn(
+                              "w-full py-2 sm:py-2.5 px-3 sm:px-4 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 border shadow-sm cursor-pointer",
+                              isDark ? "bg-amber-950/60 hover:bg-amber-900/60 text-amber-300 border-amber-800" : "bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300"
+                            )}
                           >
-                            <Clock size={13} className="text-amber-700" />
+                            <Clock size={13} className={isDark ? "text-amber-400" : "text-amber-700"} />
                             <span>Coming Soon</span>
                           </button>
                         ) : isConn ? (
                           <button
                             onClick={() => setIsYouTubeConfigModalOpen(true)}
-                            className="w-full py-2 sm:py-2.5 px-3 sm:px-4 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer border border-slate-200 shadow-sm"
+                            className={cn(
+                              "w-full py-2 sm:py-2.5 px-3 sm:px-4 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer border shadow-sm",
+                              isDark ? "bg-slate-800 hover:bg-slate-700 text-slate-200 border-slate-700" : "bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200"
+                            )}
                           >
-                            <Settings size={13} className="text-slate-600" />
+                            <Settings size={13} className={isDark ? "text-slate-400" : "text-slate-600"} />
                             <span>Configure YouTube</span>
                           </button>
                         ) : (
@@ -1442,9 +1629,12 @@ const ClientChannelsPage = () => {
                             <Link
                               href="/client/plans"
                               title={`Included in ${state.requiredPlanName}`}
-                              className="flex-1 py-2 sm:py-2.5 px-2.5 bg-red-50 hover:bg-red-100 text-red-800 border border-red-200/80 rounded-xl text-xs font-extrabold transition flex items-center justify-center gap-1 cursor-pointer shadow-2xs truncate"
+                              className={cn(
+                                "flex-1 py-2 sm:py-2.5 px-2.5 rounded-xl text-xs font-extrabold transition flex items-center justify-center gap-1 cursor-pointer shadow-2xs truncate border",
+                                isDark ? "bg-red-950/60 hover:bg-red-900/60 text-red-300 border-red-800/60" : "bg-red-50 hover:bg-red-100 text-red-800 border border-red-200/80"
+                              )}
                             >
-                              <Layers size={13} className="text-red-600 shrink-0" />
+                              <Layers size={13} className="text-red-500 shrink-0" />
                               <span className="truncate">{state.requiredPlanName || 'Plan'}</span>
                             </Link>
                           </div>
@@ -1613,7 +1803,7 @@ const ClientChannelsPage = () => {
                   key: 'razorpay',
                   name: 'Razorpay Gateway',
                   desc: 'Accept online payments directly via automated invoices and chat links.',
-                  icon: <CreditCard size={28} className="text-[#02042B]" />,
+                  icon: <RazorpayBrandIcon size={28} isDark={isDark} />,
                   isConnected: isRazorpayConnected,
                   connectedInfo: client?.razorpay_config?.merchant_name || 'Gateway Active',
                   onConnect: () => setIsRazorpayConfigModalOpen(true),
@@ -1662,18 +1852,18 @@ const ClientChannelsPage = () => {
                 <>
                   {/* Category 2: Active Connectors (8) */}
                   {activeConnectors.length > 0 && (
-                    <div className="pt-6 sm:pt-8 border-t border-slate-200/80 space-y-4 sm:space-y-6">
+                    <div className={cn("pt-6 sm:pt-8 border-t space-y-4 sm:space-y-6", isDark ? "border-slate-800" : "border-slate-200/80")}>
                       <div className="flex flex-wrap items-center justify-between gap-2">
                         <div className="flex flex-wrap items-center gap-2">
                           <span className="w-2 h-2 rounded-full bg-blue-500 shadow-xs shadow-blue-500/50 shrink-0" />
-                          <h2 className="text-xs sm:text-sm font-extrabold uppercase tracking-wider text-slate-800">
+                          <h2 className={cn("text-xs sm:text-sm font-extrabold uppercase tracking-wider", isDark ? "text-slate-100" : "text-slate-800")}>
                             Connectors
                           </h2>
-                          <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-blue-50 text-blue-700 border border-blue-200 shrink-0">
+                          <span className={cn("px-2 py-0.5 rounded-full text-[10px] font-extrabold shrink-0", isDark ? "bg-blue-900/40 text-blue-400 border border-blue-800/60" : "bg-blue-50 text-blue-700 border border-blue-200")}>
                             {activeConnectors.length} Connectors
                           </span>
                         </div>
-                        <span className="text-xs text-slate-400 font-medium hidden md:inline">
+                        <span className={cn("text-xs font-medium hidden md:inline", isDark ? "text-slate-500" : "text-slate-400")}>
                           Productivity, Storage, Mail & Data Connectors
                         </span>
                       </div>
@@ -1686,19 +1876,30 @@ const ClientChannelsPage = () => {
                           return (
                             <div
                               key={item.key}
-                              className="bg-white rounded-2xl sm:rounded-3xl border border-slate-200/90 hover:border-slate-300 p-4 sm:p-6 lg:p-7 flex flex-col justify-between transition-all duration-300 shadow-sm hover:shadow-md relative group"
+                              className={cn(
+                                "rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-7 flex flex-col justify-between transition-all duration-300 shadow-sm hover:shadow-md relative group border",
+                                isDark
+                                  ? "bg-[#0f172a] border-slate-800 hover:border-slate-700"
+                                  : "bg-white border-slate-200/90 hover:border-slate-300"
+                              )}
                             >
                               <div>
                                 <div className="flex items-start justify-between gap-2.5 mb-3 sm:mb-4">
                                   <div className="flex items-center gap-2.5 sm:gap-3.5 min-w-0 flex-1">
-                                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center bg-slate-50 border border-slate-100 shadow-xs shrink-0">
+                                    <div className={cn(
+                                      "w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center shadow-xs shrink-0 border",
+                                      isDark ? "bg-slate-800/80 border-slate-700" : "bg-slate-50 border-slate-100"
+                                    )}>
                                       {item.icon}
                                     </div>
                                     <div className="min-w-0 flex-1">
-                                      <h3 className="font-extrabold text-slate-900 text-sm sm:text-base leading-tight break-words">
+                                      <h3 className={cn("font-extrabold text-sm sm:text-base leading-tight break-words", isDark ? "text-white" : "text-slate-900")}>
                                         {item.name}
                                       </h3>
-                                      <span className="inline-block text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md mt-0.5">
+                                      <span className={cn(
+                                        "inline-block text-[9px] sm:text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md mt-0.5",
+                                        isDark ? "text-slate-300 bg-slate-800 border border-slate-700" : "text-slate-500 bg-slate-100"
+                                      )}>
                                         {item.badge}
                                       </span>
                                     </div>
@@ -1706,26 +1907,35 @@ const ClientChannelsPage = () => {
 
                                   <div className="shrink-0">
                                     {isConn ? (
-                                      <span className="inline-flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[9px] sm:text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 whitespace-nowrap">
+                                      <span className={cn(
+                                        "inline-flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[9px] sm:text-[10px] font-bold whitespace-nowrap",
+                                        isDark ? "bg-emerald-950/60 text-emerald-400 border border-emerald-800/60" : "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                                      )}>
                                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                                         <span>Connected</span>
                                       </span>
                                     ) : (
-                                      <span className="inline-flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[9px] sm:text-[10px] font-bold bg-slate-50 text-slate-500 border border-slate-200 whitespace-nowrap">
-                                        <span className="w-1.5 h-1.5 rounded-full bg-slate-300" />
+                                      <span className={cn(
+                                        "inline-flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[9px] sm:text-[10px] font-bold whitespace-nowrap",
+                                        isDark ? "bg-slate-800/60 text-slate-400 border border-slate-700" : "bg-slate-50 text-slate-500 border border-slate-200"
+                                      )}>
+                                        <span className={cn("w-1.5 h-1.5 rounded-full", isDark ? "bg-slate-600" : "bg-slate-300")} />
                                         <span>Offline</span>
                                       </span>
                                     )}
                                   </div>
                                 </div>
 
-                                <p className="text-xs text-slate-500 leading-relaxed mb-3 sm:mb-4">
+                                <p className={cn("text-xs leading-relaxed mb-3 sm:mb-4", isDark ? "text-slate-400" : "text-slate-500")}>
                                   {item.desc}
                                 </p>
 
                                 {isConn && (
-                                  <div className="px-3 py-2 rounded-xl bg-slate-50 border border-slate-100 text-[11px] sm:text-xs font-semibold text-slate-700 truncate mb-3 sm:mb-4">
-                                    <span className="text-slate-400 font-normal">Status: </span>
+                                  <div className={cn(
+                                    "px-3 py-2 rounded-xl text-[11px] sm:text-xs font-semibold truncate mb-3 sm:mb-4 border",
+                                    isDark ? "bg-slate-800/60 border-slate-700 text-slate-200" : "bg-slate-50 border-slate-100 text-slate-700"
+                                  )}>
+                                    <span className={isDark ? "text-slate-400 font-normal" : "text-slate-400 font-normal"}>Status: </span>
                                     <span>{item.connectedInfo}</span>
                                   </div>
                                 )}
@@ -1735,9 +1945,14 @@ const ClientChannelsPage = () => {
                                 {isConn ? (
                                   <button
                                     onClick={item.onConfigure}
-                                    className="w-full py-2 sm:py-2.5 px-3 sm:px-4 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer border border-slate-200 shadow-xs"
+                                    className={cn(
+                                      "w-full py-2 sm:py-2.5 px-3 sm:px-4 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer border shadow-xs",
+                                      isDark
+                                        ? "bg-slate-800 hover:bg-slate-700 text-slate-200 border-slate-700"
+                                        : "bg-slate-100 hover:bg-slate-200 text-slate-800 border-slate-200"
+                                    )}
                                   >
-                                    <Settings size={13} className="text-slate-600" />
+                                    <Settings size={13} className={isDark ? "text-slate-400" : "text-slate-600"} />
                                     <span>Configure</span>
                                   </button>
                                 ) : (
@@ -1755,9 +1970,14 @@ const ClientChannelsPage = () => {
                                     <Link
                                       href="/client/plans"
                                       title={`Included in ${state.requiredPlanName || 'Plan'}`}
-                                      className="flex-1 py-2 sm:py-2.5 px-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 rounded-xl text-xs font-extrabold transition flex items-center justify-center gap-1 cursor-pointer shadow-2xs truncate"
+                                      className={cn(
+                                        "flex-1 py-2 sm:py-2.5 px-2.5 rounded-xl text-xs font-extrabold transition flex items-center justify-center gap-1 cursor-pointer shadow-2xs truncate border",
+                                        isDark
+                                          ? "bg-slate-800 hover:bg-slate-700 text-slate-200 border-slate-700"
+                                          : "bg-slate-100 hover:bg-slate-200 text-slate-800 border-slate-200"
+                                      )}
                                     >
-                                      <Layers size={13} className="text-slate-600 shrink-0" />
+                                      <Layers size={13} className={cn("shrink-0", isDark ? "text-slate-400" : "text-slate-600")} />
                                       <span className="truncate">{state.requiredPlanName || 'Plan'}</span>
                                     </Link>
                                   </div>
@@ -1771,18 +1991,18 @@ const ClientChannelsPage = () => {
                   )}
 
                   {/* Category 3: Workspace Features & Modules (9) */}
-                  <div className="pt-6 sm:pt-8 border-t border-slate-200/80 space-y-4 sm:space-y-6">
+                  <div className={cn("pt-6 sm:pt-8 border-t space-y-4 sm:space-y-6", isDark ? "border-slate-800" : "border-slate-200/80")}>
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <div className="flex flex-wrap items-center gap-2">
                         <span className="w-2 h-2 rounded-full bg-purple-500 shadow-xs shadow-purple-500/50 shrink-0" />
-                        <h2 className="text-xs sm:text-sm font-extrabold uppercase tracking-wider text-slate-800">
+                        <h2 className={cn("text-xs sm:text-sm font-extrabold uppercase tracking-wider", isDark ? "text-slate-100" : "text-slate-800")}>
                           Features & Modules
                         </h2>
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-purple-50 text-purple-700 border border-purple-200 shrink-0">
+                        <span className={cn("px-2 py-0.5 rounded-full text-[10px] font-extrabold shrink-0", isDark ? "bg-purple-900/40 text-purple-300 border border-purple-800/60" : "bg-purple-50 text-purple-700 border border-purple-200")}>
                           {allFeaturesList.length} Modules
                         </span>
                       </div>
-                      <span className="text-xs text-slate-400 font-medium hidden md:inline">
+                      <span className={cn("text-xs font-medium hidden md:inline", isDark ? "text-slate-500" : "text-slate-400")}>
                         Core Workspace Business Features & Automation Tools
                       </span>
                     </div>
@@ -1795,33 +2015,47 @@ const ClientChannelsPage = () => {
                         return (
                           <div
                             key={item.key}
-                            className="bg-white rounded-2xl sm:rounded-3xl border border-slate-200/90 hover:border-slate-300 p-4 sm:p-6 lg:p-7 flex flex-col justify-between transition-all duration-300 shadow-sm hover:shadow-md relative group"
+                            className={cn(
+                              "rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-7 flex flex-col justify-between transition-all duration-300 shadow-sm hover:shadow-md relative group border",
+                              isDark
+                                ? "bg-[#0f172a] border-slate-800 hover:border-slate-700"
+                                : "bg-white border-slate-200/90 hover:border-slate-300"
+                            )}
                           >
                             <div>
                               <div className="flex items-start justify-between gap-2.5 mb-3 sm:mb-4">
                                 <div className="flex items-center gap-2.5 sm:gap-3.5 min-w-0 flex-1">
-                                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center bg-slate-50 border border-slate-100 shadow-xs shrink-0">
+                                  <div className={cn(
+                                    "w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center shadow-xs shrink-0 border",
+                                    isDark ? "bg-slate-800/80 border-slate-700" : "bg-slate-50 border-slate-100"
+                                  )}>
                                     {item.icon}
                                   </div>
                                   <div className="min-w-0 flex-1">
-                                    <h3 className="font-extrabold text-slate-900 text-sm sm:text-base leading-tight break-words">
+                                    <h3 className={cn("font-extrabold text-sm sm:text-base leading-tight break-words", isDark ? "text-white" : "text-slate-900")}>
                                       {item.name}
                                     </h3>
-                                    <span className="inline-block text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-purple-700 bg-purple-50 px-2 py-0.5 rounded-md mt-0.5 border border-purple-100">
+                                    <span className={cn(
+                                      "inline-block text-[9px] sm:text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md mt-0.5 border",
+                                      isDark ? "text-purple-300 bg-purple-950/60 border-purple-800/50" : "text-purple-700 bg-purple-50 border-purple-100"
+                                    )}>
                                       {item.badge}
                                     </span>
                                   </div>
                                 </div>
 
                                 <div className="shrink-0">
-                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[9px] sm:text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 whitespace-nowrap">
+                                  <span className={cn(
+                                    "inline-flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[9px] sm:text-[10px] font-bold whitespace-nowrap",
+                                    isDark ? "bg-emerald-950/60 text-emerald-400 border border-emerald-800/60" : "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                                  )}>
                                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                                     <span>Active</span>
                                   </span>
                                 </div>
                               </div>
 
-                              <p className="text-xs text-slate-500 leading-relaxed mb-3 sm:mb-4">
+                              <p className={cn("text-xs leading-relaxed mb-3 sm:mb-4", isDark ? "text-slate-400" : "text-slate-500")}>
                                 {item.desc}
                               </p>
                             </div>
@@ -1841,9 +2075,14 @@ const ClientChannelsPage = () => {
                               ) : isConn ? (
                                 <button
                                   onClick={item.onConfigure}
-                                  className="w-full py-2 sm:py-2.5 px-3 sm:px-4 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer border border-slate-200 shadow-xs"
+                                  className={cn(
+                                    "w-full py-2 sm:py-2.5 px-3 sm:px-4 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer border shadow-xs",
+                                    isDark
+                                      ? "bg-slate-800 hover:bg-slate-700 text-slate-200 border-slate-700"
+                                      : "bg-slate-100 hover:bg-slate-200 text-slate-800 border-slate-200"
+                                  )}
                                 >
-                                  <Settings size={13} className="text-slate-600" />
+                                  <Settings size={13} className={isDark ? "text-slate-400" : "text-slate-600"} />
                                   <span>Configure</span>
                                 </button>
                               ) : (
@@ -1861,9 +2100,14 @@ const ClientChannelsPage = () => {
                                   <Link
                                     href="/client/plans"
                                     title={`Included in ${state.requiredPlanName || 'Plan'}`}
-                                    className="flex-1 py-2 sm:py-2.5 px-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 rounded-xl text-xs font-extrabold transition flex items-center justify-center gap-1 cursor-pointer shadow-2xs truncate"
+                                    className={cn(
+                                      "flex-1 py-2 sm:py-2.5 px-2.5 rounded-xl text-xs font-extrabold transition flex items-center justify-center gap-1 cursor-pointer shadow-2xs truncate border",
+                                      isDark
+                                        ? "bg-slate-800 hover:bg-slate-700 text-slate-200 border-slate-700"
+                                        : "bg-slate-100 hover:bg-slate-200 text-slate-800 border-slate-200"
+                                    )}
                                   >
-                                    <Layers size={13} className="text-slate-600 shrink-0" />
+                                    <Layers size={13} className={cn("shrink-0", isDark ? "text-slate-400" : "text-slate-600")} />
                                     <span className="truncate">{state.requiredPlanName || 'Plan'}</span>
                                   </Link>
                                 </div>
@@ -1877,18 +2121,18 @@ const ClientChannelsPage = () => {
 
                   {/* Category 3: Dedicated Coming Soon Integrations */}
                   {comingSoonConnectors.length > 0 && (
-                    <div className="pt-6 sm:pt-8 border-t border-slate-200/80 space-y-4 sm:space-y-6">
+                    <div className={cn("pt-6 sm:pt-8 border-t space-y-4 sm:space-y-6", isDark ? "border-slate-800" : "border-slate-200/80")}>
                       <div className="flex flex-wrap items-center justify-between gap-2">
                         <div className="flex flex-wrap items-center gap-2">
                           <span className="w-2 h-2 rounded-full bg-amber-500 shadow-xs shadow-amber-500/50 shrink-0" />
-                          <h2 className="text-xs sm:text-sm font-extrabold uppercase tracking-wider text-slate-800">
+                          <h2 className={cn("text-xs sm:text-sm font-extrabold uppercase tracking-wider", isDark ? "text-slate-100" : "text-slate-800")}>
                             Coming Soon Integrations
                           </h2>
-                          <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-50 text-amber-700 border border-amber-200 shrink-0">
+                          <span className={cn("px-2 py-0.5 rounded-full text-[10px] font-extrabold shrink-0", isDark ? "bg-amber-900/40 text-amber-300 border border-amber-800/60" : "bg-amber-50 text-amber-700 border border-amber-200")}>
                             {comingSoonConnectors.length} Scheduled
                           </span>
                         </div>
-                        <span className="text-xs text-slate-400 font-medium hidden md:inline">
+                        <span className={cn("text-xs font-medium hidden md:inline", isDark ? "text-slate-500" : "text-slate-400")}>
                           Scheduled to go live soon by platform administrator
                         </span>
                       </div>
@@ -1897,40 +2141,59 @@ const ClientChannelsPage = () => {
                         {comingSoonConnectors.map((item) => (
                           <div
                             key={item.key}
-                            className="bg-white rounded-2xl sm:rounded-3xl border border-amber-200/80 bg-amber-50/15 p-4 sm:p-6 lg:p-7 flex flex-col justify-between transition-all duration-300 shadow-sm hover:shadow-md relative group"
+                            className={cn(
+                              "rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-7 flex flex-col justify-between transition-all duration-300 shadow-sm hover:shadow-md relative group border",
+                              isDark
+                                ? "bg-[#0f172a] border-amber-500/30 hover:border-amber-500/50"
+                                : "bg-white border-amber-200/80 bg-amber-50/15 hover:border-amber-300"
+                            )}
                           >
                             <div>
                               {/* Header */}
                               <div className="flex items-start justify-between gap-2.5 mb-3 sm:mb-4">
                                 <div className="flex items-center gap-2.5 sm:gap-3.5 min-w-0 flex-1">
-                                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center bg-slate-50 border border-slate-100 shadow-xs shrink-0">
+                                  <div className={cn(
+                                    "w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center shadow-xs shrink-0 border",
+                                    isDark ? "bg-slate-800/80 border-slate-700" : "bg-slate-50 border-slate-100"
+                                  )}>
                                     {item.icon}
                                   </div>
                                   <div className="min-w-0 flex-1">
-                                    <h3 className="font-extrabold text-slate-900 text-sm sm:text-base leading-tight break-words">
+                                    <h3 className={cn("font-extrabold text-sm sm:text-base leading-tight break-words", isDark ? "text-white" : "text-slate-900")}>
                                       {item.name}
                                     </h3>
-                                    <span className="inline-block text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md mt-0.5">
+                                    <span className={cn(
+                                      "inline-block text-[9px] sm:text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md mt-0.5",
+                                      isDark ? "text-slate-300 bg-slate-800 border border-slate-700" : "text-slate-500 bg-slate-100"
+                                    )}>
                                       {item.badge}
                                     </span>
                                   </div>
                                 </div>
 
                                 <div className="shrink-0">
-                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[9px] sm:text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200 whitespace-nowrap">
+                                  <span className={cn(
+                                    "inline-flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[9px] sm:text-[10px] font-bold whitespace-nowrap",
+                                    isDark ? "bg-amber-950/60 text-amber-300 border border-amber-800/60" : "bg-amber-50 text-amber-700 border border-amber-200"
+                                  )}>
                                     <Sparkles size={10} />
                                     <span>Soon</span>
                                   </span>
                                 </div>
                               </div>
 
-                              <p className="text-xs text-slate-500 leading-relaxed mb-3 sm:mb-4">
+                              <p className={cn("text-xs leading-relaxed mb-3 sm:mb-4", isDark ? "text-slate-400" : "text-slate-500")}>
                                 {item.desc}
                               </p>
 
                               {/* Coming soon notice */}
-                              <div className="px-3 py-2 rounded-xl bg-amber-50/70 border border-amber-200/60 text-[11px] sm:text-xs font-medium text-amber-900 mb-3 sm:mb-4 flex items-center gap-1.5">
-                                <Clock size={12} className="text-amber-600 shrink-0" />
+                              <div className={cn(
+                                "px-3 py-2 rounded-xl text-[11px] sm:text-xs font-medium mb-3 sm:mb-4 flex items-center gap-1.5 border",
+                                isDark
+                                  ? "bg-amber-950/30 border-amber-800/50 text-amber-300"
+                                  : "bg-amber-50/70 border-amber-200/60 text-amber-900"
+                              )}>
+                                <Clock size={12} className={isDark ? "text-amber-400 shrink-0" : "text-amber-600 shrink-0"} />
                                 <span>Scheduled to go live soon by admin.</span>
                               </div>
                             </div>
@@ -1939,9 +2202,14 @@ const ClientChannelsPage = () => {
                             <div className="pt-1 sm:pt-2">
                               <button
                                 onClick={() => openComingSoon({ name: item.name, key: item.key })}
-                                className="w-full py-2 sm:py-2.5 px-3 sm:px-4 bg-amber-100 hover:bg-amber-200 text-amber-900 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer border border-amber-300 shadow-xs"
+                                className={cn(
+                                  "w-full py-2 sm:py-2.5 px-3 sm:px-4 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer border shadow-xs",
+                                  isDark
+                                    ? "bg-amber-950/60 hover:bg-amber-900/60 text-amber-300 border-amber-800/70"
+                                    : "bg-amber-100 hover:bg-amber-200 text-amber-900 border-amber-300"
+                                )}
                               >
-                                <Clock size={13} className="text-amber-700" />
+                                <Clock size={13} className={isDark ? "text-amber-400" : "text-amber-700"} />
                                 <span>Coming Soon</span>
                               </button>
                             </div>
@@ -2056,6 +2324,19 @@ const ClientChannelsPage = () => {
             onClose={() => setIsGoogleNewsConfigModalOpen(false)}
             client={client}
             onSaved={() => fetchClient(true)}
+          />
+        )}
+
+        {/* Razorpay Configuration Modal */}
+        {isRazorpayConfigModalOpen && (
+          <RazorpayConfigModal
+            isOpen={isRazorpayConfigModalOpen}
+            onClose={() => setIsRazorpayConfigModalOpen(false)}
+            onSaved={() => {
+              fetchClient(true);
+              setToast({ msg: 'Razorpay configuration updated!', type: 'success' });
+              setTimeout(() => setToast(null), 3000);
+            }}
           />
         )}
 

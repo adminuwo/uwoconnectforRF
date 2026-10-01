@@ -331,7 +331,7 @@ const ClientAutomationsPage = () => {
                   <textarea
                     value={greetingData.message}
                     onChange={(e) => setGreetingData({ ...greetingData, message: e.target.value })}
-                    placeholder="e.g. Hi there! Welcome to UWO Connect. How can our team assist you today?"
+                    placeholder="e.g. Hi there! Welcome to UWO Connect™. How can our team assist you today?"
                     rows={4}
                     className="w-full bg-slate-50/80 border border-slate-200 rounded-xl sm:rounded-2xl p-3 sm:p-4 text-xs text-slate-800 outline-none focus:border-[#00AB56] focus:ring-2 focus:ring-[#00AB56]/15 transition-all resize-none font-medium leading-relaxed"
                   />

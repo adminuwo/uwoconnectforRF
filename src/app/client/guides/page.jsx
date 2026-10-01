@@ -10,8 +10,10 @@ import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import GuideCard from '@/components/guides/GuideCard';
 import LearningCenterModal from '@/components/guides/LearningCenterModal';
 import { API_BASE_URL } from '@/config/apiConfig';
+import { useTour } from '@/context/TourContext';
 
 const LearningCenterPage = () => {
+  const { resetTour } = useTour();
   const [guides, setGuides] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -57,16 +59,26 @@ const LearningCenterPage = () => {
         {/* Banner - Light Theme */}
         <div className="mb-6 p-5 sm:p-6 rounded-3xl bg-gradient-to-br from-emerald-500/10 via-[#F0FDF4] to-white relative overflow-hidden border border-emerald-500/20 shadow-sm">
           <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-400/20 rounded-full blur-3xl pointer-events-none" />
-          <div className="relative z-10 max-w-2xl space-y-3">
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-600/10 text-emerald-700 rounded-xl border border-emerald-600/20 text-xs font-black uppercase tracking-widest">
-              <Sparkles size={13} /> UWOConnect Learning Academy
+          <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div className="max-w-2xl space-y-3">
+              <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-600/10 text-emerald-700 rounded-xl border border-emerald-600/20 text-xs font-black uppercase tracking-widest">
+                <Sparkles size={13} /> UWOConnect Learning Academy
+              </div>
+              <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900">
+                Interactive Learning Center & Step-by-Step Guides
+              </h1>
+              <p className="text-slate-600 text-xs sm:text-sm leading-relaxed font-medium">
+                Explore interactive tutorials, architecture blueprints, code snippets, and step-by-step setup walkthroughs for every UWOConnect feature.
+              </p>
             </div>
-            <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-slate-900">
-              Interactive Learning Center & Step-by-Step Guides
-            </h1>
-            <p className="text-slate-600 text-xs sm:text-sm leading-relaxed font-medium">
-              Explore interactive tutorials, architecture blueprints, code snippets, and step-by-step setup walkthroughs for every UWOConnect feature.
-            </p>
+            <button
+              onClick={() => resetTour()}
+              className="inline-flex items-center gap-2 px-5 py-3 bg-slate-900 hover:bg-black text-white rounded-2xl font-bold text-xs shadow-md hover:shadow-lg transition-all cursor-pointer shrink-0"
+              title="Restart step-by-step onboarding walkthrough"
+            >
+              <Rocket size={16} className="text-emerald-400" />
+              Replay Interactive Tour
+            </button>
           </div>
         </div>
 

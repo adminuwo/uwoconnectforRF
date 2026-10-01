@@ -10,11 +10,11 @@ import {
 } from '@/lib/seo';
 
 export const metadata = buildPageMetadata({
-  title: 'Contact Support & Sales — UwoConnect Platform',
+  title: 'Contact Support & Sales — UWO Connect™ Platform',
   description:
-    'Get in touch with the UwoConnect team for 24/7 technical support, product onboarding, enterprise billing, or WhatsApp Meta API integrations.',
+    'Get in touch with the UWO Connect™ team for 24/7 technical support, product onboarding, enterprise billing, or WhatsApp Meta API integrations.',
   path: '/contact',
-  keywords: ['Contact UwoConnect', 'UwoConnect support', 'WhatsApp API help', 'customer support phone', 'Aisa Technologies contact'],
+  keywords: ['Contact UWO Connect™', 'UWO Connect™ support', 'WhatsApp API help', 'customer support phone', 'Aisa Technologies contact'],
 });
 
 export default function ContactPage() {

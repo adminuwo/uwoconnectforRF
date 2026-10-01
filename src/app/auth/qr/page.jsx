@@ -198,7 +198,7 @@ export default function QrLoginPage() {
             </div>
           </div>
           <span className="text-xl font-extrabold tracking-tight text-gray-900 group-hover:text-emerald-600 transition-colors">
-            {brand?.name || 'UwoConnect'}
+            {brand?.name || 'UWO Connect™'}
           </span>
         </Link>
 
@@ -418,7 +418,7 @@ export default function QrLoginPage() {
       {/* Footer */}
       <footer className="relative z-10 w-full max-w-6xl mx-auto px-6 py-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-400 font-medium">
         <div>
-          &copy; {new Date().getFullYear()} {brand?.name || 'UwoConnect'} · All rights reserved.
+          &copy; {new Date().getFullYear()} {brand?.name || 'UWO Connect™'} · All rights reserved.
         </div>
         <div className="flex items-center gap-6">
           <Link href="/privacy" className="hover:text-gray-600 transition-colors">Privacy Policy</Link>

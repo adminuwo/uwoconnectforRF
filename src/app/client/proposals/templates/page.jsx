@@ -9,6 +9,7 @@ import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { cn } from '@/lib/utils';
+import { API_BASE_URL } from '@/config/apiConfig';
 
 const ProposalTemplatesPage = () => {
   const router = useRouter();
@@ -35,9 +36,8 @@ const ProposalTemplatesPage = () => {
   const fetchTemplates = async () => {
     setLoading(true);
     const token = localStorage.getItem('uwo_token');
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app';
     try {
-      const res = await axios.get(`${API_URL}/api/sales-document-templates/`, {
+      const res = await axios.get(`${API_BASE_URL}/api/sales-document-templates/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setTemplates(Array.isArray(res.data) ? res.data : res.data.results || []);
@@ -92,7 +92,6 @@ const ProposalTemplatesPage = () => {
 
     setSaving(true);
     const token = localStorage.getItem('uwo_token');
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app';
 
     const payload = {
       name,
@@ -103,11 +102,11 @@ const ProposalTemplatesPage = () => {
 
     try {
       if (activeModal === 'new') {
-        await axios.post(`${API_URL}/api/sales-document-templates/`, payload, {
+        await axios.post(`${API_BASE_URL}/api/sales-document-templates/`, payload, {
           headers: { Authorization: `Bearer ${token}` }
         });
       } else {
-        await axios.put(`${API_URL}/api/sales-document-templates/${modalTemplate.id}/`, payload, {
+        await axios.put(`${API_BASE_URL}/api/sales-document-templates/${modalTemplate.id}/`, payload, {
           headers: { Authorization: `Bearer ${token}` }
         });
       }
@@ -124,9 +123,8 @@ const ProposalTemplatesPage = () => {
   const handleDeleteTemplate = async (tplId) => {
     if (!confirm("Are you sure you want to delete this template?")) return;
     const token = localStorage.getItem('uwo_token');
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app';
     try {
-      await axios.delete(`${API_URL}/api/sales-document-templates/${tplId}/`, {
+      await axios.delete(`${API_BASE_URL}/api/sales-document-templates/${tplId}/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       fetchTemplates();
@@ -194,21 +192,31 @@ const ProposalTemplatesPage = () => {
                   </span>
                 </div>
                 
-                <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-50">
+                <div className="flex items-center justify-between pt-3 border-t border-slate-100">
                   <button
-                    onClick={() => handleOpenEditModal(tpl)}
-                    className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-500 hover:text-slate-900 cursor-pointer"
-                    title="Edit Template"
+                    onClick={() => router.push(`/client/quotations/new?type=PROPOSAL&template_id=${tpl.id}`)}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition-all shadow-xs cursor-pointer"
+                    title="Create a new Proposal using this template"
                   >
-                    <Edit3 size={13} />
+                    <Sparkles size={13} />
+                    <span>Use Template</span>
                   </button>
-                  <button
-                    onClick={() => handleDeleteTemplate(tpl.id)}
-                    className="p-1.5 hover:bg-red-50 rounded-lg text-slate-400 hover:text-red-600 cursor-pointer"
-                    title="Delete Template"
-                  >
-                    <Trash2 size={13} />
-                  </button>
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => handleOpenEditModal(tpl)}
+                      className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-500 hover:text-slate-900 cursor-pointer"
+                      title="Edit Template"
+                    >
+                      <Edit3 size={13} />
+                    </button>
+                    <button
+                      onClick={() => handleDeleteTemplate(tpl.id)}
+                      className="p-1.5 hover:bg-red-50 rounded-lg text-slate-400 hover:text-red-600 cursor-pointer"
+                      title="Delete Template"
+                    >
+                      <Trash2 size={13} />
+                    </button>
+                  </div>
                 </div>
               </div>
             ))

@@ -281,8 +281,26 @@ export default function PublicInvoicePage() {
   const shipping = Number(invoice.shipping || 0);
   const tax = Number(invoice.tax || 0);
   const total = Number(invoice.total || 0);
-  const amountPaid = Number(invoice.amount_paid || (invoice.payment_status === 'PAID' ? total : 0));
-  const balanceDue = Number(invoice.balance_due || (total - amountPaid));
+  const amountPaid = Number(invoice.amount_paid != null ? invoice.amount_paid : (invoice.payment_status === 'PAID' ? total : 0));
+  const balanceDue = Number(invoice.balance_due != null ? invoice.balance_due : Math.max(0, total - amountPaid));
+
+  const getItemName = (item) => item.item_name || item.name || item.product_name || item.title || 'Product Item';
+  const getItemTax = (item) => {
+    if (item.tax != null && item.tax !== '') return Number(item.tax);
+    if (item.tax_amount != null && item.tax_amount !== '') return Number(item.tax_amount);
+    if (item.tax_rate != null && item.tax_rate !== '') {
+      return (Number(item.unit_price || 0) * Number(item.quantity || 1) * Number(item.tax_rate)) / 100;
+    }
+    const itemTotal = Number(item.total || 0);
+    const baseTotal = Number(item.unit_price || 0) * Number(item.quantity || 1);
+    if (itemTotal > baseTotal) return itemTotal - baseTotal;
+    return 0;
+  };
+  const getItemTotal = (item) => {
+    if (item.total != null && item.total !== '') return Number(item.total);
+    const base = Number(item.unit_price || 0) * Number(item.quantity || 1);
+    return base + getItemTax(item);
+  };
 
   return (
     <div className="min-h-screen bg-slate-100 pb-20 font-sans text-slate-800">
@@ -374,7 +392,7 @@ export default function PublicInvoicePage() {
             </div>
 
             <div className="text-right space-y-1">
-              <span className="text-2xl font-black tracking-tight text-slate-900 block">INVOICE</span>
+              <span className="text-3xl font-black tracking-tight text-slate-900 block">INVOICE</span>
               <p className="text-xs font-bold text-slate-800">#{invoice.invoice_number}</p>
               <p className="text-[11px] text-slate-500 font-medium">
                 Date: {invoice.invoice_date ? new Date(invoice.invoice_date).toLocaleDateString() : 'N/A'}
@@ -419,25 +437,30 @@ export default function PublicInvoicePage() {
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {items.length > 0 ? (
-                  items.map((item, idx) => (
-                    <tr key={idx} className="hover:bg-slate-50/50">
-                      <td className="py-3 px-3 font-medium text-slate-900">
-                        {item.name || item.product_name || 'Product'}
-                        {item.sku && <span className="block text-[10px] text-slate-400 font-mono">SKU: {item.sku}</span>}
-                      </td>
-                      <td className="py-3 px-2 text-center text-slate-600">{item.quantity || 1}</td>
-                      <td className="py-3 px-3 text-right text-slate-600">{curSymbol}{Number(item.unit_price || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
-                      <td className="py-3 px-3 text-right text-slate-600">{curSymbol}{Number(item.tax || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
-                      <td className="py-3 px-3 text-right font-bold text-slate-900">{curSymbol}{Number(item.total || item.unit_price || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
-                    </tr>
-                  ))
+                  items.map((item, idx) => {
+                    const iName = getItemName(item);
+                    const iTax = getItemTax(item);
+                    const iTotal = getItemTotal(item);
+                    return (
+                      <tr key={idx} className="hover:bg-slate-50/50">
+                        <td className="py-3 px-3 font-semibold text-slate-900">
+                          {iName}
+                          {item.sku && <span className="block text-[10px] text-slate-400 font-mono">SKU: {item.sku}</span>}
+                        </td>
+                        <td className="py-3 px-2 text-center text-slate-600 font-medium">{item.quantity || 1}</td>
+                        <td className="py-3 px-3 text-right text-slate-600">{curSymbol}{Number(item.unit_price || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                        <td className="py-3 px-3 text-right text-slate-600">{curSymbol}{iTax.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                        <td className="py-3 px-3 text-right font-bold text-slate-900">{curSymbol}{iTotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                      </tr>
+                    );
+                  })
                 ) : (
                   <tr>
-                    <td className="py-3 px-3 font-medium text-slate-900">Product Purchase</td>
-                    <td className="py-3 px-2 text-center text-slate-600">1</td>
+                    <td className="py-3 px-3 font-semibold text-slate-900">Product Purchase</td>
+                    <td className="py-3 px-2 text-center text-slate-600 font-medium">1</td>
                     <td className="py-3 px-3 text-right text-slate-600">{curSymbol}{subtotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
-                    <td className="py-3 px-3 text-right text-slate-600">{curSymbol}0.00</td>
-                    <td className="py-3 px-3 text-right font-bold text-slate-900">{curSymbol}{subtotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                    <td className="py-3 px-3 text-right text-slate-600">{curSymbol}{tax.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                    <td className="py-3 px-3 text-right font-bold text-slate-900">{curSymbol}{total.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
                   </tr>
                 )}
               </tbody>
@@ -446,40 +469,40 @@ export default function PublicInvoicePage() {
 
           {/* Financial Summary */}
           <div className="flex justify-end my-6">
-            <div className="w-72 space-y-2 text-xs">
+            <div className="w-full sm:w-80 space-y-2 text-xs bg-slate-50/80 p-4 rounded-xl border border-slate-200/80">
               <div className="flex justify-between text-slate-600">
-                <span>Subtotal:</span>
-                <span className="font-medium">{curSymbol}{subtotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                <span className="font-medium">Subtotal:</span>
+                <span className="font-semibold text-slate-800">{curSymbol}{subtotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
               </div>
               {discount > 0 && (
-                <div className="flex justify-between text-emerald-600">
-                  <span>Discount:</span>
-                  <span>-{curSymbol}{discount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                <div className="flex justify-between text-emerald-700">
+                  <span className="font-medium">Discount:</span>
+                  <span className="font-semibold">-{curSymbol}{discount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
                 </div>
               )}
               {shipping > 0 && (
                 <div className="flex justify-between text-slate-600">
-                  <span>Shipping:</span>
-                  <span>{curSymbol}{shipping.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                  <span className="font-medium">Shipping:</span>
+                  <span className="font-semibold text-slate-800">{curSymbol}{shipping.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
                 </div>
               )}
               {tax > 0 && (
                 <div className="flex justify-between text-slate-600">
-                  <span>Tax / GST:</span>
-                  <span>{curSymbol}{tax.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                  <span className="font-medium">Tax / GST:</span>
+                  <span className="font-semibold text-slate-800">{curSymbol}{tax.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
                 </div>
               )}
-              <div className="flex justify-between text-sm font-black text-slate-900 pt-2 border-t border-slate-300">
+              <div className="flex justify-between items-center text-sm font-black text-slate-900 pt-2 border-t border-slate-300">
                 <span>Grand Total:</span>
-                <span className="text-emerald-700">{curSymbol}{total.toLocaleString(undefined, { minimumFractionDigits: 2 })} {curCode}</span>
+                <span className="text-emerald-700">{curSymbol}{total.toLocaleString(undefined, { minimumFractionDigits: 2 })} <span className="text-xs font-bold text-slate-500">{curCode}</span></span>
               </div>
-              <div className="flex justify-between text-slate-600">
-                <span>Amount Paid:</span>
+              <div className="flex justify-between text-slate-600 pt-1 border-t border-dashed border-slate-200">
+                <span className="font-medium">Amount Paid:</span>
                 <span className="font-bold text-emerald-700">{curSymbol}{amountPaid.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
               </div>
-              <div className="flex justify-between text-slate-600">
-                <span>Balance Due:</span>
-                <span className="font-bold text-slate-900">{curSymbol}{balanceDue.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+              <div className="flex justify-between text-slate-700">
+                <span className="font-medium">Balance Due:</span>
+                <span className={`font-bold ${balanceDue > 0 ? 'text-amber-700' : 'text-slate-900'}`}>{curSymbol}{balanceDue.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
               </div>
             </div>
           </div>

@@ -84,7 +84,7 @@ export default function DailyImpactSection({ isDark = true }) {
             </span>
           </h2>
           <p className={`text-base md:text-lg font-medium ${isDark ? 'text-[#8E99A8]' : 'text-slate-600'}`}>
-            See how UWO Connect simplifies team workflows, speeds up sales pipelines, and eliminates manual repetitive effort.
+            See how UWO Connect™ simplifies team workflows, speeds up sales pipelines, and eliminates manual repetitive effort.
           </p>
         </div>
 

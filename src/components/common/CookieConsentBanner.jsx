@@ -91,7 +91,7 @@ export default function CookieConsentBanner() {
               </h4>
 
               <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 font-medium leading-relaxed">
-                We use essential cookies to keep UwoConnect working properly. With your permission, we may also use optional cookies to improve your experience and understand how the website is used.{' '}
+                We use essential cookies to keep UWO Connect™ working properly. With your permission, we may also use optional cookies to improve your experience and understand how the website is used.{' '}
                 <Link
                   href="/cookie-policy"
                   className="text-[#059669] hover:text-emerald-800 dark:hover:text-emerald-400 font-bold underline transition-colors"

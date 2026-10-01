@@ -8,7 +8,7 @@ export default function KinsoTestimonials({ isDark }) {
   const testimonials = [
     {
       quote:
-        'UWO Connect replaced 7 disconnected SaaS tools for our global support team. Our average response time dropped from 4 hours to 42 seconds.',
+        'Uwo Connect replaced 7 disconnected SaaS tools for our global support team. Our average response time dropped from 4 hours to 42 seconds.',
       author: 'Rachel Vance',
       title: 'VP of Customer Experience',
       company: 'ScaleX Global',
@@ -47,7 +47,7 @@ export default function KinsoTestimonials({ isDark }) {
             Loved by Global Support & Revenue Leaders.
           </h2>
           <p className={`text-sm sm:text-base md:text-lg ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-            Discover how leading organizations use UWO Connect to streamline communication and drive customer loyalty.
+            Discover how leading organizations use Uwo Connect to streamline communication and drive customer loyalty.
           </p>
         </div>
 

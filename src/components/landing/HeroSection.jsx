@@ -43,7 +43,7 @@ export default function HeroSection({ isDark = true }) {
             isDark ? 'text-slate-300' : 'text-slate-700'
           }`}
         >
-          UWO Connect unifies WhatsApp Business API, Instagram Direct, Facebook Messenger, Email, and Web Chat into one intelligent AI automation workspace.
+          Uwo Connect unifies WhatsApp Business API, Instagram Direct, Facebook Messenger, Email, and Web Chat into one intelligent AI automation workspace.
         </p>
 
         <p
@@ -114,7 +114,7 @@ export default function HeroSection({ isDark = true }) {
 
           {/* Connection Hub Visualization Grid */}
           <div className="relative p-6 rounded-2xl bg-slate-900/80 border border-white/10 overflow-hidden mb-6">
-            {/* Central Node: UWO Connect AI Core */}
+            {/* Central Node: Uwo Connect AI Core */}
             <div className="w-24 h-24 rounded-full bg-gradient-to-br from-[#10B981] to-[#059669] mx-auto flex flex-col items-center justify-center text-black font-black shadow-[0_0_40px_rgba(16,185,129,0.5)] z-20 relative animate-pulse">
               <Sparkles size={24} />
               <span className="text-[10px] uppercase font-black tracking-widest mt-1">UWO AI</span>

@@ -257,7 +257,7 @@ const RegisterPage = () => {
           </div>
           <h2 className="text-2xl font-extrabold text-slate-900 mb-2">Registration Successful</h2>
           <p className="text-slate-600 mb-8 leading-relaxed text-sm font-medium">
-            Your {brand?.brand_name || 'UwoConnect'} account has been created and activated. You can now log in to access your business workspace.
+            Your {brand?.brand_name || 'UWO Connect™'} account has been created and activated. You can now log in to access your business workspace.
           </p>
           <Link 
             href={brand?.custom_domain ? `/auth/login?brand_domain=${brand.custom_domain}` : '/auth/login'} 
@@ -292,8 +292,8 @@ const RegisterPage = () => {
             alt={brand?.brand_name || "Brand Logo"} 
             className="w-5 h-5 rounded-full object-contain"
           />
-          <span className="text-slate-800 font-bold text-xs tracking-wider uppercase">
-            {brand?.brand_name || "UwoConnect"}
+          <span className="text-slate-800 font-bold text-xs tracking-wide">
+            {brand?.is_whitelabel && brand?.brand_name ? brand.brand_name : "UWO Connect™"}
           </span>
           <span 
             className="w-1.5 h-1.5 rounded-full animate-pulse" 

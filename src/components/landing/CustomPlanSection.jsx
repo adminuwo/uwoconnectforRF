@@ -12,9 +12,9 @@ export default function CustomPlanSection({ isDarkMode = false }) {
   const handleEmailClick = (e) => {
     e?.preventDefault();
     const recipient = 'admin@uwo24.com';
-    const subject = encodeURIComponent('Custom Plan Request - UwoConnect');
+    const subject = encodeURIComponent('Custom Plan Request - UWO Connect™');
     const body = encodeURIComponent(
-      'Hello UwoConnect Team,\n\nI am interested in a Custom Plan for my business.\n\nBusiness Name: \nRequirements / Features Needed: \nExpected Volume / Channels: \nContact Number: \n\nThank you!'
+      'Hello UWO Connect™ Team,\n\nI am interested in a Custom Plan for my business.\n\nBusiness Name: \nRequirements / Features Needed: \nExpected Volume / Channels: \nContact Number: \n\nThank you!'
     );
 
     const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${recipient}&su=${subject}&body=${body}`;
@@ -108,7 +108,7 @@ export default function CustomPlanSection({ isDarkMode = false }) {
   ];
 
   return (
-    <div className="w-full mt-12 text-left font-serif" style={{ fontFamily: "'Times New Roman', Times, serif" }}>
+    <div className="w-full mt-12 font-serif" style={{ fontFamily: "'Times New Roman', Times, serif" }}>
       <div
         className={cn(
           "relative rounded-3xl sm:rounded-[2.5rem] border p-6 sm:p-10 lg:p-14 overflow-hidden transition-all duration-300 shadow-xl",
@@ -124,7 +124,7 @@ export default function CustomPlanSection({ isDarkMode = false }) {
         {/* ══════════════════════════════════════════════════════════════ */}
         {/* 1. HEADER: CUSTOM PLAN & BUILD WHAT YOU ACTUALLY NEED          */}
         {/* ══════════════════════════════════════════════════════════════ */}
-        <div className={cn("relative z-10 max-w-4xl space-y-4 pb-8 border-b", isDarkMode ? "border-slate-800" : "border-slate-100")}>
+        <div className={cn("relative z-10 w-full space-y-4 pb-10 border-b flex flex-col items-center text-center", isDarkMode ? "border-slate-800" : "border-slate-100")}>
           <div
             className={cn(
               "inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border text-[11px] font-black tracking-wider uppercase",
@@ -139,7 +139,7 @@ export default function CustomPlanSection({ isDarkMode = false }) {
 
           <h2
             className={cn(
-              "text-3xl sm:text-5xl font-bold tracking-tight italic leading-tight",
+              "text-3xl sm:text-5xl font-bold tracking-tight italic leading-tight text-center",
               isDarkMode ? "text-white" : "text-slate-900"
             )}
             style={{ fontFamily: "'Times New Roman', Times, serif", fontStyle: "italic" }}
@@ -149,14 +149,14 @@ export default function CustomPlanSection({ isDarkMode = false }) {
 
           <h3
             className={cn(
-              "text-xl sm:text-2xl font-bold tracking-tight",
+              "text-xl sm:text-2xl font-bold tracking-tight text-center",
               isDarkMode ? "text-emerald-400" : "text-[#059669]"
             )}
           >
             Build What You Actually Need
           </h3>
 
-          <div className="space-y-2 text-sm sm:text-base font-medium leading-relaxed max-w-3xl">
+          <div className="space-y-2.5 text-sm sm:text-base font-medium leading-relaxed max-w-5xl mx-auto text-center">
             <p className={isDarkMode ? "text-slate-200" : "text-slate-600"}>
               Every business is different. If our standard plans don't cover your requirements, create a <span className={cn("font-bold", isDarkMode ? "text-emerald-400" : "text-emerald-600")}>Custom Plan</span> designed specifically for your business, workflow, and goals.
             </p>
@@ -169,8 +169,8 @@ export default function CustomPlanSection({ isDarkMode = false }) {
         {/* ══════════════════════════════════════════════════════════════ */}
         {/* 2. WHAT YOU CAN REQUEST                                       */}
         {/* ══════════════════════════════════════════════════════════════ */}
-        <div className={cn("relative z-10 py-10 border-b space-y-6", isDarkMode ? "border-slate-800" : "border-slate-100")}>
-          <div className="space-y-1">
+        <div className={cn("relative z-10 py-10 border-b space-y-6 text-left", isDarkMode ? "border-slate-800" : "border-slate-100")}>
+          <div className="space-y-1 text-left">
             <h4
               className={cn(
                 "text-2xl sm:text-3xl font-bold italic tracking-tight",
@@ -190,13 +190,13 @@ export default function CustomPlanSection({ isDarkMode = false }) {
               <div
                 key={idx}
                 className={cn(
-                  "p-5 rounded-2xl border flex flex-col justify-between transition-all duration-300 group hover:-translate-y-1",
+                  "p-5 rounded-2xl border flex flex-col justify-between transition-all duration-300 group hover:-translate-y-1 text-left",
                   isDarkMode
                     ? "bg-slate-900/90 border-slate-800 hover:border-emerald-500/50 hover:bg-slate-850"
                     : "bg-slate-50/80 border-slate-200/90 hover:border-emerald-300 hover:bg-white hover:shadow-md"
                 )}
               >
-                <div className="space-y-2.5">
+                <div className="space-y-2.5 text-left">
                   <span className="text-2xl sm:text-3xl block leading-none filter drop-shadow-xs">
                     {item.emoji}
                   </span>
@@ -215,8 +215,8 @@ export default function CustomPlanSection({ isDarkMode = false }) {
         {/* ══════════════════════════════════════════════════════════════ */}
         {/* 3. HOW IT WORKS                                               */}
         {/* ══════════════════════════════════════════════════════════════ */}
-        <div className={cn("relative z-10 py-10 border-b space-y-6", isDarkMode ? "border-slate-800" : "border-slate-100")}>
-          <div className="space-y-1">
+        <div className={cn("relative z-10 py-10 border-b space-y-6 text-left", isDarkMode ? "border-slate-800" : "border-slate-100")}>
+          <div className="space-y-1 text-left">
             <h4
               className={cn(
                 "text-2xl sm:text-3xl font-bold italic tracking-tight",
@@ -236,13 +236,13 @@ export default function CustomPlanSection({ isDarkMode = false }) {
               <div
                 key={idx}
                 className={cn(
-                  "p-5 sm:p-6 rounded-2xl border relative flex flex-col justify-between transition-all duration-300 group hover:-translate-y-1",
+                  "p-5 sm:p-6 rounded-2xl border relative flex flex-col justify-between transition-all duration-300 group hover:-translate-y-1 text-left",
                   isDarkMode
                     ? "bg-slate-900/90 border-slate-800 hover:border-emerald-500/50 hover:bg-slate-850"
                     : "bg-slate-50/60 border-slate-200/80 hover:border-emerald-300 hover:bg-white hover:shadow-md"
                 )}
               >
-                <div className="space-y-3">
+                <div className="space-y-3 text-left">
                   <div className="w-9 h-9 rounded-xl bg-[#059669] text-white flex items-center justify-center font-black text-sm shadow-sm group-hover:scale-105 transition-transform">
                     {s.step}
                   </div>
@@ -271,7 +271,7 @@ export default function CustomPlanSection({ isDarkMode = false }) {
               : "bg-gradient-to-br from-emerald-50/70 via-white to-teal-50/50 border-emerald-200/90 shadow-sm"
           )}
         >
-          <div className="space-y-2 max-w-2xl">
+          <div className="space-y-2 max-w-2xl text-left">
             <h4
               className={cn(
                 "text-2xl sm:text-3xl font-bold italic tracking-tight",

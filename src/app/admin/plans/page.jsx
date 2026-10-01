@@ -2873,7 +2873,7 @@ export default function AdminPlansPage() {
                 <div className="min-w-0 pr-2">
                   <h2 className="text-sm sm:text-base font-black text-slate-900 tracking-tight truncate">ADD FEATURE TO CATALOG</h2>
                   <p className="text-[11px] sm:text-xs text-slate-500 font-medium mt-0.5 truncate">
-                    Register a new modular entitlement into UWO Connect
+                    Register a new modular entitlement into UwoConnect
                   </p>
                 </div>
                 <button

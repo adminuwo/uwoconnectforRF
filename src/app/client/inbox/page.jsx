@@ -16,6 +16,7 @@ import AuditLogDrawer from '@/components/inbox/AuditLogDrawer';
 import MonitoringAnalyticsModal from '@/components/inbox/MonitoringAnalyticsModal';
 import { cn } from '@/lib/utils';
 import { API_BASE_URL } from '@/config/apiConfig';
+import { useBrand } from '@/context/BrandContext';
 
 const WhatsAppIcon = ({ size = 14, className = '' }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
@@ -50,6 +51,9 @@ const CHANNEL_TABS = [
 ];
 
 export default function ClientInboxPage() {
+  const { brand } = useBrand();
+  const displayBrandLogo = brand?.logo_url || '/download (3).gif';
+
   const [messages, setMessages] = useState([]);
   const [contacts, setContacts] = useState([]);
   const [conversations, setConversations] = useState([]);
@@ -829,25 +833,36 @@ export default function ClientInboxPage() {
             {/* Conversation Items */}
             <div className="flex-1 overflow-y-auto divide-y divide-slate-100">
               {loading ? (
-                <div className="p-3 space-y-2.5">
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <div key={i} className="flex items-center gap-3 p-3 rounded-2xl bg-slate-50/70 border border-slate-100 animate-pulse">
-                      <div className="w-11 h-11 rounded-full bg-slate-200 shrink-0" />
-                      <div className="flex-1 space-y-2">
-                        <div className="flex justify-between items-center">
-                          <div className="h-3.5 bg-slate-200 rounded-md w-24" />
-                          <div className="h-2.5 bg-slate-200 rounded-md w-10" />
-                        </div>
-                        <div className="h-2.5 bg-slate-100 rounded-md w-36" />
+                <div className="p-8 flex flex-col items-center justify-center space-y-3.5 my-auto h-72 text-center animate-in fade-in duration-300">
+                  <div className="relative flex items-center justify-center">
+                    <div className="absolute inset-0 rounded-2xl bg-emerald-500/20 blur-xl animate-pulse scale-150" />
+                    <div className="w-14 h-14 rounded-2xl border-2 border-emerald-100 border-t-emerald-600 animate-spin" />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="w-9 h-9 rounded-xl bg-white p-1 shadow-xs border border-slate-100 flex items-center justify-center overflow-hidden">
+                        <img 
+                          src={displayBrandLogo} 
+                          alt={brand?.brand_name || "UWO Connect™"} 
+                          className="w-full h-full object-contain"
+                          onError={(e) => { e.currentTarget.src = "/download (3).gif"; }}
+                        />
                       </div>
                     </div>
-                  ))}
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-xs font-bold text-slate-800">
+                      Loading {activeChannelFilter !== 'ALL' ? (activeChannelFilter.charAt(0) + activeChannelFilter.slice(1).toLowerCase()) : ''} Chats...
+                    </p>
+                    <p className="text-[10px] text-slate-400">Syncing live conversations</p>
+                  </div>
                 </div>
               ) : convoList.length > 0 ? (
                 convoList.map(convo => {
                   const isSelected = convo.id === activeConvo?.id;
                   const channelInfo = channelBadges[convo.channel] || channelBadges.WHATSAPP;
                   const liveState = livePresence[convo.id];
+                  const displayName = (!convo.name || convo.name.trim().toLowerCase() === 'unknown')
+                    ? (convo.rawAddress || 'Customer')
+                    : convo.name;
 
                   return (
                     <div
@@ -867,7 +882,7 @@ export default function ClientInboxPage() {
                         <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
                           <div className="relative shrink-0">
                             <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-slate-200 flex items-center justify-center font-bold text-slate-700 text-xs sm:text-sm">
-                              {convo.name.charAt(0).toUpperCase()}
+                              {displayName.charAt(0).toUpperCase()}
                             </div>
                             <span className={`absolute -bottom-1 -right-1 text-[8px] sm:text-[9px] px-1 sm:px-1.5 py-0.5 rounded-full font-bold shadow-2xs ${channelInfo.bg} ${channelInfo.text}`}>
                               {convo.channel.slice(0, 2)}
@@ -875,25 +890,11 @@ export default function ClientInboxPage() {
                           </div>
                           <div className="min-w-0 flex-1">
                             <h4 className="text-xs font-bold text-slate-900 flex items-center gap-1.5 truncate">
-                              <span className="truncate">{convo.name}</span>
+                              <span className="truncate">{displayName}</span>
                               {convo.isLocked && (
                                 <Lock className="w-3 h-3 text-amber-500 shrink-0" title="Locked by team handler" />
                               )}
                             </h4>
-                            {convo.rawAddress && (
-                              <span className={`inline-block text-[10px] font-mono font-bold px-1.5 py-0.5 rounded border mt-0.5 truncate max-w-full ${
-                                convo.channel === 'FACEBOOK'
-                                  ? 'text-blue-700 bg-blue-50 border-blue-200'
-                                  : convo.channel === 'INSTAGRAM'
-                                  ? 'text-pink-700 bg-pink-50 border-pink-200'
-                                  : convo.channel === 'GMAIL'
-                                  ? 'text-rose-700 bg-rose-50 border-rose-200'
-                                  : 'text-emerald-700 bg-emerald-50 border-emerald-200/80'
-                              }`}>
-                                {convo.channel === 'FACEBOOK' ? '👤 PSID: ' : convo.channel === 'INSTAGRAM' ? '📸 ' : convo.channel === 'GMAIL' ? '✉️ ' : '📱 '}
-                                {convo.rawAddress}
-                              </span>
-                            )}
                             <p className="text-[11px] text-slate-500 truncate mt-0.5">
                               {liveState?.isTyping ? (
                                 <span className="text-emerald-600 font-bold animate-pulse">
@@ -987,12 +988,16 @@ export default function ClientInboxPage() {
                     </button>
 
                     <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-emerald-600 text-white flex items-center justify-center font-black text-xs sm:text-sm shadow-sm shrink-0">
-                      {activeConvo.name.charAt(0).toUpperCase()}
+                      {((!activeConvo.name || activeConvo.name.trim().toLowerCase() === 'unknown') ? (activeConvo.rawAddress || 'C') : activeConvo.name).charAt(0).toUpperCase()}
                     </div>
 
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-1.5">
-                        <span className="text-xs sm:text-sm font-bold text-slate-900 truncate">{activeConvo.name}</span>
+                        <span className="text-xs sm:text-sm font-bold text-slate-900 truncate">
+                          {(!activeConvo.name || activeConvo.name.trim().toLowerCase() === 'unknown')
+                            ? (activeConvo.rawAddress || 'Customer')
+                            : activeConvo.name}
+                        </span>
                         {/* On desktop show badges inline */}
                         <div className="hidden sm:flex items-center gap-1.5 shrink-0">
                           {activeConvo.rawAddress && (
@@ -1144,40 +1149,23 @@ export default function ClientInboxPage() {
               {/* Timeline Messages View */}
               <div ref={scrollRef} className="flex-1 overflow-y-auto p-3 sm:p-6 space-y-3 sm:space-y-4">
                 {isLoadingMessages ? (
-                  <div className="space-y-4 py-4 animate-pulse">
-                    {/* Incoming bubble skeleton */}
-                    <div className="flex items-start gap-2.5 max-w-md">
-                      <div className="w-8 h-8 rounded-full bg-slate-200 shrink-0" />
-                      <div className="space-y-1.5 flex-1">
-                        <div className="bg-white p-3.5 rounded-2xl rounded-tl-sm border border-slate-100 shadow-2xs space-y-2">
-                          <div className="h-3 bg-slate-200 rounded-md w-3/4" />
-                          <div className="h-3 bg-slate-100 rounded-md w-1/2" />
+                  <div className="h-full min-h-[280px] flex flex-col items-center justify-center py-16 animate-in fade-in duration-200">
+                    <div className="relative flex items-center justify-center mb-3">
+                      <div className="absolute inset-0 rounded-2xl bg-emerald-500/20 blur-xl animate-pulse scale-125" />
+                      <div className="w-14 h-14 rounded-2xl border-2 border-emerald-100 border-t-emerald-600 animate-spin" />
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="w-9 h-9 rounded-xl bg-white p-1 shadow-xs border border-slate-100 flex items-center justify-center overflow-hidden">
+                          <img 
+                            src={displayBrandLogo} 
+                            alt={brand?.brand_name || "UWO Connect™"} 
+                            className="w-full h-full object-contain"
+                            onError={(e) => { e.currentTarget.src = "/download (3).gif"; }}
+                          />
                         </div>
-                        <div className="h-2 bg-slate-200 rounded w-12" />
                       </div>
                     </div>
-
-                    {/* Outgoing bubble skeleton */}
-                    <div className="flex items-end justify-end gap-2.5">
-                      <div className="space-y-1.5 max-w-md flex flex-col items-end">
-                        <div className="bg-emerald-600/20 p-3.5 rounded-2xl rounded-tr-sm border border-emerald-500/20 shadow-2xs space-y-2 w-64">
-                          <div className="h-3 bg-emerald-700/30 rounded-md w-full" />
-                          <div className="h-3 bg-emerald-700/20 rounded-md w-2/3" />
-                        </div>
-                        <div className="h-2 bg-slate-200 rounded w-12" />
-                      </div>
-                    </div>
-
-                    {/* Another incoming bubble skeleton */}
-                    <div className="flex items-start gap-2.5 max-w-md">
-                      <div className="w-8 h-8 rounded-full bg-slate-200 shrink-0" />
-                      <div className="space-y-1.5 flex-1">
-                        <div className="bg-white p-3.5 rounded-2xl rounded-tl-sm border border-slate-100 shadow-2xs space-y-2">
-                          <div className="h-3 bg-slate-200 rounded-md w-4/5" />
-                        </div>
-                        <div className="h-2 bg-slate-200 rounded w-12" />
-                      </div>
-                    </div>
+                    <p className="text-xs font-bold text-slate-700">Loading conversation...</p>
+                    <p className="text-[10px] text-slate-400 mt-0.5">Syncing real-time messages</p>
                   </div>
                 ) : (
                   <>
@@ -1534,26 +1522,45 @@ export default function ClientInboxPage() {
             </div>
           ) : loading ? (
             <div className="flex-1 flex flex-col items-center justify-center bg-white p-8 animate-in fade-in duration-300">
-              <div className="relative flex items-center justify-center mb-5">
-                <div className="absolute inset-0 rounded-full bg-emerald-500/20 blur-2xl animate-pulse" />
-                <div className="w-16 h-16 rounded-full border-3 border-emerald-100 border-t-emerald-600 animate-spin" />
-                <div className="absolute inset-0 flex items-center justify-center text-emerald-600">
-                  <Sparkles size={22} className="animate-pulse" />
+              <div className="relative flex items-center justify-center mb-6">
+                <div className="absolute inset-0 rounded-full bg-emerald-500/20 blur-2xl animate-pulse scale-150" />
+                <div className="w-20 h-20 rounded-2xl border-2 border-emerald-100 border-t-emerald-600 animate-spin" />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="w-14 h-14 rounded-2xl bg-white p-1.5 shadow-md shadow-emerald-600/10 border border-slate-100 flex items-center justify-center overflow-hidden">
+                    <img 
+                      src={displayBrandLogo} 
+                      alt={brand?.brand_name || "Uwo Connect"} 
+                      className="w-full h-full object-contain"
+                      onError={(e) => { e.currentTarget.src = "/download (3).gif"; }}
+                    />
+                  </div>
                 </div>
               </div>
-              <h3 className="text-base font-extrabold text-slate-900">Loading Omnichannel Inbox</h3>
-              <p className="text-xs text-slate-400 mt-1 max-w-sm text-center">
-                Syncing live conversations from WhatsApp, Instagram, Facebook, and Telegram...
+              <h3 className="text-base font-extrabold text-slate-900 flex items-center gap-2">
+                <span>Loading {activeChannelFilter !== 'ALL' ? (activeChannelFilter.charAt(0) + activeChannelFilter.slice(1).toLowerCase()) : 'Omnichannel'} Inbox</span>
+                <span className="flex gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-bounce [animation-delay:-0.3s]" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-bounce [animation-delay:-0.15s]" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-bounce" />
+                </span>
+              </h3>
+              <p className="text-xs text-slate-400 mt-1.5 max-w-sm text-center">
+                Syncing live conversations from {activeChannelFilter !== 'ALL' ? activeChannelFilter : 'WhatsApp, Instagram, Facebook, and Gmail'}...
               </p>
             </div>
           ) : (
             <div className="hidden md:flex flex-1 flex-col items-center justify-center bg-slate-50/40 p-8 text-center animate-in fade-in duration-300">
               <div className="max-w-md space-y-5 bg-white p-8 rounded-3xl border border-slate-200/80 shadow-sm">
-                <div className="w-16 h-16 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600 mx-auto shadow-inner">
-                  <MessageSquare size={32} />
+                <div className="w-16 h-16 rounded-2xl bg-white border border-emerald-100 flex items-center justify-center p-2 mx-auto shadow-md shadow-emerald-500/10">
+                  <img 
+                    src={displayBrandLogo} 
+                    alt={brand?.brand_name || "UWO Connect™"} 
+                    className="w-full h-full object-contain"
+                    onError={(e) => { e.currentTarget.src = "/download (3).gif"; }}
+                  />
                 </div>
                 <div>
-                  <h3 className="text-lg font-black text-slate-900">Unified Omnichannel Inbox</h3>
+                  <h3 className="text-lg font-black text-slate-900">{brand?.brand_name || "UWO Connect™"} Unified Inbox</h3>
                   <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">
                     Select a customer conversation from the left to start live chatting, reply with templates, assign agents, or monitor real-time message streams.
                   </p>

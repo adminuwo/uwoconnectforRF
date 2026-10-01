@@ -432,20 +432,20 @@ const ClientSettingsPage = () => {
         <div className="bg-white border border-slate-200/90 rounded-3xl shadow-sm overflow-hidden divide-y divide-slate-100">
           
           {/* 1. Header Bar */}
-          <div className="p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-5 bg-gradient-to-r from-slate-50/50 via-white to-emerald-50/20">
+          <div className="settings-header-banner p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-5 bg-gradient-to-r from-slate-50/50 via-white to-emerald-50/20 dark:from-slate-900 dark:via-slate-900/70 dark:to-emerald-950/30 border-b border-slate-100 dark:border-slate-800/80">
             <div>
               <div className="flex items-center gap-2.5 mb-2 flex-wrap">
-                <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200/80">
+                <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200/80 dark:bg-emerald-950/60 dark:text-emerald-400 dark:border-emerald-800/60">
                   Workspace Settings
                 </span>
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-slate-100 text-slate-700 border border-slate-200">
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-slate-100 text-slate-700 border border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700">
                   {client?.plan || 'FREE'} PLAN
                 </span>
               </div>
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
                 Account Profile & Settings
               </h1>
-              <p className="text-xs sm:text-sm text-slate-500 font-medium mt-1">
+              <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium mt-1">
                 Manage your business identity, branding assets, and primary contact information.
               </p>
             </div>
@@ -1026,25 +1026,25 @@ const ClientSettingsPage = () => {
               <button
                 type="button"
                 onClick={() => setIsPasswordModalOpen(true)}
-                className="inline-flex items-center justify-between sm:justify-start gap-3 px-5 py-3 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition text-left cursor-pointer shadow-2xs group"
+                className="inline-flex items-center justify-between sm:justify-start gap-3 px-5 py-3 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition text-left cursor-pointer shadow-2xs group dark:bg-slate-800 dark:hover:bg-slate-700/80 dark:border-slate-700"
               >
                 <div className="flex items-center gap-2.5">
-                  <Lock size={15} className="text-slate-500 group-hover:text-emerald-600 transition" />
-                  <span className="text-xs font-bold text-slate-800">Change Password</span>
+                  <Lock size={15} className="text-slate-500 group-hover:text-emerald-600 dark:text-slate-400 dark:group-hover:text-emerald-400 transition" />
+                  <span className="text-xs font-bold text-slate-800 dark:text-slate-200">Change Password</span>
                 </div>
-                <span className="text-xs text-slate-400 group-hover:translate-x-0.5 transition-transform">→</span>
+                <span className="text-xs text-slate-400 dark:text-slate-500 group-hover:translate-x-0.5 transition-transform">→</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => { localStorage.removeItem('token'); localStorage.removeItem('user'); window.location.href = '/auth/login'; }}
-                className="inline-flex items-center justify-between sm:justify-start gap-3 px-5 py-3 bg-rose-50/60 hover:bg-rose-50 border border-rose-200/80 rounded-xl transition text-left cursor-pointer shadow-2xs group"
+                className="inline-flex items-center justify-between sm:justify-start gap-3 px-5 py-3 bg-rose-50/70 hover:bg-rose-100 border border-rose-200/80 rounded-xl transition-all text-left cursor-pointer shadow-2xs group dark:bg-rose-950/70 dark:hover:bg-rose-900/90 dark:border-rose-500/70 dark:shadow-[0_0_16px_rgba(244,63,94,0.18)]"
               >
                 <div className="flex items-center gap-2.5">
-                  <LogOut size={15} className="text-rose-600" />
-                  <span className="text-xs font-bold text-rose-700">Sign Out</span>
+                  <LogOut size={15} className="text-rose-600 dark:text-rose-400 group-hover:scale-110 transition-transform" />
+                  <span className="text-xs font-extrabold text-rose-700 dark:text-rose-200 tracking-wide">Sign Out</span>
                 </div>
-                <span className="text-xs text-rose-400 group-hover:translate-x-0.5 transition-transform">→</span>
+                <span className="text-xs text-rose-400 dark:text-rose-300 font-bold group-hover:translate-x-1 transition-transform">→</span>
               </button>
             </div>
           </div>
@@ -1083,20 +1083,20 @@ const ClientSettingsPage = () => {
             <div className="bg-white w-full max-w-4xl rounded-3xl shadow-2xl border border-slate-100 overflow-hidden my-8 animate-in zoom-in-95 duration-200">
               
               {/* Header */}
-              <div className="p-6 sm:p-8 border-b border-slate-100 bg-gradient-to-r from-emerald-50/60 via-white to-teal-50/60 flex items-start justify-between">
+              <div className="p-6 sm:p-8 border-b border-slate-100 dark:border-slate-800 bg-gradient-to-r from-emerald-50/60 via-white to-teal-50/60 dark:from-emerald-950/40 dark:via-slate-900 dark:to-teal-950/40 flex items-start justify-between">
                 <div>
                   <div className="flex items-center gap-2 mb-1.5">
-                    <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200">
+                    <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-400 dark:border-emerald-800/60">
                       Workspace Plans & Scale
                     </span>
-                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-slate-100 text-slate-700">
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:border dark:border-slate-700">
                       Current: {client?.plan || 'Free'} Tier
                     </span>
                   </div>
-                  <h3 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                  <h3 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
                     Upgrade Your Workspace Plan
                   </h3>
-                  <p className="text-xs sm:text-sm text-slate-500 mt-1">
+                  <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
                     Choose the plan suited for your team size, communication channels, and automation volume.
                   </p>
                 </div>

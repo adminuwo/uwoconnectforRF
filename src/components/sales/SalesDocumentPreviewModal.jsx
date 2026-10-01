@@ -16,6 +16,13 @@ export default function SalesDocumentPreviewModal({ doc, isOpen, onClose, onSend
   const isProposal = doc.document_type === 'PROPOSAL';
   const curSymbol = doc.currency_symbol || '$';
   const curCode = doc.currency || 'USD';
+  const items = doc.items || [];
+  const sections = (doc.proposal_sections && doc.proposal_sections.length > 0)
+    ? doc.proposal_sections 
+    : (doc.proposal_template?.sections || [
+        { title: 'Project Overview', content: 'Outline of strategic roadmap and alignment.' },
+        { title: 'Scope of Work & Deliverables', content: 'Breakdown of service deliverables and outputs.' }
+      ]);
 
   const handleDownloadPDF = async () => {
     const token = localStorage.getItem('token');
@@ -290,14 +297,6 @@ export default function SalesDocumentPreviewModal({ doc, isOpen, onClose, onSend
     }
   };
 
-  const items = doc.items || [];
-  const sections = doc.proposal_sections || [
-    { title: '1. Executive Summary', content: 'This proposal outlines our strategic solution, technical scope, and commercial terms.' },
-    { title: '2. Scope of Work & Deliverables', content: 'Custom project development, testing, integration, and training.' },
-    { title: '3. Project Timeline & Milestones', content: 'Phase 1: Discovery (Week 1-2)\nPhase 2: Execution (Week 3-6)\nPhase 3: Deployment & Handover (Week 7)' },
-    { title: '4. Terms & Warranty Support', content: 'Includes 12 months SLA support and dedicated account manager.' }
-  ];
-
   return (
     <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
       <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-4xl max-h-[92vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200 print:shadow-none print:border-none print:max-h-none print:overflow-visible">
@@ -357,8 +356,8 @@ export default function SalesDocumentPreviewModal({ doc, isOpen, onClose, onSend
         </div>
 
         {/* Document Visual Layout */}
-        <div className="flex-1 overflow-y-auto p-8 bg-slate-100 flex justify-center print:p-0 print:bg-white print:overflow-visible">
-          <div id="printable-sales-document" className="w-full max-w-3xl bg-white rounded-xl shadow-lg border border-slate-200 p-8 text-slate-800 print:shadow-none print:border-none print:p-0">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-8 bg-slate-100 flex justify-center items-start print:p-0 print:bg-white print:overflow-visible">
+          <div id="printable-sales-document" className="w-full max-w-3xl bg-white rounded-xl shadow-lg border border-slate-200 p-6 sm:p-8 text-slate-800 h-fit mb-8 print:shadow-none print:border-none print:p-0 print:mb-0">
             
             {isProposal ? (
               /* PROPOSAL VISUAL PREVIEW */
@@ -579,9 +578,9 @@ export default function SalesDocumentPreviewModal({ doc, isOpen, onClose, onSend
                 </div>
 
                 {/* Notes & Terms */}
-                <div className="pt-6 border-t border-slate-200 text-xs space-y-2">
+                <div className="pt-6 pb-2 border-t border-slate-200 text-xs space-y-2">
                   <p className="font-bold text-slate-800">Terms & Conditions:</p>
-                  <p className="text-slate-500 text-[11px] whitespace-pre-line">{doc.terms_conditions || '1. Valid for 15 days from issue date.\n2. Goods once sold subject to standard terms.'}</p>
+                  <p className="text-slate-500 text-[11px] whitespace-pre-line leading-relaxed">{doc.terms_conditions || '1. Valid for 15 days from issue date.\n2. Goods once sold subject to standard terms.'}</p>
                 </div>
 
               </div>

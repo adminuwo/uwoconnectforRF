@@ -1,12 +1,18 @@
-'use client';
-
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
-import { X, Download, Printer, CheckCircle2, Clock, AlertTriangle, Building2, FileText, Globe, Mail, Phone, Copy, Share2 } from 'lucide-react';
+import { X, Download, Printer, CheckCircle2, Clock, Building2, FileText, Share2, Copy, AlertCircle, Send, Trash2 } from 'lucide-react';
 import { API_BASE_URL } from '@/config/apiConfig';
 
-export default function InvoicePreviewModal({ invoice, isOpen, onClose, onRegenerate }) {
+export default function InvoicePreviewModal({ invoice, isOpen, onClose, onRegenerate, onSend, onDelete }) {
   const [copied, setCopied] = useState(false);
+  const [logoError, setLogoError] = useState(false);
+  const scrollRef = useRef(null);
+
+  useEffect(() => {
+    if (isOpen && scrollRef.current) {
+      scrollRef.current.scrollTop = 0;
+    }
+  }, [isOpen, invoice]);
 
   if (!isOpen || !invoice) return null;
 
@@ -15,8 +21,40 @@ export default function InvoicePreviewModal({ invoice, isOpen, onClose, onRegene
     ? `${window.location.origin}/public/invoice/${token}`
     : `/public/invoice/${token}`;
 
+  const seller = invoice.seller_details || {};
+  const billing = invoice.billing_details || {};
+  const items = invoice.line_items || [];
+  const curSymbol = invoice.currency_symbol || '$';
+  const curCode = invoice.currency || 'USD';
+
+  const subtotal = Number(invoice.subtotal || invoice.total || 0);
+  const discount = Number(invoice.discount || 0);
+  const shipping = Number(invoice.shipping || 0);
+  const tax = Number(invoice.tax || 0);
+  const total = Number(invoice.total || 0);
+  const amountPaid = Number(invoice.amount_paid != null ? invoice.amount_paid : (invoice.payment_status === 'PAID' ? total : 0));
+  const balanceDue = Number(invoice.balance_due != null ? invoice.balance_due : Math.max(0, total - amountPaid));
+
+  const getItemName = (item) => item.item_name || item.name || item.product_name || item.title || 'Product Item';
+  const getItemTax = (item) => {
+    if (item.tax != null && item.tax !== '') return Number(item.tax);
+    if (item.tax_amount != null && item.tax_amount !== '') return Number(item.tax_amount);
+    if (item.tax_rate != null && item.tax_rate !== '') {
+      return (Number(item.unit_price || 0) * Number(item.quantity || 1) * Number(item.tax_rate)) / 100;
+    }
+    const itemTotal = Number(item.total || 0);
+    const baseTotal = Number(item.unit_price || 0) * Number(item.quantity || 1);
+    if (itemTotal > baseTotal) return itemTotal - baseTotal;
+    return 0;
+  };
+  const getItemTotal = (item) => {
+    if (item.total != null && item.total !== '') return Number(item.total);
+    const base = Number(item.unit_price || 0) * Number(item.quantity || 1);
+    return base + getItemTax(item);
+  };
+
   const handleDownloadPDF = async () => {
-    const tokenHeader = localStorage.getItem('token');
+    const tokenHeader = localStorage.getItem('token') || localStorage.getItem('uwo_token');
     const downloadUrl = `${API_BASE_URL}/api/invoices/${invoice.id}/download/`;
     try {
       const res = await axios.get(downloadUrl, {
@@ -92,9 +130,9 @@ export default function InvoicePreviewModal({ invoice, isOpen, onClose, onRegene
   td.bold { font-weight: 700; color: #0f172a; }
   .sku-text { font-size: 8px; color: #94a3b8; font-family: monospace; }
   .summary-section { display: flex; justify-content: flex-end; margin: 16px 0; }
-  .summary-table { width: 260px; }
+  .summary-table { width: 280px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0; padding: 10px 12px; }
   .summary-row { display: flex; justify-content: space-between; padding: 3px 0; font-size: 10px; color: #475569; }
-  .summary-row.total { padding-top: 8px; margin-top: 4px; border-top: 2px solid #059669; font-size: 13px; font-weight: 900; color: #0f172a; }
+  .summary-row.total { padding-top: 8px; margin-top: 6px; border-top: 1px solid #cbd5e1; font-size: 13px; font-weight: 900; color: #0f172a; }
   .summary-row.total .value { color: #059669; }
   .summary-row .value { font-weight: 600; }
   .summary-row .bold-value { font-weight: 700; color: #059669; }
@@ -115,7 +153,7 @@ export default function InvoicePreviewModal({ invoice, isOpen, onClose, onRegene
       ${(seller.company_logo_url || seller.logo_url) ? `<img src="${seller.company_logo_url || seller.logo_url}" class="company-logo" alt="Logo" onerror="this.style.display='none'" />` : `<div class="company-name-fallback">${seller.company_name || seller.business_name || 'Company Name'}</div>`}
       <div class="company-name">${seller.company_name || seller.business_name || 'Company Name'}</div>
       <div class="company-details">
-        ${seller.address ? `${seller.address}<br/>` : ''}
+        ${seller.address ? `${seller.address.replace(/\n/g, '<br/>')}<br/>` : ''}
         ${seller.email ? `Email: ${seller.email}<br/>` : ''}
         ${seller.phone ? `Phone: ${seller.phone}<br/>` : ''}
         ${seller.tax_id_gstin ? `<span class="gstin">GSTIN / Tax ID: ${seller.tax_id_gstin}</span>` : ''}
@@ -143,24 +181,28 @@ export default function InvoicePreviewModal({ invoice, isOpen, onClose, onRegene
       <tr>
         <th>Item Description</th>
         <th class="center" style="width:50px">Qty</th>
-        <th class="right" style="width:100px">Unit Price (${curCode})</th>
-        <th class="right" style="width:90px">Tax (${curCode})</th>
-        <th class="right" style="width:100px">Line Total (${curCode})</th>
+        <th class="right" style="width:110px">Unit Price (${curCode})</th>
+        <th class="right" style="width:95px">Tax (${curCode})</th>
+        <th class="right" style="width:110px">Line Total (${curCode})</th>
       </tr>
     </thead>
     <tbody>
-      ${(items.length > 0 ? items : [{ name: 'Product Purchase', quantity: 1, unit_price: subtotal, tax: 0, total: subtotal }]).map(item => `
+      ${(items.length > 0 ? items : [{ name: 'Product Purchase', quantity: 1, unit_price: subtotal, tax: tax, total: total }]).map(item => {
+        const iName = getItemName(item);
+        const iTax = getItemTax(item);
+        const iTotal = getItemTotal(item);
+        return `
         <tr>
           <td class="bold">
-            ${item.name || item.product_name || 'Product'}
+            ${iName}
             ${item.sku ? `<br/><span class="sku-text">SKU: ${item.sku}</span>` : ''}
           </td>
           <td class="center">${item.quantity || 1}</td>
           <td class="right">${curSymbol}${Number(item.unit_price || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
-          <td class="right">${curSymbol}${Number(item.tax || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
-          <td class="right bold">${curSymbol}${Number(item.total || item.unit_price || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+          <td class="right">${curSymbol}${iTax.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+          <td class="right bold">${curSymbol}${iTotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
         </tr>
-      `).join('')}
+      `}).join('')}
     </tbody>
   </table>
 
@@ -195,7 +237,6 @@ export default function InvoicePreviewModal({ invoice, isOpen, onClose, onRegene
 </html>`);
     iframeDoc.close();
 
-    // Wait for images to load, then print
     printIframe.contentWindow.onafterprint = () => {
       document.body.removeChild(printIframe);
     };
@@ -203,7 +244,6 @@ export default function InvoicePreviewModal({ invoice, isOpen, onClose, onRegene
     setTimeout(() => {
       printIframe.contentWindow.focus();
       printIframe.contentWindow.print();
-      // Fallback cleanup if onafterprint is not supported
       setTimeout(() => {
         if (document.body.contains(printIframe)) {
           document.body.removeChild(printIframe);
@@ -219,42 +259,26 @@ export default function InvoicePreviewModal({ invoice, isOpen, onClose, onRegene
   };
 
   const handleWhatsAppShare = () => {
-    const seller = invoice.seller_details || {};
     const companyName = seller.company_name || seller.business_name || 'UWOConnect';
-    const total = Number(invoice.total || 0).toLocaleString(undefined, { minimumFractionDigits: 2 });
-    const curSymbol = invoice.currency_symbol || '$';
+    const totalFormatted = Number(invoice.total || 0).toLocaleString(undefined, { minimumFractionDigits: 2 });
 
-    const msg = `Your invoice from ${companyName} is ready.\n\nInvoice: #${invoice.invoice_number}\nAmount: ${curSymbol}${total}\n\nView and download your invoice:\n${publicUrl}`;
+    const msg = `Your invoice from ${companyName} is ready.\n\nInvoice: #${invoice.invoice_number}\nAmount: ${curSymbol}${totalFormatted}\n\nView and download your invoice:\n${publicUrl}`;
     const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`;
     window.open(waUrl, '_blank');
   };
 
-  const seller = invoice.seller_details || {};
-  const billing = invoice.billing_details || {};
-  const items = invoice.line_items || [];
-  const curSymbol = invoice.currency_symbol || '$';
-  const curCode = invoice.currency || 'USD';
-
-  const subtotal = Number(invoice.subtotal || invoice.total || 0);
-  const discount = Number(invoice.discount || 0);
-  const shipping = Number(invoice.shipping || 0);
-  const tax = Number(invoice.tax || 0);
-  const total = Number(invoice.total || 0);
-  const amountPaid = Number(invoice.amount_paid || (invoice.payment_status === 'PAID' ? total : 0));
-  const balanceDue = Number(invoice.balance_due || (total - amountPaid));
-
   return (
-    <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
-      <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-4xl max-h-[92vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4 overflow-hidden">
+      <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-4xl max-h-[94vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
         
         {/* Modal Top Header Bar */}
-        <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50 print:hidden flex-wrap gap-3">
+        <div className="px-5 py-3.5 border-b border-slate-200 flex items-center justify-between bg-slate-50 print:hidden flex-wrap gap-3 shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-black">
+            <div className="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-black">
               <FileText className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-base font-extrabold text-slate-900">
+              <h3 className="text-sm sm:text-base font-extrabold text-slate-900">
                 Invoice Preview • {invoice.invoice_number}
               </h3>
               <p className="text-xs text-slate-500 font-medium">
@@ -266,15 +290,26 @@ export default function InvoicePreviewModal({ invoice, isOpen, onClose, onRegene
           <div className="flex items-center gap-2">
             <button
               onClick={handleCopyLink}
-              className="px-3 py-1.5 rounded-lg text-xs font-bold text-slate-700 bg-white border border-slate-200 hover:bg-slate-100 transition-colors flex items-center gap-1.5 cursor-pointer"
+              className="px-3 py-1.5 rounded-lg text-xs font-bold text-slate-700 bg-white border border-slate-200 hover:bg-slate-100 transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs"
             >
               <Copy className="w-3.5 h-3.5" />
               {copied ? 'Copied Link!' : 'Public Link'}
             </button>
 
+            {onSend && (
+              <button
+                onClick={() => onSend(invoice)}
+                className="px-3 py-1.5 rounded-lg text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
+                title="Send Invoice to Customer"
+              >
+                <Send className="w-3.5 h-3.5" />
+                Send
+              </button>
+            )}
+
             <button
               onClick={handleWhatsAppShare}
-              className="px-3 py-1.5 rounded-lg text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 transition-colors flex items-center gap-1.5 cursor-pointer shadow-sm"
+              className="px-3 py-1.5 rounded-lg text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
             >
               <Share2 className="w-3.5 h-3.5" />
               WhatsApp
@@ -290,44 +325,66 @@ export default function InvoicePreviewModal({ invoice, isOpen, onClose, onRegene
 
             <button
               onClick={handleDownloadPDF}
-              className="px-4 py-1.5 rounded-lg text-xs font-bold text-white bg-slate-900 hover:bg-black transition-colors flex items-center gap-1.5 cursor-pointer shadow-md"
+              className="px-3.5 py-1.5 rounded-lg text-xs font-bold text-white bg-slate-900 hover:bg-black transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
             >
               <Download className="w-3.5 h-3.5" />
               Download PDF
             </button>
 
+            {onDelete && (
+              <button
+                onClick={() => onDelete(invoice)}
+                className="px-3 py-1.5 rounded-lg text-xs font-bold text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                title="Delete this Invoice"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                Delete
+              </button>
+            )}
+
             <button
               onClick={onClose}
-              className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-200 transition-colors cursor-pointer ml-2"
+              className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-200 transition-colors cursor-pointer ml-1"
             >
               <X className="w-5 h-5" />
             </button>
           </div>
         </div>
 
-        {/* Printable A4 Visual Preview Document */}
-        <div className="flex-1 overflow-y-auto p-8 bg-slate-100 flex justify-center print:p-0 print:bg-white print:overflow-visible">
-          <div id="printable-invoice-document" className="w-full max-w-3xl bg-white rounded-xl shadow-lg border border-slate-200 p-8 text-slate-800 print:shadow-none print:border-none print:p-0">
+        {/* Printable A4 Visual Preview Document Area */}
+        <div 
+          ref={scrollRef}
+          className="flex-1 overflow-y-auto p-4 sm:p-6 bg-slate-100/90 print:p-0 print:bg-white print:overflow-visible"
+        >
+          <div 
+            id="printable-invoice-document" 
+            className="w-full max-w-3xl mx-auto mb-6 bg-white rounded-2xl shadow-xl border border-slate-200/90 p-6 sm:p-8 text-slate-800 print:shadow-none print:border-none print:p-0 print:mb-0 transition-all"
+          >
             
             {/* Header / Company Logo (TOP-LEFT) & Invoice Status (TOP-RIGHT) */}
-            <div className="flex justify-between items-start pb-6 border-b border-slate-200 gap-6">
-              <div className="space-y-1.5 max-w-sm">
-                {seller.company_logo_url || seller.logo_url ? (
-                  <img 
-                    src={seller.company_logo_url || seller.logo_url} 
-                    alt={seller.company_name || 'Company'} 
-                    className="h-12 max-w-[200px] object-contain mb-1" 
-                  />
+            <div className="flex justify-between items-start pb-5 border-b border-slate-200 gap-6">
+              <div className="space-y-1 max-w-sm">
+                {(seller.company_logo_url || seller.logo_url) && !logoError ? (
+                  <div className="mb-1.5">
+                    <img 
+                      src={seller.company_logo_url || seller.logo_url} 
+                      alt={seller.company_name || 'Company'} 
+                      className="h-12 max-w-[200px] object-contain"
+                      onError={() => setLogoError(true)}
+                    />
+                  </div>
                 ) : (
-                  <div className="text-xl font-black text-slate-900 tracking-tight flex items-center gap-2">
-                    <Building2 className="w-6 h-6 text-emerald-600" />
-                    {seller.company_name || seller.business_name || 'Company Name'}
+                  <div className="text-lg font-black text-slate-900 tracking-tight flex items-center gap-2 mb-1">
+                    <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+                      <Building2 className="w-4 h-4" />
+                    </div>
+                    <span>{seller.company_name || seller.business_name || 'Company Name'}</span>
                   </div>
                 )}
                 
                 <div className="text-xs text-slate-500 font-medium space-y-0.5">
                   <p className="font-bold text-slate-900">{seller.company_name || seller.business_name || 'Company Name'}</p>
-                  {seller.address && <p>{seller.address}</p>}
+                  {seller.address && <p className="whitespace-pre-line">{seller.address}</p>}
                   {seller.email && <p>Email: {seller.email}</p>}
                   {seller.phone && <p>Phone: {seller.phone}</p>}
                   {seller.tax_id_gstin && (
@@ -360,7 +417,7 @@ export default function InvoicePreviewModal({ invoice, isOpen, onClose, onRegene
             </div>
 
             {/* Billed To Customer Grid */}
-            <div className="my-6 bg-slate-50 rounded-xl p-4 border border-slate-200/80 text-xs">
+            <div className="my-5 bg-slate-50 rounded-xl p-4 border border-slate-200/80 text-xs">
               <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 block mb-1">BILL TO</span>
               <h4 className="font-extrabold text-slate-900 text-sm">{billing.name || 'Valued Customer'}</h4>
               {billing.email && <p className="text-slate-600 mt-0.5">Email: {billing.email}</p>}
@@ -369,7 +426,7 @@ export default function InvoicePreviewModal({ invoice, isOpen, onClose, onRegene
             </div>
 
             {/* Line Items Table */}
-            <div className="overflow-x-auto my-6 border border-slate-200 rounded-xl">
+            <div className="overflow-x-auto my-5 border border-slate-200 rounded-xl shadow-2xs">
               <table className="w-full text-left border-collapse text-xs">
                 <thead>
                   <tr className="bg-slate-100 text-slate-700 font-extrabold border-b border-slate-200">
@@ -382,25 +439,30 @@ export default function InvoicePreviewModal({ invoice, isOpen, onClose, onRegene
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {items.length > 0 ? (
-                    items.map((item, idx) => (
-                      <tr key={idx} className="hover:bg-slate-50/50">
-                        <td className="py-3 px-3 font-medium text-slate-900">
-                          {item.name || item.product_name || 'Product'}
-                          {item.sku && <span className="block text-[10px] text-slate-400 font-mono">SKU: {item.sku}</span>}
-                        </td>
-                        <td className="py-3 px-2 text-center text-slate-600">{item.quantity || 1}</td>
-                        <td className="py-3 px-3 text-right text-slate-600">{curSymbol}{Number(item.unit_price || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
-                        <td className="py-3 px-3 text-right text-slate-600">{curSymbol}{Number(item.tax || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
-                        <td className="py-3 px-3 text-right font-bold text-slate-900">{curSymbol}{Number(item.total || item.unit_price || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
-                      </tr>
-                    ))
+                    items.map((item, idx) => {
+                      const iName = getItemName(item);
+                      const iTax = getItemTax(item);
+                      const iTotal = getItemTotal(item);
+                      return (
+                        <tr key={idx} className="hover:bg-slate-50/50">
+                          <td className="py-3 px-3 font-semibold text-slate-900">
+                            {iName}
+                            {item.sku && <span className="block text-[10px] text-slate-400 font-mono">SKU: {item.sku}</span>}
+                          </td>
+                          <td className="py-3 px-2 text-center text-slate-600 font-medium">{item.quantity || 1}</td>
+                          <td className="py-3 px-3 text-right text-slate-600">{curSymbol}{Number(item.unit_price || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                          <td className="py-3 px-3 text-right text-slate-600">{curSymbol}{iTax.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                          <td className="py-3 px-3 text-right font-bold text-slate-900">{curSymbol}{iTotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                        </tr>
+                      );
+                    })
                   ) : (
                     <tr>
-                      <td className="py-3 px-3 font-medium text-slate-900">Product Purchase</td>
-                      <td className="py-3 px-2 text-center text-slate-600">1</td>
+                      <td className="py-3 px-3 font-semibold text-slate-900">Product Purchase</td>
+                      <td className="py-3 px-2 text-center text-slate-600 font-medium">1</td>
                       <td className="py-3 px-3 text-right text-slate-600">{curSymbol}{subtotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
-                      <td className="py-3 px-3 text-right text-slate-600">{curSymbol}0.00</td>
-                      <td className="py-3 px-3 text-right font-bold text-slate-900">{curSymbol}{subtotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                      <td className="py-3 px-3 text-right text-slate-600">{curSymbol}{tax.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                      <td className="py-3 px-3 text-right font-bold text-slate-900">{curSymbol}{total.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
                     </tr>
                   )}
                 </tbody>
@@ -408,49 +470,49 @@ export default function InvoicePreviewModal({ invoice, isOpen, onClose, onRegene
             </div>
 
             {/* Financial Summary */}
-            <div className="flex justify-end my-6">
-              <div className="w-72 space-y-2 text-xs">
+            <div className="flex justify-end my-5">
+              <div className="w-full sm:w-80 space-y-2 text-xs bg-slate-50/80 p-4 rounded-xl border border-slate-200/80">
                 <div className="flex justify-between text-slate-600">
-                  <span>Subtotal:</span>
-                  <span className="font-medium">{curSymbol}{subtotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                  <span className="font-medium">Subtotal:</span>
+                  <span className="font-semibold text-slate-800">{curSymbol}{subtotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
                 </div>
                 {discount > 0 && (
-                  <div className="flex justify-between text-emerald-600">
-                    <span>Discount:</span>
-                    <span>-{curSymbol}{discount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                  <div className="flex justify-between text-emerald-700">
+                    <span className="font-medium">Discount:</span>
+                    <span className="font-semibold">-{curSymbol}{discount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
                   </div>
                 )}
                 {shipping > 0 && (
                   <div className="flex justify-between text-slate-600">
-                    <span>Shipping:</span>
-                    <span>{curSymbol}{shipping.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                    <span className="font-medium">Shipping:</span>
+                    <span className="font-semibold text-slate-800">{curSymbol}{shipping.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
                   </div>
                 )}
                 {tax > 0 && (
                   <div className="flex justify-between text-slate-600">
-                    <span>Tax / GST:</span>
-                    <span>{curSymbol}{tax.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                    <span className="font-medium">Tax / GST:</span>
+                    <span className="font-semibold text-slate-800">{curSymbol}{tax.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
                   </div>
                 )}
-                <div className="flex justify-between text-sm font-black text-slate-900 pt-2 border-t border-slate-300">
+                <div className="flex justify-between items-center text-sm font-black text-slate-900 pt-2 border-t border-slate-300">
                   <span>Grand Total:</span>
-                  <span className="text-emerald-700">{curSymbol}{total.toLocaleString(undefined, { minimumFractionDigits: 2 })} {curCode}</span>
+                  <span className="text-emerald-700">{curSymbol}{total.toLocaleString(undefined, { minimumFractionDigits: 2 })} <span className="text-xs font-bold text-slate-500">{curCode}</span></span>
                 </div>
-                <div className="flex justify-between text-slate-600">
-                  <span>Amount Paid:</span>
+                <div className="flex justify-between text-slate-600 pt-1 border-t border-dashed border-slate-200">
+                  <span className="font-medium">Amount Paid:</span>
                   <span className="font-bold text-emerald-700">{curSymbol}{amountPaid.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
                 </div>
-                <div className="flex justify-between text-slate-600">
-                  <span>Balance Due:</span>
-                  <span className="font-bold text-slate-900">{curSymbol}{balanceDue.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                <div className="flex justify-between text-slate-700">
+                  <span className="font-medium">Balance Due:</span>
+                  <span className={`font-bold ${balanceDue > 0 ? 'text-amber-700' : 'text-slate-900'}`}>{curSymbol}{balanceDue.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
                 </div>
               </div>
             </div>
 
             {/* Dedicated Payment Information Section */}
-            <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 text-xs space-y-1.5 my-6">
-              <h5 className="font-extrabold text-slate-800 uppercase tracking-wider text-[10px] text-slate-500">PAYMENT INFORMATION</h5>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 font-medium text-slate-700">
+            <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 text-xs space-y-1.5 my-5">
+              <h5 className="font-extrabold uppercase tracking-wider text-[10px] text-slate-400">PAYMENT INFORMATION</h5>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 font-medium text-slate-700">
                 <div>
                   <span className="text-[10px] text-slate-400 block font-bold">STATUS</span>
                   <span className="font-extrabold text-emerald-700">{invoice.payment_status}</span>
@@ -471,7 +533,7 @@ export default function InvoicePreviewModal({ invoice, isOpen, onClose, onRegene
             </div>
 
             {/* Footer / Notes */}
-            <div className="pt-6 border-t border-slate-200 text-[11px] text-slate-500 space-y-1">
+            <div className="pt-5 border-t border-slate-200 text-[11px] text-slate-500 space-y-0.5">
               <p className="font-bold text-slate-700">Thank you for your business!</p>
               <p>All payments are securely processed and verified via UWOConnect Multi-Channel Integration.</p>
             </div>
@@ -482,3 +544,4 @@ export default function InvoicePreviewModal({ invoice, isOpen, onClose, onRegene
     </div>
   );
 }
+

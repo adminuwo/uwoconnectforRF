@@ -239,7 +239,7 @@ export default function AutomationNetwork() {
             <span className="px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-black uppercase tracking-widest border border-emerald-200">
               UNIFIED ENGINE
             </span>
-            <h3 className="text-2xl font-black text-slate-900 tracking-tight">UWO Connect</h3>
+            <h3 className="text-2xl font-black text-slate-900 tracking-tight">UwoConnect</h3>
             <p className="text-xs text-slate-600 font-medium max-w-[240px] leading-relaxed">
               Auto-syncing channels, tools & workflows
             </p>

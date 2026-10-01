@@ -36,11 +36,13 @@ import {
   Globe,
   Building2,
   Wallet,
-  LayoutTemplate
+  LayoutTemplate,
+  Target
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useEntitlement } from '@/context/EntitlementContext';
 import { useBrand } from '@/context/BrandContext';
+import { useTheme } from '@/context/ThemeContext';
 
 // Tour ID → sidebar link name mapping
 const TOUR_IDS = {
@@ -108,6 +110,7 @@ const Sidebar = ({ role, isOpen, onClose, onToggle }) => {
   const pathname = usePathname();
   const { entitlements, openUpgradeModal } = useEntitlement();
   const { brand } = useBrand();
+  const { isDark } = useTheme();
   const [mounted, setMounted] = useState(false);
   const [userObj, setUserObj] = useState({});
 
@@ -247,6 +250,7 @@ const Sidebar = ({ role, isOpen, onClose, onToggle }) => {
     { name: 'Auto Replies', href: '/client/automations', icon: Zap, requiredPlan: 'Starter', featureKey: 'feature_autoreply' },
     { name: 'Workflows', href: '/client/workflows', icon: GitBranch, requiredPlan: 'Starter', featureKey: 'feature_workflow' },
     { name: 'Leads (CRM)', href: '/client/crm', icon: Users, requiredPlan: 'Starter', featureKey: 'feature_crm' },
+    // { name: 'Competitor Intelligence', href: '/client/competitor-analysis', icon: Target, requiredPlan: 'Starter', featureKey: 'feature_competitor_analysis' }, // Shifted to Topbar near + Topup
     { name: 'Quotations', href: '/client/quotations', icon: FileCheck, requiredPlan: 'Starter', featureKey: 'feature_quotation' },
     { name: 'Proposals', href: '/client/proposals', icon: FileText, requiredPlan: 'Starter', featureKey: 'feature_proposal' },
     { name: 'Invoices', href: '/client/invoices', icon: Receipt, requiredPlan: 'Starter', featureKey: 'feature_invoice' },
@@ -314,7 +318,10 @@ const Sidebar = ({ role, isOpen, onClose, onToggle }) => {
       <aside
         data-tour="sidebar-nav"
         className={cn(
-          'bg-white border-r border-slate-100 flex flex-col font-sans transition-all duration-300 ease-in-out shrink-0 overflow-hidden',
+          'flex flex-col font-sans transition-all duration-300 ease-in-out shrink-0 overflow-hidden',
+          isDark 
+            ? 'bg-[#0f172a] border-r border-slate-800/80 text-slate-200' 
+            : 'bg-white border-r border-slate-100 text-slate-800',
           // Mobile View: Slide-over drawer
           'fixed inset-y-0 left-0 z-50 shadow-2xl lg:shadow-none h-full',
           isOpen ? 'translate-x-0 w-[260px] sm:w-[270px]' : '-translate-x-full',
@@ -325,12 +332,13 @@ const Sidebar = ({ role, isOpen, onClose, onToggle }) => {
       >
         {/* ── Brand Header ── */}
         <div className={cn(
-          'flex border-b border-slate-100/80 shrink-0 transition-all duration-300',
+          'flex shrink-0 transition-all duration-300',
+          isDark ? 'border-b border-slate-800/80' : 'border-b border-slate-100/80',
           isOpen ? 'items-center px-3.5 sm:px-4 py-3 justify-between gap-2 flex-row' : 'flex-col items-center px-0 py-2 gap-1'
         )}>
           {(() => {
-            const displayBrandName = "UWO Connect";
-            const displayBrandLogo = "/download (3).gif";
+            const displayBrandName = brand?.brand_name || "UWO Connect™";
+            const displayBrandLogo = brand?.logo_url || "/download (3).gif";
 
             return isOpen ? (
               <div className="flex items-center gap-2.5 min-w-0 flex-1">
@@ -341,12 +349,12 @@ const Sidebar = ({ role, isOpen, onClose, onToggle }) => {
                   onError={(e) => { e.currentTarget.src = "/download (3).gif"; }}
                 />
                 <div className="min-w-0 flex-1">
-                  <h1 className="text-sm font-black text-slate-900 tracking-tight leading-tight whitespace-nowrap truncate" title={displayBrandName}>
+                  <h1 className={cn("text-sm font-black tracking-tight leading-tight whitespace-nowrap truncate", isDark ? "text-white" : "text-slate-900")} title={displayBrandName}>
                     {displayBrandName}
                   </h1>
                   <span className={cn(
                     "text-[7.5px] font-black uppercase tracking-[0.18em] block mt-0.5 whitespace-nowrap",
-                    effectiveRole === 'ADMIN' ? "text-[#059669]" : isAgencyUser ? "text-blue-600" : "text-[#059669]"
+                    effectiveRole === 'ADMIN' ? "text-[#059669]" : isAgencyUser ? "text-blue-500" : "text-[#059669]"
                   )}>
                     V1.0 {mounted ? (effectiveRole === 'ADMIN' ? 'SUPER ADMIN' : isAgencyUser ? 'AGENCY ADMIN' : (effectiveRole || 'WORKSPACE')) : (effectiveRole === 'ADMIN' ? 'SUPER ADMIN' : 'WORKSPACE')}
                   </span>
@@ -370,7 +378,7 @@ const Sidebar = ({ role, isOpen, onClose, onToggle }) => {
             title={isOpen ? 'Collapse Sidebar' : 'Expand Sidebar'}
             className={cn(
               'hidden lg:flex items-center justify-center rounded-xl transition-all duration-200 cursor-pointer shrink-0',
-              'text-slate-400 hover:text-[#059669] hover:bg-emerald-50',
+              isDark ? 'text-slate-400 hover:text-[#059669] hover:bg-slate-800/80' : 'text-slate-400 hover:text-[#059669] hover:bg-emerald-50',
               isOpen ? 'p-1.5' : 'w-8 h-6'
             )}
           >
@@ -384,7 +392,10 @@ const Sidebar = ({ role, isOpen, onClose, onToggle }) => {
             <button
               onClick={onClose}
               title="Close menu"
-              className="lg:hidden p-1.5 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer flex items-center justify-center shrink-0"
+              className={cn(
+                "lg:hidden p-1.5 rounded-xl transition-colors cursor-pointer flex items-center justify-center shrink-0",
+                isDark ? "text-slate-400 hover:text-slate-200 hover:bg-slate-800" : "text-slate-400 hover:text-slate-700 hover:bg-slate-100"
+              )}
             >
               <X size={18} />
             </button>
@@ -397,7 +408,7 @@ const Sidebar = ({ role, isOpen, onClose, onToggle }) => {
           isOpen ? 'px-2' : 'px-2'
         )}>
           {isOpen && (
-            <p className="px-3 text-[8px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 italic opacity-70">Menu</p>
+            <p className={cn("px-3 text-[8px] font-black uppercase tracking-[0.2em] mb-2 italic opacity-70", isDark ? "text-slate-400" : "text-slate-400")}>Menu</p>
           )}
 
           {links.map((link) => {
@@ -423,7 +434,7 @@ const Sidebar = ({ role, isOpen, onClose, onToggle }) => {
                   className={cn(
                     'group flex items-center rounded-xl transition-all duration-200 relative overflow-hidden cursor-pointer',
                     isOpen ? 'gap-2 px-2 py-2' : 'justify-center px-0 py-2',
-                    'text-slate-400 hover:bg-emerald-50/50 hover:text-slate-700'
+                    isDark ? 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-300' : 'text-slate-400 hover:bg-emerald-50/50 hover:text-slate-700'
                   )}
                 >
                   <Icon size={isOpen ? 16 : 18} className="text-slate-400 shrink-0 opacity-60" />
@@ -454,8 +465,14 @@ const Sidebar = ({ role, isOpen, onClose, onToggle }) => {
                   'group flex items-center rounded-xl transition-all duration-300 relative overflow-hidden',
                   isOpen ? 'gap-2 px-2 py-2' : 'justify-center px-0 py-2',
                   isActive
-                    ? 'bg-gradient-to-r from-emerald-50/80 to-emerald-50/10 text-[#047857] shadow-[0_4px_12px_rgba(5,150,105,0.02)] border border-[#059669]/5'
-                    : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50 hover:shadow-sm hover:-translate-y-0.5'
+                    ? (isDark
+                        ? 'bg-gradient-to-r from-emerald-950/70 to-emerald-900/30 text-emerald-400 shadow-none border border-emerald-600/30'
+                        : 'bg-gradient-to-r from-emerald-50/80 to-emerald-50/10 text-[#047857] shadow-[0_4px_12px_rgba(5,150,105,0.02)] border border-[#059669]/5'
+                      )
+                    : (isDark
+                        ? 'text-slate-300 hover:text-white hover:bg-slate-800/80'
+                        : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50 hover:shadow-sm hover:-translate-y-0.5'
+                      )
                 )}
               >
                 {/* Active left bar */}
@@ -468,7 +485,7 @@ const Sidebar = ({ role, isOpen, onClose, onToggle }) => {
                   strokeWidth={isActive ? 2.5 : 2}
                   className={cn(
                     'transition-all duration-300 shrink-0',
-                    isActive ? 'text-[#059669] scale-110 drop-shadow-md' : 'text-slate-400 group-hover:text-slate-600'
+                    isActive ? (isDark ? 'text-emerald-400 scale-110 drop-shadow-md' : 'text-[#059669] scale-110 drop-shadow-md') : (isDark ? 'text-slate-400 group-hover:text-slate-200' : 'text-slate-400 group-hover:text-slate-600')
                   )}
                 />
 
@@ -476,14 +493,17 @@ const Sidebar = ({ role, isOpen, onClose, onToggle }) => {
                 {isOpen && (
                   <span className={cn(
                     'text-[12px] tracking-tight font-bold z-10 relative truncate',
-                    isActive ? 'text-[#047857]' : 'text-slate-500'
+                    isActive ? (isDark ? 'text-emerald-400 font-black' : 'text-[#047857]') : (isDark ? 'text-slate-300 group-hover:text-white' : 'text-slate-500')
                   )}>
                     {link.name}
                   </span>
                 )}
 
                 {isActive && isOpen && (
-                  <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-white/40 to-transparent pointer-events-none" />
+                  <div className={cn(
+                    "absolute right-0 top-0 bottom-0 w-24 pointer-events-none",
+                    isDark ? "bg-gradient-to-l from-[#0f172a]/60 to-transparent" : "bg-gradient-to-l from-white/40 to-transparent"
+                  )} />
                 )}
               </Link>
             );
@@ -491,14 +511,14 @@ const Sidebar = ({ role, isOpen, onClose, onToggle }) => {
         </nav>
 
         {/* ── Footer ── */}
-        <div className={cn('shrink-0 border-t border-slate-50', isOpen ? 'p-4' : 'p-2')}>
+        <div className={cn('shrink-0', isDark ? 'border-t border-slate-800/80' : 'border-t border-slate-50', isOpen ? 'p-4' : 'p-2')}>
           <button
             data-tour="sidebar-logout"
             onClick={handleLogout}
             title={!isOpen ? 'Logout' : undefined}
             className={cn(
               'flex items-center rounded-xl transition-all group font-bold',
-              'text-slate-400 hover:text-red-500 hover:bg-red-50',
+              isDark ? 'text-slate-400 hover:text-red-400 hover:bg-red-950/40' : 'text-slate-400 hover:text-red-500 hover:bg-red-50',
               isOpen ? 'w-full gap-2 px-2 py-2 mb-1' : 'w-full justify-center px-0 py-2'
             )}
           >
@@ -512,13 +532,19 @@ const Sidebar = ({ role, isOpen, onClose, onToggle }) => {
                 href="https://uwo24.com/privacy-policy"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-[8px] font-bold text-slate-400 uppercase tracking-widest hover:text-[#059669] transition-colors italic"
+                className={cn(
+                  "text-[8px] font-bold uppercase tracking-widest transition-colors italic",
+                  isDark ? "text-slate-400 hover:text-emerald-400" : "text-slate-400 hover:text-[#059669]"
+                )}
               >
                 Privacy Policy
               </a>
               <Link
                 href="/terms"
-                className="text-[8px] font-bold text-slate-400 uppercase tracking-widest hover:text-[#059669] transition-colors italic"
+                className={cn(
+                  "text-[8px] font-bold uppercase tracking-widest transition-colors italic",
+                  isDark ? "text-slate-400 hover:text-emerald-400" : "text-slate-400 hover:text-[#059669]"
+                )}
               >
                 Terms of Service
               </Link>
@@ -529,7 +555,7 @@ const Sidebar = ({ role, isOpen, onClose, onToggle }) => {
         <style jsx>{`
           .custom-scrollbar::-webkit-scrollbar { width: 3px; }
           .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-          .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 20px; }
+          .custom-scrollbar::-webkit-scrollbar-thumb { background: ${isDark ? '#334155' : '#e2e8f0'}; border-radius: 20px; }
         `}</style>
       </aside>
     </>

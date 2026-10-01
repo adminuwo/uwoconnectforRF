@@ -311,7 +311,7 @@ export const UWOLoginModal = ({
                 <Loader2 className="w-5 h-5 animate-spin" />
               ) : (
                 <>
-                  <span>{isRegisterMode ? 'Create UWO Connect Account' : 'Sign In to Workspace'}</span>
+                  <span>{isRegisterMode ? 'Create UWO Connect™ Account' : 'Sign In to Workspace'}</span>
                   <ArrowRight className="w-4 h-4" />
                 </>
               )}

@@ -25,7 +25,7 @@ export default function BeforeAfterSection({ isDark = true }) {
             </span>
           </h2>
           <p className={`text-base md:text-lg font-medium ${isDark ? 'text-[#8E99A8]' : 'text-slate-600'}`}>
-            Compare how business communication transforms when you switch from fragmented apps to UWO Connect's unified AI automation workspace.
+            Compare how business communication transforms when you switch from fragmented apps to UwoConnect's unified AI automation workspace.
           </p>
 
           {/* Interactive Toggle */}
@@ -75,7 +75,7 @@ export default function BeforeAfterSection({ isDark = true }) {
                   </div>
                   <div>
                     <h3 className={`text-lg font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>Disconnected Reality</h3>
-                    <p className="text-xs text-red-400 font-medium">Without UWO Connect</p>
+                    <p className="text-xs text-red-400 font-medium">Without Uwo Connect</p>
                   </div>
                 </div>
                 <span className="px-3 py-1 bg-red-500/20 text-red-400 text-[10px] font-bold uppercase tracking-wider rounded-full border border-red-500/30">
@@ -126,7 +126,7 @@ export default function BeforeAfterSection({ isDark = true }) {
                   </div>
                   <div>
                     <h3 className={`text-lg font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>Intelligent Connection</h3>
-                    <p className="text-xs text-[#10B981] font-medium">Powered by UWO Connect AI</p>
+                    <p className="text-xs text-[#10B981] font-medium">Powered by Uwo Connect AI</p>
                   </div>
                 </div>
                 <span className="px-3 py-1 bg-[#10B981]/20 text-[#10B981] text-[10px] font-bold uppercase tracking-wider rounded-full border border-[#10B981]/40">

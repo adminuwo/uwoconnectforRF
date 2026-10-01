@@ -86,7 +86,7 @@ export default function AdminContentManagementPage() {
   const [maintenance, setMaintenance] = useState({
     is_enabled: false,
     title: 'Under Maintenance',
-    message: 'We are upgrading UWO Connect to deliver better speed and reliability. We will be back shortly.',
+    message: 'We are upgrading UwoConnect to deliver better speed and reliability. We will be back shortly.',
     estimated_completion: 'Within 30 minutes'
   });
   const [maintenanceSaving, setMaintenanceSaving] = useState(false);
@@ -475,7 +475,7 @@ export default function AdminContentManagementPage() {
               </span>
             </div>
             <p className="text-gray-500 text-sm mt-1">
-              Real-time remote content, banners, feature toggles, and legal documents for UWO Connect Mobile App.
+              Real-time remote content, banners, feature toggles, and legal documents for UwoConnect Mobile App.
             </p>
           </div>
 
@@ -1653,7 +1653,7 @@ export default function AdminContentManagementPage() {
                               {previewData.content.welcome_title || 'Welcome'}
                             </p>
                             <h4 className="text-base font-black text-white">
-                              {previewData.content.app_name || 'UWO Connect'}
+                              {previewData.content.app_name || 'Uwo Connect'}
                             </h4>
                           </div>
                           <div className="w-8 h-8 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 font-bold text-xs">

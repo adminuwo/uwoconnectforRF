@@ -52,7 +52,7 @@ export default function KinsoProblemStatement({ isDark }) {
           </p>
 
           <p className={isDark ? 'text-gray-300' : 'text-gray-600'}>
-            UWO Connect brings every conversation into one AI-powered workspace where your team can
+            Uwo Connect brings every conversation into one AI-powered workspace where your team can
             collaborate, automate repetitive work, prioritize important conversations, and deliver
             exceptional customer experiences from a single dashboard.
           </p>

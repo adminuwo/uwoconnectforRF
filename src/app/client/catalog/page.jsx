@@ -10,6 +10,24 @@ import {
 } from 'lucide-react';
 import axios from 'axios';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
+import { API_BASE_URL } from '@/config/apiConfig';
+
+const CURRENCY_OPTIONS = [
+  { code: 'INR', symbol: '₹', label: 'INR (₹) - Indian Rupee' },
+  { code: 'USD', symbol: '$', label: 'USD ($) - US Dollar' },
+  { code: 'EUR', symbol: '€', label: 'EUR (€) - Euro' },
+  { code: 'GBP', symbol: '£', label: 'GBP (£) - British Pound' },
+  { code: 'AED', symbol: 'AED ', label: 'AED (د.إ) - UAE Dirham' },
+  { code: 'CAD', symbol: 'CA$', label: 'CAD (CA$) - Canadian Dollar' },
+  { code: 'AUD', symbol: 'AU$', label: 'AUD (AU$) - Australian Dollar' },
+  { code: 'SAR', symbol: 'SAR ', label: 'SAR (﷼) - Saudi Riyal' },
+  { code: 'SGD', symbol: 'SG$', label: 'SGD (SG$) - Singapore Dollar' },
+];
+
+const getCurrencySymbol = (curr) => {
+  const match = CURRENCY_OPTIONS.find(c => c.code === (curr || '').toUpperCase());
+  return match ? match.symbol : (curr ? `${curr} ` : '₹');
+};
 
 export default function CatalogPage() {
   const [products, setProducts] = useState([]);
@@ -24,8 +42,19 @@ export default function CatalogPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [importing, setImporting] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [basicImgError, setBasicImgError] = useState(false);
+  const [mediaImgError, setMediaImgError] = useState(false);
   const fileInputRef = useRef(null);
   const imageInputRef = useRef(null);
+
+  const resolveImageUrl = (url) => {
+    if (!url) return '';
+    if (url.startsWith('data:') || url.startsWith('blob:')) return url;
+    if (url.startsWith('/media/')) {
+      return `${API_BASE_URL}${url}`;
+    }
+    return url;
+  };
 
   // Detail Drawer State
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -58,7 +87,7 @@ export default function CatalogPage() {
     product_type: 'PHYSICAL',
     brand: '',
     sku: '',
-    currency: 'USD',
+    currency: 'INR',
     description: '',
     image_url: '',
     gallery_images: [],
@@ -90,7 +119,7 @@ export default function CatalogPage() {
   const fetchRazorpayStatus = async () => {
     try {
       const token = localStorage.getItem('uwo_token');
-      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/razorpay/status`, {
+      const res = await axios.get(`${API_BASE_URL}/api/razorpay/status`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setRazorpayConnected(res.data?.connected === true);
@@ -115,7 +144,7 @@ export default function CatalogPage() {
     try {
       setLoading(true);
       const token = localStorage.getItem('uwo_token');
-      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/products/`, {
+      const res = await axios.get(`${API_BASE_URL}/api/products/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setProducts(Array.isArray(res.data) ? res.data : (res.data?.results || []));
@@ -129,7 +158,7 @@ export default function CatalogPage() {
   const fetchAnalytics = async () => {
     try {
       const token = localStorage.getItem('uwo_token');
-      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/products/analytics/`, {
+      const res = await axios.get(`${API_BASE_URL}/api/products/analytics/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setAnalyticsData(res.data);
@@ -147,12 +176,16 @@ export default function CatalogPage() {
   const openAddModal = () => {
     setEditingId(null);
     setFormData(initialFormData);
+    setBasicImgError(false);
+    setMediaImgError(false);
     setModalTab('basic');
     setModalOpen(true);
   };
 
   const openEditModal = (product) => {
     setEditingId(product.id);
+    setBasicImgError(false);
+    setMediaImgError(false);
     setFormData({
       name: product.name || '',
       price: product.price || '',
@@ -161,7 +194,7 @@ export default function CatalogPage() {
       product_type: product.product_type || 'PHYSICAL',
       brand: product.brand || '',
       sku: product.sku || '',
-      currency: product.currency || 'USD',
+      currency: product.currency || 'INR',
       description: product.description || '',
       image_url: product.image_url || '',
       gallery_images: product.gallery_images || [],
@@ -196,6 +229,8 @@ export default function CatalogPage() {
     const reader = new FileReader();
     reader.onload = () => {
       setFormData(prev => ({ ...prev, image_url: reader.result }));
+      setBasicImgError(false);
+      setMediaImgError(false);
     };
     reader.readAsDataURL(file);
 
@@ -206,7 +241,7 @@ export default function CatalogPage() {
       uploadData.append('image', file);
 
       const res = await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/products/upload_image/`,
+        `${API_BASE_URL}/api/products/upload_image/`,
         uploadData,
         {
           headers: {
@@ -246,11 +281,11 @@ export default function CatalogPage() {
       };
 
       if (editingId) {
-        await axios.patch(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/products/${editingId}/`, payload, {
+        await axios.patch(`${API_BASE_URL}/api/products/${editingId}/`, payload, {
           headers: { Authorization: `Bearer ${token}` }
         });
       } else {
-        await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/products/`, payload, {
+        await axios.post(`${API_BASE_URL}/api/products/`, payload, {
           headers: { Authorization: `Bearer ${token}` }
         });
       }
@@ -269,7 +304,7 @@ export default function CatalogPage() {
     if (!confirm('Are you sure you want to delete this product?')) return;
     try {
       const token = localStorage.getItem('uwo_token');
-      await axios.delete(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/products/${id}/`, {
+      await axios.delete(`${API_BASE_URL}/api/products/${id}/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       fetchProducts();
@@ -285,7 +320,7 @@ export default function CatalogPage() {
     try {
       const token = localStorage.getItem('uwo_token');
       const allIds = products.map(p => p.id);
-      await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/products/bulk_action/`, {
+      await axios.post(`${API_BASE_URL}/api/products/bulk_action/`, {
         ids: allIds,
         action: 'delete'
       }, {
@@ -309,7 +344,7 @@ export default function CatalogPage() {
         sku: product.sku ? `${product.sku}-COPY` : '',
         id: undefined
       };
-      await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/products/`, duplicateData, {
+      await axios.post(`${API_BASE_URL}/api/products/`, duplicateData, {
         headers: { Authorization: `Bearer ${token}` }
       });
       fetchProducts();
@@ -321,7 +356,7 @@ export default function CatalogPage() {
   const trackProductClick = async (product, clickType = 'button') => {
     try {
       const token = localStorage.getItem('uwo_token');
-      await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/products/${product.id}/track_click/`, { type: clickType }, {
+      await axios.post(`${API_BASE_URL}/api/products/${product.id}/track_click/`, { type: clickType }, {
         headers: { Authorization: `Bearer ${token}` }
       });
       fetchAnalytics();
@@ -329,7 +364,7 @@ export default function CatalogPage() {
   };
 
   const handleCopyLink = (product) => {
-    const trackingUrl = product.product_url ? `${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/products/${product.id}/redirect_link/` : window.location.href;
+    const trackingUrl = product.product_url ? `${API_BASE_URL}/api/products/${product.id}/redirect_link/` : window.location.href;
     navigator.clipboard.writeText(trackingUrl);
     setCopiedId(product.id);
     trackProductClick(product, 'link');
@@ -337,8 +372,9 @@ export default function CatalogPage() {
   };
 
   const handleShareWhatsApp = (product) => {
-    const trackingUrl = `${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/products/${product.id}/redirect_link/`;
-    const text = `Check out *${product.name}* ($${product.price})\n${product.description || ''}\n🔗 ${product.cta_text || 'View Product'}: ${trackingUrl}`;
+    const trackingUrl = `${API_BASE_URL}/api/products/${product.id}/redirect_link/`;
+    const sym = getCurrencySymbol(product.currency);
+    const text = `Check out *${product.name}* (${sym}${product.price})\n${product.description || ''}\n🔗 ${product.cta_text || 'View Product'}: ${trackingUrl}`;
     window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
   };
 
@@ -728,9 +764,10 @@ export default function CatalogPage() {
                       <div className="h-52 bg-slate-50 relative border-b border-slate-100 overflow-hidden group">
                         {product.image_url ? (
                           <img 
-                            src={product.image_url} 
+                            src={resolveImageUrl(product.image_url)} 
                             alt={product.name} 
                             className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-700 ease-out"
+                            onError={(e) => { e.currentTarget.style.display = 'none'; }}
                           />
                         ) : (
                           <div className="w-full h-full flex flex-col items-center justify-center text-slate-300 bg-gradient-to-br from-slate-50 to-emerald-50/30">
@@ -772,9 +809,9 @@ export default function CatalogPage() {
                           {/* Price & SKU */}
                           <div className="flex items-baseline justify-between mb-4">
                             <div>
-                              <span className="text-xl font-black text-slate-900">${product.price}</span>
+                              <span className="text-xl font-black text-slate-900">{getCurrencySymbol(product.currency)}{product.price}</span>
                               {product.discount_price && (
-                                <span className="text-xs text-slate-400 line-through ml-2">${product.discount_price}</span>
+                                <span className="text-xs text-slate-400 line-through ml-2">{getCurrencySymbol(product.currency)}{product.discount_price}</span>
                               )}
                             </div>
                             {product.sku && (
@@ -891,7 +928,16 @@ export default function CatalogPage() {
                         </td>
                         <td className="p-4 flex items-center gap-3">
                           <div className="w-10 h-10 rounded-xl bg-slate-100 overflow-hidden shrink-0 border border-slate-200">
-                            {product.image_url ? <img src={product.image_url} alt="" className="w-full h-full object-cover" /> : <ShoppingBag className="m-2.5 text-slate-400" size={20} />}
+                            {product.image_url ? (
+                              <img 
+                                src={resolveImageUrl(product.image_url)} 
+                                alt="" 
+                                className="w-full h-full object-cover" 
+                                onError={(e) => { e.currentTarget.style.display = 'none'; }} 
+                              />
+                            ) : (
+                              <ShoppingBag className="m-2.5 text-slate-400" size={20} />
+                            )}
                           </div>
                           <div>
                             <p className="font-bold text-slate-900">{product.name}</p>
@@ -903,7 +949,7 @@ export default function CatalogPage() {
                             {product.category}
                           </span>
                         </td>
-                        <td className="p-4 font-black text-slate-900">${product.price}</td>
+                        <td className="p-4 font-black text-slate-900">{getCurrencySymbol(product.currency)}{product.price}</td>
                         <td className="p-4">
                           {product.product_url ? (
                             <a href={product.product_url} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 text-emerald-600 hover:underline font-bold text-xs">
@@ -1075,18 +1121,27 @@ export default function CatalogPage() {
                     {/* Quick Image Browse Banner */}
                     <div className="flex items-center gap-3 p-3 bg-slate-50/80 rounded-2xl border border-slate-200/80">
                       <div className="w-14 h-14 rounded-xl border border-slate-200 overflow-hidden bg-white shrink-0 flex items-center justify-center">
-                        {formData.image_url ? (
-                          <img src={formData.image_url} alt="Product" className="w-full h-full object-cover" />
+                        {formData.image_url && !basicImgError ? (
+                          <img
+                            src={resolveImageUrl(formData.image_url)}
+                            alt="Product"
+                            className="w-full h-full object-cover"
+                            onError={() => setBasicImgError(true)}
+                          />
                         ) : (
                           <ImageIcon className="text-slate-300" size={22} />
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-xs font-bold text-slate-800">
-                          {formData.image_url ? 'Catalog Image Selected' : 'Product Image'}
+                          {formData.image_url && !basicImgError ? 'Catalog Image Selected' : 'Product Image'}
                         </p>
                         <p className="text-[10px] text-slate-400 truncate">
-                          {formData.image_url ? 'Attached to this product' : 'Browse from computer or configure in Media tab'}
+                          {formData.image_url && !basicImgError ? (
+                            'Attached to this product'
+                          ) : (
+                            'Browse from computer (PNG, JPG, WEBP)'
+                          )}
                         </p>
                       </div>
                       <button
@@ -1096,7 +1151,7 @@ export default function CatalogPage() {
                         className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs transition-all cursor-pointer flex items-center gap-1.5 shadow-xs disabled:opacity-50 shrink-0"
                       >
                         {uploadingImage ? <Loader2 size={12} className="animate-spin" /> : <Upload size={12} />}
-                        {formData.image_url ? 'Change Image' : 'Browse Image'}
+                        {formData.image_url && !basicImgError ? 'Change Image' : 'Browse Image'}
                       </button>
                     </div>
 
@@ -1112,28 +1167,45 @@ export default function CatalogPage() {
                       />
                     </div>
 
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                       <div>
-                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block">Price ($) *</label>
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block">Currency</label>
+                        <select 
+                          value={formData.currency || 'INR'}
+                          onChange={e => setFormData({...formData, currency: e.target.value})}
+                          className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3 py-3 text-xs font-bold text-slate-800 outline-none focus:border-emerald-500 transition-all cursor-pointer"
+                        >
+                          {CURRENCY_OPTIONS.map(c => (
+                            <option key={c.code} value={c.code}>{c.label}</option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block">
+                          Price ({getCurrencySymbol(formData.currency).trim()}) *
+                        </label>
                         <input 
                           type="number" 
                           step="0.01"
                           required
                           value={formData.price}
                           onChange={e => setFormData({...formData, price: e.target.value})}
-                          placeholder="29.99"
+                          placeholder="999.00"
                           className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-xs font-semibold text-slate-800 outline-none focus:border-emerald-500 transition-all"
                         />
                       </div>
 
                       <div>
-                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block">Discount Price ($)</label>
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block">
+                          Discount ({getCurrencySymbol(formData.currency).trim()})
+                        </label>
                         <input 
                           type="number" 
                           step="0.01"
                           value={formData.discount_price}
                           onChange={e => setFormData({...formData, discount_price: e.target.value})}
-                          placeholder="19.99"
+                          placeholder="799.00"
                           className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-xs font-semibold text-slate-800 outline-none focus:border-emerald-500 transition-all"
                         />
                       </div>
@@ -1161,7 +1233,7 @@ export default function CatalogPage() {
                           type="text" 
                           value={formData.brand}
                           onChange={e => setFormData({...formData, brand: e.target.value})}
-                          placeholder="e.g. UWO Connect"
+                          placeholder="e.g. Uwo  Connect"
                           className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-xs font-semibold text-slate-800 outline-none focus:border-emerald-500 transition-all"
                         />
                       </div>
@@ -1211,13 +1283,14 @@ export default function CatalogPage() {
                       </div>
 
                       {/* Image Preview or Upload/Browse Area */}
-                      {formData.image_url ? (
+                      {formData.image_url && !mediaImgError ? (
                         <div className="flex items-center gap-4 p-4 rounded-2xl bg-emerald-50/40 border border-emerald-200/80">
                           <div className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-xl overflow-hidden border border-emerald-200 bg-white shadow-xs shrink-0">
                             <img 
-                              src={formData.image_url} 
+                              src={resolveImageUrl(formData.image_url)} 
                               alt="Catalog Preview" 
                               className="w-full h-full object-cover" 
+                              onError={() => setMediaImgError(true)}
                             />
                           </div>
                           <div className="flex-1 min-w-0 space-y-2">

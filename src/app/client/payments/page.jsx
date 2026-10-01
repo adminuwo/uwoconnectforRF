@@ -6,7 +6,7 @@ import {
   CreditCard, CheckCircle2, XCircle, AlertCircle, Loader2,
   Link2, Link2Off, RefreshCw, Settings2, Shield, Zap,
   ToggleLeft, ToggleRight, ExternalLink, Copy, CheckCheck,
-  TrendingUp, IndianRupee, Clock
+  TrendingUp, IndianRupee, Clock, Key, Eye, EyeOff, X
 } from 'lucide-react';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import axios from 'axios';
@@ -35,6 +35,17 @@ export default function PaymentsGatewayPage() {
   const [showDisconnectConfirm, setShowDisconnectConfirm] = useState(false);
   const [copied, setCopied] = useState(false);
   const [toast, setToast] = useState(null);
+
+  // Manual API Key modal state
+  const [showKeyModal, setShowKeyModal] = useState(false);
+  const [keyForm, setKeyForm] = useState({
+    key_id: '',
+    key_secret: '',
+    webhook_secret: '',
+  });
+  const [showSecret, setShowSecret] = useState(false);
+  const [savingKeys, setSavingKeys] = useState(false);
+  const [keyError, setKeyError] = useState('');
 
   const [connection, setConnection] = useState({
     connected: false,
@@ -105,6 +116,49 @@ export default function PaymentsGatewayPage() {
       showToast(err?.response?.data?.error || 'Failed to initiate connection', 'error');
     } finally {
       setConnecting(false);
+    }
+  };
+
+  const handleSaveManualKeys = async (e) => {
+    if (e && e.preventDefault) e.preventDefault();
+    setKeyError('');
+
+    const kid = (keyForm.key_id || '').trim();
+    const ksec = (keyForm.key_secret || '').trim();
+    const wsec = (keyForm.webhook_secret || '').trim();
+
+    if (!kid || !ksec) {
+      setKeyError('Please provide both Razorpay Key ID and Key Secret.');
+      return;
+    }
+
+    if (!kid.startsWith('rzp_test_') && !kid.startsWith('rzp_live_')) {
+      setKeyError('Invalid format. Razorpay Key ID must start with "rzp_test_" or "rzp_live_".');
+      return;
+    }
+
+    setSavingKeys(true);
+    try {
+      const res = await axios.post(`${API()}/api/razorpay/keys`, {
+        key_id: kid,
+        key_secret: ksec,
+        webhook_secret: wsec,
+      }, {
+        headers: { Authorization: `Bearer ${getToken()}` },
+      });
+
+      if (res.data.success) {
+        showToast(res.data.message || 'Razorpay connected successfully!', 'success');
+        setShowKeyModal(false);
+        setKeyForm({ key_id: '', key_secret: '', webhook_secret: '' });
+        fetchStatus();
+      } else {
+        setKeyError(res.data.error || 'Failed to connect. Please check credentials.');
+      }
+    } catch (err) {
+      setKeyError(err?.response?.data?.error || 'Failed to verify keys with Razorpay.');
+    } finally {
+      setSavingKeys(false);
     }
   };
 
@@ -333,12 +387,33 @@ export default function PaymentsGatewayPage() {
                         ) : (
                           <RazorpayLogo />
                         )}
-                        {connecting ? 'Redirecting to Razorpay…' : 'Connect Razorpay Account'}
+                        {connecting ? 'Redirecting to Razorpay…' : 'Connect via Razorpay Login (OAuth)'}
                         {!connecting && <ExternalLink size={14} className="opacity-70" />}
                       </button>
 
+                      {/* Divider */}
+                      <div className="relative my-2 flex items-center justify-center">
+                        <div className="border-t border-slate-200 w-full" />
+                        <span className="bg-white px-3 text-[10px] uppercase tracking-wider font-extrabold text-slate-400 absolute">
+                          OR CONNECT WITH API KEYS
+                        </span>
+                      </div>
+
+                      {/* Direct API Keys Button */}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setKeyError('');
+                          setShowKeyModal(true);
+                        }}
+                        className="w-full flex items-center justify-center gap-2.5 bg-slate-900 hover:bg-slate-800 text-white font-black py-3.5 rounded-2xl shadow-md transition-all hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0"
+                      >
+                        <Key size={17} className="text-amber-400" />
+                        Enter API Key ID & Secret (Fastest & Direct)
+                      </button>
+
                       <p className="text-center text-[10px] text-slate-400">
-                        You'll be redirected to Razorpay to authorize. No API keys or passwords needed.
+                        Copy your Key ID & Secret from Razorpay Dashboard &gt; Settings &gt; API Keys.
                       </p>
                     </div>
                   ) : (
@@ -351,12 +426,28 @@ export default function PaymentsGatewayPage() {
                         View Dashboard
                       </button>
                       <button
+                        type="button"
+                        onClick={() => {
+                          setKeyForm({
+                            key_id: connection.linked_key_id || '',
+                            key_secret: '',
+                            webhook_secret: '',
+                          });
+                          setKeyError('');
+                          setShowKeyModal(true);
+                        }}
+                        className="flex items-center gap-2 px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm rounded-xl transition-all"
+                      >
+                        <Key size={14} className="text-amber-400" />
+                        Update API Keys
+                      </button>
+                      <button
                         onClick={handleConnect}
                         disabled={connecting}
                         className="flex items-center gap-2 px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-sm rounded-xl transition-all"
                       >
                         {connecting ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
-                        Reconnect
+                        OAuth Reconnect
                       </button>
                       <button
                         onClick={() => setShowDisconnectConfirm(true)}
@@ -450,6 +541,140 @@ export default function PaymentsGatewayPage() {
                 Yes, Disconnect
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Direct API Key Modal ── */}
+      {showKeyModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl shadow-2xl max-w-lg w-full p-7 border border-slate-100 relative animate-in zoom-in-95 duration-200">
+            {/* Close Button */}
+            <button
+              onClick={() => setShowKeyModal(false)}
+              className="absolute top-5 right-5 p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+            >
+              <X size={18} />
+            </button>
+
+            {/* Modal Header */}
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 rounded-2xl bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-600">
+                <Key size={24} />
+              </div>
+              <div>
+                <h3 className="text-xl font-black text-slate-900 tracking-tight">Connect Razorpay API Keys</h3>
+                <p className="text-xs text-slate-500 font-medium">Direct connection — customer payments go to your account</p>
+              </div>
+            </div>
+
+            {/* Instruction Banner */}
+            <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-100 text-xs text-slate-600 mb-5 leading-relaxed">
+              <span className="font-bold text-slate-800">Where to find your keys:</span> Log into your{' '}
+              <a
+                href="https://dashboard.razorpay.com/app/keys"
+                target="_blank"
+                rel="noreferrer"
+                className="text-blue-600 font-bold hover:underline inline-flex items-center gap-0.5"
+              >
+                Razorpay Dashboard <ExternalLink size={11} />
+              </a>{' '}
+              &gt; <b>Settings</b> &gt; <b>API Keys</b> &gt; click <b>Generate Key</b>.
+            </div>
+
+            {/* Error Message */}
+            {keyError && (
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-600 flex items-start gap-2">
+                <AlertCircle size={15} className="shrink-0 mt-0.5" />
+                <span>{keyError}</span>
+              </div>
+            )}
+
+            {/* Form */}
+            <form onSubmit={handleSaveManualKeys} className="space-y-4">
+              <div>
+                <label className="block text-xs font-black uppercase tracking-wider text-slate-700 mb-1.5">
+                  Razorpay Key ID <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="rzp_live_xxxxxxxxxxxx or rzp_test_xxxxxxxxxxxx"
+                  value={keyForm.key_id}
+                  onChange={(e) => setKeyForm({ ...keyForm, key_id: e.target.value })}
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-mono text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"
+                />
+                <p className="text-[10px] text-slate-400 mt-1">
+                  Starting with <code className="text-slate-600">rzp_live_</code> (Live) or <code className="text-slate-600">rzp_test_</code> (Test).
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-xs font-black uppercase tracking-wider text-slate-700 mb-1.5">
+                  Razorpay Key Secret <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <input
+                    type={showSecret ? 'text' : 'password'}
+                    required
+                    placeholder="Enter your Key Secret"
+                    value={keyForm.key_secret}
+                    onChange={(e) => setKeyForm({ ...keyForm, key_secret: e.target.value })}
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-mono text-slate-800 pr-11 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowSecret(!showSecret)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1"
+                  >
+                    {showSecret ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
+                <p className="text-[10px] text-slate-400 mt-1">
+                  Key Secret is securely encrypted server-side and never shared with anyone.
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-xs font-black uppercase tracking-wider text-slate-700 mb-1.5">
+                  Webhook Secret <span className="text-slate-400 font-normal">(Optional)</span>
+                </label>
+                <input
+                  type="text"
+                  placeholder="Optional Webhook secret for instant transaction sync"
+                  value={keyForm.webhook_secret}
+                  onChange={(e) => setKeyForm({ ...keyForm, webhook_secret: e.target.value })}
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-mono text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"
+                />
+              </div>
+
+              <div className="pt-2 flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => setShowKeyModal(false)}
+                  className="flex-1 py-3 rounded-xl border border-slate-200 text-slate-600 font-bold text-sm hover:bg-slate-50 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={savingKeys}
+                  className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-sm shadow-md shadow-blue-200 transition-all disabled:opacity-60"
+                >
+                  {savingKeys ? (
+                    <>
+                      <Loader2 size={16} className="animate-spin" />
+                      Verifying with Razorpay…
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle2 size={16} />
+                      Verify &amp; Connect Account
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

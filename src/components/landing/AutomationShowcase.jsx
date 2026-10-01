@@ -14,7 +14,7 @@ export default function AutomationShowcase({ isDark = true }) {
           One Platform. Endless Possibilities.
         </h2>
         <p className={`text-lg md:text-xl font-medium max-w-2xl mx-auto mb-16 leading-relaxed ${isDark ? 'text-[#8E99A8]' : 'text-slate-600'}`}>
-          Whether you're generating leads or scaling operations, UWO Connect helps every team work smarter with connected data, AI-powered automation, and seamless collaboration.
+          Whether you're generating leads or scaling operations, UwoConnect helps every team work smarter with connected data, AI-powered automation, and seamless collaboration.
         </p>
 
         <div className={`max-w-5xl mx-auto rounded-[32px] p-8 md:p-12 relative overflow-hidden border ${isDark

@@ -63,7 +63,7 @@ export default function KinsoSecurity({ isDark }) {
             Security Built for Global Compliance.
           </h2>
           <p className={`text-sm sm:text-base md:text-lg ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-            UWO Connect protects your customer data with zero compromise on speed or reliability.
+            Uwo Connect protects your customer data with zero compromise on speed or reliability.
           </p>
         </div>
 

@@ -1229,7 +1229,7 @@ const YouTubeManager = () => {
             </a>.
           </div>
           <div>
-            <span>You can revoke UwoConnect access at any time via</span>
+            <span>You can revoke UWO Connect™ access at any time via</span>
             <a 
               href="https://myaccount.google.com/permissions" 
               target="_blank" 

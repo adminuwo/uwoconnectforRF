@@ -32,7 +32,7 @@ const UWOHeroVideo = () => {
         {/* Brand Name / Header Badge */}
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs sm:text-sm font-black uppercase tracking-widest backdrop-blur-md shadow-2xl">
           <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-          <span>UWO Connect</span>
+          <span>Uwo Connect</span>
         </div>
 
         {/* Primary Headline */}
@@ -70,7 +70,7 @@ const UWOHeroVideo = () => {
             className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-slate-900/80 hover:bg-slate-850 text-white font-bold px-8 py-4 rounded-2xl text-base border border-slate-700/80 hover:border-emerald-500/50 backdrop-blur-md transition-all duration-300 cursor-pointer shadow-lg"
           >
             <PlayCircle size={18} className="text-emerald-400" />
-            <span>Explore UWO Connect</span>
+            <span>Explore Uwo Connect</span>
           </button>
         </div>
 

@@ -12,13 +12,13 @@ export default function FeatureComparison({ isDark = true }) {
         <div className="flex-1 text-center lg:text-left max-w-2xl">
           <span className="text-[10px] font-bold text-[#10B981] uppercase tracking-widest block mb-3">The Advantage</span>
           <h2 className={`text-3xl md:text-5xl font-bold tracking-tight mb-6 ${isDark ? 'text-white' : 'text-slate-900'}`}>
-            Why Businesses Choose UWO Connect
+            Why Businesses Choose UWO Connect™
           </h2>
           <p className={`text-lg md:text-xl font-medium leading-relaxed mb-8 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
             Because customer engagement should feel connected—not complicated.
           </p>
           <p className={`text-base md:text-lg mb-8 ${isDark ? 'text-[#8E99A8]' : 'text-slate-600'}`}>
-            Instead of juggling multiple tools for messaging, CRM, automation, and support, UWO Connect brings everything together in one intelligent platform.
+            Instead of juggling multiple tools for messaging, CRM, automation, and support, UWO Connect™ brings everything together in one intelligent platform.
           </p>
           <button className="btn-accent px-8 py-4 flex items-center justify-center lg:justify-start gap-2 mx-auto lg:mx-0">
             See It In Action <ArrowRight size={16} />

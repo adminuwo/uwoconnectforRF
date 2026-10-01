@@ -15,11 +15,13 @@ import LearningCenterModal from '@/components/guides/LearningCenterModal';
 import { cn } from '@/lib/utils';
 import { API_BASE_URL } from '@/config/apiConfig';
 import { useEntitlement } from '@/context/EntitlementContext';
+import { useTheme } from '@/context/ThemeContext';
 import AgencyAdminDashboard from './agency/page';
 
 const ClientOverview = () => {
   const router = useRouter();
   const { entitlements } = useEntitlement();
+  const { isDark } = useTheme();
   const [mounted, setMounted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [userName, setUserName] = useState('User');
@@ -271,10 +273,10 @@ const ClientOverview = () => {
     {
       title: 'Connected Connectors',
       count: `${resourceCounts.connectors} Connectors`,
-      subtitle: 'WhatsApp, IG, Telegram & Email',
+      subtitle: 'WhatsApp, IG, Facebook & Email',
       icon: Share2,
       path: '/client/channels',
-      color: 'bg-emerald-50 text-emerald-600 border-emerald-100',
+      color: isDark ? 'bg-emerald-950/70 text-emerald-400 border-emerald-800/70' : 'bg-emerald-50 text-emerald-600 border-emerald-100',
     },
     {
       title: 'Projects & Workflows',
@@ -282,7 +284,7 @@ const ClientOverview = () => {
       subtitle: 'Automated routing & AI replies',
       icon: GitBranch,
       path: '/client/workflows',
-      color: 'bg-blue-50 text-blue-600 border-blue-100',
+      color: isDark ? 'bg-blue-950/70 text-blue-400 border-blue-800/70' : 'bg-blue-50 text-blue-600 border-blue-100',
     },
     {
       title: 'Team Members',
@@ -290,7 +292,7 @@ const ClientOverview = () => {
       subtitle: 'Active agents & supervisors',
       icon: Users,
       path: '/client/team',
-      color: 'bg-purple-50 text-purple-600 border-purple-100',
+      color: isDark ? 'bg-purple-950/70 text-purple-400 border-purple-800/70' : 'bg-purple-50 text-purple-600 border-purple-100',
     },
   ];
 
@@ -301,7 +303,7 @@ const ClientOverview = () => {
       subtitle: 'Trained documents & system KB',
       icon: FileText,
       path: '/client/knowledge',
-      color: 'bg-teal-50 text-teal-600 border-teal-100',
+      color: isDark ? 'bg-teal-950/70 text-teal-400 border-teal-800/70' : 'bg-teal-50 text-teal-600 border-teal-100',
     },
     {
       title: 'Catalog Products',
@@ -309,7 +311,7 @@ const ClientOverview = () => {
       subtitle: 'E-commerce items & pricing inventory',
       icon: Package,
       path: '/client/catalog',
-      color: 'bg-amber-50 text-amber-600 border-amber-100',
+      color: isDark ? 'bg-amber-950/70 text-amber-400 border-amber-800/70' : 'bg-amber-50 text-amber-600 border-amber-100',
     },
   ];
 
@@ -374,22 +376,35 @@ const ClientOverview = () => {
         <div className="max-w-7xl mx-auto w-full p-4 sm:p-6 pb-20">
           
           {/* Welcome Section */}
-          <div data-tour="dashboard-welcome" className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 pb-6 border-b border-slate-100">
+          <div data-tour="dashboard-welcome" className={cn(
+            "flex flex-col sm:flex-row sm:items-center justify-between mb-8 pb-6 border-b transition-colors",
+            isDark ? "border-slate-800" : "border-slate-100"
+          )}>
             <div>
               <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-                <span className="px-2.5 py-0.5 rounded-md bg-emerald-50 border border-emerald-200/60 text-emerald-800 text-[10px] font-black uppercase tracking-wider">
+                <span className={cn(
+                  "px-2.5 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider border",
+                  isDark
+                    ? "bg-emerald-950/70 border-emerald-800/70 text-emerald-300"
+                    : "bg-emerald-50 border-emerald-200/60 text-emerald-800"
+                )}>
                   🏢 {userObj?.client?.business_name || 'My Workspace'}
                 </span>
                 {activePlanName && (
-                  <span className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 text-[10px] font-bold uppercase tracking-wider">
+                  <span className={cn(
+                    "px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider border",
+                    isDark
+                      ? "bg-slate-800 border-slate-700 text-slate-300"
+                      : "bg-slate-100 border-transparent text-slate-700"
+                  )}>
                     {activePlanName} Plan
                   </span>
                 )}
               </div>
-              <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight mb-1">
-                Welcome, <span className="text-emerald-700">{userName}</span>
+              <h1 className={cn("text-2xl sm:text-3xl font-black tracking-tight mb-1", isDark ? "text-white" : "text-slate-900")}>
+                Welcome, <span className={isDark ? "text-emerald-400" : "text-emerald-700"}>{userName}</span>
               </h1>
-              <p className="text-slate-500 font-medium text-xs sm:text-sm">Your multi-channel communication & automation command center.</p>
+              <p className={cn("font-medium text-xs sm:text-sm", isDark ? "text-slate-400" : "text-slate-500")}>Your multi-channel communication & automation command center.</p>
             </div>
             <button 
               data-tour="dashboard-launch-btn"
@@ -410,23 +425,28 @@ const ClientOverview = () => {
                 <div
                   key={res.title}
                   onClick={() => handleCardClick(res.path)}
-                  className="p-6 rounded-3xl glass-panel border border-white/80 hover-lift cursor-pointer flex flex-col justify-between space-y-4 transition-all group relative overflow-hidden shadow-sm hover:shadow-md"
+                  className={cn(
+                    "p-6 rounded-3xl cursor-pointer flex flex-col justify-between space-y-4 transition-all group relative overflow-hidden shadow-sm hover:shadow-md",
+                    isDark
+                      ? "bg-[#0f172a] hover:bg-[#1e293b] border border-slate-800 hover:border-emerald-500/40 shadow-xl"
+                      : "glass-panel border border-white/80 hover-lift"
+                  )}
                 >
                   <div className="flex items-center justify-between">
-                    <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center border font-bold shadow-sm", res.color)}>
+                    <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center border font-bold shadow-sm transition-transform group-hover:scale-105", res.color)}>
                       <Icon size={22} />
                     </div>
-                    <ChevronRight size={18} className="text-slate-300 group-hover:text-slate-900 group-hover:translate-x-1 transition-all" />
+                    <ChevronRight size={18} className={cn("transition-all group-hover:translate-x-1", isDark ? "text-slate-500 group-hover:text-emerald-400" : "text-slate-300 group-hover:text-slate-900")} />
                   </div>
 
                   <div>
-                    <h4 className="text-sm font-bold text-slate-900 group-hover:text-emerald-700 transition-colors mb-1">
+                    <h4 className={cn("text-sm font-bold transition-colors mb-1", isDark ? "text-white group-hover:text-emerald-400" : "text-slate-900 group-hover:text-emerald-700")}>
                       {res.title}
                     </h4>
-                    <span className="text-base font-black text-emerald-700 block">
+                    <span className={cn("text-base font-black block", isDark ? "text-emerald-400" : "text-emerald-700")}>
                       {res.count}
                     </span>
-                    <p className="text-xs text-slate-400 italic mt-1">
+                    <p className={cn("text-xs italic mt-1", isDark ? "text-slate-400" : "text-slate-400")}>
                       {res.subtitle}
                     </p>
                   </div>
@@ -443,23 +463,28 @@ const ClientOverview = () => {
                 <div
                   key={res.title}
                   onClick={() => handleCardClick(res.path)}
-                  className="p-6 rounded-3xl glass-panel border border-white/80 hover-lift cursor-pointer flex flex-col justify-between space-y-4 transition-all group relative overflow-hidden shadow-sm hover:shadow-md"
+                  className={cn(
+                    "p-6 rounded-3xl cursor-pointer flex flex-col justify-between space-y-4 transition-all group relative overflow-hidden shadow-sm hover:shadow-md",
+                    isDark
+                      ? "bg-[#0f172a] hover:bg-[#1e293b] border border-slate-800 hover:border-emerald-500/40 shadow-xl"
+                      : "glass-panel border border-white/80 hover-lift"
+                  )}
                 >
                   <div className="flex items-center justify-between">
-                    <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center border font-bold shadow-sm", res.color)}>
+                    <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center border font-bold shadow-sm transition-transform group-hover:scale-105", res.color)}>
                       <Icon size={22} />
                     </div>
-                    <ChevronRight size={18} className="text-slate-300 group-hover:text-slate-900 group-hover:translate-x-1 transition-all" />
+                    <ChevronRight size={18} className={cn("transition-all group-hover:translate-x-1", isDark ? "text-slate-500 group-hover:text-emerald-400" : "text-slate-300 group-hover:text-slate-900")} />
                   </div>
 
                   <div>
-                    <h4 className="text-sm font-bold text-slate-900 group-hover:text-emerald-700 transition-colors mb-1">
+                    <h4 className={cn("text-sm font-bold transition-colors mb-1", isDark ? "text-white group-hover:text-emerald-400" : "text-slate-900 group-hover:text-emerald-700")}>
                       {res.title}
                     </h4>
-                    <span className="text-base font-black text-emerald-700 block">
+                    <span className={cn("text-base font-black block", isDark ? "text-emerald-400" : "text-emerald-700")}>
                       {res.count}
                     </span>
-                    <p className="text-xs text-slate-400 italic mt-1">
+                    <p className={cn("text-xs italic mt-1", isDark ? "text-slate-400" : "text-slate-400")}>
                       {res.subtitle}
                     </p>
                   </div>
@@ -470,16 +495,28 @@ const ClientOverview = () => {
         </div>
 
         {/* ── Assigned Projects & Milestones Widget ── */}
-        <div className="mb-10 p-6 rounded-3xl bg-white border border-slate-200/90 shadow-sm relative overflow-hidden">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100 mb-5">
+        <div className={cn(
+          "mb-10 p-6 rounded-3xl shadow-sm relative overflow-hidden border transition-colors",
+          isDark ? "bg-[#0f172a] border-slate-800" : "bg-white border-slate-200/90"
+        )}>
+          <div className={cn(
+            "flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b mb-5",
+            isDark ? "border-slate-800" : "border-slate-100"
+          )}>
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100 font-bold">
+              <div className={cn(
+                "w-10 h-10 rounded-2xl flex items-center justify-center border font-bold",
+                isDark ? "bg-emerald-950/60 text-emerald-400 border-emerald-800/60" : "bg-emerald-50 text-emerald-600 border-emerald-100"
+              )}>
                 <FolderKanban size={20} />
               </div>
               <div>
-                <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                <h3 className={cn("text-base font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
                   My Assigned Projects & Milestones
-                  <span className="px-2 py-0.5 bg-emerald-50 text-emerald-700 text-[10px] font-bold rounded-full border border-emerald-200">
+                  <span className={cn(
+                    "px-2 py-0.5 text-[10px] font-bold rounded-full border",
+                    isDark ? "bg-emerald-950/80 text-emerald-300 border-emerald-800" : "bg-emerald-50 text-emerald-700 border-emerald-200"
+                  )}>
                     {assignedProjects.length} Active
                   </span>
                 </h3>
@@ -490,7 +527,10 @@ const ClientOverview = () => {
             <div className="flex items-center gap-2">
               <button
                 onClick={() => router.push('/client/reports')}
-                className="px-3.5 py-2 bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold rounded-xl text-xs transition-all border border-slate-200 cursor-pointer flex items-center gap-1.5"
+                className={cn(
+                  "px-3.5 py-2 font-bold rounded-xl text-xs transition-all border cursor-pointer flex items-center gap-1.5",
+                  isDark ? "bg-slate-800 hover:bg-slate-700 text-slate-200 border-slate-700" : "bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200"
+                )}
               >
                 <FileText size={13} /> Submit Report
               </button>
@@ -504,9 +544,12 @@ const ClientOverview = () => {
           </div>
 
           {assignedProjects.length === 0 ? (
-            <div className="text-center py-8 bg-slate-50/50 rounded-2xl border border-dashed border-slate-200 text-slate-400 text-xs">
-              <p className="font-semibold text-slate-600">No assigned projects yet.</p>
-              <p className="text-[11px] text-slate-400 mt-0.5">When the admin assigns you to a workspace project, it will appear here with live milestones.</p>
+            <div className={cn(
+              "text-center py-8 rounded-2xl border border-dashed text-xs",
+              isDark ? "bg-slate-800/40 border-slate-800 text-slate-400" : "bg-slate-50/50 border-slate-200 text-slate-400"
+            )}>
+              <p className={cn("font-semibold", isDark ? "text-slate-300" : "text-slate-600")}>No assigned projects yet.</p>
+              <p className={cn("text-[11px] mt-0.5", isDark ? "text-slate-500" : "text-slate-400")}>When the admin assigns you to a workspace project, it will appear here with live milestones.</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -522,15 +565,20 @@ const ClientOverview = () => {
                   <div
                     key={p.id || p._id}
                     onClick={() => router.push('/client/team')}
-                    className="p-4 rounded-2xl bg-slate-50/60 hover:bg-slate-50 border border-slate-200/80 hover:border-emerald-300 transition-all cursor-pointer group flex flex-col justify-between space-y-3"
+                    className={cn(
+                      "p-4 rounded-2xl border transition-all cursor-pointer group flex flex-col justify-between space-y-3",
+                      isDark
+                        ? "bg-slate-800/60 hover:bg-slate-800 border-slate-700/80 hover:border-emerald-500/40"
+                        : "bg-slate-50/60 hover:bg-slate-50 border-slate-200/80 hover:border-emerald-300"
+                    )}
                   >
                     <div>
                       <div className="flex items-center justify-between gap-2">
                         <span className={cn(
                           "px-2 py-0.5 rounded-full text-[9px] font-bold uppercase",
-                          p.status === 'COMPLETED' ? "bg-emerald-100 text-emerald-800" :
-                          p.status === 'IN_PROGRESS' ? "bg-blue-100 text-blue-800" :
-                          "bg-slate-200 text-slate-700"
+                          p.status === 'COMPLETED' ? (isDark ? "bg-emerald-950 text-emerald-300 border border-emerald-800" : "bg-emerald-100 text-emerald-800") :
+                          p.status === 'IN_PROGRESS' ? (isDark ? "bg-blue-950 text-blue-300 border border-blue-800" : "bg-blue-100 text-blue-800") :
+                          (isDark ? "bg-slate-700 text-slate-300" : "bg-slate-200 text-slate-700")
                         )}>
                           {p.status?.replace('_', ' ') || 'PLANNING'}
                         </span>
@@ -541,7 +589,7 @@ const ClientOverview = () => {
                         )}
                       </div>
 
-                      <h4 className="font-bold text-slate-900 text-sm mt-2 group-hover:text-emerald-700 transition-colors line-clamp-1">
+                      <h4 className={cn("font-bold text-sm mt-2 transition-colors line-clamp-1", isDark ? "text-slate-100 group-hover:text-emerald-400" : "text-slate-900 group-hover:text-emerald-700")}>
                         {p.name}
                       </h4>
                       {p.description && (
@@ -551,11 +599,11 @@ const ClientOverview = () => {
 
                     {/* Progress */}
                     <div className="space-y-1.5 pt-1">
-                      <div className="flex justify-between text-[11px] font-bold text-slate-700">
+                      <div className={cn("flex justify-between text-[11px] font-bold", isDark ? "text-slate-300" : "text-slate-700")}>
                         <span className="text-slate-400 font-semibold">{completedMilestones} / {totalMilestones} Milestones</span>
-                        <span className="text-emerald-600 font-black">{progressPercent}%</span>
+                        <span className={isDark ? "text-emerald-400 font-black" : "text-emerald-600 font-black"}>{progressPercent}%</span>
                       </div>
-                      <div className="w-full bg-slate-200/80 h-2 rounded-full overflow-hidden">
+                      <div className={cn("w-full h-2 rounded-full overflow-hidden", isDark ? "bg-slate-700" : "bg-slate-200/80")}>
                         <div
                           className="bg-emerald-500 h-full rounded-full transition-all duration-300"
                           style={{ width: `${progressPercent}%` }}
@@ -571,7 +619,10 @@ const ClientOverview = () => {
 
         {/* YouTube Channel Stats Widget */}
         {ytData && (
-          <div className="mb-10 p-6 rounded-3xl glass-panel border border-red-100 bg-red-50/10 shadow-sm relative overflow-hidden">
+          <div className={cn(
+            "mb-10 p-6 rounded-3xl shadow-sm relative overflow-hidden border transition-colors",
+            isDark ? "bg-[#0f172a] border-slate-800" : "glass-panel border-red-100 bg-red-50/10"
+          )}>
             <div className="absolute top-0 right-0 w-64 h-64 bg-red-500/5 rounded-full blur-3xl pointer-events-none" />
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
               <div className="flex items-center gap-4">
@@ -587,27 +638,30 @@ const ClientOverview = () => {
                   </div>
                 )}
                 <div>
-                  <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                  <h3 className={cn("text-lg font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
                     <span className="w-2.5 h-2.5 rounded-full bg-red-600 animate-pulse" />
                     {ytData.channel_name || 'YouTube Channel'}
                   </h3>
-                  <p className="text-xs text-slate-500 font-medium">Linked YouTube Content & Analytics</p>
+                  <p className={cn("text-xs font-medium", isDark ? "text-slate-400" : "text-slate-500")}>Linked YouTube Content & Analytics</p>
                 </div>
               </div>
 
               {/* Stat Counters */}
-              <div className="grid grid-cols-3 gap-4 md:gap-8 bg-white/60 p-4 rounded-2xl border border-red-100/50 backdrop-blur-sm">
+              <div className={cn(
+                "grid grid-cols-3 gap-4 md:gap-8 p-4 rounded-2xl border backdrop-blur-sm",
+                isDark ? "bg-slate-800/80 border-slate-700" : "bg-white/60 border-red-100/50"
+              )}>
                 <div>
                   <span className="text-xs text-slate-400 font-semibold uppercase tracking-wider block">Subscribers</span>
                   <span className="text-lg font-black text-red-600">{ytData.subscribers?.toLocaleString() || 0}</span>
                 </div>
                 <div>
                   <span className="text-xs text-slate-400 font-semibold uppercase tracking-wider block">Total Views</span>
-                  <span className="text-lg font-black text-slate-800">{ytData.total_views?.toLocaleString() || 0}</span>
+                  <span className={cn("text-lg font-black", isDark ? "text-slate-100" : "text-slate-800")}>{ytData.total_views?.toLocaleString() || 0}</span>
                 </div>
                 <div>
                   <span className="text-xs text-slate-400 font-semibold uppercase tracking-wider block">Videos</span>
-                  <span className="text-lg font-black text-slate-800">{ytData.video_count?.toLocaleString() || 0}</span>
+                  <span className={cn("text-lg font-black", isDark ? "text-slate-100" : "text-slate-800")}>{ytData.video_count?.toLocaleString() || 0}</span>
                 </div>
               </div>
 
@@ -615,7 +669,7 @@ const ClientOverview = () => {
               <div>
                 <button 
                   onClick={() => handleCardClick('/client/youtube')}
-                  className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-2xl text-xs uppercase tracking-wider transition-all shadow-sm hover:shadow-md"
+                  className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-2xl text-xs uppercase tracking-wider transition-all shadow-sm hover:shadow-md cursor-pointer"
                 >
                   Manage Videos & Comments
                 </button>
@@ -624,7 +678,10 @@ const ClientOverview = () => {
 
             {/* Latest Video Feature Row */}
             {ytData.latest_video && (
-              <div className="mt-6 pt-6 border-t border-red-100/50 flex flex-col sm:flex-row items-center gap-4">
+              <div className={cn(
+                "mt-6 pt-6 border-t flex flex-col sm:flex-row items-center gap-4",
+                isDark ? "border-slate-800" : "border-red-100/50"
+              )}>
                 {ytData.latest_video.thumbnail && (
                   <img 
                     src={ytData.latest_video.thumbnail} 
@@ -634,7 +691,7 @@ const ClientOverview = () => {
                 )}
                 <div className="flex-1">
                   <span className="text-[10px] font-bold text-red-600 uppercase tracking-widest block mb-1">Latest Upload</span>
-                  <h4 className="text-sm font-bold text-slate-900 line-clamp-1">{ytData.latest_video.title}</h4>
+                  <h4 className={cn("text-sm font-bold line-clamp-1", isDark ? "text-white" : "text-slate-900")}>{ytData.latest_video.title}</h4>
                   <p className="text-xs text-slate-400 font-medium">Published on {new Date(ytData.latest_video.published_at).toLocaleDateString()}</p>
                 </div>
                 <div>
@@ -642,7 +699,12 @@ const ClientOverview = () => {
                     href={`https://www.youtube.com/watch?v=${ytData.latest_video.id}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs transition-all"
+                    className={cn(
+                      "inline-flex items-center gap-1.5 px-4 py-2 font-bold rounded-xl text-xs transition-all border",
+                      isDark
+                        ? "bg-slate-800 hover:bg-slate-700 text-slate-200 border-slate-700"
+                        : "bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200"
+                    )}
                   >
                     Watch Video <ArrowUpRight size={14} />
                   </a>
@@ -653,23 +715,26 @@ const ClientOverview = () => {
         )}
 
         {/* Live Connected Channels & Industry News Widget */}
-        <div className="mb-10 p-6 rounded-3xl glass-panel border border-blue-100 bg-blue-50/10 shadow-sm relative overflow-hidden space-y-4">
+        <div className={cn(
+          "mb-10 p-6 rounded-3xl shadow-sm relative overflow-hidden space-y-4 border transition-colors",
+          isDark ? "bg-[#0f172a] border-slate-800" : "glass-panel border-blue-100 bg-blue-50/10"
+        )}>
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <div className="p-3 bg-blue-600 text-white rounded-2xl shadow-sm">
                 <Newspaper size={24} />
               </div>
               <div>
-                <h3 className="text-base font-black text-slate-900 flex items-center gap-2">
+                <h3 className={cn("text-base font-black flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
                   Live Connected Channels & Industry News
-                  <span className="px-2 py-0.5 bg-blue-100 text-blue-700 text-[10px] font-extrabold rounded-full">LIVE FEED</span>
+                  <span className={cn("px-2 py-0.5 text-[10px] font-extrabold rounded-full", isDark ? "bg-blue-950 text-blue-300 border border-blue-800" : "bg-blue-100 text-blue-700")}>LIVE FEED</span>
                 </h3>
-                <p className="text-xs text-slate-500 font-medium">Real-time breaking updates matching your connected channels & topics</p>
+                <p className={cn("text-xs font-medium", isDark ? "text-slate-400" : "text-slate-500")}>Real-time breaking updates matching your connected channels & topics</p>
               </div>
             </div>
             <button
               onClick={() => router.push('/client/google-news')}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs transition-all shadow-sm flex items-center gap-1.5 shrink-0"
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs transition-all shadow-sm flex items-center gap-1.5 shrink-0 cursor-pointer"
             >
               Open Full News Hub <ArrowUpRight size={14} />
             </button>
@@ -690,10 +755,15 @@ const ClientOverview = () => {
               </div>
             ) : (
               dashboardNews.map((article, idx) => (
-                <div key={idx} className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs flex flex-col justify-between space-y-3 hover:border-blue-300 transition-all">
+                <div key={idx} className={cn(
+                  "p-4 rounded-2xl border shadow-xs flex flex-col justify-between space-y-3 transition-all",
+                  isDark
+                    ? "bg-slate-800/70 border-slate-700 hover:border-blue-400"
+                    : "bg-white border-slate-200/80 hover:border-blue-300"
+                )}>
                   <div className="space-y-1.5">
                     <div className="flex items-center justify-between text-[10px] font-bold text-slate-400">
-                      <span className="px-2 py-0.5 bg-blue-50 text-blue-700 rounded-md font-extrabold truncate max-w-[120px]">
+                      <span className={cn("px-2 py-0.5 rounded-md font-extrabold truncate max-w-[120px]", isDark ? "bg-blue-950/80 text-blue-300 border border-blue-800" : "bg-blue-50 text-blue-700")}>
                         {article.source}
                       </span>
                       <span>{article.pub_date ? new Date(article.pub_date).toLocaleDateString() : 'Recent'}</span>
@@ -702,21 +772,21 @@ const ClientOverview = () => {
                       href={article.link}
                       target="_blank"
                       rel="noreferrer"
-                      className="text-xs font-bold text-slate-800 hover:text-blue-600 line-clamp-2 block leading-snug"
+                      className={cn("text-xs font-bold line-clamp-2 block leading-snug", isDark ? "text-slate-100 hover:text-blue-400" : "text-slate-800 hover:text-blue-600")}
                     >
                       {article.title}
                     </a>
-                    <p className="text-[11px] text-slate-500 line-clamp-2 leading-relaxed">
+                    <p className={cn("text-[11px] line-clamp-2 leading-relaxed", isDark ? "text-slate-400" : "text-slate-500")}>
                       {article.snippet}
                     </p>
                   </div>
 
-                  <div className="pt-2 border-t border-slate-100 flex items-center justify-between">
+                  <div className={cn("pt-2 border-t flex items-center justify-between", isDark ? "border-slate-700/80" : "border-slate-100")}>
                     <a
                       href={article.link}
                       target="_blank"
                       rel="noreferrer"
-                      className="text-[10px] font-bold text-slate-400 hover:text-slate-600 flex items-center gap-0.5"
+                      className="text-[10px] font-bold text-slate-400 hover:text-slate-300 flex items-center gap-0.5"
                     >
                       Read <ExternalLink size={10} />
                     </a>
@@ -746,23 +816,26 @@ const ClientOverview = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-12">
           {/* Main Activity / Interactive Line Graph */}
           <div className="lg:col-span-2 space-y-6 lg:space-y-12">
-            <div className="glass-panel premium-shadow p-4 sm:p-8 relative overflow-hidden space-y-6">
+            <div className={cn(
+              "p-4 sm:p-8 relative overflow-hidden space-y-6 rounded-3xl border shadow-sm transition-colors",
+              isDark ? "bg-[#0f172a] border-slate-800" : "glass-panel premium-shadow"
+            )}>
               
               {/* Header & Time Filter Tabs */}
-              <div className="flex flex-col space-y-4 border-b border-slate-100 pb-6">
+              <div className={cn("flex flex-col space-y-4 border-b pb-6", isDark ? "border-slate-800" : "border-slate-100")}>
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div>
-                    <h3 className="text-xl font-bold text-slate-900 flex items-center gap-2">
-                      <TrendingUp size={20} className="text-emerald-600" />
+                    <h3 className={cn("text-xl font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
+                      <TrendingUp size={20} className={isDark ? "text-emerald-400" : "text-emerald-600"} />
                       Automation Performance
                     </h3>
-                    <p className="text-xs font-semibold text-emerald-700 uppercase tracking-widest mt-1 italic">
+                    <p className={cn("text-xs font-semibold uppercase tracking-widest mt-1 italic", isDark ? "text-emerald-400" : "text-emerald-700")}>
                       {currentChartConfig.title}
                     </p>
                   </div>
 
                   {/* Time Presets Switcher */}
-                  <div className="flex flex-wrap items-center gap-1.5 bg-slate-100/70 p-1.5 rounded-2xl border border-slate-200/60">
+                  <div className={cn("flex flex-wrap items-center gap-1.5 p-1.5 rounded-2xl border", isDark ? "bg-slate-800/80 border-slate-700" : "bg-slate-100/70 border-slate-200/60")}>
                     {[
                       { id: '7d', label: '7 Days' },
                       { id: '30d', label: '30 Days' },
@@ -776,8 +849,8 @@ const ClientOverview = () => {
                         className={cn(
                           "px-3 py-1.5 rounded-xl text-xs font-bold transition-all duration-200",
                           selectedPeriod === tab.id
-                            ? "bg-white text-emerald-700 shadow-sm border border-slate-200/80"
-                            : "text-slate-500 hover:text-slate-900 hover:bg-white/50"
+                            ? (isDark ? "bg-slate-700 text-emerald-400 shadow-sm border border-slate-600" : "bg-white text-emerald-700 shadow-sm border border-slate-200/80")
+                            : (isDark ? "text-slate-400 hover:text-white hover:bg-slate-700/50" : "text-slate-500 hover:text-slate-900 hover:bg-white/50")
                         )}
                       >
                         {tab.label}
@@ -788,8 +861,8 @@ const ClientOverview = () => {
 
                 {/* Custom Date Range Picker Input (when 'custom' tab is selected) */}
                 {selectedPeriod === 'custom' && (
-                  <div className="flex flex-wrap items-center gap-3 pt-2 bg-emerald-50/50 p-3 rounded-2xl border border-emerald-100">
-                    <div className="flex items-center gap-2 text-xs font-bold text-emerald-800">
+                  <div className={cn("flex flex-wrap items-center gap-3 pt-2 p-3 rounded-2xl border", isDark ? "bg-emerald-950/40 border-emerald-800/60 text-emerald-300" : "bg-emerald-50/50 border-emerald-100 text-emerald-800")}>
+                    <div className="flex items-center gap-2 text-xs font-bold">
                       <Calendar size={15} />
                       <span>Select Date Range:</span>
                     </div>
@@ -798,14 +871,20 @@ const ClientOverview = () => {
                         type="date"
                         value={customStartDate}
                         onChange={(e) => setCustomStartDate(e.target.value)}
-                        className="px-3 py-1.5 text-xs rounded-xl border border-slate-200 bg-white font-medium focus:outline-none focus:border-emerald-500"
+                        className={cn(
+                          "px-3 py-1.5 text-xs rounded-xl border font-medium focus:outline-none focus:border-emerald-500",
+                          isDark ? "bg-slate-800 border-slate-700 text-white" : "bg-white border-slate-200 text-slate-900"
+                        )}
                       />
                       <span className="text-xs font-bold text-slate-400">to</span>
                       <input
                         type="date"
                         value={customEndDate}
                         onChange={(e) => setCustomEndDate(e.target.value)}
-                        className="px-3 py-1.5 text-xs rounded-xl border border-slate-200 bg-white font-medium focus:outline-none focus:border-emerald-500"
+                        className={cn(
+                          "px-3 py-1.5 text-xs rounded-xl border font-medium focus:outline-none focus:border-emerald-500",
+                          isDark ? "bg-slate-800 border-slate-700 text-white" : "bg-white border-slate-200 text-slate-900"
+                        )}
                       />
                     </div>
                   </div>
@@ -823,10 +902,10 @@ const ClientOverview = () => {
                   </defs>
 
                   {/* Horizontal Grid lines */}
-                  <line x1="0" y1="20" x2="500" y2="20" stroke="#F8FAFC" strokeWidth="1" />
-                  <line x1="0" y1="70" x2="500" y2="70" stroke="#F1F5F9" strokeWidth="1" strokeDasharray="3 3" />
-                  <line x1="0" y1="120" x2="500" y2="120" stroke="#F1F5F9" strokeWidth="1" strokeDasharray="3 3" />
-                  <line x1="0" y1="170" x2="500" y2="170" stroke="#E2E8F0" strokeWidth="1" />
+                  <line x1="0" y1="20" x2="500" y2="20" stroke={isDark ? "#1e293b" : "#F8FAFC"} strokeWidth="1" />
+                  <line x1="0" y1="70" x2="500" y2="70" stroke={isDark ? "#1e293b" : "#F1F5F9"} strokeWidth="1" strokeDasharray="3 3" />
+                  <line x1="0" y1="120" x2="500" y2="120" stroke={isDark ? "#1e293b" : "#F1F5F9"} strokeWidth="1" strokeDasharray="3 3" />
+                  <line x1="0" y1="170" x2="500" y2="170" stroke={isDark ? "#334155" : "#E2E8F0"} strokeWidth="1" />
 
                   {/* Soft Light Gradient Area Fill */}
                   <path
@@ -846,7 +925,7 @@ const ClientOverview = () => {
                   />
 
                   {/* Single End Active Endpoint Dot */}
-                  <circle cx={currentChartConfig.endpoint.x} cy={currentChartConfig.endpoint.y} r="4" fill="#00AB56" stroke="#FFFFFF" strokeWidth="2" />
+                  <circle cx={currentChartConfig.endpoint.x} cy={currentChartConfig.endpoint.y} r="4" fill="#00AB56" stroke={isDark ? "#0f172a" : "#FFFFFF"} strokeWidth="2" />
                 </svg>
 
                 {/* Dynamic Date Labels */}
@@ -863,20 +942,26 @@ const ClientOverview = () => {
           {/* Right Sidebar Status Section */}
           <div className="space-y-6 lg:space-y-8">
             {/* Upcoming CRM Follow-Ups & Tasks Widget */}
-            <div className="bg-white rounded-[32px] p-6 sm:p-8 text-slate-800 premium-shadow relative overflow-hidden border border-slate-200">
+            <div className={cn(
+              "rounded-[32px] p-6 sm:p-8 relative overflow-hidden border shadow-sm transition-colors",
+              isDark ? "bg-[#0f172a] border-slate-800 text-slate-100" : "bg-white border-slate-200 text-slate-800 premium-shadow"
+            )}>
               <div className="flex items-center justify-between mb-5">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
+                  <div className={cn(
+                    "w-9 h-9 rounded-xl flex items-center justify-center font-bold",
+                    isDark ? "bg-emerald-950/70 text-emerald-400 border border-emerald-800/60" : "bg-emerald-50 text-emerald-600"
+                  )}>
                     <Clock size={18} />
                   </div>
                   <div>
-                    <h3 className="text-base font-bold text-slate-900">CRM Follow-Ups</h3>
+                    <h3 className={cn("text-base font-bold", isDark ? "text-white" : "text-slate-900")}>CRM Follow-Ups</h3>
                     <p className="text-[11px] text-slate-400 font-medium">Scheduled lead actions</p>
                   </div>
                 </div>
                 <button 
                   onClick={() => router.push('/client/crm')}
-                  className="text-xs font-bold text-emerald-600 hover:text-emerald-700 flex items-center gap-1 transition-colors"
+                  className={cn("text-xs font-bold flex items-center gap-1 transition-colors", isDark ? "text-emerald-400 hover:text-emerald-300" : "text-emerald-600 hover:text-emerald-700")}
                 >
                   <span>Pipeline</span>
                   <ChevronRight size={14} />
@@ -884,11 +969,14 @@ const ClientOverview = () => {
               </div>
 
               {upcomingFollowUps.length === 0 ? (
-                <div className="p-4 bg-slate-50 rounded-2xl border border-dashed border-slate-200 text-center">
-                  <p className="text-xs font-semibold text-slate-500">No follow-ups due this week</p>
+                <div className={cn(
+                  "p-4 rounded-2xl border border-dashed text-center",
+                  isDark ? "bg-slate-800/40 border-slate-800 text-slate-400" : "bg-slate-50 border-slate-200 text-slate-500"
+                )}>
+                  <p className="text-xs font-semibold">No follow-ups due this week</p>
                   <button
                     onClick={() => router.push('/client/crm')}
-                    className="mt-2 text-xs font-bold text-emerald-600 hover:underline inline-flex items-center gap-1"
+                    className="mt-2 text-xs font-bold text-emerald-500 hover:underline inline-flex items-center gap-1"
                   >
                     <span>Open CRM to schedule</span> &rarr;
                   </button>
@@ -901,16 +989,17 @@ const ClientOverview = () => {
                       <div
                         key={fu.id}
                         onClick={() => router.push('/client/crm')}
-                        className={`p-3 rounded-2xl border cursor-pointer hover:shadow-sm transition-all ${
-                          isOverdue 
-                            ? 'bg-rose-50/70 border-rose-200 hover:bg-rose-50' 
-                            : 'bg-slate-50/80 border-slate-200/80 hover:bg-slate-100/70'
-                        }`}
+                        className={cn(
+                          "p-3 rounded-2xl border cursor-pointer hover:shadow-sm transition-all",
+                          isOverdue
+                            ? (isDark ? "bg-rose-950/40 border-rose-800/60 hover:bg-rose-950/60" : "bg-rose-50/70 border-rose-200 hover:bg-rose-50")
+                            : (isDark ? "bg-slate-800/70 border-slate-700 hover:bg-slate-800" : "bg-slate-50/80 border-slate-200/80 hover:bg-slate-100/70")
+                        )}
                       >
                         <div className="flex items-start justify-between gap-2">
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center gap-1.5 flex-wrap">
-                              <span className="font-bold text-xs text-slate-900 truncate">
+                              <span className={cn("font-bold text-xs truncate", isDark ? "text-white" : "text-slate-900")}>
                                 {fu.contact_name}
                               </span>
                               {isOverdue && (
@@ -919,11 +1008,14 @@ const ClientOverview = () => {
                                 </span>
                               )}
                             </div>
-                            <p className="text-[11px] text-slate-600 truncate mt-0.5 font-medium">
+                            <p className={cn("text-[11px] truncate mt-0.5 font-medium", isDark ? "text-slate-300" : "text-slate-600")}>
                               {fu.title}
                             </p>
                           </div>
-                          <span className="text-[10px] font-bold px-2 py-0.5 bg-white border border-slate-200 rounded-md text-slate-600 shrink-0">
+                          <span className={cn(
+                            "text-[10px] font-bold px-2 py-0.5 rounded-md shrink-0 border",
+                            isDark ? "bg-slate-800 border-slate-700 text-slate-300" : "bg-white border-slate-200 text-slate-600"
+                          )}>
                             {fu.follow_up_type}
                           </span>
                         </div>
@@ -937,7 +1029,7 @@ const ClientOverview = () => {
                   {upcomingFollowUps.length > 4 && (
                     <button
                       onClick={() => router.push('/client/crm')}
-                      className="w-full text-center text-xs font-bold text-emerald-600 hover:text-emerald-700 py-1"
+                      className="w-full text-center text-xs font-bold text-emerald-500 hover:text-emerald-400 py-1"
                     >
                       View all {upcomingFollowUps.length} follow-ups &rarr;
                     </button>
@@ -947,35 +1039,54 @@ const ClientOverview = () => {
             </div>
 
             {/* System Live Card */}
-            <div className="bg-gradient-to-br from-[#f0fdf4] to-white rounded-[32px] p-6 sm:p-8 text-slate-800 premium-shadow relative overflow-hidden border border-emerald-100">
+            <div className={cn(
+              "rounded-[32px] p-6 sm:p-8 relative overflow-hidden border transition-colors",
+              isDark
+                ? "bg-gradient-to-br from-emerald-950/40 via-[#0f172a] to-[#0f172a] border-emerald-900/60 text-slate-100"
+                : "bg-gradient-to-br from-[#f0fdf4] to-white border-emerald-100 text-slate-800 premium-shadow"
+            )}>
               <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none" />
-              <h3 className="text-lg font-bold mb-6 flex items-center gap-3 text-slate-900">
-                <Activity size={20} className="text-emerald-600" /> System Live
+              <h3 className={cn("text-lg font-bold mb-6 flex items-center gap-3", isDark ? "text-white" : "text-slate-900")}>
+                <Activity size={20} className={isDark ? "text-emerald-400" : "text-emerald-600"} /> System Live
               </h3>
               <div className="space-y-6">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
                     <div className="w-2 h-2 rounded-full bg-emerald-500" />
-                    <span className="text-sm font-bold text-slate-700">WhatsApp API</span>
+                    <span className={cn("text-sm font-bold", isDark ? "text-slate-200" : "text-slate-700")}>WhatsApp API</span>
                   </div>
-                  <span className="text-[10px] font-bold px-2 py-1 bg-emerald-100/50 text-[#047857] rounded-lg">OPERATIONAL</span>
+                  <span className={cn(
+                    "text-[10px] font-bold px-2 py-1 rounded-lg",
+                    isDark ? "bg-emerald-950 border border-emerald-800 text-emerald-300" : "bg-emerald-100/50 text-[#047857]"
+                  )}>OPERATIONAL</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
                     <div className="w-2 h-2 rounded-full bg-emerald-500" />
-                    <span className="text-sm font-bold text-slate-700">RAG Knowledge</span>
+                    <span className={cn("text-sm font-bold", isDark ? "text-slate-200" : "text-slate-700")}>RAG Knowledge</span>
                   </div>
-                  <span className="text-[10px] font-bold px-2 py-1 bg-emerald-100/50 text-[#047857] rounded-lg">TRAINED</span>
+                  <span className={cn(
+                    "text-[10px] font-bold px-2 py-1 rounded-lg",
+                    isDark ? "bg-emerald-950 border border-emerald-800 text-emerald-300" : "bg-emerald-100/50 text-[#047857]"
+                  )}>TRAINED</span>
                 </div>
                 <div className="flex items-center justify-between opacity-50">
                   <div className="flex items-center gap-4">
                     <div className="w-2 h-2 rounded-full bg-slate-400" />
-                    <span className="text-sm font-bold text-slate-700">Facebook Messenger</span>
+                    <span className={cn("text-sm font-bold", isDark ? "text-slate-400" : "text-slate-700")}>Facebook Messenger</span>
                   </div>
-                  <span className="text-[10px] font-bold px-2 py-1 bg-slate-100 text-slate-500 rounded-lg">LINK NEEDED</span>
+                  <span className={cn(
+                    "text-[10px] font-bold px-2 py-1 rounded-lg",
+                    isDark ? "bg-slate-800 text-slate-400 border border-slate-700" : "bg-slate-100 text-slate-500"
+                  )}>LINK NEEDED</span>
                 </div>
               </div>
-              <button className="w-full mt-8 py-4 bg-emerald-50 hover:bg-emerald-100/80 text-[#047857] transition-all rounded-2xl text-[10px] font-bold uppercase tracking-[0.2em] border border-emerald-100">
+              <button className={cn(
+                "w-full mt-8 py-4 transition-all rounded-2xl text-[10px] font-bold uppercase tracking-[0.2em] border cursor-pointer",
+                isDark
+                  ? "bg-emerald-950/60 hover:bg-emerald-900/60 text-emerald-300 border-emerald-800/60"
+                  : "bg-emerald-50 hover:bg-emerald-100/80 text-[#047857] border-emerald-100"
+              )}>
                 System Health Details
               </button>
             </div>

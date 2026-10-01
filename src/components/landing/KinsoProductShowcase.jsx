@@ -77,7 +77,7 @@ export default function KinsoProductShowcase({ isDark }) {
             Built for enterprise speed, AI automation, & complete control.
           </h2>
           <p className={`text-xs sm:text-base md:text-lg ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-            Explore the real UWO Connect workspace interface designed to handle millions of customer interactions with zero lag.
+            Explore the real UWO Connect™ workspace interface designed to handle millions of customer interactions with zero lag.
           </p>
         </div>
 
@@ -94,7 +94,7 @@ export default function KinsoProductShowcase({ isDark }) {
                 <Inbox className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
               <div className="min-w-0">
-                <h3 className="text-xs sm:text-base md:text-lg font-bold truncate">UWO Connect — Command Center</h3>
+                <h3 className="text-xs sm:text-base md:text-lg font-bold truncate">UWO Connect™ — Command Center</h3>
                 <span className="text-[10px] sm:text-xs text-gray-400 block truncate">Live Production Workspace • 24 Connected Channels</span>
               </div>
             </div>
@@ -263,7 +263,7 @@ export default function KinsoProductShowcase({ isDark }) {
                   <div className="space-y-3">
                     <div className="flex flex-col items-start gap-1">
                       <div className="max-w-[92%] sm:max-w-md p-3.5 rounded-2xl rounded-tl-sm bg-gray-100 dark:bg-white/10 text-xs text-gray-800 dark:text-gray-200 leading-relaxed break-words shadow-2xs">
-                        Hi team! We want to integrate our WhatsApp, Gmail, and HubSpot pipelines into UWO Connect. Can we schedule an onboarding walkthrough?
+                        Hi team! We want to integrate our WhatsApp, Gmail, and HubSpot pipelines into UWO Connect™. Can we schedule an onboarding walkthrough?
                       </div>
                       <span className="text-[10px] text-gray-400 pl-1">10:42 AM • WhatsApp</span>
                     </div>

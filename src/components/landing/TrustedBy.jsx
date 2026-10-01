@@ -17,7 +17,7 @@ export default function TrustedBy({ isDark = true }) {
           Built for Growing Businesses
         </h2>
         <p className={`text-sm md:text-base font-medium max-w-2xl mx-auto ${isDark ? 'text-[#8E99A8]' : 'text-slate-600'}`}>
-          Designed for businesses that want to create exceptional customer experiences. Whether you're a team of five or five hundred, UWO Connect scales with your business.
+          Designed for businesses that want to create exceptional customer experiences. Whether you're a team of five or five hundred, UWO Connect™ scales with your business.
         </p>
       </div>
       

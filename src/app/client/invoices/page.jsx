@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   Receipt, Search, Filter, Eye, Download, Send, Trash2, ChevronLeft, 
   ChevronRight, BarChart3, TrendingUp, DollarSign, X, Check, ArrowRight,
-  User, MoreHorizontal, Loader2, Sparkles, CreditCard, Ban, Settings, RefreshCw, Plus, Building2
+  User, MoreHorizontal, Loader2, Sparkles, CreditCard, Ban, Settings, RefreshCw, Plus, Building2, AlertTriangle
 } from 'lucide-react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
@@ -56,6 +56,16 @@ export default function InvoicesPage() {
   });
 
   const [toast, setToast] = useState(null);
+
+  // Send Invoice Modal State
+  const [sendModalInvoice, setSendModalInvoice] = useState(null);
+  const [sendChannel, setSendChannel] = useState('WHATSAPP');
+  const [sendRecipient, setSendRecipient] = useState('');
+  const [sendSending, setSendSending] = useState(false);
+
+  // Delete Invoice Confirmation Modal State
+  const [deleteConfirmInvoice, setDeleteConfirmInvoice] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const showToast = (msg, type = 'success') => {
     setToast({ msg, type });
@@ -150,6 +160,83 @@ export default function InvoicesPage() {
       fetchInvoices();
     } catch (err) {
       showToast('Regeneration failed', 'error');
+    }
+  };
+
+  const handleOpenSendModal = (inv) => {
+    setSendModalInvoice(inv);
+    const billing = inv.billing_details || {};
+    if (billing.phone) {
+      setSendChannel('WHATSAPP');
+      setSendRecipient(billing.phone);
+    } else {
+      setSendChannel('EMAIL');
+      setSendRecipient(billing.email || '');
+    }
+  };
+
+  const handleSendInvoice = async () => {
+    if (!sendRecipient) {
+      showToast(sendChannel === 'EMAIL' ? 'Please enter a recipient email' : 'Please enter a recipient phone number', 'error');
+      return;
+    }
+
+    setSendSending(true);
+    const token = localStorage.getItem('uwo_token') || localStorage.getItem('token');
+    try {
+      await axios.post(`${API_BASE_URL}/api/invoices/${sendModalInvoice.id}/send/`, {
+        channel: sendChannel,
+        recipient: sendRecipient,
+        phone: sendRecipient,
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      showToast(`Invoice #${sendModalInvoice.invoice_number} sent successfully via ${sendChannel}!`);
+      setSendModalInvoice(null);
+    } catch (err) {
+      console.warn("Failed to send invoice:", err);
+      const errMsg = err.response?.data?.error || err.response?.data?.detail || err.message || 'Failed to send invoice';
+      showToast(errMsg, 'error');
+    } finally {
+      setSendSending(false);
+    }
+  };
+
+  const handleDirectWhatsAppWeb = (inv) => {
+    if (!inv) return;
+    const curSymbol = inv.currency_symbol || '$';
+    const totalFormatted = Number(inv.total || 0).toLocaleString(undefined, { minimumFractionDigits: 2 });
+    const seller = inv.seller_details || {};
+    const companyName = seller.company_name || seller.business_name || settingsData.company_name || 'Our Company';
+    const publicUrl = `https://uwoconnect.aisa24.com/public/invoice/${inv.secure_token}`;
+    const phone = inv.billing_details?.phone ? inv.billing_details.phone.replace(/[^0-9]/g, '') : '';
+    const msg = `Dear ${inv.billing_details?.name || 'Valued Customer'},\n\nYour invoice #${inv.invoice_number} from ${companyName} is ready.\n\nTotal Amount: ${curSymbol}${totalFormatted}\nPayment Status: ${inv.payment_status || 'PAID'}\n\nView and download your official invoice:\n${publicUrl}\n\nRegards,\n${companyName}`;
+    const waUrl = phone 
+      ? `https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(msg)}`
+      : `https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`;
+    window.open(waUrl, '_blank');
+  };
+
+  const handleDeleteInvoice = async () => {
+    if (!deleteConfirmInvoice) return;
+    setIsDeleting(true);
+    const token = localStorage.getItem('uwo_token') || localStorage.getItem('token');
+    try {
+      await axios.delete(`${API_BASE_URL}/api/invoices/${deleteConfirmInvoice.id}/`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      showToast(`Invoice #${deleteConfirmInvoice.invoice_number} deleted successfully.`);
+      if (selectedInvoice?.id === deleteConfirmInvoice.id) {
+        setIsPreviewOpen(false);
+        setSelectedInvoice(null);
+      }
+      setDeleteConfirmInvoice(null);
+      fetchInvoices();
+    } catch (err) {
+      console.error('Error deleting invoice:', err);
+      showToast(err.response?.data?.detail || err.response?.data?.error || 'Failed to delete invoice.', 'error');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -338,17 +425,36 @@ export default function InvoicesPage() {
                               setIsPreviewOpen(true);
                             }}
                             className="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors text-[11px] font-bold flex items-center gap-1 cursor-pointer"
+                            title="View Invoice Details"
                           >
                             <Eye className="w-3.5 h-3.5" />
                             View
                           </button>
 
                           <button
+                            onClick={() => handleOpenSendModal(inv)}
+                            className="px-2.5 py-1 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 transition-colors text-[11px] font-bold flex items-center gap-1 cursor-pointer shadow-2xs"
+                            title="Send Invoice to Customer (WhatsApp / Email)"
+                          >
+                            <Send className="w-3.5 h-3.5" />
+                            Send
+                          </button>
+
+                          <button
                             onClick={() => handleDownloadPDF(inv)}
                             className="px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 transition-colors text-[11px] font-bold flex items-center gap-1 cursor-pointer"
+                            title="Download Official PDF"
                           >
                             <Download className="w-3.5 h-3.5" />
                             PDF
+                          </button>
+
+                          <button
+                            onClick={() => setDeleteConfirmInvoice(inv)}
+                            className="px-2 py-1 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white border border-rose-200 transition-colors text-[11px] font-bold flex items-center justify-center cursor-pointer shadow-2xs"
+                            title="Delete Invoice"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
                           </button>
                         </div>
                       </td>
@@ -372,6 +478,8 @@ export default function InvoicesPage() {
             isOpen={isPreviewOpen}
             onClose={() => setIsPreviewOpen(false)}
             onRegenerate={handleRegenerate}
+            onSend={(inv) => handleOpenSendModal(inv)}
+            onDelete={(inv) => setDeleteConfirmInvoice(inv)}
           />
         )}
 
@@ -468,6 +576,20 @@ export default function InvoicesPage() {
           </div>
         )}
 
+        {/* Invoice Preview Modal */}
+        {selectedInvoice && (
+          <InvoicePreviewModal
+            invoice={selectedInvoice}
+            isOpen={isPreviewOpen}
+            onClose={() => setIsPreviewOpen(false)}
+            onRegenerate={handleRegenerate}
+            onSend={(inv) => {
+              setIsPreviewOpen(false);
+              handleOpenSendModal(inv);
+            }}
+          />
+        )}
+
         {/* Invoice Create Modal */}
         <InvoiceCreateModal
           isOpen={isCreateModalOpen}
@@ -478,6 +600,183 @@ export default function InvoicesPage() {
             showToast('Manual invoice created successfully!');
           }}
         />
+
+        {/* Send Invoice Modal Dialog */}
+        {sendModalInvoice && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
+            <div className="bg-white border border-slate-200 rounded-3xl p-6 w-full max-w-md shadow-2xl relative space-y-4">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                <div>
+                  <h3 className="font-black text-slate-900 text-sm">Send Invoice #{sendModalInvoice.invoice_number}</h3>
+                  <p className="text-[11px] text-slate-500 font-medium">Customer: {sendModalInvoice.billing_details?.name || 'Valued Customer'}</p>
+                </div>
+                <button onClick={() => setSendModalInvoice(null)} className="p-1.5 hover:bg-slate-100 rounded-xl text-slate-400 hover:text-slate-600 transition-colors cursor-pointer">
+                  <X size={16} />
+                </button>
+              </div>
+
+              <div className="space-y-3.5">
+                <div>
+                  <label className="block text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1.5">Dispatch Channel</label>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSendChannel('WHATSAPP');
+                        setSendRecipient(sendModalInvoice.billing_details?.phone || '');
+                      }}
+                      className={cn(
+                        "flex-1 py-2 px-3 rounded-xl border text-xs font-bold text-center cursor-pointer transition-all",
+                        sendChannel === 'WHATSAPP' ? "bg-emerald-600 border-emerald-600 text-white shadow-xs" : "bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100"
+                      )}
+                    >
+                      WhatsApp Message
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSendChannel('EMAIL');
+                        setSendRecipient(sendModalInvoice.billing_details?.email || '');
+                      }}
+                      className={cn(
+                        "flex-1 py-2 px-3 rounded-xl border text-xs font-bold text-center cursor-pointer transition-all",
+                        sendChannel === 'EMAIL' ? "bg-slate-900 border-slate-900 text-white shadow-xs" : "bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100"
+                      )}
+                    >
+                      Email Message
+                    </button>
+                  </div>
+                </div>
+
+                {sendChannel === 'WHATSAPP' ? (
+                  <div>
+                    <label className="block text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1.5">Recipient Phone Number</label>
+                    <input
+                      type="text"
+                      value={sendRecipient}
+                      onChange={(e) => setSendRecipient(e.target.value)}
+                      placeholder="+919876543210 (Include country code)"
+                      className="w-full p-2.5 bg-slate-50 text-slate-800 text-xs rounded-xl border border-slate-200 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 font-medium"
+                    />
+                    <p className="text-[10px] text-slate-400 mt-1 font-semibold">
+                      Must include country code (e.g. +91 for India, +1 for US) without spaces.
+                    </p>
+                  </div>
+                ) : (
+                  <div>
+                    <label className="block text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1.5">Recipient Email Address</label>
+                    <input
+                      type="email"
+                      value={sendRecipient}
+                      onChange={(e) => setSendRecipient(e.target.value)}
+                      placeholder="customer@example.com"
+                      className="w-full p-2.5 bg-slate-50 text-slate-800 text-xs rounded-xl border border-slate-200 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 font-medium"
+                    />
+                  </div>
+                )}
+              </div>
+
+              {/* Quick WhatsApp Web fallback */}
+              {sendChannel === 'WHATSAPP' && (
+                <div className="p-3 bg-emerald-50/70 border border-emerald-200/60 rounded-xl flex items-center justify-between gap-2">
+                  <div className="text-[11px] text-emerald-900 font-medium">
+                    Or dispatch via your WhatsApp Web directly:
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleDirectWhatsAppWeb(sendModalInvoice)}
+                    className="px-2.5 py-1 bg-white border border-emerald-300 text-emerald-700 hover:bg-emerald-100 rounded-lg text-[10px] font-bold shrink-0 cursor-pointer shadow-2xs transition-colors"
+                  >
+                    Open Web Chat
+                  </button>
+                </div>
+              )}
+
+              <div className="flex items-center gap-2.5 pt-3 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setSendModalInvoice(null)}
+                  className="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl cursor-pointer transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSendInvoice}
+                  disabled={sendSending}
+                  className="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5 shadow-sm shadow-emerald-600/20 transition-all"
+                >
+                  {sendSending && <Loader2 size={13} className="animate-spin" />}
+                  <span>{sendSending ? 'Sending...' : 'Send Now'}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Delete Invoice Confirmation Modal */}
+        {deleteConfirmInvoice && (
+          <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+            <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+              <div className="p-6">
+                <div className="w-12 h-12 rounded-2xl bg-rose-50 border border-rose-100 flex items-center justify-center text-rose-600 mb-4">
+                  <AlertTriangle className="w-6 h-6" />
+                </div>
+
+                <h3 className="text-lg font-black text-slate-900 mb-1">
+                  Delete Invoice?
+                </h3>
+                <p className="text-xs text-slate-500 leading-relaxed mb-4">
+                  Are you sure you want to permanently delete invoice <span className="font-bold text-slate-800">#{deleteConfirmInvoice.invoice_number}</span>? This will remove all records and physical invoice documents associated with it. This action cannot be undone.
+                </p>
+
+                <div className="bg-slate-50 rounded-xl p-3 border border-slate-200/80 mb-5 text-xs space-y-1.5">
+                  <div className="flex justify-between">
+                    <span className="text-slate-500">Customer:</span>
+                    <span className="font-bold text-slate-800">{deleteConfirmInvoice.billing_details?.name || 'Valued Customer'}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-500">Total Amount:</span>
+                    <span className="font-black text-slate-900">{deleteConfirmInvoice.currency_symbol || '$'}{Number(deleteConfirmInvoice.total || 0).toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-500">Status:</span>
+                    <span className="font-bold text-emerald-700">{deleteConfirmInvoice.payment_status}</span>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-end gap-2.5">
+                  <button
+                    type="button"
+                    onClick={() => setDeleteConfirmInvoice(null)}
+                    disabled={isDeleting}
+                    className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleDeleteInvoice}
+                    disabled={isDeleting}
+                    className="px-4 py-2 rounded-xl text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs disabled:opacity-50"
+                  >
+                    {isDeleting ? (
+                      <>
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        <span>Deleting...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Trash2 className="w-3.5 h-3.5" />
+                        <span>Delete Invoice</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
       </div>
     </DashboardLayout>

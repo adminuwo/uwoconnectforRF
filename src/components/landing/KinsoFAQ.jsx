@@ -9,9 +9,9 @@ export default function KinsoFAQ({ isDark }) {
 
   const faqs = [
     {
-      question: 'What channels does UWO Connect support out of the box?',
+      question: 'What channels does Uwo Connect support out of the box?',
       answer:
-        'UWO Connect supports WhatsApp Business API, Instagram Direct Messages, Facebook Messenger, Telegram, LinkedIn Sales Navigator, Gmail, X (Twitter), YouTube Comments, TikTok Direct, Custom REST APIs, Webhooks, Microsoft Teams, and Slack.',
+        'Uwo Connect supports WhatsApp Business API, Instagram Direct Messages, Facebook Messenger, Telegram, LinkedIn Sales Navigator, Gmail, X (Twitter), YouTube Comments, TikTok Direct, Custom REST APIs, Webhooks, Microsoft Teams, and Slack.',
     },
     {
       question: 'How long does it take to connect our existing channels and CRM?',
@@ -26,10 +26,10 @@ export default function KinsoFAQ({ isDark }) {
     {
       question: 'Can agents oversee AI responses before they are sent to customers?',
       answer:
-        'Absolutly. You can run UWO Connect in "Human-in-the-Loop" mode where AI drafts smart replies for agent approval, or in "Autonomous Mode" for routine queries.',
+        'Absolutly. You can run Uwo Connect in "Human-in-the-Loop" mode where AI drafts smart replies for agent approval, or in "Autonomous Mode" for routine queries.',
     },
     {
-      question: 'Does UWO Connect offer a free trial or custom enterprise demo?',
+      question: 'Does Uwo Connect offer a free trial or custom enterprise demo?',
       answer:
         'Yes! We offer a 14-day unrestricted free trial with no credit card required. You can also book a personalized 1-on-1 demo with our technical solutions team.',
     },
@@ -47,7 +47,7 @@ export default function KinsoFAQ({ isDark }) {
             Frequently Asked Questions
           </h2>
           <p className={`text-sm sm:text-base ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-            Everything you need to know about UWO Connect features, security, and onboarding.
+            Everything you need to know about Uwo Connect features, security, and onboarding.
           </p>
         </div>
 

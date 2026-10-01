@@ -118,7 +118,7 @@ const BackgroundVideo = ({ currentTime = 0 }) => {
                   U
                 </div>
                 <div>
-                  <h3 className="font-black text-white text-lg">UWO Connect Workspace</h3>
+                  <h3 className="font-black text-white text-lg">Uwo Connect Workspace</h3>
                   <p className="text-xs text-emerald-400 font-bold">🟢 Unified Inbox & Automated Operating System</p>
                 </div>
               </div>

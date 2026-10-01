@@ -19,7 +19,7 @@ export default function WorkflowTimeline() {
           Everything Connected. Everything Smarter.
         </h2>
         <p className="text-lg font-medium text-[#8E99A8] max-w-2xl mx-auto mb-20">
-          From the first conversation to long-term customer relationships, UWO Connect keeps your entire customer journey connected.
+          From the first conversation to long-term customer relationships, UWO Connect™ keeps your entire customer journey connected.
         </p>
 
         <div className="relative max-w-5xl mx-auto">
