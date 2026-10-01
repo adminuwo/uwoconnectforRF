@@ -18,7 +18,7 @@ import ReactFlow, {
 import 'reactflow/dist/style.css';
 import {
   Save, MessageSquare, Clock, Zap, Loader2,
-  ChevronDown, Image as ImageIcon, Video, List, FileText, Webhook, Tag, BarChart3,
+  ChevronDown, Image as ImageIcon, Video, List, ListFilter, FileText, Webhook, Tag, BarChart3,
   MousePointer2, ArrowLeft, CheckCircle2, XCircle, Play, X, Plus, Trash2, Edit3, User, ShoppingBag, ExternalLink, Check, Sparkles, Bot,
   Sun, Moon, Upload
 } from 'lucide-react';
@@ -147,6 +147,110 @@ const ButtonsNode = ({ id, data = {} }) => {
             )}
           >
             <Plus size={10} strokeWidth={3} /> Add Button
+          </button>
+        )}
+      </div>
+      <Handle type="target" position={Position.Top} className={cn("w-2.5 h-2.5 bg-slate-400 border-2 -top-1", isDark ? "border-slate-900" : "border-white")} />
+    </NodeContainer>
+  );
+};
+
+const ListNode = ({ id, data = {} }) => {
+  const { isDark } = useTheme();
+  const { setNodes } = useReactFlow();
+
+  const rows = data.rows || data.items || [
+    { id: 'item_1', title: 'Option 1', description: '' },
+    { id: 'item_2', title: 'Option 2', description: '' },
+    { id: 'item_3', title: 'Option 3', description: '' }
+  ];
+
+  const handleAddRow = (e) => {
+    e.stopPropagation();
+    setNodes((nds) =>
+      nds.map((n) => {
+        if (n.id === id) {
+          const currentRows = n.data.rows || n.data.items || [];
+          if (currentRows.length < 10) {
+            const nextIdx = currentRows.length + 1;
+            const newRow = { id: `item_${nextIdx}`, title: `Option ${nextIdx}`, description: '' };
+            const updatedRows = [...currentRows, newRow];
+            return {
+              ...n,
+              data: {
+                ...n.data,
+                rows: updatedRows,
+                items: updatedRows,
+                list_items: updatedRows
+              },
+            };
+          }
+        }
+        return n;
+      })
+    );
+  };
+
+  const buttonText = data.buttonText || data.button_text || 'View Options';
+
+  return (
+    <NodeContainer id={id} title="Interactive List" icon={ListFilter} color="bg-violet-600">
+      <p className={cn("text-[11px] font-semibold mb-2 line-clamp-2", isDark ? "text-slate-200" : "text-slate-700")}>
+        "{data.message || 'Please select an option:'}"
+      </p>
+
+      {/* WhatsApp List Button Header Badge */}
+      <div className={cn(
+        "mb-2.5 px-2.5 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider flex items-center justify-between border",
+        isDark ? "bg-violet-950/70 border-violet-800/80 text-violet-300" : "bg-violet-50 border-violet-200 text-violet-700"
+      )}>
+        <span className="flex items-center gap-1.5 truncate">
+          <ListFilter size={11} className="shrink-0" />
+          <span className="truncate">{buttonText}</span>
+        </span>
+        <span className="text-[8px] opacity-75 font-semibold shrink-0">({rows.length}/10)</span>
+      </div>
+
+      <div className="space-y-1.5 max-h-56 overflow-y-auto pr-1">
+        {rows.map((row, i) => {
+          const title = typeof row === 'string' ? row : (row.title || `Option ${i + 1}`);
+          const desc = typeof row === 'object' ? (row.description || '') : '';
+          return (
+            <div key={i} className="relative">
+              <div className={cn(
+                "px-2.5 py-1.5 rounded-lg text-left border transition-all",
+                isDark ? "bg-slate-800/90 border-slate-700 hover:border-violet-500/60" : "bg-white border-slate-200 hover:border-violet-300 shadow-xs"
+              )}>
+                <div className={cn("text-[10px] font-bold truncate", isDark ? "text-slate-100" : "text-slate-800")}>
+                  {i + 1}. {title}
+                </div>
+                {desc && (
+                  <div className={cn("text-[8px] truncate mt-0.5", isDark ? "text-slate-400" : "text-slate-500")}>
+                    {desc}
+                  </div>
+                )}
+              </div>
+              <Handle
+                type="source"
+                position={Position.Right}
+                id={`list-${i}`}
+                className={cn("w-2 h-2 bg-violet-500 border-2 -right-1", isDark ? "border-slate-900" : "border-white")}
+              />
+            </div>
+          );
+        })}
+
+        {rows.length < 10 && (
+          <button
+            onClick={handleAddRow}
+            className={cn(
+              "w-full mt-2 py-1.5 border border-dashed rounded-lg text-[9px] font-bold uppercase tracking-widest transition-colors flex items-center justify-center gap-1 cursor-pointer",
+              isDark
+                ? "border-violet-800/70 text-violet-400 hover:text-violet-300 hover:border-violet-600 hover:bg-violet-950/40"
+                : "border-violet-200 text-violet-500 hover:text-violet-700 hover:border-violet-400 hover:bg-violet-50"
+            )}
+          >
+            <Plus size={10} strokeWidth={3} /> Add Option ({rows.length}/10)
           </button>
         )}
       </div>
@@ -446,6 +550,8 @@ const WorkflowBuilderInner = () => {
     let defaultMsg = 'Type your message here...';
     if (type === 'handoff') {
       defaultMsg = 'Connecting you to a human agent. Please wait...';
+    } else if (type === 'list' || type === 'interactive_list') {
+      defaultMsg = 'Please select an option from the list below:';
     }
     const center = typeof window !== 'undefined'
       ? { x: window.innerWidth / 2, y: window.innerHeight / 2 }
@@ -455,7 +561,18 @@ const WorkflowBuilderInner = () => {
       id: `node_${Date.now()}`,
       type,
       position,
-      data: { message: defaultMsg, buttons: ['Option 1'], keyword: 'hello', condition: 'If Tag = VIP' },
+      data: {
+        message: defaultMsg,
+        buttons: ['Option 1'],
+        buttonText: 'View Options',
+        rows: [
+          { id: 'item_1', title: 'Option 1', description: '' },
+          { id: 'item_2', title: 'Option 2', description: '' },
+          { id: 'item_3', title: 'Option 3', description: '' }
+        ],
+        keyword: 'hello',
+        condition: 'If Tag = VIP'
+      },
     };
     setNodes((nds) => nds.concat(newNode));
   }, [screenToFlowPosition, setNodes]);
@@ -465,6 +582,8 @@ const WorkflowBuilderInner = () => {
     plain: PlainNode,
     default: PlainNode,
     buttons: ButtonsNode,
+    list: ListNode,
+    interactive_list: ListNode,
     image: ImageNode,
     video: VideoNode,
     condition: BranchNode,
@@ -644,13 +763,26 @@ const WorkflowBuilderInner = () => {
     let defaultMsg = 'Type your message here...';
     if (type === 'handoff') {
       defaultMsg = 'Connecting you to a human agent. Please wait...';
+    } else if (type === 'list' || type === 'interactive_list') {
+      defaultMsg = 'Please select an option from the list below:';
     }
 
     const newNode = {
       id: `node_${Date.now()}`,
       type,
       position,
-      data: { message: defaultMsg, buttons: ['Option 1'], keyword: 'hello', condition: 'If Tag = VIP' },
+      data: {
+        message: defaultMsg,
+        buttons: ['Option 1'],
+        buttonText: 'View Options',
+        rows: [
+          { id: 'item_1', title: 'Option 1', description: '' },
+          { id: 'item_2', title: 'Option 2', description: '' },
+          { id: 'item_3', title: 'Option 3', description: '' }
+        ],
+        keyword: 'hello',
+        condition: 'If Tag = VIP'
+      },
     };
     setNodes((nds) => nds.concat(newNode));
   }, [screenToFlowPosition, setNodes]);
@@ -866,6 +998,7 @@ const WorkflowBuilderInner = () => {
             <SidebarCategory title="Messages" icon={MessageSquare} expanded>
               <SidebarItem icon={MessageSquare} label="Plain Message" onDragStart={(e) => onDragStart(e, 'plain')} onClick={() => { handleAddNodeDirectly('plain'); setIsSidebarOpen(false); }} />
               <SidebarItem icon={MousePointer2} label="Message + Buttons" onDragStart={(e) => onDragStart(e, 'buttons')} onClick={() => { handleAddNodeDirectly('buttons'); setIsSidebarOpen(false); }} />
+              <SidebarItem icon={ListFilter} label="Interactive List (10 Items)" onDragStart={(e) => onDragStart(e, 'list')} onClick={() => { handleAddNodeDirectly('list'); setIsSidebarOpen(false); }} color="purple" />
               <SidebarItem icon={ImageIcon} label="Message + Image" onDragStart={(e) => onDragStart(e, 'image')} onClick={() => { handleAddNodeDirectly('image'); setIsSidebarOpen(false); }} />
               <SidebarItem icon={Video} label="Message + Video" onDragStart={(e) => onDragStart(e, 'video')} onClick={() => { handleAddNodeDirectly('video'); setIsSidebarOpen(false); }} />
             </SidebarCategory>
@@ -954,6 +1087,39 @@ const MessageForm = ({ data, type, onSave, onDelete, availableProducts = [] }) =
   const [title, setTitle] = useState(data.title || data.productPrice || 'Product Demo Call');
   const [duration, setDuration] = useState(data.duration || '30');
   const [buttons, setButtons] = useState(data.buttons || ['Option 1']);
+  const [listButtonText, setListButtonText] = useState(data.buttonText || data.button_text || 'View Options');
+  const [listRows, setListRows] = useState(() => {
+    if (Array.isArray(data.rows) && data.rows.length > 0) return data.rows;
+    if (Array.isArray(data.items) && data.items.length > 0) return data.items;
+    return [
+      { id: 'item_1', title: 'Option 1', description: '' },
+      { id: 'item_2', title: 'Option 2', description: '' },
+      { id: 'item_3', title: 'Option 3', description: '' }
+    ];
+  });
+
+  const handleAddListRow = () => {
+    if (listRows.length < 10) {
+      const nextIdx = listRows.length + 1;
+      setListRows([
+        ...listRows,
+        { id: `item_${nextIdx}`, title: `Option ${nextIdx}`, description: '' }
+      ]);
+    }
+  };
+
+  const handleListRowChange = (index, field, value) => {
+    const updated = [...listRows];
+    updated[index] = {
+      ...updated[index],
+      [field]: value
+    };
+    setListRows(updated);
+  };
+
+  const handleRemoveListRow = (index) => {
+    setListRows(listRows.filter((_, i) => i !== index));
+  };
   const [mediaUrl, setMediaUrl] = useState(data.mediaUrl || null);
   const [keyword, setKeyword] = useState(data.keyword || data.ctaText || '');
   const [conditionField, setConditionField] = useState(data.conditionField || 'tag');
@@ -1159,7 +1325,7 @@ const MessageForm = ({ data, type, onSave, onDelete, availableProducts = [] }) =
           <p className={cn("text-sm font-bold", isDark ? "text-amber-300" : "text-amber-800")}>{buildCondition()}</p>
         </div>
       </div>
-    ) : (type === 'plain' || type === 'buttons' || type === 'handoff') ? (
+    ) : (type === 'plain' || type === 'buttons' || type === 'handoff' || type === 'list' || type === 'interactive_list') ? (
       <div>
         <label className="text-[10px] font-black uppercase text-slate-400 mb-2 block">Message Content</label>
         <textarea
@@ -1226,6 +1392,144 @@ const MessageForm = ({ data, type, onSave, onDelete, availableProducts = [] }) =
             <span>+ Add "🤖 Talk to AI" Button</span>
           </button>
         )}
+      </div>
+    )}
+
+    {(type === 'list' || type === 'interactive_list') && (
+      <div className="space-y-4">
+        <div className={cn(
+          "p-3 border rounded-xl",
+          isDark ? "bg-violet-950/40 border-violet-800/60 text-violet-300" : "bg-violet-50 border-violet-200 text-violet-900"
+        )}>
+          <p className={cn("text-[10px] font-bold uppercase tracking-widest mb-1 flex items-center gap-1.5", isDark ? "text-violet-400" : "text-violet-700")}>
+            <ListFilter size={14} />
+            <span>WhatsApp Interactive List Message</span>
+          </p>
+          <p className={cn("text-xs font-medium", isDark ? "text-violet-200" : "text-violet-800")}>
+            Unlike buttons which are limited to 3, an Interactive List allows up to <strong>10 selectable options</strong> in a native pop-up menu drawer on WhatsApp!
+          </p>
+        </div>
+
+        <div>
+          <label className="text-[10px] font-black uppercase text-slate-400 mb-1 flex items-center justify-between">
+            <span>List Button Title (Max 20 chars) *</span>
+            <span className={cn("text-[9px] font-bold", listButtonText.length > 20 ? "text-red-500" : "text-slate-400")}>
+              {listButtonText.length}/20
+            </span>
+          </label>
+          <input
+            type="text"
+            maxLength={20}
+            value={listButtonText}
+            onChange={(e) => setListButtonText(e.target.value)}
+            className={cn(
+              "w-full border p-3 rounded-xl text-xs font-bold focus:border-violet-500 outline-none",
+              isDark ? "bg-slate-800/80 border-slate-700 text-slate-200" : "bg-slate-50 border-slate-200 text-slate-700"
+            )}
+            placeholder="e.g. View Options"
+          />
+        </div>
+
+        <div>
+          <div className="flex justify-between items-center mb-2">
+            <label className="text-[10px] font-black uppercase text-slate-400 block mb-0">
+              List Options ({listRows.length}/10 max)
+            </label>
+            {listRows.length < 10 && (
+              <button
+                type="button"
+                onClick={handleAddListRow}
+                className="text-[10px] font-bold text-violet-500 hover:text-violet-400 uppercase tracking-widest flex items-center gap-1 cursor-pointer"
+              >
+                <Plus size={10} strokeWidth={3} /> Add Option
+              </button>
+            )}
+          </div>
+
+          <div className="space-y-3">
+            {listRows.map((row, i) => (
+              <div
+                key={i}
+                className={cn(
+                  "p-3 rounded-xl border space-y-2 relative transition-all",
+                  isDark ? "bg-slate-800/60 border-slate-700" : "bg-slate-50 border-slate-200"
+                )}
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-violet-500">
+                    Option {i + 1}
+                  </span>
+                  {listRows.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveListRow(i)}
+                      className="text-slate-400 hover:text-red-500 transition-colors p-1 cursor-pointer"
+                      title="Delete Option"
+                    >
+                      <Trash2 size={13} />
+                    </button>
+                  )}
+                </div>
+
+                <div>
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="text-[9px] font-bold uppercase text-slate-400">Title (Max 24 chars) *</span>
+                    <span className={cn("text-[9px] font-semibold", (row.title || '').length > 24 ? "text-red-500" : "text-slate-400")}>
+                      {(row.title || '').length}/24
+                    </span>
+                  </div>
+                  <input
+                    type="text"
+                    maxLength={24}
+                    value={row.title || ''}
+                    onChange={(e) => handleListRowChange(i, 'title', e.target.value)}
+                    placeholder={`e.g. Option ${i + 1}`}
+                    className={cn(
+                      "w-full border p-2.5 rounded-lg text-xs font-bold focus:border-violet-500 outline-none",
+                      isDark ? "bg-slate-900 border-slate-700 text-slate-100" : "bg-white border-slate-200 text-slate-800"
+                    )}
+                  />
+                </div>
+
+                <div>
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="text-[9px] font-bold uppercase text-slate-400">Description (Optional, max 72 chars)</span>
+                    <span className={cn("text-[9px] font-semibold", (row.description || '').length > 72 ? "text-red-500" : "text-slate-400")}>
+                      {(row.description || '').length}/72
+                    </span>
+                  </div>
+                  <input
+                    type="text"
+                    maxLength={72}
+                    value={row.description || ''}
+                    onChange={(e) => handleListRowChange(i, 'description', e.target.value)}
+                    placeholder="Short detail (e.g. Instant delivery, 24/7 support)"
+                    className={cn(
+                      "w-full border p-2 rounded-lg text-[11px] font-medium focus:border-violet-500 outline-none",
+                      isDark ? "bg-slate-900 border-slate-700 text-slate-300" : "bg-white border-slate-200 text-slate-700"
+                    )}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {listRows.length < 10 && (
+            <button
+              type="button"
+              onClick={handleAddListRow}
+              className={cn(
+                "w-full mt-2.5 py-2.5 border border-dashed rounded-xl text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all cursor-pointer",
+                isDark
+                  ? "border-violet-800/80 text-violet-400 hover:text-violet-300 hover:border-violet-600 hover:bg-violet-950/30"
+                  : "border-violet-200 text-violet-600 hover:text-violet-700 hover:border-violet-400 hover:bg-violet-50"
+              )}
+            >
+              <Plus size={14} strokeWidth={3} />
+              <span>Add Option ({listRows.length}/10)</span>
+            </button>
+          )}
+        </div>
       </div>
     )}
 
@@ -1544,6 +1848,11 @@ const MessageForm = ({ data, type, onSave, onDelete, availableProducts = [] }) =
         title,
         duration,
         buttons,
+        buttonText: listButtonText,
+        button_text: listButtonText,
+        rows: listRows,
+        items: listRows,
+        list_items: listRows,
         mediaUrl,
         productId: selectedProductId,
         productName: msg,
