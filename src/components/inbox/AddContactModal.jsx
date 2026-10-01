@@ -9,6 +9,7 @@ import {
 import axios from 'axios';
 import { API_BASE_URL } from '@/config/apiConfig';
 import { cn } from '@/lib/utils';
+import { useTheme } from '@/context/ThemeContext';
 
 export default function AddContactModal({
   isOpen,
@@ -19,6 +20,7 @@ export default function AddContactModal({
   existingContacts = [],
   onContactSaved
 }) {
+  const { isDark } = useTheme();
   const [activeTab, setActiveTab] = useState('manual'); // 'manual' | 'excel'
 
   // Manual Form State
@@ -310,22 +312,31 @@ export default function AddContactModal({
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200">
-      <div className="bg-white rounded-3xl shadow-2xl border border-slate-200 w-full max-w-xl overflow-hidden flex flex-col max-h-[90vh]">
+      <div className={cn(
+        "rounded-3xl shadow-2xl border w-full max-w-xl overflow-hidden flex flex-col max-h-[90vh] transition-colors duration-200",
+        isDark ? "bg-[#0f172a] border-slate-800 text-slate-100" : "bg-white border-slate-200 text-slate-900"
+      )}>
         
         {/* Modal Header */}
-        <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/70 shrink-0">
+        <div className={cn(
+          "px-6 py-4 border-b flex items-center justify-between shrink-0 transition-colors",
+          isDark ? "border-slate-800 bg-slate-800/60" : "border-slate-100 bg-slate-50/70"
+        )}>
           <div className="flex items-center gap-2.5">
             <div className="w-10 h-10 rounded-2xl bg-emerald-600 text-white flex items-center justify-center font-bold shadow-sm">
               <UserPlus size={20} />
             </div>
             <div>
-              <h3 className="text-base font-black text-slate-900">Add Contact</h3>
-              <p className="text-[11px] text-slate-500 font-medium">Save customer details to UWO Connect CRM &amp; Inbox</p>
+              <h3 className={cn("text-base font-black", isDark ? "text-white" : "text-slate-900")}>Add Contact</h3>
+              <p className={cn("text-[11px] font-medium", isDark ? "text-slate-400" : "text-slate-500")}>Save customer details to UWO Connect CRM &amp; Inbox</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition-all cursor-pointer"
+            className={cn(
+              "p-2 rounded-xl transition-all cursor-pointer",
+              isDark ? "text-slate-400 hover:text-white hover:bg-slate-800" : "text-slate-400 hover:text-slate-700 hover:bg-slate-100"
+            )}
           >
             <X size={18} />
           </button>
@@ -333,18 +344,25 @@ export default function AddContactModal({
 
         {/* Tab Switcher */}
         <div className="px-6 pt-4 shrink-0">
-          <div className="flex items-center gap-2 p-1 bg-slate-100/80 rounded-2xl border border-slate-200/60">
+          <div className={cn(
+            "flex items-center gap-2 p-1 rounded-2xl border transition-colors",
+            isDark ? "bg-slate-800/80 border-slate-700/80" : "bg-slate-100/80 border-slate-200/60"
+          )}>
             <button
               type="button"
               onClick={() => setActiveTab('manual')}
               className={cn(
                 "flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer",
                 activeTab === 'manual'
-                  ? "bg-white text-emerald-800 shadow-xs border border-slate-200/80 font-extrabold"
-                  : "text-slate-600 hover:text-slate-900"
+                  ? isDark 
+                    ? "bg-slate-900 text-emerald-400 shadow-xs border border-slate-700 font-extrabold"
+                    : "bg-white text-emerald-800 shadow-xs border border-slate-200/80 font-extrabold"
+                  : isDark
+                    ? "text-slate-400 hover:text-white"
+                    : "text-slate-600 hover:text-slate-900"
               )}
             >
-              <UserPlus size={15} className={activeTab === 'manual' ? 'text-emerald-600' : ''} />
+              <UserPlus size={15} className={activeTab === 'manual' ? (isDark ? 'text-emerald-400' : 'text-emerald-600') : ''} />
               <span>Manually Add Contact</span>
             </button>
             <button
@@ -353,11 +371,15 @@ export default function AddContactModal({
               className={cn(
                 "flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer",
                 activeTab === 'excel'
-                  ? "bg-white text-emerald-800 shadow-xs border border-slate-200/80 font-extrabold"
-                  : "text-slate-600 hover:text-slate-900"
+                  ? isDark
+                    ? "bg-slate-900 text-emerald-400 shadow-xs border border-slate-700 font-extrabold"
+                    : "bg-white text-emerald-800 shadow-xs border border-slate-200/80 font-extrabold"
+                  : isDark
+                    ? "text-slate-400 hover:text-white"
+                    : "text-slate-600 hover:text-slate-900"
               )}
             >
-              <FileSpreadsheet size={15} className={activeTab === 'excel' ? 'text-emerald-600' : ''} />
+              <FileSpreadsheet size={15} className={activeTab === 'excel' ? (isDark ? 'text-emerald-400' : 'text-emerald-600') : ''} />
               <span>Import from Excel</span>
             </button>
           </div>
@@ -373,15 +395,21 @@ export default function AddContactModal({
             <form onSubmit={handleManualSave} className="space-y-4">
               
               {manualError && (
-                <div className="p-3.5 bg-rose-50 border border-rose-200 rounded-2xl text-xs font-semibold text-rose-700 flex items-start gap-2.5 shadow-2xs">
-                  <ShieldAlert size={16} className="text-rose-600 shrink-0 mt-0.5" />
+                <div className={cn(
+                  "p-3.5 border rounded-2xl text-xs font-semibold flex items-start gap-2.5 shadow-2xs",
+                  isDark ? "bg-rose-950/50 border-rose-800/60 text-rose-300" : "bg-rose-50 border-rose-200 text-rose-700"
+                )}>
+                  <ShieldAlert size={16} className="text-rose-500 shrink-0 mt-0.5" />
                   <span className="leading-relaxed">{manualError}</span>
                 </div>
               )}
 
               {manualSuccess && (
-                <div className="p-3.5 bg-emerald-50 border border-emerald-200 rounded-2xl text-xs font-semibold text-emerald-800 flex items-center gap-2.5 shadow-2xs">
-                  <CheckCircle2 size={16} className="text-emerald-600 shrink-0" />
+                <div className={cn(
+                  "p-3.5 border rounded-2xl text-xs font-semibold flex items-center gap-2.5 shadow-2xs",
+                  isDark ? "bg-emerald-950/50 border-emerald-800/60 text-emerald-300" : "bg-emerald-50 border-emerald-200 text-emerald-800"
+                )}>
+                  <CheckCircle2 size={16} className="text-emerald-500 shrink-0" />
                   <span>{manualSuccess}</span>
                 </div>
               )}
@@ -389,7 +417,7 @@ export default function AddContactModal({
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 {/* Full Name */}
                 <div className="space-y-1 sm:col-span-2">
-                  <label className="block text-xs font-bold text-slate-700">
+                  <label className={cn("block text-xs font-bold", isDark ? "text-slate-300" : "text-slate-700")}>
                     Full Name <span className="text-rose-500">*</span>
                   </label>
                   <div className="relative">
@@ -399,98 +427,134 @@ export default function AddContactModal({
                       placeholder="e.g. Rohan Sharma"
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      className="w-full pl-3.5 pr-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:border-emerald-500 focus:bg-white transition-all"
+                      className={cn(
+                        "w-full pl-3.5 pr-3.5 py-2.5 rounded-xl text-xs font-bold outline-none transition-all border",
+                        isDark 
+                          ? "bg-slate-800/80 border-slate-700 text-white placeholder-slate-500 focus:bg-slate-900 focus:border-emerald-500" 
+                          : "bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400 focus:bg-white focus:border-emerald-500"
+                      )}
                     />
                   </div>
                 </div>
 
                 {/* Phone Number */}
                 <div className="space-y-1 sm:col-span-2">
-                  <label className="block text-xs font-bold text-slate-700 flex items-center justify-between">
+                  <label className={cn("block text-xs font-bold flex items-center justify-between", isDark ? "text-slate-300" : "text-slate-700")}>
                     <span>Phone Number <span className="text-rose-500">*</span></span>
                     {prefilledPhone && (
-                      <span className="text-[10px] text-emerald-700 font-extrabold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                      <span className={cn(
+                        "text-[10px] font-extrabold px-2 py-0.5 rounded border",
+                        isDark ? "text-emerald-300 bg-emerald-950/60 border-emerald-800/60" : "text-emerald-700 bg-emerald-50 border-emerald-200"
+                      )}>
                         Pre-filled from WhatsApp
                       </span>
                     )}
                   </label>
                   <div className="relative">
-                    <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
+                    <Phone className={cn("absolute left-3.5 top-1/2 -translate-y-1/2", isDark ? "text-slate-500" : "text-slate-400")} size={14} />
                     <input
                       type="text"
                       required
                       placeholder="e.g. +91 98200XXXXX"
                       value={formData.phone_number}
                       onChange={(e) => setFormData({ ...formData, phone_number: e.target.value })}
-                      className="w-full pl-9 pr-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:border-emerald-500 focus:bg-white transition-all font-mono"
+                      className={cn(
+                        "w-full pl-9 pr-3.5 py-2.5 rounded-xl text-xs font-bold outline-none transition-all font-mono border",
+                        isDark 
+                          ? "bg-slate-800/80 border-slate-700 text-white placeholder-slate-500 focus:bg-slate-900 focus:border-emerald-500" 
+                          : "bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400 focus:bg-white focus:border-emerald-500"
+                      )}
                     />
                   </div>
                 </div>
 
                 {/* Email */}
                 <div className="space-y-1">
-                  <label className="block text-xs font-bold text-slate-700">Email Address</label>
+                  <label className={cn("block text-xs font-bold", isDark ? "text-slate-300" : "text-slate-700")}>Email Address</label>
                   <div className="relative">
-                    <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
+                    <Mail className={cn("absolute left-3.5 top-1/2 -translate-y-1/2", isDark ? "text-slate-500" : "text-slate-400")} size={14} />
                     <input
                       type="email"
                       placeholder="e.g. rohan@acme.com"
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      className="w-full pl-9 pr-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:border-emerald-500 focus:bg-white transition-all"
+                      className={cn(
+                        "w-full pl-9 pr-3.5 py-2.5 rounded-xl text-xs font-bold outline-none transition-all border",
+                        isDark 
+                          ? "bg-slate-800/80 border-slate-700 text-white placeholder-slate-500 focus:bg-slate-900 focus:border-emerald-500" 
+                          : "bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400 focus:bg-white focus:border-emerald-500"
+                      )}
                     />
                   </div>
                 </div>
 
                 {/* Company */}
                 <div className="space-y-1">
-                  <label className="block text-xs font-bold text-slate-700">Company</label>
+                  <label className={cn("block text-xs font-bold", isDark ? "text-slate-300" : "text-slate-700")}>Company</label>
                   <div className="relative">
-                    <Building className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
+                    <Building className={cn("absolute left-3.5 top-1/2 -translate-y-1/2", isDark ? "text-slate-500" : "text-slate-400")} size={14} />
                     <input
                       type="text"
                       placeholder="e.g. Acme Innovations"
                       value={formData.company}
                       onChange={(e) => setFormData({ ...formData, company: e.target.value })}
-                      className="w-full pl-9 pr-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:border-emerald-500 focus:bg-white transition-all"
+                      className={cn(
+                        "w-full pl-9 pr-3.5 py-2.5 rounded-xl text-xs font-bold outline-none transition-all border",
+                        isDark 
+                          ? "bg-slate-800/80 border-slate-700 text-white placeholder-slate-500 focus:bg-slate-900 focus:border-emerald-500" 
+                          : "bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400 focus:bg-white focus:border-emerald-500"
+                      )}
                     />
                   </div>
                 </div>
 
                 {/* Tags */}
                 <div className="space-y-1 sm:col-span-2">
-                  <label className="block text-xs font-bold text-slate-700">Tags (comma separated)</label>
+                  <label className={cn("block text-xs font-bold", isDark ? "text-slate-300" : "text-slate-700")}>Tags (comma separated)</label>
                   <div className="relative">
-                    <Tag className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
+                    <Tag className={cn("absolute left-3.5 top-1/2 -translate-y-1/2", isDark ? "text-slate-500" : "text-slate-400")} size={14} />
                     <input
                       type="text"
                       placeholder="e.g. Growth Plan, Lead, High Priority"
                       value={formData.tags}
                       onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
-                      className="w-full pl-9 pr-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:border-emerald-500 focus:bg-white transition-all"
+                      className={cn(
+                        "w-full pl-9 pr-3.5 py-2.5 rounded-xl text-xs font-bold outline-none transition-all border",
+                        isDark 
+                          ? "bg-slate-800/80 border-slate-700 text-white placeholder-slate-500 focus:bg-slate-900 focus:border-emerald-500" 
+                          : "bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400 focus:bg-white focus:border-emerald-500"
+                      )}
                     />
                   </div>
                 </div>
 
                 {/* Notes */}
                 <div className="space-y-1 sm:col-span-2">
-                  <label className="block text-xs font-bold text-slate-700">Notes</label>
+                  <label className={cn("block text-xs font-bold", isDark ? "text-slate-300" : "text-slate-700")}>Notes</label>
                   <textarea
                     rows={2}
                     placeholder="Add optional internal notes about this contact..."
                     value={formData.notes}
                     onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium outline-none focus:border-emerald-500 focus:bg-white transition-all"
+                    className={cn(
+                      "w-full p-3 rounded-xl text-xs font-medium outline-none transition-all border",
+                      isDark 
+                        ? "bg-slate-800/80 border-slate-700 text-white placeholder-slate-500 focus:bg-slate-900 focus:border-emerald-500" 
+                        : "bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400 focus:bg-white focus:border-emerald-500"
+                    )}
                   />
                 </div>
               </div>
 
               {/* Action Buttons */}
-              <div className="pt-3 flex items-center justify-end gap-3 border-t border-slate-100">
+              <div className={cn("pt-3 flex items-center justify-end gap-3 border-t", isDark ? "border-slate-800" : "border-slate-100")}>
                 <button
                   type="button"
                   onClick={onClose}
-                  className="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 text-xs font-bold transition-all cursor-pointer"
+                  className={cn(
+                    "px-4 py-2.5 rounded-xl border text-xs font-bold transition-all cursor-pointer",
+                    isDark ? "border-slate-700 text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-600 hover:bg-slate-100"
+                  )}
                 >
                   Cancel
                 </button>
@@ -522,15 +586,23 @@ export default function AddContactModal({
             <div className="space-y-4">
               
               {excelError && (
-                <div className="p-3.5 bg-rose-50 border border-rose-200 rounded-2xl text-xs font-semibold text-rose-700 flex items-start gap-2.5">
-                  <ShieldAlert size={16} className="text-rose-600 shrink-0 mt-0.5" />
+                <div className={cn(
+                  "p-3.5 border rounded-2xl text-xs font-semibold flex items-start gap-2.5",
+                  isDark ? "bg-rose-950/50 border-rose-800/60 text-rose-300" : "bg-rose-50 border-rose-200 text-rose-700"
+                )}>
+                  <ShieldAlert size={16} className="text-rose-500 shrink-0 mt-0.5" />
                   <span className="leading-relaxed">{excelError}</span>
                 </div>
               )}
 
               {/* File Upload Zone */}
               {!importPreview && !importSummary && (
-                <div className="p-8 border-2 border-dashed border-slate-200 hover:border-emerald-500 rounded-3xl bg-slate-50/60 hover:bg-emerald-50/30 text-center transition-all">
+                <div className={cn(
+                  "p-8 border-2 border-dashed rounded-3xl text-center transition-all",
+                  isDark 
+                    ? "border-slate-700 hover:border-emerald-500 bg-slate-800/40 hover:bg-emerald-950/20" 
+                    : "border-slate-200 hover:border-emerald-500 bg-slate-50/60 hover:bg-emerald-50/30"
+                )}>
                   <input
                     type="file"
                     ref={fileInputRef}
@@ -538,13 +610,16 @@ export default function AddContactModal({
                     onChange={handleFileChange}
                     className="hidden"
                   />
-                  <div className="w-14 h-14 rounded-2xl bg-white border border-slate-200 text-emerald-600 flex items-center justify-center mx-auto mb-3 shadow-xs">
+                  <div className={cn(
+                    "w-14 h-14 rounded-2xl border flex items-center justify-center mx-auto mb-3 shadow-xs",
+                    isDark ? "bg-slate-800 border-slate-700 text-emerald-400" : "bg-white border-slate-200 text-emerald-600"
+                  )}>
                     <Upload size={24} />
                   </div>
-                  <h4 className="text-sm font-extrabold text-slate-800 mb-1">
+                  <h4 className={cn("text-sm font-extrabold mb-1", isDark ? "text-white" : "text-slate-800")}>
                     Upload Excel or CSV File
                   </h4>
-                  <p className="text-xs text-slate-500 mb-4 max-w-sm mx-auto leading-relaxed">
+                  <p className={cn("text-xs mb-4 max-w-sm mx-auto leading-relaxed", isDark ? "text-slate-400" : "text-slate-500")}>
                     Upload an Excel (.xlsx, .xls) or CSV file containing your contact list. Required column: <strong>Phone Number</strong>.
                   </p>
                   <button
@@ -556,7 +631,7 @@ export default function AddContactModal({
                     <span>Select Excel / CSV File</span>
                   </button>
 
-                  <div className="mt-4 pt-4 border-t border-slate-200/60 text-[10px] text-slate-400 font-mono">
+                  <div className={cn("mt-4 pt-4 border-t text-[10px] font-mono", isDark ? "border-slate-800 text-slate-500" : "border-slate-200/60 text-slate-400")}>
                     Supported columns: Name, Phone Number *, Email, Company, Tags, Notes
                   </div>
                 </div>
@@ -565,18 +640,21 @@ export default function AddContactModal({
               {/* File Parsing Loading */}
               {isParsing && (
                 <div className="py-12 text-center space-y-3">
-                  <Loader2 size={32} className="animate-spin text-emerald-600 mx-auto" />
-                  <p className="text-xs font-bold text-slate-700">Validating &amp; Parsing Excel file...</p>
+                  <Loader2 size={32} className="animate-spin text-emerald-500 mx-auto" />
+                  <p className={cn("text-xs font-bold", isDark ? "text-slate-300" : "text-slate-700")}>Validating &amp; Parsing Excel file...</p>
                 </div>
               )}
 
               {/* Import Preview Card */}
               {importPreview && !importSummary && (
                 <div className="space-y-4">
-                  <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
+                  <div className={cn(
+                    "p-5 rounded-2xl border space-y-3",
+                    isDark ? "bg-slate-800/60 border-slate-700" : "bg-slate-50 border-slate-200"
+                  )}>
                     <div className="flex items-center justify-between">
-                      <h4 className="text-sm font-black text-slate-900 flex items-center gap-2">
-                        <FileSpreadsheet size={16} className="text-emerald-600" />
+                      <h4 className={cn("text-sm font-black flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
+                        <FileSpreadsheet size={16} className={isDark ? "text-emerald-400" : "text-emerald-600"} />
                         <span>Import Contacts Preview</span>
                       </h4>
                       <button
@@ -585,7 +663,7 @@ export default function AddContactModal({
                           setImportPreview(null);
                           setFile(null);
                         }}
-                        className="text-[11px] font-bold text-slate-500 hover:underline"
+                        className={cn("text-[11px] font-bold hover:underline", isDark ? "text-slate-400" : "text-slate-500")}
                       >
                         Change File
                       </button>
@@ -593,29 +671,44 @@ export default function AddContactModal({
 
                     {/* Preview Stats Badge Strip */}
                     <div className="grid grid-cols-3 gap-2.5 pt-1">
-                      <div className="p-3 bg-white rounded-xl border border-slate-200 text-center">
-                        <span className="text-[10px] text-slate-400 font-bold block uppercase">Total Found</span>
-                        <span className="text-base font-black text-slate-900">{importPreview.total}</span>
+                      <div className={cn(
+                        "p-3 rounded-xl border text-center",
+                        isDark ? "bg-slate-900 border-slate-700" : "bg-white border-slate-200"
+                      )}>
+                        <span className={cn("text-[10px] font-bold block uppercase", isDark ? "text-slate-400" : "text-slate-400")}>Total Found</span>
+                        <span className={cn("text-base font-black", isDark ? "text-white" : "text-slate-900")}>{importPreview.total}</span>
                       </div>
-                      <div className="p-3 bg-emerald-50 rounded-xl border border-emerald-200 text-center">
-                        <span className="text-[10px] text-emerald-700 font-extrabold block uppercase">✓ Ready</span>
-                        <span className="text-base font-black text-emerald-700">{importPreview.valid.length}</span>
+                      <div className={cn(
+                        "p-3 rounded-xl border text-center",
+                        isDark ? "bg-emerald-950/50 border-emerald-800/60 text-emerald-300" : "bg-emerald-50 border-emerald-200 text-emerald-700"
+                      )}>
+                        <span className="text-[10px] font-extrabold block uppercase">✓ Ready</span>
+                        <span className="text-base font-black">{importPreview.valid.length}</span>
                       </div>
-                      <div className="p-3 bg-amber-50 rounded-xl border border-amber-200 text-center">
-                        <span className="text-[10px] text-amber-700 font-extrabold block uppercase">⚠ Invalid / Dupes</span>
-                        <span className="text-base font-black text-amber-700">{importPreview.invalid.length}</span>
+                      <div className={cn(
+                        "p-3 rounded-xl border text-center",
+                        isDark ? "bg-amber-950/50 border-amber-800/60 text-amber-300" : "bg-amber-50 border-amber-200 text-amber-700"
+                      )}>
+                        <span className="text-[10px] font-extrabold block uppercase">⚠ Invalid / Dupes</span>
+                        <span className="text-base font-black">{importPreview.invalid.length}</span>
                       </div>
                     </div>
 
                     {/* Invalid / Flagged Rows Notice */}
                     {importPreview.invalid.length > 0 && (
-                      <div className="mt-3 p-3 bg-amber-50/80 rounded-xl border border-amber-200 text-xs space-y-1.5 max-h-32 overflow-y-auto custom-scrollbar">
-                        <div className="font-bold text-amber-900 flex items-center gap-1.5">
-                          <AlertCircle size={14} className="text-amber-600 shrink-0" />
+                      <div className={cn(
+                        "mt-3 p-3 rounded-xl border text-xs space-y-1.5 max-h-32 overflow-y-auto custom-scrollbar",
+                        isDark ? "bg-amber-950/40 border-amber-800/60" : "bg-amber-50/80 border-amber-200"
+                      )}>
+                        <div className={cn("font-bold flex items-center gap-1.5", isDark ? "text-amber-300" : "text-amber-900")}>
+                          <AlertCircle size={14} className={isDark ? "text-amber-400" : "text-amber-600"} />
                           <span>Flagged Rows ({importPreview.invalid.length} skipped):</span>
                         </div>
                         {importPreview.invalid.slice(0, 5).map((inv, idx) => (
-                          <div key={idx} className="text-[11px] text-amber-800 flex justify-between gap-2 border-b border-amber-200/50 pb-1">
+                          <div key={idx} className={cn(
+                            "text-[11px] flex justify-between gap-2 border-b pb-1",
+                            isDark ? "text-amber-200/90 border-amber-800/50" : "text-amber-800 border-amber-200/50"
+                          )}>
                             <span>Row {inv.row}: {inv.name} ({inv.phone})</span>
                             <span className="font-semibold italic">{inv.reason}</span>
                           </div>
@@ -627,11 +720,11 @@ export default function AddContactModal({
                   {/* Progress Bar during Import */}
                   {isImporting && (
                     <div className="space-y-2 py-2">
-                      <div className="flex justify-between text-xs font-bold text-slate-700">
+                      <div className={cn("flex justify-between text-xs font-bold", isDark ? "text-slate-300" : "text-slate-700")}>
                         <span>Importing contacts into UWO Connect...</span>
-                        <span className="text-emerald-700">{importProgress}%</span>
+                        <span className="text-emerald-500">{importProgress}%</span>
                       </div>
-                      <div className="h-2.5 w-full bg-slate-100 rounded-full overflow-hidden border border-slate-200">
+                      <div className={cn("h-2.5 w-full rounded-full overflow-hidden border", isDark ? "bg-slate-800 border-slate-700" : "bg-slate-100 border-slate-200")}>
                         <div 
                           className="h-full bg-emerald-600 transition-all duration-300 rounded-full"
                           style={{ width: `${importProgress}%` }}
@@ -641,12 +734,15 @@ export default function AddContactModal({
                   )}
 
                   {/* Action Buttons */}
-                  <div className="pt-2 flex items-center justify-end gap-3 border-t border-slate-100">
+                  <div className={cn("pt-2 flex items-center justify-end gap-3 border-t", isDark ? "border-slate-800" : "border-slate-100")}>
                     <button
                       type="button"
                       disabled={isImporting}
                       onClick={onClose}
-                      className="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 text-xs font-bold transition-all cursor-pointer"
+                      className={cn(
+                        "px-4 py-2.5 rounded-xl border text-xs font-bold transition-all cursor-pointer",
+                        isDark ? "border-slate-700 text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-600 hover:bg-slate-100"
+                      )}
                     >
                       Cancel
                     </button>
@@ -674,28 +770,31 @@ export default function AddContactModal({
 
               {/* Final Import Completion Summary */}
               {importSummary && (
-                <div className="p-6 rounded-2xl bg-emerald-50 border border-emerald-200 text-center space-y-4 animate-in fade-in">
+                <div className={cn(
+                  "p-6 rounded-2xl border text-center space-y-4 animate-in fade-in",
+                  isDark ? "bg-emerald-950/40 border-emerald-800/60" : "bg-emerald-50 border-emerald-200"
+                )}>
                   <div className="w-12 h-12 rounded-2xl bg-emerald-600 text-white flex items-center justify-center mx-auto shadow-sm">
                     <CheckCircle2 size={24} />
                   </div>
                   <div>
-                    <h4 className="text-base font-black text-slate-900">
+                    <h4 className={cn("text-base font-black", isDark ? "text-white" : "text-slate-900")}>
                       Import Completed Successfully!
                     </h4>
-                    <p className="text-xs text-slate-600 mt-1">
+                    <p className={cn("text-xs mt-1", isDark ? "text-slate-300" : "text-slate-600")}>
                       {importSummary.successCount} valid contacts have been imported and saved to UWO Connect.
                     </p>
                   </div>
                   <div className="flex justify-center gap-4 text-xs font-bold">
-                    <span className="text-emerald-800">✓ {importSummary.successCount} Imported</span>
+                    <span className={isDark ? "text-emerald-300" : "text-emerald-800"}>✓ {importSummary.successCount} Imported</span>
                     {importSummary.invalidCount > 0 && (
-                      <span className="text-amber-800">⚠ {importSummary.invalidCount} Skipped</span>
+                      <span className={isDark ? "text-amber-300" : "text-amber-800"}>⚠ {importSummary.invalidCount} Skipped</span>
                     )}
                   </div>
                   <button
                     type="button"
                     onClick={onClose}
-                    className="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs transition-all shadow-sm"
+                    className="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs transition-all shadow-sm cursor-pointer"
                   >
                     Done
                   </button>
@@ -710,9 +809,9 @@ export default function AddContactModal({
         {/* ═══════════════════════════════════════════════════════════════ */}
         {/* IMPORTANT WHATSAPP NOTICE DISCLAIMER                           */}
         {/* ═══════════════════════════════════════════════════════════════ */}
-        <div className="px-6 py-3 bg-slate-50 border-t border-slate-200/80 shrink-0">
-          <div className="flex items-start gap-2 text-[11px] text-slate-500 font-medium leading-tight">
-            <Info size={14} className="text-slate-400 shrink-0 mt-0.5" />
+        <div className={cn("px-6 py-3 border-t shrink-0", isDark ? "bg-slate-800/70 border-slate-800 text-slate-400" : "bg-slate-50 border-slate-200/80 text-slate-500")}>
+          <div className="flex items-start gap-2 text-[11px] font-medium leading-tight">
+            <Info size={14} className={cn("shrink-0 mt-0.5", isDark ? "text-slate-400" : "text-slate-400")} />
             <span>
               Saving a contact here stores it in UWO Connect. It does NOT automatically save the number to the customer's phone or WhatsApp contacts.
             </span>

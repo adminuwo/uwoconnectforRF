@@ -19,6 +19,7 @@ import AddContactModal from '@/components/inbox/AddContactModal';
 import { cn } from '@/lib/utils';
 import { API_BASE_URL } from '@/config/apiConfig';
 import { useBrand } from '@/context/BrandContext';
+import { useTheme } from '@/context/ThemeContext';
 
 const getAuthToken = () => {
   if (typeof window === 'undefined') return '';
@@ -59,6 +60,7 @@ const CHANNEL_TABS = [
 
 export default function ClientInboxPage() {
   const { brand } = useBrand();
+  const { isDark } = useTheme();
   const displayBrandLogo = brand?.logo_url || '/download (3).gif';
 
   const [messages, setMessages] = useState([]);
@@ -955,10 +957,11 @@ export default function ClientInboxPage() {
 
   return (
     <DashboardLayout>
-      <div className="flex flex-col h-[calc(100dvh-3.5rem)] md:h-[calc(100vh-4rem)] bg-slate-50 text-slate-900 overflow-hidden">
+      <div className={cn(
+        "flex flex-col h-[calc(100dvh-3.5rem)] md:h-[calc(100vh-4rem)] overflow-hidden transition-colors duration-200",
+        isDark ? "bg-[#090d16] text-slate-100" : "bg-slate-50 text-slate-900"
+      )}>
         
-
-
         {/* ========================================================================= */}
         {/* MAIN WORKSPACE split: SIDEBAR & LIVE CHAT MONITOR WINDOW                   */}
         {/* ========================================================================= */}
@@ -967,23 +970,30 @@ export default function ClientInboxPage() {
           {/* ----------------------------------------------------------------------- */}
           {/* LEFT SIDEBAR: CONVERSATIONS LIST & FILTERS                             */}
           {/* ----------------------------------------------------------------------- */}
-          {/* ----------------------------------------------------------------------- */}
-          {/* LEFT SIDEBAR: CONVERSATIONS LIST & FILTERS                             */}
-          {/* ----------------------------------------------------------------------- */}
-          <div className={`w-full md:w-80 lg:w-96 bg-white border-r border-slate-200 flex flex-col ${
+          <div className={cn(
+            "w-full md:w-80 lg:w-96 border-r flex flex-col transition-colors duration-200",
+            isDark ? "bg-[#0f172a] border-slate-800/80" : "bg-white border-slate-200",
             mobileShowChat ? 'hidden md:flex' : 'flex'
-          }`}>
+          )}>
             
             {/* Search & Channel Filter */}
-            <div className="p-3 sm:p-3.5 border-b border-slate-200 space-y-2.5">
+            <div className={cn(
+              "p-3 sm:p-3.5 border-b space-y-2.5 transition-colors duration-200",
+              isDark ? "border-slate-800/80 bg-[#0f172a]" : "border-slate-200 bg-white"
+            )}>
               <div className="relative">
-                <Search className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
+                <Search className={cn("w-4 h-4 absolute left-3 top-3", isDark ? "text-slate-500" : "text-slate-400")} />
                 <input
                   type="text"
                   placeholder="Search customer, phone or message..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full bg-slate-100 border border-slate-200 rounded-xl pl-9 pr-4 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:ring-2 focus:ring-emerald-500 outline-none"
+                  className={cn(
+                    "w-full rounded-xl pl-9 pr-4 py-2.5 text-xs outline-none transition-colors duration-200 border focus:ring-2 focus:ring-emerald-500",
+                    isDark 
+                      ? "bg-slate-800/80 border-slate-700/80 text-white placeholder-slate-500" 
+                      : "bg-slate-100 border-slate-200 text-slate-900 placeholder-slate-400"
+                  )}
                 />
               </div>
 
@@ -1001,10 +1011,12 @@ export default function ClientInboxPage() {
                         "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all whitespace-nowrap cursor-pointer shrink-0 border",
                         isActive 
                           ? cn(tab.activeClass, "border-transparent shadow-xs")
-                          : "bg-slate-100/80 text-slate-600 hover:bg-slate-200/70 hover:text-slate-900 border-slate-200/80"
+                          : isDark
+                            ? "bg-slate-800/80 text-slate-300 hover:bg-slate-700/80 hover:text-white border-slate-700/70"
+                            : "bg-slate-100/80 text-slate-600 hover:bg-slate-200/70 hover:text-slate-900 border-slate-200/80"
                       )}
                     >
-                      <Icon size={13} className={isActive ? 'text-white' : tab.color || 'text-slate-500'} />
+                      <Icon size={13} className={isActive ? 'text-white' : tab.color || (isDark ? 'text-slate-400' : 'text-slate-500')} />
                       <span>{tab.label}</span>
                     </button>
                   );
@@ -1013,14 +1025,20 @@ export default function ClientInboxPage() {
             </div>
 
             {/* Conversation Items */}
-            <div className="flex-1 overflow-y-auto divide-y divide-slate-100">
+            <div className={cn(
+              "flex-1 overflow-y-auto divide-y transition-colors duration-200",
+              isDark ? "divide-slate-800/80 bg-[#0f172a]" : "divide-slate-100 bg-white"
+            )}>
               {loading ? (
                 <div className="p-8 flex flex-col items-center justify-center space-y-3.5 my-auto h-72 text-center animate-in fade-in duration-300">
                   <div className="relative flex items-center justify-center">
                     <div className="absolute inset-0 rounded-2xl bg-emerald-500/20 blur-xl animate-pulse scale-150" />
                     <div className="w-14 h-14 rounded-2xl border-2 border-emerald-100 border-t-emerald-600 animate-spin" />
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="w-9 h-9 rounded-xl bg-white p-1 shadow-xs border border-slate-100 flex items-center justify-center overflow-hidden">
+                      <div className={cn(
+                        "w-9 h-9 rounded-xl p-1 shadow-xs border flex items-center justify-center overflow-hidden",
+                        isDark ? "bg-slate-800 border-slate-700" : "bg-white border-slate-100"
+                      )}>
                         <img 
                           src={displayBrandLogo} 
                           alt={brand?.brand_name || "UWO Connect™"} 
@@ -1031,10 +1049,10 @@ export default function ClientInboxPage() {
                     </div>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-xs font-bold text-slate-800">
+                    <p className={cn("text-xs font-bold", isDark ? "text-slate-200" : "text-slate-800")}>
                       Loading {activeChannelFilter !== 'ALL' ? (activeChannelFilter.charAt(0) + activeChannelFilter.slice(1).toLowerCase()) : ''} Chats...
                     </p>
-                    <p className="text-[10px] text-slate-400">Syncing live conversations</p>
+                    <p className={cn("text-[10px]", isDark ? "text-slate-500" : "text-slate-400")}>Syncing live conversations</p>
                   </div>
                 </div>
               ) : convoList.length > 0 ? (
@@ -1054,16 +1072,24 @@ export default function ClientInboxPage() {
                         setSelectedConvoId(convo.id);
                         setMobileShowChat(true);
                       }}
-                      className={`p-3 sm:p-4 cursor-pointer transition-all border-l-4 ${
+                      className={cn(
+                        "p-3 sm:p-4 cursor-pointer transition-all border-l-4",
                         isSelected 
-                          ? 'bg-emerald-50/80 border-emerald-500' 
-                          : 'border-transparent hover:bg-slate-50'
-                      }`}
+                          ? isDark 
+                            ? "bg-emerald-950/40 border-emerald-500" 
+                            : "bg-emerald-50/80 border-emerald-500" 
+                          : isDark 
+                            ? "border-transparent hover:bg-slate-800/50" 
+                            : "border-transparent hover:bg-slate-50"
+                      )}
                     >
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
                           <div className="relative shrink-0">
-                            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-slate-200 flex items-center justify-center font-bold text-slate-700 text-xs sm:text-sm">
+                            <div className={cn(
+                              "w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-bold text-xs sm:text-sm",
+                              isDark ? "bg-slate-800 text-slate-200 border border-slate-700/80" : "bg-slate-200 text-slate-700"
+                            )}>
                               {displayName.charAt(0).toUpperCase()}
                             </div>
                             <span className={`absolute -bottom-1 -right-1 text-[8px] sm:text-[9px] px-1 sm:px-1.5 py-0.5 rounded-full font-bold shadow-2xs ${channelInfo.bg} ${channelInfo.text}`}>
@@ -1071,15 +1097,15 @@ export default function ClientInboxPage() {
                             </span>
                           </div>
                           <div className="min-w-0 flex-1">
-                            <h4 className="text-xs font-bold text-slate-900 flex items-center gap-1.5 truncate">
+                            <h4 className={cn("text-xs font-bold flex items-center gap-1.5 truncate", isDark ? "text-slate-100" : "text-slate-900")}>
                               <span className="truncate">{displayName}</span>
                               {convo.isLocked && (
                                 <Lock className="w-3 h-3 text-amber-500 shrink-0" title="Locked by team handler" />
                               )}
                             </h4>
-                            <p className="text-[11px] text-slate-500 truncate mt-0.5">
+                            <p className={cn("text-[11px] truncate mt-0.5", isDark ? "text-slate-400" : "text-slate-500")}>
                               {liveState?.isTyping ? (
-                                <span className="text-emerald-600 font-bold animate-pulse">
+                                <span className="text-emerald-500 font-bold animate-pulse">
                                   ✍️ {liveState.typingUser || 'Employee'} is typing...
                                 </span>
                               ) : (
@@ -1090,7 +1116,7 @@ export default function ClientInboxPage() {
                         </div>
 
                         <div className="text-right shrink-0 flex flex-col items-end">
-                          <span className="text-[10px] text-slate-400 font-medium whitespace-nowrap">
+                          <span className={cn("text-[10px] font-medium whitespace-nowrap", isDark ? "text-slate-500" : "text-slate-400")}>
                             {new Date(convo.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                           </span>
 
@@ -1102,19 +1128,27 @@ export default function ClientInboxPage() {
                               handleToggleBotForConvo(convo);
                             }}
                             title={convo.botPaused ? "Bot is Paused (Click to Turn Bot ON)" : "Bot is Active (Click to Turn Bot OFF / Take Over)"}
-                            className={`mt-1.5 inline-flex items-center gap-1 text-[9px] sm:text-[10px] font-bold px-2 py-0.5 rounded-full border transition-all cursor-pointer shadow-2xs ${
+                            className={cn(
+                              "mt-1.5 inline-flex items-center gap-1 text-[9px] sm:text-[10px] font-bold px-2 py-0.5 rounded-full border transition-all cursor-pointer shadow-2xs",
                               convo.botPaused
-                                ? "bg-amber-50 text-amber-700 border-amber-300 hover:bg-amber-100"
-                                : "bg-emerald-50 text-emerald-700 border-emerald-300 hover:bg-emerald-100"
-                            }`}
+                                ? isDark 
+                                  ? "bg-amber-950/50 text-amber-300 border-amber-800/60 hover:bg-amber-900/60"
+                                  : "bg-amber-50 text-amber-700 border-amber-300 hover:bg-amber-100"
+                                : isDark
+                                  ? "bg-emerald-950/50 text-emerald-300 border-emerald-800/60 hover:bg-emerald-900/60"
+                                  : "bg-emerald-50 text-emerald-700 border-emerald-300 hover:bg-emerald-100"
+                            )}
                           >
-                            <Bot className={`w-3 h-3 ${convo.botPaused ? "text-amber-500" : "text-emerald-600"}`} />
+                            <Bot className={`w-3 h-3 ${convo.botPaused ? "text-amber-500" : (isDark ? "text-emerald-400" : "text-emerald-600")}`} />
                             <span>{convo.botPaused ? "Bot OFF" : "Bot ON"}</span>
                           </button>
 
                           {liveState?.viewer && liveState.viewer !== currentUser?.username && liveState.viewer !== currentUser?.email && (
                             <div className="mt-1 flex justify-end">
-                              <span className="inline-flex items-center gap-1 text-[9px] px-1.5 py-0.5 rounded-md bg-blue-100 text-blue-700 font-bold max-w-[110px] truncate">
+                              <span className={cn(
+                                "inline-flex items-center gap-1 text-[9px] px-1.5 py-0.5 rounded-md font-bold max-w-[110px] truncate",
+                                isDark ? "bg-blue-950/60 text-blue-300 border border-blue-800/60" : "bg-blue-100 text-blue-700"
+                              )}>
                                 🟢 {liveState.viewer}
                               </span>
                             </div>
@@ -1125,19 +1159,24 @@ export default function ClientInboxPage() {
                   );
                 })
               ) : (
-                <div className="text-center py-12 text-slate-400 text-xs">
+                <div className={cn("text-center py-12 text-xs", isDark ? "text-slate-500" : "text-slate-400")}>
                   No conversations match filters.
                 </div>
               )}
               {conversations.length > 0 && hasMoreConvos && (
-                <div className="p-3 flex justify-center border-t border-slate-100">
+                <div className={cn("p-3 flex justify-center border-t", isDark ? "border-slate-800/80" : "border-slate-100")}>
                   <button 
                     disabled={isLoadingMoreContacts}
                     onClick={handleLoadMoreContacts}
-                    className="text-xs font-bold text-emerald-700 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100 px-4 py-2.5 rounded-xl transition-all w-full disabled:opacity-70 flex justify-center items-center gap-2 cursor-pointer shadow-2xs"
+                    className={cn(
+                      "text-xs font-bold px-4 py-2.5 rounded-xl transition-all w-full disabled:opacity-70 flex justify-center items-center gap-2 cursor-pointer shadow-2xs border",
+                      isDark
+                        ? "text-emerald-400 hover:text-emerald-300 bg-emerald-950/30 hover:bg-emerald-900/40 border-emerald-800/50"
+                        : "text-emerald-700 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border-emerald-200"
+                    )}
                   >
                     {isLoadingMoreContacts ? (
-                      <>Loading more contacts... <div className="w-3.5 h-3.5 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin" /></>
+                      <>Loading more contacts... <div className="w-3.5 h-3.5 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" /></>
                     ) : (
                       "Load More Contacts"
                     )}
@@ -1151,19 +1190,27 @@ export default function ClientInboxPage() {
           {/* RIGHT MAIN WINDOW: LIVE CHAT & ADMIN MONITORING PANEL                    */}
           {/* ----------------------------------------------------------------------- */}
           {activeConvo ? (
-            <div className={`flex-1 flex flex-col h-full overflow-hidden bg-emerald-50/20 ${
+            <div className={cn(
+              "flex-1 flex flex-col h-full overflow-hidden transition-colors duration-200",
+              isDark ? "bg-[#090d16]" : "bg-emerald-50/20",
               mobileShowChat ? 'flex' : 'hidden md:flex'
-            }`}>
+            )}>
               
               {/* Live Chat Header & Control Bar */}
-              <div className="bg-white border-b border-slate-200 p-2.5 sm:p-3.5 shadow-2xs shrink-0">
+              <div className={cn(
+                "border-b p-2.5 sm:p-3.5 shadow-2xs shrink-0 transition-colors duration-200",
+                isDark ? "bg-[#0f172a] border-slate-800/80" : "bg-white border-slate-200"
+              )}>
                 {/* Row 1: Back + User Info + Actions */}
                 <div className="flex items-center justify-between gap-2">
                   {/* Customer Avatar & Name */}
                   <div className="flex items-center gap-2 sm:gap-2.5 min-w-0 flex-1">
                     <button 
                       onClick={() => setMobileShowChat(false)}
-                      className="md:hidden p-1.5 -ml-1 rounded-lg text-slate-600 hover:bg-slate-100 shrink-0 cursor-pointer"
+                      className={cn(
+                        "md:hidden p-1.5 -ml-1 rounded-lg shrink-0 cursor-pointer transition-colors",
+                        isDark ? "text-slate-300 hover:bg-slate-800" : "text-slate-600 hover:bg-slate-100"
+                      )}
                       title="Back to conversations"
                     >
                       <ArrowLeft className="w-5 h-5" />
@@ -1175,7 +1222,7 @@ export default function ClientInboxPage() {
 
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-1.5">
-                        <span className="text-xs sm:text-sm font-bold text-slate-900 truncate">
+                        <span className={cn("text-xs sm:text-sm font-bold truncate", isDark ? "text-slate-100" : "text-slate-900")}>
                           {(!activeConvo.name || activeConvo.name.trim().toLowerCase() === 'unknown')
                             ? (activeConvo.rawAddress || 'Customer')
                             : activeConvo.name}
@@ -1183,15 +1230,24 @@ export default function ClientInboxPage() {
                         {/* On desktop show badges inline */}
                         <div className="hidden sm:flex items-center gap-1.5 shrink-0">
                           {activeConvo.rawAddress && (
-                            <span className={`text-[11px] font-mono font-bold px-2 py-0.5 rounded-md border shadow-2xs ${
-                              activeConvo.channel === 'FACEBOOK'
-                                ? 'text-blue-800 bg-blue-50 border-blue-200'
-                                : activeConvo.channel === 'INSTAGRAM'
-                                ? 'text-pink-800 bg-pink-50 border-pink-200'
-                                : activeConvo.channel === 'GMAIL'
-                                ? 'text-rose-800 bg-rose-50 border-rose-200'
-                                : 'text-emerald-800 bg-emerald-50 border-emerald-200'
-                            }`}>
+                            <span className={cn(
+                              "text-[11px] font-mono font-bold px-2 py-0.5 rounded-md border shadow-2xs",
+                              isDark
+                                ? activeConvo.channel === 'FACEBOOK'
+                                  ? 'text-blue-300 bg-blue-950/60 border-blue-800/60'
+                                  : activeConvo.channel === 'INSTAGRAM'
+                                  ? 'text-pink-300 bg-pink-950/60 border-pink-800/60'
+                                  : activeConvo.channel === 'GMAIL'
+                                  ? 'text-rose-300 bg-rose-950/60 border-rose-800/60'
+                                  : 'text-emerald-300 bg-emerald-950/60 border-emerald-800/60'
+                                : activeConvo.channel === 'FACEBOOK'
+                                  ? 'text-blue-800 bg-blue-50 border-blue-200'
+                                  : activeConvo.channel === 'INSTAGRAM'
+                                  ? 'text-pink-800 bg-pink-50 border-pink-200'
+                                  : activeConvo.channel === 'GMAIL'
+                                  ? 'text-rose-800 bg-rose-50 border-rose-200'
+                                  : 'text-emerald-800 bg-emerald-50 border-emerald-200'
+                            )}>
                               {activeConvo.channel === 'FACEBOOK' ? '👤 PSID: ' : activeConvo.channel === 'INSTAGRAM' ? '📸 IG: ' : activeConvo.channel === 'GMAIL' ? '✉️ ' : '📱 '}
                               {activeConvo.rawAddress}
                             </span>
@@ -1210,17 +1266,17 @@ export default function ClientInboxPage() {
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-1.5 text-[10px] sm:text-xs text-slate-500 truncate">
+                      <div className={cn("flex items-center gap-1.5 text-[10px] sm:text-xs truncate", isDark ? "text-slate-400" : "text-slate-500")}>
                         {livePresence[activeConvo.id]?.isTyping ? (
-                          <span className="text-emerald-600 font-bold flex items-center gap-1 animate-pulse truncate">
+                          <span className="text-emerald-500 font-bold flex items-center gap-1 animate-pulse truncate">
                             ✍️ {livePresence[activeConvo.id]?.typingUser || activeConvo.handlerName || 'Agent'} is typing...
                           </span>
                         ) : livePresence[activeConvo.id]?.viewer && livePresence[activeConvo.id]?.viewer !== currentUser?.username && livePresence[activeConvo.id]?.viewer !== currentUser?.email ? (
-                          <span className="text-blue-600 font-semibold flex items-center gap-1 truncate">
+                          <span className="text-blue-400 font-semibold flex items-center gap-1 truncate">
                             🟢 {livePresence[activeConvo.id]?.viewer}
                           </span>
                         ) : (
-                          <span className="text-slate-400 truncate">Online</span>
+                          <span className={cn("truncate", isDark ? "text-slate-500" : "text-slate-400")}>Online</span>
                         )}
                       </div>
                     </div>
@@ -1240,26 +1296,41 @@ export default function ClientInboxPage() {
                     {activeConvo.botPaused ? (
                       <button
                         onClick={handleResumeBot}
-                        className="px-2 sm:px-2.5 py-1 rounded-lg text-[10px] sm:text-[11px] font-bold bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-300 transition-all flex items-center gap-1 cursor-pointer shadow-2xs shrink-0"
+                        className={cn(
+                          "px-2 sm:px-2.5 py-1 rounded-lg text-[10px] sm:text-[11px] font-bold border transition-all flex items-center gap-1 cursor-pointer shadow-2xs shrink-0",
+                          isDark
+                            ? "bg-emerald-950/60 text-emerald-300 hover:bg-emerald-900/60 border-emerald-800/60"
+                            : "bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border-emerald-300"
+                        )}
                         title="Resume AI Bot & Workflow for this conversation"
                       >
-                        <Bot className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                        <Bot className={`w-3.5 h-3.5 shrink-0 ${isDark ? "text-emerald-400" : "text-emerald-600"}`} />
                         <span className="hidden xs:inline sm:inline">Resume Bot</span>
                       </button>
                     ) : (
                       <button
                         onClick={handleTakeover}
-                        className="px-2 sm:px-2.5 py-1 rounded-lg text-[10px] sm:text-[11px] font-bold bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-300 transition-all flex items-center gap-1 cursor-pointer shadow-2xs shrink-0"
+                        className={cn(
+                          "px-2 sm:px-2.5 py-1 rounded-lg text-[10px] sm:text-[11px] font-bold border transition-all flex items-center gap-1 cursor-pointer shadow-2xs shrink-0",
+                          isDark
+                            ? "bg-amber-950/60 text-amber-300 hover:bg-amber-900/60 border-amber-800/60"
+                            : "bg-amber-50 text-amber-700 hover:bg-amber-100 border-amber-300"
+                        )}
                         title="Pause AI Bot and take over manually"
                       >
-                        <ShieldAlert className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                        <ShieldAlert className="w-3.5 h-3.5 text-amber-500 shrink-0" />
                         <span className="hidden sm:inline">Take Over</span>
                       </button>
                     )}
 
                     <button
                       onClick={() => setIsTransferModalOpen(true)}
-                      className="px-2 sm:px-2.5 py-1 rounded-lg text-[10px] sm:text-[11px] font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200 transition-all flex items-center gap-1 cursor-pointer shrink-0"
+                      className={cn(
+                        "px-2 sm:px-2.5 py-1 rounded-lg text-[10px] sm:text-[11px] font-bold border transition-all flex items-center gap-1 cursor-pointer shrink-0",
+                        isDark
+                          ? "bg-slate-800 text-slate-200 hover:bg-slate-700 border-slate-700"
+                          : "bg-slate-100 text-slate-700 hover:bg-slate-200 border-slate-200"
+                      )}
                       title="Transfer"
                     >
                       <ArrowRightLeft className="w-3 h-3 shrink-0" />
@@ -1268,7 +1339,12 @@ export default function ClientInboxPage() {
 
                     <button
                       onClick={fetchAuditLogs}
-                      className="p-1 sm:p-1.5 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200 transition-colors cursor-pointer shrink-0"
+                      className={cn(
+                        "p-1 sm:p-1.5 rounded-lg border transition-colors cursor-pointer shrink-0",
+                        isDark
+                          ? "bg-slate-800 text-slate-300 hover:bg-slate-700 border-slate-700"
+                          : "bg-slate-100 text-slate-600 hover:bg-slate-200 border-slate-200"
+                      )}
                       title="Inspect Audit Log"
                     >
                       <History className="w-3.5 h-3.5" />
@@ -1277,18 +1353,30 @@ export default function ClientInboxPage() {
                 </div>
 
                 {/* Row 2: Sub-badges & Handler pill on Mobile */}
-                <div className="flex sm:hidden items-center justify-between gap-1.5 pt-1.5 border-t border-slate-100 mt-1.5">
+                <div className={cn(
+                  "flex sm:hidden items-center justify-between gap-1.5 pt-1.5 border-t mt-1.5",
+                  isDark ? "border-slate-800/80" : "border-slate-100"
+                )}>
                   <div className="flex items-center gap-1 min-w-0 flex-1 overflow-x-auto scrollbar-none py-0.5">
                     {activeConvo.rawAddress && (
-                      <span className={`text-[10px] font-mono font-bold px-1.5 py-0.5 rounded border shadow-2xs truncate max-w-[140px] ${
-                        activeConvo.channel === 'FACEBOOK'
-                          ? 'text-blue-800 bg-blue-50 border-blue-200'
-                          : activeConvo.channel === 'INSTAGRAM'
-                          ? 'text-pink-800 bg-pink-50 border-pink-200'
-                          : activeConvo.channel === 'GMAIL'
-                          ? 'text-rose-800 bg-rose-50 border-rose-200'
-                          : 'text-emerald-800 bg-emerald-50 border-emerald-200'
-                      }`}>
+                      <span className={cn(
+                        "text-[10px] font-mono font-bold px-1.5 py-0.5 rounded border shadow-2xs truncate max-w-[140px]",
+                        isDark
+                          ? activeConvo.channel === 'FACEBOOK'
+                            ? 'text-blue-300 bg-blue-950/60 border-blue-800/60'
+                            : activeConvo.channel === 'INSTAGRAM'
+                            ? 'text-pink-300 bg-pink-950/60 border-pink-800/60'
+                            : activeConvo.channel === 'GMAIL'
+                            ? 'text-rose-300 bg-rose-950/60 border-rose-800/60'
+                            : 'text-emerald-300 bg-emerald-950/60 border-emerald-800/60'
+                          : activeConvo.channel === 'FACEBOOK'
+                            ? 'text-blue-800 bg-blue-50 border-blue-200'
+                            : activeConvo.channel === 'INSTAGRAM'
+                            ? 'text-pink-800 bg-pink-50 border-pink-200'
+                            : activeConvo.channel === 'GMAIL'
+                            ? 'text-rose-800 bg-rose-50 border-rose-200'
+                            : 'text-emerald-800 bg-emerald-50 border-emerald-200'
+                      )}>
                         {activeConvo.channel === 'FACEBOOK' ? '👤 ' : activeConvo.channel === 'INSTAGRAM' ? '📸 ' : activeConvo.channel === 'GMAIL' ? '✉️ ' : '📱 '}
                         {activeConvo.rawAddress}
                       </span>
@@ -1308,13 +1396,19 @@ export default function ClientInboxPage() {
 
                   <div className="shrink-0">
                     {activeConvo?.handlerName || activeConvo?.assignedToName ? (
-                      <div className="flex items-center gap-1 text-[10px] font-semibold text-amber-800 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
-                        <Lock className="w-2.5 h-2.5 text-amber-600 shrink-0" />
+                      <div className={cn(
+                        "flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full border",
+                        isDark ? "text-amber-300 bg-amber-950/60 border-amber-800/60" : "text-amber-800 bg-amber-50 border-amber-200"
+                      )}>
+                        <Lock className="w-2.5 h-2.5 text-amber-500 shrink-0" />
                         <span className="truncate max-w-[100px]">{activeConvo.handlerName || activeConvo.assignedToName}</span>
                       </div>
                     ) : (
-                      <div className="flex items-center gap-1 text-[10px] font-semibold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-                        <Bot className="w-2.5 h-2.5 text-emerald-600 shrink-0" />
+                      <div className={cn(
+                        "flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full border",
+                        isDark ? "text-emerald-300 bg-emerald-950/60 border-emerald-800/60" : "text-emerald-800 bg-emerald-50 border-emerald-200"
+                      )}>
+                        <Bot className="w-2.5 h-2.5 text-emerald-500 shrink-0" />
                         <span>AI Bot</span>
                       </div>
                     )}
@@ -1322,15 +1416,24 @@ export default function ClientInboxPage() {
                 </div>
 
                 {/* Desktop Handler Pill */}
-                <div className="hidden sm:flex lg:hidden items-center gap-1.5 pt-1 border-t border-slate-100">
+                <div className={cn(
+                  "hidden sm:flex lg:hidden items-center gap-1.5 pt-1 border-t",
+                  isDark ? "border-slate-800/80" : "border-slate-100"
+                )}>
                   {activeConvo?.handlerName || activeConvo?.assignedToName ? (
-                    <div className="flex items-center gap-1.5 text-[11px] font-semibold text-amber-800 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200 shadow-2xs">
-                      <Lock className="w-3 h-3 text-amber-600 shrink-0" />
+                    <div className={cn(
+                      "flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-0.5 rounded-full border shadow-2xs",
+                      isDark ? "text-amber-300 bg-amber-950/60 border-amber-800/60" : "text-amber-800 bg-amber-50 border-amber-200"
+                    )}>
+                      <Lock className="w-3 h-3 text-amber-500 shrink-0" />
                       <span>Handling: <strong>{activeConvo.handlerName || activeConvo.assignedToName}</strong></span>
                     </div>
                   ) : (
-                    <div className="flex items-center gap-1.5 text-[11px] font-semibold text-emerald-800 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200 shadow-2xs">
-                      <Bot className="w-3 h-3 text-emerald-600 shrink-0" />
+                    <div className={cn(
+                      "flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-0.5 rounded-full border shadow-2xs",
+                      isDark ? "text-emerald-300 bg-emerald-950/60 border-emerald-800/60" : "text-emerald-800 bg-emerald-50 border-emerald-200"
+                    )}>
+                      <Bot className="w-3 h-3 text-emerald-500 shrink-0" />
                       <span>Handling: <strong>Unassigned (AI Copilot)</strong></span>
                     </div>
                   )}
@@ -1339,12 +1442,15 @@ export default function ClientInboxPage() {
 
               {/* WhatsApp 24-Hour Customer Window Alert Banner */}
               {activeConvo?.channel === 'WHATSAPP' && !is24hWindowActive && (
-                <div className="bg-amber-50 border-b border-amber-200 px-3.5 py-2.5 flex flex-wrap items-center justify-between gap-2.5 text-xs shrink-0 animate-in fade-in duration-200">
-                  <div className="flex items-center gap-2 text-amber-900 min-w-0">
-                    <span className="p-1 rounded-md bg-amber-200/80 text-amber-900 font-bold shrink-0 text-xs">⏰</span>
+                <div className={cn(
+                  "border-b px-3.5 py-2.5 flex flex-wrap items-center justify-between gap-2.5 text-xs shrink-0 animate-in fade-in duration-200",
+                  isDark ? "bg-amber-950/50 border-amber-800/60 text-amber-200" : "bg-amber-50 border-amber-200 text-amber-900"
+                )}>
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span className={cn("p-1 rounded-md font-bold shrink-0 text-xs", isDark ? "bg-amber-900/80 text-amber-200" : "bg-amber-200/80 text-amber-900")}>⏰</span>
                     <div className="min-w-0">
                       <span className="font-bold text-xs">24-Hour Customer Window Closed</span>
-                      <p className="text-[11px] text-amber-800 leading-tight">
+                      <p className={cn("text-[11px] leading-tight", isDark ? "text-amber-300/80" : "text-amber-800")}>
                         Customer hasn't replied in 24 hours. Meta requires an approved template to message this contact.
                       </p>
                     </div>
@@ -1367,7 +1473,10 @@ export default function ClientInboxPage() {
                       <div className="absolute inset-0 rounded-2xl bg-emerald-500/20 blur-xl animate-pulse scale-125" />
                       <div className="w-14 h-14 rounded-2xl border-2 border-emerald-100 border-t-emerald-600 animate-spin" />
                       <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="w-9 h-9 rounded-xl bg-white p-1 shadow-xs border border-slate-100 flex items-center justify-center overflow-hidden">
+                        <div className={cn(
+                          "w-9 h-9 rounded-xl p-1 shadow-xs border flex items-center justify-center overflow-hidden",
+                          isDark ? "bg-slate-800 border-slate-700" : "bg-white border-slate-100"
+                        )}>
                           <img 
                             src={displayBrandLogo} 
                             alt={brand?.brand_name || "UWO Connect™"} 
@@ -1377,8 +1486,8 @@ export default function ClientInboxPage() {
                         </div>
                       </div>
                     </div>
-                    <p className="text-xs font-bold text-slate-700">Loading conversation...</p>
-                    <p className="text-[10px] text-slate-400 mt-0.5">Syncing real-time messages</p>
+                    <p className={cn("text-xs font-bold", isDark ? "text-slate-200" : "text-slate-700")}>Loading conversation...</p>
+                    <p className={cn("text-[10px] mt-0.5", isDark ? "text-slate-500" : "text-slate-400")}>Syncing real-time messages</p>
                   </div>
                 ) : (
                   <>
@@ -1391,7 +1500,12 @@ export default function ClientInboxPage() {
                             setMessagesOffset(nextOffset);
                             fetchMessages(activeConvo.rawAddress || activeConvo.id, nextOffset, true);
                           }}
-                          className="px-4 py-1.5 bg-white border border-slate-200 rounded-full text-xs font-semibold text-slate-500 hover:text-emerald-600 hover:border-emerald-200 transition-colors shadow-sm disabled:opacity-70 flex items-center gap-2 cursor-pointer"
+                          className={cn(
+                            "px-4 py-1.5 rounded-full text-xs font-semibold transition-colors shadow-sm disabled:opacity-70 flex items-center gap-2 cursor-pointer border",
+                            isDark
+                              ? "bg-slate-800 border-slate-700 text-slate-300 hover:text-emerald-400 hover:border-emerald-700"
+                              : "bg-white border-slate-200 text-slate-500 hover:text-emerald-600 hover:border-emerald-200"
+                          )}
                         >
                           {isLoadingMoreMessages ? (
                             <>Loading... <div className="w-3 h-3 border-2 border-slate-400 border-t-transparent rounded-full animate-spin" /></>
@@ -1468,17 +1582,23 @@ export default function ClientInboxPage() {
                     if (isInternal) {
                       return (
                         <div key={`${msg.id || 'msg'}_${index}`} className="my-3 flex justify-center">
-                          <div className="max-w-md bg-amber-50 border border-amber-200 rounded-xl p-3 shadow-xs">
-                            <div className="flex items-center justify-between gap-2 text-xs font-bold text-amber-900 mb-1">
+                          <div className={cn(
+                            "max-w-md rounded-xl p-3 shadow-xs border",
+                            isDark ? "bg-amber-950/50 border-amber-800/70" : "bg-amber-50 border-amber-200"
+                          )}>
+                            <div className={cn(
+                              "flex items-center justify-between gap-2 text-xs font-bold mb-1",
+                              isDark ? "text-amber-300" : "text-amber-900"
+                            )}>
                               <span className="flex items-center gap-1.5">
-                                <StickyNote className="w-3.5 h-3.5 text-amber-600" />
+                                <StickyNote className={cn("w-3.5 h-3.5", isDark ? "text-amber-400" : "text-amber-600")} />
                                 Internal Private Note • {msg.sender_name || currentUser?.first_name || currentUser?.username || 'Team Member'}
                               </span>
-                              <span className="text-[10px] font-normal text-amber-700">
+                              <span className={cn("text-[10px] font-normal", isDark ? "text-amber-400/80" : "text-amber-700")}>
                                 {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                               </span>
                             </div>
-                            <p className="text-xs text-amber-950 font-medium">{msg.body}</p>
+                            <p className={cn("text-xs font-medium", isDark ? "text-amber-200" : "text-amber-950")}>{msg.body}</p>
                           </div>
                         </div>
                       );
@@ -1491,26 +1611,42 @@ export default function ClientInboxPage() {
                       >
                         {/* Outgoing Employee Badge Header */}
                         {!isIncoming && (
-                          <div className="flex items-center gap-1.5 mb-1 text-[10px] font-bold text-slate-500 pr-1">
-                            <span className="text-emerald-700">{msg.sender_name || currentUser?.first_name || currentUser?.username || 'Team Member'}</span>
+                          <div className={cn(
+                            "flex items-center gap-1.5 mb-1 text-[10px] font-bold pr-1",
+                            isDark ? "text-slate-400" : "text-slate-500"
+                          )}>
+                            <span className={isDark ? "text-emerald-400" : "text-emerald-700"}>{msg.sender_name || currentUser?.first_name || currentUser?.username || 'Team Member'}</span>
                             <span>({msg.sender_department || currentUser?.department || 'Support Team'})</span>
                             <span>• {msg.channel || activeConvo.channel}</span>
                           </div>
                         )}
 
-                        <div className={`max-w-[88%] sm:max-w-xl rounded-2xl p-3 sm:p-4 text-xs shadow-sm ${
+                        <div className={cn(
+                          "max-w-[88%] sm:max-w-xl rounded-2xl p-3 sm:p-4 text-xs shadow-sm",
                           isIncoming 
-                            ? isEmail ? 'bg-slate-50 text-slate-900 rounded-tl-none border border-slate-300' : 'bg-white text-slate-900 rounded-tl-none border border-slate-200'
+                            ? isEmail 
+                              ? isDark
+                                ? 'bg-[#1e293b] text-slate-100 rounded-tl-none border border-slate-700 shadow-md'
+                                : 'bg-slate-50 text-slate-900 rounded-tl-none border border-slate-300'
+                              : isDark
+                                ? 'bg-[#1e293b] text-slate-100 rounded-tl-none border border-slate-700/80 shadow-md'
+                                : 'bg-white text-slate-900 rounded-tl-none border border-slate-200'
                             : 'bg-emerald-600 text-white rounded-tr-none shadow-emerald-600/10'
-                        }`}>
+                        )}>
                           {/* Gmail Header Badge */}
                           {isEmail && (
-                            <div className="flex items-center justify-between gap-2 pb-2.5 mb-2.5 border-b border-slate-200">
-                              <div className="flex items-center gap-1.5 text-[11px] font-extrabold text-rose-600">
+                            <div className={cn(
+                              "flex items-center justify-between gap-2 pb-2.5 mb-2.5 border-b",
+                              isDark ? "border-slate-700" : "border-slate-200"
+                            )}>
+                              <div className="flex items-center gap-1.5 text-[11px] font-extrabold text-rose-500">
                                 <Mail className="w-3.5 h-3.5" />
                                 <span>GMAIL INBOX MESSAGE</span>
                               </div>
-                              <span className="text-[9px] font-bold bg-rose-100 text-rose-700 px-2 py-0.5 rounded-full">
+                              <span className={cn(
+                                "text-[9px] font-bold px-2 py-0.5 rounded-full",
+                                isDark ? "bg-rose-950/60 text-rose-300 border border-rose-800/60" : "bg-rose-100 text-rose-700"
+                              )}>
                                 Email
                               </span>
                             </div>
@@ -1518,9 +1654,12 @@ export default function ClientInboxPage() {
 
                           {/* Email Subject Title */}
                           {emailSubject && (
-                            <div className="mb-2 pb-2 border-b border-slate-200/60">
-                              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Subject</span>
-                              <h4 className="font-extrabold text-sm text-slate-900 leading-snug">
+                            <div className={cn(
+                              "mb-2 pb-2 border-b",
+                              isDark ? "border-slate-700" : "border-slate-200/60"
+                            )}>
+                              <span className={cn("text-[10px] font-bold uppercase tracking-wider block", isDark ? "text-slate-400" : "text-slate-400")}>Subject</span>
+                              <h4 className={cn("font-extrabold text-sm leading-snug", isDark ? "text-slate-100" : "text-slate-900")}>
                                 {emailSubject}
                               </h4>
                             </div>
@@ -1528,16 +1667,19 @@ export default function ClientInboxPage() {
 
                           {/* ── MEDIA PREVIEW (image / document / video) ── */}
                           {msg.media_url && msg.media_type === 'image' && (
-                            <div className="mb-2 rounded-xl overflow-hidden border border-slate-200/60">
+                            <div className={cn(
+                              "mb-2 rounded-xl overflow-hidden border",
+                              isDark ? "border-slate-700 bg-slate-900" : "border-slate-200/60 bg-slate-100"
+                            )}>
                               <img
                                 src={msg.media_url}
                                 alt="Customer photo"
-                                className="w-full max-h-72 object-contain bg-slate-100 cursor-pointer hover:opacity-90 transition-opacity"
+                                className="w-full max-h-72 object-contain cursor-pointer hover:opacity-90 transition-opacity"
                                 onClick={() => window.open(msg.media_url, '_blank')}
                                 onError={(e) => { e.target.style.display = 'none'; }}
                               />
                               {msg.body && msg.body !== '📷 [Photo]' && (
-                                <p className="text-[11px] px-2 py-1 text-slate-500 italic">{msg.body.replace('📷 ', '')}</p>
+                                <p className={cn("text-[11px] px-2 py-1 italic", isDark ? "text-slate-400" : "text-slate-500")}>{msg.body.replace('📷 ', '')}</p>
                               )}
                             </div>
                           )}
@@ -1547,18 +1689,21 @@ export default function ClientInboxPage() {
                               href={msg.media_url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className={`flex items-center gap-2.5 p-2.5 rounded-xl border mb-2 no-underline transition-all ${
+                              className={cn(
+                                "flex items-center gap-2.5 p-2.5 rounded-xl border mb-2 no-underline transition-all",
                                 isIncoming
-                                  ? 'bg-blue-50 border-blue-200 text-blue-800 hover:bg-blue-100'
-                                  : 'bg-white/20 border-white/30 text-white hover:bg-white/30'
-                              }`}
+                                  ? isDark
+                                    ? "bg-slate-800/80 border-slate-700 text-slate-200 hover:bg-slate-800"
+                                    : "bg-blue-50 border-blue-200 text-blue-800 hover:bg-blue-100"
+                                  : "bg-white/20 border-white/30 text-white hover:bg-white/30"
+                              )}
                             >
-                              <div className={`p-1.5 rounded-lg ${isIncoming ? 'bg-blue-100' : 'bg-white/20'}`}>
+                              <div className={cn("p-1.5 rounded-lg", isIncoming ? (isDark ? "bg-slate-700" : "bg-blue-100") : "bg-white/20")}>
                                 <FileText className="w-4 h-4" />
                               </div>
                               <div className="flex-1 min-w-0">
                                 <p className="font-bold text-[11px] truncate">{msg.media_filename || 'Document'}</p>
-                                <p className={`text-[9px] ${isIncoming ? 'text-blue-500' : 'text-white/70'}`}>
+                                <p className={cn("text-[9px]", isIncoming ? (isDark ? "text-slate-400" : "text-blue-500") : "text-white/70")}>
                                   {msg.media_mime_type || 'File'} • Tap to open
                                 </p>
                               </div>
@@ -1567,7 +1712,7 @@ export default function ClientInboxPage() {
                           )}
 
                           {msg.media_url && msg.media_type === 'video' && (
-                            <div className="mb-2 rounded-xl overflow-hidden border border-slate-200/60 bg-black">
+                            <div className={cn("mb-2 rounded-xl overflow-hidden border bg-black", isDark ? "border-slate-700" : "border-slate-200/60")}>
                               <video
                                 src={msg.media_url}
                                 controls
@@ -1578,24 +1723,30 @@ export default function ClientInboxPage() {
                           )}
                           {/* ── END MEDIA PREVIEW ── */}
 
-                          <div className={`whitespace-pre-wrap font-normal leading-relaxed ${isEmail ? 'max-h-72 overflow-y-auto pr-1 text-slate-800' : ''}`}>
+                          <div className={cn(
+                            "whitespace-pre-wrap font-normal leading-relaxed",
+                            isEmail ? (isDark ? "max-h-72 overflow-y-auto pr-1 text-slate-200" : "max-h-72 overflow-y-auto pr-1 text-slate-800") : ""
+                          )}>
                             {emailBodyText}
                           </div>
                           
                           {/* Render Interactive CTA Quick Reply Buttons */}
                           {msgButtons.length > 0 && (
-                            <div className="mt-2.5 space-y-1.5 pt-2 border-t border-slate-200/40">
+                            <div className={cn("mt-2.5 space-y-1.5 pt-2 border-t", isDark ? "border-slate-700/80" : "border-slate-200/40")}>
                               {msgButtons.map((btnText, bIdx) => (
                                 <button
                                   key={bIdx}
                                   onClick={() => {
                                     setReplyText(btnText);
                                   }}
-                                  className={`w-full py-1.5 px-3 rounded-lg text-xs font-extrabold transition-all flex items-center justify-center gap-1.5 border shadow-2xs cursor-pointer ${
+                                  className={cn(
+                                    "w-full py-1.5 px-3 rounded-lg text-xs font-extrabold transition-all flex items-center justify-center gap-1.5 border shadow-2xs cursor-pointer",
                                     isIncoming 
-                                      ? 'bg-slate-50 hover:bg-emerald-50 text-emerald-700 border-slate-200 hover:border-emerald-300' 
-                                      : 'bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-xs'
-                                  }`}
+                                      ? isDark
+                                        ? "bg-slate-800/90 hover:bg-emerald-950/60 text-emerald-400 border-slate-700 hover:border-emerald-700"
+                                        : "bg-slate-50 hover:bg-emerald-50 text-emerald-700 border-slate-200 hover:border-emerald-300" 
+                                      : "bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-xs"
+                                  )}
                                 >
                                   <span>💬 {btnText}</span>
                                 </button>
@@ -1605,7 +1756,7 @@ export default function ClientInboxPage() {
 
                           {/* Render Interactive CTA Link Buttons */}
                           {msgUrls.length > 0 && (
-                            <div className="mt-2.5 space-y-1.5 pt-2 border-t border-slate-200/40">
+                            <div className={cn("mt-2.5 space-y-1.5 pt-2 border-t", isDark ? "border-slate-700/80" : "border-slate-200/40")}>
                               {msgUrls.map((url, uIdx) => {
                                 let label = '🌐 Open Link';
                                 let icon = <ExternalLink className="w-3.5 h-3.5" />;
@@ -1628,11 +1779,16 @@ export default function ClientInboxPage() {
                                     href={url}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className={`w-full py-2 px-3 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2 border shadow-sm cursor-pointer no-underline ${
+                                    className={cn(
+                                      "w-full py-2 px-3 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2 border shadow-sm cursor-pointer no-underline",
                                       isIncoming
-                                        ? 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border-emerald-200'
-                                        : 'bg-white text-emerald-800 hover:bg-slate-50 border-white/80 shadow-md'
-                                    }`}
+                                        ? isDark
+                                          ? "bg-emerald-950/70 hover:bg-emerald-900/80 text-emerald-300 border-emerald-800/80"
+                                          : "bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border-emerald-200"
+                                        : isDark
+                                          ? "bg-white text-emerald-900 hover:bg-slate-100 border-white/80 shadow-md"
+                                          : "bg-white text-emerald-800 hover:bg-slate-50 border-white/80 shadow-md"
+                                    )}
                                   >
                                     {icon}
                                     <span className="truncate">{label}</span>
@@ -1644,7 +1800,10 @@ export default function ClientInboxPage() {
 
                           {/* Error info on failed messages */}
                           {msg.status === 'FAILED' && (
-                            <div className="mt-2.5 p-2 rounded-xl bg-rose-950/40 border border-rose-300/40 text-[10px] text-rose-100 flex items-start gap-2 shadow-xs">
+                            <div className={cn(
+                              "mt-2.5 p-2 rounded-xl border text-[10px] flex items-start gap-2 shadow-xs",
+                              isDark ? "bg-rose-950/60 border-rose-800/60 text-rose-200" : "bg-rose-950/40 border-rose-300/40 text-rose-100"
+                            )}>
                               <span className="shrink-0 text-amber-300 font-bold">⚠️</span>
                               <div className="flex-1 space-y-1">
                                 <span className="font-semibold block leading-tight">
@@ -1653,9 +1812,12 @@ export default function ClientInboxPage() {
                                 {activeConvo.channel === 'WHATSAPP' && (
                                   <button
                                     onClick={() => { fetchTemplates(); setIsTemplateModalOpen(true); }}
-                                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-white hover:bg-slate-100 text-slate-900 font-bold text-[10px] transition-colors cursor-pointer shadow-2xs mt-0.5"
+                                    className={cn(
+                                      "inline-flex items-center gap-1 px-2.5 py-1 rounded-md font-bold text-[10px] transition-colors cursor-pointer shadow-2xs mt-0.5",
+                                      isDark ? "bg-slate-800 hover:bg-slate-700 text-white" : "bg-white hover:bg-slate-100 text-slate-900"
+                                    )}
                                   >
-                                    <LayoutTemplate className="w-3 h-3 text-emerald-600" />
+                                    <LayoutTemplate className="w-3 h-3 text-emerald-500" />
                                     <span>Send Approved Template Instead</span>
                                   </button>
                                 )}
@@ -1663,9 +1825,7 @@ export default function ClientInboxPage() {
                             </div>
                           )}
 
-                          <div className={`mt-2 flex items-center justify-end gap-1.5 text-[9px] ${
-                            isIncoming ? 'text-slate-400' : 'text-emerald-100'
-                          }`}>
+                          <div className={cn("mt-2 flex items-center justify-end gap-1.5 text-[9px]", isIncoming ? (isDark ? "text-slate-400" : "text-slate-400") : "text-emerald-100")}>
                             <span>{new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                             {!isIncoming && (
                               <>
@@ -1686,7 +1846,7 @@ export default function ClientInboxPage() {
                     );
                   })
                 ) : (
-                  <div className="text-center py-16 text-slate-400 text-xs">
+                  <div className={cn("text-center py-16 text-xs", isDark ? "text-slate-500" : "text-slate-400")}>
                     Start replying or monitoring live.
                   </div>
                 )}
@@ -1695,28 +1855,37 @@ export default function ClientInboxPage() {
               </div>
 
               {/* Composer Box (Public Reply vs Internal Note) */}
-              <div className="bg-white border-t border-slate-200 p-2.5 sm:p-4 space-y-2 sm:space-y-3 shrink-0">
+              <div className={cn(
+                "border-t p-2.5 sm:p-4 space-y-2 sm:space-y-3 shrink-0 transition-colors duration-200",
+                isDark ? "bg-[#0f172a] border-slate-800/80" : "bg-white border-slate-200"
+              )}>
                 
                 {/* Note Toggle */}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-1.5 sm:gap-2">
                     <button
                       onClick={() => setIsInternalNote(false)}
-                      className={`px-2.5 sm:px-3 py-1 rounded-lg text-[10px] sm:text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
+                      className={cn(
+                        "px-2.5 sm:px-3 py-1 rounded-lg text-[10px] sm:text-xs font-bold transition-all whitespace-nowrap cursor-pointer",
                         !isInternalNote 
-                          ? 'bg-emerald-600 text-white shadow-xs' 
-                          : 'text-slate-500 hover:text-slate-900 bg-slate-100'
-                      }`}
+                          ? "bg-emerald-600 text-white shadow-xs" 
+                          : isDark
+                            ? "text-slate-400 hover:text-white bg-slate-800"
+                            : "text-slate-500 hover:text-slate-900 bg-slate-100"
+                      )}
                     >
                       Public Reply
                     </button>
                     <button
                       onClick={() => setIsInternalNote(true)}
-                      className={`px-2.5 sm:px-3 py-1 rounded-lg text-[10px] sm:text-xs font-bold transition-all flex items-center gap-1 whitespace-nowrap cursor-pointer ${
+                      className={cn(
+                        "px-2.5 sm:px-3 py-1 rounded-lg text-[10px] sm:text-xs font-bold transition-all flex items-center gap-1 whitespace-nowrap cursor-pointer",
                         isInternalNote 
-                          ? 'bg-amber-500 text-white shadow-xs' 
-                          : 'text-slate-500 hover:text-slate-900 bg-slate-100'
-                      }`}
+                          ? "bg-amber-500 text-white shadow-xs" 
+                          : isDark
+                            ? "text-slate-400 hover:text-white bg-slate-800"
+                            : "text-slate-500 hover:text-slate-900 bg-slate-100"
+                      )}
                     >
                       <StickyNote className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" />
                       <span>Internal Private Note</span>
@@ -1724,10 +1893,15 @@ export default function ClientInboxPage() {
                     {activeConvo?.channel === 'WHATSAPP' && (
                       <button
                         onClick={() => { fetchTemplates(); setIsTemplateModalOpen(true); }}
-                        className="px-2.5 sm:px-3 py-1 rounded-lg text-[10px] sm:text-xs font-bold transition-all flex items-center gap-1 whitespace-nowrap cursor-pointer text-emerald-700 hover:text-emerald-900 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 shadow-2xs"
+                        className={cn(
+                          "px-2.5 sm:px-3 py-1 rounded-lg text-[10px] sm:text-xs font-bold transition-all flex items-center gap-1 whitespace-nowrap cursor-pointer border shadow-2xs",
+                          isDark
+                            ? "text-emerald-400 hover:text-emerald-300 bg-emerald-950/40 hover:bg-emerald-900/50 border-emerald-800/60"
+                            : "text-emerald-700 hover:text-emerald-900 bg-emerald-50 hover:bg-emerald-100 border-emerald-200"
+                        )}
                         title="Send Meta WhatsApp Template (re-engage contact beyond 24h)"
                       >
-                        <LayoutTemplate className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0 text-emerald-600" />
+                        <LayoutTemplate className={cn("w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0", isDark ? "text-emerald-400" : "text-emerald-600")} />
                         <span>Send Template</span>
                       </button>
                     )}
@@ -1748,7 +1922,12 @@ export default function ClientInboxPage() {
                         }
                       }}
                       placeholder={isInternalNote ? "Add private internal note..." : "Type a message..."}
-                      className="w-full min-w-0 bg-slate-100 hover:bg-slate-200/60 focus:bg-white border border-slate-200 rounded-xl sm:rounded-2xl px-3 py-2 sm:px-3.5 sm:py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:ring-2 focus:ring-emerald-500 outline-none resize-none transition-all block"
+                      className={cn(
+                        "w-full min-w-0 border rounded-xl sm:rounded-2xl px-3 py-2 sm:px-3.5 sm:py-2.5 text-xs outline-none resize-none transition-all block focus:ring-2 focus:ring-emerald-500",
+                        isDark
+                          ? "bg-slate-800/90 hover:bg-slate-800 focus:bg-slate-900 border-slate-700 text-white placeholder-slate-500"
+                          : "bg-slate-100 hover:bg-slate-200/60 focus:bg-white border-slate-200 text-slate-900 placeholder-slate-400"
+                      )}
                       style={{ minHeight: '38px', maxHeight: '80px' }}
                     />
                   </div>
@@ -1765,12 +1944,18 @@ export default function ClientInboxPage() {
               </div>
             </div>
           ) : loading ? (
-            <div className="flex-1 flex flex-col items-center justify-center bg-white p-8 animate-in fade-in duration-300">
+            <div className={cn(
+              "flex-1 flex flex-col items-center justify-center p-8 animate-in fade-in duration-300",
+              isDark ? "bg-[#090d16]" : "bg-white"
+            )}>
               <div className="relative flex items-center justify-center mb-6">
                 <div className="absolute inset-0 rounded-full bg-emerald-500/20 blur-2xl animate-pulse scale-150" />
                 <div className="w-20 h-20 rounded-2xl border-2 border-emerald-100 border-t-emerald-600 animate-spin" />
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="w-14 h-14 rounded-2xl bg-white p-1.5 shadow-md shadow-emerald-600/10 border border-slate-100 flex items-center justify-center overflow-hidden">
+                  <div className={cn(
+                    "w-14 h-14 rounded-2xl p-1.5 shadow-md border flex items-center justify-center overflow-hidden",
+                    isDark ? "bg-slate-800 border-slate-700" : "bg-white border-slate-100 shadow-emerald-600/10"
+                  )}>
                     <img 
                       src={displayBrandLogo} 
                       alt={brand?.brand_name || "Uwo Connect"} 
@@ -1780,7 +1965,7 @@ export default function ClientInboxPage() {
                   </div>
                 </div>
               </div>
-              <h3 className="text-base font-extrabold text-slate-900 flex items-center gap-2">
+              <h3 className={cn("text-base font-extrabold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
                 <span>Loading {activeChannelFilter !== 'ALL' ? (activeChannelFilter.charAt(0) + activeChannelFilter.slice(1).toLowerCase()) : 'Omnichannel'} Inbox</span>
                 <span className="flex gap-1">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-bounce [animation-delay:-0.3s]" />
@@ -1788,14 +1973,23 @@ export default function ClientInboxPage() {
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-bounce" />
                 </span>
               </h3>
-              <p className="text-xs text-slate-400 mt-1.5 max-w-sm text-center">
+              <p className={cn("text-xs mt-1.5 max-w-sm text-center", isDark ? "text-slate-400" : "text-slate-400")}>
                 Syncing live conversations from {activeChannelFilter !== 'ALL' ? activeChannelFilter : 'WhatsApp, Instagram, Facebook, and Gmail'}...
               </p>
             </div>
           ) : (
-            <div className="hidden md:flex flex-1 flex-col items-center justify-center bg-slate-50/40 p-8 text-center animate-in fade-in duration-300">
-              <div className="max-w-md space-y-5 bg-white p-8 rounded-3xl border border-slate-200/80 shadow-sm">
-                <div className="w-16 h-16 rounded-2xl bg-white border border-emerald-100 flex items-center justify-center p-2 mx-auto shadow-md shadow-emerald-500/10">
+            <div className={cn(
+              "hidden md:flex flex-1 flex-col items-center justify-center p-8 text-center animate-in fade-in duration-300",
+              isDark ? "bg-[#090d16]" : "bg-slate-50/40"
+            )}>
+              <div className={cn(
+                "max-w-md space-y-5 p-8 rounded-3xl border shadow-sm",
+                isDark ? "bg-[#0f172a] border-slate-800/80 shadow-xl" : "bg-white border-slate-200/80"
+              )}>
+                <div className={cn(
+                  "w-16 h-16 rounded-2xl border flex items-center justify-center p-2 mx-auto shadow-md",
+                  isDark ? "bg-slate-800 border-slate-700" : "bg-white border-emerald-100 shadow-emerald-500/10"
+                )}>
                   <img 
                     src={displayBrandLogo} 
                     alt={brand?.brand_name || "UWO Connect™"} 
@@ -1804,23 +1998,37 @@ export default function ClientInboxPage() {
                   />
                 </div>
                 <div>
-                  <h3 className="text-lg font-black text-slate-900">{brand?.brand_name || "UWO Connect™"} Unified Inbox</h3>
-                  <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">
+                  <h3 className={cn("text-lg font-black", isDark ? "text-white" : "text-slate-900")}>
+                    {brand?.brand_name || "UWO Connect™"} Unified Inbox
+                  </h3>
+                  <p className={cn("text-xs mt-1.5 leading-relaxed", isDark ? "text-slate-400" : "text-slate-500")}>
                     Select a customer conversation from the left to start live chatting, reply with templates, assign agents, or monitor real-time message streams.
                   </p>
                 </div>
 
-                <div className="flex flex-wrap items-center justify-center gap-2 pt-2 border-t border-slate-100">
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-2xs">
+                <div className={cn("flex flex-wrap items-center justify-center gap-2 pt-2 border-t", isDark ? "border-slate-800" : "border-slate-100")}>
+                  <span className={cn(
+                    "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold border shadow-2xs",
+                    isDark ? "bg-emerald-950/50 text-emerald-300 border-emerald-800/60" : "bg-emerald-50 text-emerald-700 border-emerald-200"
+                  )}>
                     <WhatsAppIcon size={13} /> WhatsApp
                   </span>
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold bg-pink-50 text-pink-700 border border-pink-200 shadow-2xs">
+                  <span className={cn(
+                    "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold border shadow-2xs",
+                    isDark ? "bg-pink-950/50 text-pink-300 border-pink-800/60" : "bg-pink-50 text-pink-700 border-pink-200"
+                  )}>
                     <InstagramIcon size={13} /> Instagram
                   </span>
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold bg-blue-50 text-blue-700 border border-blue-200 shadow-2xs">
+                  <span className={cn(
+                    "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold border shadow-2xs",
+                    isDark ? "bg-blue-950/50 text-blue-300 border-blue-800/60" : "bg-blue-50 text-blue-700 border-blue-200"
+                  )}>
                     <FacebookIcon size={13} /> Facebook
                   </span>
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold bg-red-50 text-red-700 border border-red-200 shadow-2xs">
+                  <span className={cn(
+                    "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold border shadow-2xs",
+                    isDark ? "bg-red-950/50 text-red-300 border-red-800/60" : "bg-red-50 text-red-700 border-red-200"
+                  )}>
                     <Mail size={13} /> Gmail
                   </span>
                 </div>
@@ -1865,57 +2073,83 @@ export default function ClientInboxPage() {
       {/* Meta WhatsApp Template Picker Modal */}
       {isTemplateModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 animate-in fade-in duration-200">
-          <div className="bg-white rounded-3xl max-w-lg w-full shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[85vh]">
-            <div className="p-4 border-b border-slate-200 flex items-center justify-between bg-slate-50/80">
+          <div className={cn(
+            "rounded-3xl max-w-lg w-full shadow-2xl border overflow-hidden flex flex-col max-h-[85vh] transition-colors",
+            isDark ? "bg-[#0f172a] border-slate-800 text-slate-100" : "bg-white border-slate-200 text-slate-900"
+          )}>
+            <div className={cn(
+              "p-4 border-b flex items-center justify-between",
+              isDark ? "bg-slate-800/70 border-slate-800" : "bg-slate-50/80 border-slate-200"
+            )}>
               <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center shadow-2xs">
+                <div className={cn(
+                  "w-9 h-9 rounded-xl flex items-center justify-center shadow-2xs",
+                  isDark ? "bg-emerald-950/70 text-emerald-400" : "bg-emerald-100 text-emerald-700"
+                )}>
                   <LayoutTemplate className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="font-extrabold text-slate-900 text-sm">Send WhatsApp Template</h3>
-                  <p className="text-[11px] text-slate-500">Bypasses the Meta 24-hour limit to message this contact</p>
+                  <h3 className={cn("font-extrabold text-sm", isDark ? "text-white" : "text-slate-900")}>Send WhatsApp Template</h3>
+                  <p className={cn("text-[11px]", isDark ? "text-slate-400" : "text-slate-500")}>Bypasses the Meta 24-hour limit to message this contact</p>
                 </div>
               </div>
               <button
                 onClick={() => setIsTemplateModalOpen(false)}
-                className="w-8 h-8 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-200 flex items-center justify-center cursor-pointer transition-colors"
+                className={cn(
+                  "w-8 h-8 rounded-xl flex items-center justify-center cursor-pointer transition-colors",
+                  isDark ? "text-slate-400 hover:text-white hover:bg-slate-800" : "text-slate-400 hover:text-slate-700 hover:bg-slate-200"
+                )}
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <div className="p-4 overflow-y-auto space-y-3 flex-1 bg-slate-50/30">
+            <div className={cn("p-4 overflow-y-auto space-y-3 flex-1", isDark ? "bg-[#090d16]/50" : "bg-slate-50/30")}>
               {loadingTemplates ? (
-                <div className="text-center py-10 text-slate-400 text-xs flex flex-col items-center gap-2">
-                  <Loader2 className="w-6 h-6 animate-spin text-emerald-600" />
+                <div className={cn("text-center py-10 text-xs flex flex-col items-center gap-2", isDark ? "text-slate-400" : "text-slate-400")}>
+                  <Loader2 className="w-6 h-6 animate-spin text-emerald-500" />
                   <span>Loading approved Meta templates...</span>
                 </div>
               ) : metaTemplates.length === 0 ? (
-                <div className="text-center py-10 text-slate-500 text-xs bg-white rounded-2xl border border-dashed border-slate-200 p-6">
-                  <LayoutTemplate className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-                  <p className="font-bold text-slate-700">No approved templates found</p>
-                  <p className="text-slate-400 mt-1">Please sync or create approved templates in Campaigns/Templates tab.</p>
+                <div className={cn(
+                  "text-center py-10 text-xs rounded-2xl border border-dashed p-6",
+                  isDark ? "bg-slate-800/40 border-slate-700 text-slate-400" : "bg-white border-slate-200 text-slate-500"
+                )}>
+                  <LayoutTemplate className={cn("w-8 h-8 mx-auto mb-2", isDark ? "text-slate-600" : "text-slate-300")} />
+                  <p className={cn("font-bold", isDark ? "text-slate-300" : "text-slate-700")}>No approved templates found</p>
+                  <p className={cn("mt-1", isDark ? "text-slate-500" : "text-slate-400")}>Please sync or create approved templates in Campaigns/Templates tab.</p>
                 </div>
               ) : (
                 metaTemplates.map((t) => (
                   <div
                     key={t.id || t.name}
-                    className="p-4 rounded-2xl bg-white border border-slate-200 hover:border-emerald-500 hover:shadow-md transition-all flex flex-col justify-between gap-3 group"
+                    className={cn(
+                      "p-4 rounded-2xl border transition-all flex flex-col justify-between gap-3 group",
+                      isDark
+                        ? "bg-slate-800/80 border-slate-700 hover:border-emerald-500 hover:shadow-md"
+                        : "bg-white border-slate-200 hover:border-emerald-500 hover:shadow-md"
+                    )}
                   >
                     <div>
                       <div className="flex items-center justify-between">
-                        <span className="font-bold text-xs text-slate-900 font-mono tracking-tight">{t.name}</span>
-                        <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200 shadow-2xs">
+                        <span className={cn("font-bold text-xs font-mono tracking-tight", isDark ? "text-white" : "text-slate-900")}>{t.name}</span>
+                        <span className={cn(
+                          "text-[9px] font-black uppercase px-2 py-0.5 rounded-full shadow-2xs border",
+                          isDark ? "bg-emerald-950/60 text-emerald-300 border-emerald-800/60" : "bg-emerald-100 text-emerald-800 border-emerald-200"
+                        )}>
                           {t.status || 'APPROVED'}
                         </span>
                       </div>
-                      <div className="flex items-center gap-2 text-[10px] text-slate-400 mt-1">
-                        <span>Language: <strong className="text-slate-600">{t.language || 'en_US'}</strong></span>
+                      <div className={cn("flex items-center gap-2 text-[10px] mt-1", isDark ? "text-slate-400" : "text-slate-400")}>
+                        <span>Language: <strong className={isDark ? "text-slate-300" : "text-slate-600"}>{t.language || 'en_US'}</strong></span>
                         <span>•</span>
-                        <span>Category: <strong className="text-slate-600">{t.category || 'UTILITY'}</strong></span>
+                        <span>Category: <strong className={isDark ? "text-slate-300" : "text-slate-600"}>{t.category || 'UTILITY'}</strong></span>
                       </div>
                       {t.content && (
-                        <p className="text-xs text-slate-600 mt-2 bg-slate-50 p-2.5 rounded-xl border border-slate-100 leading-relaxed font-sans line-clamp-3">
+                        <p className={cn(
+                          "text-xs mt-2 p-2.5 rounded-xl border leading-relaxed font-sans line-clamp-3",
+                          isDark ? "bg-slate-900/80 text-slate-300 border-slate-700" : "bg-slate-50 text-slate-600 border-slate-100"
+                        )}>
                           {t.content}
                         </p>
                       )}
