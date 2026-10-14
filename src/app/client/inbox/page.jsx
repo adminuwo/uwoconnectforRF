@@ -429,7 +429,7 @@ export default function ClientInboxPage() {
       const token = getAuthToken();
       if (!token) return;
 
-      let wsUrl = API_BASE_URL || 'https://aisaconnectback-anaqbuapb6c6apgy.centralindia-01.azurewebsites.net';
+      let wsUrl = API_BASE_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app';
       wsUrl = wsUrl.replace(/^http/, 'ws') + `/ws/inbox/?token=${token}`;
       
       const ws = new WebSocket(wsUrl);
