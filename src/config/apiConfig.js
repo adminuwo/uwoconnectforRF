@@ -22,10 +22,10 @@ const getApiBaseUrl = () => {
       return `http://${currentHost}:8000`;
     }
     // Live / Production external host
-    return 'https://aisaconnectback-anaqbuapb6c6apgy.centralindia-01.azurewebsites.net';
+    return 'https://uwoconnectforrb-743928421487.asia-south1.run.app';
   }
   return process.env.NODE_ENV === 'production'
-    ? 'https://aisaconnectback-anaqbuapb6c6apgy.centralindia-01.azurewebsites.net'
+    ? 'https://uwoconnectforrb-743928421487.asia-south1.run.app'
     : 'http://127.0.0.1:8000';
 };
 
