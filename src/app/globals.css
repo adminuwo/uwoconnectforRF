@@ -791,6 +791,88 @@ svg * {
   color: #ef4444;
 }
 
+/* ── Audio Narration Bar ── */
+.tour-audio-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  background: linear-gradient(135deg, rgba(236, 253, 245, 0.95), rgba(240, 253, 250, 0.95));
+  border-top: 1px solid rgba(16, 185, 129, 0.15);
+  border-bottom: 1px solid rgba(16, 185, 129, 0.15);
+}
+
+.tour-audio-eq {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 12px;
+}
+
+.tour-audio-eq .eq-bar {
+  width: 2.5px;
+  background: #059669;
+  border-radius: 99px;
+  height: 3px;
+  transition: height 0.2s ease;
+}
+
+.tour-audio-eq-active .eq-bar-1 {
+  animation: eq-pulse 0.6s ease-in-out infinite alternate;
+}
+.tour-audio-eq-active .eq-bar-2 {
+  animation: eq-pulse 0.8s ease-in-out infinite alternate 0.15s;
+}
+.tour-audio-eq-active .eq-bar-3 {
+  animation: eq-pulse 0.5s ease-in-out infinite alternate 0.3s;
+}
+.tour-audio-eq-active .eq-bar-4 {
+  animation: eq-pulse 0.7s ease-in-out infinite alternate 0.1s;
+}
+
+@keyframes eq-pulse {
+  0% { height: 3px; }
+  100% { height: 12px; }
+}
+
+.tour-audio-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 8px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tour-audio-btn:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+  border-color: #cbd5e1;
+}
+
+.tour-audio-voice-btn {
+  font-size: 11px;
+  font-weight: 800;
+  color: #047857;
+  background: #ecfdf5;
+  border-color: #a7f3d0;
+}
+
+.tour-audio-voice-btn:hover {
+  background: #d1fae5;
+  border-color: #6ee7b7;
+}
+
+.tour-audio-btn-muted {
+  color: #ef4444;
+  background: #fef2f2;
+  border-color: #fecaca;
+}
+
 /* ── Body ── */
 .tour-tooltip-body {
   padding: 14px 20px 12px 20px;

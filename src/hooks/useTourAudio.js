@@ -19,7 +19,7 @@ export const useTourAudio = () => {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [language, setLanguageState] = useState('hi'); // 'hi' (Hindi) or 'en' (English)
-  const [voice, setVoiceState] = useState('nova');     // 'nova' (Female) or 'cedar' (Male)
+  const [voice, setVoiceState] = useState('dev');     // 'dev' (Male / Channels & CRM) or 'abha' (Female / Automations)
   const [voices, setVoices] = useState([]);
   const [hasInteracted, setHasInteracted] = useState(false);
 
@@ -27,6 +27,16 @@ export const useTourAudio = () => {
   const audioCtxRef = useRef(null);
   const currentUtteranceRef = useRef(null);
   const mountedRef = useRef(false);
+  const languageRef = useRef(language);
+  const voiceRef = useRef(voice);
+
+  useEffect(() => {
+    languageRef.current = language;
+  }, [language]);
+
+  useEffect(() => {
+    voiceRef.current = voice;
+  }, [voice]);
 
   // Initialize preferences from localStorage and load browser voices
   useEffect(() => {
@@ -46,8 +56,10 @@ export const useTourAudio = () => {
       }
 
       const savedVoice = localStorage.getItem('uwo_tour_voice');
-      if (savedVoice === 'nova' || savedVoice === 'cedar') {
-        setVoiceState(savedVoice);
+      if (savedVoice === 'dev' || savedVoice === 'cedar') {
+        setVoiceState('dev');
+      } else if (savedVoice === 'abha' || savedVoice === 'nova') {
+        setVoiceState('abha');
       }
     } catch (e) {
       // Ignore localStorage access issues
@@ -147,7 +159,7 @@ export const useTourAudio = () => {
    */
   const getBestVoice = useCallback((lang, targetVoice) => {
     if (!voices || voices.length === 0) return null;
-    const isMale = targetVoice === 'cedar';
+    const isMale = targetVoice === 'dev' || targetVoice === 'cedar';
 
     if (lang === 'hi') {
       // Prefer dedicated Hindi voices matching gender preference if possible
@@ -226,8 +238,9 @@ export const useTourAudio = () => {
         utterance.lang = lang === 'hi' ? 'hi-IN' : 'en-US';
       }
 
+      const isMale = targetVoice === 'dev' || targetVoice === 'cedar';
       utterance.rate = lang === 'hi' ? 0.95 : 0.98;
-      utterance.pitch = 1.0;
+      utterance.pitch = isMale ? 0.85 : 1.0;
       utterance.volume = 1.0;
 
       utterance.onstart = () => {
@@ -254,17 +267,18 @@ export const useTourAudio = () => {
 
   /**
    * Narrate a specific tour step.
-   * Plays OpenAI gpt-4o-mini-tts audio for the selected voice persona (Nova or Cedar),
+   * Plays OpenAI audio for the selected voice persona (Dev or Abha),
    * falling back to root audio files and browser synthesis.
    */
   const speakStep = useCallback((step, targetLang, targetVoice) => {
     if (!step) return;
-    const lang = targetLang || language;
-    // Step-assigned voice persona (e.g. Cedar for channels/inbox/knowledge, Nova for crm/broadcast/automations)
-    const activeVoice = targetVoice || step.voice || voice;
+    const lang = targetLang || languageRef.current || 'hi';
+    const rawVoice = targetVoice || step.voice || voiceRef.current || 'dev';
+    const activeVoice = (rawVoice === 'dev' || rawVoice === 'cedar') ? 'dev' : 'abha';
 
-    if (activeVoice !== voice) {
+    if (activeVoice !== voiceRef.current) {
       setVoiceState(activeVoice);
+      voiceRef.current = activeVoice;
     }
 
     stopAudio();
@@ -277,9 +291,11 @@ export const useTourAudio = () => {
     // Determine the step key (e.g., 'welcome', 'channels', 'automations', 'knowledge')
     const stepKey = step.key || step.id?.replace(/^sidebar-/, '') || 'welcome';
 
-    // 1. Primary: Voice-specific folder generated via gpt-4o-mini-tts
+    // 1. Primary: Voice persona specific folder (dev / abha)
     const primaryUrl = `/audio/tour/${activeVoice}/${stepKey}_${lang}.mp3`;
-    // 2. Secondary: Root tour audio directory or explicit config URLs
+    // 2. Secondary: Cedar / Nova fallback
+    const secondaryVoiceUrl = `/audio/tour/${activeVoice === 'dev' ? 'cedar' : 'nova'}/${stepKey}_${lang}.mp3`;
+    // 3. Root tour audio directory or explicit config URLs
     const fallbackUrl = lang === 'hi' 
       ? (step.audioUrlHi || `/audio/tour/${stepKey}_hi.mp3`)
       : (step.audioUrl || `/audio/tour/${stepKey}_en.mp3`);
@@ -305,13 +321,15 @@ export const useTourAudio = () => {
       }
     };
 
-    // Try primary voice-specific file first -> fallback root file -> speech synthesis
+    // Try primary voice-specific file -> secondary voice file -> root file -> speech synthesis
     tryPlayAudio(primaryUrl, () => {
-      tryPlayAudio(fallbackUrl, () => {
-        speakViaSynthesis(step, lang, activeVoice);
+      tryPlayAudio(secondaryVoiceUrl, () => {
+        tryPlayAudio(fallbackUrl, () => {
+          speakViaSynthesis(step, lang, activeVoice);
+        });
       });
     });
-  }, [language, voice, isMuted, playChime, stopAudio, speakViaSynthesis]);
+  }, [isMuted, playChime, stopAudio, speakViaSynthesis]);
 
   /**
    * Toggle mute / unmute.
@@ -327,11 +345,11 @@ export const useTourAudio = () => {
         stopAudio();
       } else if (currentStepObj) {
         // When unmuting, narrate current step immediately
-        setTimeout(() => speakStep(currentStepObj, language, currentStepObj.voice || voice), 50);
+        setTimeout(() => speakStep(currentStepObj, languageRef.current, currentStepObj.voice || voiceRef.current), 50);
       }
       return next;
     });
-  }, [stopAudio, speakStep, language, voice]);
+  }, [stopAudio, speakStep]);
 
   /**
    * Change narration language (Hindi <-> English).
@@ -339,29 +357,31 @@ export const useTourAudio = () => {
   const setLanguage = useCallback((newLang, currentStepObj) => {
     if (newLang !== 'hi' && newLang !== 'en') return;
     setLanguageState(newLang);
+    languageRef.current = newLang;
     try {
       localStorage.setItem('uwo_tour_audio_lang', newLang);
     } catch (e) {}
 
     if (currentStepObj && !isMuted) {
-      speakStep(currentStepObj, newLang, currentStepObj.voice || voice);
+      speakStep(currentStepObj, newLang, currentStepObj.voice || voiceRef.current);
     }
-  }, [isMuted, speakStep, voice]);
+  }, [isMuted, speakStep]);
 
   /**
-   * Switch between voice personas: 'nova' (Female) <-> 'cedar' (Male).
+   * Switch between voice personas: 'dev' (Male) <-> 'abha' (Female).
    */
   const setVoice = useCallback((newVoice, currentStepObj) => {
-    if (newVoice !== 'nova' && newVoice !== 'cedar') return;
-    setVoiceState(newVoice);
+    const normalized = (newVoice === 'dev' || newVoice === 'cedar') ? 'dev' : 'abha';
+    setVoiceState(normalized);
+    voiceRef.current = normalized;
     try {
-      localStorage.setItem('uwo_tour_voice', newVoice);
+      localStorage.setItem('uwo_tour_voice', normalized);
     } catch (e) {}
 
     if (currentStepObj && !isMuted) {
-      speakStep(currentStepObj, language, newVoice);
+      speakStep(currentStepObj, languageRef.current, normalized);
     }
-  }, [isMuted, speakStep, language]);
+  }, [isMuted, speakStep]);
 
   /**
    * Replay current step audio with active settings.

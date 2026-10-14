@@ -15,6 +15,9 @@ const tourSteps = [
     tip: 'Press ESC anytime to pause, or use Next / Prev buttons below.',
     placement: 'bottom',
     icon: '🚀',
+    voice: 'abha',
+    audioHi: 'UWO Connect में आपका स्वागत है! यह आपका ऑल-इन-वन बिज़नेस ऑटोमेशन कमांड सेंटर है। आइए, एक मिनट में इसके ज़रूरी टूल्स को समझते हैं।',
+    audioEn: 'Welcome to UWO Connect! Your all-in-one business growth command center. Take a quick one-minute tour of your essential tools.',
   },
   {
     id: 'sidebar-nav',
@@ -26,6 +29,9 @@ const tourSteps = [
     tip: 'The active menu section is highlighted with a green indicator bar.',
     placement: 'right',
     icon: '🗂️',
+    voice: 'dev',
+    audioHi: 'यूनिफाइड साइडबार मेन्यू। यहाँ से आप अपने सभी बिज़नेस ऑटोमेशन मॉड्यूल्स, टीम इनबॉक्स, सीआरएम और चैनल सेटिंग्स को आसानी से एक्सेस कर सकते हैं।',
+    audioEn: 'Unified Sidebar Menu. Access all your business automation modules, inbox, CRM, and channel settings from this navigation panel.',
   },
   {
     id: 'dashboard-stats',
@@ -37,6 +43,9 @@ const tourSteps = [
     tip: null,
     placement: 'bottom',
     icon: '📊',
+    voice: 'dev',
+    audioHi: 'रियल-टाइम एनालिटिक्स। यहाँ से अपने सभी ऐक्टिव कन्वर्सेशन, AI रिस्पांस रेट और वर्कफ्लो का लाइव स्टेटस देखें।',
+    audioEn: 'Real-Time Analytics. Monitor total active conversations, AI response rates, workflow executions, and system health status live.',
   },
   {
     id: 'dashboard-launch-btn',
@@ -48,6 +57,9 @@ const tourSteps = [
     tip: null,
     placement: 'bottom',
     icon: '⚡',
+    voice: 'abha',
+    audioHi: 'विजुअल फ्लो क्रिएटर। ड्रैग-एंड-ड्रॉप वर्कफ्लो बिल्डर लॉन्च करने के लिए यहाँ क्लिक करें और कुछ ही मिनटों में ऑटोमेशन बनाएं।',
+    audioEn: 'Visual Flow Creator. Click here to instantly launch the drag-and-drop workflow builder.',
   },
   {
     id: 'sidebar-channels',
@@ -59,6 +71,9 @@ const tourSteps = [
     tip: 'WhatsApp API is recommended for official business marketing.',
     placement: 'right',
     icon: '🔗',
+    voice: 'dev',
+    audioHi: 'चैनल्स। अपने वॉट्सऐप क्लाउड एपीआई, इंस्टाग्राम और फेसबुक को एक क्लिक में कनेक्ट करें। आपके सारे कस्टमर मेसेज एक ही जगह आएंगे।',
+    audioEn: 'Channels. Connect your WhatsApp Cloud API, Instagram, and Facebook in one click. All customer messages arrive in one unified hub.',
   },
   {
     id: 'sidebar-youtube',
@@ -70,6 +85,9 @@ const tourSteps = [
     tip: 'Define Custom Keyword Rules for instant pricing & FAQ replies.',
     placement: 'right',
     icon: '🎬',
+    voice: 'dev',
+    audioHi: 'यूट्यूब ऑटोमेशन और AI बॉट। अपने यूट्यूब वीडियो के कमेंट्स का AI द्वारा ऑटो रिप्लाई करें और नए वीडियो पर वॉट्सऐप ब्रॉडकास्ट भेजें।',
+    audioEn: 'YouTube Automation and AI Bot. Manage YouTube channel videos, auto-reply to comments via RAG AI or custom keyword rules.',
   },
   {
     id: 'sidebar-google-news',
@@ -81,6 +99,9 @@ const tourSteps = [
     tip: null,
     placement: 'right',
     icon: '📰',
+    voice: 'abha',
+    audioHi: 'गूगल न्यूज़ और कंटेंट हब। AI न्यूज़ आर्टिकल्स और ब्लॉग पोस्ट्स ऑटोमैटिकली जेनरेट करें और अपनी ब्रांड अथॉरिटी बढ़ाएं।',
+    audioEn: 'Google News and Content Hub. Generate AI news articles, blog posts, and manage search indexable press content automatically.',
   },
   {
     id: 'sidebar-automations',
@@ -92,6 +113,9 @@ const tourSteps = [
     tip: null,
     placement: 'right',
     icon: '⚡',
+    voice: 'abha',
+    audioHi: '24/7 एआई ऑटो रिप्लाई। स्मार्ट एआई बॉट आपके कस्टमर्स के प्राइस, टाइमिंग और सवालों का तुरंत 24 घंटे जवाब देता है।',
+    audioEn: '24/7 AI Auto Replies. Smart AI bot that instantly answers common customer questions about prices, timings, and FAQs round the clock.',
   },
   {
     id: 'sidebar-workflows',
@@ -103,6 +127,9 @@ const tourSteps = [
     tip: null,
     placement: 'right',
     icon: '🔀',
+    voice: 'abha',
+    audioHi: 'चैट वर्कफ्लोज़। इंटरैक्टिव चैट फ्लो बनाएं जो कस्टमर की डिटेल्स खुद कलेक्ट करे, अपॉइंटमेंट्स बुक करे और फॉलो-अप ले।',
+    audioEn: 'Chat Workflows. Build interactive chat flows to automatically collect customer details, book appointments, and follow up effortlessly.',
   },
   {
     id: 'sidebar-crm',
@@ -114,6 +141,9 @@ const tourSteps = [
     tip: null,
     placement: 'right',
     icon: '👥',
+    voice: 'dev',
+    audioHi: 'लीड्स और सीआरएम। आपके सारे कस्टमर कॉन्टैक्ट्स, फोन नंबर्स और चैट हिस्ट्री यहाँ ऑटोमैटिकली सेव और ऑर्गनाइज़ होते हैं।',
+    audioEn: 'Leads and CRM. All captured customer contacts, phone numbers, and full chat histories are automatically organized in your database.',
   },
   {
     id: 'sidebar-inbox',
@@ -125,6 +155,9 @@ const tourSteps = [
     tip: null,
     placement: 'right',
     icon: '💬',
+    voice: 'dev',
+    audioHi: 'टीम इनबॉक्स। वॉट्सऐप और इंस्टाग्राम के सभी कस्टमर मेसेजेस को एक ही शेयर्ड इनबॉक्स में देखें और अपनी टीम के साथ लाइव चैट करें।',
+    audioEn: 'Team Inbox. View and reply to customer chats across WhatsApp and Instagram in a single unified inbox where your team can live chat anytime.',
   },
   {
     id: 'sidebar-campaigns',
@@ -136,6 +169,9 @@ const tourSteps = [
     tip: null,
     placement: 'right',
     icon: '📢',
+    voice: 'abha',
+    audioHi: 'वॉट्सऐप ब्रॉडकास्ट। अपने सभी कस्टमर्स को फेस्टिव ऑफर्स, डिस्काउंट्स और नए ऑफर्स एक क्लिक में सीधे वॉट्सऐप पर भेजें।',
+    audioEn: 'WhatsApp Broadcasts. Send festival offers, discounts, and announcement messages to all your contacts in one click with high open rates.',
   },
   {
     id: 'sidebar-knowledge',
@@ -147,6 +183,9 @@ const tourSteps = [
     tip: null,
     placement: 'right',
     icon: '🧠',
+    voice: 'abha',
+    audioHi: 'एआई नॉलेज बेस। अपनी कंपनी के पीडीएफ, ब्रोशर और फाइल्स यहाँ अपलोड करें। आपका स्मार्ट एआई बॉट आपके बिज़नेस को सीखकर कस्टमर्स को 24 घंटे सटीक जवाब देगा।',
+    audioEn: 'AI Knowledge Base. Upload your company documents, PDFs, and brochures. Your smart AI bot learns your business information to answer customer queries with 100% precision 24/7.',
   },
   {
     id: 'sidebar-catalog',
@@ -158,6 +197,9 @@ const tourSteps = [
     tip: null,
     placement: 'right',
     icon: '🛍️',
+    voice: 'abha',
+    audioHi: 'ई-कॉमर्स कैटलॉग। अपने प्रोडक्ट्स ऐड करें और डायरेक्ट चेकआउट लिंक शेयर करके वॉट्सऐप चैट के अंदर ही ऑनलाइन सेल करें।',
+    audioEn: 'E-Commerce Catalog. Add your products and share instant checkout links to sell directly inside customer WhatsApp chats.',
   },
   {
     id: 'sidebar-orders',
@@ -169,6 +211,9 @@ const tourSteps = [
     tip: null,
     placement: 'right',
     icon: '🧾',
+    voice: 'dev',
+    audioHi: 'ऑर्डर्स और रसीदें। कस्टमर ऑर्डर्स, पेमेंट स्टेटस और इनवॉइस रसीदें रियल-टाइम में ट्रैक करें।',
+    audioEn: 'Orders and Receipts. Track customer orders, payment status, invoice receipts, and fulfillment status in real-time.',
   },
   {
     id: 'sidebar-team',
@@ -180,6 +225,9 @@ const tourSteps = [
     tip: null,
     placement: 'right',
     icon: '🛡️',
+    voice: 'dev',
+    audioHi: 'टीम और रोल मैनेजमेंट। अपनी टीम के मेंबर्स को इनवाइट करें और उन्हें रोल और परमिशन्स असाइन करें।',
+    audioEn: 'Team and Role Management. Invite workspace team members, assign agent roles, and set custom feature permissions.',
   },
   {
     id: 'sidebar-reports',
@@ -191,6 +239,9 @@ const tourSteps = [
     tip: null,
     placement: 'right',
     icon: '📋',
+    voice: 'dev',
+    audioHi: 'प्रोडक्टिविटी रिपोर्ट्स। टीम परफॉरमेंस, चैट रिस्पांस टाइम और वर्कफ्लो की विस्तृत रिपोर्ट्स देखें।',
+    audioEn: 'Work and Productivity Reports. Generate detailed analytics reports on team performance, chat response times, and workflow execution logs.',
   },
   {
     id: 'sidebar-settings',
@@ -202,6 +253,9 @@ const tourSteps = [
     tip: null,
     placement: 'right',
     icon: '⚙️',
+    voice: 'dev',
+    audioHi: 'वर्कस्पेस सेटिंग्स। अपने बिज़नेस की डिटेल्स, API क्रेडेंशियल्स और बिलिंग को यहाँ से कॉन्फ़िगर करें।',
+    audioEn: 'Workspace Settings. Configure business details, API credentials, Webhook integrations, AI model defaults, and billing.',
   },
   {
     id: 'sidebar-support',
@@ -213,6 +267,9 @@ const tourSteps = [
     tip: null,
     placement: 'right',
     icon: '🎧',
+    voice: 'abha',
+    audioHi: 'हेल्प और सपोर्ट डेस्क। सपोर्ट टिकट सबमिट करें, यूज़र गाइड्स एक्सेस करें या डायरेक्ट टेक्निकल सपोर्ट से संपर्क करें।',
+    audioEn: 'Help and Support Desk. Submit support tickets, access platform user guides, or directly contact technical support.',
   },
   {
     id: 'header-team-chat',
@@ -224,6 +281,9 @@ const tourSteps = [
     tip: null,
     placement: 'bottom',
     icon: '💬',
+    voice: 'dev',
+    audioHi: 'लाइव टीम चैट रूम। अपनी टीम के ऑनलाइन एजेंट्स से रियल-टाइम में इंटरनल चैट करें।',
+    audioEn: 'Live Team Workspace Room. Open internal team chat sidebar to communicate with online agents and supervisors in real-time.',
   },
   {
     id: 'sidebar-logout',
@@ -235,6 +295,9 @@ const tourSteps = [
     tip: null,
     placement: 'right',
     icon: '🔐',
+    voice: 'dev',
+    audioHi: 'सिक्योर लॉगआउट। अपने सेशन को सुरक्षित रूप से लॉगआउट करें। आपके ऑटोमेटेड बॉट्स बैकग्राउंड में 24 घंटे काम करते रहेंगे।',
+    audioEn: 'Secure Logout. Safely log out of your session. All automated bots and workflows continue running in the background 24/7.',
   },
 ];
 

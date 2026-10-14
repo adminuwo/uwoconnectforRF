@@ -11,8 +11,6 @@ import {
   ChevronLeft,
   ChevronRight,
   X,
-  Lightbulb,
-  Info,
   CheckCircle2,
   BookOpen,
   Volume2,
@@ -122,6 +120,7 @@ const TooltipCard = ({
   onToggleMute,
   onReplayAudio,
   onSetLanguage,
+  onSetVoice,
 }) => {
   const isLast  = currentStep === totalSteps - 1;
   const isFirst = currentStep === 0;
@@ -160,6 +159,18 @@ const TooltipCard = ({
       {/* Synchronized Voice Audio Narration Bar */}
       <div className="tour-audio-bar">
         <div className="flex items-center gap-2">
+          {/* Avatar of active character (Dev or Abha) */}
+          <div className="relative shrink-0 flex items-center justify-center">
+            <img
+              src={(voice === 'dev' || voice === 'cedar') ? '/Dev_face.png' : '/Abha_face.png'}
+              alt={(voice === 'dev' || voice === 'cedar') ? 'Dev' : 'Abha'}
+              className="w-7 h-7 rounded-full object-cover bg-emerald-50 border border-emerald-400/60 shadow-xs"
+            />
+            {isSpeaking && (
+              <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-white animate-ping" />
+            )}
+          </div>
+
           {/* Animated Equalizer Waves */}
           <div className={`tour-audio-eq ${isSpeaking ? 'tour-audio-eq-active' : ''}`} title={isSpeaking ? "Voice Guide: Speaking" : "Voice Guide: Ready"}>
             <span className="eq-bar eq-bar-1" />
@@ -169,32 +180,53 @@ const TooltipCard = ({
           </div>
 
           <div className="flex flex-col">
-            <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-800 flex items-center gap-1">
+            <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-900 flex items-center gap-1">
               {isSpeaking ? (
                 <>
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping inline-block" />
-                  <span>{voice === 'cedar' ? '👨 Cedar' : '👩 Nova'}: Speaking</span>
+                  <span>{(voice === 'dev' || voice === 'cedar') ? '👨 DEV' : '👩 ABHA'}: Speaking</span>
                 </>
               ) : isMuted ? (
                 'Voice: Muted'
               ) : (
-                <span>{voice === 'cedar' ? '👨 Cedar' : '👩 Nova'}: Ready</span>
+                <span>{(voice === 'dev' || voice === 'cedar') ? '👨 DEV' : '👩 ABHA'}: Ready</span>
               )}
+            </span>
+            <span className="text-[9px] font-semibold text-emerald-700/80 leading-none">
+              {(voice === 'dev' || voice === 'cedar') ? 'Connectors Guide' : 'Automation Guide'}
             </span>
           </div>
         </div>
 
         {/* Audio Controls */}
         <div className="flex items-center gap-1.5">
-          {/* Language Switcher Button (HI / EN) */}
-          <button
-            type="button"
-            onClick={() => onSetLanguage(language === 'hi' ? 'en' : 'hi', step)}
-            className="tour-audio-btn tour-audio-lang-btn"
-            title={`Switch to ${language === 'hi' ? 'English' : 'हिन्दी'} narration`}
-          >
-            {language === 'hi' ? '🇮🇳 HI' : '🌐 EN'}
-          </button>
+          {/* Explicit Language Selector Pills (🇮🇳 हिन्दी / 🌐 EN) */}
+          <div className="flex items-center rounded-lg border border-slate-200/90 bg-white/95 p-0.5 shadow-xs">
+            <button
+              type="button"
+              onClick={() => onSetLanguage('hi', step)}
+              className={`px-2 py-0.5 rounded-md text-[11px] font-bold transition-all ${
+                language === 'hi'
+                  ? 'bg-emerald-600 text-white shadow-xs font-black'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+              }`}
+              title="हिन्दी में सुनें"
+            >
+              🇮🇳 हिन्दी
+            </button>
+            <button
+              type="button"
+              onClick={() => onSetLanguage('en', step)}
+              className={`px-2 py-0.5 rounded-md text-[11px] font-bold transition-all ${
+                language === 'en'
+                  ? 'bg-emerald-600 text-white shadow-xs font-black'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+              }`}
+              title="Listen in English"
+            >
+              🌐 EN
+            </button>
+          </div>
 
           {/* Replay Audio Button */}
           <button
@@ -223,20 +255,6 @@ const TooltipCard = ({
       {/* Body */}
       <div className="tour-tooltip-body">
         <p className="tour-description">{step.description}</p>
-
-        {step.why && (
-          <div className="tour-why">
-            <Info size={13} className="tour-why-icon" />
-            <p>{step.why}</p>
-          </div>
-        )}
-
-        {step.tip && (
-          <div className="tour-tip">
-            <Lightbulb size={13} className="tour-tip-icon" />
-            <p><strong>Tip:</strong> {step.tip}</p>
-          </div>
-        )}
 
         {/* View Guide Link */}
         <div className="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between">
@@ -399,14 +417,14 @@ const ProductTour = () => {
 
     // Trigger voice narration as soon as step element is active and spotlight is positioned
     const speechTimer = setTimeout(() => {
-      speakStep(step);
+      speakStep(step, language, step.voice || voice);
     }, 280);
 
     return () => {
       clearTimeout(speechTimer);
       stopAudio();
     };
-  }, [isActive, isNavigating, currentStep, step, speakStep, stopAudio]);
+  }, [isActive, isNavigating, currentStep, step, speakStep, stopAudio, language, voice]);
 
   useEffect(() => {
     if (!isActive) return;
@@ -487,6 +505,7 @@ const ProductTour = () => {
               onToggleMute={toggleMute}
               onReplayAudio={replayAudio}
               onSetLanguage={setLanguage}
+              onSetVoice={setVoice}
             />
           )}
 

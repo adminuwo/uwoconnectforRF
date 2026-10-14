@@ -7,7 +7,7 @@ export default function AuthHeroSide({
   title = <>Build your <br/> automation empire.</>,
   subtitle = 'Connect all your tools in one seamless dashboard and let your workflows run on autopilot.',
   badgeText = 'Secure • Fast • Reliable',
-  imageSrc = '/Abha & Dev Login Page Image.png',
+  imageSrc = '/abha_dev_login.png',
   altText = 'Abha and Dev - UWO Connect',
   className = '',
 }) {

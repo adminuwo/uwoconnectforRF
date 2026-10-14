@@ -211,7 +211,7 @@ const LoginPage = () => {
           {/* Hero Illustration - Abha + Dev */}
           <div className="relative z-10 w-full flex-1 flex items-center justify-center mt-12 mb-8">
             <img 
-              src="/Abha & Dev Login Page Image.png" 
+              src="/abha_dev_login.png" 
               alt="Abha and Dev - UWO Connect" 
               className="max-w-full max-h-[100%] object-contain filter drop-shadow-[0_10px_20px_rgba(0,0,0,0.03)]"
             />

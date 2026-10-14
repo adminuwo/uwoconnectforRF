@@ -227,7 +227,7 @@ export default function QrLoginPage() {
         >
           {/* Left Side: Abha & Dev Hero */}
           <AuthHeroSide
-            imageSrc="/Abha & Dev QR Page.png"
+            imageSrc="/abha_dev_qr.png"
             title={<>Seamless mobile <br/> authentication.</>}
             subtitle="Scan the QR code with your UWO Connect mobile app to log in securely without entering your password."
             badgeText="Secure • Fast • Passwordless"
