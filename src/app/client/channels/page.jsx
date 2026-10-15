@@ -537,6 +537,10 @@ const ClientChannelsPage = () => {
       setTimeout(() => setToast(null), 5000);
     }
 
+    // ── TEMPORARILY DISABLED: Meta Embedded Signup / OAuth callback for Facebook & Instagram ──
+    // Disabled while new Meta Developer App is being created. WhatsApp stays active.
+    // TODO: Re-enable once new Meta App is approved and credentials are configured.
+    /*
     if (code) {
       if (state === 'facebook') {
         setToast({ msg: 'Connecting Facebook...', type: 'success' });
@@ -580,7 +584,7 @@ const ClientChannelsPage = () => {
           }
         };
         connectInstagram();
-      } else if (state === 'whatsapp') {
+      } else */if (code && state === 'whatsapp') {
         // If loaded inside a popup window, relay the code to the parent dashboard immediately and close!
         if (typeof window !== 'undefined' && window.opener && !window.opener.closed) {
           try {
@@ -599,7 +603,6 @@ const ClientChannelsPage = () => {
         saveWhatsAppCredentials(code);
         window.history.replaceState({}, document.title, window.location.pathname);
       }
-    }
 
     // Listen for Meta Embedded Signup postMessage events from popup
     const handleMetaMessage = (event) => {
@@ -840,6 +843,10 @@ const ClientChannelsPage = () => {
     }
   };
 
+  // ── TEMPORARILY DISABLED: Facebook & Instagram OAuth connect handlers ──
+  // Disabled while new Meta Developer App is being created.
+  // TODO: Re-enable once new Meta App is approved. Update client_id values too.
+  /*
   const handleFacebookConnect = () => {
     const origin = typeof window !== 'undefined' ? window.location.origin : 'https://uwoconnect.aisa24.com';
     const redirectUri = encodeURIComponent(`${origin}/client/channels?state=facebook`);
@@ -854,6 +861,7 @@ const ClientChannelsPage = () => {
     const instagramOAuthUrl = `https://www.instagram.com/oauth/authorize?force_reauth=true&client_id=1704328300882543&redirect_uri=${redirectUri}&response_type=code&scope=instagram_business_basic%2Cinstagram_business_manage_messages%2Cinstagram_business_manage_comments%2Cinstagram_business_content_publish%2Cinstagram_business_manage_insights&state=instagram`;
     window.location.href = instagramOAuthUrl;
   };
+  */
 
   const openComingSoon = (channelDef) => {
     setComingSoonModalChannel(channelDef);
