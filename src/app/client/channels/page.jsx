@@ -1097,7 +1097,7 @@ const ClientChannelsPage = () => {
                           )}>
                             <div className="flex items-center gap-2">
                               <CheckCircle2 size={13} className="text-emerald-500 shrink-0" />
-                              <span>WhatsApp Cloud API Embedded Signup</span>
+                              <span>WhatsApp Cloud API Direct Credentials</span>
                             </div>
                             <div className="flex items-center gap-2">
                               <CheckCircle2 size={13} className="text-emerald-500 shrink-0" />
@@ -1133,22 +1133,13 @@ const ClientChannelsPage = () => {
                           </button>
                         ) : (
                           <div className="flex items-center gap-2">
+                            {/* Temporarily disabled embedded signup flow while new Meta app is being created */}
                             <button
-                              onClick={handleWhatsAppConnect}
-                              disabled={waConnecting}
-                              className="flex-1 py-2 sm:py-2.5 px-3 bg-[#25D366] hover:bg-[#20bd5a] text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer shadow-md shadow-emerald-600/20 disabled:opacity-60"
+                              onClick={() => setIsConfigModalOpen(true)}
+                              className="flex-1 py-2 sm:py-2.5 px-3 bg-[#25D366] hover:bg-[#20bd5a] text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer shadow-md shadow-emerald-600/20"
                             >
-                              {waConnecting ? (
-                                <>
-                                  <Loader2 size={15} className="animate-spin" />
-                                  <span>Connecting...</span>
-                                </>
-                              ) : (
-                                <>
-                                  <WhatsAppBrandIcon size={16} />
-                                  <span>Connect</span>
-                                </>
-                              )}
+                              <WhatsAppBrandIcon size={16} />
+                              <span>Configure Credentials</span>
                             </button>
                             <button
                               onClick={() => setIsConfigModalOpen(true)}
@@ -1316,13 +1307,13 @@ const ClientChannelsPage = () => {
                           </button>
                         ) : (
                           <div className="flex items-center gap-2">
+                            {/* Temporarily disabled Facebook OAuth connect while new Meta app is created */}
                             <button
-                              onClick={handleFacebookConnect}
-                              disabled={fbLoading}
-                              className="flex-1 py-2 sm:py-2.5 px-3 bg-[#1877F2] hover:bg-[#166fe5] text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer shadow-md shadow-blue-600/20 disabled:opacity-50"
+                              onClick={() => setIsFacebookConfigModalOpen(true)}
+                              className="flex-1 py-2 sm:py-2.5 px-3 bg-[#1877F2] hover:bg-[#166fe5] text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer shadow-md shadow-blue-600/20"
                             >
-                              {fbLoading ? <Loader2 size={14} className="animate-spin" /> : <FacebookBrandIcon size={16} />}
-                              <span>Connect</span>
+                              <FacebookBrandIcon size={16} />
+                              <span>Configure Credentials</span>
                             </button>
                             <Link
                               href="/client/plans"
@@ -1480,13 +1471,13 @@ const ClientChannelsPage = () => {
                           </button>
                         ) : (
                           <div className="flex items-center gap-2">
+                            {/* Temporarily disabled Instagram OAuth connect while new Meta app is created */}
                             <button
-                              onClick={handleInstagramConnect}
-                              disabled={igLoading}
-                              className="flex-1 py-2 sm:py-2.5 px-3 bg-gradient-to-r from-[#FF7A00] via-[#FF0069] to-[#D300C5] hover:opacity-95 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer shadow-md shadow-pink-600/20 disabled:opacity-50"
+                              onClick={() => setIsInstagramConfigModalOpen(true)}
+                              className="flex-1 py-2 sm:py-2.5 px-3 bg-gradient-to-r from-[#FF7A00] via-[#FF0069] to-[#D300C5] hover:opacity-95 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer shadow-md shadow-pink-600/20"
                             >
-                              {igLoading ? <Loader2 size={14} className="animate-spin" /> : <InstagramBrandIcon size={16} />}
-                              <span>Connect</span>
+                              <InstagramBrandIcon size={16} />
+                              <span>Configure Credentials</span>
                             </button>
                             <Link
                               href="/client/plans"

@@ -18,7 +18,7 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-ARG NEXT_PUBLIC_API_URL=https://uwoconnectforrb-743928421487.asia-south1.run.app
+ARG NEXT_PUBLIC_API_URL
 ARG NEXT_PUBLIC_FIREBASE_API_KEY=AIzaSyCLdlIXdWfczEiwFtaCd3sq9jX27zUDmY0
 ARG NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=uwoconnect.firebaseapp.com
 ARG NEXT_PUBLIC_FIREBASE_PROJECT_ID=uwoconnect
