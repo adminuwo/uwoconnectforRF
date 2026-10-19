@@ -30,7 +30,7 @@ const WHATSAPP_VERTICALS = [
 
 const DAYS_OF_WEEK = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
-export default function WhatsAppConfigModal({ isOpen, onClose, client, onSaved }) {
+export default function WhatsAppConfigModal({ isOpen, onClose, client, onSaved, onLaunchEmbedded }) {
   // Navigation
   const [activeTab, setActiveTab] = useState('credentials'); // 'credentials' | 'profile' | 'hours' | 'status'
 
@@ -318,11 +318,16 @@ export default function WhatsAppConfigModal({ isOpen, onClose, client, onSaved }
 
       // Sync via embedded signup endpoint first to register WABA & webhooks
       try {
+        const origin = typeof window !== 'undefined' ? window.location.origin : 'https://uwoconnectforrf-743928421487.asia-south1.run.app';
+        const redirect_uri = origin.includes('localhost')
+          ? `${origin}/client/channels`
+          : 'https://uwoconnectforrf-743928421487.asia-south1.run.app/client/channels';
+
         await axios.post(`${apiUrl}/api/auth/whatsapp/embedded-signup`, {
           waba_id: wabaId,
           phone_number_id: phoneId,
           access_token: accessToken || undefined,
-          redirect_uri: 'https://uwoconnect.aisa24.com/client/channels'
+          redirect_uri: redirect_uri
         }, {
           headers: { Authorization: `Bearer ${token}` }
         });
@@ -559,9 +564,32 @@ export default function WhatsAppConfigModal({ isOpen, onClose, client, onSaved }
                       <Settings size={14} className="text-emerald-600" /> WhatsApp Cloud API Credentials
                     </h3>
                     <p className="text-[11px] text-slate-500 mt-0.5">
-                      Enter credentials from Meta Developer Portal (WhatsApp &gt; API Setup).
+                      Enter credentials from Meta Developer Portal (WhatsApp &gt; API Setup), or use 1-Click Embedded Signup below.
                     </p>
                   </div>
+
+                  {onLaunchEmbedded && (
+                    <div className="bg-gradient-to-r from-emerald-500/10 via-emerald-500/5 to-transparent border border-emerald-500/20 rounded-xl p-3.5 sm:p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                      <div>
+                        <h4 className="text-xs font-bold text-emerald-900 flex items-center gap-1.5">
+                          <Sparkles size={14} className="text-emerald-600" /> Instant 1-Click Meta Embedded Signup
+                        </h4>
+                        <p className="text-[11px] text-slate-600 mt-0.5">
+                          Connect automatically without copying & pasting Access Tokens or Phone IDs manually.
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          onClose();
+                          onLaunchEmbedded();
+                        }}
+                        className="px-3.5 py-2 bg-[#25D366] hover:bg-[#20bd5a] text-white rounded-lg text-xs font-bold flex items-center gap-1.5 shadow-sm shrink-0 cursor-pointer transition"
+                      >
+                        <CheckCircle2 size={14} /> Connect with Meta
+                      </button>
+                    </div>
+                  )}
                   
                   {/* Display Name */}
                   <div className="space-y-1.5">
