@@ -351,7 +351,7 @@ const RegisterPage = () => {
   }
 
   return (
-    <div className="min-h-screen w-full flex flex-col justify-between items-center p-4 bg-[#f8fafc] font-sans relative overflow-hidden selection:bg-emerald-500 selection:text-white py-6">
+    <div className="min-h-screen w-full flex flex-col justify-between items-center p-3 sm:p-4 bg-[#f8fafc] font-sans relative overflow-x-hidden overflow-y-auto selection:bg-emerald-500 selection:text-white py-4 sm:py-6">
       {/* Subtle Background Elements */}
       <div className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] bg-emerald-400/10 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute bottom-[-20%] right-[-10%] w-[600px] h-[600px] bg-blue-400/10 rounded-full blur-[120px] pointer-events-none" />
@@ -382,12 +382,12 @@ const RegisterPage = () => {
       </header>
 
       {/* Main Split Card */}
-      <main className="relative z-10 w-full flex-1 flex items-center justify-center py-4">
+      <main className="relative z-10 w-full flex-1 flex items-center justify-center py-2 sm:py-4 my-auto">
         <motion.div 
           initial={{ opacity: 0, y: 20 }} 
           animate={{ opacity: 1, y: 0 }} 
           transition={{ duration: 0.6, ease: "easeOut" }}
-          className="w-full max-w-[1050px] bg-white rounded-[32px] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.05)] border border-slate-100 flex flex-col md:flex-row overflow-hidden relative z-10 my-auto"
+          className="w-full max-w-[1050px] bg-white rounded-[32px] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.05)] border border-slate-100 flex flex-col md:flex-row overflow-hidden relative z-10 my-auto md:max-h-[88vh]"
         >
           {/* Left Side: Abha & Dev Hero */}
           <AuthHeroSide
@@ -397,7 +397,7 @@ const RegisterPage = () => {
           />
 
           {/* Right Side: Registration Flow */}
-          <div className="w-full md:w-3/5 p-6 sm:p-10 flex flex-col justify-center bg-white relative max-h-[85vh] overflow-y-auto">
+          <div className="w-full md:w-3/5 p-6 sm:p-8 md:p-10 flex flex-col justify-start bg-white relative overflow-y-auto md:max-h-[88vh]">
         {/* Brand Header */}
         <div className="flex items-center gap-2.5 mb-4 px-4 py-1.5 rounded-full bg-slate-50 border border-slate-200/80 shadow-xs">
           <img 
@@ -421,7 +421,7 @@ const RegisterPage = () => {
         {portfolioGate !== 'yes' ? (
           portfolioGate === 'enter_name' ? (
             /* Step 1 - Enter Meta Portfolio Name */
-            <div className="w-full text-center py-2 animate-in fade-in zoom-in-95 duration-200">
+            <div className="w-full text-center py-2 animate-in fade-in zoom-in-95 duration-200 my-auto">
               <div className="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-xs border border-emerald-100">
                 <Briefcase size={26} />
               </div>
@@ -522,7 +522,7 @@ const RegisterPage = () => {
             </div>
           ) : (
             /* Step 1 - Initial Question */
-            <div className="w-full text-center py-2 animate-in fade-in duration-200">
+            <div className="w-full text-center py-2 animate-in fade-in duration-200 my-auto">
               <div className="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-xs border border-emerald-100">
                 <Briefcase size={26} />
               </div>

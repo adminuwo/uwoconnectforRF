@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { X, Loader2, AlertCircle, Eye, EyeOff } from 'lucide-react';
+import { X, Loader2, AlertCircle, Eye, EyeOff, Sparkles, CheckCircle2 } from 'lucide-react';
 import axios from 'axios';
 import { cn } from '@/lib/utils';
 
-export default function FacebookConfigModal({ isOpen, onClose, client, onSaved }) {
+export default function FacebookConfigModal({ isOpen, onClose, client, onSaved, onLaunchEmbedded }) {
   const [pageName, setPageName] = useState('');
   const [pageId, setPageId] = useState('');
   const [accessToken, setAccessToken] = useState('');
@@ -169,6 +169,29 @@ export default function FacebookConfigModal({ isOpen, onClose, client, onSaved }
             <div className="mb-6 bg-red-50 border border-red-200 rounded-xl p-4 flex items-center gap-3 text-red-800 text-xs font-semibold">
               <AlertCircle size={16} className="shrink-0" />
               <span>{errors.form}</span>
+            </div>
+          )}
+
+          {onLaunchEmbedded && (
+            <div className="mb-5 bg-gradient-to-r from-blue-500/10 via-blue-500/5 to-transparent border border-blue-500/20 rounded-xl p-3.5 sm:p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+              <div>
+                <h4 className="text-xs font-bold text-blue-950 flex items-center gap-1.5">
+                  <Sparkles size={14} className="text-blue-600" /> Instant 1-Click Facebook Page Connect
+                </h4>
+                <p className="text-[11px] text-slate-600 mt-0.5">
+                  Connect your Facebook Page automatically without manual IDs or Page Tokens.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  onClose();
+                  onLaunchEmbedded();
+                }}
+                className="px-3.5 py-2 bg-[#1877F2] hover:bg-[#166fe5] text-white rounded-lg text-xs font-bold flex items-center gap-1.5 shadow-sm shrink-0 cursor-pointer transition"
+              >
+                <CheckCircle2 size={14} /> Connect with Facebook
+              </button>
             </div>
           )}
 

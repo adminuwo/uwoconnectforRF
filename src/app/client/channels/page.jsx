@@ -313,11 +313,16 @@ const ClientChannelsPage = () => {
     try {
       const token = localStorage.getItem('uwo_token') || localStorage.getItem('token');
 
+      const origin = typeof window !== 'undefined' ? window.location.origin : 'https://uwoconnectforrf-743928421487.asia-south1.run.app';
+      const redirect_uri = origin.includes('localhost') 
+        ? `${origin}/client/channels`
+        : 'https://uwoconnectforrf-743928421487.asia-south1.run.app/client/channels';
+
       const res = await axios.post(`${API_BASE_URL}/api/auth/whatsapp/embedded-signup`, {
         code,
         waba_id,
         phone_number_id,
-        redirect_uri: 'https://uwoconnect.aisa24.com/client/channels'
+        redirect_uri: redirect_uri
       }, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -339,6 +344,45 @@ const ClientChannelsPage = () => {
       setTimeout(() => setToast(null), 5000);
     } finally {
       setWaConnecting(false);
+    }
+  };
+
+  // Helper function to save Facebook credentials to the backend via 1-Click Embedded Signup
+  const saveFacebookCredentials = async (code) => {
+    if (!code) return;
+    setFbLoading(true);
+    setToast({ msg: 'Connecting Facebook Page...', type: 'success' });
+    try {
+      const token = typeof window !== 'undefined' ? (localStorage.getItem('uwo_token') || localStorage.getItem('token')) : null;
+      const origin = typeof window !== 'undefined' ? window.location.origin : 'https://uwoconnectforrf-743928421487.asia-south1.run.app';
+      const redirect_uri = origin.includes('localhost')
+        ? `${origin}/client/channels`
+        : 'https://uwoconnectforrf-743928421487.asia-south1.run.app/client/channels';
+
+      const res = await axios.post(`${API_BASE_URL}/api/auth/facebook/embedded-signup`, {
+        code,
+        redirect_uri
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      if (res.data?.facebook_config) {
+        setClient(prev => ({
+          ...(prev || {}),
+          facebook_config: res.data.facebook_config,
+          facebook_enabled: true
+        }));
+      }
+      await fetchClient();
+      setToast({ msg: '✅ Facebook Page connected successfully!', type: 'success' });
+      setTimeout(() => setToast(null), 4000);
+    } catch (err) {
+      console.error('[Facebook Embedded Signup Error]:', err);
+      const errMsg = err?.response?.data?.error || err?.response?.data?.details?.error?.message || 'Failed to complete Facebook connection';
+      setToast({ msg: errMsg, type: 'error' });
+      setTimeout(() => setToast(null), 5000);
+    } finally {
+      setFbLoading(false);
     }
   };
 
@@ -380,10 +424,10 @@ const ClientChannelsPage = () => {
 
     window.fbAsyncInit = function () {
       window.FB.init({
-        appId: '991147863536661',
+        appId: '1675703437621442',
         cookie: true,
         xfbml: true,
-        version: 'v20.0'
+        version: 'v22.0'
       });
     };
 
@@ -397,10 +441,10 @@ const ClientChannelsPage = () => {
       document.body.appendChild(script);
     } else if (window.FB) {
       window.FB.init({
-        appId: '991147863536661',
+        appId: '1675703437621442',
         cookie: true,
         xfbml: true,
-        version: 'v20.0'
+        version: 'v22.0'
       });
     }
   }, []);
@@ -413,35 +457,8 @@ const ClientChannelsPage = () => {
     const code = params.get('code');
     const state = params.get('state');
 
-    // Instagram Business OAuth callback
-    if (code && state === 'instagram') {
-      window.history.replaceState({}, document.title, window.location.pathname);
-      (async () => {
-        setIgLoading(true);
-        try {
-          const token = localStorage.getItem('uwo_token');
-          await axios.post(
-            `${API_BASE_URL}/api/auth/instagram/oauth-callback`,
-            {
-              code,
-              redirect_uri: `${window.location.origin}/client/channels`
-            },
-            { headers: { Authorization: `Bearer ${token}` } }
-          );
-          await fetchClient();
-          setToast({ msg: '✅ Instagram account connected!', type: 'success' });
-          setTimeout(() => setToast(null), 4000);
-        } catch (err) {
-          const msg = err?.response?.data?.error || 'Failed to connect Instagram.';
-          setToast({ msg, type: 'error' });
-          setTimeout(() => setToast(null), 5000);
-        } finally {
-          setIgLoading(false);
-        }
-      })();
-    }
     // Gmail callback
-    else if (params.get('gmail_connected') === 'true') {
+    if (params.get('gmail_connected') === 'true') {
       fetchClient();
       setToast({ msg: '✅ Gmail connected successfully!', type: 'success' });
       setTimeout(() => setToast(null), 4000);
@@ -537,54 +554,16 @@ const ClientChannelsPage = () => {
       setTimeout(() => setToast(null), 5000);
     }
 
-    // ── TEMPORARILY DISABLED: Meta Embedded Signup / OAuth callback for Facebook & Instagram ──
-    // Disabled while new Meta Developer App is being created. WhatsApp stays active.
-    // TODO: Re-enable once new Meta App is approved and credentials are configured.
-    /*
+    // ── Meta Embedded Signup / OAuth callback for WhatsApp & Instagram ──
     if (code) {
-      if (state === 'facebook') {
-        setToast({ msg: 'Connecting Facebook...', type: 'success' });
-        const connectFacebook = async () => {
-          try {
-            const token = localStorage.getItem('uwo_token');
-            await axios.post(`${API_BASE_URL}/api/auth/facebook/embedded-signup`,
-              { code: code },
-              { headers: { Authorization: `Bearer ${token}` } }
-            );
-            fetchClient();
-            setToast({ msg: 'Facebook connected successfully!', type: 'success' });
-            setTimeout(() => setToast(null), 3000);
-          } catch (err) {
-            console.error("Error connecting Facebook", err);
-            setToast({ msg: err.response?.data?.error || 'Failed to connect Facebook', type: 'error' });
-            setTimeout(() => setToast(null), 4000);
-          } finally {
-            window.history.replaceState({}, document.title, window.location.pathname);
-          }
-        };
-        connectFacebook();
-      } else if (state === 'instagram') {
-        setToast({ msg: 'Connecting Instagram...', type: 'success' });
-        const connectInstagram = async () => {
-          try {
-            const token = typeof window !== 'undefined' ? (localStorage.getItem('uwo_token') || localStorage.getItem('token')) : null;
-            await axios.post(`${API_BASE_URL}/api/auth/instagram/embedded-signup`,
-              { code: code },
-              { headers: { Authorization: `Bearer ${token}` } }
-            );
-            fetchClient();
-            setToast({ msg: 'Instagram connected successfully!', type: 'success' });
-            setTimeout(() => setToast(null), 3000);
-          } catch (err) {
-            console.error("Error connecting Instagram", err);
-            setToast({ msg: err.response?.data?.error || 'Failed to connect Instagram', type: 'error' });
-            setTimeout(() => setToast(null), 4000);
-          } finally {
-            window.history.replaceState({}, document.title, window.location.pathname);
-          }
-        };
-        connectInstagram();
-      } else */if (code && state === 'whatsapp') {
+      let pendingChannel = null;
+      try {
+        pendingChannel = sessionStorage.getItem('pending_oauth_channel');
+      } catch (e) { }
+
+      if (state === 'whatsapp' || pendingChannel === 'whatsapp') {
+        try { sessionStorage.removeItem('pending_oauth_channel'); } catch (e) { }
+
         // If loaded inside a popup window, relay the code to the parent dashboard immediately and close!
         if (typeof window !== 'undefined' && window.opener && !window.opener.closed) {
           try {
@@ -602,7 +581,68 @@ const ClientChannelsPage = () => {
 
         saveWhatsAppCredentials(code);
         window.history.replaceState({}, document.title, window.location.pathname);
+      } else if (state === 'facebook' || pendingChannel === 'facebook') {
+        try { sessionStorage.removeItem('pending_oauth_channel'); } catch (e) { }
+
+        // If loaded inside a popup window, relay the code to the parent dashboard immediately and close!
+        if (typeof window !== 'undefined' && window.opener && !window.opener.closed) {
+          try {
+            window.opener.postMessage({
+              type: 'UWO_FACEBOOK_CODE',
+              code: code,
+              state: 'facebook'
+            }, '*');
+          } catch (e) { }
+          setTimeout(() => {
+            window.close();
+          }, 600);
+          return;
+        }
+
+        saveFacebookCredentials(code);
+        window.history.replaceState({}, document.title, window.location.pathname);
+      } else if (state === 'instagram' || pendingChannel === 'instagram') {
+        try { sessionStorage.removeItem('pending_oauth_channel'); } catch (e) { }
+        setToast({ msg: 'Connecting Instagram...', type: 'success' });
+        const connectInstagram = async () => {
+          try {
+            const token = typeof window !== 'undefined' ? (localStorage.getItem('uwo_token') || localStorage.getItem('token')) : null;
+            const origin = typeof window !== 'undefined' ? window.location.origin : 'https://uwoconnectforrf-743928421487.asia-south1.run.app';
+            await axios.post(`${API_BASE_URL}/api/auth/instagram/embedded-signup`,
+              { code: code, redirect_uri: redirectUri },
+              { headers: { Authorization: `Bearer ${token}` } }
+            );
+            fetchClient();
+            setToast({ msg: 'Instagram connected successfully!', type: 'success' });
+            setTimeout(() => setToast(null), 3000);
+          } catch (err) {
+            console.error("Error connecting Instagram", err);
+            setToast({ msg: err.response?.data?.error || err.response?.data?.details?.error_message || 'Failed to connect Instagram', type: 'error' });
+            setTimeout(() => setToast(null), 4000);
+          } finally {
+            window.history.replaceState({}, document.title, window.location.pathname);
+          }
+        };
+        connectInstagram();
+      } else {
+        // Fallback: If code is returned without state, process for WhatsApp Embedded Signup
+        if (typeof window !== 'undefined' && window.opener && !window.opener.closed) {
+          try {
+            window.opener.postMessage({
+              type: 'UWO_WHATSAPP_CODE',
+              code: code,
+              state: 'whatsapp'
+            }, '*');
+          } catch (e) { }
+          setTimeout(() => {
+            window.close();
+          }, 600);
+          return;
+        }
+        saveWhatsAppCredentials(code);
+        window.history.replaceState({}, document.title, window.location.pathname);
       }
+    }
 
     // Listen for Meta Embedded Signup postMessage events from popup
     const handleMetaMessage = (event) => {
@@ -617,6 +657,15 @@ const ClientChannelsPage = () => {
       // 2. Authorization code relayed from redirect_uri popup
       if (event.data?.type === 'UWO_WHATSAPP_CODE' && event.data?.code) {
         saveWhatsAppCredentials(event.data.code);
+        return;
+      }
+
+      // 2b. Facebook authorization code relayed from redirect_uri popup
+      if (event.data?.type === 'UWO_FACEBOOK_CODE' && event.data?.code) {
+        if (popupRef.current && !popupRef.current.closed) {
+          try { popupRef.current.close(); } catch (e) { }
+        }
+        saveFacebookCredentials(event.data.code);
         return;
       }
 
@@ -778,14 +827,18 @@ const ClientChannelsPage = () => {
   const handleWhatsAppConnect = () => {
     if (typeof window === 'undefined') return;
 
-    const appId = '991147863536661';
-    const configId = '1048515390903125';
+    const appId = '1675703437621442';
+    const configId = '2652244361881214';
 
-    setToast({ msg: 'Opening WhatsApp Business Setup...', type: 'success' });
+    try {
+      sessionStorage.setItem('pending_oauth_channel', 'whatsapp');
+    } catch (e) { }
+
+    setToast({ msg: 'Opening WhatsApp Business 1-Click Onboarding...', type: 'success' });
 
     const isHttps = window.location.protocol === 'https:';
 
-    // Official Meta JavaScript SDK Embedded Signup flow (Strictly requires HTTPS)
+    // Official Meta JavaScript SDK Embedded Signup flow (if running on HTTPS with FB SDK initialized)
     if (isHttps && window.FB) {
       try {
         window.FB.login(
@@ -802,7 +855,7 @@ const ClientChannelsPage = () => {
             response_type: 'code',
             override_default_response_type: true,
             extras: {
-              setup: {},
+              version: 'v4',
               sessionInfoVersion: '3',
               featureType: 'whatsapp_business_app_onboarding'
             }
@@ -810,30 +863,65 @@ const ClientChannelsPage = () => {
         );
         return;
       } catch (err) {
-        console.warn('[FB.login error, falling back to oauth dialog]:', err);
+        console.warn('[FB.login error, falling back to Meta-hosted onboarding]:', err);
       }
     }
 
-    // Fallback for HTTP (e.g. localhost:3000 development) where FB.login is blocked by Meta
-    const extras = encodeURIComponent(JSON.stringify({
-      setup: {},
+    // Official Meta-Hosted WhatsApp Onboarding URL
+    const extrasObj = {
+      version: 'v4',
       sessionInfoVersion: '3',
       featureType: 'whatsapp_business_app_onboarding'
-    }));
+    };
+    const extras = encodeURIComponent(JSON.stringify(extrasObj));
 
     const origin = window.location.origin;
-    const targetRedirectUri = `${origin}/client/channels`;
+    const targetRedirectUri = origin.includes('localhost')
+      ? `${origin}/client/channels`
+      : 'https://uwoconnectforrf-743928421487.asia-south1.run.app/client/channels';
     const redirectUri = encodeURIComponent(targetRedirectUri);
-    const oauthUrl = `https://www.facebook.com/v20.0/dialog/oauth?client_id=${appId}&config_id=${configId}&response_type=code&override_default_response_type=true&extras=${extras}&redirect_uri=${redirectUri}&state=whatsapp`;
 
-    const width = 600;
+    const onboardUrl = `https://business.facebook.com/messaging/whatsapp/onboard/?app_id=${appId}&config_id=${configId}&extras=${extras}&redirect_uri=${redirectUri}&state=whatsapp`;
+
+    const width = 640;
+    const height = 750;
+    const left = Math.max(0, Math.round((window.innerWidth - width) / 2 + (window.screenX || window.screenLeft || 0)));
+    const top = Math.max(0, Math.round((window.innerHeight - height) / 2 + (window.screenY || window.screenTop || 0)));
+
+    const popup = window.open(
+      onboardUrl,
+      'WhatsAppOnboarding',
+      `width=${width},height=${height},top=${top},left=${left},status=no,resizable=yes,toolbar=no,menubar=no,scrollbars=yes,location=no`
+    );
+    popupRef.current = popup;
+
+    if (!popup || popup.closed || typeof popup.closed === 'undefined') {
+      window.location.href = onboardUrl;
+    }
+  };
+
+  const handleFacebookConnect = () => {
+    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://uwoconnectforrf-743928421487.asia-south1.run.app';
+    const redirectUri = origin.includes('localhost')
+      ? `${origin}/client/channels`
+      : 'https://uwoconnectforrf-743928421487.asia-south1.run.app/client/channels';
+    const appId = '1675703437621442';
+    const scope = 'pages_show_list,pages_messaging,pages_read_engagement,pages_manage_metadata';
+
+    try {
+      sessionStorage.setItem('pending_oauth_channel', 'facebook');
+    } catch (e) { }
+
+    const oauthUrl = `https://www.facebook.com/v22.0/dialog/oauth?client_id=${appId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${encodeURIComponent(scope)}&response_type=code&state=facebook`;
+
+    const width = 640;
     const height = 750;
     const left = Math.max(0, Math.round((window.innerWidth - width) / 2 + (window.screenX || window.screenLeft || 0)));
     const top = Math.max(0, Math.round((window.innerHeight - height) / 2 + (window.screenY || window.screenTop || 0)));
 
     const popup = window.open(
       oauthUrl,
-      'WhatsAppOAuth',
+      'FacebookLoginForBusiness',
       `width=${width},height=${height},top=${top},left=${left},status=no,resizable=yes,toolbar=no,menubar=no,scrollbars=yes,location=no`
     );
     popupRef.current = popup;
@@ -843,25 +931,12 @@ const ClientChannelsPage = () => {
     }
   };
 
-  // ── TEMPORARILY DISABLED: Facebook & Instagram OAuth connect handlers ──
-  // Disabled while new Meta Developer App is being created.
-  // TODO: Re-enable once new Meta App is approved. Update client_id values too.
-  /*
-  const handleFacebookConnect = () => {
-    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://uwoconnect.aisa24.com';
-    const redirectUri = encodeURIComponent(`${origin}/client/channels?state=facebook`);
-    const appId = process.env.NEXT_PUBLIC_META_APP_ID || '991147863536661';
-    const oauthUrl = `https://www.facebook.com/v20.0/dialog/oauth?client_id=${appId}&redirect_uri=${redirectUri}&scope=public_profile,email,pages_show_list,pages_read_engagement,pages_messaging&response_type=code&state=facebook`;
-
-    window.location.href = oauthUrl;
-  };
-
   const handleInstagramConnect = () => {
-    const redirectUri = encodeURIComponent(`${window.location.origin}/client/channels`);
-    const instagramOAuthUrl = `https://www.instagram.com/oauth/authorize?force_reauth=true&client_id=1704328300882543&redirect_uri=${redirectUri}&response_type=code&scope=instagram_business_basic%2Cinstagram_business_manage_messages%2Cinstagram_business_manage_comments%2Cinstagram_business_content_publish%2Cinstagram_business_manage_insights&state=instagram`;
+    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://uwoconnectforrf-743928421487.asia-south1.run.app';
+    const redirectUri = encodeURIComponent(`${origin}/client/channels`);
+    const instagramOAuthUrl = `https://www.instagram.com/oauth/authorize?force_reauth=true&client_id=1761486008404014&redirect_uri=${redirectUri}&response_type=code&scope=instagram_business_basic%2Cinstagram_business_manage_messages%2Cinstagram_business_manage_comments%2Cinstagram_business_content_publish%2Cinstagram_business_manage_insights&state=instagram`;
     window.location.href = instagramOAuthUrl;
   };
-  */
 
   const openComingSoon = (channelDef) => {
     setComingSoonModalChannel(channelDef);
@@ -1141,13 +1216,13 @@ const ClientChannelsPage = () => {
                           </button>
                         ) : (
                           <div className="flex items-center gap-2">
-                            {/* Temporarily disabled embedded signup flow while new Meta app is being created */}
                             <button
-                              onClick={() => setIsConfigModalOpen(true)}
-                              className="flex-1 py-2 sm:py-2.5 px-3 bg-[#25D366] hover:bg-[#20bd5a] text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer shadow-md shadow-emerald-600/20"
+                              onClick={handleWhatsAppConnect}
+                              disabled={waConnecting}
+                              className="flex-1 py-2 sm:py-2.5 px-3 bg-[#25D366] hover:bg-[#20bd5a] text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer shadow-md shadow-emerald-600/20 disabled:opacity-60"
                             >
                               <WhatsAppBrandIcon size={16} />
-                              <span>Configure Credentials</span>
+                              <span>{waConnecting ? 'Connecting...' : 'Connect WhatsApp (1-Click)'}</span>
                             </button>
                             <button
                               onClick={() => setIsConfigModalOpen(true)}
@@ -1315,19 +1390,38 @@ const ClientChannelsPage = () => {
                           </button>
                         ) : (
                           <div className="flex items-center gap-2">
-                            {/* Temporarily disabled Facebook OAuth connect while new Meta app is created */}
+                            <button
+                              onClick={handleFacebookConnect}
+                              disabled={fbLoading}
+                              className="flex-1 py-2 sm:py-2.5 px-3 bg-[#1877F2] hover:bg-[#166fe5] text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer shadow-md shadow-blue-600/20 disabled:opacity-60"
+                            >
+                              {fbLoading ? (
+                                <>
+                                  <Loader2 size={14} className="animate-spin" />
+                                  <span>Connecting...</span>
+                                </>
+                              ) : (
+                                <>
+                                  <FacebookBrandIcon size={16} />
+                                  <span>Connect Facebook</span>
+                                </>
+                              )}
+                            </button>
                             <button
                               onClick={() => setIsFacebookConfigModalOpen(true)}
-                              className="flex-1 py-2 sm:py-2.5 px-3 bg-[#1877F2] hover:bg-[#166fe5] text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer shadow-md shadow-blue-600/20"
+                              title="Manual Settings"
+                              className={cn(
+                                "p-2 sm:p-2.5 rounded-xl text-xs font-bold transition flex items-center justify-center border shrink-0 cursor-pointer shadow-xs",
+                                isDark ? "bg-slate-800 hover:bg-slate-700 text-slate-300 border-slate-700" : "bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200"
+                              )}
                             >
-                              <FacebookBrandIcon size={16} />
-                              <span>Configure Credentials</span>
+                              <Settings size={14} />
                             </button>
                             <Link
                               href="/client/plans"
                               title={`Included in ${state.requiredPlanName}`}
                               className={cn(
-                                "flex-1 py-2 sm:py-2.5 px-2.5 rounded-xl text-xs font-extrabold transition flex items-center justify-center gap-1 cursor-pointer shadow-2xs truncate border",
+                                "py-2 sm:py-2.5 px-2.5 rounded-xl text-xs font-extrabold transition flex items-center justify-center gap-1 cursor-pointer shadow-2xs truncate border shrink-0",
                                 isDark ? "bg-blue-950/60 hover:bg-blue-900/60 text-blue-300 border-blue-800/60" : "bg-[#1877F2]/10 hover:bg-[#1877F2]/20 text-[#1877F2] border border-[#1877F2]/30"
                               )}
                             >
@@ -1467,31 +1561,50 @@ const ClientChannelsPage = () => {
                             <span>Coming Soon</span>
                           </button>
                         ) : isConn ? (
-                          <button
-                            onClick={() => setIsInstagramConfigModalOpen(true)}
-                            className={cn(
-                              "w-full py-2 sm:py-2.5 px-3 sm:px-4 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer border shadow-sm",
-                              isDark ? "bg-slate-800 hover:bg-slate-700 text-slate-200 border-slate-700" : "bg-slate-100 hover:bg-slate-200 text-slate-800 border-slate-200"
-                            )}
-                          >
-                            <Settings size={13} className={isDark ? "text-slate-400" : "text-slate-600"} />
-                            <span>Configure Instagram</span>
-                          </button>
-                        ) : (
                           <div className="flex items-center gap-2">
-                            {/* Temporarily disabled Instagram OAuth connect while new Meta app is created */}
                             <button
                               onClick={() => setIsInstagramConfigModalOpen(true)}
+                              className={cn(
+                                "flex-1 py-2 sm:py-2.5 px-3 sm:px-4 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer border shadow-sm",
+                                isDark ? "bg-slate-800 hover:bg-slate-700 text-slate-200 border-slate-700" : "bg-slate-100 hover:bg-slate-200 text-slate-800 border-slate-200"
+                              )}
+                            >
+                              <Settings size={13} className={isDark ? "text-slate-400" : "text-slate-600"} />
+                              <span>Configure</span>
+                            </button>
+                            <button
+                              onClick={handleInstagramConnect}
+                              title="Re-authorize via Instagram"
+                              className="py-2 sm:py-2.5 px-3 bg-gradient-to-r from-[#FF7A00] via-[#FF0069] to-[#D300C5] hover:opacity-95 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer shadow-md shadow-pink-600/20"
+                            >
+                              <InstagramBrandIcon size={14} />
+                              <span>Reconnect</span>
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={handleInstagramConnect}
                               className="flex-1 py-2 sm:py-2.5 px-3 bg-gradient-to-r from-[#FF7A00] via-[#FF0069] to-[#D300C5] hover:opacity-95 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer shadow-md shadow-pink-600/20"
                             >
                               <InstagramBrandIcon size={16} />
-                              <span>Configure Credentials</span>
+                              <span>Connect Instagram</span>
+                            </button>
+                            <button
+                              onClick={() => setIsInstagramConfigModalOpen(true)}
+                              title="Manual Configuration"
+                              className={cn(
+                                "p-2 sm:p-2.5 rounded-xl border text-xs font-bold transition flex items-center justify-center cursor-pointer shadow-2xs",
+                                isDark ? "bg-slate-800 hover:bg-slate-700 text-slate-300 border-slate-700" : "bg-white hover:bg-slate-50 text-slate-700 border-slate-200"
+                              )}
+                            >
+                              <Settings size={14} />
                             </button>
                             <Link
                               href="/client/plans"
                               title={`Included in ${state.requiredPlanName}`}
                               className={cn(
-                                "flex-1 py-2 sm:py-2.5 px-2.5 rounded-xl text-xs font-extrabold transition flex items-center justify-center gap-1 cursor-pointer shadow-2xs truncate border",
+                                "py-2 sm:py-2.5 px-2.5 rounded-xl text-xs font-extrabold transition flex items-center justify-center gap-1 cursor-pointer shadow-2xs truncate border",
                                 isDark ? "bg-pink-950/60 hover:bg-pink-900/60 text-pink-300 border-pink-800/60" : "bg-pink-50 hover:bg-pink-100 text-pink-800 border border-pink-200/80"
                               )}
                             >
@@ -2278,6 +2391,7 @@ const ClientChannelsPage = () => {
             isOpen={isConfigModalOpen}
             onClose={() => setIsConfigModalOpen(false)}
             client={client}
+            onLaunchEmbedded={handleWhatsAppConnect}
             onSaved={(updatedData) => {
               if (updatedData) {
                 setClient(prev => ({ ...prev, ...updatedData }));
@@ -2293,6 +2407,7 @@ const ClientChannelsPage = () => {
             isOpen={isFacebookConfigModalOpen}
             onClose={() => setIsFacebookConfigModalOpen(false)}
             client={client}
+            onLaunchEmbedded={handleFacebookConnect}
             onSaved={handleFacebookSaved}
           />
         )}
