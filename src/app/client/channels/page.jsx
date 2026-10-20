@@ -313,10 +313,8 @@ const ClientChannelsPage = () => {
     try {
       const token = localStorage.getItem('uwo_token') || localStorage.getItem('token');
 
-      const origin = typeof window !== 'undefined' ? window.location.origin : 'https://uwoconnectforrf-743928421487.asia-south1.run.app';
-      const redirect_uri = origin.includes('localhost') 
-        ? `${origin}/client/channels`
-        : 'https://uwoconnectforrf-743928421487.asia-south1.run.app/client/channels';
+      const origin = typeof window !== 'undefined' ? window.location.origin : 'https://uwoconnect.aisa24.com';
+      const redirect_uri = `${origin}/client/channels`;
 
       const res = await axios.post(`${API_BASE_URL}/api/auth/whatsapp/embedded-signup`, {
         code,
@@ -354,10 +352,8 @@ const ClientChannelsPage = () => {
     setToast({ msg: 'Connecting Facebook Page...', type: 'success' });
     try {
       const token = typeof window !== 'undefined' ? (localStorage.getItem('uwo_token') || localStorage.getItem('token')) : null;
-      const origin = typeof window !== 'undefined' ? window.location.origin : 'https://uwoconnectforrf-743928421487.asia-south1.run.app';
-      const redirect_uri = origin.includes('localhost')
-        ? `${origin}/client/channels`
-        : 'https://uwoconnectforrf-743928421487.asia-south1.run.app/client/channels';
+      const origin = typeof window !== 'undefined' ? window.location.origin : 'https://uwoconnect.aisa24.com';
+      const redirect_uri = `${origin}/client/channels`;
 
       const res = await axios.post(`${API_BASE_URL}/api/auth/facebook/embedded-signup`, {
         code,
@@ -875,10 +871,8 @@ const ClientChannelsPage = () => {
     };
     const extras = encodeURIComponent(JSON.stringify(extrasObj));
 
-    const origin = window.location.origin;
-    const targetRedirectUri = origin.includes('localhost')
-      ? `${origin}/client/channels`
-      : 'https://uwoconnectforrf-743928421487.asia-south1.run.app/client/channels';
+    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://uwoconnect.aisa24.com';
+    const targetRedirectUri = `${origin}/client/channels`;
     const redirectUri = encodeURIComponent(targetRedirectUri);
 
     const onboardUrl = `https://business.facebook.com/messaging/whatsapp/onboard/?app_id=${appId}&config_id=${configId}&extras=${extras}&redirect_uri=${redirectUri}&state=whatsapp`;
@@ -901,10 +895,8 @@ const ClientChannelsPage = () => {
   };
 
   const handleFacebookConnect = () => {
-    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://uwoconnectforrf-743928421487.asia-south1.run.app';
-    const redirectUri = origin.includes('localhost')
-      ? `${origin}/client/channels`
-      : 'https://uwoconnectforrf-743928421487.asia-south1.run.app/client/channels';
+    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://uwoconnect.aisa24.com';
+    const redirectUri = `${origin}/client/channels`;
     const appId = '1675703437621442';
     const scope = 'pages_show_list,pages_messaging,pages_read_engagement,pages_manage_metadata';
 
