@@ -511,6 +511,49 @@ export function getChannelAccessState(channelKey, clientData, activePlans = []) 
   const canonicalKey = CANONICAL_CHANNEL_KEY[key] || CANONICAL_CHANNEL_KEY[cleanKey] || cleanKey;
   const featureKey = FEATURE_KEY_MAP[key] || FEATURE_KEY_MAP[cleanKey] || `connector_${cleanKey}`;
 
+  // Google OAuth Reviewer / Verification account entitlement bypass (Phase 6):
+  const isGoogleConnector = ['gmail', 'google_calendar', 'google_sheets', 'google_docs', 'google_slides', 'youtube'].includes(canonicalKey) || ['gmail', 'google_calendar', 'google_sheets', 'google_docs', 'google_slides', 'youtube'].includes(cleanKey);
+  const isReviewerAccount = Boolean(
+    clientData?.is_verification_account ||
+    clientData?.settings?.is_verification_account ||
+    (typeof window !== 'undefined' && (localStorage.getItem('is_google_reviewer') === 'true' || (localStorage.getItem('uwo_user_email') || '').includes('reviewer')))
+  );
+
+  // If this is a reviewer account and a Google connector, grant direct access without subscription paywall
+  if (isReviewerAccount && isGoogleConnector) {
+    const isConn = Boolean(
+      (cleanKey === 'gmail' && (clientData?.gmail_enabled || clientData?.gmail_config?.email)) ||
+      (cleanKey === 'google_calendar' && (clientData?.google_calendar_enabled || clientData?.google_calendar_config?.connected)) ||
+      (cleanKey === 'google_sheets' && (clientData?.google_sheets_enabled || clientData?.google_sheets_config?.connected)) ||
+      (cleanKey === 'google_docs' && (clientData?.google_docs_enabled || clientData?.google_docs_config?.connected)) ||
+      (cleanKey === 'google_slides' && (clientData?.google_slides_enabled || clientData?.google_slides_config?.connected)) ||
+      (cleanKey === 'youtube' && (clientData?.youtube_enabled || clientData?.youtube_config?.channel_id))
+    );
+
+    if (isConn) {
+      return {
+        status: 'CONNECTED',
+        label: 'Connected',
+        canConnect: false,
+        canConfigure: true,
+        isDisabled: false,
+        isIncludedInPlan: true,
+        requiredPlanName: 'Reviewer Test Plan',
+        badgeColor: 'bg-emerald-50 text-emerald-700 border-emerald-200'
+      };
+    }
+    return {
+      status: 'NOT_CONNECTED',
+      label: 'Available to Connect',
+      canConnect: true,
+      canConfigure: true,
+      isDisabled: false,
+      isIncludedInPlan: true,
+      requiredPlanName: 'Reviewer Test Plan',
+      badgeColor: 'bg-blue-50 text-blue-700 border-blue-200'
+    };
+  }
+
   // 0. Level 1: Global Admin Master Check (Channels, Connectors, & Features)
   const gConnectors = clientData?.global_connectors;
   const effConnectors = clientData?.effective_connectors;

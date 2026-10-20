@@ -312,20 +312,25 @@ export default function GmailConfigModal({ client, isOpen, onClose, onSaved }) {
                   Granted Google OAuth Scopes
                 </h4>
                 <p className="text-slate-500 text-[11px]">
-                  UWO Connect requests official restricted scopes via Google Cloud OAuth Consent Screen:
+                  UWOConnect requests the official restricted Gmail scope verified by Google's Trust & Safety Team:
                 </p>
                 <div className="space-y-2 pt-2">
-                  <div className="p-2.5 bg-white rounded-xl border border-slate-200/80 font-mono text-[11px] text-slate-800 flex items-center justify-between">
-                    <span>https://www.googleapis.com/auth/gmail.readonly</span>
-                    <span className="text-emerald-700 font-sans text-[10px] font-bold bg-emerald-50 px-2 py-0.5 rounded">Granted</span>
+                  <div className="p-3 bg-white rounded-xl border border-slate-200/80 space-y-1">
+                    <div className="flex items-center justify-between">
+                      <span className="font-mono text-[11px] font-bold text-slate-800">
+                        https://www.googleapis.com/auth/gmail.modify
+                      </span>
+                      <span className="text-emerald-700 font-sans text-[10px] font-bold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                        Verified Scope
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-slate-500">
+                      Allows UWOConnect to read customer support emails, dispatch AI and template auto-replies, and manage folder labels (inbox, sent, trash).
+                    </p>
                   </div>
-                  <div className="p-2.5 bg-white rounded-xl border border-slate-200/80 font-mono text-[11px] text-slate-800 flex items-center justify-between">
-                    <span>https://www.googleapis.com/auth/gmail.send</span>
-                    <span className="text-emerald-700 font-sans text-[10px] font-bold bg-emerald-50 px-2 py-0.5 rounded">Granted</span>
-                  </div>
-                  <div className="p-2.5 bg-white rounded-xl border border-slate-200/80 font-mono text-[11px] text-slate-800 flex items-center justify-between">
-                    <span>https://www.googleapis.com/auth/gmail.labels</span>
-                    <span className="text-emerald-700 font-sans text-[10px] font-bold bg-emerald-50 px-2 py-0.5 rounded">Granted</span>
+                  <div className="p-2.5 bg-white rounded-xl border border-slate-200/80 font-mono text-[11px] text-slate-700 flex items-center justify-between">
+                    <span>https://www.googleapis.com/auth/userinfo.email</span>
+                    <span className="text-slate-600 font-sans text-[10px] font-semibold bg-slate-100 px-2 py-0.5 rounded">Identity</span>
                   </div>
                 </div>
               </div>
