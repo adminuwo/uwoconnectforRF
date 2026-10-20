@@ -58,6 +58,7 @@ const TOUR_IDS = {
   'Messages': 'sidebar-inbox',
   'Inbox': 'sidebar-inbox',
   'Inbox / Messages': 'sidebar-inbox',
+  'Gmail': 'sidebar-gmail',
   'Broadcasts': 'sidebar-campaigns',
   'Knowledge Base': 'sidebar-knowledge',
   'Catalog': 'sidebar-catalog',
@@ -309,8 +310,9 @@ const Sidebar = ({ role, isOpen, onClose, onToggle }) => {
 
     // ── Core Communication & Automation ──
     { name: 'Channels', href: '/client/channels', icon: Link2, requiredPlan: 'Starter', featureKey: 'feature_channels' },
-    { name: 'Google News', href: '/client/google-news', icon: Newspaper, requiredPlan: 'Starter', featureKey: 'connector_google_news' },
     { name: 'Inbox / Messages', href: '/client/inbox', icon: MessageSquare, requiredPlan: 'Starter', featureKey: 'feature_shared_inbox' },
+    { name: 'Gmail', href: '/client/gmail', icon: Mail, requiredPlan: 'Starter', featureKey: 'connector_gmail' },
+    { name: 'Google News', href: '/client/google-news', icon: Newspaper, requiredPlan: 'Starter', featureKey: 'connector_google_news' },
     { name: 'Auto Replies', href: '/client/automations', icon: Zap, requiredPlan: 'Starter', featureKey: 'feature_autoreply' },
     { name: 'Workflows', href: '/client/workflows', icon: GitBranch, requiredPlan: 'Starter', featureKey: 'feature_workflow' },
 
@@ -343,6 +345,7 @@ const Sidebar = ({ role, isOpen, onClose, onToggle }) => {
     { name: 'Proposals', href: '/client/proposals', icon: FileText },
     { name: 'Invoices', href: '/client/invoices', icon: Receipt },
     { name: 'Messages', href: '/client/inbox', icon: MessageSquare },
+    { name: 'Gmail', href: '/client/gmail', icon: Mail },
     { name: 'Knowledge Base', href: '/client/knowledge', icon: Brain },
     { name: 'Catalog', href: '/client/catalog', icon: ShoppingBag },
     { name: 'Orders', href: '/client/orders', icon: Receipt },

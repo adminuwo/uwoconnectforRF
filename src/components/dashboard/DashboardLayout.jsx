@@ -43,6 +43,7 @@ const PAGE_TITLES = {
   '/admin/support': 'Super Admin Support Desk',
   '/client/guides': 'Learning Center',
   '/client/channels': 'Channels',
+  '/client/gmail': 'Gmail',
   '/client/email': 'Email / Gmail',
   '/client/calls': 'Voice & Video Calls',
   '/client/youtube': 'YouTube',
