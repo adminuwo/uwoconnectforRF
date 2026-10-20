@@ -1798,6 +1798,18 @@ const ClientChannelsPage = () => {
                   btnColor: 'bg-[#0078D4] hover:bg-[#106EBE] text-white'
                 },
                 {
+                  key: 'google_calendar',
+                  name: 'Google Calendar',
+                  desc: 'Auto-book customer consultations, team meetings, and appointment reminders.',
+                  icon: <GoogleCalendarIcon size={28} />,
+                  isConnected: isGoogleCalendarConnected,
+                  connectedInfo: client?.google_calendar_config?.account_email || 'Calendar Connected',
+                  onConnect: () => setIsGoogleCalendarConfigModalOpen(true),
+                  onConfigure: () => setIsGoogleCalendarConfigModalOpen(true),
+                  badge: 'Appointments',
+                  btnColor: 'bg-[#4285F4] hover:bg-[#3367d6] text-white'
+                },
+                {
                   key: 'google_maps',
                   name: 'Google Maps',
                   desc: 'Google Maps location intelligence, business verification, and geo-routing.',
