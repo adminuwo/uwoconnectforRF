@@ -10,23 +10,34 @@
 const PRIVATE_IP_REGEX = /^(127\.|10\.|192\.168\.|172\.(1[6-9]|2[0-9]|3[01])\.)/;
 
 const getApiBaseUrl = () => {
-  if (process.env.NEXT_PUBLIC_API_URL) {
-    return process.env.NEXT_PUBLIC_API_URL;
-  }
   if (typeof window !== 'undefined' && window.location) {
     const currentHost = window.location.hostname;
     if (currentHost === 'localhost' || currentHost === '127.0.0.1') {
-      return 'http://127.0.0.1:8000';
+      return process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080';
     }
     if (PRIVATE_IP_REGEX.test(currentHost)) {
-      return `http://${currentHost}:8000`;
+      return `http://${currentHost}:8080`;
     }
-    // Live / Production external host
+    // Live / Production external host (e.g. uwoconnect.aisa24.com, *.run.app)
+    if (
+      process.env.NEXT_PUBLIC_API_URL &&
+      !process.env.NEXT_PUBLIC_API_URL.includes('127.0.0.1') &&
+      !process.env.NEXT_PUBLIC_API_URL.includes('localhost')
+    ) {
+      return process.env.NEXT_PUBLIC_API_URL;
+    }
     return 'https://uwoconnectforrb-743928421487.asia-south1.run.app';
+  }
+  if (
+    process.env.NEXT_PUBLIC_API_URL &&
+    !process.env.NEXT_PUBLIC_API_URL.includes('127.0.0.1') &&
+    !process.env.NEXT_PUBLIC_API_URL.includes('localhost')
+  ) {
+    return process.env.NEXT_PUBLIC_API_URL;
   }
   return process.env.NODE_ENV === 'production'
     ? 'https://uwoconnectforrb-743928421487.asia-south1.run.app'
-    : 'http://127.0.0.1:8000';
+    : 'http://127.0.0.1:8080';
 };
 
 export const getUnifiedApiBaseUrl = () => {

@@ -57,6 +57,11 @@ export default function YouTubeConfigModal({ client, isOpen, onClose, onSaved })
     setConnecting(true);
     try {
       const token = localStorage.getItem('token') || localStorage.getItem('uwo_token');
+      if (!token) {
+        showNotification('Please log in again to connect YouTube.', 'error');
+        setConnecting(false);
+        return;
+      }
       const res = await axios.get(`${API_BASE_URL}/api/auth/youtube/connect`, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -64,11 +69,21 @@ export default function YouTubeConfigModal({ client, isOpen, onClose, onSaved })
         window.location.href = res.data.url || res.data.auth_url;
         return;
       }
+      if (res.data?.error) {
+        showNotification(res.data.error, 'error');
+        setConnecting(false);
+        return;
+      }
     } catch (err) {
       console.warn('Direct API connect error, using query redirect:', err);
+      const token = localStorage.getItem('token') || localStorage.getItem('uwo_token');
+      if (token) {
+        window.location.href = `${API_BASE_URL}/api/auth/youtube/connect?token=${encodeURIComponent(token)}`;
+        return;
+      }
+      showNotification('Failed to initiate YouTube connection. Check credentials.', 'error');
+      setConnecting(false);
     }
-    const token = localStorage.getItem('token') || localStorage.getItem('uwo_token');
-    window.location.href = `${API_BASE_URL}/api/auth/youtube/connect${token ? `?token=${token}` : ''}`;
   };
 
   const handleManualSave = async () => {
