@@ -46,6 +46,7 @@ import GoogleCalendarConfigModal, { GoogleCalendarIcon } from '@/components/chan
 import GoogleSheetsConfigModal, { GoogleSheetsIcon } from '@/components/channels/GoogleSheetsConfigModal';
 import GoogleDocsConfigModal, { GoogleDocsIcon } from '@/components/channels/GoogleDocsConfigModal';
 import GoogleSlidesConfigModal, { GoogleSlidesIcon } from '@/components/channels/GoogleSlidesConfigModal';
+import GoogleDriveConfigModal, { GoogleDriveIcon } from '@/components/channels/GoogleDriveConfigModal';
 import GoogleNewsConfigModal, { GoogleNewsIcon } from '@/components/channels/GoogleNewsConfigModal';
 import OutlookConfigModal, { OutlookIcon } from '@/components/channels/OutlookConfigModal';
 import YouTubeConfigModal, { YouTubeBrandIcon } from '@/components/channels/YouTubeConfigModal';
@@ -172,6 +173,7 @@ const ClientChannelsPage = () => {
   const [isGoogleSheetsConfigModalOpen, setIsGoogleSheetsConfigModalOpen] = useState(false);
   const [isGoogleDocsConfigModalOpen, setIsGoogleDocsConfigModalOpen] = useState(false);
   const [isGoogleSlidesConfigModalOpen, setIsGoogleSlidesConfigModalOpen] = useState(false);
+  const [isGoogleDriveConfigModalOpen, setIsGoogleDriveConfigModalOpen] = useState(false);
   const [isGoogleNewsConfigModalOpen, setIsGoogleNewsConfigModalOpen] = useState(false);
   const [isZohoConfigModalOpen, setIsZohoConfigModalOpen] = useState(false);
   const [isYouTubeConfigModalOpen, setIsYouTubeConfigModalOpen] = useState(false);
@@ -776,6 +778,7 @@ const ClientChannelsPage = () => {
   const isGoogleSheetsConnected = Boolean(client?.google_sheets_enabled || client?.google_sheets_config?.spreadsheet_id || client?.google_sheets_config?.access_token || client?.google_sheets_config?.account_email);
   const isGoogleDocsConnected = Boolean(client?.google_docs_enabled || client?.google_docs_config?.document_id || client?.google_docs_config?.default_doc_id || client?.google_docs_config?.access_token || client?.google_docs_config?.account_email);
   const isGoogleSlidesConnected = Boolean(client?.google_slides_enabled || client?.google_slides_config?.presentation_id || client?.google_slides_config?.default_presentation_id || client?.google_slides_config?.access_token || client?.google_slides_config?.account_email);
+  const isGoogleDriveConnected = Boolean(client?.google_drive_enabled || client?.google_drive_config?.connected || client?.google_docs_enabled || client?.google_sheets_enabled || client?.google_slides_enabled);
   const isGoogleNewsConnected = Boolean(client?.google_news_enabled || client?.google_news_config?.topic || client?.google_news_config?.query);
   const isGoogleMapsConnected = Boolean(client?.google_maps_enabled || client?.google_maps_config?.api_key || client?.google_maps_config?.place_id);
   const isYouTubeConnected = Boolean(client?.youtube_enabled || client?.youtube_config?.channel_id || client?.youtube_config?.access_token || client?.youtube_config?.channel_title);
@@ -1870,6 +1873,18 @@ const ClientChannelsPage = () => {
                   btnColor: 'bg-[#F4B400] hover:bg-[#e3a600] text-white'
                 },
                 {
+                  key: 'google_drive',
+                  name: 'Google Drive',
+                  desc: 'Cloud file management to upload, organize, and browse documents, sheets, and slides.',
+                  icon: <GoogleDriveIcon size={28} />,
+                  isConnected: isGoogleDriveConnected,
+                  connectedInfo: client?.google_drive_config?.account_email || client?.google_docs_config?.account_email || 'Drive Connected',
+                  onConnect: () => setIsGoogleDriveConfigModalOpen(true),
+                  onConfigure: () => setIsGoogleDriveConfigModalOpen(true),
+                  badge: 'Cloud Files',
+                  btnColor: 'bg-[#34A853] hover:bg-[#2d9247] text-white'
+                },
+                {
                   key: 'google_news',
                   name: 'Google News Feed',
                   desc: 'Track industry news, brand keywords, and real-time market trends automatically.',
@@ -2473,6 +2488,16 @@ const ClientChannelsPage = () => {
             onClose={() => setIsGoogleSlidesConfigModalOpen(false)}
             client={client}
             onSaved={handleGoogleSlidesSaved}
+          />
+        )}
+
+        {/* Google Drive Configuration Modal */}
+        {isGoogleDriveConfigModalOpen && (
+          <GoogleDriveConfigModal
+            isOpen={isGoogleDriveConfigModalOpen}
+            onClose={() => setIsGoogleDriveConfigModalOpen(false)}
+            client={client}
+            onSaved={() => fetchClient(true)}
           />
         )}
 

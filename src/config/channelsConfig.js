@@ -7,7 +7,7 @@ export const GLOBAL_ACTIVE_CHANNELS = ['whatsapp', 'facebook', 'instagram'];
 export const GLOBAL_ALL_CHANNELS = [
   'whatsapp', 'facebook', 'instagram', 'calls', 'google_news', 'telegram',
   'gmail', 'outlook', 'onedrive', 'google_calendar', 'google_sheets',
-  'google_docs', 'google_slides', 'zoho', 'youtube', 'razorpay',
+  'google_docs', 'google_slides', 'google_drive', 'zoho', 'youtube', 'razorpay',
   'broadcasts', 'workflows', 'automations', 'knowledge', 'crm',
   'proposals', 'quotations', 'invoices', 'catalog', 'orders', 'reports', 'team'
 ];
@@ -135,6 +135,18 @@ export const CHANNEL_DEFINITIONS = [
     color: '#F4B400',
     badgeBg: 'bg-yellow-50 text-yellow-700 border-yellow-200',
     iconColor: 'text-yellow-600 bg-yellow-50 border-yellow-100',
+  },
+  {
+    key: 'google_drive',
+    name: 'Google Drive',
+    shortName: 'G-Drive',
+    category: 'STORAGE',
+    tagline: 'Cloud File Storage',
+    description: 'Browse, manage, upload, and organize cloud documents, folders, and shared media.',
+    isCore: false,
+    color: '#0F9D58',
+    badgeBg: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+    iconColor: 'text-emerald-600 bg-emerald-50 border-emerald-100',
   },
   {
     key: 'zoho',
@@ -386,6 +398,7 @@ export const FEATURE_KEY_MAP = {
   'google_sheets': 'connector_google_sheets',
   'google_docs': 'connector_google_docs',
   'google_slides': 'connector_google_slides',
+  'google_drive': 'connector_google_drive',
   'google_news': 'connector_google_news',
   'google_maps': 'connector_google_maps',
   'zoho': 'feature_crm',
@@ -447,6 +460,8 @@ export const CANONICAL_CHANNEL_KEY = {
   'connector_google_docs': 'google_docs',
   'google_slides': 'google_slides',
   'connector_google_slides': 'google_slides',
+  'google_drive': 'google_drive',
+  'connector_google_drive': 'google_drive',
   'zoho': 'zoho',
   'zoho_crm': 'zoho',
   'connector_zoho': 'zoho',
@@ -512,7 +527,7 @@ export function getChannelAccessState(channelKey, clientData, activePlans = []) 
   const featureKey = FEATURE_KEY_MAP[key] || FEATURE_KEY_MAP[cleanKey] || `connector_${cleanKey}`;
 
   // Google OAuth Reviewer / Verification account entitlement bypass (Phase 6):
-  const isGoogleConnector = ['gmail', 'google_calendar', 'google_sheets', 'google_docs', 'google_slides', 'youtube'].includes(canonicalKey) || ['gmail', 'google_calendar', 'google_sheets', 'google_docs', 'google_slides', 'youtube'].includes(cleanKey);
+  const isGoogleConnector = ['gmail', 'google_calendar', 'google_sheets', 'google_docs', 'google_slides', 'google_drive', 'youtube'].includes(canonicalKey) || ['gmail', 'google_calendar', 'google_sheets', 'google_docs', 'google_slides', 'google_drive', 'youtube'].includes(cleanKey);
   const isReviewerAccount = Boolean(
     clientData?.is_verification_account ||
     clientData?.settings?.is_verification_account ||
@@ -527,6 +542,7 @@ export function getChannelAccessState(channelKey, clientData, activePlans = []) 
       (cleanKey === 'google_sheets' && (clientData?.google_sheets_enabled || clientData?.google_sheets_config?.connected)) ||
       (cleanKey === 'google_docs' && (clientData?.google_docs_enabled || clientData?.google_docs_config?.connected)) ||
       (cleanKey === 'google_slides' && (clientData?.google_slides_enabled || clientData?.google_slides_config?.connected)) ||
+      (cleanKey === 'google_drive' && (clientData?.google_drive_enabled || clientData?.google_drive_config?.connected || clientData?.google_docs_enabled || clientData?.google_sheets_enabled || clientData?.google_slides_enabled)) ||
       (cleanKey === 'youtube' && (clientData?.youtube_enabled || clientData?.youtube_config?.channel_id))
     );
 
@@ -715,6 +731,8 @@ export function getChannelAccessState(channelKey, clientData, activePlans = []) 
     isConnected = Boolean(clientData?.google_docs_enabled || clientData?.google_docs_config?.connected);
   } else if (key === 'google_slides') {
     isConnected = Boolean(clientData?.google_slides_enabled || clientData?.google_slides_config?.connected);
+  } else if (key === 'google_drive') {
+    isConnected = Boolean(clientData?.google_drive_enabled || clientData?.google_drive_config?.connected || clientData?.google_docs_enabled || clientData?.google_sheets_enabled || clientData?.google_slides_enabled);
   } else if (key === 'zoho') {
     isConnected = Boolean(clientData?.zoho_enabled || clientData?.zoho_config?.connected);
   } else if (key === 'google_news') {

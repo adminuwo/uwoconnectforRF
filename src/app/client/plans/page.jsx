@@ -194,6 +194,7 @@ const getKeyFriendlyName = (key) => {
     connector_onedrive: 'OneDrive',
     connector_google_sheets: 'Google Sheets',
     connector_google_slides: 'Google Slides',
+    connector_google_drive: 'Google Drive',
     connector_google_news: 'Google News Feed',
     connector_zoho: 'Zoho CRM',
     connector_google_calendar: 'Google Calendar',
