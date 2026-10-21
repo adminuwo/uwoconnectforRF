@@ -131,7 +131,7 @@ export default function YouTubeConfigModal({ client, isOpen, onClose, onSaved })
       const token = localStorage.getItem('token') || localStorage.getItem('uwo_token');
       await axios.patch(`${API_BASE_URL}/api/client/update/`, {
         youtube_enabled: false,
-        youtube_config: null
+        youtube_config: {}
       }, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -141,7 +141,7 @@ export default function YouTubeConfigModal({ client, isOpen, onClose, onSaved })
         onSaved({
           ...client,
           youtube_enabled: false,
-          youtube_config: null
+          youtube_config: {}
         });
       }
       setTimeout(() => {

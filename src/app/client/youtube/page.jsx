@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { 
-  Play, ThumbsUp, MessageSquare, Eye, ArrowUpRight, 
+import {
+  Play, ThumbsUp, MessageSquare, Eye, ArrowUpRight,
   Send, Loader2, ArrowLeft, Calendar, Video, Heart, CornerDownRight,
   AlertCircle, Plus, Trash2, Sparkles
 } from 'lucide-react';
@@ -19,7 +19,7 @@ const Youtube = ({ size = 20, className }) => (
     fill="currentColor"
     className={className}
   >
-    <path d="M23.498 6.163a3.003 3.003 0 0 0-2.11-2.107C19.528 3.545 12 3.545 12 3.545s-7.528 0-9.388.511a3.003 3.003 0 0 0-2.11 2.107A30.213 30.213 0 0 0 0 12c0 1.944.15 3.89.49 5.837a3.003 3.003 0 0 0 2.11 2.107c1.86.51 9.388.51 9.388.51s7.528 0 9.388-.51a3.003 3.003 0 0 0 2.11-2.107A30.213 30.213 0 0 0 24 12a30.213 30.213 0 0 0-.502-5.837zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+    <path d="M23.498 6.163a3.003 3.003 0 0 0-2.11-2.107C19.528 3.545 12 3.545 12 3.545s-7.528 0-9.388.511a3.003 3.003 0 0 0-2.11 2.107A30.213 30.213 0 0 0 0 12c0 1.944.15 3.89.49 5.837a3.003 3.003 0 0 0 2.11 2.107c1.86.51 9.388.51 9.388.51s7.528 0 9.388-.51a3.003 3.003 0 0 0 2.11-2.107A30.213 30.213 0 0 0 24 12a30.213 30.213 0 0 0-.502-5.837zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
   </svg>
 );
 
@@ -230,7 +230,7 @@ const YouTubeManager = () => {
 
     setUploadingVideo(true);
     const token = localStorage.getItem('uwo_token');
-    const headers = { 
+    const headers = {
       Authorization: `Bearer ${token}`
     };
 
@@ -253,7 +253,7 @@ const YouTubeManager = () => {
         setUploadTitle('');
         setUploadDescription('');
         setUploadFile(null);
-        
+
         // Refresh videos list
         setLoadingVideos(true);
         const videosRes = await axios.get(
@@ -265,8 +265,9 @@ const YouTubeManager = () => {
         }
       }
     } catch (err) {
-      console.error('Error uploading video:', err.response?.data || err.message);
-      showToast(err.response?.data?.error || 'Failed to upload video to YouTube.', 'error');
+      console.warn('YouTube upload notice:', err.response?.data || err.message);
+      const errMsg = err.response?.data?.error || err.response?.data?.detail || err.message || 'Failed to upload video to YouTube.';
+      showToast(errMsg, 'error');
     } finally {
       setUploadingVideo(false);
       setLoadingVideos(false);
@@ -370,7 +371,7 @@ const YouTubeManager = () => {
         },
         { headers }
       );
-      
+
       if (res.data && !res.data.error) {
         showToast('Reply posted successfully!');
         // Clear reply text
@@ -426,19 +427,18 @@ const YouTubeManager = () => {
   return (
     <DashboardLayout role="CLIENT">
       <div className="max-w-7xl mx-auto w-full p-3 sm:p-6 pb-20 space-y-6 sm:space-y-10">
-        
+
         {/* Toast Notification */}
         {toast && (
-          <div className={`fixed bottom-5 right-5 z-50 flex items-center gap-3 px-5 py-3 rounded-2xl shadow-lg border transition-all ${
-            toast.type === 'error' ? 'bg-red-50 text-red-700 border-red-200' : 'bg-emerald-50 text-emerald-800 border-emerald-200'
-          }`}>
+          <div className={`fixed bottom-5 right-5 z-50 flex items-center gap-3 px-5 py-3 rounded-2xl shadow-lg border transition-all ${toast.type === 'error' ? 'bg-red-50 text-red-700 border-red-200' : 'bg-emerald-50 text-emerald-800 border-emerald-200'
+            }`}>
             <AlertCircle size={18} />
             <span className="text-xs font-bold">{toast.msg}</span>
           </div>
         )}
 
         {/* Back navigation */}
-        <button 
+        <button
           onClick={() => router.push('/client/channels')}
           className="flex items-center gap-2 text-slate-500 hover:text-red-600 font-bold transition-all text-sm group"
         >
@@ -451,12 +451,12 @@ const YouTubeManager = () => {
           <div className="p-4 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl glass-panel border border-red-100 bg-red-50/10 shadow-sm relative overflow-hidden">
             <div className="absolute top-0 right-0 w-80 h-80 bg-red-500/5 rounded-full blur-3xl pointer-events-none" />
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 sm:gap-6">
-              
+
               <div className="flex items-start sm:items-center gap-3 sm:gap-5 min-w-0">
                 {ytData.channel_thumbnail ? (
-                  <img 
-                    src={ytData.channel_thumbnail} 
-                    alt={ytData.channel_name} 
+                  <img
+                    src={ytData.channel_thumbnail}
+                    alt={ytData.channel_name}
                     className="w-14 h-14 sm:w-20 sm:h-20 rounded-full border-2 sm:border-4 border-red-500 shadow-md object-cover shrink-0"
                   />
                 ) : (
@@ -471,7 +471,7 @@ const YouTubeManager = () => {
                     </h1>
                     <span className="text-[10px] sm:text-xs font-black px-2 py-0.5 sm:py-1 bg-red-100 text-red-700 rounded-lg uppercase tracking-wider shrink-0">Active</span>
                   </div>
-                  
+
                   {isEditingDescription ? (
                     <div className="mt-2 flex flex-col gap-2">
                       <textarea
@@ -569,27 +569,26 @@ const YouTubeManager = () => {
             ) : (
               <div className="flex gap-4 sm:gap-5 overflow-x-auto pb-4 pt-1 scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent">
                 {videos.map((vid) => (
-                  <div 
+                  <div
                     key={vid.id}
                     onClick={() => loadComments(vid)}
-                    className={`min-w-[220px] sm:min-w-[280px] max-w-[240px] sm:max-w-[280px] p-3 sm:p-4 rounded-2xl sm:rounded-3xl border transition-all cursor-pointer relative overflow-hidden group flex flex-col justify-between shrink-0 snap-start ${
-                      selectedVideo?.id === vid.id 
-                        ? 'bg-red-50/20 border-red-400 shadow-md ring-2 ring-red-500/10' 
+                    className={`min-w-[220px] sm:min-w-[280px] max-w-[240px] sm:max-w-[280px] p-3 sm:p-4 rounded-2xl sm:rounded-3xl border transition-all cursor-pointer relative overflow-hidden group flex flex-col justify-between shrink-0 snap-start ${selectedVideo?.id === vid.id
+                        ? 'bg-red-50/20 border-red-400 shadow-md ring-2 ring-red-500/10'
                         : 'bg-white hover:bg-slate-50/50 border-slate-100 hover:shadow-sm'
-                    }`}
+                      }`}
                   >
                     <div>
                       {/* Video Thumbnail with Play Overlay */}
-                      <a 
+                      <a
                         href={vid.url}
                         target="_blank"
                         rel="noopener noreferrer"
                         onClick={(e) => e.stopPropagation()}
                         className="relative rounded-xl sm:rounded-2xl overflow-hidden aspect-video border border-slate-100/50 mb-2.5 sm:mb-3 block"
                       >
-                        <img 
-                          src={vid.thumbnail} 
-                          alt={vid.title} 
+                        <img
+                          src={vid.thumbnail}
+                          alt={vid.title}
                           className="w-full h-full object-cover group-hover:scale-105 transition-all duration-300"
                         />
                         <div className="absolute inset-0 bg-black/10 group-hover:bg-black/30 transition-all flex items-center justify-center">
@@ -649,7 +648,7 @@ const YouTubeManager = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-              
+
               {/* Column 1: WhatsApp Broadcasting */}
               <div className="p-4 bg-slate-50/50 rounded-2xl border border-slate-100 flex flex-col justify-between space-y-3">
                 <div className="space-y-2">
@@ -659,8 +658,8 @@ const YouTubeManager = () => {
                       <span className="text-[9px] text-slate-400 font-bold block mt-0.5">Send alerts to contacts on upload</span>
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer shrink-0">
-                      <input 
-                        type="checkbox" 
+                      <input
+                        type="checkbox"
                         checked={broadcastEnabled}
                         onChange={(e) => setBroadcastEnabled(e.target.checked)}
                         className="sr-only peer"
@@ -677,7 +676,7 @@ const YouTubeManager = () => {
                 {broadcastEnabled && (
                   <div className="space-y-2 pt-2 border-t border-slate-100/50">
                     <label className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Message Template</label>
-                    <textarea 
+                    <textarea
                       rows={2}
                       value={broadcastTemplate}
                       onChange={(e) => setBroadcastTemplate(e.target.value)}
@@ -702,11 +701,10 @@ const YouTubeManager = () => {
                   <button
                     type="button"
                     onClick={() => setBotEnabled(false)}
-                    className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border text-center transition-all ${
-                      !botEnabled
+                    className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border text-center transition-all ${!botEnabled
                         ? 'bg-red-50 border-red-500 text-red-700 shadow-sm ring-1 ring-red-500/10'
                         : 'bg-white border-slate-200 text-slate-600 hover:border-red-200'
-                    }`}
+                      }`}
                   >
                     <span className="text-base">✍️</span>
                     <span className="text-[9px] font-black uppercase tracking-wide">Manual Assistant</span>
@@ -716,11 +714,10 @@ const YouTubeManager = () => {
                   <button
                     type="button"
                     onClick={() => setBotEnabled(true)}
-                    className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border text-center transition-all ${
-                      botEnabled
+                    className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border text-center transition-all ${botEnabled
                         ? 'bg-red-50 border-red-500 text-red-700 shadow-sm ring-1 ring-red-500/10'
                         : 'bg-white border-slate-200 text-slate-600 hover:border-red-200'
-                    }`}
+                      }`}
                   >
                     <span className="text-base">🤖</span>
                     <span className="text-[9px] font-black uppercase tracking-wide">Auto AI Bot</span>
@@ -742,19 +739,18 @@ const YouTubeManager = () => {
 
                   <div className="grid grid-cols-3 gap-1.5 mt-2">
                     {[
-                      { value: 'concise',      label: 'Concise',      emoji: '⚡' },
-                      { value: 'friendly',     label: 'Friendly',     emoji: '😊' },
+                      { value: 'concise', label: 'Concise', emoji: '⚡' },
+                      { value: 'friendly', label: 'Friendly', emoji: '😊' },
                       { value: 'professional', label: 'Professional', emoji: '💼' },
                     ].map(opt => (
                       <button
                         key={opt.value}
                         type="button"
                         onClick={() => setBotBehavior(opt.value)}
-                        className={`flex flex-col items-center gap-0.5 py-1.5 rounded-lg border text-center transition-all ${
-                          botBehavior === opt.value
+                        className={`flex flex-col items-center gap-0.5 py-1.5 rounded-lg border text-center transition-all ${botBehavior === opt.value
                             ? 'bg-red-50 border-red-500 text-red-700 font-black shadow-sm ring-1 ring-red-500/10'
                             : 'bg-white border-slate-200 text-slate-600 hover:border-red-200 text-slate-500'
-                        }`}
+                          }`}
                       >
                         <span className="text-xs">{opt.emoji}</span>
                         <span className="text-[8px] uppercase font-bold tracking-wider">{opt.label}</span>
@@ -764,14 +760,14 @@ const YouTubeManager = () => {
                 </div>
 
                 <div className="flex gap-2.5 pt-2 border-t border-slate-100/50">
-                  <button 
+                  <button
                     disabled={savingSettings}
                     onClick={handleSaveSettings}
                     className="flex-1 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-[10px] font-bold uppercase transition-all flex items-center justify-center gap-1.5"
                   >
                     {savingSettings ? <Loader2 className="animate-spin" size={11} /> : 'Save Setup'}
                   </button>
-                  <button 
+                  <button
                     disabled={checkingBroadcast}
                     onClick={handleCheckBroadcast}
                     className="flex-1 py-2.5 bg-red-50 hover:bg-red-100/80 text-red-600 border border-red-100 rounded-xl text-[10px] font-bold uppercase transition-all flex items-center justify-center gap-1.5"
@@ -786,7 +782,7 @@ const YouTubeManager = () => {
 
           {/* Row 3.5: Custom Keyword Auto-Replies (Collapsible & Compact) */}
           <div className="bg-white border border-slate-200/60 rounded-2xl p-4 shadow-xs transition-all">
-            <div 
+            <div
               onClick={() => setIsKeywordSectionOpen(!isKeywordSectionOpen)}
               className="flex items-center justify-between cursor-pointer select-none"
             >
@@ -805,7 +801,7 @@ const YouTubeManager = () => {
                 </div>
               </div>
 
-              <button 
+              <button
                 type="button"
                 className="text-xs font-semibold text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200/80 px-3 py-1.5 rounded-xl transition-all flex items-center gap-1.5"
               >
@@ -819,15 +815,15 @@ const YouTubeManager = () => {
               <div className="mt-4 pt-4 border-t border-slate-100 space-y-4 animate-in fade-in duration-150">
                 {/* Form */}
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     value={newKeywordInput}
                     onChange={(e) => setNewKeywordInput(e.target.value)}
                     placeholder="Keywords (e.g. price, cost)"
                     className="sm:w-1/3 text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-red-500 font-medium bg-slate-50/50"
                   />
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     value={newReplyInput}
                     onChange={(e) => setNewReplyInput(e.target.value)}
                     placeholder="Preset Reply text..."
@@ -889,7 +885,7 @@ const YouTubeManager = () => {
 
           {/* Row 4: Engagement Hub & Comments list */}
           <div className="bg-white border border-slate-100 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-sm space-y-4 sm:space-y-6">
-            
+
             {/* Header with Search and Dropdown Selector */}
             <div className="border-b border-slate-100 pb-4 flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4">
               <div className="flex items-center gap-2">
@@ -903,8 +899,8 @@ const YouTubeManager = () => {
               {/* Controls: Video Select + Comment Search */}
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 flex-1 max-w-full sm:max-w-2xl justify-end">
                 {/* Video Select Dropdown */}
-                <select 
-                  value={selectedVideo?.id || ''} 
+                <select
+                  value={selectedVideo?.id || ''}
                   onChange={(e) => {
                     const video = videos.find(v => v.id === e.target.value);
                     if (video) loadComments(video);
@@ -920,11 +916,11 @@ const YouTubeManager = () => {
                 {/* Comment Search input */}
                 <div className="relative flex-1">
                   <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 text-xs">🔍</span>
-                  <input 
-                    type="text" 
-                    placeholder="Search comments..." 
-                    value={commentSearch} 
-                    onChange={(e) => setCommentSearch(e.target.value)} 
+                  <input
+                    type="text"
+                    placeholder="Search comments..."
+                    value={commentSearch}
+                    onChange={(e) => setCommentSearch(e.target.value)}
                     className="w-full text-xs pl-8 pr-4 py-2 sm:py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-red-500 font-medium"
                   />
                 </div>
@@ -943,21 +939,21 @@ const YouTubeManager = () => {
               </div>
             ) : (
               <div className="bg-white border border-slate-100 rounded-2xl overflow-hidden flex flex-col justify-between">
-                
+
                 {/* Active Video Header Info */}
                 <div className="p-3 bg-slate-50/50 border-b border-slate-100 flex items-center justify-between gap-3">
                   <div className="flex items-center gap-3">
-                    <img 
-                      src={selectedVideo.thumbnail} 
-                      alt={selectedVideo.title} 
+                    <img
+                      src={selectedVideo.thumbnail}
+                      alt={selectedVideo.title}
                       className="w-14 h-10 object-cover rounded-lg border border-slate-200 shrink-0"
                     />
                     <div className="min-w-0">
                       <h3 className="text-xs font-bold text-slate-800 truncate max-w-md">{selectedVideo.title}</h3>
-                      <a 
-                        href={selectedVideo.url} 
-                        target="_blank" 
-                        rel="noopener noreferrer" 
+                      <a
+                        href={selectedVideo.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
                         className="text-[9px] text-red-600 font-bold hover:underline flex items-center gap-0.5 mt-0.5"
                       >
                         Open on YouTube <ArrowUpRight size={8} />
@@ -985,8 +981,8 @@ const YouTubeManager = () => {
                     </div>
                   ) : (
                     (() => {
-                      const filtered = comments.filter((comment) => 
-                        comment.text?.toLowerCase().includes(commentSearch.toLowerCase()) || 
+                      const filtered = comments.filter((comment) =>
+                        comment.text?.toLowerCase().includes(commentSearch.toLowerCase()) ||
                         comment.author?.toLowerCase().includes(commentSearch.toLowerCase())
                       );
 
@@ -1006,9 +1002,9 @@ const YouTubeManager = () => {
                           {/* Author info */}
                           <div className="flex items-center gap-2.5">
                             {comment.author_photo ? (
-                              <img 
-                                src={comment.author_photo} 
-                                alt={comment.author} 
+                              <img
+                                src={comment.author_photo}
+                                alt={comment.author}
                                 className="w-6 h-6 rounded-full border border-slate-100"
                               />
                             ) : (
@@ -1034,9 +1030,9 @@ const YouTubeManager = () => {
                                 <div key={reply.reply_id} className="space-y-1 bg-white p-2 rounded-xl border border-slate-100/60 shadow-sm">
                                   <div className="flex items-center gap-1.5">
                                     {reply.author_photo ? (
-                                      <img 
-                                        src={reply.author_photo} 
-                                        alt={reply.author} 
+                                      <img
+                                        src={reply.author_photo}
+                                        alt={reply.author}
                                         className="w-4 h-4 rounded-full border border-slate-100"
                                       />
                                     ) : (
@@ -1060,15 +1056,15 @@ const YouTubeManager = () => {
                           {/* Reply box */}
                           <div className="flex items-center gap-2 pt-1 border-t border-slate-100/50 pl-2">
                             <CornerDownRight size={12} className="text-slate-400" />
-                            <input 
-                              type="text" 
+                            <input
+                              type="text"
                               placeholder={`Write a reply (${botBehavior} AI mode)...`}
                               value={replyText[comment.comment_id] || ''}
                               onChange={(e) => setReplyText(prev => ({ ...prev, [comment.comment_id]: e.target.value }))}
                               onKeyDown={(e) => e.key === 'Enter' && handleSendReply(comment.comment_id)}
                               className="flex-1 bg-transparent text-xs text-slate-800 focus:outline-none placeholder-slate-300 font-bold"
                             />
-                            <button 
+                            <button
                               disabled={generatingAI[comment.comment_id]}
                               onClick={() => handleAISuggestReply(comment.comment_id, comment.text)}
                               className="p-1.5 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-xl transition-all disabled:opacity-40"
@@ -1080,7 +1076,7 @@ const YouTubeManager = () => {
                                 <Sparkles size={14} />
                               )}
                             </button>
-                            <button 
+                            <button
                               disabled={sendingReply[comment.comment_id]}
                               onClick={() => handleSendReply(comment.comment_id)}
                               className="p-1.5 text-slate-600 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all disabled:opacity-40"
@@ -1122,7 +1118,7 @@ const YouTubeManager = () => {
                   <Video size={18} className="text-red-600" />
                   <span>Upload Video to YouTube</span>
                 </h3>
-                <button 
+                <button
                   onClick={() => setIsUploadModalOpen(false)}
                   className="text-slate-400 hover:text-slate-700 font-bold"
                 >
@@ -1133,8 +1129,8 @@ const YouTubeManager = () => {
               <form onSubmit={handleUploadVideo} className="space-y-4">
                 <div>
                   <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Select Video File</label>
-                  <input 
-                    type="file" 
+                  <input
+                    type="file"
                     accept="video/*"
                     onChange={(e) => setUploadFile(e.target.files[0])}
                     className="w-full text-xs text-slate-600 border border-slate-200 rounded-xl p-2.5 focus:outline-none file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-[10px] file:font-bold file:uppercase file:bg-red-50 file:text-red-700 hover:file:bg-red-100/80 file:cursor-pointer"
@@ -1144,8 +1140,8 @@ const YouTubeManager = () => {
 
                 <div>
                   <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Video Title</label>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     placeholder="Enter video title"
                     value={uploadTitle}
                     onChange={(e) => setUploadTitle(e.target.value)}
@@ -1156,7 +1152,7 @@ const YouTubeManager = () => {
 
                 <div>
                   <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Video Description</label>
-                  <textarea 
+                  <textarea
                     rows={3}
                     placeholder="Enter video description..."
                     value={uploadDescription}
@@ -1167,7 +1163,7 @@ const YouTubeManager = () => {
 
                 <div>
                   <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Privacy Status</label>
-                  <select 
+                  <select
                     value={uploadPrivacy}
                     onChange={(e) => setUploadPrivacy(e.target.value)}
                     className="w-full text-xs p-3 rounded-xl border border-slate-200 focus:outline-none focus:border-red-500 font-bold bg-white"
@@ -1179,14 +1175,14 @@ const YouTubeManager = () => {
                 </div>
 
                 <div className="pt-2 flex items-center gap-3">
-                  <button 
+                  <button
                     type="button"
                     onClick={() => setIsUploadModalOpen(false)}
                     className="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all uppercase tracking-wider"
                   >
                     Cancel
                   </button>
-                  <button 
+                  <button
                     type="submit"
                     disabled={uploadingVideo}
                     className="flex-1 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-bold transition-all uppercase tracking-wider flex items-center justify-center gap-1.5"
@@ -1210,19 +1206,19 @@ const YouTubeManager = () => {
           <div className="flex flex-wrap items-center gap-1.5">
             <span className="font-semibold text-slate-700">YouTube API Compliance:</span>
             <span>By using this YouTube integration, you agree to be bound by the</span>
-            <a 
-              href="https://www.youtube.com/t/terms" 
-              target="_blank" 
-              rel="noopener noreferrer" 
+            <a
+              href="https://www.youtube.com/t/terms"
+              target="_blank"
+              rel="noopener noreferrer"
               className="text-red-600 font-bold hover:underline inline-flex items-center gap-0.5"
             >
               YouTube Terms of Service ↗
             </a>
             <span>and the</span>
-            <a 
-              href="https://policies.google.com/privacy" 
-              target="_blank" 
-              rel="noopener noreferrer" 
+            <a
+              href="https://policies.google.com/privacy"
+              target="_blank"
+              rel="noopener noreferrer"
               className="text-red-600 font-bold hover:underline inline-flex items-center gap-0.5"
             >
               Google Privacy Policy ↗
@@ -1230,10 +1226,10 @@ const YouTubeManager = () => {
           </div>
           <div>
             <span>You can revoke UWO Connect access at any time via</span>
-            <a 
-              href="https://myaccount.google.com/permissions" 
-              target="_blank" 
-              rel="noopener noreferrer" 
+            <a
+              href="https://myaccount.google.com/permissions"
+              target="_blank"
+              rel="noopener noreferrer"
               className="text-blue-600 font-bold hover:underline ml-1 inline-flex items-center gap-0.5"
             >
               Google Security Settings ↗
