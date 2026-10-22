@@ -17,6 +17,7 @@ import UWOLoginModal from '@/components/UWOLoginModal';
 import TermsModal from '@/components/TermsModal';
 import PricingComparisonTable from '@/components/pricing/PricingComparisonTable';
 import CustomPlanSection from './CustomPlanSection';
+import ProjectsDropdown, { MobileProjectsAccordion } from './ProjectsDropdown';
 import { useBrand } from '@/context/BrandContext';
 import ScrollReveal from './ScrollReveal';
 
@@ -713,6 +714,10 @@ export default function UwoLandingPage() {
             <Link href="/pricing" className="px-3 py-1.5 rounded-lg hover:text-[#0B8F78] hover:bg-emerald-50/50 dark:hover:bg-slate-800/60 transition-colors">
               Pricing
             </Link>
+            <Link href="/about" className="px-3 py-1.5 rounded-lg hover:text-[#0B8F78] hover:bg-emerald-50/50 dark:hover:bg-slate-800/60 transition-colors">
+              About
+            </Link>
+            <ProjectsDropdown isDarkMode={isDarkMode} align="right" />
           </nav>
 
           {/* Right Action Buttons */}
@@ -825,6 +830,14 @@ export default function UwoLandingPage() {
             >
               Pricing
             </Link>
+            <Link
+              href="/about"
+              onClick={() => setMobileMenuOpen(false)}
+              className="block text-sm font-semibold text-slate-700 dark:text-slate-300 py-1"
+            >
+              About
+            </Link>
+            <MobileProjectsAccordion isDarkMode={isDarkMode} onItemClick={() => setMobileMenuOpen(false)} />
             <div className="pt-2 border-t border-slate-200 dark:border-slate-800 flex items-center gap-3">
               <button
                 type="button"
