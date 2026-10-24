@@ -74,7 +74,7 @@ const AdminProductsPage = () => {
 
   return (
     <DashboardLayout role="ADMIN">
-      <div className="w-full max-w-7xl mx-auto pb-24 px-4 sm:px-6 lg:px-8 font-sans text-slate-800 space-y-6">
+      <div className="w-full max-w-full pb-24 px-4 sm:px-6 lg:px-8 font-sans text-slate-800 space-y-6">
         
         {/* Page Top Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-4 pb-2 border-b border-slate-100">

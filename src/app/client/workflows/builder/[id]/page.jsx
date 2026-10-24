@@ -1771,7 +1771,7 @@ const MessageForm = ({ data, type, onSave, onDelete, availableProducts = [] }) =
               {uploadingMedia ? (
                 <>
                   <Loader2 size={24} className="text-emerald-500 animate-spin" />
-                  <p className="text-xs font-bold text-emerald-500">Uploading to Azure Cloud...</p>
+                  <p className="text-xs font-bold text-emerald-500">Uploading to Cloud Storage...</p>
                 </>
               ) : (
                 <>

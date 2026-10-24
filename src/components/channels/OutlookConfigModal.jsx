@@ -74,7 +74,7 @@ export default function OutlookConfigModal({ isOpen, onClose, client, onSaved })
   const [excelData, setExcelData] = useState({ name: 'John Doe', email: 'john@company.com', status: 'Qualified Lead' });
   const [excelSuccess, setExcelSuccess] = useState('');
 
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app';
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
   const isConnected = statusData?.connected || !!client?.outlook_enabled;
 
   const fetchStatus = useCallback(async () => {

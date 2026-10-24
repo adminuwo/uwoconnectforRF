@@ -13,7 +13,7 @@ const AdminWorkflowsPage = () => {
     const fetch = async () => {
       try {
         const token = localStorage.getItem('token');
-        const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/admin/workflows`, {
+        const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/admin/workflows`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         setWorkflows(Array.isArray(res.data) ? res.data : (res.data?.results || []));

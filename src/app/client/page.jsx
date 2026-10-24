@@ -339,7 +339,7 @@ const ClientOverview = () => {
   return (
     <DashboardLayout role="CLIENT">
       {isAgencyUser && (
-        <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 pt-4 flex items-center justify-between border-b border-slate-200/80 pb-3 mb-2">
+        <div className="w-full max-w-full px-4 sm:px-6 lg:px-8 pt-4 flex items-center justify-between border-b border-slate-200/80 pb-3 mb-2 font-sans">
           <div className="flex items-center gap-2">
             <button
               onClick={() => setViewMode('agency')}
@@ -373,7 +373,7 @@ const ClientOverview = () => {
       {isAgencyUser && viewMode === 'agency' ? (
         <AgencyAdminDashboard />
       ) : (
-        <div className="max-w-7xl mx-auto w-full p-4 sm:p-6 pb-20">
+        <div className="w-full max-w-full p-4 sm:p-6 lg:p-8 pb-20 font-sans">
           
           {/* Welcome Section */}
           <div data-tour="dashboard-welcome" className={cn(

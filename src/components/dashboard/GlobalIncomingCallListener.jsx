@@ -55,7 +55,7 @@ export default function GlobalIncomingCallListener() {
     const token = localStorage.getItem('uwo_token') || localStorage.getItem('token');
     if (!token) return;
 
-    const backendUrlStr = API_BASE_URL || 'http://127.0.0.1:8080';
+    const backendUrlStr = API_BASE_URL || '';
     const isSecureBackend = backendUrlStr.startsWith('https');
     const protocol = isSecureBackend ? 'wss:' : 'ws:';
     const backendHost = new URL(backendUrlStr).host;

@@ -36,7 +36,7 @@ export default function GoogleSlidesConfigModal({ client, isOpen, onClose, onSav
 
   const isConnected = Boolean(client?.google_slides_enabled);
   const config = client?.google_slides_config || {};
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app';
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
 
   useEffect(() => {
     if (isOpen && isConnected) {

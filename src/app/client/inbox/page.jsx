@@ -8,7 +8,7 @@ import {
   FileText, Download, Image as ImageIcon, Music, Film, Video, ExternalLink,
   Shield, ShieldAlert, ArrowRightLeft, History, BarChart3, Activity, Users, Eye, StickyNote,
   Clock, Tag, RefreshCw, AlertCircle, Bot, ChevronLeft, ChevronRight,
-  LayoutTemplate, X, UserPlus
+  LayoutTemplate, X, UserPlus, CheckCircle2, Copy
 } from 'lucide-react';
 import axios from 'axios';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
@@ -80,6 +80,22 @@ export default function ClientInboxPage() {
   // Real-time Indicators State
   const [livePresence, setLivePresence] = useState({}); // { convoId: [ { username, role, isTyping } ] }
   const [currentUser, setCurrentUser] = useState(null);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const fileInputRef = useRef(null);
+
+  const resolveMediaUrl = (url) => {
+    if (!url) return null;
+    const trimmed = String(url).trim();
+    if (!trimmed || trimmed === '/' || trimmed.includes('download (3).gif')) return null;
+    if (trimmed.startsWith('http://') || trimmed.startsWith('https://') || trimmed.startsWith('blob:') || trimmed.startsWith('data:')) {
+      return trimmed;
+    }
+    const base = API_BASE_URL || 'http://127.0.0.1:8000';
+    if (trimmed.startsWith('/')) {
+      return `${base}${trimmed}`;
+    }
+    return `${base}/${trimmed}`;
+  };
 
   // Modals & Drawers
   const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
@@ -216,7 +232,7 @@ export default function ClientInboxPage() {
           convoDbId: c.id || null,
           botPaused: Boolean(c.bot_paused),
           status: c.status || 'OPEN',
-          contactObj: { platform_id: c.contact_platform_id, phone_number: c.contact_phone, name: c.contact_name },
+          contactObj: { platform_id: c.contact_platform_id, phone_number: c.contact_phone, name: c.contact_name, email: c.contact_email },
           messages: []
         };
       });
@@ -429,7 +445,7 @@ export default function ClientInboxPage() {
       const token = getAuthToken();
       if (!token) return;
 
-      let wsUrl = API_BASE_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app';
+      let wsUrl = API_BASE_URL || '';
       wsUrl = wsUrl.replace(/^http/, 'ws') + `/ws/inbox/?token=${token}`;
       
       const ws = new WebSocket(wsUrl);
@@ -606,10 +622,13 @@ export default function ClientInboxPage() {
 
   // 3. Send Reply or Internal Private Note
   const handleSendMessage = async () => {
-    if (!replyText.trim() || !activeConvo || isSending) return;
+    if ((!replyText.trim() && !selectedFile) || !activeConvo || isSending) return;
     
     const textToSend = replyText.trim();
+    const fileToSend = selectedFile;
     setReplyText('');
+    setSelectedFile(null);
+    if (fileInputRef.current) fileInputRef.current.value = '';
     setIsSending(true);
 
     const nowTs = Date.now();
@@ -618,13 +637,16 @@ export default function ClientInboxPage() {
       id: `temp_${nowTs}`,
       from_address: currentUser?.username || 'SYSTEM',
       to_address: targetAddress,
-      body: textToSend,
+      body: textToSend || (fileToSend ? `📎 ${fileToSend.name}` : ''),
       channel: activeConvo.channel,
       message_type: isInternalNote ? 'INTERNAL' : 'OUTGOING',
       sender_name: currentUser?.username || 'Team Member',
       sender_avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${currentUser?.username || 'User'}`,
       sender_department: currentUser?.department || 'Support',
       status: 'PENDING',
+      media_url: fileToSend ? URL.createObjectURL(fileToSend) : null,
+      media_type: fileToSend?.type?.startsWith('image/') ? 'image' : (fileToSend ? 'document' : null),
+      media_filename: fileToSend?.name || null,
       created_at: new Date().toISOString()
     };
 
@@ -634,14 +656,31 @@ export default function ClientInboxPage() {
       const token = getAuthToken();
       const apiUrl = API_BASE_URL;
 
-      const res = await axios.post(`${apiUrl}/api/messages/`, {
-        to_number: targetAddress,
-        body: textToSend,
-        channel: activeConvo.channel,
-        message_type: isInternalNote ? 'INTERNAL' : 'OUTGOING'
-      }, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      let res;
+      if (fileToSend) {
+        const formData = new FormData();
+        formData.append('to_number', targetAddress);
+        if (textToSend) formData.append('body', textToSend);
+        formData.append('channel', activeConvo.channel);
+        formData.append('message_type', isInternalNote ? 'INTERNAL' : 'OUTGOING');
+        formData.append('file', fileToSend);
+
+        res = await axios.post(`${apiUrl}/api/messages/`, formData, {
+          headers: { 
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'multipart/form-data'
+          }
+        });
+      } else {
+        res = await axios.post(`${apiUrl}/api/messages/`, {
+          to_number: targetAddress,
+          body: textToSend,
+          channel: activeConvo.channel,
+          message_type: isInternalNote ? 'INTERNAL' : 'OUTGOING'
+        }, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+      }
 
       if (res.data) {
         if (res.data.status === 'FAILED') {
@@ -668,7 +707,7 @@ export default function ClientInboxPage() {
             if (activeIdx !== -1) {
               const updatedItem = {
                 ...prev[activeIdx],
-                lastMessage: res.data.body || textToSend,
+                lastMessage: res.data.body || textToSend || (fileToSend ? fileToSend.name : 'Message sent'),
                 time: new Date().toISOString()
               };
               const remaining = prev.filter((_, idx) => idx !== activeIdx);
@@ -953,6 +992,37 @@ export default function ClientInboxPage() {
     INSTAGRAM: { name: 'Instagram', bg: 'bg-gradient-to-r from-purple-500 to-pink-500', text: 'text-white' },
     FACEBOOK: { name: 'Facebook', bg: 'bg-blue-600', text: 'text-white' },
     GMAIL: { name: 'Gmail', bg: 'bg-rose-500', text: 'text-white' }
+  };
+
+  const getOutgoingBubbleStyle = (convoChannel) => {
+    const ch = (convoChannel || 'WHATSAPP').toUpperCase();
+    if (ch === 'INSTAGRAM' || ch === 'IG' || ch === 'INSTA') {
+      return 'bg-[#E1306C] text-white rounded-tr-none shadow-[#E1306C]/20';
+    }
+    if (ch === 'FACEBOOK' || ch === 'FB' || ch === 'MESSENGER') {
+      return 'bg-[#1877F2] text-white rounded-tr-none shadow-[#1877F2]/20';
+    }
+    if (ch === 'YOUTUBE' || ch === 'YT') {
+      return 'bg-red-600 text-white rounded-tr-none shadow-red-600/20';
+    }
+    if (ch === 'GMAIL' || ch === 'EMAIL' || ch === 'MAIL') {
+      return 'bg-rose-600 text-white rounded-tr-none shadow-rose-600/20';
+    }
+    return 'bg-emerald-600 text-white rounded-tr-none shadow-emerald-600/10';
+  };
+
+  const getSendButtonClass = (convoChannel) => {
+    const ch = (convoChannel || 'WHATSAPP').toUpperCase();
+    if (ch === 'INSTAGRAM' || ch === 'IG' || ch === 'INSTA') {
+      return 'bg-[#E1306C] hover:bg-[#c7255d] disabled:hover:bg-[#E1306C] shadow-[#E1306C]/20';
+    }
+    if (ch === 'FACEBOOK' || ch === 'FB' || ch === 'MESSENGER') {
+      return 'bg-[#1877F2] hover:bg-[#1464cc] disabled:hover:bg-[#1877F2] shadow-[#1877F2]/20';
+    }
+    if (ch === 'GMAIL' || ch === 'EMAIL' || ch === 'MAIL') {
+      return 'bg-rose-600 hover:bg-rose-700 disabled:hover:bg-rose-600 shadow-rose-600/20';
+    }
+    return 'bg-emerald-600 hover:bg-emerald-700 disabled:hover:bg-emerald-600 shadow-emerald-600/20';
   };
 
   return (
@@ -1604,6 +1674,81 @@ export default function ClientInboxPage() {
                       );
                     }
 
+                    // Lead Application Form detection
+                    const rawMsgBody = (msg.body || '').trim();
+                    const isLeadTemplate = rawMsgBody.includes('[Instagram Lead Form Application]') || 
+                                           rawMsgBody.includes('Lead Form') ||
+                                           (rawMsgBody.includes('filled out your form') && (rawMsgBody.includes('Email:') || rawMsgBody.includes('Phone')));
+
+                    let leadInfo = null;
+                    if (isLeadTemplate) {
+                      const nameM = rawMsgBody.match(/(?:Full [Nn]ame|Name):\s*([^\n\r]+)/i);
+                      const phoneM = rawMsgBody.match(/(?:Phone(?: number)?|Mobile):\s*([^\n\r]+)/i);
+                      const emailM = rawMsgBody.match(/Email:\s*([^\n\r]+)/i);
+                      const cityM = rawMsgBody.match(/City:\s*([^\n\r]+)/i);
+
+                      let parsedName = nameM ? nameM[1].trim() : '';
+                      let parsedPhone = phoneM ? phoneM[1].trim() : '';
+                      let parsedEmail = emailM ? emailM[1].trim() : '';
+                      let parsedCity = cityM ? cityM[1].trim() : '';
+
+                      if ((!parsedName || !parsedPhone || !parsedEmail || !parsedCity) && activeConvo?.messages) {
+                        for (const otherMsg of activeConvo.messages) {
+                          const ob = otherMsg.body || '';
+                          if (!parsedName) {
+                            const m = ob.match(/(?:Full [Nn]ame|Name):\s*([^\n\r]+)/i);
+                            if (m) parsedName = m[1].trim();
+                          }
+                          if (!parsedPhone) {
+                            const m = ob.match(/(?:Phone(?: number)?|Mobile):\s*([^\n\r]+)/i);
+                            if (m) parsedPhone = m[1].trim();
+                          }
+                          if (!parsedEmail) {
+                            const m = ob.match(/Email:\s*([^\n\r]+)/i);
+                            if (m) parsedEmail = m[1].trim();
+                          }
+                          if (!parsedCity) {
+                            const m = ob.match(/City:\s*([^\n\r]+)/i);
+                            if (m) parsedCity = m[1].trim();
+                          }
+                        }
+                      }
+
+                      if (!parsedName) {
+                        if (activeConvo?.contactObj?.name && activeConvo.contactObj.name !== 'Customer') {
+                          parsedName = activeConvo.contactObj.name;
+                        } else if (activeConvo?.name && activeConvo.name !== 'Customer') {
+                          parsedName = activeConvo.name;
+                        } else {
+                          parsedName = 'Lead Applicant';
+                        }
+                      }
+
+                      if (!parsedPhone) {
+                        parsedPhone = activeConvo?.contactObj?.phone_number || (activeConvo?.rawAddress?.startsWith('+') ? activeConvo.rawAddress : '');
+                      }
+
+                      if (!parsedEmail) {
+                        parsedEmail = activeConvo?.contactObj?.email || '';
+                      }
+
+                      leadInfo = {
+                        name: parsedName,
+                        phone: parsedPhone,
+                        email: parsedEmail,
+                        city: parsedCity
+                      };
+                    }
+
+                    const resolvedMedia = resolveMediaUrl(msg.media_url || msg.metadata?.media_url);
+
+                    const isDocument = msg.media_type === 'document' || 
+                                       (resolvedMedia && (resolvedMedia.toLowerCase().includes('.pdf') || resolvedMedia.includes('/documents/') || resolvedMedia.includes('media-proxy'))) ||
+                                       (msg.media_filename && msg.media_filename.toLowerCase().endsWith('.pdf'));
+
+                    const isImage = (msg.media_type === 'image' || (resolvedMedia && /\.(png|jpe?g|gif|webp|svg)$/i.test(resolvedMedia))) && !isDocument;
+                    const isVideo = msg.media_type === 'video' || (resolvedMedia && /\.(mp4|mov|webm)$/i.test(resolvedMedia));
+
                     return (
                       <div
                         key={`${msg.id || 'msg'}_${index}`}
@@ -1631,7 +1776,7 @@ export default function ClientInboxPage() {
                               : isDark
                                 ? 'bg-[#1e293b] text-slate-100 rounded-tl-none border border-slate-700/80 shadow-md'
                                 : 'bg-white text-slate-900 rounded-tl-none border border-slate-200'
-                            : 'bg-emerald-600 text-white rounded-tr-none shadow-emerald-600/10'
+                            : getOutgoingBubbleStyle(activeConvo?.channel)
                         )}>
                           {/* Gmail Header Badge */}
                           {isEmail && (
@@ -1666,16 +1811,16 @@ export default function ClientInboxPage() {
                           )}
 
                           {/* ── MEDIA PREVIEW (image / document / video) ── */}
-                          {msg.media_url && msg.media_type === 'image' && (
+                          {resolvedMedia && isImage && (
                             <div className={cn(
                               "mb-2 rounded-xl overflow-hidden border",
                               isDark ? "border-slate-700 bg-slate-900" : "border-slate-200/60 bg-slate-100"
                             )}>
                               <img
-                                src={msg.media_url}
+                                src={resolvedMedia}
                                 alt="Customer photo"
                                 className="w-full max-h-72 object-contain cursor-pointer hover:opacity-90 transition-opacity"
-                                onClick={() => window.open(msg.media_url, '_blank')}
+                                onClick={() => window.open(resolvedMedia, '_blank')}
                                 onError={(e) => { e.target.style.display = 'none'; }}
                               />
                               {msg.body && msg.body !== '📷 [Photo]' && (
@@ -1684,37 +1829,41 @@ export default function ClientInboxPage() {
                             </div>
                           )}
 
-                          {msg.media_url && msg.media_type === 'document' && (
+                          {isDocument && (
                             <a
-                              href={msg.media_url}
+                              href={resolvedMedia || '#'}
                               target="_blank"
                               rel="noopener noreferrer"
                               className={cn(
-                                "flex items-center gap-2.5 p-2.5 rounded-xl border mb-2 no-underline transition-all",
+                                "flex items-center gap-2.5 p-3 rounded-xl border mb-2 no-underline transition-all cursor-pointer shadow-xs",
                                 isIncoming
                                   ? isDark
-                                    ? "bg-slate-800/80 border-slate-700 text-slate-200 hover:bg-slate-800"
-                                    : "bg-blue-50 border-blue-200 text-blue-800 hover:bg-blue-100"
+                                    ? "bg-slate-800/90 border-slate-700 text-slate-100 hover:bg-slate-800"
+                                    : "bg-blue-50/80 border-blue-200 text-blue-900 hover:bg-blue-100"
                                   : "bg-white/20 border-white/30 text-white hover:bg-white/30"
                               )}
                             >
-                              <div className={cn("p-1.5 rounded-lg", isIncoming ? (isDark ? "bg-slate-700" : "bg-blue-100") : "bg-white/20")}>
-                                <FileText className="w-4 h-4" />
+                              <div className={cn("p-2 rounded-lg shrink-0", isIncoming ? (isDark ? "bg-slate-700 text-rose-400" : "bg-white text-rose-600 shadow-2xs") : "bg-white/20 text-white")}>
+                                <FileText className="w-5 h-5" />
                               </div>
                               <div className="flex-1 min-w-0">
-                                <p className="font-bold text-[11px] truncate">{msg.media_filename || 'Document'}</p>
-                                <p className={cn("text-[9px]", isIncoming ? (isDark ? "text-slate-400" : "text-blue-500") : "text-white/70")}>
-                                  {msg.media_mime_type || 'File'} • Tap to open
+                                <p className="font-bold text-xs truncate">
+                                  {msg.media_filename || (resolvedMedia ? resolvedMedia.split('/').pop().split('?')[0] : 'Document.pdf')}
+                                </p>
+                                <p className={cn("text-[10px]", isIncoming ? (isDark ? "text-slate-400" : "text-blue-600 font-medium") : "text-white/80")}>
+                                  {msg.media_mime_type || 'PDF Document'} • Click to view & open
                                 </p>
                               </div>
-                              <Download className="w-3.5 h-3.5 shrink-0 opacity-70" />
+                              <div className={cn("p-1.5 rounded-lg shrink-0", isIncoming ? (isDark ? "bg-slate-700 text-slate-300" : "bg-blue-100 text-blue-700") : "bg-white/20 text-white")}>
+                                <ExternalLink className="w-3.5 h-3.5" />
+                              </div>
                             </a>
                           )}
 
-                          {msg.media_url && msg.media_type === 'video' && (
+                          {resolvedMedia && isVideo && (
                             <div className={cn("mb-2 rounded-xl overflow-hidden border bg-black", isDark ? "border-slate-700" : "border-slate-200/60")}>
                               <video
-                                src={msg.media_url}
+                                src={resolvedMedia}
                                 controls
                                 className="w-full max-h-60"
                                 preload="metadata"
@@ -1723,12 +1872,135 @@ export default function ClientInboxPage() {
                           )}
                           {/* ── END MEDIA PREVIEW ── */}
 
-                          <div className={cn(
-                            "whitespace-pre-wrap font-normal leading-relaxed",
-                            isEmail ? (isDark ? "max-h-72 overflow-y-auto pr-1 text-slate-200" : "max-h-72 overflow-y-auto pr-1 text-slate-800") : ""
-                          )}>
-                            {emailBodyText}
-                          </div>
+                          {isLeadTemplate && leadInfo ? (
+                            <div className={cn(
+                              "rounded-xl p-3.5 my-1 border shadow-xs transition-all",
+                              isDark
+                                ? "bg-slate-900/90 border-slate-700 text-slate-100"
+                                : "bg-gradient-to-br from-white to-pink-50/50 border-pink-200/80 text-slate-900"
+                            )}>
+                              {/* Card Header */}
+                              <div className={cn("flex items-center justify-between pb-2 mb-2.5 border-b", isDark ? "border-slate-800" : "border-pink-100")}>
+                                <div className="flex items-center gap-2">
+                                  <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-amber-500 via-pink-500 to-purple-600 flex items-center justify-center text-white shadow-xs shrink-0">
+                                    <InstagramIcon size={14} />
+                                  </div>
+                                  <div>
+                                    <h5 className="font-extrabold text-xs tracking-tight leading-tight">Instagram Lead Application</h5>
+                                    <span className="text-[10px] text-pink-600 dark:text-pink-400 font-semibold">Meta Lead Ad Submission</span>
+                                  </div>
+                                </div>
+                                <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800/80">
+                                  <CheckCircle2 className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
+                                  Verified Lead
+                                </span>
+                              </div>
+
+                              {/* Lead Details */}
+                              <div className="space-y-2 mb-2.5">
+                                {leadInfo.name && (
+                                  <div className={cn("flex items-center gap-2.5 p-2 rounded-lg", isDark ? "bg-slate-800/60" : "bg-white/80 border border-slate-100")}>
+                                    <User className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                                    <div className="min-w-0 flex-1">
+                                      <div className="text-[9px] uppercase tracking-wider text-slate-400 font-bold">Applicant Name</div>
+                                      <div className="text-xs font-bold truncate">{leadInfo.name}</div>
+                                    </div>
+                                  </div>
+                                )}
+
+                                {leadInfo.phone && (
+                                  <div className={cn("flex items-center gap-2.5 p-2 rounded-lg", isDark ? "bg-slate-800/60" : "bg-white/80 border border-slate-100")}>
+                                    <Phone className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                                    <div className="min-w-0 flex-1">
+                                      <div className="text-[9px] uppercase tracking-wider text-slate-400 font-bold">Phone Number</div>
+                                      <a 
+                                        href={`tel:${leadInfo.phone.replace(/\s+/g, '')}`} 
+                                        className="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline truncate block"
+                                      >
+                                        {leadInfo.phone}
+                                      </a>
+                                    </div>
+                                    <button
+                                      type="button"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        navigator.clipboard?.writeText(leadInfo.phone);
+                                      }}
+                                      className="p-1 rounded hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-400 hover:text-slate-600 cursor-pointer"
+                                      title="Copy Phone"
+                                    >
+                                      <Copy className="w-3 h-3" />
+                                    </button>
+                                  </div>
+                                )}
+
+                                {leadInfo.email && (
+                                  <div className={cn("flex items-center gap-2.5 p-2 rounded-lg", isDark ? "bg-slate-800/60" : "bg-white/80 border border-slate-100")}>
+                                    <Mail className="w-3.5 h-3.5 text-blue-500 shrink-0" />
+                                    <div className="min-w-0 flex-1">
+                                      <div className="text-[9px] uppercase tracking-wider text-slate-400 font-bold">Email Address</div>
+                                      <a 
+                                        href={`mailto:${leadInfo.email}`} 
+                                        className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline truncate block"
+                                      >
+                                        {leadInfo.email}
+                                      </a>
+                                    </div>
+                                    <button
+                                      type="button"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        navigator.clipboard?.writeText(leadInfo.email);
+                                      }}
+                                      className="p-1 rounded hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-400 hover:text-slate-600 cursor-pointer"
+                                      title="Copy Email"
+                                    >
+                                      <Copy className="w-3 h-3" />
+                                    </button>
+                                  </div>
+                                )}
+
+                                {leadInfo.city && (
+                                  <div className={cn("flex items-center gap-2.5 p-2 rounded-lg", isDark ? "bg-slate-800/60" : "bg-white/80 border border-slate-100")}>
+                                    <MapPin className="w-3.5 h-3.5 text-rose-500 shrink-0" />
+                                    <div className="min-w-0 flex-1">
+                                      <div className="text-[9px] uppercase tracking-wider text-slate-400 font-bold">City / Location</div>
+                                      <div className="text-xs font-bold truncate">{leadInfo.city}</div>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* Action Buttons */}
+                              <div className="flex items-center gap-2 pt-1">
+                                {leadInfo.phone && (
+                                  <a
+                                    href={`tel:${leadInfo.phone.replace(/\s+/g, '')}`}
+                                    className="flex-1 flex items-center justify-center gap-1.5 py-1.5 px-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold transition-all shadow-xs"
+                                  >
+                                    <Phone className="w-3 h-3" />
+                                    <span>Call Applicant</span>
+                                  </a>
+                                )}
+                                {leadInfo.email && (
+                                  <a
+                                    href={`mailto:${leadInfo.email}`}
+                                    className="flex-1 flex items-center justify-center gap-1.5 py-1.5 px-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-[11px] font-bold transition-all shadow-xs"
+                                  >
+                                    <Mail className="w-3 h-3" />
+                                    <span>Send Email</span>
+                                  </a>
+                                )}
+                              </div>
+                            </div>
+                          ) : (
+                            <div className={cn(
+                              "whitespace-pre-wrap font-normal leading-relaxed",
+                              isEmail ? (isDark ? "max-h-72 overflow-y-auto pr-1 text-slate-200" : "max-h-72 overflow-y-auto pr-1 text-slate-800") : ""
+                            )}>
+                              {emailBodyText}
+                            </div>
+                          )}
                           
                           {/* Render Interactive CTA Quick Reply Buttons */}
                           {msgButtons.length > 0 && (
@@ -1908,8 +2180,60 @@ export default function ClientInboxPage() {
                   </div>
                 </div>
 
+                {/* Selected File Attachment Badge */}
+                {selectedFile && (
+                  <div className={cn(
+                    "flex items-center justify-between gap-2 px-3 py-1.5 rounded-xl border text-xs animate-in fade-in duration-200",
+                    isDark ? "bg-slate-800/90 border-slate-700 text-slate-200" : "bg-emerald-50 border-emerald-200 text-emerald-900"
+                  )}>
+                    <div className="flex items-center gap-2 truncate">
+                      <FileText className="w-4 h-4 text-emerald-600 shrink-0" />
+                      <span className="font-semibold truncate">{selectedFile.name}</span>
+                      <span className="text-[10px] opacity-75 shrink-0">({(selectedFile.size / 1024).toFixed(1)} KB)</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelectedFile(null);
+                        if (fileInputRef.current) fileInputRef.current.value = '';
+                      }}
+                      className="p-1 rounded-full hover:bg-black/10 dark:hover:bg-white/10 text-slate-400 hover:text-slate-600 cursor-pointer transition-colors"
+                      title="Remove file"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                )}
+
                 {/* Text input area - Guaranteed responsive layout with fixed-size send button */}
                 <div className="flex items-center gap-2 w-full min-w-0">
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={(e) => {
+                      if (e.target.files && e.target.files[0]) {
+                        setSelectedFile(e.target.files[0]);
+                      }
+                    }}
+                    className="hidden"
+                    accept="*/*"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className={cn(
+                      "w-9 h-9 sm:w-10 sm:h-10 min-w-[36px] sm:min-w-[40px] shrink-0 rounded-xl sm:rounded-2xl border flex items-center justify-center transition-all cursor-pointer",
+                      selectedFile
+                        ? "bg-emerald-50 border-emerald-300 text-emerald-600 dark:bg-emerald-950/60 dark:border-emerald-700 dark:text-emerald-400 shadow-xs"
+                        : isDark
+                          ? "bg-slate-800 border-slate-700 text-slate-400 hover:text-white hover:bg-slate-700"
+                          : "bg-slate-100 border-slate-200 text-slate-500 hover:text-slate-800 hover:bg-slate-200"
+                    )}
+                    title="Attach Document or Media"
+                  >
+                    <Paperclip className="w-4 h-4" />
+                  </button>
+
                   <div className="flex-1 min-w-0">
                     <textarea
                       rows={1}
@@ -1934,8 +2258,11 @@ export default function ClientInboxPage() {
                   <button
                     type="button"
                     onClick={handleSendMessage}
-                    disabled={!replyText.trim() || isSending}
-                    className="w-9 h-9 sm:w-10 sm:h-10 min-w-[36px] sm:min-w-[40px] shrink-0 rounded-xl sm:rounded-2xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white shadow-md disabled:opacity-40 disabled:hover:bg-emerald-600 disabled:cursor-not-allowed transition-all flex items-center justify-center cursor-pointer"
+                    disabled={(!replyText.trim() && !selectedFile) || isSending}
+                    className={cn(
+                      "w-9 h-9 sm:w-10 sm:h-10 min-w-[36px] sm:min-w-[40px] shrink-0 rounded-xl sm:rounded-2xl active:scale-95 text-white shadow-md disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center justify-center cursor-pointer",
+                      getSendButtonClass(activeConvo?.channel)
+                    )}
                     title="Send"
                   >
                     {isSending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}

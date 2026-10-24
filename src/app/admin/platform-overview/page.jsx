@@ -192,7 +192,7 @@ export default function ClientPlatformOverviewPage() {
 
   return (
     <DashboardLayout>
-      <div className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-[1600px] mx-auto min-h-screen">
+      <div className="p-4 sm:p-6 lg:p-8 space-y-6 w-full max-w-full min-h-screen font-sans">
         {/* ── Page Header ── */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs">
           <div className="space-y-1">

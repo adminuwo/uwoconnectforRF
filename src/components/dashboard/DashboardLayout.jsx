@@ -41,6 +41,7 @@ const PAGE_TITLES = {
   '/admin/audit-logs': 'Platform Security Audit Trail',
   '/admin/settings': 'Global Platform Settings',
   '/admin/support': 'Super Admin Support Desk',
+  '/client/projects': 'Our Projects',
   '/client/guides': 'Learning Center',
   '/client/channels': 'Channels',
   '/client/gmail': 'Gmail',
@@ -139,7 +140,17 @@ const DashboardLayout = ({ children, role: initialRole }) => {
   const { resetTour } = useTour();
   const { entitlements } = useEntitlement();
   const { theme, isDark, toggleTheme } = useTheme();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const isDesktop = window.innerWidth >= 1024;
+      const saved = localStorage.getItem('sidebar_expanded');
+      if (saved !== null) {
+        return saved === 'true' && isDesktop;
+      }
+      return isDesktop;
+    }
+    return true;
+  });
   const [chatOpen, setChatOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [user, setUser] = useState(null);
@@ -204,15 +215,31 @@ const DashboardLayout = ({ children, role: initialRole }) => {
   const [clientsLoaded, setClientsLoaded] = useState(false);
   const switcherRef = useRef(null);
 
+  const handleToggleSidebar = () => {
+    setSidebarOpen(prev => {
+      const next = !prev;
+      if (typeof window !== 'undefined' && window.innerWidth >= 1024) {
+        localStorage.setItem('sidebar_expanded', String(next));
+      }
+      return next;
+    });
+  };
+
   // Responsive sidebar: open by default on desktop (>=1024px), closed on mobile (<1024px)
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const isDesktop = window.innerWidth >= 1024;
-      setSidebarOpen(isDesktop);
+      const saved = localStorage.getItem('sidebar_expanded');
+      if (saved !== null) {
+        setSidebarOpen(saved === 'true' && isDesktop);
+      } else {
+        setSidebarOpen(isDesktop);
+      }
 
       const handleResize = () => {
         if (window.innerWidth >= 1024) {
-          setSidebarOpen(true);
+          const currentSaved = localStorage.getItem('sidebar_expanded');
+          setSidebarOpen(currentSaved !== null ? currentSaved === 'true' : true);
         } else {
           setSidebarOpen(false);
         }
@@ -515,7 +542,7 @@ const DashboardLayout = ({ children, role: initialRole }) => {
         )}
         style={{ fontFamily: "'Times New Roman', Times, serif" }}
       >
-        <Sidebar role={displayRole} isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} onToggle={() => setSidebarOpen(v => !v)} />
+        <Sidebar role={displayRole} isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} onToggle={handleToggleSidebar} />
 
         <main className={cn(
           "flex-1 dashboard-main h-full flex flex-col min-w-0 overflow-hidden dashboard-font-times font-serif",
@@ -530,7 +557,7 @@ const DashboardLayout = ({ children, role: initialRole }) => {
               {/* Mobile Menu Button */}
               <button
                 type="button"
-                onClick={() => setSidebarOpen(prev => !prev)}
+                onClick={handleToggleSidebar}
                 className={cn(
                   "lg:hidden p-1.5 sm:p-2 -ml-1 rounded-xl transition-all cursor-pointer flex items-center justify-center shrink-0",
                   isDark
@@ -818,7 +845,7 @@ const DashboardLayout = ({ children, role: initialRole }) => {
 
           {/* Content */}
           <div className={cn(
-            "flex-1 min-h-0 relative overflow-y-auto flex flex-col custom-scrollbar transition-colors duration-200",
+            "flex-1 min-h-0 relative overflow-y-auto flex flex-col custom-scrollbar transition-colors duration-200 [scrollbar-gutter:stable]",
             isDark ? "bg-[#0b0f19]" : "bg-gradient-to-br from-slate-50/50 to-white"
           )}>
             <div className={cn(

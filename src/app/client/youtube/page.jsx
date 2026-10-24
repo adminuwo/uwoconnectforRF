@@ -76,7 +76,7 @@ const YouTubeManager = () => {
 
       try {
         setLoadingVideos(true);
-        const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app';
+        const API_BASE = process.env.NEXT_PUBLIC_API_URL || '';
 
         const [statsRes, videosRes, settingsRes] = await Promise.all([
           axios.get(`${API_BASE}/api/youtube/analytics`, { headers }).catch(e => e.response || {}),
@@ -122,7 +122,7 @@ const YouTubeManager = () => {
 
     try {
       const res = await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/youtube/settings`,
+        `${process.env.NEXT_PUBLIC_API_URL || ''}/api/youtube/settings`,
         {
           broadcast_enabled: broadcastEnabled,
           broadcast_template: broadcastTemplate,
@@ -150,7 +150,7 @@ const YouTubeManager = () => {
 
     try {
       const res = await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/youtube/settings`,
+        `${process.env.NEXT_PUBLIC_API_URL || ''}/api/youtube/settings`,
         {
           broadcast_enabled: broadcastEnabled,
           broadcast_template: broadcastTemplate,
@@ -204,7 +204,7 @@ const YouTubeManager = () => {
 
     try {
       const res = await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/youtube/profile`,
+        `${process.env.NEXT_PUBLIC_API_URL || ''}/api/youtube/profile`,
         { description: channelDescription },
         { headers }
       );
@@ -242,7 +242,7 @@ const YouTubeManager = () => {
 
     try {
       const res = await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/youtube/upload`,
+        `${process.env.NEXT_PUBLIC_API_URL || ''}/api/youtube/upload`,
         formData,
         { headers }
       );
@@ -257,7 +257,7 @@ const YouTubeManager = () => {
         // Refresh videos list
         setLoadingVideos(true);
         const videosRes = await axios.get(
-          `${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/youtube/videos`,
+          `${process.env.NEXT_PUBLIC_API_URL || ''}/api/youtube/videos`,
           { headers }
         );
         if (videosRes.data && videosRes.data.videos) {
@@ -285,7 +285,7 @@ const YouTubeManager = () => {
 
     try {
       const res = await axios.delete(
-        `${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/youtube/delete?video_id=${videoId}`,
+        `${process.env.NEXT_PUBLIC_API_URL || ''}/api/youtube/delete?video_id=${videoId}`,
         { headers }
       );
       if (res.data && !res.data.error) {
@@ -310,7 +310,7 @@ const YouTubeManager = () => {
 
     try {
       const res = await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/youtube/broadcast-check`,
+        `${process.env.NEXT_PUBLIC_API_URL || ''}/api/youtube/broadcast-check`,
         {},
         { headers }
       );
@@ -340,7 +340,7 @@ const YouTubeManager = () => {
 
     try {
       const res = await axios.get(
-        `${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/youtube/comments?video_id=${video.id}`,
+        `${process.env.NEXT_PUBLIC_API_URL || ''}/api/youtube/comments?video_id=${video.id}`,
         { headers }
       );
       if (res.data && res.data.comments) {
@@ -364,7 +364,7 @@ const YouTubeManager = () => {
 
     try {
       const res = await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/youtube/comments`,
+        `${process.env.NEXT_PUBLIC_API_URL || ''}/api/youtube/comments`,
         {
           parent_id: commentId,
           reply_text: text
@@ -396,7 +396,7 @@ const YouTubeManager = () => {
 
     try {
       const res = await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/youtube/ai-suggest-reply`,
+        `${process.env.NEXT_PUBLIC_API_URL || ''}/api/youtube/ai-suggest-reply`,
         { comment_text: commentText },
         { headers }
       );

@@ -39,11 +39,9 @@ export default function AxiosNetworkFixer() {
       const url = config.url || '';
       
       if (isLocal) {
-        // When developing locally, redirect Cloud Run / Azure backend requests to local Django backend
-        if ((url.includes('uwoconnectforrb-743928421487.asia-south1.run.app') || url.includes('azurewebsites.net')) && !config._retried) {
-          config.url = url
-            .replace('https://uwoconnectforrb-743928421487.asia-south1.run.app', 'http://127.0.0.1:8000')
-            .replace(/https:\/\/[^/]+\.azurewebsites\.net/, 'http://127.0.0.1:8000');
+        // When developing locally, redirect Cloud Run backend requests to local Django backend
+        if (url.includes('uwoconnectforrb-743928421487.asia-south1.run.app') && !config._retried) {
+          config.url = url.replace('https://uwoconnectforrb-743928421487.asia-south1.run.app', 'http://127.0.0.1:8000');
         } else if (host === 'localhost' || host === '127.0.0.1') {
           // Map LAN IP to 127.0.0.1
           if (/^https?:\/\/(192\.168\.[0-9.]+|10\.[0-9.]+|172\.(1[6-9]|2[0-9]|3[01])\.[0-9.]+):8000/.test(url)) {
@@ -51,10 +49,10 @@ export default function AxiosNetworkFixer() {
           }
         }
       } else if (isExternalHost(host)) {
-        // For production domain, redirect to live Cloud Run backend
-        const rewriteBase = (host.includes('run.app') || host.includes('uwoconnectforrf') || host.includes('aisa24.com') || host.includes('azurewebsites.net'))
-          ? 'https://uwoconnectforrb-743928421487.asia-south1.run.app'
-          : ''; // ngrok / vercel / other → relative path (Next.js rewrites proxy)
+        // For production/external domain, proxy via relative path or configured NEXT_PUBLIC_API_URL
+        const rewriteBase = (process.env.NEXT_PUBLIC_API_URL && !PRIVATE_ORIGIN_RE.test(process.env.NEXT_PUBLIC_API_URL))
+          ? process.env.NEXT_PUBLIC_API_URL.replace(/\/$/, '')
+          : ''; // ngrok / vercel / custom domain → relative path (Next.js rewrites proxy)
 
         if (PRIVATE_ORIGIN_RE.test(url)) {
           config.url = rewriteBase + url.replace(PRIVATE_ORIGIN_RE, '');

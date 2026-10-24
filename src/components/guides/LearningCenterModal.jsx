@@ -189,7 +189,7 @@ const LearningCenterModal = ({ guideSlug, isOpen, onClose }) => {
       setLoading(true);
       const token = localStorage.getItem('token');
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
-      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app';
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
       try {
         const [guideRes, progressRes] = await Promise.all([
@@ -245,7 +245,7 @@ const LearningCenterModal = ({ guideSlug, isOpen, onClose }) => {
 
     const token = localStorage.getItem('token');
     if (!token) return;
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app';
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
     try {
       await axios.post(
@@ -268,7 +268,7 @@ const LearningCenterModal = ({ guideSlug, isOpen, onClose }) => {
 
     const token = localStorage.getItem('token');
     if (!token) return;
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app';
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
     try {
       await axios.post(

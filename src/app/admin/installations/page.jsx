@@ -279,7 +279,7 @@ export default function InstallationsAnalyticsPage() {
 
   return (
     <DashboardLayout>
-      <div className="p-4 sm:p-6 lg:p-8 space-y-5 max-w-[1600px] mx-auto min-h-screen">
+      <div className="p-4 sm:p-6 lg:p-8 space-y-5 w-full max-w-full min-h-screen font-sans">
         {/* Toast Notification */}
         {toast && (
           <div className={cn(
@@ -650,35 +650,6 @@ export default function InstallationsAnalyticsPage() {
 
             {/* Filter Controls Row */}
             <div className="flex flex-wrap items-center gap-2">
-              {/* Platform Segmented Control */}
-              <div className="inline-flex items-center bg-slate-100/80 p-0.5 rounded-lg border border-slate-200/60 text-xs">
-                {[
-                  { key: 'ALL', label: 'All', count: data.summary.total_installations },
-                  { key: 'WEB', label: 'Web', count: data.summary.web?.total ?? 0 },
-                  { key: 'ANDROID', label: 'Android', count: data.summary.android?.total ?? 0 },
-                  { key: 'IOS', label: 'iOS', count: data.summary.ios?.total ?? 0 },
-                ].map((tab) => (
-                  <button
-                    key={tab.key}
-                    onClick={() => { setPlatformFilter(tab.key); setPage(1); }}
-                    className={cn(
-                      "px-2.5 py-1 rounded-md text-xs transition-all font-medium inline-flex items-center gap-1.5",
-                      platformFilter === tab.key
-                        ? "bg-white text-slate-900 shadow-2xs font-semibold"
-                        : "text-slate-500 hover:text-slate-800"
-                    )}
-                  >
-                    <span>{tab.label}</span>
-                    <span className={cn(
-                      "text-[10px] px-1.5 py-0.2 rounded-full font-bold",
-                      platformFilter === tab.key ? "bg-slate-100 text-slate-700" : "bg-slate-200/60 text-slate-500"
-                    )}>
-                      {tab.count}
-                    </span>
-                  </button>
-                ))}
-              </div>
-
               {/* Status Segmented Control */}
               <div className="inline-flex items-center bg-slate-100/80 p-0.5 rounded-lg border border-slate-200/60 text-xs">
                 {[

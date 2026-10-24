@@ -85,7 +85,7 @@ export default function FacebookConfigModal({ isOpen, onClose, client, onSaved, 
       };
 
       const res = await axios.patch(
-        `${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/profile`, 
+        `${process.env.NEXT_PUBLIC_API_URL || ''}/api/profile`, 
         payload, 
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -112,7 +112,7 @@ export default function FacebookConfigModal({ isOpen, onClose, client, onSaved, 
       };
 
       const res = await axios.patch(
-        `${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/profile`, 
+        `${process.env.NEXT_PUBLIC_API_URL || ''}/api/profile`, 
         payload, 
         { headers: { Authorization: `Bearer ${token}` } }
       );

@@ -5,7 +5,7 @@ import axios from 'axios';
 import { 
   Upload, FileText, Trash2, Loader2, Database, CheckCircle2, X, 
   Sparkles, Search, Filter, Cpu, BookOpen, Bot, ShieldCheck, AlertCircle, RefreshCw, Eye,
-  Globe, Link2, AlignLeft
+  Globe, Link2, AlignLeft, ExternalLink, Layers, Settings2, Send, ChevronDown, ChevronUp
 } from 'lucide-react';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { API_BASE_URL } from '@/config/apiConfig';
@@ -23,6 +23,13 @@ const KnowledgeBasePage = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState('ALL');
   const [selectedPreviewDoc, setSelectedPreviewDoc] = useState(null);
+  const [recrawlingId, setRecrawlingId] = useState(null);
+  const [maxPages, setMaxPages] = useState(25);
+  const [maxDepth, setMaxDepth] = useState(3);
+  const [showAdvancedCrawl, setShowAdvancedCrawl] = useState(false);
+  const [queryText, setQueryText] = useState('');
+  const [queryLoading, setQueryLoading] = useState(false);
+  const [queryResult, setQueryResult] = useState(null);
   const fileInputRef = useRef(null);
 
   const API = API_BASE_URL;
@@ -59,7 +66,9 @@ const KnowledgeBasePage = () => {
         await axios.post(`${API}/api/knowledge/`, {
           website_url: websiteUrl.trim(),
           title: title.trim() || websiteUrl.trim(),
-          doc_type: 'URL'
+          doc_type: 'URL',
+          max_pages: maxPages,
+          max_depth: maxDepth
         }, { headers });
         setWebsiteUrl('');
       } else if (activeSource === 'TEXT') {
@@ -92,6 +101,46 @@ const KnowledgeBasePage = () => {
       alert(err.response?.data?.message || err.response?.data?.error || 'Failed to process knowledge source');
     } finally {
       setUploading(false);
+    }
+  };
+
+  const handleRecrawl = async (id) => {
+    setRecrawlingId(id);
+    try {
+      const token = localStorage.getItem('uwo_token');
+      await axios.post(`${API}/api/knowledge/${id}/recrawl/`, {
+        max_pages: maxPages,
+        max_depth: maxDepth
+      }, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
+      });
+      await fetchDocuments();
+      alert('Website re-crawl and staged indexing completed successfully!');
+    } catch (err) {
+      alert(err.response?.data?.error || err.response?.data?.message || 'Failed to re-crawl website');
+    } finally {
+      setRecrawlingId(null);
+    }
+  };
+
+  const handleTestQuery = async (e) => {
+    e.preventDefault();
+    if (!queryText.trim()) return;
+    setQueryLoading(true);
+    setQueryResult(null);
+    try {
+      const token = localStorage.getItem('uwo_token');
+      const res = await axios.post(`${API}/api/knowledge/query/`, {
+        query: queryText.trim(),
+        top_k: 4
+      }, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
+      });
+      setQueryResult(res.data);
+    } catch (err) {
+      alert(err.response?.data?.error || err.response?.data?.message || 'Failed to query RAG pipeline');
+    } finally {
+      setQueryLoading(false);
     }
   };
 
@@ -300,19 +349,66 @@ const KnowledgeBasePage = () => {
                       type="url"
                       value={websiteUrl}
                       onChange={e => setWebsiteUrl(e.target.value)}
-                      placeholder="https://yourcompany.com/about-us or https://domain.com/faq"
+                      placeholder="https://yourcompany.com or https://docs.yourcompany.com"
                       className="w-full bg-slate-50 border border-slate-200 rounded-2xl pl-11 pr-4 py-3 outline-none focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 transition-all text-xs font-medium text-slate-900"
                       required
                     />
                   </div>
                 </div>
 
+                {/* Advanced Crawl Settings Toggle */}
+                <div className="border border-slate-200/80 rounded-2xl p-3 bg-slate-50/50">
+                  <button
+                    type="button"
+                    onClick={() => setShowAdvancedCrawl(!showAdvancedCrawl)}
+                    className="w-full flex items-center justify-between text-xs font-bold text-slate-700 hover:text-blue-600 transition-colors cursor-pointer"
+                  >
+                    <span className="flex items-center gap-1.5">
+                      <Settings2 size={14} className="text-blue-500" /> Advanced Crawler Configuration
+                    </span>
+                    {showAdvancedCrawl ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                  </button>
+
+                  {showAdvancedCrawl && (
+                    <div className="mt-3 pt-3 border-t border-slate-200/80 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="text-[11px] font-bold text-slate-600 mb-1 block">
+                          Max Pages to Crawl: <span className="text-blue-600 font-extrabold">{maxPages}</span>
+                        </label>
+                        <input
+                          type="range"
+                          min="1"
+                          max="100"
+                          value={maxPages}
+                          onChange={e => setMaxPages(Number(e.target.value))}
+                          className="w-full accent-blue-600 cursor-pointer"
+                        />
+                        <span className="text-[10px] text-slate-400">Deep crawling parses internal links & sitemaps</span>
+                      </div>
+                      <div>
+                        <label className="text-[11px] font-bold text-slate-600 mb-1 block">
+                          Max Crawl Depth: <span className="text-blue-600 font-extrabold">{maxDepth}</span>
+                        </label>
+                        <input
+                          type="range"
+                          min="1"
+                          max="5"
+                          value={maxDepth}
+                          onChange={e => setMaxDepth(Number(e.target.value))}
+                          className="w-full accent-blue-600 cursor-pointer"
+                        />
+                        <span className="text-[10px] text-slate-400">Link depth levels from root URL</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
                 <div className="p-4 bg-blue-50/70 border border-blue-200/80 rounded-2xl flex items-start gap-3">
                   <Globe size={18} className="text-blue-600 shrink-0 mt-0.5" />
                   <div className="text-xs text-blue-900 space-y-1">
-                    <p className="font-bold">Automated Intelligent Web Scraping</p>
+                    <p className="font-bold">Multi-Page Recursive Crawler with Structured Extraction</p>
                     <p className="text-[11px] text-blue-700 leading-relaxed">
-                      Our scraper fetches the live page, cleans headers, scripts, and footers using BeautifulSoup, extracts content, and automatically chunks it into vector embeddings for accurate AI bot responses.
+                      Crawls internal pages, parses <code className="bg-blue-100/70 px-1 py-0.5 rounded font-mono">sitemap.xml</code>, respects <code className="bg-blue-100/70 px-1 py-0.5 rounded font-mono">robots.txt</code>, extracts markdown tables, lists, and FAQs, defended by SSRF security filters.
                     </p>
                   </div>
                 </div>
@@ -446,10 +542,32 @@ const KnowledgeBasePage = () => {
                         <span className="px-2 py-0.5 bg-slate-100 text-slate-600 rounded-md text-[9px] font-black uppercase tracking-wider">
                           {doc.file_type || 'TXT'}
                         </span>
+                        {doc.source_url && (
+                          <a
+                            href={doc.source_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 text-[11px] font-bold text-blue-600 hover:text-blue-800 hover:underline"
+                            title={doc.source_url}
+                          >
+                            <ExternalLink size={11} /> Source
+                          </a>
+                        )}
                       </div>
                       <div className="flex items-center gap-2 text-[11px] font-semibold text-slate-400">
-                        <span>{formatSize(doc.file_size)}</span>
-                        <span>•</span>
+                        {doc.crawl_metadata?.crawled_count ? (
+                          <>
+                            <span className="text-blue-700 font-bold bg-blue-50 px-2 py-0.5 rounded-md text-[10px]">
+                              Crawled {doc.crawl_metadata.crawled_count} Pages
+                            </span>
+                            <span>•</span>
+                          </>
+                        ) : (
+                          <>
+                            <span>{formatSize(doc.file_size)}</span>
+                            <span>•</span>
+                          </>
+                        )}
                         <span className="text-emerald-700 font-bold">{doc.chunks || 0} Vector Chunks</span>
                         <span>•</span>
                         <span>{doc.created_at ? new Date(doc.created_at).toLocaleDateString() : 'Recently'}</span>
@@ -466,6 +584,18 @@ const KnowledgeBasePage = () => {
                       <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-50 text-amber-700 border border-amber-200 rounded-full text-[10px] font-black uppercase">
                         <Loader2 size={13} className="animate-spin" /> Processing
                       </span>
+                    )}
+
+                    {doc.file_type === 'URL' && (
+                      <button
+                        type="button"
+                        disabled={recrawlingId === doc.id}
+                        onClick={() => handleRecrawl(doc.id)}
+                        className="p-2 text-slate-400 hover:text-blue-600 rounded-xl hover:bg-blue-50 transition-colors cursor-pointer disabled:opacity-50"
+                        title="Re-crawl and update website data"
+                      >
+                        <RefreshCw size={16} className={recrawlingId === doc.id ? 'animate-spin text-blue-600' : ''} />
+                      </button>
                     )}
 
                     {doc.text_preview && (
@@ -495,10 +625,111 @@ const KnowledgeBasePage = () => {
 
         </div>
 
+        {/* Interactive RAG Retrieval & Citation Tester */}
+        <div className="bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950 rounded-3xl p-6 sm:p-8 text-white border border-slate-800 shadow-xl space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400">
+                <Sparkles size={20} />
+              </div>
+              <div>
+                <h3 className="text-base font-extrabold text-white">Interactive RAG Retrieval & Citation Tester</h3>
+                <p className="text-xs text-slate-400">Test how your indexed website and documents answer real user queries</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 text-[11px] font-bold px-3 py-1.5 bg-slate-800/80 rounded-xl border border-slate-700/60 text-slate-300">
+              <ShieldCheck size={14} className="text-emerald-400" /> Hybrid Reciprocal Rank Fusion Active
+            </div>
+          </div>
+
+          <form onSubmit={handleTestQuery} className="flex gap-2">
+            <div className="relative flex-1">
+              <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input
+                type="text"
+                value={queryText}
+                onChange={e => setQueryText(e.target.value)}
+                placeholder="Ask any question to test AI knowledge retrieval (e.g. 'What are the pricing tiers and support levels?')"
+                className="w-full bg-slate-800/90 border border-slate-700 rounded-2xl pl-11 pr-4 py-3 text-xs font-medium text-white placeholder-slate-400 outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20 transition-all"
+              />
+            </div>
+            <button
+              type="submit"
+              disabled={queryLoading || !queryText.trim()}
+              className="px-5 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-2xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
+            >
+              {queryLoading ? (
+                <><Loader2 size={15} className="animate-spin" /> Querying...</>
+              ) : (
+                <><Send size={15} /> Test Retrieval</>
+              )}
+            </button>
+          </form>
+
+          {/* Query Result Preview */}
+          {queryResult && (
+            <div className="space-y-4 pt-2 border-t border-slate-800">
+              <div className="bg-slate-800/60 rounded-2xl p-5 border border-slate-700/80 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-xs font-extrabold text-indigo-300 uppercase tracking-wider">
+                    <Bot size={15} /> Synthesized AI Answer
+                  </div>
+                  <span className="text-[10px] text-slate-400 font-bold bg-slate-700/60 px-2 py-0.5 rounded-md">
+                    Retrieved {queryResult.total_chunks_found || 0} Knowledge Chunks
+                  </span>
+                </div>
+                <p className="text-xs text-slate-200 leading-relaxed whitespace-pre-wrap">
+                  {queryResult.answer}
+                </p>
+              </div>
+
+              {queryResult.retrieved_chunks && queryResult.retrieved_chunks.length > 0 && (
+                <div className="space-y-2">
+                  <h4 className="text-xs font-extrabold text-slate-300 uppercase tracking-wider">
+                    Retrieved Evidence Chunks ({queryResult.retrieved_chunks.length})
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {queryResult.retrieved_chunks.map((chk, idx) => (
+                      <div key={idx} className="bg-slate-800/40 rounded-xl p-3 border border-slate-700/60 space-y-2 text-xs">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="font-bold text-indigo-300 text-[11px] truncate">
+                            {chk.doc_title || 'Document Chunk'}
+                          </span>
+                          <span className="text-[10px] font-mono bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded font-bold shrink-0">
+                            Score: {chk.score || 0}
+                          </span>
+                        </div>
+                        {chk.heading_path && (
+                          <p className="text-[10px] text-slate-400 truncate font-semibold">
+                            Section: {chk.heading_path}
+                          </p>
+                        )}
+                        {chk.source_url && (
+                          <a
+                            href={chk.source_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-[10px] text-blue-400 hover:underline flex items-center gap-1 truncate"
+                          >
+                            <ExternalLink size={10} /> {chk.source_url}
+                          </a>
+                        )}
+                        <p className="text-[11px] text-slate-300 line-clamp-3 bg-slate-900/50 p-2 rounded-lg font-mono">
+                          {chk.text || chk.chunk_text}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
         {/* Text Preview Modal */}
         {selectedPreviewDoc && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 backdrop-blur-sm p-4">
-            <div className="bg-white rounded-3xl max-w-xl w-full p-6 shadow-2xl border border-slate-100 space-y-4">
+            <div className="bg-white rounded-3xl max-w-2xl w-full p-6 shadow-2xl border border-slate-100 space-y-4">
               <div className="flex justify-between items-center pb-3 border-b border-slate-100">
                 <div className="flex items-center gap-2">
                   <BookOpen className="text-emerald-600" size={18} />
@@ -508,6 +739,38 @@ const KnowledgeBasePage = () => {
                   <X size={18} />
                 </button>
               </div>
+
+              {/* Crawler Diagnostics if URL Document */}
+              {selectedPreviewDoc.crawl_metadata && (
+                <div className="bg-blue-50/70 border border-blue-200/80 rounded-2xl p-4 text-xs space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-blue-900 flex items-center gap-1.5">
+                      <Globe size={14} className="text-blue-600" /> Website Crawl Diagnostics
+                    </span>
+                    <span className="text-[10px] font-bold text-blue-700">
+                      Duration: {selectedPreviewDoc.crawl_metadata.duration_seconds || 0}s
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-4 gap-2 text-center pt-1">
+                    <div className="bg-white p-2 rounded-xl border border-blue-100">
+                      <p className="text-[10px] text-slate-400 font-semibold">Discovered</p>
+                      <p className="text-xs font-black text-slate-800">{selectedPreviewDoc.crawl_metadata.discovered_count || 0}</p>
+                    </div>
+                    <div className="bg-white p-2 rounded-xl border border-blue-100">
+                      <p className="text-[10px] text-slate-400 font-semibold">Fetched</p>
+                      <p className="text-xs font-black text-emerald-700">{selectedPreviewDoc.crawl_metadata.fetched_count || 0}</p>
+                    </div>
+                    <div className="bg-white p-2 rounded-xl border border-blue-100">
+                      <p className="text-[10px] text-slate-400 font-semibold">Skipped</p>
+                      <p className="text-xs font-black text-slate-500">{selectedPreviewDoc.crawl_metadata.skipped_count || 0}</p>
+                    </div>
+                    <div className="bg-white p-2 rounded-xl border border-blue-100">
+                      <p className="text-[10px] text-slate-400 font-semibold">Chunks</p>
+                      <p className="text-xs font-black text-indigo-600">{selectedPreviewDoc.crawl_metadata.chunks_created || selectedPreviewDoc.chunks || 0}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 text-xs font-mono text-slate-700 max-h-80 overflow-y-auto whitespace-pre-wrap leading-relaxed">
                 {selectedPreviewDoc.text_preview || 'No text extracted.'}

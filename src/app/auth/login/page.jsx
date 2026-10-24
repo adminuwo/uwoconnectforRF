@@ -135,6 +135,10 @@ const LoginPage = () => {
         router.push('/client');
       }
     } catch (err) {
+      if (err.response?.data?.is_email_unverified) {
+        router.push(`/auth/verify-email?email=${encodeURIComponent(email)}&reason=unverified`);
+        return;
+      }
       if (err.response?.data?.message) {
         setError(err.response.data.message);
       } else {
