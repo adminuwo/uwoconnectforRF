@@ -49,7 +49,7 @@ export default function AboutClient() {
       badge: 'Legal Tech OS',
       accentColor: 'from-blue-500/20 to-indigo-500/20 text-blue-500 border-blue-500/30',
       glow: 'group-hover:border-blue-500/50 group-hover:shadow-[0_0_30px_rgba(59,130,246,0.15)]',
-      url: 'https://uwo24.com/ai-legal'
+      url: 'https://ailegal.aisa24.com'
     },
     {
       layer: 'Layer 03 • Discovery & Distribution',
@@ -60,7 +60,7 @@ export default function AboutClient() {
       badge: 'App Ecosystem',
       accentColor: 'from-cyan-500/20 to-teal-500/20 text-cyan-500 border-cyan-500/30',
       glow: 'group-hover:border-cyan-500/50 group-hover:shadow-[0_0_30px_rgba(6,182,212,0.15)]',
-      url: 'https://aimall24.com/'
+      url: 'https://aimall24.com'
     },
     {
       layer: 'Layer 04 • Enterprise Automation',
@@ -71,7 +71,7 @@ export default function AboutClient() {
       badge: 'Omnichannel SaaS',
       accentColor: 'from-emerald-500/20 to-teal-500/20 text-emerald-500 border-emerald-500/30',
       glow: 'group-hover:border-emerald-500/50 group-hover:shadow-[0_0_30px_rgba(16,185,129,0.15)]',
-      url: 'https://uwo24.com/projects/uwo-connect'
+      url: 'https://uwoconnect.aisa24.com'
     },
     {
       layer: 'Layer 05 • Human Operating System',
@@ -82,7 +82,7 @@ export default function AboutClient() {
       badge: 'Human Readiness',
       accentColor: 'from-amber-500/20 to-yellow-500/20 text-amber-500 border-amber-500/30',
       glow: 'group-hover:border-amber-500/50 group-hover:shadow-[0_0_30px_rgba(245,158,11,0.15)]',
-      url: 'https://efv.uwo.in/'
+      url: 'https://efv.uwo.in'
     },
     {
       layer: 'Layer 06 • Sovereign Governance',

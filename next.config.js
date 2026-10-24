@@ -1,7 +1,10 @@
 /** @type {import('next').NextConfig} */
+const PROD_BACKEND_URL = 'https://uwoconnectforrb-743928421487.asia-south1.run.app';
+const DEFAULT_BACKEND_URL = process.env.NODE_ENV === 'production' ? PROD_BACKEND_URL : 'http://127.0.0.1:8000';
+
 const nextConfig = {
   env: {
-    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080',
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || DEFAULT_BACKEND_URL,
   },
   reactStrictMode: false,
   eslint: {
@@ -68,7 +71,7 @@ const nextConfig = {
     ];
   },
   async rewrites() {
-    let backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080';
+    let backendUrl = process.env.NEXT_PUBLIC_API_URL || DEFAULT_BACKEND_URL;
     if (!backendUrl.startsWith('http://') && !backendUrl.startsWith('https://')) {
       backendUrl = `https://${backendUrl}`;
     }

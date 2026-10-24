@@ -182,7 +182,7 @@ const ProposalsPage = () => {
     if (!confirm("Are you sure you want to delete this proposal?")) return;
     setActionLoading(prev => ({ ...prev, [docId]: 'delete' }));
     const token = localStorage.getItem('uwo_token');
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app';
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
     try {
       await axios.delete(`${API_URL}/api/sales-documents/${docId}/`, {
         headers: { Authorization: `Bearer ${token}` }
@@ -205,7 +205,7 @@ const ProposalsPage = () => {
 
   return (
     <DashboardLayout role="CLIENT">
-      <div className="max-w-7xl mx-auto w-full p-3 sm:p-6 pb-20 space-y-4 sm:space-y-6">
+      <div className="w-full max-w-full p-4 sm:p-6 lg:p-8 pb-20 space-y-4 sm:space-y-6 font-sans">
         
         {/* Header & Actions */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">

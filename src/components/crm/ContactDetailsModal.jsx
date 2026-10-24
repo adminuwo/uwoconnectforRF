@@ -5,7 +5,7 @@ import {
   ShoppingBag, Calendar, Clock, CheckCircle2, AlertCircle, Plus, Check, Ban 
 } from 'lucide-react';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
 const FOLLOW_UP_TYPES = [
   { id: 'CALL', label: 'Phone Call', icon: Phone, color: 'text-blue-600 bg-blue-50 border-blue-200' },

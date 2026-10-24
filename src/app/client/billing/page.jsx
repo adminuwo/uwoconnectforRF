@@ -76,7 +76,7 @@ export default function ClientBillingPage() {
 
   return (
     <DashboardLayout>
-      <div className="p-6 sm:p-8 space-y-8 max-w-7xl mx-auto selection:bg-emerald-500/20 selection:text-emerald-900">
+      <div className="p-4 sm:p-6 lg:p-8 space-y-8 w-full max-w-full selection:bg-emerald-500/20 selection:text-emerald-900 font-sans">
         
         {/* Header Title */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200/80 pb-6">

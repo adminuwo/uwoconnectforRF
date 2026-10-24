@@ -19,6 +19,9 @@ import { API_BASE_URL } from '@/config/apiConfig';
 import { useBrand } from '@/context/BrandContext';
 import { motion } from 'framer-motion';
 import AuthHeroSide from '@/components/auth/AuthHeroSide';
+import OtpVerificationCard from '@/components/auth/OtpVerificationCard';
+import PasswordStrengthIndicator from '@/components/auth/PasswordStrengthIndicator';
+import { evaluatePassword } from '@/lib/passwordValidation';
 
 const RegisterPage = () => {
   const { brand } = useBrand();
@@ -27,6 +30,13 @@ const RegisterPage = () => {
 
   // Meta Portfolio Gate: null = unanswered, 'yes' = has portfolio, 'no' = no portfolio
   const [portfolioGate, setPortfolioGate] = useState(null);
+
+  // OTP Verification state for pending registration
+  const [otpVerificationStep, setOtpVerificationStep] = useState({
+    active: false,
+    email: '',
+    otpDebug: '',
+  });
 
   const [formData, setFormData] = useState({
     name: '',
@@ -47,6 +57,8 @@ const RegisterPage = () => {
   const [success, setSuccess] = useState(false);
   const [showTerms, setShowTerms] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [showUWOModal, setShowUWOModal] = useState(false);
   const [inviteInfo, setInviteInfo] = useState(null);
   const router = useRouter();
@@ -259,6 +271,17 @@ const RegisterPage = () => {
       setError('Please enter your Meta Portfolio name.');
       return;
     }
+
+    const evalRes = evaluatePassword(formData.password, confirmPassword);
+    if (!evalRes.isValid) {
+      setError('Please ensure your password meets all 5 security requirements.');
+      return;
+    }
+    if (formData.password !== confirmPassword) {
+      setError('Passwords do not match. Please verify your confirm password.');
+      return;
+    }
+
     setLoading(true);
     setError('');
     try {
@@ -287,22 +310,33 @@ const RegisterPage = () => {
         registration_method: 'email'
       });
 
-      if (res.status === 201 && res.data.token) {
-        const { token, user } = res.data;
-        storeUserSession(token, user);
-
-        if (user.role !== 'ADMIN' && !localStorage.getItem('aisa_tour_completed')) {
-          localStorage.setItem('aisa_tour_pending', 'true');
-          localStorage.removeItem('aisa_tour_step');
+      if (res.status === 201) {
+        if (res.data?.requires_otp || res.data?.status === 'PENDING_VERIFICATION') {
+          setOtpVerificationStep({
+            active: true,
+            email: res.data.email || formData.email.trim().toLowerCase(),
+            otpDebug: res.data.otp_debug || '',
+          });
+          return;
         }
 
-        if (user.role === 'ADMIN') {
-          router.push('/admin');
+        if (res.data.token) {
+          const { token, user } = res.data;
+          storeUserSession(token, user);
+
+          if (user.role !== 'ADMIN' && !localStorage.getItem('aisa_tour_completed')) {
+            localStorage.setItem('aisa_tour_pending', 'true');
+            localStorage.removeItem('aisa_tour_step');
+          }
+
+          if (user.role === 'ADMIN') {
+            router.push('/admin');
+          } else {
+            router.push('/client');
+          }
         } else {
-          router.push('/client');
+          setSuccess(true);
         }
-      } else {
-        setSuccess(true);
       }
     } catch (err) {
       console.error('Registration error:', err);
@@ -417,8 +451,16 @@ const RegisterPage = () => {
           />
         </div>
 
-        {/* ── STEP 1: Meta Portfolio Eligibility Gate ── */}
-        {portfolioGate !== 'yes' ? (
+        {/* ── STEP: Email OTP Verification (Active on Pending Verification) ── */}
+        {otpVerificationStep.active ? (
+          <div className="w-full my-auto py-2 animate-in fade-in zoom-in-95 duration-200">
+            <OtpVerificationCard
+              email={otpVerificationStep.email}
+              initialOtpDebug={otpVerificationStep.otpDebug}
+              onBack={() => setOtpVerificationStep({ active: false, email: '', otpDebug: '' })}
+            />
+          </div>
+        ) : portfolioGate !== 'yes' ? (
           portfolioGate === 'enter_name' ? (
             /* Step 1 - Enter Meta Portfolio Name */
             <div className="w-full text-center py-2 animate-in fade-in zoom-in-95 duration-200 my-auto">
@@ -846,6 +888,81 @@ const RegisterPage = () => {
                 )}
               </button>
             </div>
+
+            {/* Live Password Strength Bar & Requirements Checklist */}
+            <PasswordStrengthIndicator
+              password={formData.password}
+              confirmPassword={confirmPassword}
+              showChecklist={true}
+              showConfirmIndicator={false}
+              className="mt-2"
+            />
+          </div>
+
+          {/* 7. Confirm Password */}
+          <div className="space-y-1 w-full" style={{ width: '100%' }}>
+            <label htmlFor="reg-confirm-password" className="block text-xs font-bold text-slate-700 ml-1">
+              Confirm Password <span className="text-emerald-600">*</span>
+            </label>
+            <div className="relative w-full" style={{ position: 'relative', width: '100%', display: 'block' }}>
+              <Lock
+                className="w-4 h-4 text-slate-400 pointer-events-none"
+                style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', zIndex: 10 }}
+              />
+              <input
+                id="reg-confirm-password"
+                name="confirmPassword"
+                type={showConfirmPassword ? "text" : "password"}
+                required
+                autoComplete="new-password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="••••••••••••"
+                className="w-full block bg-slate-50/90 text-slate-900 placeholder:text-slate-400 outline-none rounded-2xl py-2.5 pl-10 pr-12 font-medium text-sm border border-slate-200/80 focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 transition-all shadow-sm cursor-text select-text"
+                style={{ width: '100%', display: 'block', boxSizing: 'border-box' }}
+              />
+              <button
+                type="button"
+                tabIndex={-1}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setShowConfirmPassword((prev) => !prev);
+                }}
+                className="text-slate-400 hover:text-emerald-600 active:scale-95 transition-all p-1.5 rounded-xl focus:outline-none cursor-pointer flex items-center justify-center"
+                style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', zIndex: 20, width: 'auto', height: 'auto', maxWidth: '36px', minWidth: 'unset' }}
+                aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+              >
+                {showConfirmPassword ? (
+                  <EyeOff className="w-4 h-4 text-emerald-600" />
+                ) : (
+                  <Eye className="w-4 h-4 text-slate-400 hover:text-emerald-600" />
+                )}
+              </button>
+            </div>
+
+            {/* Confirm password match indicator */}
+            {confirmPassword.length > 0 && (
+              <div
+                className={`flex items-center gap-1.5 text-[11px] font-semibold mt-1.5 ml-1 ${
+                  formData.password && formData.password === confirmPassword
+                    ? 'text-emerald-600 dark:text-emerald-400'
+                    : 'text-rose-600 dark:text-rose-400'
+                }`}
+              >
+                {formData.password && formData.password === confirmPassword ? (
+                  <>
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    <span>Passwords match</span>
+                  </>
+                ) : (
+                  <>
+                    <XCircle className="w-3.5 h-3.5" />
+                    <span>Passwords do not match</span>
+                  </>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Terms checkbox */}

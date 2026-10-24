@@ -1463,7 +1463,7 @@ export default function AdminPlansPage() {
 
   return (
     <DashboardLayout role="ADMIN">
-      <div className="max-w-7xl mx-auto pb-24 px-3 sm:px-6 lg:px-8 font-sans w-full min-w-0">
+      <div className="w-full max-w-full pb-24 px-4 sm:px-6 lg:px-8 font-sans min-w-0">
         
         {/* ── Toast Notification ── */}
         {toastMessage && (

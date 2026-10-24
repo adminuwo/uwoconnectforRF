@@ -13,7 +13,7 @@ import {
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { cn } from '@/lib/utils';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || '';
 
 const PRESENCE = {
   available: { dot: 'bg-emerald-400', text: 'Available' },

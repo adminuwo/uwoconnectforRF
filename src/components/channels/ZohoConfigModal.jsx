@@ -22,7 +22,7 @@ export default function ZohoConfigModal({ client, isOpen, onClose, onSaved }) {
 
   const isConnected = Boolean(client?.zoho_enabled);
   const config = client?.zoho_config || {};
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app';
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
 
   const handleConnect = async () => {
     setConnecting(true);

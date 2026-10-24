@@ -290,7 +290,7 @@ const ClientWorkflowsPage = () => {
 
   return (
     <DashboardLayout role="CLIENT">
-      <div className="max-w-7xl mx-auto w-full p-4 sm:p-6 pb-24">
+      <div className="w-full max-w-full p-4 sm:p-6 lg:p-8 pb-24 font-sans">
         
         {/* HEADER SECTION */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-10 pb-6 border-b border-slate-100 gap-4">

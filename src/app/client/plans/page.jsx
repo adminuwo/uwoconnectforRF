@@ -659,7 +659,7 @@ export default function ClientPlansPage() {
 
   return (
     <DashboardLayout role="CLIENT">
-      <div className="max-w-7xl mx-auto pb-24 px-3 sm:px-6 lg:px-8">
+      <div className="w-full max-w-full pb-24 px-4 sm:px-6 lg:px-8 font-sans">
         
         {/* Toast */}
         {toast && (

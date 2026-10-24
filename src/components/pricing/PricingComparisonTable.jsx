@@ -798,7 +798,7 @@ export default function PricingComparisonTable({ plansData, onSelectPlan, isAdmi
               <div className="space-y-1 bg-slate-50 p-3.5 rounded-2xl border border-slate-100">
                 <div className="flex items-baseline gap-1">
                   <span className="text-xl font-black text-slate-900">
-                    {plan.currency && plan.currency.trim().length > 1 ? `${plan.currency.trim()} ` : (plan.currency || '₹')}
+                    {(!plan.currency || plan.currency.trim().toUpperCase() === 'INR' || plan.currency.trim() === '₹') ? '₹' : `${plan.currency.trim()} `}
                     {displayPrice.toLocaleString('en-IN')}
                   </span>
                   <span className="text-xs text-slate-500 font-bold">{periodLabel}</span>
@@ -1116,7 +1116,7 @@ export default function PricingComparisonTable({ plansData, onSelectPlan, isAdmi
                       <div className="space-y-1">
                         <div className="flex items-baseline gap-1">
                           <span className={cn("text-xl sm:text-2xl font-black tracking-tight", dark ? "text-white" : "text-slate-900")}>
-                            {plan.currency && plan.currency.trim().length > 1 ? `${plan.currency.trim()} ` : (plan.currency || '₹')}
+                            {(!plan.currency || plan.currency.trim().toUpperCase() === 'INR' || plan.currency.trim() === '₹') ? '₹' : `${plan.currency.trim()} `}
                             {displayPrice.toLocaleString('en-IN')}
                           </span>
                           <span className="text-xs text-slate-500 font-bold">{periodLabel}</span>

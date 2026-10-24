@@ -158,8 +158,8 @@ export default function AddContactModal({
     if (!selectedFile) return;
 
     const name = selectedFile.name.toLowerCase();
-    if (!name.endsWith('.csv') && !name.endsWith('.xlsx') && !name.endsWith('.xls')) {
-      setExcelError('Please select a valid Excel (.xlsx, .xls) or CSV file.');
+    if (!name.endsWith('.csv')) {
+      setExcelError('Please upload a standard CSV file (.csv). If using Excel, choose "Save As" -> CSV.');
       return;
     }
 

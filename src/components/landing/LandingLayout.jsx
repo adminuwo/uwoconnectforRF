@@ -37,7 +37,7 @@ export default function LandingLayout({ children, activePage = '' }) {
       } else {
         setLoggedInUser(null);
       }
-    } catch (e) {}
+    } catch (e) { }
 
     // Default to dark mode unless explicitly set to light
     try {
@@ -49,7 +49,7 @@ export default function LandingLayout({ children, activePage = '' }) {
         setIsDarkMode(true);
         document.documentElement.classList.add('dark');
       }
-    } catch (e) {}
+    } catch (e) { }
   }, []);
 
   useEffect(() => {
@@ -70,7 +70,7 @@ export default function LandingLayout({ children, activePage = '' }) {
     setIsDarkMode(newTheme);
     try {
       localStorage.setItem('uwo_landing_theme', newTheme ? 'dark' : 'light');
-    } catch (e) {}
+    } catch (e) { }
   };
 
   const handleDashboardRedirect = () => {

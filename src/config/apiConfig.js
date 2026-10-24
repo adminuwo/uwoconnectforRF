@@ -1,43 +1,39 @@
 /**
  * Central API configuration.
- * Uses runtime-computed base URL so that:
- *  - ngrok/external → '' (relative, proxied by Next.js)
- *  - LAN IP (192.168.x.x) → http://<same-host>:8080
- *  - localhost → http://127.0.0.1:8080
- *  - production → https://aisaconnectback-anaqbuapb6c6apgy.centralindia-01.azurewebsites.net
+ * Resolves the backend API base URL dynamically:
+ *  - Explicit NEXT_PUBLIC_API_URL env var always takes highest priority
+ *  - localhost / 127.0.0.1 → http://127.0.0.1:8000 (Django default port)
+ *  - LAN IP (192.168.x.x) → http://<same-host>:8000
+ *  - Production browser → '' (relative /api/* path, proxied by Next.js rewrites)
+ *  - Production SSR/Node → process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'
  */
 
 const PRIVATE_IP_REGEX = /^(127\.|10\.|192\.168\.|172\.(1[6-9]|2[0-9]|3[01])\.)/;
 
 const getApiBaseUrl = () => {
+  // 1. Explicit env variable always takes highest priority
+  if (process.env.NEXT_PUBLIC_API_URL && process.env.NEXT_PUBLIC_API_URL.trim()) {
+    return process.env.NEXT_PUBLIC_API_URL.trim().replace(/\/$/, '');
+  }
+
+  // 2. Browser runtime context
   if (typeof window !== 'undefined' && window.location) {
     const currentHost = window.location.hostname;
     if (currentHost === 'localhost' || currentHost === '127.0.0.1') {
-      return process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080';
+      return 'http://127.0.0.1:8000';
     }
     if (PRIVATE_IP_REGEX.test(currentHost)) {
-      return `http://${currentHost}:8080`;
+      return `http://${currentHost}:8000`;
     }
-    // Live / Production external host (e.g. uwoconnect.aisa24.com, *.run.app)
-    if (
-      process.env.NEXT_PUBLIC_API_URL &&
-      !process.env.NEXT_PUBLIC_API_URL.includes('127.0.0.1') &&
-      !process.env.NEXT_PUBLIC_API_URL.includes('localhost')
-    ) {
-      return process.env.NEXT_PUBLIC_API_URL;
-    }
-    return 'https://uwoconnectforrb-743928421487.asia-south1.run.app';
+    // External/Production domain (e.g. uwoconnect.aisa24.com, Cloud Run frontend)
+    // Return empty string so all requests use relative /api/... paths proxied by Next.js
+    return '';
   }
-  if (
-    process.env.NEXT_PUBLIC_API_URL &&
-    !process.env.NEXT_PUBLIC_API_URL.includes('127.0.0.1') &&
-    !process.env.NEXT_PUBLIC_API_URL.includes('localhost')
-  ) {
-    return process.env.NEXT_PUBLIC_API_URL;
-  }
+
+  // 3. Node.js / SSR context fallback
   return process.env.NODE_ENV === 'production'
     ? 'https://uwoconnectforrb-743928421487.asia-south1.run.app'
-    : 'http://127.0.0.1:8080';
+    : 'http://127.0.0.1:8000';
 };
 
 export const getUnifiedApiBaseUrl = () => {

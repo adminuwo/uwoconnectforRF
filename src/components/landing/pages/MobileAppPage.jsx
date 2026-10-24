@@ -146,25 +146,39 @@ export default function MobileAppPage() {
   return (
     <LandingLayout activePage="mobile-app">
       {({ isDarkMode }) => (
-        <div className="flex flex-col gap-24 sm:gap-32 lg:gap-40 py-12 sm:py-20 lg:py-28">
+        <div className="flex flex-col w-full">
 
           {/* ══════════════════════════════════════════════════════════════ */}
-          {/* 1. HERO SECTION: CINEMATIC DUAL-COLUMN WITH LIVE DEMO PHONE    */}
+          {/* 1. HERO SECTION: FULL-SCREEN IMMERSIVE HERO WITH LIVE DEMO    */}
           {/* ══════════════════════════════════════════════════════════════ */}
-          <section className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full relative">
+          <section className={cn(
+            "w-full min-h-[calc(100vh-4rem)] flex items-center justify-center relative overflow-hidden px-4 sm:px-8 lg:px-12 xl:px-16 py-8 sm:py-10 lg:py-12 border-b transition-colors duration-300",
+            isDarkMode
+              ? "bg-gradient-to-b from-[#070B14] via-[#0B1220] to-[#070B14] border-slate-800/80"
+              : "bg-gradient-to-b from-white via-emerald-50/25 to-[#F8FAFC] border-slate-200/80"
+          )}>
+
+            {/* Subtle Tech Pattern Background */}
+            <div
+              className="absolute inset-0 opacity-[0.035] dark:opacity-[0.05] pointer-events-none"
+              style={{
+                backgroundImage: 'radial-gradient(circle, #0B8F78 1.2px, transparent 1.2px)',
+                backgroundSize: '36px 36px'
+              }}
+            />
 
             {/* Ambient Background Glows */}
             <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-gradient-to-tr from-[#0B8F78]/15 via-teal-500/10 to-transparent rounded-full blur-[140px] pointer-events-none" />
-            <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-gradient-to-bl from-teal-500/15 via-blue-500/10 to-transparent rounded-full blur-[140px] pointer-events-none" />
+            <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-gradient-to-bl from-teal-500/15 via-blue-500/10 to-transparent rounded-full blur-[140px] pointer-events-none" />
 
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center relative z-10">
+            <div className="w-full max-w-[1536px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 xl:gap-16 items-center relative z-10">
 
               {/* Left Column: Heading, Subtitle & Download CTAs */}
               <motion.div
-                initial={{ opacity: 0, y: 30 }}
+                initial={{ opacity: 0, y: 25 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6 }}
-                className="lg:col-span-7 space-y-8 text-left"
+                className="lg:col-span-7 xl:col-span-7 space-y-6 sm:space-y-7 text-left"
               >
                 {/* Live Badge */}
                 <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border border-[#0B8F78]/30 bg-[#0B8F78]/10 backdrop-blur-md">
@@ -175,7 +189,7 @@ export default function MobileAppPage() {
                 </div>
 
                 {/* Big Bold Headline with Dark Green Accent */}
-                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-[1.1] text-slate-900 dark:text-white">
+                <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-[62px] font-black tracking-tight leading-[1.08] text-slate-900 dark:text-white">
                   Work From Anywhere.{' '}
                   <span className="text-[#0B8F78]">
                     Close Deals Everywhere.
@@ -282,21 +296,21 @@ export default function MobileAppPage() {
 
               {/* Right Column: High Fidelity LIGHT THEME Phone Chassis with Video/Live Recording Mode */}
               <motion.div
-                initial={{ opacity: 0, scale: 0.95, y: 30 }}
+                initial={{ opacity: 0, scale: 0.95, y: 25 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 transition={{ duration: 0.7, delay: 0.15 }}
-                className="lg:col-span-5 relative flex flex-col items-center justify-start"
+                className="lg:col-span-5 xl:col-span-5 relative flex flex-col items-center justify-center w-full"
               >
-                <div className="relative mx-auto w-full max-w-[340px]">
+                <div className="relative mx-auto w-full max-w-[340px] xl:max-w-[360px]">
 
                   {/* Ambient Pulsing Glow behind chassis */}
                   <div className="absolute inset-0 bg-gradient-to-tr from-[#0B8F78]/25 via-teal-500/20 to-blue-500/20 rounded-[56px] blur-2xl transform scale-95 pointer-events-none" />
 
                   {/* Phone Chassis Outer Frame (Space Black / Titanium Metallic Border) */}
-                  <div className="relative rounded-[48px] p-3 bg-gradient-to-b from-slate-800 via-slate-900 to-slate-950 border-[4px] border-slate-700/80 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.5)]">
+                  <div className="relative rounded-[46px] p-2.5 sm:p-3 bg-gradient-to-b from-slate-800 via-slate-900 to-slate-950 border-[3.5px] border-slate-700/80 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.45)]">
 
-                    {/* Phone Screen Display — 100% LIGHT THEME CANVAS (Taller Height) */}
-                    <div className="relative rounded-[38px] overflow-hidden bg-slate-50 text-slate-900 h-[720px] flex flex-col justify-between border border-slate-200/90 shadow-inner">
+                    {/* Phone Screen Display — 100% LIGHT THEME CANVAS (Fits within screen gracefully) */}
+                    <div className="relative rounded-[36px] overflow-hidden bg-slate-50 text-slate-900 h-[600px] sm:h-[620px] xl:h-[650px] flex flex-col justify-between border border-slate-200/90 shadow-inner">
 
                       {/* 1. iOS STATUS BAR WITH REALISTIC DYNAMIC ISLAND */}
                       <div className="pt-3 pb-1.5 px-6 bg-white flex items-center justify-between text-[11px] font-bold text-slate-900 select-none z-20 border-b border-slate-100">
@@ -819,9 +833,14 @@ export default function MobileAppPage() {
           </section>
 
           {/* ══════════════════════════════════════════════════════════════ */}
-          {/* 2. 6 CORE NATIVE MOBILE CAPABILITIES (2x3 GRID)               */}
+          {/* SUBSEQUENT SECTIONS                                            */}
           {/* ══════════════════════════════════════════════════════════════ */}
-          <section className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full space-y-12">
+          <div className="flex flex-col gap-24 sm:gap-32 lg:gap-40 py-20 sm:py-28">
+
+            {/* ══════════════════════════════════════════════════════════════ */}
+            {/* 2. 6 CORE NATIVE MOBILE CAPABILITIES (2x3 GRID)               */}
+            {/* ══════════════════════════════════════════════════════════════ */}
+            <section className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full space-y-12">
             <div className="text-center space-y-3 max-w-2xl mx-auto">
               <span className="text-xs font-bold uppercase tracking-wider text-[#0B8F78]">
                 Native Performance
@@ -1016,6 +1035,7 @@ export default function MobileAppPage() {
             </div>
           </section>
 
+          </div>
         </div>
       )}
     </LandingLayout>

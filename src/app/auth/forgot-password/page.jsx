@@ -2,11 +2,13 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { Loader2, Check, KeyRound, ShieldCheck, Lock, ArrowLeft, Mail, AlertCircle, ArrowRight } from 'lucide-react';
+import { Loader2, Check, KeyRound, ShieldCheck, Lock, ArrowLeft, Mail, AlertCircle, ArrowRight, Eye, EyeOff } from 'lucide-react';
 import axios from 'axios';
 import { motion } from 'framer-motion';
 import AuthHeroSide from '@/components/auth/AuthHeroSide';
 import { useBrand } from '@/context/BrandContext';
+import PasswordStrengthIndicator from '@/components/auth/PasswordStrengthIndicator';
+import { evaluatePassword } from '@/lib/passwordValidation';
 
 const ForgotPasswordPage = () => {
   const { brand } = useBrand();
@@ -16,11 +18,13 @@ const ForgotPasswordPage = () => {
   const [debugOtp, setDebugOtp] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
 
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app';
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL || '';
 
   // Step 1: Send OTP to Email
   const handleSendOTP = async (e) => {
@@ -74,8 +78,9 @@ const ForgotPasswordPage = () => {
   // Step 3: Set New Password
   const handleResetPassword = async (e) => {
     e.preventDefault();
-    if (!newPassword || newPassword.length < 6) {
-      setError('Password must be at least 6 characters long.');
+    const evaluation = evaluatePassword(newPassword);
+    if (!evaluation.isValid) {
+      setError('Password does not meet all security requirements. Please fulfill all criteria below.');
       return;
     }
     if (newPassword !== confirmPassword) {
@@ -302,14 +307,21 @@ const ForgotPasswordPage = () => {
                   <div className="relative">
                     <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                     <input
-                      type="password"
+                      type={showNewPassword ? "text" : "password"}
                       required
-                      minLength={6}
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
-                      placeholder="••••••••••••"
-                      className="w-full bg-slate-50/90 text-slate-900 placeholder:text-slate-400 outline-none rounded-2xl py-2.5 pl-10 pr-4 font-medium text-sm border border-slate-200/80 focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 transition-all shadow-sm"
+                      placeholder="Enter new password"
+                      className="w-full bg-slate-50/90 text-slate-900 placeholder:text-slate-400 outline-none rounded-2xl py-2.5 pl-10 pr-11 font-medium text-sm border border-slate-200/80 focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 transition-all shadow-sm"
                     />
+                    <button
+                      type="button"
+                      onClick={() => setShowNewPassword(!showNewPassword)}
+                      aria-label={showNewPassword ? "Hide password" : "Show password"}
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none transition-colors"
+                    >
+                      {showNewPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
                   </div>
                 </div>
 
@@ -320,16 +332,30 @@ const ForgotPasswordPage = () => {
                   <div className="relative">
                     <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                     <input
-                      type="password"
+                      type={showConfirmPassword ? "text" : "password"}
                       required
-                      minLength={6}
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
-                      placeholder="••••••••••••"
-                      className="w-full bg-slate-50/90 text-slate-900 placeholder:text-slate-400 outline-none rounded-2xl py-2.5 pl-10 pr-4 font-medium text-sm border border-slate-200/80 focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 transition-all shadow-sm"
+                      placeholder="Re-enter new password"
+                      className="w-full bg-slate-50/90 text-slate-900 placeholder:text-slate-400 outline-none rounded-2xl py-2.5 pl-10 pr-11 font-medium text-sm border border-slate-200/80 focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 transition-all shadow-sm"
                     />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      aria-label={showConfirmPassword ? "Hide confirm password" : "Show confirm password"}
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none transition-colors"
+                    >
+                      {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
                   </div>
                 </div>
+
+                {/* Password Strength Indicator & Real-Time Checklist */}
+                <PasswordStrengthIndicator 
+                  password={newPassword}
+                  confirmPassword={confirmPassword}
+                  showChecklist={true}
+                />
 
                 <button
                   type="submit"

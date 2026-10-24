@@ -224,14 +224,14 @@ export default function UwoLandingPage() {
       } else {
         setLoggedInUser(null);
       }
-    } catch (e) {}
+    } catch (e) { }
 
     try {
       const savedTheme = localStorage.getItem('uwo_landing_theme');
       if (savedTheme === 'dark') {
         setIsDarkMode(true);
       }
-    } catch (e) {}
+    } catch (e) { }
   }, []);
 
   useEffect(() => {
@@ -248,7 +248,7 @@ export default function UwoLandingPage() {
     setIsDarkMode(newTheme);
     try {
       localStorage.setItem('uwo_landing_theme', newTheme ? 'dark' : 'light');
-    } catch (e) {}
+    } catch (e) { }
   };
 
   // Parallax listener on desktop
@@ -928,7 +928,7 @@ export default function UwoLandingPage() {
                   <ArrowRight size={16} />
                 </button>
                 <a
-                  href="#platform"
+                  href="#channels"
                   className={cn(
                     "px-7 py-3.5 rounded-xl border text-sm font-bold transition-all hover:scale-105 active:scale-95 cursor-pointer flex items-center gap-2",
                     isDarkMode
@@ -1080,156 +1080,7 @@ export default function UwoLandingPage() {
           </div>
         </section>
 
-        {/* ════════════════════════════════════════════════════════════════ */}
-        {/* 3. "EVERYTHING YOUR BUSINESS NEEDS" — PRODUCT ECOSYSTEM        */}
-        {/* ════════════════════════════════════════════════════════════════ */}
-        <section
-          id="platform"
-          className={cn(
-            "py-20 sm:py-28 px-4 sm:px-6 lg:px-8 border-b transition-colors",
-            isDarkMode ? "bg-[#090E1A] border-slate-800" : "bg-white border-slate-200/80"
-          )}
-        >
-          <div className="max-w-7xl mx-auto space-y-14">
 
-            {/* Editorial Header */}
-            <ScrollReveal y={30}>
-              <div className="text-center space-y-3 max-w-3xl mx-auto">
-                <span className="text-xs font-bold tracking-widest text-[#0B8F78] uppercase block">
-                  THE UNIFIED ARCHITECTURE
-                </span>
-                <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight">
-                  Everything Your Business Needs. Connected in One Place.
-                </h2>
-                <p className={cn("text-sm sm:text-base font-normal", isDarkMode ? "text-slate-300" : "text-slate-600")}>
-                  UWO Connect brings communication, productivity tools, and business automation together.
-                </p>
-              </div>
-            </ScrollReveal>
-
-            {/* Central Ecosystem Diagram (No Repetitive Boxy Cards) */}
-            <ScrollReveal y={35} delay={0.15}>
-              <div className={cn(
-                "p-8 sm:p-12 lg:p-16 rounded-3xl border relative overflow-hidden",
-                isDarkMode
-                  ? "bg-slate-950/70 border-slate-800 shadow-2xl"
-                  : "bg-[#F8FAFC]/90 border-slate-200/90 shadow-lg"
-              )}>
-
-              {/* Background Flow Lines */}
-              <div className="absolute inset-0 pointer-events-none opacity-20">
-                <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-                  <defs>
-                    <linearGradient id="ecosystemGlow" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" stopColor="#0B8F78" />
-                      <stop offset="50%" stopColor="#2563EB" />
-                      <stop offset="100%" stopColor="#10B981" />
-                    </linearGradient>
-                  </defs>
-                  <line x1="20%" y1="50%" x2="50%" y2="50%" stroke="url(#ecosystemGlow)" strokeWidth="2" strokeDasharray="6 6" />
-                  <line x1="80%" y1="50%" x2="50%" y2="50%" stroke="url(#ecosystemGlow)" strokeWidth="2" strokeDasharray="6 6" />
-                  <line x1="50%" y1="20%" x2="50%" y2="50%" stroke="url(#ecosystemGlow)" strokeWidth="2" strokeDasharray="6 6" />
-                </svg>
-              </div>
-
-              <div className="relative z-10 grid grid-cols-1 lg:grid-cols-3 gap-8 items-center text-left">
-
-                {/* Pillar 1: CHANNELS */}
-                <div className="space-y-4">
-                  <div className="flex items-center gap-2">
-                    <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-[#0B8F78] text-[10px] font-black uppercase tracking-wider">
-                      4 CHANNELS
-                    </span>
-                    <span className="text-xs text-slate-400">Incoming Feed</span>
-                  </div>
-                  <h3 className="text-xl sm:text-2xl font-bold">Channels</h3>
-                  <p className={cn("text-xs sm:text-sm leading-relaxed", isDarkMode ? "text-slate-400" : "text-slate-600")}>
-                    Connect with customers wherever they are. WhatsApp, Instagram, Facebook, and YouTube synced seamlessly.
-                  </p>
-                  <div className="flex items-center gap-2 pt-2">
-                    <div className="p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs hover:scale-110 transition-transform">
-                      <WhatsAppLogo size={22} />
-                    </div>
-                    <div className="p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs hover:scale-110 transition-transform">
-                      <InstagramLogo size={22} />
-                    </div>
-                    <div className="p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs hover:scale-110 transition-transform">
-                      <FacebookLogo size={22} />
-                    </div>
-                    <div className="p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs hover:scale-110 transition-transform">
-                      <YouTubeLogo size={22} />
-                    </div>
-                  </div>
-                  <a href="#channels" className="text-xs font-bold text-[#0B8F78] inline-flex items-center gap-1 hover:underline pt-2">
-                    <span>Explore Channels</span>
-                    <ArrowRight size={13} />
-                  </a>
-                </div>
-
-                {/* Central Core: UWO CONNECT ENGINE */}
-                <div className={cn(
-                  "flex flex-col items-center justify-center p-6 sm:p-8 rounded-2xl border text-center relative group transition-all duration-300",
-                  isDarkMode 
-                    ? "bg-slate-900/90 border-emerald-500/50 shadow-[0_0_35px_rgba(11,143,120,0.3)] text-white backdrop-blur-xl" 
-                    : "bg-white border-emerald-500/30 shadow-xl text-slate-900"
-                )}>
-                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#0B8F78] to-[#2563EB] flex items-center justify-center text-white shadow-lg shadow-emerald-600/30 mb-4 group-hover:scale-110 transition-transform duration-300">
-                    <Zap size={30} className="fill-white" />
-                  </div>
-                  <h4 className={cn("text-lg font-black tracking-tight", isDarkMode ? "text-white" : "text-slate-900")}>
-                    UWO Connect Core
-                  </h4>
-                  <p className={cn("text-xs mt-1 max-w-xs leading-relaxed", isDarkMode ? "text-slate-300" : "text-slate-600")}>
-                    Autonomous message routing, AI logic execution, multi-agent dispatch &amp; instant sync.
-                  </p>
-                  <div className={cn(
-                    "mt-4 flex items-center gap-2 text-[11px] font-bold px-3.5 py-1.5 rounded-full border transition-colors",
-                    isDarkMode 
-                      ? "text-emerald-300 bg-emerald-950/80 border-emerald-700/70 shadow-inner" 
-                      : "text-emerald-700 bg-emerald-50 border-emerald-200"
-                  )}>
-                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-                    <span>0.2s Processing Velocity</span>
-                  </div>
-                </div>
-
-                {/* Pillar 2: CONNECTORS (Dev) */}
-                <div className="space-y-4">
-                  <div className="flex items-center gap-2">
-                    <span className="px-2.5 py-0.5 rounded-full bg-blue-500/10 text-[#2563EB] text-[10px] font-black uppercase tracking-wider">
-                      8 CONNECTORS
-                    </span>
-                    <span className="text-xs text-slate-400">Tool Ecosystem</span>
-                  </div>
-                  <h3 className="text-xl sm:text-2xl font-bold">Connectors</h3>
-                  <p className={cn("text-xs sm:text-sm leading-relaxed", isDarkMode ? "text-slate-400" : "text-slate-600")}>
-                    Integrate your business tools. Gmail, Outlook, Google Maps, Docs, Sheets, OneDrive, Slides &amp; News.
-                  </p>
-                  <div className="flex flex-wrap items-center gap-2 pt-2">
-                    <div className="p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs hover:scale-110 transition-transform">
-                      <GmailLogo size={20} />
-                    </div>
-                    <div className="p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs hover:scale-110 transition-transform">
-                      <OutlookLogo size={20} />
-                    </div>
-                    <div className="p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs hover:scale-110 transition-transform">
-                      <GoogleSheetsLogo size={20} />
-                    </div>
-                    <div className="p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs hover:scale-110 transition-transform">
-                      <GoogleDocsLogo size={20} />
-                    </div>
-                  </div>
-                  <a href="#connectors" className="text-xs font-bold text-[#2563EB] inline-flex items-center gap-1 hover:underline pt-2">
-                    <span>Explore Connectors</span>
-                    <ArrowRight size={13} />
-                  </a>
-                </div>
-
-              </div>
-            </div>
-          </ScrollReveal>
-        </div>
-      </section>
 
         {/* ════════════════════════════════════════════════════════════════ */}
         {/* 4. CHANNELS SECTION — UNIFIED COMMUNICATION WORKSPACE          */}
@@ -1262,28 +1113,28 @@ export default function UwoLandingPage() {
             <ScrollReveal y={25} delay={0.15}>
               <div className="flex flex-wrap items-center justify-center gap-2 max-w-2xl mx-auto">
 
-              {channelsList.map((ch) => (
-                <button
-                  key={ch.id}
-                  type="button"
-                  onClick={() => setActiveChannelTab(ch.id)}
-                  className={cn(
-                    "px-4 py-2.5 rounded-xl border text-xs font-bold flex items-center gap-2 transition-all cursor-pointer",
-                    activeChannelTab === ch.id
-                      ? "bg-[#0B8F78] text-white border-[#0B8F78] shadow-md shadow-emerald-700/20 scale-105"
-                      : isDarkMode
-                        ? "bg-slate-900 border-slate-800 text-slate-300 hover:text-white"
-                        : "bg-white border-slate-200 text-slate-700 hover:text-slate-900 hover:border-slate-300"
-                  )}
-                >
-                  {ch.logo}
-                  <span>{ch.name}</span>
-                  {ch.comingSoon && (
-                    <span className="ml-0.5 text-[8px] px-1.5 py-0.5 rounded-full bg-red-500/15 text-red-500 font-extrabold border border-red-500/25 uppercase leading-none">Soon</span>
-                  )}
-                </button>
-              ))}
-            </div>
+                {channelsList.map((ch) => (
+                  <button
+                    key={ch.id}
+                    type="button"
+                    onClick={() => setActiveChannelTab(ch.id)}
+                    className={cn(
+                      "px-4 py-2.5 rounded-xl border text-xs font-bold flex items-center gap-2 transition-all cursor-pointer",
+                      activeChannelTab === ch.id
+                        ? "bg-[#0B8F78] text-white border-[#0B8F78] shadow-md shadow-emerald-700/20 scale-105"
+                        : isDarkMode
+                          ? "bg-slate-900 border-slate-800 text-slate-300 hover:text-white"
+                          : "bg-white border-slate-200 text-slate-700 hover:text-slate-900 hover:border-slate-300"
+                    )}
+                  >
+                    {ch.logo}
+                    <span>{ch.name}</span>
+                    {ch.comingSoon && (
+                      <span className="ml-0.5 text-[8px] px-1.5 py-0.5 rounded-full bg-red-500/15 text-red-500 font-extrabold border border-red-500/25 uppercase leading-none">Soon</span>
+                    )}
+                  </button>
+                ))}
+              </div>
             </ScrollReveal>
 
             {/* Realistic Unified Communication Interface Mockup */}
@@ -1352,7 +1203,7 @@ export default function UwoLandingPage() {
                         <span className={`w-2 h-2 rounded-full ${currentChannel.comingSoon ? 'bg-amber-500 animate-pulse' : 'bg-emerald-500'}`} />
                         <span>Unified Inbox View • {currentChannel.name} {currentChannel.comingSoon ? 'Integration' : 'Feed Active'}</span>
                       </div>
-                      
+
                       {currentChannel.comingSoon ? (
                         <div className="p-10 sm:p-14 text-center space-y-4 flex flex-col items-center justify-center bg-gradient-to-b from-slate-50 to-slate-100/80 dark:from-slate-900 dark:to-slate-950 min-h-[350px]">
                           <div className="w-16 h-16 rounded-3xl bg-red-500/10 text-red-500 flex items-center justify-center border border-red-500/20 shadow-sm animate-bounce">
@@ -1425,101 +1276,101 @@ export default function UwoLandingPage() {
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
 
 
-              {/* Dev Character Showcase */}
-              <div className="lg:col-span-4 flex flex-col items-center lg:items-start text-center lg:text-left space-y-4">
-                <div className="relative">
-                  <div className="absolute inset-0 bg-blue-500/15 rounded-full blur-2xl pointer-events-none" />
-                  <img
-                    src="/Dev_transparent.png"
-                    alt="Dev - Integration Intelligence"
-                    className="relative z-10 w-48 sm:w-60 object-contain drop-shadow-xl"
-                  />
-                </div>
-                <div className="space-y-1">
-                  <span className="text-xs font-black tracking-widest text-[#2563EB] uppercase block">
-                    MEET DEV • CHIEF CONNECTOR
-                  </span>
-                  <h4 className="text-lg font-bold">Unifying All Business Data Streams</h4>
-                  <p className={cn("text-xs leading-relaxed max-w-xs", isDarkMode ? "text-slate-400" : "text-slate-600")}>
-                    Dev automatically synchronizes external emails, documents, spreadsheets, and calendar invites straight into UWO Connect workflows.
-                  </p>
-                </div>
-              </div>
-
-              {/* Interactive Orbital Network (No 8 Generic Cards) */}
-              <div className="lg:col-span-8">
-                <div className={cn(
-                  "p-6 sm:p-10 rounded-3xl border relative",
-                  isDarkMode
-                    ? "bg-slate-950/80 border-slate-800 shadow-xl"
-                    : "bg-[#F8FAFC] border-slate-200/90 shadow-md"
-                )}>
-                  {/* Central Node Description */}
-                  <div className="pb-6 mb-6 border-b border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-left">
-                    <div>
-                      <span className="text-[10px] font-black uppercase text-blue-600 tracking-wider">
-                        ACTIVE CONNECTOR SELECTION
-                      </span>
-                      <h4 className="text-xl font-bold flex items-center gap-2 mt-0.5">
-                        {connectorsList[activeConnectorIndex].logo}
-                        <span>{connectorsList[activeConnectorIndex].name}</span>
-                      </h4>
-                    </div>
-                    <div className="text-xs font-semibold px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 w-fit">
-                      {connectorsList[activeConnectorIndex].stat}
-                    </div>
+                {/* Dev Character Showcase */}
+                <div className="lg:col-span-4 flex flex-col items-center lg:items-start text-center lg:text-left space-y-4">
+                  <div className="relative">
+                    <div className="absolute inset-0 bg-blue-500/15 rounded-full blur-2xl pointer-events-none" />
+                    <img
+                      src="/Dev_transparent.png"
+                      alt="Dev - Integration Intelligence"
+                      className="relative z-10 w-48 sm:w-60 object-contain drop-shadow-xl"
+                    />
                   </div>
-
-                  <p className={cn("text-xs sm:text-sm font-normal text-left mb-8 leading-relaxed", isDarkMode ? "text-slate-300" : "text-slate-600")}>
-                    {connectorsList[activeConnectorIndex].desc}
-                  </p>
-
-                  {/* Connector Grid Selector */}
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                    {connectorsList.map((conn, idx) => {
-                      const isActive = activeConnectorIndex === idx;
-                      return (
-                        <button
-                          key={conn.id}
-                          type="button"
-                          onClick={() => setActiveConnectorIndex(idx)}
-                          className={cn(
-                            "p-3.5 rounded-2xl border text-left flex items-center gap-3 transition-all duration-200 cursor-pointer",
-                            isActive
-                              ? "bg-blue-600 text-white border-blue-600 shadow-lg shadow-blue-600/25 scale-[1.03]"
-                              : isDarkMode
-                                ? "bg-slate-900 border-slate-800 text-slate-300 hover:text-white hover:bg-slate-850"
-                                : "bg-white border-slate-200/90 text-slate-700 hover:text-slate-900 hover:border-slate-300"
-                          )}
-                        >
-                          <div className="shrink-0">{conn.logo}</div>
-                          <div className="overflow-hidden">
-                            <span className="text-xs font-bold block truncate">{conn.name}</span>
-                            <span className={cn(
-                              "text-[10px] block truncate",
-                              isActive ? "text-blue-100" : "text-slate-400"
-                            )}>
-                              {conn.category}
-                            </span>
-                          </div>
-                        </button>
-                      );
-                    })}
-                  </div>
-
-                  {/* Connected Status Line */}
-                  <div className="mt-8 pt-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-[11px] text-slate-500">
-                    <span className="flex items-center gap-1.5 text-emerald-600 font-bold">
-                      <CheckCircle2 size={13} /> All 8 connectors ready for 1-click authorization
+                  <div className="space-y-1">
+                    <span className="text-xs font-black tracking-widest text-[#2563EB] uppercase block">
+                      MEET DEV • CHIEF CONNECTOR
                     </span>
-                    <span>Zero custom coding needed</span>
+                    <h4 className="text-lg font-bold">Unifying All Business Data Streams</h4>
+                    <p className={cn("text-xs leading-relaxed max-w-xs", isDarkMode ? "text-slate-400" : "text-slate-600")}>
+                      Dev automatically synchronizes external emails, documents, spreadsheets, and calendar invites straight into UWO Connect workflows.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Interactive Orbital Network (No 8 Generic Cards) */}
+                <div className="lg:col-span-8">
+                  <div className={cn(
+                    "p-6 sm:p-10 rounded-3xl border relative",
+                    isDarkMode
+                      ? "bg-slate-950/80 border-slate-800 shadow-xl"
+                      : "bg-[#F8FAFC] border-slate-200/90 shadow-md"
+                  )}>
+                    {/* Central Node Description */}
+                    <div className="pb-6 mb-6 border-b border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-left">
+                      <div>
+                        <span className="text-[10px] font-black uppercase text-blue-600 tracking-wider">
+                          ACTIVE CONNECTOR SELECTION
+                        </span>
+                        <h4 className="text-xl font-bold flex items-center gap-2 mt-0.5">
+                          {connectorsList[activeConnectorIndex].logo}
+                          <span>{connectorsList[activeConnectorIndex].name}</span>
+                        </h4>
+                      </div>
+                      <div className="text-xs font-semibold px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 w-fit">
+                        {connectorsList[activeConnectorIndex].stat}
+                      </div>
+                    </div>
+
+                    <p className={cn("text-xs sm:text-sm font-normal text-left mb-8 leading-relaxed", isDarkMode ? "text-slate-300" : "text-slate-600")}>
+                      {connectorsList[activeConnectorIndex].desc}
+                    </p>
+
+                    {/* Connector Grid Selector */}
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                      {connectorsList.map((conn, idx) => {
+                        const isActive = activeConnectorIndex === idx;
+                        return (
+                          <button
+                            key={conn.id}
+                            type="button"
+                            onClick={() => setActiveConnectorIndex(idx)}
+                            className={cn(
+                              "p-3.5 rounded-2xl border text-left flex items-center gap-3 transition-all duration-200 cursor-pointer",
+                              isActive
+                                ? "bg-blue-600 text-white border-blue-600 shadow-lg shadow-blue-600/25 scale-[1.03]"
+                                : isDarkMode
+                                  ? "bg-slate-900 border-slate-800 text-slate-300 hover:text-white hover:bg-slate-850"
+                                  : "bg-white border-slate-200/90 text-slate-700 hover:text-slate-900 hover:border-slate-300"
+                            )}
+                          >
+                            <div className="shrink-0">{conn.logo}</div>
+                            <div className="overflow-hidden">
+                              <span className="text-xs font-bold block truncate">{conn.name}</span>
+                              <span className={cn(
+                                "text-[10px] block truncate",
+                                isActive ? "text-blue-100" : "text-slate-400"
+                              )}>
+                                {conn.category}
+                              </span>
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {/* Connected Status Line */}
+                    <div className="mt-8 pt-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-[11px] text-slate-500">
+                      <span className="flex items-center gap-1.5 text-emerald-600 font-bold">
+                        <CheckCircle2 size={13} /> All 8 connectors ready for 1-click authorization
+                      </span>
+                      <span>Zero custom coding needed</span>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          </ScrollReveal>
-        </div>
-      </section>
+            </ScrollReveal>
+          </div>
+        </section>
 
         {/* ════════════════════════════════════════════════════════════════ */}
         {/* 6. AUTOMATION SECTION — ABHA & SEQUENTIAL WORKFLOW TIMELINE    */}
@@ -1555,110 +1406,110 @@ export default function UwoLandingPage() {
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
 
 
-              {/* Connected Timeline (No 7 repetitive cards) */}
-              <div className="lg:col-span-8 order-2 lg:order-1">
-                <div className={cn(
-                  "p-6 sm:p-10 rounded-3xl border text-left",
-                  isDarkMode ? "bg-slate-950/80 border-slate-800" : "bg-white border-slate-200/90 shadow-md"
-                )}>
+                {/* Connected Timeline (No 7 repetitive cards) */}
+                <div className="lg:col-span-8 order-2 lg:order-1">
+                  <div className={cn(
+                    "p-6 sm:p-10 rounded-3xl border text-left",
+                    isDarkMode ? "bg-slate-950/80 border-slate-800" : "bg-white border-slate-200/90 shadow-md"
+                  )}>
 
-                  {/* Current Active Step Spotlight */}
-                  <div className="p-4 sm:p-5 rounded-2xl bg-emerald-50/70 dark:bg-emerald-950/40 border border-emerald-500/30 mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded bg-[#0B8F78] text-white">
-                          STEP {automationSteps[activeWorkflowStep].step}
-                        </span>
-                        <h4 className="text-sm sm:text-base font-extrabold">
-                          {automationSteps[activeWorkflowStep].title}
-                        </h4>
+                    {/* Current Active Step Spotlight */}
+                    <div className="p-4 sm:p-5 rounded-2xl bg-emerald-50/70 dark:bg-emerald-950/40 border border-emerald-500/30 mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded bg-[#0B8F78] text-white">
+                            STEP {automationSteps[activeWorkflowStep].step}
+                          </span>
+                          <h4 className="text-sm sm:text-base font-extrabold">
+                            {automationSteps[activeWorkflowStep].title}
+                          </h4>
+                        </div>
+                        <p className="text-xs text-slate-600 dark:text-slate-300 font-medium">
+                          {automationSteps[activeWorkflowStep].detail}
+                        </p>
                       </div>
-                      <p className="text-xs text-slate-600 dark:text-slate-300 font-medium">
-                        {automationSteps[activeWorkflowStep].detail}
-                      </p>
+                      <span className="text-[11px] font-bold text-emerald-700 dark:text-emerald-300 shrink-0">
+                        ⚡ 0.2s Execution Time
+                      </span>
                     </div>
-                    <span className="text-[11px] font-bold text-emerald-700 dark:text-emerald-300 shrink-0">
-                      ⚡ 0.2s Execution Time
-                    </span>
-                  </div>
 
-                  {/* Sequential Timeline Nodes */}
-                  <div className="space-y-2 relative">
-                    {/* Glowing vertical connector line */}
-                    <div className="absolute top-6 bottom-6 left-5 w-0.5 bg-gradient-to-b from-emerald-500 via-teal-500 to-emerald-700 opacity-30" />
+                    {/* Sequential Timeline Nodes */}
+                    <div className="space-y-2 relative">
+                      {/* Glowing vertical connector line */}
+                      <div className="absolute top-6 bottom-6 left-5 w-0.5 bg-gradient-to-b from-emerald-500 via-teal-500 to-emerald-700 opacity-30" />
 
-                    {automationSteps.map((st, i) => {
-                      const isActive = activeWorkflowStep === i;
-                      return (
-                        <div
-                          key={st.step}
-                          onClick={() => setActiveWorkflowStep(i)}
-                          className={cn(
-                            "relative z-10 p-3.5 rounded-2xl border transition-all duration-200 cursor-pointer flex items-center justify-between gap-4",
-                            isActive
-                              ? "bg-emerald-500/10 border-emerald-500 text-slate-900 dark:text-white shadow-sm ring-1 ring-emerald-500/30 translate-x-1"
-                              : isDarkMode
-                                ? "bg-slate-900/60 border-slate-800/80 text-slate-400 hover:text-slate-200 hover:border-slate-700"
-                                : "bg-slate-50/50 border-slate-200/70 text-slate-600 hover:text-slate-900 hover:border-slate-300"
-                          )}
-                        >
-                          <div className="flex items-center gap-3">
-                            <span className={cn(
-                              "w-7 h-7 rounded-xl flex items-center justify-center text-[10px] font-black shrink-0 transition-colors",
+                      {automationSteps.map((st, i) => {
+                        const isActive = activeWorkflowStep === i;
+                        return (
+                          <div
+                            key={st.step}
+                            onClick={() => setActiveWorkflowStep(i)}
+                            className={cn(
+                              "relative z-10 p-3.5 rounded-2xl border transition-all duration-200 cursor-pointer flex items-center justify-between gap-4",
                               isActive
-                                ? "bg-[#0B8F78] text-white"
-                                : isDarkMode ? "bg-slate-800 text-slate-400" : "bg-white text-slate-500 border border-slate-200"
-                            )}>
-                              {st.step}
-                            </span>
-                            <div>
-                              <h5 className="text-xs sm:text-sm font-bold leading-tight">{st.title}</h5>
-                              <p className="text-[11px] text-slate-400 dark:text-slate-500 font-normal">{st.desc}</p>
+                                ? "bg-emerald-500/10 border-emerald-500 text-slate-900 dark:text-white shadow-sm ring-1 ring-emerald-500/30 translate-x-1"
+                                : isDarkMode
+                                  ? "bg-slate-900/60 border-slate-800/80 text-slate-400 hover:text-slate-200 hover:border-slate-700"
+                                  : "bg-slate-50/50 border-slate-200/70 text-slate-600 hover:text-slate-900 hover:border-slate-300"
+                            )}
+                          >
+                            <div className="flex items-center gap-3">
+                              <span className={cn(
+                                "w-7 h-7 rounded-xl flex items-center justify-center text-[10px] font-black shrink-0 transition-colors",
+                                isActive
+                                  ? "bg-[#0B8F78] text-white"
+                                  : isDarkMode ? "bg-slate-800 text-slate-400" : "bg-white text-slate-500 border border-slate-200"
+                              )}>
+                                {st.step}
+                              </span>
+                              <div>
+                                <h5 className="text-xs sm:text-sm font-bold leading-tight">{st.title}</h5>
+                                <p className="text-[11px] text-slate-400 dark:text-slate-500 font-normal">{st.desc}</p>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-2 shrink-0">
+                              <span className={cn(
+                                "text-[10px] font-bold px-2 py-0.5 rounded-md",
+                                isActive ? "bg-emerald-500 text-white" : "text-slate-400"
+                              )}>
+                                {st.tag}
+                              </span>
+                              <div className="shrink-0">{st.icon}</div>
                             </div>
                           </div>
+                        );
+                      })}
+                    </div>
 
-                          <div className="flex items-center gap-2 shrink-0">
-                            <span className={cn(
-                              "text-[10px] font-bold px-2 py-0.5 rounded-md",
-                              isActive ? "bg-emerald-500 text-white" : "text-slate-400"
-                            )}>
-                              {st.tag}
-                            </span>
-                            <div className="shrink-0">{st.icon}</div>
-                          </div>
-                        </div>
-                      );
-                    })}
                   </div>
-
                 </div>
+
+                {/* Abha Character Showcase */}
+                <div className="lg:col-span-4 flex flex-col items-center lg:items-end text-center lg:text-right space-y-4 order-1 lg:order-2">
+                  <div className="relative">
+                    <div className="absolute inset-0 bg-emerald-500/15 rounded-full blur-2xl pointer-events-none" />
+                    <img
+                      src="/Abha_transparent.png"
+                      alt="Abha - Automation Intelligence"
+                      className="relative z-10 w-48 sm:w-60 object-contain drop-shadow-xl"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <span className="text-xs font-black tracking-widest text-[#0B8F78] uppercase block">
+                      MEET ABHA • AUTOMATION LEADER
+                    </span>
+                    <h4 className="text-lg font-bold">Zero-Manual Delay from Query to Cash</h4>
+                    <p className={cn("text-xs leading-relaxed max-w-xs", isDarkMode ? "text-slate-400" : "text-slate-600")}>
+                      Abha triggers AI price catalogs, creates CRM pipeline deals, compiles GST quotation PDFs, and records closed invoices in under 0.2s.
+                    </p>
+                  </div>
+                </div>
+
               </div>
-
-              {/* Abha Character Showcase */}
-              <div className="lg:col-span-4 flex flex-col items-center lg:items-end text-center lg:text-right space-y-4 order-1 lg:order-2">
-                <div className="relative">
-                  <div className="absolute inset-0 bg-emerald-500/15 rounded-full blur-2xl pointer-events-none" />
-                  <img
-                    src="/Abha_transparent.png"
-                    alt="Abha - Automation Intelligence"
-                    className="relative z-10 w-48 sm:w-60 object-contain drop-shadow-xl"
-                  />
-                </div>
-                <div className="space-y-1">
-                  <span className="text-xs font-black tracking-widest text-[#0B8F78] uppercase block">
-                    MEET ABHA • AUTOMATION LEADER
-                  </span>
-                  <h4 className="text-lg font-bold">Zero-Manual Delay from Query to Cash</h4>
-                  <p className={cn("text-xs leading-relaxed max-w-xs", isDarkMode ? "text-slate-400" : "text-slate-600")}>
-                    Abha triggers AI price catalogs, creates CRM pipeline deals, compiles GST quotation PDFs, and records closed invoices in under 0.2s.
-                  </p>
-                </div>
-              </div>
-
-            </div>
-          </ScrollReveal>
-        </div>
-      </section>
+            </ScrollReveal>
+          </div>
+        </section>
 
         {/* ════════════════════════════════════════════════════════════════ */}
         {/* 7. "HOW UWO CONNECT WORKS" — CONNECT → AUTOMATE → GROW        */}
@@ -1808,90 +1659,90 @@ export default function UwoLandingPage() {
               <div className="rounded-2xl sm:rounded-3xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xl overflow-hidden backdrop-blur-xl">
 
 
-              {/* Browser-style Titlebar Header */}
-              <div className="px-4 py-3 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-950/80">
-                <div className="flex items-center gap-1.5">
-                  <span className="w-2.5 h-2.5 rounded-full bg-rose-500" />
-                  <span className="w-2.5 h-2.5 rounded-full bg-amber-500" />
-                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
-                </div>
-                <div className="text-[11px] font-mono text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
-                  <span>LIVE DEMO: Omnichannel Inbound → GST Invoice</span>
-                </div>
-                <div className="text-[10px] font-bold text-emerald-600 flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
-                  <span>1080p HD</span>
-                </div>
-              </div>
-
-              {/* 16:9 Aspect Ratio Display Screen */}
-              <div className="relative aspect-video w-full overflow-hidden bg-slate-950 group">
-                <img
-                  src="/dashboard/dashboard_main.png"
-                  alt="UWO Connect Interactive Demo Screen"
-                  className={cn(
-                    "w-full h-full object-cover transition-all duration-700",
-                    isVideoPlaying ? "scale-105 filter brightness-105" : "filter brightness-90"
-                  )}
-                />
-
-                {/* Overlay Play Button & Simulated State */}
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent flex items-center justify-center p-6">
-                  {!isVideoPlaying ? (
-                    <button
-                      type="button"
-                      onClick={() => setIsVideoPlaying(true)}
-                      className="w-20 h-20 rounded-full bg-gradient-to-tr from-[#0B8F78] to-[#2563EB] text-white flex items-center justify-center shadow-2xl shadow-emerald-500/40 hover:scale-110 active:scale-95 transition-all cursor-pointer group"
-                    >
-                      <Play size={32} className="ml-1 fill-white" />
-                    </button>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => setIsVideoPlaying(false)}
-                      className="w-16 h-16 rounded-full bg-slate-900/80 text-white flex items-center justify-center shadow-2xl backdrop-blur-md hover:scale-110 active:scale-95 transition-all cursor-pointer"
-                    >
-                      <Pause size={26} className="fill-white" />
-                    </button>
-                  )}
-                </div>
-
-                {/* Video Playback Controls Bar */}
-                <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-5 bg-gradient-to-t from-slate-950 to-transparent flex flex-col gap-2">
-                  <div className="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
-                    <div
-                      className="bg-gradient-to-r from-emerald-500 to-blue-500 h-full transition-all duration-300"
-                      style={{ width: `${videoProgress}%` }}
-                    />
+                {/* Browser-style Titlebar Header */}
+                <div className="px-4 py-3 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-950/80">
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2.5 h-2.5 rounded-full bg-rose-500" />
+                    <span className="w-2.5 h-2.5 rounded-full bg-amber-500" />
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
                   </div>
-                  <div className="flex items-center justify-between text-white text-[11px] font-semibold">
-                    <div className="flex items-center gap-3">
+                  <div className="text-[11px] font-mono text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                    <span>LIVE DEMO: Omnichannel Inbound → GST Invoice</span>
+                  </div>
+                  <div className="text-[10px] font-bold text-emerald-600 flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
+                    <span>1080p HD</span>
+                  </div>
+                </div>
+
+                {/* 16:9 Aspect Ratio Display Screen */}
+                <div className="relative aspect-video w-full overflow-hidden bg-slate-950 group">
+                  <img
+                    src="/dashboard/dashboard_main.png"
+                    alt="UWO Connect Interactive Demo Screen"
+                    className={cn(
+                      "w-full h-full object-cover transition-all duration-700",
+                      isVideoPlaying ? "scale-105 filter brightness-105" : "filter brightness-90"
+                    )}
+                  />
+
+                  {/* Overlay Play Button & Simulated State */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent flex items-center justify-center p-6">
+                    {!isVideoPlaying ? (
                       <button
                         type="button"
-                        onClick={() => setIsVideoPlaying(!isVideoPlaying)}
-                        className="hover:text-emerald-400 transition-colors cursor-pointer"
+                        onClick={() => setIsVideoPlaying(true)}
+                        className="w-20 h-20 rounded-full bg-gradient-to-tr from-[#0B8F78] to-[#2563EB] text-white flex items-center justify-center shadow-2xl shadow-emerald-500/40 hover:scale-110 active:scale-95 transition-all cursor-pointer group"
                       >
-                        {isVideoPlaying ? <Pause size={14} /> : <Play size={14} className="fill-white" />}
+                        <Play size={32} className="ml-1 fill-white" />
                       </button>
-                      <span>0:{videoProgress < 10 ? `0${videoProgress}` : videoProgress} / 2:15</span>
-                      <span className="text-emerald-400 font-bold hidden sm:inline">
-                        • AI Catalog Bot Dispatched Quotation in 0.2s
-                      </span>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => setIsVideoPlaying(false)}
+                        className="w-16 h-16 rounded-full bg-slate-900/80 text-white flex items-center justify-center shadow-2xl backdrop-blur-md hover:scale-110 active:scale-95 transition-all cursor-pointer"
+                      >
+                        <Pause size={26} className="fill-white" />
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Video Playback Controls Bar */}
+                  <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-5 bg-gradient-to-t from-slate-950 to-transparent flex flex-col gap-2">
+                    <div className="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                      <div
+                        className="bg-gradient-to-r from-emerald-500 to-blue-500 h-full transition-all duration-300"
+                        style={{ width: `${videoProgress}%` }}
+                      />
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Volume2 size={14} className="text-slate-400" />
-                      <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px] font-mono">
-                        AUTO-PLAYBACK
-                      </span>
+                    <div className="flex items-center justify-between text-white text-[11px] font-semibold">
+                      <div className="flex items-center gap-3">
+                        <button
+                          type="button"
+                          onClick={() => setIsVideoPlaying(!isVideoPlaying)}
+                          className="hover:text-emerald-400 transition-colors cursor-pointer"
+                        >
+                          {isVideoPlaying ? <Pause size={14} /> : <Play size={14} className="fill-white" />}
+                        </button>
+                        <span>0:{videoProgress < 10 ? `0${videoProgress}` : videoProgress} / 2:15</span>
+                        <span className="text-emerald-400 font-bold hidden sm:inline">
+                          • AI Catalog Bot Dispatched Quotation in 0.2s
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Volume2 size={14} className="text-slate-400" />
+                        <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px] font-mono">
+                          AUTO-PLAYBACK
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
 
+                </div>
               </div>
-            </div>
-          </ScrollReveal>
-        </div>
-      </section>
+            </ScrollReveal>
+          </div>
+        </section>
 
         {/* ════════════════════════════════════════════════════════════════ */}
         {/* 9. "STOP SWITCHING BETWEEN TOOLS" — BEFORE VS AFTER             */}
@@ -1921,93 +1772,93 @@ export default function UwoLandingPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch text-left">
 
 
-              {/* BEFORE: DISCONNECTED CHAOS */}
-              <div className={cn(
-                "p-8 sm:p-10 rounded-3xl border flex flex-col justify-between space-y-6 transition-all duration-300 relative overflow-hidden",
-                isDarkMode
-                  ? "bg-rose-950/20 border-rose-900/40 text-slate-100"
-                  : "bg-rose-50/50 border-rose-200/90 text-slate-900"
-              )}>
-                <div className="space-y-4">
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-100 dark:bg-rose-950 text-rose-700 dark:text-rose-300 text-xs font-extrabold border border-rose-200 dark:border-rose-900">
-                    <X size={13} strokeWidth={3} />
-                    <span>Without UWO Connect</span>
+                {/* BEFORE: DISCONNECTED CHAOS */}
+                <div className={cn(
+                  "p-8 sm:p-10 rounded-3xl border flex flex-col justify-between space-y-6 transition-all duration-300 relative overflow-hidden",
+                  isDarkMode
+                    ? "bg-rose-950/20 border-rose-900/40 text-slate-100"
+                    : "bg-rose-50/50 border-rose-200/90 text-slate-900"
+                )}>
+                  <div className="space-y-4">
+                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-100 dark:bg-rose-950 text-rose-700 dark:text-rose-300 text-xs font-extrabold border border-rose-200 dark:border-rose-900">
+                      <X size={13} strokeWidth={3} />
+                      <span>Without UWO Connect</span>
+                    </div>
+
+                    <h3 className="text-2xl sm:text-3xl font-black text-rose-600 dark:text-rose-400">
+                      Disconnected Chaos
+                    </h3>
+
+                    <p className={cn("text-xs sm:text-sm font-normal leading-relaxed", isDarkMode ? "text-slate-300" : "text-slate-600")}>
+                      10 browser tabs, manual copy-pasting, lost leads, delayed replies, and chaotic manual invoicing.
+                    </p>
+
+                    {/* Chaos Visual Mockup Badges */}
+                    <div className="space-y-2 pt-2 text-xs">
+                      <div className="p-2.5 rounded-xl bg-white/80 dark:bg-slate-900/80 border border-rose-200 dark:border-rose-900/50 flex items-center justify-between text-rose-700 dark:text-rose-300">
+                        <span>❌ 10+ Scattered Browser Tabs</span>
+                        <span className="font-mono text-[10px]">Overwhelmed</span>
+                      </div>
+                      <div className="p-2.5 rounded-xl bg-white/80 dark:bg-slate-900/80 border border-rose-200 dark:border-rose-900/50 flex items-center justify-between text-rose-700 dark:text-rose-300">
+                        <span>❌ Unanswered WhatsApp &amp; DMs</span>
+                        <span className="font-mono text-[10px]">Lost Leads</span>
+                      </div>
+                      <div className="p-2.5 rounded-xl bg-white/80 dark:bg-slate-900/80 border border-rose-200 dark:border-rose-900/50 flex items-center justify-between text-rose-700 dark:text-rose-300">
+                        <span>❌ Manual GST Invoice Calculations</span>
+                        <span className="font-mono text-[10px]">Prone to Error</span>
+                      </div>
+                    </div>
                   </div>
 
-                  <h3 className="text-2xl sm:text-3xl font-black text-rose-600 dark:text-rose-400">
-                    Disconnected Chaos
-                  </h3>
-
-                  <p className={cn("text-xs sm:text-sm font-normal leading-relaxed", isDarkMode ? "text-slate-300" : "text-slate-600")}>
-                    10 browser tabs, manual copy-pasting, lost leads, delayed replies, and chaotic manual invoicing.
-                  </p>
-
-                  {/* Chaos Visual Mockup Badges */}
-                  <div className="space-y-2 pt-2 text-xs">
-                    <div className="p-2.5 rounded-xl bg-white/80 dark:bg-slate-900/80 border border-rose-200 dark:border-rose-900/50 flex items-center justify-between text-rose-700 dark:text-rose-300">
-                      <span>❌ 10+ Scattered Browser Tabs</span>
-                      <span className="font-mono text-[10px]">Overwhelmed</span>
-                    </div>
-                    <div className="p-2.5 rounded-xl bg-white/80 dark:bg-slate-900/80 border border-rose-200 dark:border-rose-900/50 flex items-center justify-between text-rose-700 dark:text-rose-300">
-                      <span>❌ Unanswered WhatsApp &amp; DMs</span>
-                      <span className="font-mono text-[10px]">Lost Leads</span>
-                    </div>
-                    <div className="p-2.5 rounded-xl bg-white/80 dark:bg-slate-900/80 border border-rose-200 dark:border-rose-900/50 flex items-center justify-between text-rose-700 dark:text-rose-300">
-                      <span>❌ Manual GST Invoice Calculations</span>
-                      <span className="font-mono text-[10px]">Prone to Error</span>
-                    </div>
+                  <div className="text-[11px] font-bold text-rose-500 pt-4 border-t border-rose-200/60 dark:border-rose-900/40">
+                    Average response time: 4 to 8 hours
                   </div>
                 </div>
 
-                <div className="text-[11px] font-bold text-rose-500 pt-4 border-t border-rose-200/60 dark:border-rose-900/40">
-                  Average response time: 4 to 8 hours
+                {/* AFTER: ONE CLEAN CENTRAL WORKSPACE */}
+                <div className={cn(
+                  "p-8 sm:p-10 rounded-3xl border flex flex-col justify-between space-y-6 transition-all duration-300 relative overflow-hidden shadow-xl",
+                  isDarkMode
+                    ? "bg-emerald-950/20 border-emerald-800/60 text-slate-100"
+                    : "bg-emerald-50/50 border-emerald-200/90 text-slate-900"
+                )}>
+                  <div className="space-y-4">
+                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 text-xs font-extrabold border border-emerald-200 dark:border-emerald-800">
+                      <Check size={13} strokeWidth={3} />
+                      <span>With UWO Connect</span>
+                    </div>
+
+                    <h3 className="text-2xl sm:text-3xl font-black text-emerald-700 dark:text-emerald-400">
+                      One Clean Central Workspace
+                    </h3>
+
+                    <p className={cn("text-xs sm:text-sm font-normal leading-relaxed", isDarkMode ? "text-slate-300" : "text-slate-600")}>
+                      Messages, Leads, Documents, Quotations, Payments, and Invoices automatically synced in real time.
+                    </p>
+
+                    {/* Clean Visual Mockup Badges */}
+                    <div className="space-y-2 pt-2 text-xs">
+                      <div className="p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-emerald-300 dark:border-emerald-800/80 flex items-center justify-between text-emerald-800 dark:text-emerald-300 font-medium">
+                        <span>✅ Unified Inbox (WhatsApp, IG, FB, YT)</span>
+                        <span className="font-mono text-[10px] text-emerald-600">1 Window</span>
+                      </div>
+                      <div className="p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-emerald-300 dark:border-emerald-800/80 flex items-center justify-between text-emerald-800 dark:text-emerald-300 font-medium">
+                        <span>✅ AI Auto-Replies &amp; Catalog Dispatch</span>
+                        <span className="font-mono text-[10px] text-emerald-600">0.2s Speed</span>
+                      </div>
+                      <div className="p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-emerald-300 dark:border-emerald-800/80 flex items-center justify-between text-emerald-800 dark:text-emerald-300 font-medium">
+                        <span>✅ Automated GST Billing &amp; Google Sheets</span>
+                        <span className="font-mono text-[10px] text-emerald-600">100% Synced</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="text-[11px] font-bold text-emerald-600 pt-4 border-t border-emerald-200/60 dark:border-emerald-800/40">
+                    Average response time: 0.2s instant closure
+                  </div>
                 </div>
+
               </div>
-
-              {/* AFTER: ONE CLEAN CENTRAL WORKSPACE */}
-              <div className={cn(
-                "p-8 sm:p-10 rounded-3xl border flex flex-col justify-between space-y-6 transition-all duration-300 relative overflow-hidden shadow-xl",
-                isDarkMode
-                  ? "bg-emerald-950/20 border-emerald-800/60 text-slate-100"
-                  : "bg-emerald-50/50 border-emerald-200/90 text-slate-900"
-              )}>
-                <div className="space-y-4">
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 text-xs font-extrabold border border-emerald-200 dark:border-emerald-800">
-                    <Check size={13} strokeWidth={3} />
-                    <span>With UWO Connect</span>
-                  </div>
-
-                  <h3 className="text-2xl sm:text-3xl font-black text-emerald-700 dark:text-emerald-400">
-                    One Clean Central Workspace
-                  </h3>
-
-                  <p className={cn("text-xs sm:text-sm font-normal leading-relaxed", isDarkMode ? "text-slate-300" : "text-slate-600")}>
-                    Messages, Leads, Documents, Quotations, Payments, and Invoices automatically synced in real time.
-                  </p>
-
-                  {/* Clean Visual Mockup Badges */}
-                  <div className="space-y-2 pt-2 text-xs">
-                    <div className="p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-emerald-300 dark:border-emerald-800/80 flex items-center justify-between text-emerald-800 dark:text-emerald-300 font-medium">
-                      <span>✅ Unified Inbox (WhatsApp, IG, FB, YT)</span>
-                      <span className="font-mono text-[10px] text-emerald-600">1 Window</span>
-                    </div>
-                    <div className="p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-emerald-300 dark:border-emerald-800/80 flex items-center justify-between text-emerald-800 dark:text-emerald-300 font-medium">
-                      <span>✅ AI Auto-Replies &amp; Catalog Dispatch</span>
-                      <span className="font-mono text-[10px] text-emerald-600">0.2s Speed</span>
-                    </div>
-                    <div className="p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-emerald-300 dark:border-emerald-800/80 flex items-center justify-between text-emerald-800 dark:text-emerald-300 font-medium">
-                      <span>✅ Automated GST Billing &amp; Google Sheets</span>
-                      <span className="font-mono text-[10px] text-emerald-600">100% Synced</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="text-[11px] font-bold text-emerald-600 pt-4 border-t border-emerald-200/60 dark:border-emerald-800/40">
-                  Average response time: 0.2s instant closure
-                </div>
-              </div>
-
-            </div>
             </ScrollReveal>
 
           </div>
@@ -2045,105 +1896,105 @@ export default function UwoLandingPage() {
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch text-left">
 
 
-              {/* Left Column: Vertical Feature Navigation */}
-              <div className="lg:col-span-5 space-y-2 flex flex-col justify-between">
-                <div className="space-y-1.5">
-                  {modulesList.map((mod, idx) => {
-                    const isActive = activeModuleIndex === idx;
-                    return (
-                      <button
-                        key={mod.id}
-                        type="button"
-                        onClick={() => setActiveModuleIndex(idx)}
-                        className={cn(
-                          "w-full p-3 sm:p-3.5 rounded-2xl border text-left flex items-center justify-between transition-all duration-200 cursor-pointer",
-                          isActive
-                            ? "bg-[#0B8F78] text-white border-[#0B8F78] shadow-md shadow-emerald-700/20 translate-x-1 font-bold"
-                            : isDarkMode
-                              ? "bg-slate-900 border-slate-800 text-slate-300 hover:text-white hover:bg-slate-850"
-                              : "bg-white border-slate-200/90 text-slate-700 hover:text-slate-900 hover:border-slate-300"
-                        )}
-                      >
-                        <div className="flex items-center gap-3">
-                          <span className={cn(
-                            "w-6 h-6 rounded-lg flex items-center justify-center text-[10px] font-black",
-                            isActive ? "bg-white/20 text-white" : "bg-slate-100 dark:bg-slate-800 text-slate-400"
-                          )}>
-                            {mod.num}
-                          </span>
-                          <span className="text-xs sm:text-sm font-bold">{mod.title}</span>
-                        </div>
-                        <ArrowRight size={14} className={cn("transition-transform", isActive ? "translate-x-0.5 opacity-100" : "opacity-0")} />
-                      </button>
-                    );
-                  })}
-                </div>
-
-                <div className="pt-4">
-                  <button
-                    type="button"
-                    onClick={handleStartFree}
-                    className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-[#0B8F78] to-[#0F766E] text-white text-xs font-bold shadow-md shadow-emerald-700/20 flex items-center gap-2 transition-all hover:scale-105 cursor-pointer"
-                  >
-                    <span>Launch Free Workspace</span>
-                    <ArrowRight size={14} />
-                  </button>
-                </div>
-              </div>
-
-              {/* Right Column: Large Dashboard Screenshot & Details */}
-              {(() => {
-                const activeMod = modulesList[activeModuleIndex] || modulesList[0];
-                return (
-                  <div className="lg:col-span-7 flex flex-col justify-between rounded-3xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 sm:p-8 shadow-2xl overflow-hidden">
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2.5">
-                          <div className="p-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 text-[#0B8F78]">
-                            {activeMod.icon}
-                          </div>
-                          <div>
-                            <span className="text-[10px] font-black uppercase text-emerald-600 tracking-wider">
-                              MODULE {activeMod.num} • {activeMod.badge}
+                {/* Left Column: Vertical Feature Navigation */}
+                <div className="lg:col-span-5 space-y-2 flex flex-col justify-between">
+                  <div className="space-y-1.5">
+                    {modulesList.map((mod, idx) => {
+                      const isActive = activeModuleIndex === idx;
+                      return (
+                        <button
+                          key={mod.id}
+                          type="button"
+                          onClick={() => setActiveModuleIndex(idx)}
+                          className={cn(
+                            "w-full p-3 sm:p-3.5 rounded-2xl border text-left flex items-center justify-between transition-all duration-200 cursor-pointer",
+                            isActive
+                              ? "bg-[#0B8F78] text-white border-[#0B8F78] shadow-md shadow-emerald-700/20 translate-x-1 font-bold"
+                              : isDarkMode
+                                ? "bg-slate-900 border-slate-800 text-slate-300 hover:text-white hover:bg-slate-850"
+                                : "bg-white border-slate-200/90 text-slate-700 hover:text-slate-900 hover:border-slate-300"
+                          )}
+                        >
+                          <div className="flex items-center gap-3">
+                            <span className={cn(
+                              "w-6 h-6 rounded-lg flex items-center justify-center text-[10px] font-black",
+                              isActive ? "bg-white/20 text-white" : "bg-slate-100 dark:bg-slate-800 text-slate-400"
+                            )}>
+                              {mod.num}
                             </span>
-                            <h3 className="text-xl sm:text-2xl font-bold">{activeMod.title}</h3>
+                            <span className="text-xs sm:text-sm font-bold">{mod.title}</span>
                           </div>
+                          <ArrowRight size={14} className={cn("transition-transform", isActive ? "translate-x-0.5 opacity-100" : "opacity-0")} />
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <div className="pt-4">
+                    <button
+                      type="button"
+                      onClick={handleStartFree}
+                      className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-[#0B8F78] to-[#0F766E] text-white text-xs font-bold shadow-md shadow-emerald-700/20 flex items-center gap-2 transition-all hover:scale-105 cursor-pointer"
+                    >
+                      <span>Launch Free Workspace</span>
+                      <ArrowRight size={14} />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Right Column: Large Dashboard Screenshot & Details */}
+                {(() => {
+                  const activeMod = modulesList[activeModuleIndex] || modulesList[0];
+                  return (
+                    <div className="lg:col-span-7 flex flex-col justify-between rounded-3xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 sm:p-8 shadow-2xl overflow-hidden">
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2.5">
+                            <div className="p-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 text-[#0B8F78]">
+                              {activeMod.icon}
+                            </div>
+                            <div>
+                              <span className="text-[10px] font-black uppercase text-emerald-600 tracking-wider">
+                                MODULE {activeMod.num} • {activeMod.badge}
+                              </span>
+                              <h3 className="text-xl sm:text-2xl font-bold">{activeMod.title}</h3>
+                            </div>
+                          </div>
+                        </div>
+
+                        <p className={cn("text-xs sm:text-sm font-normal leading-relaxed", isDarkMode ? "text-slate-300" : "text-slate-600")}>
+                          {activeMod.desc}
+                        </p>
+
+                        <div className="flex flex-wrap items-center gap-2 pt-1">
+                          {activeMod.features.map((f, i) => (
+                            <span
+                              key={i}
+                              className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-[11px] font-semibold text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700"
+                            >
+                              ✓ {f}
+                            </span>
+                          ))}
                         </div>
                       </div>
 
-                      <p className={cn("text-xs sm:text-sm font-normal leading-relaxed", isDarkMode ? "text-slate-300" : "text-slate-600")}>
-                        {activeMod.desc}
-                      </p>
-
-                      <div className="flex flex-wrap items-center gap-2 pt-1">
-                        {activeMod.features.map((f, i) => (
-                          <span
-                            key={i}
-                            className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-[11px] font-semibold text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700"
-                          >
-                            ✓ {f}
-                          </span>
-                        ))}
+                      {/* Screenshot Container */}
+                      <div className="mt-6 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-md">
+                        <div className="px-3 py-1.5 bg-slate-50 dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 text-[10px] text-slate-400 flex items-center justify-between">
+                          <span>Live Dashboard Screen</span>
+                          <span className="text-emerald-500 font-bold">100% Native SaaS</span>
+                        </div>
+                        <img
+                          src={activeMod.screenshot}
+                          alt={`${activeMod.title} Screen`}
+                          className="w-full h-auto object-cover max-h-[360px]"
+                        />
                       </div>
                     </div>
+                  );
+                })()}
 
-                    {/* Screenshot Container */}
-                    <div className="mt-6 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-md">
-                      <div className="px-3 py-1.5 bg-slate-50 dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 text-[10px] text-slate-400 flex items-center justify-between">
-                        <span>Live Dashboard Screen</span>
-                        <span className="text-emerald-500 font-bold">100% Native SaaS</span>
-                      </div>
-                      <img
-                        src={activeMod.screenshot}
-                        alt={`${activeMod.title} Screen`}
-                        className="w-full h-auto object-cover max-h-[360px]"
-                      />
-                    </div>
-                  </div>
-                );
-              })()}
-
-            </div>
+              </div>
             </ScrollReveal>
 
           </div>
@@ -2211,45 +2062,45 @@ export default function UwoLandingPage() {
             <ScrollReveal y={35} delay={0.15}>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
 
-              {[
-                { title: 'Custom Domain & Logo', desc: 'Point your subdomain (e.g. portal.youragency.com) with custom logo & palette.' },
-                { title: '100% Profit Retention', desc: 'Plug in your own payment gateway. Keep 100% of subscription fees directly.' },
-                { title: 'Multi-Tenant Isolation', desc: 'Provision independent, isolated workspaces for every business client you sign.' },
-                { title: 'Full AI & Automation', desc: 'Provide WhatsApp, IG, FB bots, CRM pipelines, and GST billing under your brand.' }
-              ].map((item, idx) => (
-                <div
-                  key={idx}
+                {[
+                  { title: 'Custom Domain & Logo', desc: 'Point your subdomain (e.g. portal.youragency.com) with custom logo & palette.' },
+                  { title: '100% Profit Retention', desc: 'Plug in your own payment gateway. Keep 100% of subscription fees directly.' },
+                  { title: 'Multi-Tenant Isolation', desc: 'Provision independent, isolated workspaces for every business client you sign.' },
+                  { title: 'Full AI & Automation', desc: 'Provide WhatsApp, IG, FB bots, CRM pipelines, and GST billing under your brand.' }
+                ].map((item, idx) => (
+                  <div
+                    key={idx}
+                    className={cn(
+                      "p-6 rounded-2xl border transition-all",
+                      isDarkMode ? "bg-slate-900/80 border-slate-800" : "bg-white border-slate-200/90 shadow-sm"
+                    )}
+                  >
+                    <h4 className="text-sm font-bold text-emerald-600 dark:text-emerald-400 mb-1">{item.title}</h4>
+                    <p className={cn("text-xs leading-relaxed", isDarkMode ? "text-slate-400" : "text-slate-600")}>{item.desc}</p>
+                  </div>
+                ))}
+              </div>
+
+              {/* Action Bar */}
+              <div className="flex flex-wrap items-center gap-3 pt-4">
+                <a
+                  href="mailto:connect@uwo24.com?subject=Agency%20White-Label%20Inquiry%20-%20UWO%20Connect"
+                  className="px-6 py-3.5 rounded-xl bg-[#0B8F78] hover:bg-[#097361] text-white text-xs font-bold shadow-md shadow-emerald-700/20 inline-flex items-center gap-2 transition-all hover:scale-105 cursor-pointer"
+                >
+                  <span>Apply for Agency White-Label</span>
+                  <ArrowRight size={14} />
+                </a>
+                <Link
+                  href="/book"
                   className={cn(
-                    "p-6 rounded-2xl border transition-all",
-                    isDarkMode ? "bg-slate-900/80 border-slate-800" : "bg-white border-slate-200/90 shadow-sm"
+                    "px-6 py-3.5 rounded-xl border text-xs font-bold inline-flex items-center gap-2 transition-all hover:scale-105 cursor-pointer",
+                    isDarkMode ? "bg-slate-900 border-slate-800 text-slate-300 hover:text-white" : "bg-white border-slate-200 text-slate-700 hover:text-slate-900"
                   )}
                 >
-                  <h4 className="text-sm font-bold text-emerald-600 dark:text-emerald-400 mb-1">{item.title}</h4>
-                  <p className={cn("text-xs leading-relaxed", isDarkMode ? "text-slate-400" : "text-slate-600")}>{item.desc}</p>
-                </div>
-              ))}
-            </div>
-
-            {/* Action Bar */}
-            <div className="flex flex-wrap items-center gap-3 pt-4">
-              <a
-                href="mailto:connect@uwo24.com?subject=Agency%20White-Label%20Inquiry%20-%20UWO%20Connect"
-                className="px-6 py-3.5 rounded-xl bg-[#0B8F78] hover:bg-[#097361] text-white text-xs font-bold shadow-md shadow-emerald-700/20 inline-flex items-center gap-2 transition-all hover:scale-105 cursor-pointer"
-              >
-                <span>Apply for Agency White-Label</span>
-                <ArrowRight size={14} />
-              </a>
-              <Link
-                href="/book"
-                className={cn(
-                  "px-6 py-3.5 rounded-xl border text-xs font-bold inline-flex items-center gap-2 transition-all hover:scale-105 cursor-pointer",
-                  isDarkMode ? "bg-slate-900 border-slate-800 text-slate-300 hover:text-white" : "bg-white border-slate-200 text-slate-700 hover:text-slate-900"
-                )}
-              >
-                <span>Book a Live Platform Demo</span>
-                <ExternalLink size={14} />
-              </Link>
-            </div>
+                  <span>Book a Live Platform Demo</span>
+                  <ExternalLink size={14} />
+                </Link>
+              </div>
             </ScrollReveal>
 
           </div>
@@ -2286,43 +2137,43 @@ export default function UwoLandingPage() {
             <ScrollReveal y={35} delay={0.15}>
               <div className="space-y-3">
 
-              {displayedFaqs.map((faq, idx) => {
-                const isOpen = openFaqIndex === idx;
-                return (
-                  <div
-                    key={idx}
-                    className={cn(
-                      "rounded-2xl border transition-all duration-200 overflow-hidden",
-                      isDarkMode
-                        ? "bg-slate-900/60 border-slate-800 hover:border-slate-700"
-                        : "bg-slate-50/60 border-slate-200/80 hover:border-slate-300"
-                    )}
-                  >
-                    <button
-                      type="button"
-                      onClick={() => setOpenFaqIndex(isOpen ? null : idx)}
-                      className="w-full p-5 sm:p-6 text-left flex items-center justify-between gap-4 cursor-pointer"
+                {displayedFaqs.map((faq, idx) => {
+                  const isOpen = openFaqIndex === idx;
+                  return (
+                    <div
+                      key={idx}
+                      className={cn(
+                        "rounded-2xl border transition-all duration-200 overflow-hidden",
+                        isDarkMode
+                          ? "bg-slate-900/60 border-slate-800 hover:border-slate-700"
+                          : "bg-slate-50/60 border-slate-200/80 hover:border-slate-300"
+                      )}
                     >
-                      <span className="font-bold text-sm sm:text-base leading-snug">{faq.q}</span>
-                      <span className={cn(
-                        "w-7 h-7 rounded-full flex items-center justify-center shrink-0 border transition-all",
-                        isOpen
-                          ? "bg-[#0B8F78] text-white border-[#0B8F78]"
-                          : isDarkMode ? "bg-slate-800 text-slate-400 border-slate-700" : "bg-white text-slate-500 border-slate-200"
-                      )}>
-                        {isOpen ? <Minus size={14} /> : <Plus size={14} />}
-                      </span>
-                    </button>
+                      <button
+                        type="button"
+                        onClick={() => setOpenFaqIndex(isOpen ? null : idx)}
+                        className="w-full p-5 sm:p-6 text-left flex items-center justify-between gap-4 cursor-pointer"
+                      >
+                        <span className="font-bold text-sm sm:text-base leading-snug">{faq.q}</span>
+                        <span className={cn(
+                          "w-7 h-7 rounded-full flex items-center justify-center shrink-0 border transition-all",
+                          isOpen
+                            ? "bg-[#0B8F78] text-white border-[#0B8F78]"
+                            : isDarkMode ? "bg-slate-800 text-slate-400 border-slate-700" : "bg-white text-slate-500 border-slate-200"
+                        )}>
+                          {isOpen ? <Minus size={14} /> : <Plus size={14} />}
+                        </span>
+                      </button>
 
-                    {isOpen && (
-                      <div className="px-5 sm:px-6 pb-6 pt-1 text-xs sm:text-sm leading-relaxed border-t border-slate-200/40 dark:border-slate-800 text-slate-600 dark:text-slate-300">
-                        {faq.a}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
+                      {isOpen && (
+                        <div className="px-5 sm:px-6 pb-6 pt-1 text-xs sm:text-sm leading-relaxed border-t border-slate-200/40 dark:border-slate-800 text-slate-600 dark:text-slate-300">
+                          {faq.a}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
             </ScrollReveal>
 
             {/* Show More Button */}

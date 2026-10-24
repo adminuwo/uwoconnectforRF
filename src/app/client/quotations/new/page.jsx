@@ -299,7 +299,7 @@ const NewQuotationPage = () => {
 
   const fetchContacts = async () => {
     const token = localStorage.getItem('uwo_token');
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app';
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
     try {
       const res = await axios.get(`${API_URL}/api/contacts/`, {
         headers: { Authorization: `Bearer ${token}` }
@@ -312,7 +312,7 @@ const NewQuotationPage = () => {
 
   const fetchProducts = async () => {
     const token = localStorage.getItem('uwo_token');
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app';
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
     try {
       // First try to fetch from catalog products
       const res = await axios.get(`${API_URL}/api/products/`, {
@@ -347,7 +347,7 @@ const NewQuotationPage = () => {
 
   const fetchSalespeople = async () => {
     const token = localStorage.getItem('uwo_token');
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app';
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
     try {
       const res = await axios.get(`${API_URL}/api/admin/users`, {
         headers: { Authorization: `Bearer ${token}` }
@@ -458,7 +458,7 @@ const NewQuotationPage = () => {
 
     setLoading(true);
     const token = localStorage.getItem('uwo_token');
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app';
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
     const payload = {
       document_type: docType,

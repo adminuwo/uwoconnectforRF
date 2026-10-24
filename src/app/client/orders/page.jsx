@@ -44,7 +44,7 @@ export default function OrdersPage() {
 
   return (
     <DashboardLayout role="CLIENT">
-      <div className="max-w-7xl mx-auto w-full p-4 sm:p-6 pb-20 font-sans text-slate-800">
+      <div className="w-full max-w-full p-4 sm:p-6 lg:p-8 pb-20 font-sans text-slate-800">
         
         {/* Header */}
         <div className="mb-8">

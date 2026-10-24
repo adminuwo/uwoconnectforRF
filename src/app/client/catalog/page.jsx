@@ -389,7 +389,7 @@ export default function CatalogPage() {
       setImporting(true);
       const token = localStorage.getItem('uwo_token');
       const res = await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/products/import_csv/`, 
+        `${process.env.NEXT_PUBLIC_API_URL || ''}/api/products/import_csv/`, 
         body, 
         {
           headers: { 
@@ -442,7 +442,7 @@ export default function CatalogPage() {
     if (selectedProductIds.length === 0) return;
     try {
       const token = localStorage.getItem('uwo_token');
-      const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/products/bulk_action/`, {
+      const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/products/bulk_action/`, {
         ids: selectedProductIds,
         action: bulkActionType,
         payload: bulkPayload
@@ -540,7 +540,7 @@ export default function CatalogPage() {
 
   return (
     <DashboardLayout role="CLIENT">
-      <div className="max-w-7xl mx-auto w-full p-4 sm:p-6 pb-24 font-sans text-slate-800">
+      <div className="w-full max-w-full p-4 sm:p-6 lg:p-8 pb-24 font-sans text-slate-800">
 
         {/* --- TOP HEADER --- */}
         <div className="mb-8 flex items-center justify-between flex-wrap gap-4 bg-white/70 backdrop-blur-md p-6 rounded-3xl border border-slate-200/80 shadow-sm">
@@ -1598,7 +1598,7 @@ export default function CatalogPage() {
               
               <div className="w-48 h-48 mx-auto bg-slate-100 rounded-2xl border border-slate-200 flex items-center justify-center mb-4">
                 <img 
-                  src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(`${process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app'}/api/products/${activeQrProduct.id}/redirect_link/`)}`} 
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/products/${activeQrProduct.id}/redirect_link/`)}`} 
                   alt="QR Code"
                   className="w-44 h-44 object-contain"
                 />
