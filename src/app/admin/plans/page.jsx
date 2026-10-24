@@ -351,6 +351,7 @@ const DEFAULT_FEATURES = [
 const INITIAL_PLANS = [
   {
     id: 'plan-starter',
+    slug: 'starter',
     name: 'Starter',
     badge: 'STARTER',
     status: 'ACTIVE',
@@ -376,6 +377,7 @@ const INITIAL_PLANS = [
   },
   {
     id: 'plan-pro',
+    slug: 'growth',
     name: 'Growth',
     badge: 'GROWTH',
     status: 'ACTIVE',
@@ -412,6 +414,7 @@ const INITIAL_PLANS = [
   },
   {
     id: 'plan-enterprise',
+    slug: 'advanced',
     name: 'Advanced',
     badge: 'ADVANCED',
     status: 'ACTIVE',
@@ -669,7 +672,8 @@ export default function AdminPlansPage() {
         if (featList.length > 0) setFeatures(featList);
       }
       if (plansRes.status === 'fulfilled' && (plansRes.value.data?.results || Array.isArray(plansRes.value.data))) {
-        const rawPlanList = Array.isArray(plansRes.value.data) ? plansRes.value.data : (plansRes.value.data.results || []);
+        const rawPlanList = (Array.isArray(plansRes.value.data) ? plansRes.value.data : (plansRes.value.data.results || []))
+          .filter(p => p.slug !== 'free' && !(p.name || '').toLowerCase().includes('no active'));
         if (rawPlanList.length > 0) {
           const mappedPlans = rawPlanList.map(p => {
             const meta = p.metadata || {};
@@ -737,6 +741,7 @@ export default function AdminPlansPage() {
 
             return {
               id: p.id,
+              slug: p.slug || (p.name || '').toLowerCase(),
               name: p.name,
               badge: p.name.toUpperCase(),
               badge_text: p.badge_text || p.name.toUpperCase(),
@@ -1264,15 +1269,24 @@ export default function AdminPlansPage() {
         channel_details: monthlyChannelDetails,
         metadata: updatedPlanObj.metadata
       }, { headers: { Authorization: `Bearer ${token}` } });
-    } catch (err) {
-      console.log('Updated in state pool:', err);
-    }
 
-    setPlans(prev => prev.map(p => p.id === editingPlan.id ? updatedPlanObj : p));
-    setIsEditPlanModalOpen(false);
-    setEditingPlan(null);
-    showToast(`Plan "${updatedPlanObj.name}" updated with independent Monthly & Yearly configurations!`);
-    fetchBackendData();
+      setPlans(prev => prev.map(p => p.id === editingPlan.id ? updatedPlanObj : p));
+      setIsEditPlanModalOpen(false);
+      setEditingPlan(null);
+      showToast(`Plan "${updatedPlanObj.name}" updated with independent Monthly & Yearly configurations!`);
+      fetchBackendData();
+    } catch (err) {
+      console.error('Plan update error:', err);
+      if (err.response?.status === 401 || err.response?.status === 403) {
+        showToast('Authentication expired: Please log in as admin to save changes to the database.', 'error');
+      } else {
+        setPlans(prev => prev.map(p => p.id === editingPlan.id ? updatedPlanObj : p));
+        setIsEditPlanModalOpen(false);
+        setEditingPlan(null);
+        showToast(`Plan "${updatedPlanObj.name}" updated.`);
+        fetchBackendData();
+      }
+    }
   };
 
 

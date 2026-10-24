@@ -39,8 +39,8 @@ const SEEDED_FALLBACK_PLANS = [
     name: 'Starter',
     slug: 'starter',
     description: 'Perfect for small teams starting automation on 1 chosen channel',
-    monthly_price: 599,
-    yearly_price: 5999,
+    monthly_price: 499,
+    yearly_price: 4999,
     yearly_discount_percent: 83.0,
     currency: '₹',
     tax_info: '(+taxes)',
@@ -385,7 +385,9 @@ export default function PricingComparisonTable({ plansData, onSelectPlan, isAdmi
 
   const filter3CorePlans = (planList) => {
     if (!Array.isArray(planList) || planList.length === 0) return SEEDED_FALLBACK_PLANS;
-    const activeOnly = planList.filter(p => p.status !== 'INACTIVE' && p.is_active !== false);
+    const activeOnly = planList.filter(
+      p => p.status !== 'INACTIVE' && p.is_active !== false && p.slug !== 'free' && !(p.name || '').toLowerCase().includes('no active')
+    );
 
     const targetTiers = ['starter', 'growth', 'advanced'];
     const result = [];
@@ -535,16 +537,36 @@ export default function PricingComparisonTable({ plansData, onSelectPlan, isAdmi
   };
 
   const handleSubscribeClick = (plan) => {
+    const isYearly = (billingPeriod || '').toUpperCase() === 'YEARLY';
+    const effectivePrice = isYearly
+      ? (plan.yearly_price || Math.round((plan.price || 499) * 12 * 0.85))
+      : (plan.monthly_price || plan.price || 499);
+    const enrichedPlan = {
+      ...plan,
+      price: effectivePrice,
+      billing_cycle: isYearly ? 'Yearly' : 'Monthly',
+      billing_period: isYearly ? 'YEARLY' : 'MONTHLY',
+      selectedChannels: selectedChannels[plan.slug] || ['whatsapp']
+    };
+
     if (onSelectPlan) {
-      onSelectPlan(plan);
+      onSelectPlan(enrichedPlan);
       return;
     }
 
     const token = typeof window !== 'undefined' ? (localStorage.getItem('token') || localStorage.getItem('uwo_token')) : null;
+    const planSlug = plan.slug || (plan.name || '').toLowerCase() || 'starter';
+    const channelList = (selectedChannels[plan.slug] || ['whatsapp']).join(',');
+    const queryParams = new URLSearchParams({
+      plan: planSlug,
+      cycle: isYearly ? 'yearly' : 'monthly',
+      channels: channelList
+    }).toString();
+
     if (token) {
-      router.push('/client/plans');
+      router.push(`/client/plans?${queryParams}`);
     } else {
-      router.push('/auth/login');
+      router.push(`/auth/login?redirect=${encodeURIComponent(`/client/plans?${queryParams}`)}`);
     }
   };
 
@@ -596,9 +618,11 @@ export default function PricingComparisonTable({ plansData, onSelectPlan, isAdmi
     }
 
     const planSlug = (planObj.slug || planObj.name || planObj.id || '').toString().toLowerCase();
+    const pName = (planObj.name || '').toLowerCase();
     const fallbackPlan = SEEDED_FALLBACK_PLANS.find(
       p => (p.slug || '').toLowerCase() === planSlug ||
         (p.name || '').toLowerCase() === planSlug ||
+        p.slug === pName || pName.includes(p.slug) ||
         (p.id || '').toLowerCase() === planSlug
     );
 
@@ -810,20 +834,43 @@ export default function PricingComparisonTable({ plansData, onSelectPlan, isAdmi
               )}
 
               {/* CTA Button */}
-              <button
-                onClick={() => handleSubscribeClick(plan)}
-                className={cn(
-                  "w-full py-3 px-4 rounded-xl text-xs font-extrabold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md",
-                  isGrowth
-                    ? "bg-[#059669] hover:bg-[#047857] text-white shadow-emerald-700/20"
-                    : (planSlug === 'advanced'
-                      ? "bg-teal-700 hover:bg-teal-800 text-white shadow-teal-700/20"
-                      : "bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-600/20")
-                )}
-              >
-                <span>{isCurrent ? "Current Active Plan" : ((plan.cta_text && plan.cta_text !== 'Start Free Trial') ? plan.cta_text : "Get Started")}</span>
-                <ChevronRight size={15} />
-              </button>
+              {(() => {
+                const isExpired = Boolean(entitlements?.is_expired);
+                const daysLeft = entitlements?.days_remaining;
+                let ctaLabel = ((plan.cta_text && plan.cta_text !== 'Start Free Trial') ? plan.cta_text : "Get Started");
+                let btnClass = isGrowth
+                  ? "bg-[#059669] hover:bg-[#047857] text-white shadow-emerald-700/20"
+                  : (planSlug === 'advanced'
+                    ? "bg-teal-700 hover:bg-teal-800 text-white shadow-teal-700/20"
+                    : "bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-600/20");
+
+                if (isCurrent) {
+                  if (isExpired) {
+                    ctaLabel = "Renew Plan (Expired)";
+                    btnClass = "bg-rose-600 hover:bg-rose-700 text-white shadow-rose-600/30 animate-pulse";
+                  } else if (daysLeft !== null && daysLeft !== undefined && daysLeft <= 7) {
+                    ctaLabel = `Renew Early (${daysLeft}d left)`;
+                    btnClass = "bg-amber-600 hover:bg-amber-700 text-white shadow-amber-600/30";
+                  } else if (daysLeft !== null && daysLeft !== undefined) {
+                    ctaLabel = `Current Plan (${daysLeft}d left)`;
+                  } else {
+                    ctaLabel = "Current Active Plan";
+                  }
+                }
+
+                return (
+                  <button
+                    onClick={() => handleSubscribeClick(plan)}
+                    className={cn(
+                      "w-full py-3 px-4 rounded-xl text-xs font-extrabold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md",
+                      btnClass
+                    )}
+                  >
+                    <span>{ctaLabel}</span>
+                    <ChevronRight size={15} />
+                  </button>
+                );
+              })()}
 
               {/* Channel Selector Area */}
               <div className="pt-3 border-t border-slate-200/80 space-y-2">
@@ -1084,20 +1131,43 @@ export default function PricingComparisonTable({ plansData, onSelectPlan, isAdmi
                       </div>
 
 
-                      <button
-                        onClick={() => handleSubscribeClick(plan)}
-                        className={cn(
-                          "w-full py-3 px-4 rounded-xl text-xs sm:text-sm font-extrabold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md",
-                          isGrowth
-                            ? "bg-[#059669] hover:bg-[#047857] text-white shadow-emerald-700/20"
-                            : (planSlug === 'advanced'
-                              ? "bg-teal-700 hover:bg-teal-800 text-white shadow-teal-700/20"
-                              : "bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-600/20")
-                        )}
-                      >
-                        <span>{isCurrent ? "Current Active Plan" : ((plan.cta_text && plan.cta_text !== 'Start Free Trial') ? plan.cta_text : "Get Started")}</span>
-                        <ChevronRight size={15} />
-                      </button>
+                      {(() => {
+                        const isExpired = Boolean(entitlements?.is_expired);
+                        const daysLeft = entitlements?.days_remaining;
+                        let ctaLabel = ((plan.cta_text && plan.cta_text !== 'Start Free Trial') ? plan.cta_text : "Get Started");
+                        let btnClass = isGrowth
+                          ? "bg-[#059669] hover:bg-[#047857] text-white shadow-emerald-700/20"
+                          : (planSlug === 'advanced'
+                            ? "bg-teal-700 hover:bg-teal-800 text-white shadow-teal-700/20"
+                            : "bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-600/20");
+
+                        if (isCurrent) {
+                          if (isExpired) {
+                            ctaLabel = "Renew Plan (Expired)";
+                            btnClass = "bg-rose-600 hover:bg-rose-700 text-white shadow-rose-600/30 animate-pulse";
+                          } else if (daysLeft !== null && daysLeft !== undefined && daysLeft <= 7) {
+                            ctaLabel = `Renew Early (${daysLeft}d left)`;
+                            btnClass = "bg-amber-600 hover:bg-amber-700 text-white shadow-amber-600/30";
+                          } else if (daysLeft !== null && daysLeft !== undefined) {
+                            ctaLabel = `Current Plan (${daysLeft}d left)`;
+                          } else {
+                            ctaLabel = "Current Active Plan";
+                          }
+                        }
+
+                        return (
+                          <button
+                            onClick={() => handleSubscribeClick(plan)}
+                            className={cn(
+                              "w-full py-3 px-4 rounded-xl text-xs sm:text-sm font-extrabold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md",
+                              btnClass
+                            )}
+                          >
+                            <span>{ctaLabel}</span>
+                            <ChevronRight size={15} />
+                          </button>
+                        );
+                      })()}
 
                       {/* ════════════════════════════════════════════════════════════ */}
                       {/* PER-PLAN CHANNEL SELECTOR AREA (DRILL-DOWN CONTROLLER) */}
@@ -1161,9 +1231,11 @@ export default function PricingComparisonTable({ plansData, onSelectPlan, isAdmi
 
             {/* SECTION HEADER: SELECTED CHANNEL DRILL-DOWN */}
             <tr className={cn("border-y", dark ? "bg-slate-900 border-slate-800" : "bg-slate-100 border-slate-200")}>
-              <td colSpan={4} className={cn("py-2.5 px-6 font-black text-xs uppercase tracking-widest flex items-center gap-2", dark ? "text-slate-200" : "text-slate-800")}>
-                <Layers size={14} className="text-emerald-500" />
-                <span>Selected Channel Details & Entitlements</span>
+              <td colSpan={4} className="py-2.5 px-6">
+                <div className={cn("font-black text-xs uppercase tracking-widest flex items-center gap-2", dark ? "text-slate-200" : "text-slate-800")}>
+                  <Layers size={14} className="text-emerald-500" />
+                  <span>Selected Channel Details & Entitlements</span>
+                </div>
               </td>
             </tr>
 

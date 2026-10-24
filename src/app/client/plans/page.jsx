@@ -38,6 +38,7 @@ import { cn } from '@/lib/utils';
 import { API_BASE_URL } from '@/config/apiConfig';
 import { UWOLoginModal } from '@/components/UWOLoginModal';
 import { useBrand } from '@/context/BrandContext';
+import { useEntitlement } from '@/context/EntitlementContext';
 
 // ═════════════════════════════════════════════════════════════════════════════════
 // ── BRAND LOGOS (same as Admin Plans page) ──
@@ -305,6 +306,7 @@ const getFeatureBrandLogo = (key, size = 22) => {
 
 export default function ClientPlansPage() {
   const { brand } = useBrand();
+  const { entitlements, fetchEntitlements } = useEntitlement();
   const [plans, setPlans] = useState([]);
   const [client, setClient] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -354,24 +356,58 @@ export default function ClientPlansPage() {
 
       if (plansRes.status === 'fulfilled' && plansRes.value?.data) {
         const rawPlans = Array.isArray(plansRes.value.data) ? plansRes.value.data : (plansRes.value.data.results || []);
-        const activeOnly = rawPlans.filter(p => p.is_active !== false);
+        const activeOnly = rawPlans.filter(p => p.is_active !== false && p.slug !== 'free' && !(p.name || '').toLowerCase().includes('no active'));
 
-        // Filter down to exactly 3 distinct primary plans: Starter, Growth/Pro, Enterprise
-        const unique3 = [];
-        const seenCategories = new Set();
-        activeOnly.forEach(p => {
-          const lowName = (p.name || '').toLowerCase();
-          let catKey = 'starter';
-          if (lowName.includes('growth') || lowName.includes('pro')) catKey = 'growth';
-          else if (lowName.includes('enterprise') || lowName.includes('advanced') || lowName.includes('full')) catKey = 'enterprise';
-          
-          if (!seenCategories.has(catKey) && unique3.length < 3) {
-            seenCategories.add(catKey);
-            unique3.push(p);
+        // Filter and sort down to exactly 3 distinct primary plans: Starter, Growth, Advanced
+        const targetTiers = ['starter', 'growth', 'advanced'];
+        const matched3 = [];
+        const seen = new Set();
+
+        targetTiers.forEach(tier => {
+          const found = activeOnly.find(p => {
+            const s = `${p.slug || ''} ${p.name || ''}`.toLowerCase();
+            if (tier === 'starter') return s.includes('starter');
+            if (tier === 'growth') return s.includes('growth') || s.includes('pro');
+            if (tier === 'advanced') return s.includes('advanced') || s.includes('enterprise');
+            return false;
+          });
+          if (found && !seen.has(found.slug || found.id)) {
+            seen.add(found.slug || found.id);
+            matched3.push(found);
           }
         });
 
-        setPlans(unique3.length === 3 ? unique3 : activeOnly.slice(0, 3));
+        const finalPlanList = matched3.length === 3 ? matched3 : activeOnly.slice(0, 3);
+        setPlans(finalPlanList);
+
+        // Auto-open upgrade modal if redirected with plan query parameter
+        if (typeof window !== 'undefined') {
+          try {
+            const params = new URLSearchParams(window.location.search);
+            const targetPlanSlug = params.get('plan');
+            const targetCycle = params.get('cycle') || params.get('billing');
+            if (targetPlanSlug) {
+              const foundPlan = finalPlanList.find(p =>
+                (p.slug || '').toLowerCase() === targetPlanSlug.toLowerCase() ||
+                (p.name || '').toLowerCase() === targetPlanSlug.toLowerCase()
+              );
+              if (foundPlan) {
+                const isYearly = (targetCycle || '').toUpperCase() === 'YEARLY';
+                const effectivePrice = isYearly
+                  ? (foundPlan.yearly_price || Math.round((foundPlan.price || 499) * 12 * 0.85))
+                  : (foundPlan.monthly_price || foundPlan.price || 499);
+                setSelectedPlanForUpgrade({
+                  ...foundPlan,
+                  price: effectivePrice,
+                  billing_cycle: isYearly ? 'Yearly' : 'Monthly'
+                });
+                setIsUpgradeModalOpen(true);
+              }
+            }
+          } catch (e) {
+            console.warn("Error parsing URL search params:", e);
+          }
+        }
       } else {
         setPlans([
           {
@@ -426,25 +462,14 @@ export default function ClientPlansPage() {
     }
   };
 
-  const ensureAuthToken = async () => {
-    let token = localStorage.getItem('token') || localStorage.getItem('uwo_token');
-    if (token) return token;
-    
-    try {
-      const res = await axios.post(`${API_BASE_URL}/api/auth/login`, {
-        email: 'abha@uwo24.com',
-        password: 'admin123'
-      });
-      if (res.data && (res.data.token || res.data.access_token)) {
-        const newToken = res.data.token || res.data.access_token;
-        localStorage.setItem('token', newToken);
-        localStorage.setItem('uwo_token', newToken);
-        return newToken;
-      }
-    } catch (e) {
-      console.warn("Auto login failed:", e);
+  const ensureAuthToken = () => {
+    const token = typeof window !== 'undefined' ? (localStorage.getItem('token') || localStorage.getItem('uwo_token')) : null;
+    if (!token) {
+      setIsLoginModalOpen(true);
+      setToast({ msg: "Please log in to your account to upgrade your workspace plan.", type: 'error' });
+      return null;
     }
-    return null;
+    return token;
   };
 
   const handleOpenUpgradeModal = (plan) => {
@@ -457,7 +482,11 @@ export default function ClientPlansPage() {
     if (!sandboxPaymentData) return;
     setProcessingSandboxPay(true);
     try {
-      const token = await ensureAuthToken();
+      const token = ensureAuthToken();
+      if (!token) {
+        setProcessingSandboxPay(false);
+        return;
+      }
       const verifyRes = await axios.post(
         `${API_BASE_URL}/api/payments/verify-order/`,
         {
@@ -506,12 +535,14 @@ export default function ClientPlansPage() {
 
   const handleProcessPayment = async () => {
     if (!selectedPlanForUpgrade) return;
+    
+    const token = ensureAuthToken();
+    if (!token) return;
+
     setSubmittingUpgrade(true);
     
     try {
-      let token = await ensureAuthToken();
-
-      // 1. Create order on backend with auto 401 retry
+      // 1. Create order on backend with session expiry detection
       let orderRes;
       try {
         orderRes = await axios.post(
@@ -523,18 +554,13 @@ export default function ClientPlansPage() {
           { headers: { Authorization: `Bearer ${token}` } }
         );
       } catch (err401) {
-        if (err401.response?.status === 401) {
+        if (err401.response?.status === 401 || err401.response?.status === 403) {
           localStorage.removeItem('token');
           localStorage.removeItem('uwo_token');
-          token = await ensureAuthToken();
-          orderRes = await axios.post(
-            `${API_BASE_URL}/api/payments/create-order/`,
-            {
-              plan: selectedPlanForUpgrade.name,
-              billing_cycle: (selectedPlanForUpgrade.billing_cycle || 'Monthly').toUpperCase()
-            },
-            { headers: { Authorization: `Bearer ${token}` } }
-          );
+          setIsLoginModalOpen(true);
+          setToast({ msg: "Your session has expired. Please log in to complete your upgrade.", type: 'error' });
+          setSubmittingUpgrade(false);
+          return;
         } else {
           throw err401;
         }
@@ -578,6 +604,10 @@ export default function ClientPlansPage() {
                 plan_name: selectedPlanForUpgrade.name
               }));
               setIsUpgradeModalOpen(false);
+              await fetchPlansAndProfile();
+              if (fetchEntitlements) {
+                await fetchEntitlements();
+              }
               setToast({ msg: `Payment Successful! ${selectedPlanForUpgrade.name} plan is now active.`, type: 'success' });
             } else {
               setToast({ msg: "Payment verification failed.", type: "error" });
@@ -588,9 +618,9 @@ export default function ClientPlansPage() {
           }
         },
         prefill: {
-          name: client?.business_name || "UWO Client",
-          email: client?.email || "abha@uwo24.com",
-          contact: client?.phone_number || "8358990909"
+          name: client?.business_name || client?.name || "Workspace Member",
+          email: client?.email || "",
+          contact: client?.phone_number || ""
         },
         theme: {
           color: "#059669"
@@ -598,31 +628,12 @@ export default function ClientPlansPage() {
       };
 
       const rzp = new window.Razorpay(options);
-      rzp.on("payment.failed", async function (response) {
-        console.warn('Razorpay payment action, executing verification fallback...', response);
-        try {
-          const verifyRes = await axios.post(
-            `${API_BASE_URL}/api/payments/verify-order/`,
-            {
-              razorpay_payment_id: `pay_rzp_test_${Date.now()}`,
-              razorpay_order_id: razorpay_order_id || `order_rzp_test_${Date.now()}`,
-              razorpay_signature: 'rzp_test_pass',
-              order_id: order_id
-            },
-            { headers: { Authorization: `Bearer ${token}` } }
-          );
-          if (verifyRes.data.success) {
-            setClient(prev => ({
-              ...prev,
-              plan: selectedPlanForUpgrade.name,
-              plan_name: selectedPlanForUpgrade.name
-            }));
-            setIsUpgradeModalOpen(false);
-            setToast({ msg: `Payment Successful (Test Mode)! Upgraded to ${selectedPlanForUpgrade.name}.`, type: 'success' });
-          }
-        } catch (e) {
-          setToast({ msg: response.error?.description || "Payment Failed", type: "error" });
-        }
+      rzp.on("payment.failed", function (response) {
+        console.warn('Razorpay payment cancelled or failed:', response);
+        setToast({ 
+          msg: response.error?.description || "Payment was cancelled or failed. Please try again.", 
+          type: "error" 
+        });
       });
 
       rzp.open();
@@ -658,6 +669,32 @@ export default function ClientPlansPage() {
           </div>
         )}
 
+        {/* Expired Subscription Warning Banner */}
+        {entitlements?.is_expired && (
+          <div className="mb-6 p-4 sm:p-5 rounded-2xl bg-rose-50 border border-rose-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm animate-in fade-in duration-300">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-rose-100 flex items-center justify-center shrink-0">
+                <Lock className="w-5 h-5 text-rose-600" />
+              </div>
+              <div>
+                <h4 className="text-sm font-black text-rose-900">Subscription Expired</h4>
+                <p className="text-xs text-rose-700 mt-0.5">
+                  Your <strong>{client?.plan_name || client?.plan || 'Workspace'}</strong> subscription has expired. Automated channel replies and outbound workflows are currently paused.
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => {
+                const targetPlan = plans.find(p => (p.slug || '').toLowerCase() === (client?.plan || '').toLowerCase()) || plans[0];
+                if (targetPlan) handleOpenUpgradeModal(targetPlan);
+              }}
+              className="px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-xs shadow-md shadow-rose-600/20 shrink-0 cursor-pointer transition-all self-start sm:self-auto"
+            >
+              Renew Plan Now
+            </button>
+          </div>
+        )}
+
         {/* Page Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 my-4 sm:my-6 p-4 sm:p-6 rounded-3xl bg-white text-slate-900 shadow-sm border border-slate-200">
           <div>
@@ -675,11 +712,19 @@ export default function ClientPlansPage() {
           </div>
 
           <div className="flex items-center gap-3">
-            <div className="px-4 py-2.5 rounded-2xl bg-emerald-50/50 border border-emerald-200 flex items-center gap-2.5 text-xs text-slate-700">
-              <Layers size={16} className="text-emerald-600" />
-              <span className="font-medium">
-                Current Plan: <strong className="text-emerald-900 font-bold ml-1">{client?.plan_name || client?.plan || 'Starter'}</strong>
-              </span>
+            <div className="px-4 py-2.5 rounded-2xl bg-emerald-50/50 border border-emerald-200 flex flex-col sm:flex-row sm:items-center gap-2 text-xs text-slate-700">
+              <div className="flex items-center gap-2">
+                <Layers size={16} className="text-emerald-600" />
+                <span className="font-medium">
+                  Current Plan: <strong className="text-emerald-900 font-bold ml-1">{client?.plan_name || client?.plan || 'Starter'}</strong>
+                </span>
+              </div>
+              {entitlements?.expires_at && !entitlements?.is_expired && (
+                <span className="text-[10px] font-extrabold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full border border-emerald-300">
+                  Valid till {new Date(entitlements.expires_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                  {entitlements?.days_remaining !== null && ` (${entitlements.days_remaining}d left)`}
+                </span>
+              )}
             </div>
           </div>
         </div>

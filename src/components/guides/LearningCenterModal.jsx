@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
+import { API_BASE_URL } from '@/config/apiConfig';
 
 // ── Copy Code Component ───────────────────────────────────────────────────────
 const CodeBlock = ({ code, language }) => {
@@ -42,12 +43,33 @@ const CodeBlock = ({ code, language }) => {
 
 // ── Interactive Checklist Component ─────────────────────────────────────────
 const InteractiveChecklist = ({ items }) => {
-  const [checkedState, setCheckedState] = useState(items || []);
+  const normalizedItems = (items || []).map(item => {
+    if (typeof item === 'string') {
+      return { label: item, checked: false };
+    }
+    return {
+      label: item.label || item.text || item.title || '',
+      checked: Boolean(item.checked)
+    };
+  });
+
+  const [checkedState, setCheckedState] = useState(normalizedItems);
+
+  useEffect(() => {
+    if (items) {
+      setCheckedState((items || []).map(item => ({
+        label: typeof item === 'string' ? item : (item.label || item.text || item.title || ''),
+        checked: typeof item === 'object' && item !== null ? Boolean(item.checked) : false
+      })));
+    }
+  }, [items]);
 
   const toggleCheck = (idx) => {
     const next = [...checkedState];
-    next[idx] = { ...next[idx], checked: !next[idx].checked };
-    setCheckedState(next);
+    if (next[idx]) {
+      next[idx] = { ...next[idx], checked: !next[idx].checked };
+      setCheckedState(next);
+    }
   };
 
   return (
@@ -66,7 +88,7 @@ const InteractiveChecklist = ({ items }) => {
             {item.checked && <Check size={12} strokeWidth={3} />}
           </div>
           <span className={`text-xs font-semibold tracking-wide ${item.checked ? 'line-through text-slate-400' : 'text-slate-700'}`}>
-            {item.text || item}
+            {item.label}
           </span>
         </motion.div>
       ))}
@@ -187,9 +209,9 @@ const LearningCenterModal = ({ guideSlug, isOpen, onClose }) => {
 
     const fetchGuideDetails = async () => {
       setLoading(true);
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('uwo_token') || localStorage.getItem('token');
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
-      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://uwoconnectforrb-743928421487.asia-south1.run.app';
+      const API_URL = API_BASE_URL;
 
       try {
         const [guideRes, progressRes] = await Promise.all([
