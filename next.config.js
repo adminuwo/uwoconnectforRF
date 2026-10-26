@@ -68,6 +68,16 @@ const nextConfig = {
         destination: '/contact',
         permanent: false,
       },
+      {
+        source: '/login',
+        destination: '/auth/login',
+        permanent: true,
+      },
+      {
+        source: '/register',
+        destination: '/auth/register',
+        permanent: true,
+      },
     ];
   },
   async rewrites() {

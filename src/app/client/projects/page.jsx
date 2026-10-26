@@ -43,23 +43,8 @@ export const ECOSYSTEM_PROJECTS = [
     highlights: ['Multi-Session Memory', 'Intent Routing Engine', 'Agentic Execution']
   },
   {
-    id: 'ai-legal',
-    layer: 'Layer 02 • Sovereign Vertical OS',
-    category: 'ENTERPRISE',
-    name: 'AI LEGAL™',
-    tagline: 'Sovereign Legal Intelligence OS',
-    desc: 'Precision-grounded in 75+ years of Indian jurisprudence with zero hallucination, Sec 65B electronic evidence hashing, and court-ready drafting.',
-    badge: 'Legal Tech OS',
-    status: 'ENTERPRISE VERIFIED',
-    logo: '/about-uwo/ailegal.png',
-    accent: 'from-blue-500/20 to-indigo-500/20 text-blue-500 border-blue-500/30',
-    glow: 'hover:border-blue-500/50 hover:shadow-[0_0_30px_rgba(59,130,246,0.15)]',
-    url: 'https://ailegal.aisa24.com',
-    highlights: ['75+ Years Case Law', 'Sec 65B Hash Audits', 'Automated Briefs']
-  },
-  {
     id: 'ai-mall',
-    layer: 'Layer 03 • Discovery & Marketplace',
+    layer: 'Layer 02 • Discovery & Marketplace',
     category: 'COMMERCE',
     name: 'AI Mall™',
     tagline: 'Enterprise AI Tools Marketplace',
@@ -73,25 +58,25 @@ export const ECOSYSTEM_PROJECTS = [
     highlights: ['Verified SaaS Connectors', '1-Click Deployment', 'SLA Monitoring']
   },
   {
-    id: 'ai-ads',
-    layer: 'Layer 03 • Autonomous Growth',
-    category: 'COMMERCE',
-    name: 'AI Ads™',
-    tagline: 'Predictive Multi-Channel Ad Engine',
-    desc: 'Algorithmic multi-network creative generation, automated budget reallocation, conversion rate optimization, and end-to-end attribution analytics.',
-    badge: 'Growth Intelligence',
-    status: 'LIVE / ACTIVE',
-    logo: '/about-uwo/aisa-logo.png',
-    accent: 'from-violet-500/20 to-purple-500/20 text-violet-500 border-violet-500/30',
-    glow: 'hover:border-violet-500/50 hover:shadow-[0_0_30px_rgba(139,92,246,0.15)]',
-    url: 'https://aiads.aisa24.com',
-    highlights: ['Predictive ROAS', 'Creative Automation', 'Cross-Platform Sync']
+    id: 'ai-legal',
+    layer: 'Layer 03 • Sovereign Vertical OS',
+    category: 'ENTERPRISE',
+    name: 'AI LEGAL™',
+    tagline: 'Sovereign Legal Intelligence OS',
+    desc: 'Precision-grounded in 75+ years of Indian jurisprudence with zero hallucination, Sec 65B electronic evidence hashing, and court-ready drafting.',
+    badge: 'Legal Tech OS',
+    status: 'ENTERPRISE VERIFIED',
+    logo: '/about-uwo/ailegal.png',
+    accent: 'from-blue-500/20 to-indigo-500/20 text-blue-500 border-blue-500/30',
+    glow: 'hover:border-blue-500/50 hover:shadow-[0_0_30px_rgba(59,130,246,0.15)]',
+    url: 'https://ailegal.aisa24.com',
+    highlights: ['75+ Years Case Law', 'Sec 65B Hash Audits', 'Automated Briefs']
   },
   {
     id: 'ai-education',
     layer: 'Layer 04 • Adaptive Learning',
     category: 'AI_CORE',
-    name: 'AI Education™',
+    name: 'AI Education Ecosystem™',
     tagline: 'Cognitive Personalized Learning OS',
     desc: 'Adaptive neural learning companion providing real-time cognitive assessment, customized curriculum pacing, and continuous skill evaluation.',
     badge: 'EdTech Kernel',
@@ -118,23 +103,8 @@ export const ECOSYSTEM_PROJECTS = [
     highlights: ['WhatsApp Official API', 'Visual Builder', 'Multi-Lingual AI Bot']
   },
   {
-    id: 'partner-portal',
-    layer: 'Layer 06 • Agency & White-Label',
-    category: 'ENTERPRISE',
-    name: 'Partner Portal™',
-    tagline: 'Reseller & Multi-Tenant Command Hub',
-    desc: 'Enterprise console empowering certified partners and agencies to manage multi-tenant clients, white-label domains, and custom billing models.',
-    badge: 'Partner Network',
-    status: 'TIER-1 RESELLER',
-    logo: '/about-uwo/aisa-logo.png',
-    accent: 'from-indigo-500/20 to-cyan-500/20 text-indigo-500 border-indigo-500/30',
-    glow: 'hover:border-indigo-500/50 hover:shadow-[0_0_30px_rgba(99,102,241,0.15)]',
-    url: 'https://uwoconnect.aisa24.com/client/agency',
-    highlights: ['Multi-Tenant Billing', 'White-Label Engine', 'Custom Branding']
-  },
-  {
     id: 'efv-framework',
-    layer: 'Layer 07 • Human Operating System',
+    layer: 'Layer 06 • Human Operating System',
     category: 'HUMAN_OS',
     name: 'EFV™ Framework',
     tagline: 'Energy, Frequency & Vibration',
@@ -144,7 +114,7 @@ export const ECOSYSTEM_PROJECTS = [
     logo: '/about-uwo/efv.png',
     accent: 'from-pink-500/20 to-rose-500/20 text-pink-500 border-pink-500/30',
     glow: 'hover:border-pink-500/50 hover:shadow-[0_0_30px_rgba(236,72,153,0.15)]',
-    url: 'https://efv.uwo.in/',
+    url: 'https://efvframework.com/',
     highlights: ['175 Countries Active', 'Consciousness Matrix', 'Execution Discipline']
   }
 ];
