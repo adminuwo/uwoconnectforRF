@@ -113,11 +113,11 @@ export default function OneDriveConfigModal({ isOpen, onClose, client, onSaved }
     if (!confirm('Are you sure you want to disconnect OneDrive? Existing synced files will remain in OneDrive.')) return;
     setDisconnecting(true);
     try {
-      const token = localStorage.getItem('token');
-      const res = await axios.post(`${apiUrl}/api/onedrive/disconnect/`, {}, {
+      const token = localStorage.getItem('token') || localStorage.getItem('uwo_token');
+      await axios.post(`${apiUrl}/api/onedrive/disconnect/`, {}, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      onSaved(res.data);
+      if (onSaved) onSaved();
       onClose();
     } catch (err) {
       setError('Failed to disconnect OneDrive.');

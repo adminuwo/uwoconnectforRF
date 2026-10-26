@@ -527,7 +527,7 @@ export function getChannelAccessState(channelKey, clientData, activePlans = []) 
   const featureKey = FEATURE_KEY_MAP[key] || FEATURE_KEY_MAP[cleanKey] || `connector_${cleanKey}`;
 
   // Google OAuth Reviewer / Verification account entitlement bypass (Phase 6):
-  const isGoogleConnector = ['gmail', 'google_calendar', 'google_sheets', 'google_docs', 'google_slides', 'google_drive', 'youtube'].includes(canonicalKey) || ['gmail', 'google_calendar', 'google_sheets', 'google_docs', 'google_slides', 'google_drive', 'youtube'].includes(cleanKey);
+  const isGoogleConnector = ['gmail', 'google_calendar', 'google_sheets', 'google_docs', 'google_slides', 'google_drive', 'youtube'].includes(canonicalKey);
   const isReviewerAccount = Boolean(
     clientData?.is_verification_account ||
     clientData?.settings?.is_verification_account ||
@@ -536,15 +536,22 @@ export function getChannelAccessState(channelKey, clientData, activePlans = []) 
 
   // If this is a reviewer account and a Google connector, grant direct access without subscription paywall
   if (isReviewerAccount && isGoogleConnector) {
-    const isConn = Boolean(
-      (cleanKey === 'gmail' && (clientData?.gmail_enabled || clientData?.gmail_config?.email)) ||
-      (cleanKey === 'google_calendar' && (clientData?.google_calendar_enabled || clientData?.google_calendar_config?.connected)) ||
-      (cleanKey === 'google_sheets' && (clientData?.google_sheets_enabled || clientData?.google_sheets_config?.connected)) ||
-      (cleanKey === 'google_docs' && (clientData?.google_docs_enabled || clientData?.google_docs_config?.connected)) ||
-      (cleanKey === 'google_slides' && (clientData?.google_slides_enabled || clientData?.google_slides_config?.connected)) ||
-      (cleanKey === 'google_drive' && (clientData?.google_drive_enabled || clientData?.google_drive_config?.connected || clientData?.google_docs_enabled || clientData?.google_sheets_enabled || clientData?.google_slides_enabled)) ||
-      (cleanKey === 'youtube' && (clientData?.youtube_enabled || clientData?.youtube_config?.channel_id))
-    );
+    let isConn = false;
+    if (canonicalKey === 'gmail') {
+      isConn = Boolean(clientData?.gmail_enabled || clientData?.gmail_config?.email_address || clientData?.gmail_config?.email || clientData?.gmail_config?.token || clientData?.gmail_config?.access_token);
+    } else if (canonicalKey === 'google_calendar') {
+      isConn = Boolean(clientData?.google_calendar_enabled || clientData?.google_calendar_config?.connected || clientData?.google_calendar_config?.access_token || clientData?.google_calendar_config?.account_email);
+    } else if (canonicalKey === 'google_sheets') {
+      isConn = Boolean(clientData?.google_sheets_enabled || clientData?.google_sheets_config?.connected || clientData?.google_sheets_config?.access_token || clientData?.google_sheets_config?.spreadsheet_id);
+    } else if (canonicalKey === 'google_docs') {
+      isConn = Boolean(clientData?.google_docs_enabled || clientData?.google_docs_config?.connected || clientData?.google_docs_config?.access_token || clientData?.google_docs_config?.document_id);
+    } else if (canonicalKey === 'google_slides') {
+      isConn = Boolean(clientData?.google_slides_enabled || clientData?.google_slides_config?.connected || clientData?.google_slides_config?.access_token || clientData?.google_slides_config?.presentation_id);
+    } else if (canonicalKey === 'google_drive') {
+      isConn = Boolean(clientData?.google_drive_enabled || clientData?.google_drive_config?.connected || clientData?.google_drive_config?.access_token);
+    } else if (canonicalKey === 'youtube') {
+      isConn = Boolean(clientData?.youtube_enabled || clientData?.youtube_config?.channel_id || clientData?.youtube_config?.access_token);
+    }
 
     if (isConn) {
       return {
@@ -717,32 +724,32 @@ export function getChannelAccessState(channelKey, clientData, activePlans = []) 
       clientData?.instagram_config?.access_token ||
       clientData?.instagram_config?.username
     );
-  } else if (key === 'gmail') {
-    isConnected = Boolean(clientData?.gmail_enabled || clientData?.gmail_config?.email);
-  } else if (key === 'outlook') {
-    isConnected = Boolean(clientData?.outlook_enabled || clientData?.outlook_config?.email);
-  } else if (key === 'onedrive') {
-    isConnected = Boolean(clientData?.onedrive_enabled || clientData?.onedrive_config?.connected);
-  } else if (key === 'google_calendar') {
-    isConnected = Boolean(clientData?.google_calendar_enabled || clientData?.google_calendar_config?.connected);
-  } else if (key === 'google_sheets') {
-    isConnected = Boolean(clientData?.google_sheets_enabled || clientData?.google_sheets_config?.connected);
-  } else if (key === 'google_docs') {
-    isConnected = Boolean(clientData?.google_docs_enabled || clientData?.google_docs_config?.connected);
-  } else if (key === 'google_slides') {
-    isConnected = Boolean(clientData?.google_slides_enabled || clientData?.google_slides_config?.connected);
-  } else if (key === 'google_drive') {
-    isConnected = Boolean(clientData?.google_drive_enabled || clientData?.google_drive_config?.connected || clientData?.google_docs_enabled || clientData?.google_sheets_enabled || clientData?.google_slides_enabled);
-  } else if (key === 'zoho') {
-    isConnected = Boolean(clientData?.zoho_enabled || clientData?.zoho_config?.connected);
-  } else if (key === 'google_news') {
-    isConnected = Boolean(clientData?.google_news_enabled || clientData?.google_news_config?.connected);
-  } else if (key === 'youtube') {
-    isConnected = Boolean(clientData?.youtube_enabled || clientData?.youtube_config?.channel_id);
-  } else if (key === 'razorpay') {
+  } else if (canonicalKey === 'gmail') {
+    isConnected = Boolean(clientData?.gmail_enabled || clientData?.gmail_config?.email_address || clientData?.gmail_config?.email || clientData?.gmail_config?.token || clientData?.gmail_config?.access_token);
+  } else if (canonicalKey === 'outlook') {
+    isConnected = Boolean(clientData?.outlook_enabled || clientData?.outlook_config?.email_address || clientData?.outlook_config?.email || clientData?.outlook_config?.access_token);
+  } else if (canonicalKey === 'onedrive') {
+    isConnected = Boolean(clientData?.onedrive_enabled || clientData?.onedrive_config?.connected || clientData?.onedrive_config?.access_token);
+  } else if (canonicalKey === 'google_calendar') {
+    isConnected = Boolean(clientData?.google_calendar_enabled || clientData?.google_calendar_config?.connected || clientData?.google_calendar_config?.access_token || clientData?.google_calendar_config?.account_email);
+  } else if (canonicalKey === 'google_sheets') {
+    isConnected = Boolean(clientData?.google_sheets_enabled || clientData?.google_sheets_config?.connected || clientData?.google_sheets_config?.access_token || clientData?.google_sheets_config?.spreadsheet_id);
+  } else if (canonicalKey === 'google_docs') {
+    isConnected = Boolean(clientData?.google_docs_enabled || clientData?.google_docs_config?.connected || clientData?.google_docs_config?.access_token || clientData?.google_docs_config?.document_id);
+  } else if (canonicalKey === 'google_slides') {
+    isConnected = Boolean(clientData?.google_slides_enabled || clientData?.google_slides_config?.connected || clientData?.google_slides_config?.access_token || clientData?.google_slides_config?.presentation_id);
+  } else if (canonicalKey === 'google_drive') {
+    isConnected = Boolean(clientData?.google_drive_enabled || clientData?.google_drive_config?.connected || clientData?.google_drive_config?.access_token);
+  } else if (canonicalKey === 'zoho') {
+    isConnected = Boolean(clientData?.zoho_enabled || clientData?.zoho_config?.connected || clientData?.zoho_config?.access_token || clientData?.zoho_config?.refresh_token);
+  } else if (canonicalKey === 'google_news') {
+    isConnected = Boolean(clientData?.google_news_enabled || clientData?.google_news_config?.connected || clientData?.google_news_config?.topic || clientData?.google_news_config?.query);
+  } else if (canonicalKey === 'youtube') {
+    isConnected = Boolean(clientData?.youtube_enabled || clientData?.youtube_config?.channel_id || clientData?.youtube_config?.access_token);
+  } else if (canonicalKey === 'razorpay') {
     isConnected = Boolean(clientData?.razorpay_enabled || clientData?.razorpay_config?.api_key || clientData?.razorpay_config?.key_id);
   } else {
-    isConnected = Boolean(clientData?.settings?.[`${key}_enabled`]);
+    isConnected = Boolean(clientData?.settings?.[`${key}_enabled`] || clientData?.[`${key}_enabled`] || clientData?.[`${canonicalKey}_enabled`]);
   }
 
   if (isConnected) {

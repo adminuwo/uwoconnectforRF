@@ -59,7 +59,7 @@ export default function GoogleCalendarConfigModal({ client, isOpen, onClose, onS
     setLoading(true);
     setError(null);
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('token') || localStorage.getItem('uwo_token');
       const res = await axios.get(`${apiUrl}/api/google-calendar/status/`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -79,7 +79,7 @@ export default function GoogleCalendarConfigModal({ client, isOpen, onClose, onS
     setConnecting(true);
     setError(null);
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('token') || localStorage.getItem('uwo_token');
       const res = await axios.get(`${apiUrl}/api/google-calendar/connect/`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -99,7 +99,7 @@ export default function GoogleCalendarConfigModal({ client, isOpen, onClose, onS
     setSyncing(true);
     setError(null);
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('token') || localStorage.getItem('uwo_token');
       await axios.post(`${apiUrl}/api/google-calendar/sync/`, {}, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -118,7 +118,7 @@ export default function GoogleCalendarConfigModal({ client, isOpen, onClose, onS
     if (!newEvent.summary.trim()) return;
     setCreatingEvent(true);
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('token') || localStorage.getItem('uwo_token');
       await axios.post(`${apiUrl}/api/google-calendar/create-event/`, newEvent, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -138,11 +138,11 @@ export default function GoogleCalendarConfigModal({ client, isOpen, onClose, onS
     if (!confirm('Are you sure you want to disconnect Google Calendar? Existing events will remain in your Google account.')) return;
     setDisconnecting(true);
     try {
-      const token = localStorage.getItem('token');
-      const res = await axios.post(`${apiUrl}/api/google-calendar/disconnect/`, {}, {
+      const token = localStorage.getItem('token') || localStorage.getItem('uwo_token');
+      await axios.post(`${apiUrl}/api/google-calendar/disconnect/`, {}, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      onSaved(res.data);
+      if (onSaved) onSaved();
       onClose();
     } catch (err) {
       setError('Failed to disconnect Google Calendar.');

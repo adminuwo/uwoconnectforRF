@@ -48,11 +48,11 @@ export default function ZohoConfigModal({ client, isOpen, onClose, onSaved }) {
     if (!confirm('Are you sure you want to disconnect Zoho?')) return;
     setDisconnecting(true);
     try {
-      const token = localStorage.getItem('token');
-      const res = await axios.post(`${apiUrl}/api/zoho/disconnect/`, {}, {
+      const token = localStorage.getItem('token') || localStorage.getItem('uwo_token');
+      await axios.post(`${apiUrl}/api/zoho/disconnect/`, {}, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      onSaved(res.data);
+      if (onSaved) onSaved();
       onClose();
     } catch (err) {
       setError('Failed to disconnect Zoho.');

@@ -50,7 +50,7 @@ export default function GoogleSlidesConfigModal({ client, isOpen, onClose, onSav
     setLoading(true);
     setError(null);
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('token') || localStorage.getItem('uwo_token');
       const res = await axios.get(`${apiUrl}/api/google-slides/status/`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -67,7 +67,7 @@ export default function GoogleSlidesConfigModal({ client, isOpen, onClose, onSav
     setConnecting(true);
     setError(null);
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('token') || localStorage.getItem('uwo_token');
       const res = await axios.get(`${apiUrl}/api/google-slides/connect/`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -84,7 +84,7 @@ export default function GoogleSlidesConfigModal({ client, isOpen, onClose, onSav
     setSyncing(true);
     setError(null);
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('token') || localStorage.getItem('uwo_token');
       await axios.post(`${apiUrl}/api/google-slides/sync/`, {}, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -104,7 +104,7 @@ export default function GoogleSlidesConfigModal({ client, isOpen, onClose, onSav
     setCreatingPresentation(true);
     setError(null);
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('token') || localStorage.getItem('uwo_token');
       const res = await axios.post(`${apiUrl}/api/google-slides/create-presentation/`, newPresentation, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -125,11 +125,11 @@ export default function GoogleSlidesConfigModal({ client, isOpen, onClose, onSav
     if (!window.confirm('Are you sure you want to disconnect Google Slides?')) return;
     setDisconnecting(true);
     try {
-      const token = localStorage.getItem('token');
-      const res = await axios.post(`${apiUrl}/api/google-slides/disconnect/`, {}, {
+      const token = localStorage.getItem('token') || localStorage.getItem('uwo_token');
+      await axios.post(`${apiUrl}/api/google-slides/disconnect/`, {}, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      onSaved(res.data);
+      if (onSaved) onSaved();
       onClose();
     } catch (err) {
       setError('Failed to disconnect Google Slides.');

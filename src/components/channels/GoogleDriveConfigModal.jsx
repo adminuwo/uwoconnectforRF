@@ -23,15 +23,14 @@ export default function GoogleDriveConfigModal({ client, isOpen, onClose, onSave
   const [recentFiles, setRecentFiles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [connecting, setConnecting] = useState(false);
+  const [disconnecting, setDisconnecting] = useState(false);
   const [error, setError] = useState(null);
   const [toast, setToast] = useState(null);
 
   const isConnected = Boolean(
     client?.google_drive_enabled || 
     client?.google_drive_config?.connected ||
-    client?.google_docs_enabled || 
-    client?.google_sheets_enabled || 
-    client?.google_slides_enabled
+    client?.google_drive_config?.access_token
   );
 
   useEffect(() => {
@@ -70,7 +69,7 @@ export default function GoogleDriveConfigModal({ client, isOpen, onClose, onSave
     setError(null);
     try {
       const token = localStorage.getItem('token') || localStorage.getItem('uwo_token');
-      const res = await axios.get(`${API_BASE_URL}/api/auth/google/connect-all`, {
+      const res = await axios.get(`${API_BASE_URL}/api/google-drive/connect/`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (res.data?.url || res.data?.auth_url) {
@@ -79,6 +78,23 @@ export default function GoogleDriveConfigModal({ client, isOpen, onClose, onSave
     } catch (err) {
       setError('Failed to initiate Google Drive connection.');
       setConnecting(false);
+    }
+  };
+
+  const handleDisconnect = async () => {
+    if (!confirm('Are you sure you want to disconnect Google Drive?')) return;
+    setDisconnecting(true);
+    try {
+      const token = localStorage.getItem('token') || localStorage.getItem('uwo_token');
+      await axios.post(`${API_BASE_URL}/api/google-drive/disconnect/`, {}, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (onSaved) onSaved();
+      onClose();
+    } catch (err) {
+      setError('Failed to disconnect Google Drive.');
+    } finally {
+      setDisconnecting(false);
     }
   };
 
@@ -177,12 +193,23 @@ export default function GoogleDriveConfigModal({ client, isOpen, onClose, onSave
 
         {/* Footer */}
         <div className="p-4 bg-slate-50 dark:bg-slate-800/40 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-600 dark:text-slate-300"
-          >
-            Close
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={onClose}
+              className="px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-600 dark:text-slate-300"
+            >
+              Close
+            </button>
+            {isConnected && (
+              <button
+                onClick={handleDisconnect}
+                disabled={disconnecting}
+                className="px-3.5 py-2 rounded-xl border border-rose-200 dark:border-rose-900/60 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 text-xs font-semibold text-rose-700 dark:text-rose-300"
+              >
+                {disconnecting ? 'Disconnecting...' : 'Disconnect'}
+              </button>
+            )}
+          </div>
           <a
             href="/client/drive"
             className="px-4 py-2 rounded-xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 text-xs font-semibold inline-flex items-center gap-1.5 shadow-xs"
