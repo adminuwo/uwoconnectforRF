@@ -229,11 +229,6 @@ const YouTubeManager = () => {
       return;
     }
 
-    if (uploadFile.size > 28 * 1024 * 1024) {
-      showToast(`Video size (${(uploadFile.size / (1024 * 1024)).toFixed(1)}MB) exceeds 25MB cloud limit. Please choose a smaller video.`, 'error');
-      return;
-    }
-
     setUploadingVideo(true);
     setUploadProgress(0);
     const token = localStorage.getItem('uwo_token');
@@ -241,30 +236,71 @@ const YouTubeManager = () => {
       Authorization: `Bearer ${token}`
     };
 
-    const formData = new FormData();
-    formData.append('video', uploadFile);
-    formData.append('title', uploadTitle);
-    formData.append('description', uploadDescription);
-    formData.append('privacy_status', uploadPrivacy);
-
     try {
-      const res = await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL || ''}/api/youtube/upload/`,
-        formData,
-        {
-          headers,
-          onUploadProgress: (progressEvent) => {
-            if (progressEvent.total) {
-              const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-              setUploadProgress(percent);
+      let uploadSuccess = false;
+
+      // 1. Try Direct Google Resumable Upload (allows ANY file size directly to YouTube)
+      try {
+        const sessionRes = await axios.post(
+          `${process.env.NEXT_PUBLIC_API_URL || ''}/api/youtube/upload-session/`,
+          {
+            title: uploadTitle,
+            description: uploadDescription,
+            privacy_status: uploadPrivacy,
+            content_type: uploadFile.type || 'video/mp4',
+            file_size: uploadFile.size
+          },
+          { headers }
+        );
+
+        if (sessionRes.data && sessionRes.data.upload_url) {
+          const directUploadUrl = sessionRes.data.upload_url;
+          await axios.put(directUploadUrl, uploadFile, {
+            headers: {
+              'Content-Type': uploadFile.type || 'video/mp4'
+            },
+            onUploadProgress: (progressEvent) => {
+              if (progressEvent.total) {
+                const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                setUploadProgress(percent);
+              }
+            }
+          });
+          uploadSuccess = true;
+        }
+      } catch (sessionErr) {
+        console.warn('Direct upload session failed or unhandled, falling back to standard route:', sessionErr);
+      }
+
+      // 2. Fallback to standard multipart route if resumable upload was not completed
+      if (!uploadSuccess) {
+        const formData = new FormData();
+        formData.append('video', uploadFile);
+        formData.append('title', uploadTitle);
+        formData.append('description', uploadDescription);
+        formData.append('privacy_status', uploadPrivacy);
+
+        const res = await axios.post(
+          `${process.env.NEXT_PUBLIC_API_URL || ''}/api/youtube/upload/`,
+          formData,
+          {
+            headers,
+            onUploadProgress: (progressEvent) => {
+              if (progressEvent.total) {
+                const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                setUploadProgress(percent);
+              }
             }
           }
+        );
+        if (res.data && !res.data.error) {
+          uploadSuccess = true;
         }
-      );
-      if (res.data && !res.data.error) {
+      }
+
+      if (uploadSuccess) {
         showToast('🎥 Video uploaded successfully to YouTube!');
         setIsUploadModalOpen(false);
-        // Reset states
         setUploadTitle('');
         setUploadDescription('');
         setUploadFile(null);
@@ -285,9 +321,9 @@ const YouTubeManager = () => {
       let errMsg = err.response?.data?.error || err.response?.data?.detail;
       if (!errMsg) {
         if (err.response?.status === 413 || err.message?.includes('413')) {
-          errMsg = 'Video file is too large (exceeds 25MB cloud limit). Please choose a video under 25MB or 720p.';
+          errMsg = 'Video file is too large for proxy. Please try again or select a smaller video.';
         } else if (err.message === 'Network Error') {
-          errMsg = 'Upload failed or timed out. Please choose a smaller video file (under 25MB) or check network.';
+          errMsg = 'Upload network interrupted. Please check connection and try again.';
         } else {
           errMsg = err.message || 'Failed to upload video to YouTube.';
         }
@@ -1159,13 +1195,7 @@ const YouTubeManager = () => {
                     type="file"
                     accept="video/*"
                     onChange={(e) => {
-                      const file = e.target.files[0];
-                      if (file && file.size > 28 * 1024 * 1024) {
-                        showToast(`Video (${(file.size / (1024 * 1024)).toFixed(1)}MB) exceeds 25MB cloud limit. Please choose a video under 25MB.`, 'error');
-                        e.target.value = '';
-                        setUploadFile(null);
-                        return;
-                      }
+                      const file = e.target.files?.[0];
                       setUploadFile(file || null);
                     }}
                     className="w-full text-xs text-slate-600 border border-slate-200 rounded-xl p-2.5 focus:outline-none file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-[10px] file:font-bold file:uppercase file:bg-red-50 file:text-red-700 hover:file:bg-red-100/80 file:cursor-pointer"
@@ -1177,7 +1207,7 @@ const YouTubeManager = () => {
                     </p>
                   )}
                   <p className="text-[10px] text-slate-400 mt-1 font-medium">
-                    ⚡ Recommended: MP4 under 25MB (quick processing for demo & reviews)
+                    ⚡ Supports MP4, MOV, WebM. Direct upload with live progress.
                   </p>
                 </div>
 
