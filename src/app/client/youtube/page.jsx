@@ -651,6 +651,10 @@ const YouTubeManager = () => {
                         <img
                           src={vid.thumbnail}
                           alt={vid.title}
+                          onError={(e) => {
+                            e.currentTarget.onerror = null;
+                            e.currentTarget.src = 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&auto=format&fit=crop&q=60';
+                          }}
                           className="w-full h-full object-cover group-hover:scale-105 transition-all duration-300"
                         />
                         <div className="absolute inset-0 bg-black/10 group-hover:bg-black/30 transition-all flex items-center justify-center">
