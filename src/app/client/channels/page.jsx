@@ -202,7 +202,7 @@ const ClientChannelsPage = () => {
       if (search.includes('channel=outlook')) {
         setIsOutlookConfigOpen(true);
       } else if (search.includes('channel=gmail')) {
-        handleConnectGmail();
+        setIsGmailConfigModalOpen(true);
       }
     }
 
@@ -781,21 +781,8 @@ const ClientChannelsPage = () => {
   );
 
   // Connect actions
-  const handleConnectGmail = async () => {
-    try {
-      const token = localStorage.getItem('token') || localStorage.getItem('uwo_token');
-      const res = await axios.get(`${API_BASE_URL}/api/auth/gmail/connect`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      if (res.data?.url) {
-        window.location.href = res.data.url;
-        return;
-      }
-    } catch (err) {
-      console.warn("Error connecting Gmail", err);
-    }
-    const token = localStorage.getItem('token') || localStorage.getItem('uwo_token');
-    window.location.href = `${API_BASE_URL}/api/auth/gmail/connect${token ? `?token=${token}` : ''}`;
+  const handleConnectGmail = () => {
+    setIsGmailConfigModalOpen(true);
   };
 
   const handleConnectGoogleCalendar = async () => {
@@ -1772,7 +1759,7 @@ const ClientChannelsPage = () => {
                   icon: <GmailBrandIcon size={28} />,
                   isConnected: isGmailConnected,
                   connectedInfo: client?.gmail_config?.email_address || client?.gmail_config?.email || 'Connected Account',
-                  onConnect: () => isGmailConnected ? setIsGmailConfigModalOpen(true) : handleConnectGmail(),
+                  onConnect: () => setIsGmailConfigModalOpen(true),
                   onConfigure: () => setIsGmailConfigModalOpen(true),
                   badge: 'Email Sync',
                   btnColor: 'bg-[#EA4335] hover:bg-[#d93025] text-white'

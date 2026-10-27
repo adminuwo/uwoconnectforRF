@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const PROD_BACKEND_URL = 'https://uwoconnectforrb-743928421487.asia-south1.run.app';
-const DEFAULT_BACKEND_URL = process.env.NODE_ENV === 'production' ? PROD_BACKEND_URL : 'http://127.0.0.1:8000';
+const DEFAULT_BACKEND_URL = process.env.NODE_ENV === 'production' ? PROD_BACKEND_URL : 'http://127.0.0.1:8080';
 
 const nextConfig = {
   env: {

@@ -239,7 +239,7 @@ const YouTubeManager = () => {
     try {
       let uploadSuccess = false;
 
-      // 1. Try Direct Google Resumable Upload (allows ANY file size directly to YouTube)
+      // 1. Try Direct Google Resumable Upload (bypasses Cloud Run and handles files up to 256GB)
       try {
         const sessionRes = await axios.post(
           `${process.env.NEXT_PUBLIC_API_URL || ''}/api/youtube/upload-session/`,
@@ -255,25 +255,47 @@ const YouTubeManager = () => {
 
         if (sessionRes.data && sessionRes.data.upload_url) {
           const directUploadUrl = sessionRes.data.upload_url;
-          await axios.put(directUploadUrl, uploadFile, {
-            headers: {
-              'Content-Type': uploadFile.type || 'video/mp4'
-            },
-            onUploadProgress: (progressEvent) => {
-              if (progressEvent.total) {
-                const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-                setUploadProgress(percent);
-              }
+          
+          await new Promise((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            xhr.open('PUT', directUploadUrl, true);
+            xhr.setRequestHeader('Content-Type', uploadFile.type || 'video/mp4');
+
+            if (xhr.upload) {
+              xhr.upload.onprogress = (evt) => {
+                if (evt.lengthComputable) {
+                  const percent = Math.round((evt.loaded * 100) / evt.total);
+                  setUploadProgress(percent);
+                }
+              };
             }
+
+            xhr.onload = () => {
+              if (xhr.status >= 200 && xhr.status < 300) {
+                resolve();
+              } else {
+                reject(new Error(`YouTube returned status ${xhr.status}: ${xhr.responseText}`));
+              }
+            };
+
+            xhr.onerror = () => reject(new Error('Network error during Google YouTube direct upload.'));
+            xhr.ontimeout = () => reject(new Error('Upload timed out.'));
+
+            xhr.send(uploadFile);
           });
+
           uploadSuccess = true;
         }
       } catch (sessionErr) {
-        console.warn('Direct upload session failed or unhandled, falling back to standard route:', sessionErr);
+        console.warn('Direct upload session failed or unhandled:', sessionErr);
+        // Only fallback to backend proxy if file is under 28MB (Cloud Run limit)
+        if (uploadFile.size > 28 * 1024 * 1024) {
+          throw new Error(sessionErr.message || 'Direct upload to Google failed. Please check network.');
+        }
       }
 
-      // 2. Fallback to standard multipart route if resumable upload was not completed
-      if (!uploadSuccess) {
+      // 2. Fallback to standard multipart route if resumable upload was not completed (only for small files)
+      if (!uploadSuccess && uploadFile.size <= 28 * 1024 * 1024) {
         const formData = new FormData();
         formData.append('video', uploadFile);
         formData.append('title', uploadTitle);

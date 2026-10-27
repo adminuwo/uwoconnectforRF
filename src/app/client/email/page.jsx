@@ -41,6 +41,7 @@ import {
 import axios from 'axios';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { cn } from '@/lib/utils';
+import EmailAutomationManager from '@/components/email/EmailAutomationManager';
 
 const CopyButton = ({ text }) => {
   const [copied, setCopied] = useState(false);
@@ -856,124 +857,8 @@ const ClientEmailPage = () => {
 
         {/* ── VIEW 2: AUTOMATION ───────────────────────────────────── */}
         {activeView === 'automation' && (
-          <div className="p-6 space-y-5 overflow-y-auto custom-scrollbar flex-1 max-w-3xl mx-auto w-full">
-            <div>
-              <h2 className="text-base font-bold text-slate-900">Email Automation</h2>
-              <p className="text-xs text-slate-500 mt-0.5">Configure automatic replies and workflow rules.</p>
-            </div>
-
-            {/* Info Banner */}
-            <div className="p-3.5 bg-emerald-50/60 border border-emerald-100 rounded-xl flex items-start gap-3">
-              <div className="w-7 h-7 rounded-lg bg-[#00AB56] text-white flex items-center justify-center shrink-0 mt-0.5">
-                <Zap size={14} />
-              </div>
-              <div className="text-xs">
-                <h4 className="font-semibold text-slate-800">How it works</h4>
-                <p className="text-slate-500 mt-0.5 leading-relaxed">
-                  When someone emails your connected Gmail or Outlook account, UWO Connect automatically sends a personalized reply using their name.
-                </p>
-              </div>
-            </div>
-
-            {/* Auto-Reply Form */}
-            <form onSubmit={handleSaveAutoReplyRule} className="p-5 bg-white rounded-xl border border-slate-200/80 space-y-4">
-              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-lg bg-emerald-50 text-[#00AB56] flex items-center justify-center">
-                    <Bot size={16} />
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-semibold text-slate-900">Auto-Reply Rule</h3>
-                    <p className="text-[11px] text-slate-400">Personalised instant reply for incoming emails</p>
-                  </div>
-                </div>
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <span className="text-[11px] font-medium text-slate-500">{autoReplyActive ? 'Active' : 'Off'}</span>
-                  <input
-                    type="checkbox"
-                    checked={autoReplyActive}
-                    onChange={(e) => setAutoReplyActive(e.target.checked)}
-                    className="w-4 h-4 text-[#00AB56] rounded focus:ring-0 cursor-pointer"
-                  />
-                </label>
-              </div>
-
-              <div>
-                <label className="block text-[11px] font-medium text-slate-500 mb-1">Subject Line</label>
-                <input
-                  type="text"
-                  required
-                  value={autoReplySubject}
-                  onChange={(e) => setAutoReplySubject(e.target.value)}
-                  className="w-full px-3 py-2 text-xs rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#00AB56]/20 focus:border-[#00AB56]/40"
-                />
-              </div>
-
-              <div>
-                <div className="flex items-center justify-between mb-1.5">
-                  <label className="text-[11px] font-medium text-slate-500">Message Template</label>
-                  <span className="text-[10px] text-slate-400">Insert tag:</span>
-                </div>
-                <div className="flex flex-wrap gap-1.5 mb-2">
-                  {[
-                    { tag: '{{first_name}}', label: 'First Name' },
-                    { tag: '{{sender_name}}', label: 'Full Name' },
-                    { tag: '{{email}}', label: 'Email' },
-                    { tag: '{{company}}', label: 'Company' }
-                  ].map(t => (
-                    <button
-                      key={t.tag}
-                      type="button"
-                      onClick={() => handleInsertTag(t.tag)}
-                      className="px-2 py-1 bg-slate-50 hover:bg-emerald-50 hover:text-[#00AB56] text-slate-600 text-[10px] font-medium rounded-md border border-slate-200 transition-colors cursor-pointer"
-                    >
-                      + {t.label}
-                    </button>
-                  ))}
-                </div>
-                <textarea
-                  rows={5}
-                  required
-                  value={autoReplyBody}
-                  onChange={(e) => setAutoReplyBody(e.target.value)}
-                  className="w-full p-3 text-xs rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#00AB56]/20 focus:border-[#00AB56]/40 leading-relaxed"
-                />
-              </div>
-
-              <div className="flex justify-end">
-                <button
-                  type="submit"
-                  disabled={savingAutoReply}
-                  className="px-5 py-2 bg-[#00AB56] hover:bg-[#009249] text-white text-xs font-semibold rounded-lg shadow-sm transition-all flex items-center gap-1.5 cursor-pointer"
-                >
-                  <Check size={13} />
-                  <span>{savingAutoReply ? "Saving..." : "Save Rule"}</span>
-                </button>
-              </div>
-            </form>
-
-            {/* Existing Rules */}
-            <div className="space-y-2">
-              {[
-                { title: 'Auto Welcome Email', desc: 'Sends welcome message to new subscribers.', active: true },
-                { title: 'Thank You Acknowledgment', desc: 'Replies "Thank you" to all incoming emails.', active: true },
-                { title: 'Out of Office Reply', desc: 'Holiday away message outside business hours.', active: false },
-                { title: 'CRM Lead Capture', desc: 'Parses email signature and creates CRM lead.', active: true }
-              ].map((rule, idx) => (
-                <div key={idx} className="p-3.5 bg-white rounded-xl border border-slate-200/80 flex items-center justify-between">
-                  <div>
-                    <h4 className="text-xs font-semibold text-slate-800">{rule.title}</h4>
-                    <p className="text-[11px] text-slate-400 mt-0.5">{rule.desc}</p>
-                  </div>
-                  <span className={cn(
-                    "px-2.5 py-1 rounded-md text-[10px] font-semibold",
-                    rule.active ? "bg-emerald-50 text-[#00AB56]" : "bg-slate-100 text-slate-400"
-                  )}>
-                    {rule.active ? 'Active' : 'Off'}
-                  </span>
-                </div>
-              ))}
-            </div>
+          <div className="overflow-y-auto custom-scrollbar flex-1 w-full bg-[#f8fafb]">
+            <EmailAutomationManager provider={selectedProvider} />
           </div>
         )}
 
