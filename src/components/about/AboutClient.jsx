@@ -82,7 +82,7 @@ export default function AboutClient() {
       badge: 'Human Readiness',
       accentColor: 'from-amber-500/20 to-yellow-500/20 text-amber-500 border-amber-500/30',
       glow: 'group-hover:border-amber-500/50 group-hover:shadow-[0_0_30px_rgba(245,158,11,0.15)]',
-      url: 'https://efv.uwo.in'
+      url: 'https://efvframework.com'
     },
     {
       layer: 'Layer 06 • Sovereign Governance',

@@ -103,36 +103,6 @@ export const ECOSYSTEM_PROJECTS = [
     highlights: ['Cognitive Tracking', 'Neural Tutors', 'Instant Knowledge Testing']
   },
   {
-    id: 'uwo-connect',
-    layer: 'Layer 05 • Omnichannel Infrastructure',
-    category: 'ENTERPRISE',
-    name: 'UWO Connect™',
-    tagline: 'Enterprise Multi-Channel AI Kernel',
-    desc: 'Natively connects WhatsApp Cloud API, Instagram, Gmail, and voice agents directly into unified CRMs, team workspaces, and autonomous bots.',
-    badge: 'Omnichannel SaaS',
-    status: 'YOU ARE HERE',
-    logo: '/about-uwo/uwoconnect.png',
-    accent: 'from-emerald-500/20 to-teal-500/20 text-emerald-500 border-emerald-500/30',
-    glow: 'hover:border-emerald-500/50 hover:shadow-[0_0_30px_rgba(16,185,129,0.15)]',
-    url: 'https://uwoconnect.aisa24.com',
-    highlights: ['WhatsApp Official API', 'Visual Builder', 'Multi-Lingual AI Bot']
-  },
-  {
-    id: 'partner-portal',
-    layer: 'Layer 06 • Agency & White-Label',
-    category: 'ENTERPRISE',
-    name: 'Partner Portal™',
-    tagline: 'Reseller & Multi-Tenant Command Hub',
-    desc: 'Enterprise console empowering certified partners and agencies to manage multi-tenant clients, white-label domains, and custom billing models.',
-    badge: 'Partner Network',
-    status: 'TIER-1 RESELLER',
-    logo: '/about-uwo/aisa-logo.png',
-    accent: 'from-indigo-500/20 to-cyan-500/20 text-indigo-500 border-indigo-500/30',
-    glow: 'hover:border-indigo-500/50 hover:shadow-[0_0_30px_rgba(99,102,241,0.15)]',
-    url: 'https://uwoconnect.aisa24.com/client/agency',
-    highlights: ['Multi-Tenant Billing', 'White-Label Engine', 'Custom Branding']
-  },
-  {
     id: 'efv-framework',
     layer: 'Layer 07 • Human Operating System',
     category: 'HUMAN_OS',
@@ -144,7 +114,7 @@ export const ECOSYSTEM_PROJECTS = [
     logo: '/about-uwo/efv.png',
     accent: 'from-pink-500/20 to-rose-500/20 text-pink-500 border-pink-500/30',
     glow: 'hover:border-pink-500/50 hover:shadow-[0_0_30px_rgba(236,72,153,0.15)]',
-    url: 'https://efv.uwo.in/',
+    url: 'https://efvframework.com',
     highlights: ['175 Countries Active', 'Consciousness Matrix', 'Execution Discipline']
   }
 ];
