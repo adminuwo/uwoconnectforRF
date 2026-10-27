@@ -5,12 +5,11 @@ import { ChevronDown, ExternalLink } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export const UWO_PROJECTS = [
-  { id: 'ai-legal', name: 'AI Legal', url: 'https://ailegal.aisa24.com' },
-  { id: 'ai-ads', name: 'AI Ads', url: 'https://aiads.aisa24.com' },
-  { id: 'ai-education', name: 'AI Education', url: 'https://education.uwo24.com' },
-  { id: 'ai-mall', name: 'AI Mall', url: 'https://aimall24.com' },
-  { id: 'aisa-core', name: 'AISA', url: 'https://aisa24.com' },
-  { id: 'efv-framework', name: 'EFV Framework', url: 'https://efvframework.com' },
+  { id: 'aisa-core', name: 'AISA™', url: 'https://aisa24.com' },
+  { id: 'ai-mall', name: 'AI Mall™', url: 'https://aimall24.com' },
+  { id: 'ai-legal', name: 'AI LEGAL™', url: 'https://ailegal.aisa24.com' },
+  { id: 'ai-education', name: 'AI Education Ecosystem™', url: 'https://education.uwo24.com' },
+  { id: 'efv-framework', name: 'EFV™', url: 'https://efvframework.com' },
 ];
 
 export default function ProjectsDropdown({ isDarkMode = true, align = 'right' }) {

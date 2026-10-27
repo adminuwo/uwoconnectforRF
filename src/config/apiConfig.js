@@ -20,10 +20,10 @@ const getApiBaseUrl = () => {
   if (typeof window !== 'undefined' && window.location) {
     const currentHost = window.location.hostname;
     if (currentHost === 'localhost' || currentHost === '127.0.0.1') {
-      return 'http://127.0.0.1:8000';
+      return 'http://127.0.0.1:8080';
     }
     if (PRIVATE_IP_REGEX.test(currentHost)) {
-      return `http://${currentHost}:8000`;
+      return `http://${currentHost}:8080`;
     }
     // External/Production domain (e.g. uwoconnect.aisa24.com, Cloud Run frontend)
     // Return empty string so all requests use relative /api/... paths proxied by Next.js
@@ -33,7 +33,7 @@ const getApiBaseUrl = () => {
   // 3. Node.js / SSR context fallback
   return process.env.NODE_ENV === 'production'
     ? 'https://uwoconnectforrb-743928421487.asia-south1.run.app'
-    : 'http://127.0.0.1:8000';
+    : 'http://127.0.0.1:8080';
 };
 
 export const getUnifiedApiBaseUrl = () => {

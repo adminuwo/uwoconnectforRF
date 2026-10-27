@@ -52,7 +52,7 @@ export default function GoogleDocsConfigModal({ client, isOpen, onClose, onSaved
     setLoading(true);
     setError(null);
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('token') || localStorage.getItem('uwo_token');
       const res = await axios.get(`${apiUrl}/api/google-docs/status/`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -69,7 +69,7 @@ export default function GoogleDocsConfigModal({ client, isOpen, onClose, onSaved
     setConnecting(true);
     setError(null);
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('token') || localStorage.getItem('uwo_token');
       const res = await axios.get(`${apiUrl}/api/google-docs/connect/`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -86,7 +86,7 @@ export default function GoogleDocsConfigModal({ client, isOpen, onClose, onSaved
     setSyncing(true);
     setError(null);
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('token') || localStorage.getItem('uwo_token');
       await axios.post(`${apiUrl}/api/google-docs/sync/`, {}, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -127,11 +127,11 @@ export default function GoogleDocsConfigModal({ client, isOpen, onClose, onSaved
     if (!window.confirm('Are you sure you want to disconnect Google Docs?')) return;
     setDisconnecting(true);
     try {
-      const token = localStorage.getItem('token');
-      const res = await axios.post(`${apiUrl}/api/google-docs/disconnect/`, {}, {
+      const token = localStorage.getItem('token') || localStorage.getItem('uwo_token');
+      await axios.post(`${apiUrl}/api/google-docs/disconnect/`, {}, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      onSaved(res.data);
+      if (onSaved) onSaved();
       onClose();
     } catch (err) {
       setError('Failed to disconnect Google Docs.');

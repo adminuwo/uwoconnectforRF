@@ -57,7 +57,7 @@ export default function GoogleSheetsConfigModal({ client, isOpen, onClose, onSav
     setLoading(true);
     setError(null);
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('token') || localStorage.getItem('uwo_token');
       const res = await axios.get(`${apiUrl}/api/google-sheets/status/`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -77,7 +77,7 @@ export default function GoogleSheetsConfigModal({ client, isOpen, onClose, onSav
     setConnecting(true);
     setError(null);
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('token') || localStorage.getItem('uwo_token');
       const res = await axios.get(`${apiUrl}/api/google-sheets/connect/`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -97,7 +97,7 @@ export default function GoogleSheetsConfigModal({ client, isOpen, onClose, onSav
     setSyncing(true);
     setError(null);
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('token') || localStorage.getItem('uwo_token');
       await axios.post(`${apiUrl}/api/google-sheets/sync/`, {}, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -116,7 +116,7 @@ export default function GoogleSheetsConfigModal({ client, isOpen, onClose, onSav
     if (!newRow.name.trim()) return;
     setAppendingRow(true);
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('token') || localStorage.getItem('uwo_token');
       await axios.post(`${apiUrl}/api/google-sheets/append-row/`, newRow, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -136,11 +136,11 @@ export default function GoogleSheetsConfigModal({ client, isOpen, onClose, onSav
     if (!confirm('Are you sure you want to disconnect Google Sheets? Existing spreadsheets will remain in your Google Drive.')) return;
     setDisconnecting(true);
     try {
-      const token = localStorage.getItem('token');
-      const res = await axios.post(`${apiUrl}/api/google-sheets/disconnect/`, {}, {
+      const token = localStorage.getItem('token') || localStorage.getItem('uwo_token');
+      await axios.post(`${apiUrl}/api/google-sheets/disconnect/`, {}, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      onSaved(res.data);
+      if (onSaved) onSaved();
       onClose();
     } catch (err) {
       setError('Failed to disconnect Google Sheets.');

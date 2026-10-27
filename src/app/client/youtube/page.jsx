@@ -55,6 +55,7 @@ const YouTubeManager = () => {
   const [uploadPrivacy, setUploadPrivacy] = useState('public');
   const [uploadFile, setUploadFile] = useState(null);
   const [uploadingVideo, setUploadingVideo] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [deletingVideoId, setDeletingVideoId] = useState(null);
   const [generatingAI, setGeneratingAI] = useState({});
   const [commentSearch, setCommentSearch] = useState('');
@@ -229,30 +230,103 @@ const YouTubeManager = () => {
     }
 
     setUploadingVideo(true);
+    setUploadProgress(0);
     const token = localStorage.getItem('uwo_token');
     const headers = {
       Authorization: `Bearer ${token}`
     };
 
-    const formData = new FormData();
-    formData.append('video', uploadFile);
-    formData.append('title', uploadTitle);
-    formData.append('description', uploadDescription);
-    formData.append('privacy_status', uploadPrivacy);
-
     try {
-      const res = await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL || ''}/api/youtube/upload`,
-        formData,
-        { headers }
-      );
-      if (res.data && !res.data.error) {
+      let uploadSuccess = false;
+
+      // 1. Try Direct Google Resumable Upload (bypasses Cloud Run and handles files up to 256GB)
+      try {
+        const sessionRes = await axios.post(
+          `${process.env.NEXT_PUBLIC_API_URL || ''}/api/youtube/upload-session/`,
+          {
+            title: uploadTitle,
+            description: uploadDescription,
+            privacy_status: uploadPrivacy,
+            content_type: uploadFile.type || 'video/mp4',
+            file_size: uploadFile.size
+          },
+          { headers }
+        );
+
+        if (sessionRes.data && sessionRes.data.upload_url) {
+          const directUploadUrl = sessionRes.data.upload_url;
+          
+          await new Promise((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            xhr.open('PUT', directUploadUrl, true);
+            xhr.setRequestHeader('Content-Type', uploadFile.type || 'video/mp4');
+
+            if (xhr.upload) {
+              xhr.upload.onprogress = (evt) => {
+                if (evt.lengthComputable) {
+                  const percent = Math.round((evt.loaded * 100) / evt.total);
+                  setUploadProgress(percent);
+                }
+              };
+            }
+
+            xhr.onload = () => {
+              if (xhr.status >= 200 && xhr.status < 300) {
+                resolve();
+              } else {
+                reject(new Error(`YouTube returned status ${xhr.status}: ${xhr.responseText}`));
+              }
+            };
+
+            xhr.onerror = () => reject(new Error('Network error during Google YouTube direct upload.'));
+            xhr.ontimeout = () => reject(new Error('Upload timed out.'));
+
+            xhr.send(uploadFile);
+          });
+
+          uploadSuccess = true;
+        }
+      } catch (sessionErr) {
+        console.warn('Direct upload session failed or unhandled:', sessionErr);
+        // Only fallback to backend proxy if file is under 28MB (Cloud Run limit)
+        if (uploadFile.size > 28 * 1024 * 1024) {
+          throw new Error(sessionErr.message || 'Direct upload to Google failed. Please check network.');
+        }
+      }
+
+      // 2. Fallback to standard multipart route if resumable upload was not completed (only for small files)
+      if (!uploadSuccess && uploadFile.size <= 28 * 1024 * 1024) {
+        const formData = new FormData();
+        formData.append('video', uploadFile);
+        formData.append('title', uploadTitle);
+        formData.append('description', uploadDescription);
+        formData.append('privacy_status', uploadPrivacy);
+
+        const res = await axios.post(
+          `${process.env.NEXT_PUBLIC_API_URL || ''}/api/youtube/upload/`,
+          formData,
+          {
+            headers,
+            onUploadProgress: (progressEvent) => {
+              if (progressEvent.total) {
+                const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                setUploadProgress(percent);
+              }
+            }
+          }
+        );
+        if (res.data && !res.data.error) {
+          uploadSuccess = true;
+        }
+      }
+
+      if (uploadSuccess) {
         showToast('🎥 Video uploaded successfully to YouTube!');
         setIsUploadModalOpen(false);
-        // Reset states
         setUploadTitle('');
         setUploadDescription('');
         setUploadFile(null);
+        setUploadProgress(0);
 
         // Refresh videos list
         setLoadingVideos(true);
@@ -266,10 +340,20 @@ const YouTubeManager = () => {
       }
     } catch (err) {
       console.warn('YouTube upload notice:', err.response?.data || err.message);
-      const errMsg = err.response?.data?.error || err.response?.data?.detail || err.message || 'Failed to upload video to YouTube.';
+      let errMsg = err.response?.data?.error || err.response?.data?.detail;
+      if (!errMsg) {
+        if (err.response?.status === 413 || err.message?.includes('413')) {
+          errMsg = 'Video file is too large for proxy. Please try again or select a smaller video.';
+        } else if (err.message === 'Network Error') {
+          errMsg = 'Upload network interrupted. Please check connection and try again.';
+        } else {
+          errMsg = err.message || 'Failed to upload video to YouTube.';
+        }
+      }
       showToast(errMsg, 'error');
     } finally {
       setUploadingVideo(false);
+      setUploadProgress(0);
       setLoadingVideos(false);
     }
   };
@@ -589,6 +673,10 @@ const YouTubeManager = () => {
                         <img
                           src={vid.thumbnail}
                           alt={vid.title}
+                          onError={(e) => {
+                            e.currentTarget.onerror = null;
+                            e.currentTarget.src = 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&auto=format&fit=crop&q=60';
+                          }}
                           className="w-full h-full object-cover group-hover:scale-105 transition-all duration-300"
                         />
                         <div className="absolute inset-0 bg-black/10 group-hover:bg-black/30 transition-all flex items-center justify-center">
@@ -1132,10 +1220,21 @@ const YouTubeManager = () => {
                   <input
                     type="file"
                     accept="video/*"
-                    onChange={(e) => setUploadFile(e.target.files[0])}
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      setUploadFile(file || null);
+                    }}
                     className="w-full text-xs text-slate-600 border border-slate-200 rounded-xl p-2.5 focus:outline-none file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-[10px] file:font-bold file:uppercase file:bg-red-50 file:text-red-700 hover:file:bg-red-100/80 file:cursor-pointer"
                     required
                   />
+                  {uploadFile && (
+                    <p className="text-[11px] font-bold text-emerald-600 mt-1.5 flex items-center gap-1">
+                      <span>✓</span> {uploadFile.name} ({(uploadFile.size / (1024 * 1024)).toFixed(2)} MB)
+                    </p>
+                  )}
+                  <p className="text-[10px] text-slate-400 mt-1 font-medium">
+                    ⚡ Supports MP4, MOV, WebM. Direct upload with live progress.
+                  </p>
                 </div>
 
                 <div>
@@ -1174,22 +1273,32 @@ const YouTubeManager = () => {
                   </select>
                 </div>
 
+                {uploadingVideo && (
+                  <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                    <div
+                      className="bg-red-600 h-full transition-all duration-300"
+                      style={{ width: `${Math.max(uploadProgress, 5)}%` }}
+                    />
+                  </div>
+                )}
+
                 <div className="pt-2 flex items-center gap-3">
                   <button
                     type="button"
                     onClick={() => setIsUploadModalOpen(false)}
-                    className="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all uppercase tracking-wider"
+                    disabled={uploadingVideo}
+                    className="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all uppercase tracking-wider disabled:opacity-50"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={uploadingVideo}
-                    className="flex-1 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-bold transition-all uppercase tracking-wider flex items-center justify-center gap-1.5"
+                    className="flex-1 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-bold transition-all uppercase tracking-wider flex items-center justify-center gap-1.5 disabled:opacity-75"
                   >
                     {uploadingVideo ? (
                       <>
-                        <Loader2 className="animate-spin" size={14} /> Uploading...
+                        <Loader2 className="animate-spin" size={14} /> Uploading {uploadProgress > 0 ? `${uploadProgress}%` : '...'}
                       </>
                     ) : (
                       'Publish Video'

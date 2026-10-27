@@ -202,7 +202,7 @@ const ClientChannelsPage = () => {
       if (search.includes('channel=outlook')) {
         setIsOutlookConfigOpen(true);
       } else if (search.includes('channel=gmail')) {
-        handleConnectGmail();
+        setIsGmailConfigModalOpen(true);
       }
     }
 
@@ -538,6 +538,19 @@ const ClientChannelsPage = () => {
       setTimeout(() => setToast(null), 5000);
       window.history.replaceState({}, document.title, window.location.pathname);
     }
+    // Google Drive callback
+    else if (params.get('gdrive_connected') === 'true' || params.get('google_drive_connected') === 'true') {
+      fetchClient();
+      setToast({ msg: '✅ Google Drive connected successfully!', type: 'success' });
+      setTimeout(() => setToast(null), 4000);
+      window.history.replaceState({}, document.title, window.location.pathname);
+    } else if (params.get('gdrive_error') || params.get('google_drive_error')) {
+      const err = params.get('gdrive_error') || params.get('google_drive_error');
+      const msg = err === 'access_denied' ? 'Google Drive permission was cancelled.' : `Google Drive connection failed: ${err}`;
+      setToast({ msg, type: 'error' });
+      setTimeout(() => setToast(null), 5000);
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
     // Microsoft Outlook OAuth callback
     else if (params.get('outlook_connected') === 'true') {
       window.history.replaceState({}, document.title, window.location.pathname);
@@ -714,54 +727,30 @@ const ClientChannelsPage = () => {
     setTimeout(() => setToast(null), 3000);
   };
 
+  const handleClientUpdate = (updatedClient, successMsg) => {
+    const data = updatedClient?.client || updatedClient;
+    if (data && typeof data === 'object' && (data.id || data._id || data.workspace_name)) {
+      setClient(prev => ({ ...prev, ...data }));
+    }
+    fetchClient(true);
+    if (successMsg) {
+      setToast({ msg: successMsg, type: 'success' });
+      setTimeout(() => setToast(null), 3000);
+    }
+  };
+
   const handleZohoSaved = (updatedClient) => {
-    setClient(updatedClient);
     setIsZohoConfigModalOpen(false);
-    setToast({ msg: 'Zoho configuration saved!', type: 'success' });
-    setTimeout(() => setToast(null), 3000);
+    handleClientUpdate(updatedClient, 'Zoho configuration saved!');
   };
 
-  const handleFacebookSaved = (updatedClient) => {
-    setClient(updatedClient);
-    setToast({ msg: 'Facebook configured', type: 'success' });
-    setTimeout(() => setToast(null), 3000);
-  };
-
-  const handleInstagramSaved = (updatedClient) => {
-    setClient(updatedClient);
-    setToast({ msg: 'Instagram configured', type: 'success' });
-    setTimeout(() => setToast(null), 3000);
-  };
-
-  const handleOneDriveSaved = (updatedClient) => {
-    setClient(updatedClient);
-    setToast({ msg: 'OneDrive configured', type: 'success' });
-    setTimeout(() => setToast(null), 3000);
-  };
-
-  const handleGoogleCalendarSaved = (updatedClient) => {
-    setClient(updatedClient);
-    setToast({ msg: 'Google Calendar configured', type: 'success' });
-    setTimeout(() => setToast(null), 3000);
-  };
-
-  const handleGoogleSheetsSaved = (updatedClient) => {
-    setClient(updatedClient);
-    setToast({ msg: 'Google Sheets configured', type: 'success' });
-    setTimeout(() => setToast(null), 3000);
-  };
-
-  const handleGoogleDocsSaved = (updatedClient) => {
-    setClient(updatedClient);
-    setToast({ msg: 'Google Docs configured', type: 'success' });
-    setTimeout(() => setToast(null), 3000);
-  };
-
-  const handleGoogleSlidesSaved = (updatedClient) => {
-    setClient(updatedClient);
-    setToast({ msg: 'Google Slides configured', type: 'success' });
-    setTimeout(() => setToast(null), 3000);
-  };
+  const handleFacebookSaved = (updatedClient) => handleClientUpdate(updatedClient, 'Facebook configured');
+  const handleInstagramSaved = (updatedClient) => handleClientUpdate(updatedClient, 'Instagram configured');
+  const handleOneDriveSaved = (updatedClient) => handleClientUpdate(updatedClient, 'OneDrive configured');
+  const handleGoogleCalendarSaved = (updatedClient) => handleClientUpdate(updatedClient, 'Google Calendar configured');
+  const handleGoogleSheetsSaved = (updatedClient) => handleClientUpdate(updatedClient, 'Google Sheets configured');
+  const handleGoogleDocsSaved = (updatedClient) => handleClientUpdate(updatedClient, 'Google Docs configured');
+  const handleGoogleSlidesSaved = (updatedClient) => handleClientUpdate(updatedClient, 'Google Slides configured');
 
   // Connection state checks
   const isWhatsAppConnected = Boolean(
@@ -778,7 +767,7 @@ const ClientChannelsPage = () => {
   const isGoogleSheetsConnected = Boolean(client?.google_sheets_enabled || client?.google_sheets_config?.spreadsheet_id || client?.google_sheets_config?.access_token || client?.google_sheets_config?.account_email);
   const isGoogleDocsConnected = Boolean(client?.google_docs_enabled || client?.google_docs_config?.document_id || client?.google_docs_config?.default_doc_id || client?.google_docs_config?.access_token || client?.google_docs_config?.account_email);
   const isGoogleSlidesConnected = Boolean(client?.google_slides_enabled || client?.google_slides_config?.presentation_id || client?.google_slides_config?.default_presentation_id || client?.google_slides_config?.access_token || client?.google_slides_config?.account_email);
-  const isGoogleDriveConnected = Boolean(client?.google_drive_enabled || client?.google_drive_config?.connected || client?.google_docs_enabled || client?.google_sheets_enabled || client?.google_slides_enabled);
+  const isGoogleDriveConnected = Boolean(client?.google_drive_enabled || client?.google_drive_config?.connected || client?.google_drive_config?.access_token);
   const isGoogleNewsConnected = Boolean(client?.google_news_enabled || client?.google_news_config?.topic || client?.google_news_config?.query);
   const isGoogleMapsConnected = Boolean(client?.google_maps_enabled || client?.google_maps_config?.api_key || client?.google_maps_config?.place_id);
   const isYouTubeConnected = Boolean(client?.youtube_enabled || client?.youtube_config?.channel_id || client?.youtube_config?.access_token || client?.youtube_config?.channel_title);
@@ -792,21 +781,8 @@ const ClientChannelsPage = () => {
   );
 
   // Connect actions
-  const handleConnectGmail = async () => {
-    try {
-      const token = localStorage.getItem('token') || localStorage.getItem('uwo_token');
-      const res = await axios.get(`${API_BASE_URL}/api/auth/gmail/connect`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      if (res.data?.url) {
-        window.location.href = res.data.url;
-        return;
-      }
-    } catch (err) {
-      console.warn("Error connecting Gmail", err);
-    }
-    const token = localStorage.getItem('token') || localStorage.getItem('uwo_token');
-    window.location.href = `${API_BASE_URL}/api/auth/gmail/connect${token ? `?token=${token}` : ''}`;
+  const handleConnectGmail = () => {
+    setIsGmailConfigModalOpen(true);
   };
 
   const handleConnectGoogleCalendar = async () => {
@@ -1783,7 +1759,7 @@ const ClientChannelsPage = () => {
                   icon: <GmailBrandIcon size={28} />,
                   isConnected: isGmailConnected,
                   connectedInfo: client?.gmail_config?.email_address || client?.gmail_config?.email || 'Connected Account',
-                  onConnect: () => isGmailConnected ? setIsGmailConfigModalOpen(true) : handleConnectGmail(),
+                  onConnect: () => setIsGmailConfigModalOpen(true),
                   onConfigure: () => setIsGmailConfigModalOpen(true),
                   badge: 'Email Sync',
                   btnColor: 'bg-[#EA4335] hover:bg-[#d93025] text-white'
@@ -1878,7 +1854,7 @@ const ClientChannelsPage = () => {
                   desc: 'Cloud file management to upload, organize, and browse documents, sheets, and slides.',
                   icon: <GoogleDriveIcon size={28} />,
                   isConnected: isGoogleDriveConnected,
-                  connectedInfo: client?.google_drive_config?.account_email || client?.google_docs_config?.account_email || 'Drive Connected',
+                  connectedInfo: client?.google_drive_config?.account_email || (isGoogleDriveConnected ? 'Drive Connected' : 'Google Drive Storage'),
                   onConnect: () => setIsGoogleDriveConfigModalOpen(true),
                   onConfigure: () => setIsGoogleDriveConfigModalOpen(true),
                   badge: 'Cloud Files',
@@ -2540,11 +2516,7 @@ const ClientChannelsPage = () => {
             isOpen={isYouTubeConfigModalOpen}
             onClose={() => setIsYouTubeConfigModalOpen(false)}
             client={client}
-            onSaved={(updatedClient) => {
-              setClient(updatedClient);
-              setToast({ msg: 'YouTube configuration saved!', type: 'success' });
-              setTimeout(() => setToast(null), 3000);
-            }}
+            onSaved={(updatedClient) => handleClientUpdate(updatedClient, 'YouTube configuration updated!')}
           />
         )}
 

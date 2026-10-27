@@ -43,12 +43,8 @@ import {
   LayoutTemplate,
   Target,
   Smartphone,
-  HardDriveDownload,
-  Sparkles,
-  ChevronDown,
-  ExternalLink
+  HardDriveDownload
 } from 'lucide-react';
-import { UWO_PROJECTS } from '@/components/landing/ProjectsDropdown';
 import { cn } from '@/lib/utils';
 import { useEntitlement } from '@/context/EntitlementContext';
 import { useBrand } from '@/context/BrandContext';
@@ -57,7 +53,6 @@ import { useTheme } from '@/context/ThemeContext';
 // Tour ID → sidebar link name mapping
 const TOUR_IDS = {
   'Dashboard': 'sidebar-dashboard',
-  'Our Projects': 'sidebar-projects',
   'Channels': 'sidebar-channels',
   'YouTube': 'sidebar-youtube',
   'Google News': 'sidebar-google-news',
@@ -132,7 +127,6 @@ const Sidebar = ({ role, isOpen, onClose, onToggle }) => {
   const { isDark } = useTheme();
   const [mounted, setMounted] = useState(false);
   const [userObj, setUserObj] = useState({});
-  const [projectsExpanded, setProjectsExpanded] = useState(false);
 
   const loadUser = () => {
     try {
@@ -288,7 +282,6 @@ const Sidebar = ({ role, isOpen, onClose, onToggle }) => {
 
   const adminLinks = [
     { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
-    { name: 'Our Projects', href: '/client/projects', icon: Sparkles },
     { name: 'Clients', href: '/admin/clients', icon: Users },
     { name: 'Client Platform Overview', href: '/admin/platform-overview', icon: Smartphone },
     { name: 'Installation Analytics', href: '/admin/installations', icon: HardDriveDownload },
@@ -323,11 +316,10 @@ const Sidebar = ({ role, isOpen, onClose, onToggle }) => {
     ] : []),
     { name: 'Dashboard', href: '/client', icon: LayoutDashboard },
     { name: 'Learning Center', href: '/client/guides', icon: BookOpen },
-    { name: 'Our Projects', href: '/client/projects', icon: Sparkles },
 
     // ── Core Communication & Automation ──
-    { name: 'Channels', href: '/client/channels', icon: Link2, requiredPlan: 'Starter', featureKey: 'feature_channels' },
-    { name: 'Inbox / Messages', href: '/client/inbox', icon: MessageSquare, requiredPlan: 'Starter', featureKey: 'feature_shared_inbox' },
+    { name: 'Channels', href: '/client/channels', icon: Link2, featureKey: 'feature_channels' },
+    { name: 'Inbox / Messages', href: '/client/inbox', icon: MessageSquare, featureKey: 'feature_shared_inbox' },
     { name: 'Gmail', href: '/client/gmail', icon: Mail, requiredPlan: 'Starter', featureKey: 'connector_gmail' },
     { name: 'Calendar', href: '/client/calendar', icon: Calendar, requiredPlan: 'Starter', featureKey: 'connector_google_calendar' },
     { name: 'Drive', href: '/client/drive', icon: HardDrive, requiredPlan: 'Starter', featureKey: 'connector_google_drive' },
@@ -361,7 +353,6 @@ const Sidebar = ({ role, isOpen, onClose, onToggle }) => {
 
   const agentLinks = [
     { name: 'Dashboard', href: '/client', icon: LayoutDashboard },
-    { name: 'Our Projects', href: '/client/projects', icon: Sparkles },
     { name: 'Team & Projects', href: '/client/team', icon: ShieldCheck },
     { name: 'Voice & Video Calls', href: '/client/calls', icon: PhoneCall },
     { name: 'Leads (CRM)', href: '/client/crm', icon: Users },
@@ -590,113 +581,6 @@ const Sidebar = ({ role, isOpen, onClose, onToggle }) => {
                         {link.name}
                       </span>
                       <Lock size={12} className="text-amber-500 shrink-0 ml-1" />
-                    </div>
-                  )}
-                </div>
-              );
-            }
-
-            if (link.name === 'Our Projects') {
-              return (
-                <div key={link.href} className="flex flex-col">
-                  <button
-                    type="button"
-                    data-tour={tourId}
-                    onClick={() => {
-                      if (!isOpen) {
-                        window.location.href = '/client/projects';
-                      } else {
-                        setProjectsExpanded((prev) => !prev);
-                      }
-                    }}
-                    title={!isOpen ? link.name : undefined}
-                    className={cn(
-                      'group flex items-center rounded-xl transition-all duration-300 relative overflow-hidden cursor-pointer w-full text-left',
-                      isOpen ? 'gap-2 px-2 py-2 justify-between' : 'justify-center px-0 py-2',
-                      (isActive || projectsExpanded)
-                        ? (isDark
-                            ? 'bg-emerald-950/40 text-emerald-400 border border-emerald-600/30'
-                            : 'bg-emerald-50/80 text-[#047857] border border-[#059669]/10'
-                          )
-                        : (isDark
-                            ? 'text-slate-300 hover:text-white hover:bg-slate-800/80'
-                            : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50 hover:shadow-xs'
-                          )
-                    )}
-                  >
-                    <div className="flex items-center gap-2 min-w-0">
-                      <Icon
-                        size={isOpen ? 16 : 18}
-                        className={cn(
-                          'transition-all duration-300 shrink-0',
-                          (isActive || projectsExpanded) ? 'text-emerald-500' : (isDark ? 'text-slate-400 group-hover:text-slate-200' : 'text-slate-400 group-hover:text-slate-600')
-                        )}
-                      />
-                      {isOpen && (
-                        <span className={cn(
-                          'text-[12px] tracking-tight font-bold z-10 truncate',
-                          (isActive || projectsExpanded) ? (isDark ? 'text-emerald-400 font-black' : 'text-[#047857]') : (isDark ? 'text-slate-300 group-hover:text-white' : 'text-slate-500')
-                        )}>
-                          {link.name}
-                        </span>
-                      )}
-                    </div>
-
-                    {isOpen && (
-                      <ChevronDown
-                        size={13}
-                        className={cn(
-                          "transition-transform duration-200 shrink-0",
-                          projectsExpanded ? "rotate-180 text-emerald-500" : "text-slate-400 group-hover:text-slate-200"
-                        )}
-                      />
-                    )}
-                  </button>
-
-                  {/* Expandable Accordion Submenu */}
-                  {isOpen && projectsExpanded && (
-                    <div className={cn(
-                      "ml-4 pl-2.5 my-1 border-l space-y-0.5 animate-in fade-in duration-200",
-                      isDark ? "border-emerald-500/30" : "border-emerald-500/40"
-                    )}>
-                      {UWO_PROJECTS.map((proj) => (
-                        <a
-                          key={proj.id}
-                          href={proj.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className={cn(
-                            "flex items-center justify-between px-2 py-1.5 rounded-lg text-[11px] font-medium transition-colors group",
-                            isDark
-                              ? "text-slate-300 hover:text-emerald-400 hover:bg-slate-800/60"
-                              : "text-slate-600 hover:text-[#0B8F78] hover:bg-emerald-50/60"
-                          )}
-                        >
-                          <div className="flex items-center gap-1.5 min-w-0">
-                            <div className="w-1 h-1 rounded-full bg-emerald-500 shrink-0" />
-                            <span className="truncate">{proj.name}</span>
-                          </div>
-                          <ExternalLink size={10} className="opacity-0 group-hover:opacity-100 transition-opacity shrink-0 ml-1" />
-                        </a>
-                      ))}
-
-                      <Link
-                        href="/client/projects"
-                        onClick={() => {
-                          if (typeof window !== 'undefined' && window.innerWidth < 1024 && onClose) {
-                            onClose();
-                          }
-                        }}
-                        className={cn(
-                          "flex items-center justify-between px-2 py-1.5 rounded-lg text-[11px] font-bold transition-colors",
-                          isDark
-                            ? "text-emerald-400 hover:bg-emerald-950/40"
-                            : "text-[#0B8F78] hover:bg-emerald-50"
-                        )}
-                      >
-                        <span>All Projects Overview</span>
-                        <ChevronRight size={11} />
-                      </Link>
                     </div>
                   )}
                 </div>

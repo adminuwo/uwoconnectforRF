@@ -47,19 +47,71 @@ export default function GmailConfigModal({ client, isOpen, onClose, onSaved }) {
   const handleConnectOrSwitch = async () => {
     setConnecting(true);
     try {
-      const token = localStorage.getItem('token') || localStorage.getItem('uwo_token');
-      const res = await axios.get(`${API_BASE_URL}/api/auth/gmail/connect`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      if (res.data?.url) {
-        window.location.href = res.data.url;
+      const token =
+        typeof window !== 'undefined'
+          ? (localStorage.getItem('uwo_token') ||
+             localStorage.getItem('token') ||
+             localStorage.getItem('access_token'))
+          : null;
+
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      const baseUrl = (API_BASE_URL || process.env.NEXT_PUBLIC_API_URL || '').replace(/\/$/, '');
+
+      // Check endpoints in order of reliability with strict 3.5s timeout:
+      // 1. Next.js rewrite proxy (/api/auth/gmail/connect/)
+      // 2. Direct configured API_BASE_URL
+      // 3. Local Django fallback port 8080
+      const candidateUrls = [
+        '/api/auth/gmail/connect/',
+        '/api/auth/gmail/connect',
+        baseUrl ? `${baseUrl}/api/auth/gmail/connect/` : null,
+        baseUrl ? `${baseUrl}/api/auth/gmail/connect` : null,
+        'http://127.0.0.1:8080/api/auth/gmail/connect/',
+      ].filter((u, idx, arr) => u && arr.indexOf(u) === idx);
+
+      let authUrl = null;
+
+      for (const url of candidateUrls) {
+        try {
+          const res = await axios.get(url, { headers, timeout: 3500 });
+          const candidateFound = res?.data?.url || res?.data?.auth_url;
+          if (candidateFound) {
+            authUrl = candidateFound;
+            break;
+          }
+        } catch (candidateErr) {
+          console.warn(`[GmailConnect] Endpoint ${url} did not respond:`, candidateErr?.message);
+        }
+      }
+
+      if (authUrl) {
+        window.location.href = authUrl;
         return;
       }
+
+      // If AJAX/CORS was blocked, execute direct browser navigation with token
+      if (token) {
+        const directBase = baseUrl || '';
+        window.location.href = `${directBase}/api/auth/gmail/connect/?token=${encodeURIComponent(token)}&redirect=true`;
+        return;
+      }
+
+      showNotification('Could not retrieve Google authorization URL. Please sign in again.', 'error');
+      setConnecting(false);
     } catch (err) {
-      console.warn('Error fetching Gmail auth URL:', err);
+      console.error('Error fetching Gmail auth URL:', err);
+      const errMsg =
+        err?.response?.data?.error ||
+        err?.response?.data?.detail ||
+        'Failed to initiate Google sign-in. Please try again.';
+      showNotification(errMsg, 'error');
+      setConnecting(false);
+    } finally {
+      // Small timeout to allow redirect to proceed or restore button state
+      setTimeout(() => {
+        setConnecting(false);
+      }, 4000);
     }
-    const token = localStorage.getItem('token') || localStorage.getItem('uwo_token');
-    window.location.href = `${API_BASE_URL}/api/auth/gmail/connect${token ? `?token=${token}` : ''}`;
   };
 
   const handleDisconnect = async () => {
