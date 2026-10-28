@@ -4,6 +4,8 @@ import {
   X, Tag, User, Phone, Mail, FileText, Save, Loader2, MessageSquare, 
   ShoppingBag, Calendar, Clock, CheckCircle2, AlertCircle, Plus, Check, Ban 
 } from 'lucide-react';
+import { useTheme } from '@/context/ThemeContext';
+import { cn } from '@/lib/utils';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
@@ -15,6 +17,7 @@ const FOLLOW_UP_TYPES = [
 ];
 
 export default function ContactDetailsModal({ contact, isOpen, onClose, onUpdated }) {
+  const { isDark } = useTheme();
   const [formData, setFormData] = useState({
     name: '',
     phone_number: '',
@@ -181,20 +184,29 @@ export default function ContactDetailsModal({ contact, isOpen, onClose, onUpdate
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={onClose}></div>
-      <div className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
+      <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-xs" onClick={onClose}></div>
+      <div className={cn(
+        "relative w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh] border transition-colors",
+        isDark ? "bg-[#0f172a] border-slate-800 text-slate-100" : "bg-white border-slate-200 text-slate-900"
+      )}>
         {/* Header */}
-        <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+        <div className={cn(
+          "p-6 border-b flex items-center justify-between transition-colors",
+          isDark ? "bg-[#0f172a] border-slate-800" : "bg-slate-50/50 border-slate-100"
+        )}>
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-xl flex items-center justify-center font-bold">
+            <div className={cn(
+              "w-12 h-12 rounded-xl flex items-center justify-center font-bold border",
+              isDark ? "bg-emerald-950/70 border-emerald-800 text-emerald-400" : "bg-emerald-100 border-emerald-200 text-emerald-600"
+            )}>
               <User size={24} />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-slate-900">Lead Details</h2>
-              <p className="text-sm text-slate-500 font-medium">Platform ID: {contact.platform_id || 'Direct'}</p>
+              <h2 className={cn("text-xl font-bold", isDark ? "text-white" : "text-slate-900")}>Lead Details</h2>
+              <p className={cn("text-sm font-medium", isDark ? "text-slate-400" : "text-slate-500")}>Platform ID: {contact.platform_id || 'Direct'}</p>
             </div>
           </div>
-          <button onClick={onClose} className="p-2 text-slate-400 hover:bg-slate-100 rounded-xl transition-colors">
+          <button onClick={onClose} className={cn("p-2 rounded-xl transition-colors cursor-pointer", isDark ? "text-slate-400 hover:bg-slate-800 hover:text-white" : "text-slate-400 hover:bg-slate-100 text-slate-600")}>
             <X size={20} />
           </button>
         </div>
@@ -204,42 +216,51 @@ export default function ContactDetailsModal({ contact, isOpen, onClose, onUpdate
           {/* Basic Info */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="text-xs font-bold text-slate-400 uppercase tracking-widest block mb-2">Full Name</label>
+              <label className={cn("text-xs font-bold uppercase tracking-widest block mb-2", isDark ? "text-slate-400" : "text-slate-500")}>Full Name</label>
               <div className="relative">
-                <User size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <User size={16} className={cn("absolute left-3 top-1/2 -translate-y-1/2", isDark ? "text-slate-500" : "text-slate-400")} />
                 <input 
                   type="text" 
                   value={formData.name}
                   onChange={e => setFormData({...formData, name: e.target.value})}
-                  className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 outline-none focus:border-emerald-500 transition-colors"
+                  className={cn(
+                    "w-full pl-10 pr-4 py-3 rounded-xl text-sm font-semibold outline-none transition-colors border",
+                    isDark ? "bg-slate-800 border-slate-700 text-white placeholder-slate-500 focus:border-emerald-500" : "bg-slate-50 border-slate-200 text-slate-700 placeholder-slate-400 focus:border-emerald-500"
+                  )}
                   placeholder="Enter name"
                 />
               </div>
             </div>
             
             <div>
-              <label className="text-xs font-bold text-slate-400 uppercase tracking-widest block mb-2">Phone</label>
+              <label className={cn("text-xs font-bold uppercase tracking-widest block mb-2", isDark ? "text-slate-400" : "text-slate-500")}>Phone</label>
               <div className="relative">
-                <Phone size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <Phone size={16} className={cn("absolute left-3 top-1/2 -translate-y-1/2", isDark ? "text-slate-500" : "text-slate-400")} />
                 <input 
                   type="text" 
                   value={formData.phone_number}
                   onChange={e => setFormData({...formData, phone_number: e.target.value})}
-                  className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 outline-none focus:border-emerald-500 transition-colors"
+                  className={cn(
+                    "w-full pl-10 pr-4 py-3 rounded-xl text-sm font-semibold outline-none transition-colors border",
+                    isDark ? "bg-slate-800 border-slate-700 text-white placeholder-slate-500 focus:border-emerald-500" : "bg-slate-50 border-slate-200 text-slate-700 placeholder-slate-400 focus:border-emerald-500"
+                  )}
                   placeholder="+1234567890"
                 />
               </div>
             </div>
 
             <div className="md:col-span-2">
-              <label className="text-xs font-bold text-slate-400 uppercase tracking-widest block mb-2">Email</label>
+              <label className={cn("text-xs font-bold uppercase tracking-widest block mb-2", isDark ? "text-slate-400" : "text-slate-500")}>Email</label>
               <div className="relative">
-                <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <Mail size={16} className={cn("absolute left-3 top-1/2 -translate-y-1/2", isDark ? "text-slate-500" : "text-slate-400")} />
                 <input 
                   type="email" 
                   value={formData.email}
                   onChange={e => setFormData({...formData, email: e.target.value})}
-                  className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 outline-none focus:border-emerald-500 transition-colors"
+                  className={cn(
+                    "w-full pl-10 pr-4 py-3 rounded-xl text-sm font-semibold outline-none transition-colors border",
+                    isDark ? "bg-slate-800 border-slate-700 text-white placeholder-slate-500 focus:border-emerald-500" : "bg-slate-50 border-slate-200 text-slate-700 placeholder-slate-400 focus:border-emerald-500"
+                  )}
                   placeholder="email@example.com"
                 />
               </div>
@@ -247,15 +268,20 @@ export default function ContactDetailsModal({ contact, isOpen, onClose, onUpdate
           </div>
 
           {/* CRM Follow-Ups & Tasks Section */}
-          <div className="pt-6 border-t border-slate-100">
+          <div className={cn("pt-6 border-t", isDark ? "border-slate-800" : "border-slate-100")}>
             <div className="flex items-center justify-between mb-3">
-              <label className="text-xs font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
-                <Clock size={15} className="text-emerald-600" /> CRM Follow-Ups & Reminders
+              <label className={cn("text-xs font-bold uppercase tracking-widest flex items-center gap-2", isDark ? "text-slate-400" : "text-slate-500")}>
+                <Clock size={15} className="text-emerald-500" /> CRM Follow-Ups & Reminders
               </label>
               <button
                 type="button"
                 onClick={() => setShowAddForm(!showAddForm)}
-                className="text-xs font-bold px-3 py-1.5 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 rounded-xl flex items-center gap-1.5 transition-colors"
+                className={cn(
+                  "text-xs font-bold px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-colors border cursor-pointer",
+                  isDark
+                    ? "bg-emerald-950/70 text-emerald-300 hover:bg-emerald-900/80 border-emerald-800"
+                    : "bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border-emerald-200"
+                )}
               >
                 {showAddForm ? <X size={13} /> : <Plus size={13} />}
                 {showAddForm ? 'Cancel' : 'Schedule Follow-Up'}
@@ -264,14 +290,17 @@ export default function ContactDetailsModal({ contact, isOpen, onClose, onUpdate
 
             {/* Schedule Follow-Up Form */}
             {showAddForm && (
-              <form onSubmit={handleScheduleFollowUp} className="bg-slate-50 border border-slate-200 rounded-2xl p-4 mb-4 space-y-4">
-                <div className="text-xs font-bold text-slate-800 flex items-center gap-2">
-                  <Calendar size={14} className="text-emerald-600" /> Schedule New Follow-Up
+              <form onSubmit={handleScheduleFollowUp} className={cn(
+                "rounded-2xl p-4 mb-4 space-y-4 border transition-colors",
+                isDark ? "bg-[#1e293b] border-slate-700 text-slate-100" : "bg-slate-50 border-slate-200 text-slate-800"
+              )}>
+                <div className={cn("text-xs font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-800")}>
+                  <Calendar size={14} className="text-emerald-500" /> Schedule New Follow-Up
                 </div>
 
                 {/* Type Selection */}
                 <div>
-                  <label className="text-[11px] font-bold text-slate-500 block mb-1.5">Action Type</label>
+                  <label className={cn("text-[11px] font-bold block mb-1.5", isDark ? "text-slate-400" : "text-slate-500")}>Action Type</label>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                     {FOLLOW_UP_TYPES.map((t) => {
                       const Icon = t.icon;
@@ -281,11 +310,14 @@ export default function ContactDetailsModal({ contact, isOpen, onClose, onUpdate
                           type="button"
                           key={t.id}
                           onClick={() => setNewFollowUp({ ...newFollowUp, follow_up_type: t.id })}
-                          className={`flex items-center justify-center gap-2 py-2 px-3 rounded-xl border text-xs font-bold transition-all ${
+                          className={cn(
+                            "flex items-center justify-center gap-2 py-2 px-3 rounded-xl border text-xs font-bold transition-all cursor-pointer",
                             isSelected 
                               ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm' 
-                              : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-100'
-                          }`}
+                              : isDark
+                                ? 'bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700'
+                                : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-100'
+                          )}
                         >
                           <Icon size={14} />
                           {t.label}
@@ -298,37 +330,46 @@ export default function ContactDetailsModal({ contact, isOpen, onClose, onUpdate
                 {/* Title & Date */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="text-[11px] font-bold text-slate-500 block mb-1">Title / Objective</label>
+                    <label className={cn("text-[11px] font-bold block mb-1", isDark ? "text-slate-400" : "text-slate-500")}>Title / Objective</label>
                     <input
                       type="text"
                       value={newFollowUp.title}
                       onChange={e => setNewFollowUp({ ...newFollowUp, title: e.target.value })}
                       placeholder="e.g. Call regarding quotation"
-                      className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-800 outline-none focus:border-emerald-500"
+                      className={cn(
+                        "w-full px-3 py-2 rounded-xl text-xs font-medium outline-none transition-colors border",
+                        isDark ? "bg-slate-800 border-slate-700 text-white placeholder-slate-500 focus:border-emerald-500" : "bg-white border-slate-200 text-slate-800 placeholder-slate-400 focus:border-emerald-500"
+                      )}
                     />
                   </div>
 
                   <div>
-                    <label className="text-[11px] font-bold text-slate-500 block mb-1">Scheduled Date & Time</label>
+                    <label className={cn("text-[11px] font-bold block mb-1", isDark ? "text-slate-400" : "text-slate-500")}>Scheduled Date & Time</label>
                     <input
                       type="datetime-local"
                       required
                       value={newFollowUp.scheduled_at}
                       onChange={e => setNewFollowUp({ ...newFollowUp, scheduled_at: e.target.value })}
-                      className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-800 outline-none focus:border-emerald-500"
+                      className={cn(
+                        "w-full px-3 py-2 rounded-xl text-xs font-medium outline-none transition-colors border",
+                        isDark ? "bg-slate-800 border-slate-700 text-white placeholder-slate-500 focus:border-emerald-500" : "bg-white border-slate-200 text-slate-800 placeholder-slate-400 focus:border-emerald-500"
+                      )}
                     />
                   </div>
                 </div>
 
                 {/* Note */}
                 <div>
-                  <label className="text-[11px] font-bold text-slate-500 block mb-1">Note (Optional)</label>
+                  <label className={cn("text-[11px] font-bold block mb-1", isDark ? "text-slate-400" : "text-slate-500")}>Note (Optional)</label>
                   <input
                     type="text"
                     value={newFollowUp.note}
                     onChange={e => setNewFollowUp({ ...newFollowUp, note: e.target.value })}
                     placeholder="Specific talking points or reminders..."
-                    className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-800 outline-none focus:border-emerald-500"
+                    className={cn(
+                      "w-full px-3 py-2 rounded-xl text-xs font-medium outline-none transition-colors border",
+                      isDark ? "bg-slate-800 border-slate-700 text-white placeholder-slate-500 focus:border-emerald-500" : "bg-white border-slate-200 text-slate-800 placeholder-slate-400 focus:border-emerald-500"
+                    )}
                   />
                 </div>
 
@@ -336,14 +377,17 @@ export default function ContactDetailsModal({ contact, isOpen, onClose, onUpdate
                   <button
                     type="button"
                     onClick={() => setShowAddForm(false)}
-                    className="px-3 py-1.5 text-xs font-bold text-slate-500 hover:bg-slate-200 rounded-xl transition-colors"
+                    className={cn(
+                      "px-3 py-1.5 text-xs font-bold rounded-xl transition-colors cursor-pointer",
+                      isDark ? "text-slate-400 hover:bg-slate-800 hover:text-white" : "text-slate-500 hover:bg-slate-200 text-slate-700"
+                    )}
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={scheduling}
-                    className="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-sm flex items-center gap-1.5 transition-colors disabled:opacity-50"
+                    className="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-sm flex items-center gap-1.5 transition-colors disabled:opacity-50 cursor-pointer"
                   >
                     {scheduling ? <Loader2 size={13} className="animate-spin" /> : <Save size={13} />}
                     Save Task
@@ -354,16 +398,19 @@ export default function ContactDetailsModal({ contact, isOpen, onClose, onUpdate
 
             {/* Follow-Ups List */}
             {loadingFollowUps ? (
-              <div className="py-6 flex items-center justify-center text-slate-400 text-xs">
+              <div className={cn("py-6 flex items-center justify-center text-xs", isDark ? "text-slate-500" : "text-slate-400")}>
                 <Loader2 size={16} className="animate-spin mr-2" /> Loading follow-ups...
               </div>
             ) : followUps.length === 0 ? (
-              <div className="p-4 bg-slate-50 rounded-2xl border border-dashed border-slate-200 text-center">
-                <p className="text-xs font-semibold text-slate-500">No follow-ups scheduled yet.</p>
-                <p className="text-[11px] text-slate-400 mt-0.5">Click &quot;Schedule Follow-Up&quot; above to set reminders, calls, or meetings.</p>
+              <div className={cn(
+                "p-4 rounded-2xl border border-dashed text-center transition-colors",
+                isDark ? "bg-slate-800/40 border-slate-800 text-slate-400" : "bg-slate-50 border-slate-200 text-slate-500"
+              )}>
+                <p className={cn("text-xs font-semibold", isDark ? "text-slate-300" : "text-slate-500")}>No follow-ups scheduled yet.</p>
+                <p className={cn("text-[11px] mt-0.5", isDark ? "text-slate-500" : "text-slate-400")}>Click &quot;Schedule Follow-Up&quot; above to set reminders, calls, or meetings.</p>
               </div>
             ) : (
-              <div className="space-y-2.5 max-h-56 overflow-y-auto pr-1">
+              <div className="space-y-2.5 max-h-56 overflow-y-auto pr-1 custom-scrollbar">
                 {followUps.map((fu) => {
                   const overdue = isOverdue(fu.scheduled_at, fu.status);
                   const typeDef = FOLLOW_UP_TYPES.find(t => t.id === fu.follow_up_type) || FOLLOW_UP_TYPES[0];
@@ -374,22 +421,26 @@ export default function ContactDetailsModal({ contact, isOpen, onClose, onUpdate
                   return (
                     <div 
                       key={fu.id}
-                      className={`p-3 rounded-2xl border transition-all ${
+                      className={cn(
+                        "p-3 rounded-2xl border transition-all",
                         overdue 
-                          ? 'bg-rose-50/70 border-rose-200' 
+                          ? (isDark ? 'bg-rose-950/60 border-rose-800 text-rose-300' : 'bg-rose-50/70 border-rose-200')
                           : isDone 
-                            ? 'bg-slate-50 border-slate-200 opacity-80' 
-                            : 'bg-white border-slate-200 shadow-xs'
-                      }`}
+                            ? (isDark ? 'bg-slate-800/30 border-slate-800 opacity-60 text-slate-400' : 'bg-slate-50 border-slate-200 opacity-80')
+                            : (isDark ? 'bg-[#1e293b] border-slate-700 shadow-xs text-slate-100' : 'bg-white border-slate-200 shadow-xs')
+                      )}
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex items-start gap-3">
-                          <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 border ${typeDef.color}`}>
+                          <div className={cn("w-8 h-8 rounded-xl flex items-center justify-center shrink-0 border", typeDef.color)}>
                             <Icon size={14} />
                           </div>
                           <div>
                             <div className="flex items-center gap-2 flex-wrap">
-                              <h5 className={`text-xs font-bold ${isDone ? 'line-through text-slate-500' : 'text-slate-900'}`}>
+                              <h5 className={cn(
+                                "text-xs font-bold",
+                                isDone ? (isDark ? 'line-through text-slate-500' : 'line-through text-slate-500') : (isDark ? 'text-white' : 'text-slate-900')
+                              )}>
                                 {fu.title}
                               </h5>
                               {overdue && (
@@ -403,17 +454,20 @@ export default function ContactDetailsModal({ contact, isOpen, onClose, onUpdate
                                 </span>
                               )}
                               {fu.status === 'CANCELLED' && (
-                                <span className="text-[10px] font-bold px-2 py-0.5 bg-slate-200 text-slate-600 rounded-md">
+                                <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-md", isDark ? "bg-slate-700 text-slate-300" : "bg-slate-200 text-slate-600")}>
                                   Cancelled
                                 </span>
                               )}
                             </div>
-                            <div className="flex items-center gap-2 mt-1 text-[11px] text-slate-500">
-                              <Calendar size={12} className="text-slate-400" />
+                            <div className={cn("flex items-center gap-2 mt-1 text-[11px]", isDark ? "text-slate-400" : "text-slate-500")}>
+                              <Calendar size={12} className={isDark ? "text-slate-500" : "text-slate-400"} />
                               <span>{new Date(fu.scheduled_at).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}</span>
                             </div>
                             {fu.note && (
-                              <p className="text-[11px] text-slate-600 mt-1 italic bg-white/60 px-2 py-1 rounded-lg border border-slate-100">
+                              <p className={cn(
+                                "text-[11px] mt-1 italic px-2 py-1 rounded-lg border",
+                                isDark ? "bg-slate-800/80 border-slate-700 text-slate-300" : "bg-white/60 border-slate-100 text-slate-600"
+                              )}>
                                 {fu.note}
                               </p>
                             )}
@@ -427,7 +481,7 @@ export default function ContactDetailsModal({ contact, isOpen, onClose, onUpdate
                               type="button"
                               disabled={updatingFuId === fu.id}
                               onClick={() => handleUpdateFollowUpStatus(fu.id, 'DONE')}
-                              className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold rounded-lg shadow-xs flex items-center gap-1 transition-colors disabled:opacity-50"
+                              className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold rounded-lg shadow-xs flex items-center gap-1 transition-colors disabled:opacity-50 cursor-pointer"
                               title="Mark Follow-up as Completed"
                             >
                               {updatingFuId === fu.id ? <Loader2 size={11} className="animate-spin" /> : <Check size={11} />}
@@ -437,7 +491,10 @@ export default function ContactDetailsModal({ contact, isOpen, onClose, onUpdate
                               type="button"
                               disabled={updatingFuId === fu.id}
                               onClick={() => handleUpdateFollowUpStatus(fu.id, 'CANCELLED')}
-                              className="p-1 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+                              className={cn(
+                                "p-1 rounded-lg transition-colors cursor-pointer",
+                                isDark ? "text-slate-400 hover:text-slate-200 hover:bg-slate-800" : "text-slate-400 hover:text-slate-600 hover:bg-slate-100"
+                              )}
                               title="Cancel Follow-up"
                             >
                               <Ban size={13} />
@@ -453,15 +510,18 @@ export default function ContactDetailsModal({ contact, isOpen, onClose, onUpdate
           </div>
 
           {/* Tags Section */}
-          <div className="pt-6 border-t border-slate-100">
-            <label className="text-xs font-bold text-slate-400 uppercase tracking-widest block mb-2 flex items-center gap-2">
+          <div className={cn("pt-6 border-t", isDark ? "border-slate-800" : "border-slate-100")}>
+            <label className={cn("text-xs font-bold uppercase tracking-widest block mb-2 flex items-center gap-2", isDark ? "text-slate-400" : "text-slate-400")}>
               <Tag size={14} /> Segments & Tags
             </label>
             <div className="flex flex-wrap gap-2 mb-3">
               {formData.tags.map((tag, idx) => (
-                <span key={idx} className="bg-emerald-50 text-emerald-700 border border-emerald-200 px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-1.5">
+                <span key={idx} className={cn(
+                  "border px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-1.5",
+                  isDark ? "bg-emerald-950/70 border-emerald-800 text-emerald-300" : "bg-emerald-50 text-emerald-700 border-emerald-200"
+                )}>
                   #{tag}
-                  <button onClick={() => handleRemoveTag(tag)} className="text-emerald-500 hover:text-emerald-800">
+                  <button onClick={() => handleRemoveTag(tag)} className={cn("cursor-pointer", isDark ? "text-emerald-400 hover:text-emerald-200" : "text-emerald-500 hover:text-emerald-800")}>
                     <X size={12} />
                   </button>
                 </span>
@@ -473,35 +533,41 @@ export default function ContactDetailsModal({ contact, isOpen, onClose, onUpdate
                 value={newTag}
                 onChange={e => setNewTag(e.target.value)}
                 placeholder="Type tag and press enter"
-                className="flex-1 px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-emerald-500"
+                className={cn(
+                  "flex-1 px-4 py-2 rounded-xl text-sm outline-none transition-colors border",
+                  isDark ? "bg-slate-800 border-slate-700 text-white placeholder-slate-500 focus:border-emerald-500" : "bg-slate-50 border-slate-200 text-slate-800 placeholder-slate-400 focus:border-emerald-500"
+                )}
               />
-              <button type="submit" disabled={!newTag.trim()} className="bg-slate-800 hover:bg-slate-700 disabled:opacity-50 text-white px-4 py-2 rounded-xl text-sm font-bold transition-colors">
+              <button type="submit" disabled={!newTag.trim()} className={cn(
+                "px-4 py-2 rounded-xl text-sm font-bold transition-colors cursor-pointer border",
+                isDark ? "bg-slate-800 hover:bg-slate-700 text-white border-slate-700" : "bg-slate-800 hover:bg-slate-700 text-white border-slate-800"
+              )}>
                 Add Tag
               </button>
             </form>
           </div>
 
           {/* Products Shared Section */}
-          <div className="pt-6 border-t border-slate-100">
-            <label className="text-xs font-bold text-slate-400 uppercase tracking-widest block mb-3 flex items-center gap-2">
-              <ShoppingBag size={14} className="text-emerald-600" /> Products Shared with Lead
+          <div className={cn("pt-6 border-t", isDark ? "border-slate-800" : "border-slate-100")}>
+            <label className={cn("text-xs font-bold uppercase tracking-widest block mb-3 flex items-center gap-2", isDark ? "text-slate-400" : "text-slate-400")}>
+              <ShoppingBag size={14} className="text-emerald-500" /> Products Shared with Lead
             </label>
-            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-3">
-              <div className="flex items-center justify-between p-3 bg-white rounded-xl border border-slate-100 shadow-2xs">
+            <div className={cn("rounded-2xl p-4 space-y-3 border transition-colors", isDark ? "bg-slate-800/40 border-slate-800" : "bg-slate-50 border-slate-200")}>
+              <div className={cn("flex items-center justify-between p-3 rounded-xl border shadow-2xs transition-colors", isDark ? "bg-slate-800 border-slate-700" : "bg-white border-slate-100")}>
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
+                  <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center font-bold border", isDark ? "bg-emerald-950/70 border-emerald-800 text-emerald-400" : "bg-emerald-50 border-emerald-100 text-emerald-600")}>
                     📦
                   </div>
                   <div>
-                    <h5 className="text-xs font-bold text-slate-900">AI Automation Book</h5>
-                    <p className="text-[10px] text-slate-400">Shared via WhatsApp Workflow • Aug 3, 2026</p>
+                    <h5 className={cn("text-xs font-bold", isDark ? "text-white" : "text-slate-900")}>AI Automation Book</h5>
+                    <p className={cn("text-[10px]", isDark ? "text-slate-400" : "text-slate-400")}>Shared via WhatsApp Workflow • Aug 3, 2026</p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <span className="text-xs font-black text-slate-900">$23.00</span>
+                  <span className={cn("text-xs font-black", isDark ? "text-emerald-400" : "text-slate-900")}>$23.00</span>
                   <div className="flex items-center gap-2 mt-0.5 justify-end">
-                    <span className="text-[9px] font-bold bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded">Link Clicked: Yes</span>
-                    <span className="text-[9px] font-bold bg-blue-50 text-blue-700 px-2 py-0.5 rounded">Status: Paid</span>
+                    <span className={cn("text-[9px] font-bold px-2 py-0.5 rounded border", isDark ? "bg-emerald-950/70 border-emerald-800 text-emerald-300" : "bg-emerald-50 border-emerald-200 text-emerald-700")}>Link Clicked: Yes</span>
+                    <span className={cn("text-[9px] font-bold px-2 py-0.5 rounded border", isDark ? "bg-blue-950/70 border-blue-800 text-blue-300" : "bg-blue-50 border-blue-200 text-blue-700")}>Status: Paid</span>
                   </div>
                 </div>
               </div>
@@ -509,32 +575,35 @@ export default function ContactDetailsModal({ contact, isOpen, onClose, onUpdate
           </div>
 
           {/* Internal Notes */}
-          <div className="pt-6 border-t border-slate-100">
-            <label className="text-xs font-bold text-slate-400 uppercase tracking-widest block mb-2 flex items-center gap-2">
+          <div className={cn("pt-6 border-t", isDark ? "border-slate-800" : "border-slate-100")}>
+            <label className={cn("text-xs font-bold uppercase tracking-widest block mb-2 flex items-center gap-2", isDark ? "text-slate-400" : "text-slate-400")}>
               <FileText size={14} /> Internal Notes
             </label>
             <textarea 
               value={formData.notes}
               onChange={e => setFormData({...formData, notes: e.target.value})}
-              className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-700 outline-none focus:border-emerald-500 transition-colors h-28 resize-none"
+              className={cn(
+                "w-full p-4 rounded-xl text-sm font-medium outline-none transition-colors h-28 resize-none border",
+                isDark ? "bg-slate-800 border-slate-700 text-white placeholder-slate-500 focus:border-emerald-500" : "bg-slate-50 border-slate-200 text-slate-700 placeholder-slate-400 focus:border-emerald-500"
+              )}
               placeholder="Add notes about this lead... (Only visible to your team)"
             />
           </div>
         </div>
 
         {/* Footer */}
-        <div className="p-6 border-t border-slate-100 bg-slate-50/50 flex justify-between items-center">
-          <button onClick={() => window.location.href = '/client/inbox'} className="text-sm font-bold text-slate-500 hover:text-emerald-600 flex items-center gap-2 transition-colors">
+        <div className={cn("p-6 border-t flex justify-between items-center transition-colors", isDark ? "bg-[#0f172a] border-slate-800" : "bg-slate-50/50 border-slate-100")}>
+          <button onClick={() => window.location.href = '/client/inbox'} className={cn("text-sm font-bold flex items-center gap-2 transition-colors cursor-pointer", isDark ? "text-slate-400 hover:text-emerald-400" : "text-slate-500 hover:text-emerald-600")}>
             <MessageSquare size={16} /> Open Chat
           </button>
           <div className="flex gap-3">
-            <button onClick={onClose} className="px-5 py-2.5 text-slate-500 hover:bg-slate-100 font-bold text-sm rounded-xl transition-colors">
+            <button onClick={onClose} className={cn("px-5 py-2.5 font-bold text-sm rounded-xl transition-colors cursor-pointer", isDark ? "text-slate-400 hover:bg-slate-800 hover:text-white" : "text-slate-500 hover:bg-slate-100 text-slate-700")}>
               Cancel
             </button>
             <button 
               onClick={handleSave}
               disabled={saving}
-              className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm rounded-xl shadow-md flex items-center gap-2 transition-colors disabled:opacity-50"
+              className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm rounded-xl shadow-md flex items-center gap-2 transition-colors disabled:opacity-50 cursor-pointer"
             >
               {saving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
               Save Changes

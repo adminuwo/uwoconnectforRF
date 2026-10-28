@@ -367,7 +367,10 @@ const ClientOverview = () => {
   return (
     <DashboardLayout role="CLIENT">
       {isAgencyUser && (
-        <div className="w-full max-w-full px-4 sm:px-6 lg:px-8 pt-4 flex items-center justify-between border-b border-slate-200/80 pb-3 mb-2 font-sans">
+        <div className={cn(
+          "w-full max-w-full px-4 sm:px-6 lg:px-8 pt-4 flex items-center justify-between border-b pb-3 mb-2 font-sans transition-colors",
+          isDark ? "border-slate-800" : "border-slate-200/80"
+        )}>
           <div className="flex items-center gap-2">
             <button
               onClick={() => setViewMode('agency')}
@@ -375,7 +378,9 @@ const ClientOverview = () => {
                 "flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer",
                 viewMode === 'agency'
                   ? "bg-blue-600 text-white shadow-md shadow-blue-600/20 font-black"
-                  : "bg-slate-100 text-slate-600 hover:text-slate-900"
+                  : isDark
+                    ? "bg-slate-800 text-slate-300 hover:text-white"
+                    : "bg-slate-100 text-slate-600 hover:text-slate-900"
               )}
             >
               <ShieldCheck size={14} />
@@ -387,8 +392,10 @@ const ClientOverview = () => {
               className={cn(
                 "flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer",
                 viewMode === 'workspace'
-                  ? "bg-slate-900 text-white shadow-sm font-black"
-                  : "bg-slate-100 text-slate-600 hover:text-slate-900"
+                  ? (isDark ? "bg-white text-slate-900 shadow-sm font-black" : "bg-slate-900 text-white shadow-sm font-black")
+                  : isDark
+                    ? "bg-slate-800 text-slate-300 hover:text-white"
+                    : "bg-slate-100 text-slate-600 hover:text-slate-900"
               )}
             >
               <Zap size={14} />

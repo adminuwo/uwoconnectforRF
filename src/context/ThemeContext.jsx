@@ -10,18 +10,26 @@ const ThemeContext = createContext({
 });
 
 export function ThemeProvider({ children }) {
-  const [theme, setThemeState] = useState('light');
+  const [theme, setThemeState] = useState(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const savedTheme = localStorage.getItem('uwo_theme') || localStorage.getItem('uwo_landing_theme');
+        if (savedTheme === 'dark' || savedTheme === 'light') return savedTheme;
+      } catch (_) {}
+    }
+    return 'light';
+  });
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
     try {
       const savedTheme = localStorage.getItem('uwo_theme') || localStorage.getItem('uwo_landing_theme');
-      if (savedTheme === 'dark') {
-        setThemeState('dark');
+      const activeTheme = savedTheme === 'dark' ? 'dark' : 'light';
+      setThemeState(activeTheme);
+      if (activeTheme === 'dark') {
         document.documentElement.classList.add('dark');
       } else {
-        setThemeState('light');
         document.documentElement.classList.remove('dark');
       }
     } catch (_) {}
@@ -63,7 +71,7 @@ export function ThemeProvider({ children }) {
     setTheme(theme === 'dark' ? 'light' : 'dark');
   };
 
-  const isDark = mounted ? theme === 'dark' : false;
+  const isDark = theme === 'dark';
 
   return (
     <ThemeContext.Provider value={{ theme, isDark, toggleTheme, setTheme }}>

@@ -22,8 +22,8 @@
 :root {
   --background: #f8fafc;
   --foreground: #0F172A;
-  --surface: #0B0D11;
-  --card: rgba(0, 171, 86, 0.04);
+  --surface: #ffffff;
+  --card: #ffffff;
   --primary: #00AB56;
   --secondary: #00AE8B;
   --ai-accent: #2563EB;
@@ -35,15 +35,40 @@
   --logo-green: #00AB56;
 }
 
+html.dark,
+body.dark,
+.dark {
+  --background: #0b0f19;
+  --foreground: #f8fafc;
+  --surface: #0f172a;
+  --card: #1e293b;
+  --secondary-text: #94a3b8;
+  --border: rgba(51, 65, 85, 0.7);
+}
+
 html,
 body {
-  background-color: #F0FDF4;
+  background-color: #f8fafc;
   color: var(--foreground);
   font-family: "Times New Roman", Times, serif;
   overflow-x: hidden;
   max-width: 100vw;
   scroll-behavior: smooth;
   -webkit-tap-highlight-color: transparent;
+}
+
+html.dark,
+html.dark body,
+body.dark {
+  background-color: #0b0f19 !important;
+  color: #f8fafc !important;
+}
+
+html:not(.dark),
+html:not(.dark) body,
+body:not(.dark) {
+  background-color: #f8fafc !important;
+  color: #0f172a !important;
 }
 
 img, video {
@@ -115,208 +140,256 @@ svg * {
 }
 
 /* ══════════════════════════════════════════════════════════════════════════════
-   LANDING PAGE DARK MODE CONTRAST & VISIBILITY FIXES
+   GLOBAL THEME SYSTEM: PURE DARK & PURE LIGHT ENFORCEMENT
    ══════════════════════════════════════════════════════════════════════════════ */
+html.dark,
+html.dark body,
+body.dark,
 .dark.landing-page-root,
-.dark .landing-page-root {
-  background-color: #020617 !important; /* slate-950 */
+.dark .landing-page-root,
+.dark.dashboard-root,
+.dark .dashboard-root,
+.dark .dashboard-main {
+  background-color: #0b0f19 !important;
   color: #f8fafc !important;
 }
 
-/* Sections in dark mode */
-.dark.landing-page-root section,
-.dark .landing-page-root section,
-.dark.landing-page-root #platform,
-.dark .landing-page-root #platform,
-.dark.landing-page-root #channels,
-.dark .landing-page-root #channels,
-.dark.landing-page-root #connectors,
-.dark .landing-page-root #connectors,
-.dark.landing-page-root #features,
-.dark .landing-page-root #features,
-.dark.landing-page-root #how-it-works,
-.dark .landing-page-root #how-it-works,
-.dark.landing-page-root #pricing,
-.dark .landing-page-root #pricing,
-.dark.landing-page-root #white-label,
-.dark .landing-page-root #white-label,
-.dark.landing-page-root #faq,
-.dark .landing-page-root #faq {
-  background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.85)) !important;
-  border-color: rgba(51, 65, 85, 0.8) !important; /* slate-700 */
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5) !important;
+/* Sections flow naturally on page background without forced container card styles */
+.landing-page-root section,
+.dark .landing-page-root section {
+  background: transparent;
+  box-shadow: none;
 }
 
-/* All cards inside landing sections in dark mode */
-.dark.landing-page-root [class*="bg-white"],
-.dark .landing-page-root [class*="bg-white"],
-.dark.landing-page-root [class*="bg-slate-50"],
-.dark .landing-page-root [class*="bg-slate-50"],
-.dark.landing-page-root [class*="bg-slate-100"],
-.dark .landing-page-root [class*="bg-slate-100"],
-.dark.landing-page-root .landing-card-hover,
-.dark .landing-page-root .landing-card-hover {
-  background-color: #1e293b !important; /* slate-800 */
-  border-color: #334155 !important; /* slate-700 */
+/* All cards & white surfaces in dark mode -> Deep Charcoal / Slate */
+html.dark .bg-white,
+html.dark [class~="bg-white"],
+html.dark [class*="bg-white"]:not([class*="bg-white/"]):not(button.bg-white):not(img.bg-white),
+.dark .landing-card-hover,
+.dark [data-tour*="dashboard"] [class*="bg-white"]:not([class*="bg-white/"]):not(button.bg-white) {
+  background-color: #0f172a !important;
+  border-color: #334155 !important;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4) !important;
+  color: #f8fafc !important;
+}
+
+/* Modals & Dialog overlays in dark mode */
+html.dark .fixed > [class*="bg-white"],
+html.dark [role="dialog"] [class*="bg-white"],
+html.dark [role="dialog"] {
+  background-color: #0f172a !important;
+  border-color: #334155 !important;
+  color: #f8fafc !important;
+}
+
+/* Subtle surfaces & secondary containers in dark mode */
+html.dark .bg-slate-50,
+html.dark [class~="bg-slate-50"],
+html.dark [class*="bg-slate-50"]:not([class*="bg-slate-50/"]):not(button.bg-slate-50),
+html.dark .bg-slate-100,
+html.dark [class~="bg-slate-100"],
+html.dark [class*="bg-slate-100"]:not([class*="bg-slate-100/"]):not(button.bg-slate-100),
+html.dark .bg-gray-50,
+html.dark .bg-gray-100 {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
   color: #f1f5f9 !important;
 }
 
-.dark.landing-page-root [class*="bg-slate-50"]:hover,
-.dark .landing-page-root [class*="bg-slate-50"]:hover,
-.dark.landing-page-root .landing-card-hover:hover,
-.dark .landing-page-root .landing-card-hover:hover {
+/* Translucent surfaces in dark mode */
+html.dark [class*="bg-slate-50/"],
+html.dark [class*="bg-slate-100/"] {
+  background-color: rgba(30, 41, 59, 0.75) !important;
+  border-color: #334155 !important;
+}
+
+html.dark [class*="bg-slate-50"]:hover,
+html.dark [class*="bg-slate-100"]:hover,
+.dark .landing-card-hover:hover {
   background-color: #243248 !important;
-  border-color: #10b981 !important; /* emerald-500 hover */
+  border-color: #10b981 !important;
   box-shadow: 0 14px 40px rgba(16, 185, 129, 0.2) !important;
 }
 
-/* Ensure active green buttons and badges remain green */
-.dark.landing-page-root .bg-\[\#059669\],
-.dark .landing-page-root .bg-\[\#059669\],
-.dark.landing-page-root button.bg-\[\#059669\],
-.dark .landing-page-root button.bg-\[\#059669\],
-.dark.landing-page-root .bg-emerald-600,
-.dark .landing-page-root .bg-emerald-600 {
-  background-color: #059669 !important;
-  color: #ffffff !important;
-  border-color: #059669 !important;
-}
-
-/* Headings in dark mode */
-.dark.landing-page-root h1,
-.dark .landing-page-root h1,
-.dark.landing-page-root h2,
-.dark .landing-page-root h2,
-.dark.landing-page-root h3,
-.dark .landing-page-root h3,
-.dark.landing-page-root h4,
-.dark .landing-page-root h4,
-.dark.landing-page-root h5,
-.dark .landing-page-root h5,
-.dark.landing-page-root .text-slate-900,
-.dark .landing-page-root .text-slate-900 {
-  color: #f8fafc !important; /* Crisp pure white */
+/* Headings & primary text in dark mode */
+html.dark h1,
+html.dark h2,
+html.dark h3,
+html.dark h4,
+html.dark h5,
+html.dark h6,
+html.dark .text-slate-900,
+html.dark [class*="text-slate-900"],
+html.dark .text-slate-800,
+html.dark [class*="text-slate-800"],
+html.dark .text-gray-900,
+html.dark .text-gray-800 {
+  color: #f8fafc !important;
 }
 
 /* Descriptions & secondary paragraphs in dark mode */
-.dark.landing-page-root p,
-.dark .landing-page-root p,
-.dark.landing-page-root .text-slate-500,
-.dark .landing-page-root .text-slate-500,
-.dark.landing-page-root .text-slate-600,
-.dark .landing-page-root .text-slate-600,
-.dark.landing-page-root .text-slate-700,
-.dark .landing-page-root .text-slate-700 {
-  color: #cbd5e1 !important; /* slate-300 / high contrast */
+html.dark p,
+html.dark .text-slate-700,
+html.dark [class*="text-slate-700"],
+html.dark .text-slate-600,
+html.dark [class*="text-slate-600"],
+html.dark .text-gray-700,
+html.dark .text-gray-600 {
+  color: #cbd5e1 !important;
+}
+
+html.dark .text-slate-500,
+html.dark [class*="text-slate-500"],
+html.dark .text-gray-500 {
+  color: #94a3b8 !important;
+}
+
+/* Form Controls in dark mode */
+html.dark input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]),
+html.dark textarea,
+html.dark select {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+  color: #f8fafc !important;
+}
+
+html.dark input::placeholder,
+html.dark textarea::placeholder {
+  color: #64748b !important;
+}
+
+/* Borders & Dividers in dark mode */
+html.dark [class*="border-slate-200"],
+html.dark [class*="border-slate-100"],
+html.dark [class*="border-gray-200"],
+html.dark [class*="border-gray-100"],
+html.dark [class*="divide-slate-100"] > * + *,
+html.dark [class*="divide-slate-200"] > * + * {
+  border-color: #334155 !important;
+}
+
+/* Ensure vibrant colored action buttons preserve their styles */
+.dark .bg-\[\#059669\],
+.dark button.bg-\[\#059669\],
+.dark .bg-emerald-600,
+.dark button.bg-emerald-600,
+.dark .bg-\[\#00AB56\],
+.dark button.bg-\[\#00AB56\],
+.dark .bg-blue-600,
+.dark button.bg-blue-600,
+.dark .bg-red-600,
+.dark button.bg-red-600,
+.dark .bg-rose-600,
+.dark button.bg-rose-600,
+.dark .bg-amber-600,
+.dark button.bg-amber-600 {
+  color: #ffffff !important;
 }
 
 /* Badges & pill tags in dark mode */
-.dark.landing-page-root .bg-slate-100,
-.dark .landing-page-root .bg-slate-100 {
+.dark .bg-slate-100:not(button):not(input) {
   background-color: #334155 !important;
   color: #f1f5f9 !important;
 }
 
-.dark.landing-page-root .bg-emerald-50,
-.dark .landing-page-root .bg-emerald-50,
-.dark.landing-page-root .bg-emerald-100,
-.dark .landing-page-root .bg-emerald-100 {
+.dark .bg-emerald-50,
+.dark .bg-emerald-100 {
   background-color: rgba(6, 78, 59, 0.5) !important;
   border-color: rgba(16, 185, 129, 0.4) !important;
   color: #6ee7b7 !important;
 }
 
-.dark.landing-page-root .bg-blue-50,
-.dark .landing-page-root .bg-blue-50,
-.dark.landing-page-root .bg-blue-100,
-.dark .landing-page-root .bg-blue-100 {
+.dark .bg-blue-50,
+.dark .bg-blue-100 {
   background-color: rgba(30, 58, 138, 0.5) !important;
   border-color: rgba(59, 130, 246, 0.4) !important;
   color: #93c5fd !important;
 }
 
-.dark.landing-page-root .bg-purple-50,
-.dark .landing-page-root .bg-purple-50,
-.dark.landing-page-root .bg-purple-100,
-.dark .landing-page-root .bg-purple-100 {
+.dark .bg-purple-50,
+.dark .bg-purple-100 {
   background-color: rgba(88, 28, 135, 0.5) !important;
   border-color: rgba(168, 85, 247, 0.4) !important;
   color: #d8b4fe !important;
 }
 
-/* Pricing comparison table in dark mode */
-.dark.landing-page-root table,
-.dark .landing-page-root table,
-.dark.landing-page-root table th,
-.dark .landing-page-root table th,
-.dark.landing-page-root table td,
-.dark .landing-page-root table td {
+.dark .bg-amber-50,
+.dark .bg-amber-100 {
+  background-color: rgba(120, 53, 15, 0.5) !important;
+  border-color: rgba(245, 158, 11, 0.4) !important;
+  color: #fcd34d !important;
+}
+
+.dark .bg-rose-50,
+.dark .bg-rose-100,
+.dark .bg-red-50,
+.dark .bg-red-100 {
+  background-color: rgba(136, 19, 55, 0.5) !important;
+  border-color: rgba(244, 63, 94, 0.4) !important;
+  color: #fda4af !important;
+}
+
+/* Tables in dark mode */
+.dark table,
+.dark table th,
+.dark table td {
   border-color: #334155 !important;
   color: #f1f5f9 !important;
 }
 
-.dark.landing-page-root table th,
-.dark .landing-page-root table th {
+.dark table th {
+  background-color: #1e293b !important;
+}
+
+.dark table tr.bg-slate-50\/80,
+.dark table [class*="bg-emerald-50\/"] {
   background-color: transparent !important;
 }
 
-.dark.landing-page-root table tr.bg-slate-50\/80,
-.dark .landing-page-root table tr.bg-slate-50\/80,
-.dark.landing-page-root table [class*="bg-emerald-50\/"],
-.dark .landing-page-root table [class*="bg-emerald-50\/"] {
-  background-color: transparent !important;
-}
-
-.dark.landing-page-root table td.bg-slate-50\/50,
-.dark .landing-page-root table td.bg-slate-50\/50,
-.dark.landing-page-root table td.bg-slate-50,
-.dark .landing-page-root table td.bg-slate-50 {
+.dark table td.bg-slate-50\/50,
+.dark table td.bg-slate-50 {
   background-color: #0f172a !important;
 }
 
-.dark.landing-page-root [class*="PricingComparisonTable"],
-.dark .landing-page-root [class*="PricingComparisonTable"],
-.dark.landing-page-root div:has(> table) {
-  background-color: transparent !important;
+.dark table tr:hover {
+  background-color: rgba(30, 41, 59, 0.6) !important;
 }
 
 /* FAQ Accordion items in dark mode */
-.dark.landing-page-root #faq [class*="bg-white"],
-.dark .landing-page-root #faq [class*="bg-white"],
-.dark.landing-page-root #faq [class*="bg-slate"],
-.dark .landing-page-root #faq [class*="bg-slate"] {
+.dark #faq [class*="bg-white"],
+.dark #faq [class*="bg-slate"] {
   background-color: #1e293b !important;
   border-color: #334155 !important;
 }
 
 /* Footer in dark mode */
-.dark.landing-page-root footer,
-.dark .landing-page-root footer {
+.dark footer {
   background-color: #020617 !important;
   border-color: #1e293b !important;
 }
 
-.dark.landing-page-root footer p,
-.dark .landing-page-root footer p,
-.dark.landing-page-root footer li a,
-.dark .landing-page-root footer li a {
+.dark footer p,
+.dark footer li a {
   color: #94a3b8 !important;
 }
 
-.dark.landing-page-root footer li a:hover,
-.dark .landing-page-root footer li a:hover {
+.dark footer li a:hover {
   color: #34d399 !important;
 }
 
-/* Premium Glass Cards in Dark Mode */
-.glass-card {
-  background: rgba(17, 24, 39, 0.6);
-  backdrop-filter: blur(16px) saturate(180%);
-  -webkit-backdrop-filter: blur(16px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-  transition: background 0.3s, border-color 0.3s, box-shadow 0.3s;
+/* Premium Glass Navigation & Hover Variants */
+.glass-navbar {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+  transition: background 0.3s, border-color 0.3s;
+}
+
+html.dark .glass-navbar,
+.dark .glass-navbar {
+  background: rgba(3, 7, 18, 0.75) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
 }
 
 .glass-card-hover {
@@ -324,16 +397,13 @@ svg * {
 }
 .glass-card-hover:hover {
   border-color: rgba(16, 185, 129, 0.3);
-  background: rgba(255, 255, 255, 0.05);
   box-shadow: 0 8px 32px 0 rgba(16, 185, 129, 0.1);
 }
-
-.glass-navbar {
-  background: rgba(3, 7, 18, 0.7);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  transition: background 0.3s, border-color 0.3s;
+html.dark .glass-card-hover:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+html:not(.dark) .glass-card-hover:hover {
+  background: rgba(255, 255, 255, 0.95);
 }
 
 .glow-green {
@@ -522,23 +592,43 @@ svg * {
   }
 }
 
-/* Light Mode Overrides */
-.light .glass-card {
-  background: rgba(255, 255, 255, 0.7);
-  border-color: rgba(16, 185, 129, 0.2);
+/* Glass Card Theme Variants */
+.glass-card {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid rgba(226, 232, 240, 0.8);
   box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.05);
+  color: #0f172a;
+}
+
+.dark .glass-card,
+html.dark .glass-card {
+  background: rgba(17, 24, 39, 0.7) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37) !important;
+  color: #f8fafc !important;
 }
 
 /* ========== Dashboard Component Classes ========== */
 
-/* Glass panel — white frosted glass card */
+/* Glass panel — adaptive frosted glass card */
 .glass-panel {
-  background: rgba(255, 255, 255, 0.75);
+  background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(16px) saturate(180%);
   -webkit-backdrop-filter: blur(16px) saturate(180%);
-  border: 1px solid rgba(241, 245, 249, 0.9);
+  border: 1px solid rgba(226, 232, 240, 0.9);
   border-radius: 32px;
+  color: #0f172a;
   transition: all 0.3s ease;
+}
+
+.dark .glass-panel,
+html.dark .glass-panel {
+  background: rgba(15, 23, 42, 0.95) !important;
+  border-color: rgba(51, 65, 85, 0.8) !important;
+  color: #f8fafc !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4) !important;
 }
 
 /* Premium shadow — subtle elevated shadow */

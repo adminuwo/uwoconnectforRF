@@ -11,6 +11,8 @@ import {
 } from 'lucide-react';
 import axios from 'axios';
 import { API_BASE_URL } from '@/config/apiConfig';
+import { useTheme } from '@/context/ThemeContext';
+import { cn } from '@/lib/utils';
 
 const STATUS_FILTERS = [
   { id: 'ALL', label: 'All Campaigns' },
@@ -21,6 +23,7 @@ const STATUS_FILTERS = [
 ];
 
 export default function CampaignsPage() {
+  const { isDark } = useTheme();
   const [campaigns, setCampaigns] = useState([]);
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
@@ -148,15 +151,21 @@ export default function CampaignsPage() {
       <div className="max-w-6xl mx-auto pb-16 px-3 sm:px-6 lg:px-8 space-y-4 sm:space-y-6">
         
         {/* Header */}
-        <div className="bg-white p-4 sm:p-6 rounded-3xl border border-slate-200/80 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+        <div className={cn(
+          "p-4 sm:p-6 rounded-3xl border shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 transition-colors",
+          isDark ? "bg-[#0f172a] border-slate-800 text-white" : "bg-white border-slate-200/80 text-slate-900"
+        )}>
           <div>
-            <h1 className="text-lg sm:text-2xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2 sm:gap-2.5">
-              <span className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-emerald-50 text-[#00AB56] flex items-center justify-center shrink-0 shadow-xs">
+            <h1 className={cn("text-lg sm:text-2xl font-extrabold tracking-tight flex items-center gap-2 sm:gap-2.5", isDark ? "text-white" : "text-slate-900")}>
+              <span className={cn(
+                "w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center shrink-0 shadow-xs border",
+                isDark ? "bg-emerald-950/70 border-emerald-800 text-emerald-400" : "bg-emerald-50 border-emerald-100 text-[#00AB56]"
+              )}>
                 <Megaphone size={18} />
               </span>
               <span>Broadcast Campaigns</span>
             </h1>
-            <p className="text-xs text-slate-500 font-medium mt-1">
+            <p className={cn("text-xs font-medium mt-1", isDark ? "text-slate-400" : "text-slate-500")}>
               Send bulk marketing campaigns, product updates &amp; announcements across WhatsApp &amp; Meta channels.
             </p>
           </div>
@@ -165,10 +174,15 @@ export default function CampaignsPage() {
             <button 
               onClick={syncTemplates}
               disabled={syncing}
-              className="w-full sm:w-auto justify-center px-3 sm:px-4 py-2.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 rounded-xl font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-50 shadow-xs"
+              className={cn(
+                "w-full sm:w-auto justify-center px-3 sm:px-4 py-2.5 rounded-xl font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-50 shadow-xs border",
+                isDark
+                  ? "bg-slate-800 hover:bg-slate-700 border-slate-700 text-slate-200"
+                  : "bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-700"
+              )}
               title="Sync Approved Templates from Meta WhatsApp Cloud API"
             >
-              <RefreshCw size={13} className={syncing ? "animate-spin text-[#00AB56]" : "text-slate-500"} />
+              <RefreshCw size={13} className={syncing ? "animate-spin text-[#00AB56]" : (isDark ? "text-slate-400" : "text-slate-500")} />
               <span>{syncing ? 'Syncing...' : 'Sync Meta Templates'}</span>
             </button>
 
@@ -187,75 +201,100 @@ export default function CampaignsPage() {
           <button
             type="button"
             onClick={() => setIsAddMoneyOpen(true)}
-            className="bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950 p-3 sm:p-4 rounded-2xl border border-slate-800 shadow-xs text-left text-white cursor-pointer hover:scale-[1.01] transition-all group relative overflow-hidden"
+            className={cn(
+              "p-3 sm:p-4 rounded-2xl border shadow-xs text-left cursor-pointer hover:scale-[1.01] transition-all group relative overflow-hidden",
+              isDark
+                ? "bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950 border-slate-800 text-white"
+                : "bg-gradient-to-br from-emerald-50 via-white to-emerald-100/50 border-emerald-200/80 text-slate-900"
+            )}
             title="Click to Recharge / Add Money to Wallet"
           >
             <div className="flex items-center justify-between mb-1">
-              <span className="text-[9px] sm:text-[10px] text-indigo-300 font-black uppercase tracking-wider block">
+              <span className={cn("text-[9px] sm:text-[10px] font-black uppercase tracking-wider block", isDark ? "text-indigo-300" : "text-emerald-800")}>
                 Broadcast Entitlement
               </span>
-              <span className="text-[8px] bg-emerald-500/20 text-emerald-300 px-1.5 py-0.5 rounded font-black border border-emerald-500/30">
+              <span className={cn(
+                "text-[8px] px-1.5 py-0.5 rounded font-black border",
+                isDark ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/30" : "bg-emerald-100 text-emerald-800 border-emerald-300"
+              )}>
                 + Topup
               </span>
             </div>
-            <span className={`text-sm sm:text-lg font-black block truncate ${entitlement.remaining_quantity > 0 ? 'text-emerald-400' : 'text-amber-400'}`}>
+            <span className={`text-sm sm:text-lg font-black block truncate ${entitlement.remaining_quantity > 0 ? (isDark ? 'text-emerald-400' : 'text-emerald-700') : (isDark ? 'text-amber-400' : 'text-amber-600')}`}>
               {entitlement.remaining_quantity > 0 
                 ? `${entitlement.remaining_quantity} / ${entitlement.included_quantity} Plan Free`
                 : `₹${Number(entitlement.broadcast_rate_inr || 0.94).toFixed(2)} / Wallet`}
             </span>
-            <span className="text-[10px] text-slate-400 block mt-0.5">
+            <span className={cn("text-[10px] block mt-0.5 font-medium", isDark ? "text-slate-400" : "text-slate-500")}>
               Wallet: ₹{Number(entitlement.wallet_balance_inr || 0).toFixed(2)}
             </span>
           </button>
 
-          <div className="bg-white p-3 sm:p-4 rounded-2xl border border-slate-200/80 shadow-xs">
-            <span className="text-[9px] sm:text-[10px] text-slate-400 font-bold uppercase tracking-wider block mb-1">
+          <div className={cn(
+            "p-3 sm:p-4 rounded-2xl border shadow-xs transition-colors",
+            isDark ? "bg-[#0f172a] border-slate-800 text-white" : "bg-white border-slate-200/80 text-slate-900"
+          )}>
+            <span className={cn("text-[9px] sm:text-[10px] font-bold uppercase tracking-wider block mb-1", isDark ? "text-slate-400" : "text-slate-500")}>
               Total Campaigns
             </span>
-            <span className="text-base sm:text-xl font-black text-slate-900 block">
+            <span className={cn("text-base sm:text-xl font-black block", isDark ? "text-white" : "text-slate-900")}>
               {campaigns.length}
             </span>
-            <span className="text-[10px] text-slate-400 block mt-0.5">
+            <span className={cn("text-[10px] block mt-0.5", isDark ? "text-slate-400" : "text-slate-400")}>
               Across all channels
             </span>
           </div>
           
-          <div className="bg-white p-3 sm:p-4 rounded-2xl border border-slate-200/80 shadow-xs">
-            <span className="text-[9px] sm:text-[10px] text-slate-400 font-bold uppercase tracking-wider block mb-1">
+          <div className={cn(
+            "p-3 sm:p-4 rounded-2xl border shadow-xs transition-colors",
+            isDark ? "bg-[#0f172a] border-slate-800 text-white" : "bg-white border-slate-200/80 text-slate-900"
+          )}>
+            <span className={cn("text-[9px] sm:text-[10px] font-bold uppercase tracking-wider block mb-1", isDark ? "text-slate-400" : "text-slate-500")}>
               Messages Sent
             </span>
-            <span className="text-base sm:text-xl font-black text-emerald-600 block">
+            <span className="text-base sm:text-xl font-black text-emerald-500 block">
               {totalSent.toLocaleString()}
             </span>
-            <span className="text-[10px] text-emerald-700/80 block mt-0.5 font-medium">
+            <span className={cn("text-[10px] block mt-0.5 font-medium", isDark ? "text-emerald-400/80" : "text-emerald-700/80")}>
               Delivered directly
             </span>
           </div>
           
-          <div className="bg-white p-3 sm:p-4 rounded-2xl border border-slate-200/80 shadow-xs">
-            <span className="text-[9px] sm:text-[10px] text-slate-400 font-bold uppercase tracking-wider block mb-1">
+          <div className={cn(
+            "p-3 sm:p-4 rounded-2xl border shadow-xs transition-colors",
+            isDark ? "bg-[#0f172a] border-slate-800 text-white" : "bg-white border-slate-200/80 text-slate-900"
+          )}>
+            <span className={cn("text-[9px] sm:text-[10px] font-bold uppercase tracking-wider block mb-1", isDark ? "text-slate-400" : "text-slate-500")}>
               Failed Deliveries
             </span>
-            <span className="text-base sm:text-xl font-black text-rose-600 block">
+            <span className="text-base sm:text-xl font-black text-rose-500 block">
               {totalFailed.toLocaleString()}
             </span>
-            <span className="text-[10px] text-slate-400 block mt-0.5">
+            <span className={cn("text-[10px] block mt-0.5", isDark ? "text-slate-400" : "text-slate-400")}>
               Eligible for retry
             </span>
           </div>
         </div>
 
         {/* Search & Filter Bar */}
-        <div className="bg-white p-3 sm:p-4 rounded-2xl border border-slate-200/80 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div className={cn(
+          "p-3 sm:p-4 rounded-2xl border shadow-xs flex flex-col sm:flex-row items-center justify-between gap-3 transition-colors",
+          isDark ? "bg-[#0f172a] border-slate-800" : "bg-white border-slate-200/80"
+        )}>
           {/* Search Box */}
           <div className="relative w-full sm:w-72">
-            <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+            <Search size={14} className={cn("absolute left-3.5 top-1/2 -translate-y-1/2", isDark ? "text-slate-500" : "text-slate-400")} />
             <input
               type="text"
               placeholder="Search campaigns by name..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 outline-none focus:bg-white focus:ring-2 focus:ring-emerald-500 transition-all"
+              className={cn(
+                "w-full pl-9 pr-4 py-2 rounded-xl text-xs font-semibold outline-none transition-all border",
+                isDark
+                  ? "bg-slate-800 border-slate-700 text-white placeholder-slate-500 focus:border-emerald-500"
+                  : "bg-slate-50 border-slate-200 text-slate-800 placeholder-slate-400 focus:bg-white focus:ring-2 focus:ring-emerald-500"
+              )}
             />
           </div>
 
@@ -266,11 +305,14 @@ export default function CampaignsPage() {
                 key={f.id}
                 type="button"
                 onClick={() => setStatusFilter(f.id)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
+                className={cn(
+                  "px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer border",
                   statusFilter === f.id
-                    ? 'bg-slate-900 text-white shadow-xs'
-                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                }`}
+                    ? "bg-emerald-600 text-white border-emerald-600 shadow-xs"
+                    : isDark
+                      ? "bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700"
+                      : "bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200"
+                )}
               >
                 {f.label}
               </button>
@@ -281,17 +323,23 @@ export default function CampaignsPage() {
         {/* Campaign List */}
         <div className="space-y-2.5 sm:space-y-3">
           {loading ? (
-            <div className="h-48 flex items-center justify-center text-slate-400 text-xs font-semibold gap-2 bg-white rounded-2xl border border-slate-200 shadow-xs">
+            <div className={cn(
+              "h-48 flex items-center justify-center text-xs font-semibold gap-2 rounded-2xl border shadow-xs transition-colors",
+              isDark ? "bg-[#0f172a] border-slate-800 text-slate-400" : "bg-white border-slate-200 text-slate-400"
+            )}>
               <Loader2 className="animate-spin text-[#00AB56]" size={20} />
               Loading broadcast campaigns...
             </div>
           ) : filteredCampaigns.length === 0 ? (
-            <div className="text-center py-12 bg-white rounded-2xl border border-slate-200/80 shadow-xs max-w-md mx-auto p-6">
+            <div className={cn(
+              "text-center py-12 rounded-2xl border shadow-xs max-w-md mx-auto p-6 transition-colors",
+              isDark ? "bg-[#0f172a] border-slate-800 text-slate-100" : "bg-white border-slate-200/80 text-slate-900"
+            )}>
               <Megaphone size={32} className="text-[#00AB56] mx-auto mb-2.5 opacity-90" />
-              <h3 className="text-sm font-bold text-slate-900 mb-1">
+              <h3 className={cn("text-sm font-bold mb-1", isDark ? "text-white" : "text-slate-900")}>
                 {campaigns.length === 0 ? "No campaigns yet" : "No matching campaigns found"}
               </h3>
-              <p className="text-xs text-slate-400 mb-4 font-medium">
+              <p className={cn("text-xs mb-4 font-medium", isDark ? "text-slate-400" : "text-slate-400")}>
                 {campaigns.length === 0 
                   ? "Create your first broadcast to reach your customers via WhatsApp." 
                   : "Try clearing your search query or status filter."}
@@ -319,15 +367,21 @@ export default function CampaignsPage() {
                 <div
                   key={campId}
                   onClick={() => openDetailModal(camp, (camp.total_failed > 0 && (!camp.total_sent || camp.total_sent === 0)) ? 'FAILED' : 'SENT')}
-                  className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-xs hover:border-[#00AB56]/50 hover:shadow-sm transition-all cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 group"
+                  className={cn(
+                    "p-4 sm:p-5 rounded-2xl border shadow-xs hover:border-[#00AB56]/50 hover:shadow-sm transition-all cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 group",
+                    isDark ? "bg-[#0f172a] border-slate-800 text-slate-100" : "bg-white border-slate-200/80 text-slate-900"
+                  )}
                 >
                   <div className="flex items-center gap-3 min-w-0 flex-1">
-                    <div className="w-10 h-10 rounded-xl bg-emerald-50 text-[#00AB56] border border-emerald-100 flex items-center justify-center font-bold text-sm shrink-0 shadow-xs">
+                    <div className={cn(
+                      "w-10 h-10 rounded-xl border flex items-center justify-center font-bold text-sm shrink-0 shadow-xs",
+                      isDark ? "bg-emerald-950/70 border-emerald-800 text-emerald-400" : "bg-emerald-50 text-[#00AB56] border-emerald-100"
+                    )}>
                       {(camp.name || 'C')[0].toUpperCase()}
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <h3 className="text-xs sm:text-sm font-bold text-slate-900 group-hover:text-[#00AB56] transition-colors truncate">
+                        <h3 className={cn("text-xs sm:text-sm font-bold group-hover:text-[#00AB56] transition-colors truncate", isDark ? "text-white" : "text-slate-900")}>
                           {camp.name}
                         </h3>
                         <span className={`text-[9px] sm:text-[10px] font-bold px-2 py-0.5 rounded-full border uppercase shrink-0 ${getStatusBadge(camp.status)}`}>
@@ -340,15 +394,15 @@ export default function CampaignsPage() {
                         )}
                       </div>
 
-                      <div className="flex items-center gap-1.5 sm:gap-2 mt-1.5 text-[10px] sm:text-[11px] text-slate-500 font-medium flex-wrap">
-                        <span className="px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 font-semibold shrink-0">
+                      <div className={cn("flex items-center gap-1.5 sm:gap-2 mt-1.5 text-[10px] sm:text-[11px] font-medium flex-wrap", isDark ? "text-slate-400" : "text-slate-500")}>
+                        <span className={cn("px-1.5 py-0.5 rounded font-semibold shrink-0 border", isDark ? "bg-slate-800 border-slate-700 text-slate-300" : "bg-slate-100 border-transparent text-slate-700")}>
                           {camp.channel || (camp.platforms && camp.platforms[0]) || 'WHATSAPP'}
                         </span>
                         <span>•</span>
                         <span className="truncate max-w-[140px]">Audience: <strong>{camp.audience_filter || 'ALL'}</strong></span>
                         <span>•</span>
                         {camp.scheduled_at ? (
-                          <span className="text-amber-600 font-semibold shrink-0">
+                          <span className="text-amber-500 font-semibold shrink-0">
                             📅 {new Date(camp.scheduled_at).toLocaleDateString()} {new Date(camp.scheduled_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                           </span>
                         ) : (
@@ -358,7 +412,7 @@ export default function CampaignsPage() {
 
                       {/* Mini Progress Bar */}
                       {total > 0 && (
-                        <div className="w-full max-w-xs bg-slate-100 h-1.5 rounded-full overflow-hidden mt-2.5">
+                        <div className={cn("w-full max-w-xs h-1.5 rounded-full overflow-hidden mt-2.5", isDark ? "bg-slate-800" : "bg-slate-100")}>
                           <div 
                             className="h-full bg-[#00AB56] rounded-full transition-all"
                             style={{ width: `${percent}%` }}
@@ -368,52 +422,59 @@ export default function CampaignsPage() {
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-4 text-xs pt-2.5 sm:pt-0 border-t sm:border-t-0 border-slate-100">
-                    <div className="flex gap-2 sm:gap-2.5 bg-slate-50 sm:bg-transparent p-1.5 sm:p-0 rounded-xl sm:rounded-none">
+                  <div className={cn("flex items-center justify-between sm:justify-end gap-3 sm:gap-4 text-xs pt-2.5 sm:pt-0 border-t sm:border-t-0", isDark ? "border-slate-800" : "border-slate-100")}>
+                    <div className={cn("flex gap-2 sm:gap-2.5 p-1.5 sm:p-0 rounded-xl sm:rounded-none", isDark ? "bg-slate-800/60 sm:bg-transparent" : "bg-slate-50 sm:bg-transparent")}>
                       <button
                         type="button"
                         onClick={(e) => { e.stopPropagation(); openDetailModal(camp, 'SENT'); }}
-                        className="px-2.5 py-1.5 rounded-xl hover:bg-emerald-50 hover:border-emerald-200 border border-transparent transition-all text-center cursor-pointer group/stat"
+                        className={cn(
+                          "px-2.5 py-1.5 rounded-xl border border-transparent transition-all text-center cursor-pointer group/stat",
+                          isDark ? "hover:bg-emerald-950/60 hover:border-emerald-800" : "hover:bg-emerald-50 hover:border-emerald-200"
+                        )}
                         title="Click to view list of Sent contacts"
                       >
-                        <span className="text-[8px] sm:text-[9px] text-slate-400 group-hover/stat:text-emerald-700 font-bold uppercase block">Sent</span>
-                        <span className="font-extrabold text-slate-900 group-hover/stat:text-emerald-700 text-xs sm:text-sm">{camp.total_sent || 0}</span>
+                        <span className={cn("text-[8px] sm:text-[9px] group-hover/stat:text-emerald-500 font-bold uppercase block", isDark ? "text-slate-400" : "text-slate-400")}>Sent</span>
+                        <span className={cn("font-extrabold group-hover/stat:text-emerald-500 text-xs sm:text-sm", isDark ? "text-white" : "text-slate-900")}>{camp.total_sent || 0}</span>
                       </button>
 
                       <button
                         type="button"
                         onClick={(e) => { e.stopPropagation(); openDetailModal(camp, 'SENT'); }}
-                        className="px-2.5 py-1.5 rounded-xl hover:bg-emerald-50 hover:border-emerald-200 border border-transparent transition-all text-center cursor-pointer group/stat"
+                        className={cn(
+                          "px-2.5 py-1.5 rounded-xl border border-transparent transition-all text-center cursor-pointer group/stat",
+                          isDark ? "hover:bg-emerald-950/60 hover:border-emerald-800" : "hover:bg-emerald-50 hover:border-emerald-200"
+                        )}
                         title="Click to view list of Delivered contacts"
                       >
-                        <span className="text-[8px] sm:text-[9px] text-emerald-600 font-bold uppercase block">Delivered</span>
-                        <span className="font-extrabold text-emerald-600 text-xs sm:text-sm">{camp.total_delivered || camp.total_sent || 0}</span>
+                        <span className="text-[8px] sm:text-[9px] text-emerald-500 font-bold uppercase block">Delivered</span>
+                        <span className="font-extrabold text-emerald-500 text-xs sm:text-sm">{camp.total_delivered || camp.total_sent || 0}</span>
                       </button>
 
                       <button
                         type="button"
                         onClick={(e) => { e.stopPropagation(); openDetailModal(camp, 'FAILED'); }}
-                        className={`px-2.5 py-1.5 rounded-xl border transition-all text-center cursor-pointer group/stat ${
+                        className={cn(
+                          "px-2.5 py-1.5 rounded-xl border transition-all text-center cursor-pointer group/stat",
                           (camp.total_failed || 0) > 0 
-                            ? 'bg-rose-50/80 border-rose-200/90 hover:bg-rose-100 hover:border-rose-300' 
-                            : 'border-transparent hover:bg-slate-100'
-                        }`}
+                            ? (isDark ? "bg-rose-950/60 border-rose-800 text-rose-300" : "bg-rose-50/80 border-rose-200/90 text-rose-600 hover:bg-rose-100 hover:border-rose-300")
+                            : (isDark ? "border-transparent hover:bg-slate-800" : "border-transparent hover:bg-slate-100")
+                        )}
                         title="Click to view list of Failed contacts & reasons"
                       >
-                        <span className={`text-[8px] sm:text-[9px] font-bold uppercase block ${(camp.total_failed || 0) > 0 ? 'text-rose-600' : 'text-slate-400'}`}>Failed</span>
-                        <span className={`font-extrabold text-xs sm:text-sm ${(camp.total_failed || 0) > 0 ? 'text-rose-600' : 'text-slate-500'}`}>{camp.total_failed || 0}</span>
+                        <span className={`text-[8px] sm:text-[9px] font-bold uppercase block ${(camp.total_failed || 0) > 0 ? (isDark ? 'text-rose-400' : 'text-rose-600') : 'text-slate-400'}`}>Failed</span>
+                        <span className={`font-extrabold text-xs sm:text-sm ${(camp.total_failed || 0) > 0 ? (isDark ? 'text-rose-400' : 'text-rose-600') : (isDark ? 'text-slate-400' : 'text-slate-500')}`}>{camp.total_failed || 0}</span>
                       </button>
                     </div>
 
                     <div className="flex items-center gap-1 sm:gap-2 shrink-0">
                       <button 
                         onClick={(e) => handleDeleteCampaign(e, campId)}
-                        className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
+                        className={cn("p-1.5 rounded-lg transition-colors cursor-pointer", isDark ? "text-slate-400 hover:text-rose-400 hover:bg-rose-950/60" : "text-slate-400 hover:text-rose-600 hover:bg-rose-50")}
                         title="Delete Campaign"
                       >
                         <Trash2 size={15} />
                       </button>
-                      <ChevronRight size={16} className="text-slate-400 group-hover:text-[#00AB56] transition-colors" />
+                      <ChevronRight size={16} className={cn("transition-colors", isDark ? "text-slate-500 group-hover:text-[#00AB56]" : "text-slate-400 group-hover:text-[#00AB56]")} />
                     </div>
                   </div>
                 </div>

@@ -516,8 +516,8 @@ const DashboardLayout = ({ children, role: initialRole }) => {
   return (
     <div 
       className={cn(
-        "flex flex-col h-screen w-screen overflow-hidden dashboard-font-times font-serif transition-colors duration-200",
-        isDark ? "dark bg-[#0b0f19] text-slate-100" : "bg-[#fcfdfe] text-slate-900"
+        "dashboard-root flex flex-col h-screen w-screen overflow-hidden dashboard-font-times font-serif transition-colors duration-200",
+        isDark ? "dark bg-[#0b0f19] text-slate-100" : "bg-[#f8fafc] text-slate-900"
       )}
       style={{ fontFamily: "'Times New Roman', Times, serif" }}
     >
@@ -542,7 +542,7 @@ const DashboardLayout = ({ children, role: initialRole }) => {
       <div 
         className={cn(
           "flex h-full w-full dashboard-font-times font-serif selection:bg-emerald-100 selection:text-emerald-900 flex-1 overflow-hidden transition-colors duration-200",
-          isDark ? "bg-[#0b0f19] text-slate-100" : "bg-[#fcfdfe] text-slate-900"
+          isDark ? "bg-[#0b0f19] text-slate-100" : "bg-[#f8fafc] text-slate-900"
         )}
         style={{ fontFamily: "'Times New Roman', Times, serif" }}
       >
@@ -550,7 +550,7 @@ const DashboardLayout = ({ children, role: initialRole }) => {
 
         <main className={cn(
           "flex-1 dashboard-main h-full flex flex-col min-w-0 overflow-hidden dashboard-font-times font-serif",
-          isDark ? "bg-[#0b0f19] text-slate-100" : "bg-[#fcfdfe] text-slate-900"
+          isDark ? "bg-[#0b0f19] text-slate-100" : "bg-[#f8fafc] text-slate-900"
         )} style={{ fontFamily: "'Times New Roman', Times, serif" }}>
           {/* Header */}
           <header className={cn(
@@ -850,7 +850,7 @@ const DashboardLayout = ({ children, role: initialRole }) => {
           {/* Content */}
           <div className={cn(
             "flex-1 min-h-0 relative overflow-y-auto flex flex-col custom-scrollbar transition-colors duration-200 [scrollbar-gutter:stable]",
-            isDark ? "bg-[#0b0f19]" : "bg-gradient-to-br from-slate-50/50 to-white"
+            isDark ? "bg-[#0b0f19]" : "bg-[#f8fafc]"
           )}>
             <div className={cn(
               "absolute inset-0 [background-size:40px_40px] pointer-events-none",
@@ -860,18 +860,27 @@ const DashboardLayout = ({ children, role: initialRole }) => {
             <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-[#16A34A]/5 rounded-full blur-[120px] pointer-events-none" />
             <div className="relative flex-1 flex flex-col min-h-0">
               {isPageLocked ? (
-                <div className="flex flex-col items-center justify-center p-8 sm:p-12 text-center max-w-md mx-auto my-auto bg-white rounded-3xl border border-slate-200 shadow-xl space-y-4">
-                  <div className="w-16 h-16 rounded-2xl bg-amber-50 text-amber-600 border border-amber-200 flex items-center justify-center">
+                <div className={cn(
+                  "flex flex-col items-center justify-center p-8 sm:p-12 text-center max-w-md mx-auto my-auto rounded-3xl border shadow-xl space-y-4",
+                  isDark ? "bg-[#0f172a] border-slate-800 text-slate-100" : "bg-white border-slate-200 text-slate-900"
+                )}>
+                  <div className={cn(
+                    "w-16 h-16 rounded-2xl flex items-center justify-center border",
+                    isDark ? "bg-amber-950/60 text-amber-400 border-amber-800/60" : "bg-amber-50 text-amber-600 border-amber-200"
+                  )}>
                     <Lock size={32} />
                   </div>
-                  <span className="px-3 py-1 rounded-full bg-amber-100 text-amber-800 font-extrabold text-[11px] uppercase tracking-wider">
+                  <span className={cn(
+                    "px-3 py-1 rounded-full font-extrabold text-[11px] uppercase tracking-wider",
+                    isDark ? "bg-amber-900/60 text-amber-200" : "bg-amber-100 text-amber-800"
+                  )}>
                     Plan Upgrade Required
                   </span>
-                  <h2 className="text-2xl font-black text-slate-900 tracking-tight">
+                  <h2 className={cn("text-2xl font-black tracking-tight", isDark ? "text-white" : "text-slate-900")}>
                     {currentTitle} is Locked
                   </h2>
-                  <p className="text-xs text-slate-500 font-medium leading-relaxed">
-                    This feature is available on the <strong className="text-slate-800">{reqPlanName} Plan</strong> or higher. Your workspace is currently on the <strong className="text-[#059669]">{entitlements?.plan?.name || 'Starter'} Plan</strong>.
+                  <p className={cn("text-xs font-medium leading-relaxed", isDark ? "text-slate-400" : "text-slate-500")}>
+                    This feature is available on the <strong className={isDark ? "text-slate-200" : "text-slate-800"}>{reqPlanName} Plan</strong> or higher. Your workspace is currently on the <strong className="text-[#059669]">{entitlements?.plan?.name || 'Starter'} Plan</strong>.
                   </p>
                   <Link
                     href="/client/plans"

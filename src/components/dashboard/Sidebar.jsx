@@ -434,7 +434,10 @@ const Sidebar = ({ role, isOpen, onClose, onToggle }) => {
 
             return isOpen ? (
               <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                <div className="w-8 h-8 min-w-[32px] max-w-[32px] min-h-[32px] max-h-[32px] rounded-xl overflow-hidden bg-white flex items-center justify-center shrink-0 shadow-xs border border-slate-100">
+                <div className={cn(
+                  "w-8 h-8 min-w-[32px] max-w-[32px] min-h-[32px] max-h-[32px] rounded-xl overflow-hidden flex items-center justify-center shrink-0 shadow-xs border",
+                  isDark ? "bg-slate-800 border-slate-700" : "bg-white border-slate-100"
+                )}>
                   <img
                     src={displayBrandLogo}
                     alt={displayBrandName}
@@ -462,7 +465,10 @@ const Sidebar = ({ role, isOpen, onClose, onToggle }) => {
               </div>
             ) : (
               <div className="flex items-center justify-center w-full py-1">
-                <div className="w-8 h-8 min-w-[32px] max-w-[32px] min-h-[32px] max-h-[32px] rounded-xl overflow-hidden bg-white flex items-center justify-center shrink-0 shadow-xs border border-slate-100">
+                <div className={cn(
+                  "w-8 h-8 min-w-[32px] max-w-[32px] min-h-[32px] max-h-[32px] rounded-xl overflow-hidden flex items-center justify-center shrink-0 shadow-xs border",
+                  isDark ? "bg-slate-800 border-slate-700" : "bg-white border-slate-100"
+                )}>
                   <img
                     src={displayBrandLogo}
                     alt={displayBrandName}

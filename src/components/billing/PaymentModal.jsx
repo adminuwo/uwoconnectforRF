@@ -4,6 +4,8 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { API_BASE_URL } from '@/config/apiConfig';
 import { initiateRazorpayCheckout } from '@/utils/razorpay';
+import { useTheme } from '@/context/ThemeContext';
+import { cn } from '@/lib/utils';
 import {
   X,
   CheckCircle2,
@@ -55,6 +57,7 @@ const DEFAULT_PLANS = {
 };
 
 export default function PaymentModal({ isOpen, onClose, selectedPlan = 'PROFESSIONAL', planDetails = null, billingCycle = 'MONTHLY', onSuccess }) {
+  const { isDark } = useTheme();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [mockSession, setMockSession] = useState(null);
@@ -177,15 +180,21 @@ export default function PaymentModal({ isOpen, onClose, selectedPlan = 'PROFESSI
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="bg-[#0B0D11] border border-white/10 rounded-3xl max-w-md w-full p-6 md:p-8 shadow-2xl relative overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200">
+      <div className={cn(
+        "rounded-3xl max-w-md w-full p-6 md:p-8 shadow-2xl relative overflow-hidden border transition-colors",
+        isDark ? "bg-[#0f172a] border-slate-800 text-white" : "bg-white border-slate-200 text-slate-900"
+      )}>
         {/* Glow Header */}
-        <div className="absolute -top-24 -left-24 w-48 h-48 bg-[#10B981]/20 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -top-24 -left-24 w-48 h-48 bg-[#10B981]/15 rounded-full blur-3xl pointer-events-none" />
 
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-5 right-5 text-slate-400 hover:text-white transition-colors cursor-pointer p-1 rounded-full hover:bg-white/10"
+          className={cn(
+            "absolute top-5 right-5 transition-colors cursor-pointer p-1.5 rounded-full",
+            isDark ? "text-slate-400 hover:text-white hover:bg-slate-800" : "text-slate-400 hover:text-slate-700 hover:bg-slate-100"
+          )}
         >
           <X size={20} />
         </button>
@@ -195,13 +204,13 @@ export default function PaymentModal({ isOpen, onClose, selectedPlan = 'PROFESSI
             <div className="w-16 h-16 bg-[#10B981]/20 border border-[#10B981] rounded-full flex items-center justify-center mx-auto mb-4 text-[#10B981]">
               <CheckCircle2 size={36} />
             </div>
-            <h3 className="text-2xl font-bold text-white mb-2">Payment Successful!</h3>
-            <p className="text-[#8E99A8] text-sm mb-6">
+            <h3 className={cn("text-2xl font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>Payment Successful!</h3>
+            <p className={cn("text-sm mb-6", isDark ? "text-slate-400" : "text-slate-600")}>
               Your workspace has been upgraded to <span className="text-[#10B981] font-semibold">{successData.plan}</span> plan.
             </p>
             <button
               onClick={onClose}
-              className="w-full py-3.5 bg-[#10B981] text-black font-bold rounded-2xl hover:bg-[#059669] transition-all cursor-pointer shadow-[0_0_20px_rgba(16,185,129,0.3)]"
+              className="w-full py-3.5 bg-[#10B981] text-white font-bold rounded-2xl hover:bg-[#059669] transition-all cursor-pointer shadow-[0_0_20px_rgba(16,185,129,0.3)]"
             >
               Continue to Workspace
             </button>
@@ -211,9 +220,9 @@ export default function PaymentModal({ isOpen, onClose, selectedPlan = 'PROFESSI
             <div className="w-12 h-12 bg-amber-500/20 border border-amber-500/40 rounded-full flex items-center justify-center mx-auto mb-3 text-amber-400">
               <Zap size={24} />
             </div>
-            <h4 className="text-lg font-bold text-white mb-1">Razorpay Sandbox Test Mode</h4>
-            <p className="text-xs text-slate-400 mb-6">
-              Order Receipt: <code className="text-slate-200">{mockSession.order_id}</code>
+            <h4 className={cn("text-lg font-bold mb-1", isDark ? "text-white" : "text-slate-900")}>Razorpay Sandbox Test Mode</h4>
+            <p className={cn("text-xs mb-6", isDark ? "text-slate-400" : "text-slate-600")}>
+              Order Receipt: <code className={cn("px-1.5 py-0.5 rounded text-xs", isDark ? "bg-slate-800 text-slate-200" : "bg-slate-100 text-slate-700")}>{mockSession.order_id}</code>
               <br />
               (Simulate a successful Razorpay payment transaction)
             </p>
@@ -229,7 +238,7 @@ export default function PaymentModal({ isOpen, onClose, selectedPlan = 'PROFESSI
               </button>
               <button
                 onClick={() => setMockSession(null)}
-                className="w-full py-3 text-slate-400 hover:text-white font-medium text-xs transition-colors cursor-pointer"
+                className={cn("w-full py-3 font-medium text-xs transition-colors cursor-pointer", isDark ? "text-slate-400 hover:text-white" : "text-slate-500 hover:text-slate-800")}
               >
                 Cancel
               </button>
@@ -242,34 +251,37 @@ export default function PaymentModal({ isOpen, onClose, selectedPlan = 'PROFESSI
                 <CreditCard size={20} />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-white">Checkout</h3>
-                <p className="text-xs text-[#8E99A8]">Secured by Razorpay Payments</p>
+                <h3 className={cn("text-lg font-bold", isDark ? "text-white" : "text-slate-900")}>Checkout</h3>
+                <p className={cn("text-xs", isDark ? "text-slate-400" : "text-slate-500")}>Secured by Razorpay Payments</p>
               </div>
             </div>
 
             {/* Plan Card Summary */}
-            <div className="bg-white/5 border border-white/10 rounded-2xl p-4 mb-6">
+            <div className={cn(
+              "rounded-2xl p-4 mb-6 border transition-colors",
+              isDark ? "bg-slate-800/60 border-slate-700/80" : "bg-slate-50 border-slate-200/90"
+            )}>
               <div className="flex justify-between items-center mb-2">
-                <span className="text-white font-bold">{planInfo.name}</span>
-                <span className="text-xs bg-[#10B981]/20 text-[#10B981] px-2.5 py-1 rounded-full font-bold uppercase tracking-wider">
+                <span className={cn("font-bold", isDark ? "text-white" : "text-slate-900")}>{planInfo.name}</span>
+                <span className="text-xs bg-[#10B981]/15 text-[#10B981] px-2.5 py-1 rounded-full font-bold uppercase tracking-wider border border-[#10B981]/30">
                   {billingCycle}
                 </span>
               </div>
-              <div className="flex justify-between items-baseline border-b border-white/10 pb-3 mb-3">
-                <span className="text-xs text-[#8E99A8]">Price</span>
-                <span className="text-xl font-bold text-white">₹{totalAmount.toLocaleString('en-IN')}</span>
+              <div className={cn("flex justify-between items-baseline border-b pb-3 mb-3", isDark ? "border-slate-700/60" : "border-slate-200")}>
+                <span className={cn("text-xs", isDark ? "text-slate-400" : "text-slate-500")}>Price</span>
+                <span className={cn("text-xl font-bold", isDark ? "text-white" : "text-slate-900")}>₹{totalAmount.toLocaleString('en-IN')}</span>
               </div>
               <ul className="space-y-2">
                 {planInfo.features.map((f, idx) => (
-                  <li key={idx} className="text-xs text-slate-300 flex items-center gap-2">
-                    <span className="text-[#10B981]">✓</span> {f}
+                  <li key={idx} className={cn("text-xs flex items-center gap-2", isDark ? "text-slate-300" : "text-slate-700")}>
+                    <span className="text-[#10B981] font-bold">✓</span> {f}
                   </li>
                 ))}
               </ul>
             </div>
 
             {error && (
-              <div className="mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-xs flex items-center gap-2">
+              <div className="mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded-xl text-red-500 text-xs flex items-center gap-2">
                 <AlertCircle size={16} className="shrink-0" />
                 <span>{error}</span>
               </div>
@@ -292,7 +304,7 @@ export default function PaymentModal({ isOpen, onClose, selectedPlan = 'PROFESSI
               )}
             </button>
 
-            <div className="mt-4 flex items-center justify-center gap-2 text-[10px] text-slate-400">
+            <div className={cn("mt-4 flex items-center justify-center gap-2 text-[10px]", isDark ? "text-slate-400" : "text-slate-500")}>
               <ShieldCheck size={14} className="text-[#10B981]" />
               256-bit SSL Encrypted & PCI-DSS Compliant Payment
             </div>

@@ -310,7 +310,7 @@ export default function ClientInboxPage() {
     fetchData();
   }, []);
 
-  const fetchMessages = async (contactId, offset = 0, append = false) => {
+  const fetchMessages = async (contactId, offset = 0, append = false, channel = null) => {
     if (!contactId) return;
     try {
       if (append) {
@@ -320,7 +320,8 @@ export default function ClientInboxPage() {
       }
       const token = getAuthToken();
       const apiUrl = API_BASE_URL;
-      const res = await axios.get(`${apiUrl}/api/messages/?contact_id=${encodeURIComponent(contactId)}&limit=50&offset=${offset}`, {
+      const channelParam = (channel && channel !== 'ALL') ? `&channel=${encodeURIComponent(channel)}` : '';
+      const res = await axios.get(`${apiUrl}/api/messages/?contact_id=${encodeURIComponent(contactId)}&limit=50&offset=${offset}${channelParam}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const rawList = Array.isArray(res.data) ? res.data : (res.data?.results || []);
@@ -367,7 +368,8 @@ export default function ClientInboxPage() {
       const targetConvo = (conversationsRef.current || []).find(c => c.id === selectedConvoId) || conversations.find(c => c.id === selectedConvoId);
       const addressToFetch = targetConvo?.rawAddress || selectedRawAddressRef.current || selectedConvoId;
       selectedRawAddressRef.current = addressToFetch;
-      fetchMessages(addressToFetch, 0, false);
+      const targetChannel = targetConvo?.channel || (activeChannelFilter !== 'ALL' ? activeChannelFilter : null);
+      fetchMessages(addressToFetch, 0, false, targetChannel);
     }
   }, [selectedConvoId]);
 
@@ -1548,7 +1550,7 @@ export default function ClientInboxPage() {
                           onClick={() => {
                             const nextOffset = messagesOffset + 50;
                             setMessagesOffset(nextOffset);
-                            fetchMessages(activeConvo.rawAddress || activeConvo.id, nextOffset, true);
+                            fetchMessages(activeConvo.rawAddress || activeConvo.id, nextOffset, true, activeConvo.channel || (activeChannelFilter !== 'ALL' ? activeChannelFilter : null));
                           }}
                           className={cn(
                             "px-4 py-1.5 rounded-full text-xs font-semibold transition-colors shadow-sm disabled:opacity-70 flex items-center gap-2 cursor-pointer border",

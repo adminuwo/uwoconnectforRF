@@ -507,31 +507,31 @@ export default function CreateCampaignModal({ isOpen, onClose, onCreated }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200">
-      <div className="bg-white rounded-3xl w-full max-w-2xl max-h-[92vh] overflow-hidden shadow-2xl flex flex-col animate-in zoom-in-95 duration-200 border border-slate-200">
+      <div className="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-2xl max-h-[92vh] overflow-hidden shadow-2xl flex flex-col animate-in zoom-in-95 duration-200 border border-slate-200 dark:border-slate-800">
         
         {/* Header */}
-        <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between shrink-0 bg-slate-50/70">
+        <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between shrink-0 bg-slate-50/70 dark:bg-slate-900/90">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-emerald-100 text-[#00AB56] flex items-center justify-center shadow-xs">
+            <div className="w-10 h-10 rounded-2xl bg-emerald-100 dark:bg-emerald-950 text-[#00AB56] flex items-center justify-center shadow-xs">
               <Megaphone size={20} />
             </div>
             <div>
-              <h3 className="font-extrabold text-slate-900 text-lg">Create New Broadcast</h3>
-              <p className="text-xs text-slate-500 font-medium">
+              <h3 className="font-extrabold text-slate-900 dark:text-white text-lg">Create New Broadcast</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
                 Step {step} of 3 — {step === 1 ? 'Target & Setup' : step === 2 ? 'Message Content' : 'Schedule & Confirm'}
               </p>
             </div>
           </div>
           <button 
             onClick={onClose} 
-            className="p-2 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-200/60 transition-colors cursor-pointer"
+            className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-full hover:bg-slate-200/60 dark:hover:bg-slate-800 transition-colors cursor-pointer"
           >
             <X size={18} />
           </button>
         </div>
 
         {/* Step Indicator */}
-        <div className="w-full bg-slate-100 h-1.5 shrink-0">
+        <div className="w-full bg-slate-100 dark:bg-slate-800 h-1.5 shrink-0">
           <div 
             className="bg-[#00AB56] h-full transition-all duration-300 rounded-r-full"
             style={{ width: `${(step / 3) * 100}%` }}
@@ -977,12 +977,14 @@ export default function CreateCampaignModal({ isOpen, onClose, onCreated }) {
           {/* STEP 2: MESSAGE CONTENT */}
           {step === 2 && (
             <div className="space-y-5 animate-in fade-in duration-150">
-              <div className="flex items-center justify-between bg-slate-100 p-1.5 rounded-2xl border border-slate-200">
+              <div className="flex items-center justify-between bg-slate-100 dark:bg-slate-800 p-1.5 rounded-2xl border border-slate-200 dark:border-slate-700">
                 <button
                   type="button"
                   onClick={() => setComposeMode('TEMPLATE')}
                   className={`flex-1 py-2.5 text-xs font-bold rounded-xl transition-all cursor-pointer ${
-                    composeMode === 'TEMPLATE' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-900'
+                    composeMode === 'TEMPLATE' 
+                      ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs' 
+                      : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                   }`}
                 >
                   Meta Template ({templates.length})
@@ -991,7 +993,9 @@ export default function CreateCampaignModal({ isOpen, onClose, onCreated }) {
                   type="button"
                   onClick={() => setComposeMode('CUSTOM')}
                   className={`flex-1 py-2.5 text-xs font-bold rounded-xl transition-all cursor-pointer ${
-                    composeMode === 'CUSTOM' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-900'
+                    composeMode === 'CUSTOM' 
+                      ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs' 
+                      : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                   }`}
                 >
                   Custom Compose / AI
@@ -1288,12 +1292,12 @@ export default function CreateCampaignModal({ isOpen, onClose, onCreated }) {
         </div>
 
         {/* Footer Actions */}
-        <div className="px-6 py-4 bg-white border-t border-slate-100 flex items-center justify-between shrink-0">
+        <div className="px-6 py-4 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between shrink-0">
           <button
             type="button"
             disabled={step === 1}
             onClick={() => setStep(prev => Math.max(1, prev - 1))}
-            className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold text-xs flex items-center gap-1 transition-all disabled:opacity-40 cursor-pointer"
+            className="px-4 py-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl font-bold text-xs flex items-center gap-1 transition-all disabled:opacity-40 cursor-pointer"
           >
             <ChevronLeft size={14} /> Back
           </button>

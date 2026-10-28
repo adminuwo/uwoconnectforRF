@@ -19,6 +19,7 @@ import PricingComparisonTable from '@/components/pricing/PricingComparisonTable'
 import CustomPlanSection from './CustomPlanSection';
 import ProjectsDropdown, { MobileProjectsAccordion } from './ProjectsDropdown';
 import { useBrand } from '@/context/BrandContext';
+import { useTheme } from '@/context/ThemeContext';
 import ScrollReveal from './ScrollReveal';
 
 // ── AUTHENTIC SVG BRAND LOGOS ──
@@ -198,7 +199,8 @@ export default function UwoLandingPage() {
   const [comparisonPosition, setComparisonPosition] = useState(50);
   const [openFaqIndex, setOpenFaqIndex] = useState(null);
   const [showAllFaqs, setShowAllFaqs] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const { theme, isDark, toggleTheme } = useTheme();
+  const isDarkMode = isDark;
   const [loggedInUser, setLoggedInUser] = useState(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showWhiteLabelDetails, setShowWhiteLabelDetails] = useState(false);
@@ -225,31 +227,7 @@ export default function UwoLandingPage() {
         setLoggedInUser(null);
       }
     } catch (e) { }
-
-    try {
-      const savedTheme = localStorage.getItem('uwo_landing_theme');
-      if (savedTheme === 'dark') {
-        setIsDarkMode(true);
-      }
-    } catch (e) { }
   }, []);
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    if (isDarkMode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, [isDarkMode]);
-
-  const toggleTheme = () => {
-    const newTheme = !isDarkMode;
-    setIsDarkMode(newTheme);
-    try {
-      localStorage.setItem('uwo_landing_theme', newTheme ? 'dark' : 'light');
-    } catch (e) { }
-  };
 
   // Parallax listener on desktop
   const handleMouseMove = (e) => {
@@ -657,7 +635,7 @@ export default function UwoLandingPage() {
     <div
       style={{ fontFamily: "'Times New Roman', Times, serif" }}
       className={cn(
-        "min-h-screen transition-colors duration-300 selection:bg-emerald-500/20 selection:text-emerald-900 pt-16",
+        "landing-page-root min-h-screen transition-colors duration-300 selection:bg-emerald-500/20 selection:text-emerald-900 pt-16",
         isDarkMode ? "bg-[#070B14] text-slate-100 dark" : "bg-[#F8FAFC] text-slate-900"
       )}
     >

@@ -10,6 +10,8 @@ import axios from 'axios';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import ContactDetailsModal from '@/components/crm/ContactDetailsModal';
 import { API_BASE_URL } from '@/config/apiConfig';
+import { useTheme } from '@/context/ThemeContext';
+import { cn } from '@/lib/utils';
 
 const STAGES = [
   { id: 'NEW', label: 'New Lead', color: 'bg-blue-100 text-blue-700 border-blue-200' },
@@ -38,6 +40,7 @@ const getContactChannel = (contact) => {
 
 export default function CRMPage() {
   const router = useRouter();
+  const { isDark } = useTheme();
   const [contacts, setContacts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -213,30 +216,49 @@ export default function CRMPage() {
 
   return (
     <DashboardLayout role="CLIENT">
-      <div className="bg-slate-50 font-sans flex flex-col min-h-[calc(100vh-140px)] md:h-[calc(100vh-140px)] w-full max-w-full rounded-[24px] sm:rounded-[32px] overflow-hidden border border-slate-200 shadow-sm">
+      <div className={cn(
+        "font-sans flex flex-col min-h-[calc(100vh-140px)] md:h-[calc(100vh-140px)] w-full max-w-full rounded-[24px] sm:rounded-[32px] overflow-hidden border shadow-sm transition-colors",
+        isDark ? "bg-[#0b0f19] border-slate-800" : "bg-slate-50 border-slate-200"
+      )}>
       {/* Header */}
-      <header className="bg-white border-b border-slate-200 px-4 sm:px-8 py-5 flex flex-col gap-4 shrink-0">
+      <header className={cn(
+        "border-b px-4 sm:px-8 py-5 flex flex-col gap-4 shrink-0 transition-colors",
+        isDark ? "bg-[#0f172a] border-slate-800" : "bg-white border-slate-200"
+      )}>
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-3">
+            <h1 className={cn("text-2xl font-black tracking-tight flex items-center gap-3", isDark ? "text-white" : "text-slate-900")}>
               <Users className="text-emerald-600" />
               Leads Pipeline
             </h1>
-            <p className="text-xs sm:text-sm text-slate-500 mt-0.5 font-medium">Manage your omni-channel customer leads, stages, and follow-ups.</p>
+            <p className={cn("text-xs sm:text-sm mt-0.5 font-medium", isDark ? "text-slate-400" : "text-slate-500")}>Manage your omni-channel customer leads, stages, and follow-ups.</p>
           </div>
           
           <div className="flex flex-wrap items-center gap-2.5 w-full md:w-auto">
-            <div className="flex items-center bg-slate-100/80 p-1 rounded-xl border border-slate-200/60 shadow-inner">
+            <div className={cn(
+              "flex items-center p-1 rounded-xl border shadow-inner transition-colors",
+              isDark ? "bg-slate-800/80 border-slate-700" : "bg-slate-100/80 border-slate-200/60"
+            )}>
               <button 
                 onClick={() => setViewMode('kanban')}
-                className={`p-2 rounded-lg flex items-center justify-center transition-all duration-200 ${viewMode === 'kanban' ? 'bg-white shadow-sm text-emerald-600 font-bold' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'}`}
+                className={cn(
+                  "p-2 rounded-lg flex items-center justify-center transition-all duration-200 cursor-pointer",
+                  viewMode === 'kanban' 
+                    ? (isDark ? "bg-slate-700 text-emerald-400 shadow-sm font-bold" : "bg-white shadow-sm text-emerald-600 font-bold")
+                    : (isDark ? "text-slate-400 hover:text-white" : "text-slate-500 hover:text-slate-700")
+                )}
                 title="Kanban View"
               >
                 <LayoutGrid size={16} />
               </button>
               <button 
                 onClick={() => setViewMode('sheet')}
-                className={`p-2 rounded-lg flex items-center justify-center transition-all duration-200 ${viewMode === 'sheet' ? 'bg-white shadow-sm text-emerald-600 font-bold' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'}`}
+                className={cn(
+                  "p-2 rounded-lg flex items-center justify-center transition-all duration-200 cursor-pointer",
+                  viewMode === 'sheet' 
+                    ? (isDark ? "bg-slate-700 text-emerald-400 shadow-sm font-bold" : "bg-white shadow-sm text-emerald-600 font-bold")
+                    : (isDark ? "text-slate-400 hover:text-white" : "text-slate-500 hover:text-slate-700")
+                )}
                 title="Sheet View"
               >
                 <Table size={16} />
@@ -244,25 +266,33 @@ export default function CRMPage() {
             </div>
 
             <div className="relative flex-1 sm:flex-none">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={17} />
+              <Search className={cn("absolute left-3 top-1/2 -translate-y-1/2", isDark ? "text-slate-500" : "text-slate-400")} size={17} />
               <input 
                 type="text" 
                 placeholder="Search leads by name, phone..." 
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9 pr-4 py-2 bg-slate-100 border-transparent focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 rounded-xl outline-none transition-all w-full sm:w-60 text-xs sm:text-sm font-medium"
+                className={cn(
+                  "pl-9 pr-4 py-2 rounded-xl outline-none transition-all w-full sm:w-60 text-xs sm:text-sm font-medium border",
+                  isDark 
+                    ? "bg-slate-800 border-slate-700 text-white placeholder-slate-500 focus:border-emerald-500" 
+                    : "bg-slate-100 border-transparent text-slate-900 placeholder-slate-400 focus:bg-white focus:border-emerald-500"
+                )}
               />
             </div>
             
             <div className="flex items-center gap-2 w-full sm:w-auto">
-              <label className="flex items-center justify-center gap-1.5 bg-slate-800 text-white px-3.5 py-2 rounded-xl text-xs font-bold shadow-sm hover:bg-slate-700 transition-all cursor-pointer flex-1 sm:flex-none">
+              <label className={cn(
+                "flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold shadow-sm transition-all cursor-pointer flex-1 sm:flex-none border",
+                isDark ? "bg-slate-800 hover:bg-slate-700 text-white border-slate-700" : "bg-white hover:bg-slate-50 text-slate-700 border-slate-300"
+              )}>
                 <input type="file" accept=".csv" className="hidden" onChange={handleImport} />
                 <Download size={14} className="rotate-180" />
                 Import CSV
               </label>
               <button 
                 onClick={exportToCSV}
-                className="flex items-center justify-center gap-1.5 bg-emerald-600 text-white px-3.5 py-2 rounded-xl text-xs font-bold shadow-sm hover:bg-emerald-700 transition-all flex-1 sm:flex-none"
+                className="flex items-center justify-center gap-1.5 bg-emerald-600 text-white px-3.5 py-2 rounded-xl text-xs font-bold shadow-sm hover:bg-emerald-700 transition-all flex-1 sm:flex-none cursor-pointer"
               >
                 <Download size={14} />
                 Export CSV
@@ -275,76 +305,100 @@ export default function CRMPage() {
         <div className="flex items-center gap-2 overflow-x-auto pb-1 custom-scrollbar text-xs font-bold">
           <button
             onClick={() => { setActiveChannel('ALL'); setOnlyFollowups(false); }}
-            className={`px-3 py-1.5 rounded-xl transition-all shrink-0 flex items-center gap-1.5 border ${
+            className={cn(
+              "px-3 py-1.5 rounded-xl transition-all shrink-0 flex items-center gap-1.5 border cursor-pointer",
               activeChannel === 'ALL' && !onlyFollowups
-                ? 'bg-slate-900 text-white border-slate-900 shadow-sm'
-                : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
-            }`}
+                ? "bg-emerald-600 text-white border-emerald-600 shadow-sm"
+                : (isDark ? "bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700" : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50")
+            )}
           >
             <span>All Leads</span>
-            <span className={`px-1.5 py-0.2 rounded-full text-[10px] ${activeChannel === 'ALL' && !onlyFollowups ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-600'}`}>{channelCounts.ALL}</span>
+            <span className={cn(
+              "px-1.5 py-0.2 rounded-full text-[10px]",
+              activeChannel === 'ALL' && !onlyFollowups ? "bg-emerald-800 text-white" : (isDark ? "bg-slate-700 text-slate-300" : "bg-slate-100 text-slate-600")
+            )}>{channelCounts.ALL}</span>
           </button>
 
           <button
             onClick={() => { setActiveChannel('WHATSAPP'); setOnlyFollowups(false); }}
-            className={`px-3 py-1.5 rounded-xl transition-all shrink-0 flex items-center gap-1.5 border ${
+            className={cn(
+              "px-3 py-1.5 rounded-xl transition-all shrink-0 flex items-center gap-1.5 border cursor-pointer",
               activeChannel === 'WHATSAPP' && !onlyFollowups
-                ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm'
-                : 'bg-white text-emerald-700 border-emerald-200 hover:bg-emerald-50/50'
-            }`}
+                ? "bg-emerald-600 text-white border-emerald-600 shadow-sm"
+                : (isDark ? "bg-slate-800 text-emerald-400 border-slate-700 hover:bg-slate-700" : "bg-white text-emerald-700 border-emerald-200 hover:bg-emerald-50/50")
+            )}
           >
             <span>🟢 WhatsApp</span>
-            <span className={`px-1.5 py-0.2 rounded-full text-[10px] ${activeChannel === 'WHATSAPP' && !onlyFollowups ? 'bg-emerald-700 text-white' : 'bg-emerald-100 text-emerald-800'}`}>{channelCounts.WHATSAPP}</span>
+            <span className={cn(
+              "px-1.5 py-0.2 rounded-full text-[10px]",
+              activeChannel === 'WHATSAPP' && !onlyFollowups ? "bg-emerald-800 text-white" : (isDark ? "bg-emerald-950/60 text-emerald-300 border border-emerald-800/60" : "bg-emerald-100 text-emerald-800")
+            )}>{channelCounts.WHATSAPP}</span>
           </button>
 
           <button
             onClick={() => { setActiveChannel('INSTAGRAM'); setOnlyFollowups(false); }}
-            className={`px-3 py-1.5 rounded-xl transition-all shrink-0 flex items-center gap-1.5 border ${
+            className={cn(
+              "px-3 py-1.5 rounded-xl transition-all shrink-0 flex items-center gap-1.5 border cursor-pointer",
               activeChannel === 'INSTAGRAM' && !onlyFollowups
-                ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white border-transparent shadow-sm'
-                : 'bg-white text-purple-700 border-purple-200 hover:bg-purple-50/50'
-            }`}
+                ? "bg-gradient-to-r from-purple-600 to-pink-600 text-white border-transparent shadow-sm"
+                : (isDark ? "bg-slate-800 text-purple-400 border-slate-700 hover:bg-slate-700" : "bg-white text-purple-700 border-purple-200 hover:bg-purple-50/50")
+            )}
           >
             <span>🟣 Instagram</span>
-            <span className={`px-1.5 py-0.2 rounded-full text-[10px] ${activeChannel === 'INSTAGRAM' && !onlyFollowups ? 'bg-purple-800 text-white' : 'bg-purple-100 text-purple-800'}`}>{channelCounts.INSTAGRAM}</span>
+            <span className={cn(
+              "px-1.5 py-0.2 rounded-full text-[10px]",
+              activeChannel === 'INSTAGRAM' && !onlyFollowups ? "bg-purple-800 text-white" : (isDark ? "bg-purple-950/60 text-purple-300 border border-purple-800/60" : "bg-purple-100 text-purple-800")
+            )}>{channelCounts.INSTAGRAM}</span>
           </button>
 
           <button
             onClick={() => { setActiveChannel('FACEBOOK'); setOnlyFollowups(false); }}
-            className={`px-3 py-1.5 rounded-xl transition-all shrink-0 flex items-center gap-1.5 border ${
+            className={cn(
+              "px-3 py-1.5 rounded-xl transition-all shrink-0 flex items-center gap-1.5 border cursor-pointer",
               activeChannel === 'FACEBOOK' && !onlyFollowups
-                ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
-                : 'bg-white text-blue-700 border-blue-200 hover:bg-blue-50/50'
-            }`}
+                ? "bg-blue-600 text-white border-blue-600 shadow-sm"
+                : (isDark ? "bg-slate-800 text-blue-400 border-slate-700 hover:bg-slate-700" : "bg-white text-blue-700 border-blue-200 hover:bg-blue-50/50")
+            )}
           >
             <span>🔵 Messenger</span>
-            <span className={`px-1.5 py-0.2 rounded-full text-[10px] ${activeChannel === 'FACEBOOK' && !onlyFollowups ? 'bg-blue-700 text-white' : 'bg-blue-100 text-blue-800'}`}>{channelCounts.FACEBOOK}</span>
+            <span className={cn(
+              "px-1.5 py-0.2 rounded-full text-[10px]",
+              activeChannel === 'FACEBOOK' && !onlyFollowups ? "bg-blue-800 text-white" : (isDark ? "bg-blue-950/60 text-blue-300 border border-blue-800/60" : "bg-blue-100 text-blue-800")
+            )}>{channelCounts.FACEBOOK}</span>
           </button>
 
           <button
             onClick={() => { setActiveChannel('GMAIL'); setOnlyFollowups(false); }}
-            className={`px-3 py-1.5 rounded-xl transition-all shrink-0 flex items-center gap-1.5 border ${
+            className={cn(
+              "px-3 py-1.5 rounded-xl transition-all shrink-0 flex items-center gap-1.5 border cursor-pointer",
               activeChannel === 'GMAIL' && !onlyFollowups
-                ? 'bg-amber-600 text-white border-amber-600 shadow-sm'
-                : 'bg-white text-amber-700 border-amber-200 hover:bg-amber-50/50'
-            }`}
+                ? "bg-amber-600 text-white border-amber-600 shadow-sm"
+                : (isDark ? "bg-slate-800 text-amber-400 border-slate-700 hover:bg-slate-700" : "bg-white text-amber-700 border-amber-200 hover:bg-amber-50/50")
+            )}
           >
             <span>✉️ Email</span>
-            <span className={`px-1.5 py-0.2 rounded-full text-[10px] ${activeChannel === 'GMAIL' && !onlyFollowups ? 'bg-amber-700 text-white' : 'bg-amber-100 text-amber-800'}`}>{channelCounts.GMAIL}</span>
+            <span className={cn(
+              "px-1.5 py-0.2 rounded-full text-[10px]",
+              activeChannel === 'GMAIL' && !onlyFollowups ? "bg-amber-800 text-white" : (isDark ? "bg-amber-950/60 text-amber-300 border border-amber-800/60" : "bg-amber-100 text-amber-800")
+            )}>{channelCounts.GMAIL}</span>
           </button>
 
           {channelCounts.DUE_TODAY > 0 && (
             <button
               onClick={() => setOnlyFollowups(!onlyFollowups)}
-              className={`px-3 py-1.5 rounded-xl transition-all shrink-0 flex items-center gap-1.5 border ml-auto ${
+              className={cn(
+                "px-3 py-1.5 rounded-xl transition-all shrink-0 flex items-center gap-1.5 border ml-auto cursor-pointer",
                 onlyFollowups
-                  ? 'bg-rose-600 text-white border-rose-600 shadow-sm'
-                  : 'bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100'
-              }`}
+                  ? "bg-rose-600 text-white border-rose-600 shadow-sm"
+                  : (isDark ? "bg-rose-950/60 text-rose-300 border-rose-800 hover:bg-rose-900/60" : "bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100")
+              )}
             >
               <Clock size={13} />
               <span>Due Today & Overdue</span>
-              <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-black ${onlyFollowups ? 'bg-rose-800 text-white' : 'bg-rose-200 text-rose-900'}`}>
+              <span className={cn(
+                "px-1.5 py-0.2 rounded-full text-[10px] font-black",
+                onlyFollowups ? "bg-rose-800 text-white" : (isDark ? "bg-rose-900 text-rose-200" : "bg-rose-200 text-rose-900")
+              )}>
                 {channelCounts.DUE_TODAY}
               </span>
             </button>
@@ -359,27 +413,36 @@ export default function CRMPage() {
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600"></div>
           </div>
         ) : viewMode === 'sheet' ? (
-          <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden flex flex-col h-full">
+          <div className={cn(
+            "rounded-2xl shadow-sm overflow-hidden flex flex-col h-full border transition-colors",
+            isDark ? "bg-[#0f172a] border-slate-800" : "bg-white border-slate-200"
+          )}>
             <div className="overflow-auto flex-1 custom-scrollbar">
               <table className="w-full text-left border-collapse">
-                <thead className="bg-slate-50 border-b border-slate-200 sticky top-0 z-10">
+                <thead className={cn(
+                  "border-b sticky top-0 z-10 transition-colors",
+                  isDark ? "bg-slate-800/90 border-slate-700 text-slate-300" : "bg-slate-50 border-slate-200 text-slate-500"
+                )}>
                   <tr>
-                    <th className="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider">Name</th>
-                    <th className="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider">Contact</th>
-                    <th className="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider">Channel</th>
-                    <th className="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider">Stage</th>
-                    <th className="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider">Next Follow-Up</th>
-                    <th className="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider">Created</th>
-                    <th className="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Action</th>
+                    <th className={cn("py-4 px-6 text-xs font-bold uppercase tracking-wider", isDark ? "text-slate-300" : "text-slate-500")}>Name</th>
+                    <th className={cn("py-4 px-6 text-xs font-bold uppercase tracking-wider", isDark ? "text-slate-300" : "text-slate-500")}>Contact</th>
+                    <th className={cn("py-4 px-6 text-xs font-bold uppercase tracking-wider", isDark ? "text-slate-300" : "text-slate-500")}>Channel</th>
+                    <th className={cn("py-4 px-6 text-xs font-bold uppercase tracking-wider", isDark ? "text-slate-300" : "text-slate-500")}>Stage</th>
+                    <th className={cn("py-4 px-6 text-xs font-bold uppercase tracking-wider", isDark ? "text-slate-300" : "text-slate-500")}>Next Follow-Up</th>
+                    <th className={cn("py-4 px-6 text-xs font-bold uppercase tracking-wider", isDark ? "text-slate-300" : "text-slate-500")}>Created</th>
+                    <th className={cn("py-4 px-6 text-xs font-bold uppercase tracking-wider text-right", isDark ? "text-slate-300" : "text-slate-500")}>Action</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100">
+                <tbody className={cn("divide-y transition-colors", isDark ? "divide-slate-800" : "divide-slate-100")}>
                   {filteredContacts.map(contact => {
                     const ch = getContactChannel(contact);
                     return (
                     <tr 
                       key={contact.id} 
-                      className="hover:bg-slate-50/80 transition-colors group cursor-pointer"
+                      className={cn(
+                        "transition-colors group cursor-pointer",
+                        isDark ? "hover:bg-slate-800/50" : "hover:bg-slate-50/80"
+                      )}
                       onClick={(e) => {
                         if (e.target.tagName !== 'SELECT' && e.target.tagName !== 'OPTION' && !e.target.closest('button')) {
                           setSelectedContact(contact);
@@ -387,41 +450,53 @@ export default function CRMPage() {
                       }}
                     >
                       <td className="py-4 px-6">
-                        <div className="font-bold text-slate-800">{contact.name !== 'Unknown' ? contact.name : 'Unknown User'}</div>
-                        <div className="text-xs text-slate-400 font-mono mt-0.5">{contact.platform_id || ''}</div>
+                        <div className={cn("font-bold", isDark ? "text-slate-100" : "text-slate-800")}>{contact.name !== 'Unknown' ? contact.name : 'Unknown User'}</div>
+                        <div className={cn("text-xs font-mono mt-0.5", isDark ? "text-slate-500" : "text-slate-400")}>{contact.platform_id || ''}</div>
                       </td>
                       <td className="py-4 px-6">
                         {contact.phone_number && (
-                          <div className="flex items-center gap-2 text-xs text-slate-600 mb-1 font-medium">
-                            <Phone size={13} className="text-slate-400 shrink-0" />
+                          <div className={cn("flex items-center gap-2 text-xs mb-1 font-medium", isDark ? "text-slate-300" : "text-slate-600")}>
+                            <Phone size={13} className={isDark ? "text-slate-500 shrink-0" : "text-slate-400 shrink-0"} />
                             {contact.phone_number}
                           </div>
                         )}
                         {contact.email && (
-                          <div className="flex items-center gap-2 text-xs text-slate-600 font-medium">
-                            <Mail size={13} className="text-slate-400 shrink-0" />
+                          <div className={cn("flex items-center gap-2 text-xs font-medium", isDark ? "text-slate-300" : "text-slate-600")}>
+                            <Mail size={13} className={isDark ? "text-slate-500 shrink-0" : "text-slate-400 shrink-0"} />
                             <span className="truncate max-w-[150px]">{contact.email}</span>
                           </div>
                         )}
                       </td>
                       <td className="py-4 px-6">
                         {ch === 'WHATSAPP' && (
-                          <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                          <span className={cn(
+                            "inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full border",
+                            isDark ? "bg-emerald-950/60 text-emerald-300 border-emerald-800/60" : "bg-emerald-50 text-emerald-700 border-emerald-200"
+                          )}>
                             🟢 WhatsApp
                           </span>
                         )}
                         {ch === 'INSTAGRAM' && (
-                          <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 border border-purple-200">
+                          <span className={cn(
+                            "inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full border",
+                            isDark ? "bg-purple-950/60 text-purple-300 border-purple-800/60" : "bg-purple-50 text-purple-700 border-purple-200"
+                          )}>
                             🟣 Instagram
                           </span>
                         )}
                         {ch === 'FACEBOOK' && (
-                          <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
+                          <span className={cn(
+                            "inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full border",
+                            isDark ? "bg-blue-950/60 text-blue-300 border-blue-800/60" : "bg-blue-50 text-blue-700 border-blue-200"
+                          )}>
                             🔵 Messenger
                           </span>
                         )}
                         {ch === 'GMAIL' && (
-                          <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
+                          <span className={cn(
+                            "inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full border",
+                            isDark ? "bg-amber-950/60 text-amber-300 border-amber-800/60" : "bg-amber-50 text-amber-700 border-amber-200"
+                          )}>
                             ✉️ Email
                           </span>
                         )}
@@ -430,10 +505,13 @@ export default function CRMPage() {
                         <select
                           value={contact.stage || 'NEW'}
                           onChange={(e) => updateContactStage(contact.id, e.target.value)}
-                          className={`text-xs font-bold px-2.5 py-1.5 rounded-lg border outline-none cursor-pointer appearance-none ${STAGES.find(s => s.id === contact.stage)?.color || 'bg-slate-100 text-slate-600 border-slate-200'}`}
+                          className={cn(
+                            "text-xs font-bold px-2.5 py-1.5 rounded-lg border outline-none cursor-pointer appearance-none",
+                            STAGES.find(s => s.id === contact.stage)?.color || (isDark ? "bg-slate-800 text-slate-300 border-slate-700" : "bg-slate-100 text-slate-600 border-slate-200")
+                          )}
                         >
                           {STAGES.map(s => (
-                            <option key={s.id} value={s.id} className="bg-white text-slate-800">{s.label}</option>
+                            <option key={s.id} value={s.id} className={isDark ? "bg-slate-800 text-slate-100" : "bg-white text-slate-800"}>{s.label}</option>
                           ))}
                         </select>
                       </td>
@@ -441,23 +519,28 @@ export default function CRMPage() {
                         {contact.next_followup_at ? (
                           <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold ${
                             new Date(contact.next_followup_at) < new Date() 
-                              ? 'bg-rose-50 text-rose-700 border border-rose-200' 
-                              : 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                              ? (isDark ? 'bg-rose-950/60 text-rose-300 border border-rose-800' : 'bg-rose-50 text-rose-700 border border-rose-200')
+                              : (isDark ? 'bg-emerald-950/60 text-emerald-300 border border-emerald-800' : 'bg-emerald-50 text-emerald-800 border border-emerald-200')
                           }`}>
-                            <Clock size={12} className={new Date(contact.next_followup_at) < new Date() ? 'text-rose-500' : 'text-emerald-600'} />
+                            <Clock size={12} className={new Date(contact.next_followup_at) < new Date() ? 'text-rose-500' : 'text-emerald-500'} />
                             <span>{new Date(contact.next_followup_at).toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
                           </div>
                         ) : (
-                          <span className="text-xs text-slate-400 font-medium">—</span>
+                          <span className={cn("text-xs font-medium", isDark ? "text-slate-500" : "text-slate-400")}>—</span>
                         )}
                       </td>
-                      <td className="py-4 px-6 text-xs text-slate-500 font-medium">
+                      <td className={cn("py-4 px-6 text-xs font-medium", isDark ? "text-slate-400" : "text-slate-500")}>
                         {new Date(contact.created_at).toLocaleDateString()}
                       </td>
                       <td className="py-4 px-6 text-right">
                         <button
                           onClick={(e) => openInInbox(contact, e)}
-                          className="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-50 hover:bg-emerald-600 text-emerald-700 hover:text-white rounded-lg text-xs font-bold border border-emerald-200 transition-colors"
+                          className={cn(
+                            "inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold border transition-colors",
+                            isDark
+                              ? "bg-emerald-950/60 hover:bg-emerald-600 text-emerald-300 hover:text-white border-emerald-800"
+                              : "bg-emerald-50 hover:bg-emerald-600 text-emerald-700 hover:text-white border-emerald-200"
+                          )}
                           title="Open Live Chat in Inbox"
                         >
                           <MessageSquare size={12} />
@@ -469,7 +552,7 @@ export default function CRMPage() {
                   })}
                   {filteredContacts.length === 0 && (
                     <tr>
-                      <td colSpan="7" className="py-12 text-center text-slate-500 font-medium">
+                      <td colSpan="7" className={cn("py-12 text-center font-medium", isDark ? "text-slate-500" : "text-slate-500")}>
                         No leads found matching your search.
                       </td>
                     </tr>
@@ -486,13 +569,22 @@ export default function CRMPage() {
               return (
                 <div 
                   key={stage.id} 
-                  className="w-80 shrink-0 flex flex-col bg-slate-100/50 rounded-2xl border border-slate-200/60 overflow-hidden"
+                  className={cn(
+                    "w-80 shrink-0 flex flex-col rounded-2xl border overflow-hidden transition-colors",
+                    isDark ? "bg-[#0f172a]/70 border-slate-800" : "bg-slate-100/50 border-slate-200/60"
+                  )}
                   onDragOver={handleDragOver}
                   onDrop={(e) => handleDrop(e, stage.id)}
                 >
-                  <div className="p-3.5 border-b border-slate-200/60 flex items-center justify-between bg-slate-100/80">
-                    <h3 className="font-bold text-slate-700 text-xs sm:text-sm">{stage.label}</h3>
-                    <span className="bg-white text-slate-500 text-xs font-bold px-2 py-0.5 rounded-full shadow-sm border border-slate-200">
+                  <div className={cn(
+                    "p-3.5 border-b flex items-center justify-between transition-colors",
+                    isDark ? "bg-[#0f172a] border-slate-800" : "bg-slate-100/80 border-slate-200/60"
+                  )}>
+                    <h3 className={cn("font-bold text-xs sm:text-sm", isDark ? "text-slate-200" : "text-slate-700")}>{stage.label}</h3>
+                    <span className={cn(
+                      "text-xs font-bold px-2 py-0.5 rounded-full shadow-sm border",
+                      isDark ? "bg-slate-800 text-slate-300 border-slate-700" : "bg-white text-slate-500 border-slate-200"
+                    )}>
                       {stageContacts.length}
                     </span>
                   </div>
@@ -509,46 +601,61 @@ export default function CRMPage() {
                           draggable
                           onDragStart={(e) => handleDragStart(e, contact.id)}
                           onClick={() => setSelectedContact(contact)}
-                          className="bg-white p-3.5 rounded-xl shadow-sm border border-slate-200/80 cursor-grab active:cursor-grabbing hover:shadow-md transition-all group relative"
+                          className={cn(
+                            "p-3.5 rounded-xl shadow-sm border cursor-grab active:cursor-grabbing hover:shadow-md transition-all group relative",
+                            isDark ? "bg-[#1e293b] border-slate-700 text-slate-100" : "bg-white border-slate-200/80 text-slate-900"
+                          )}
                         >
                           <div className="flex justify-between items-start mb-1.5">
-                            <h4 className="font-bold text-slate-800 text-sm truncate pr-2">
+                            <h4 className={cn("font-bold text-sm truncate pr-2", isDark ? "text-slate-100" : "text-slate-800")}>
                               {contact.name !== 'Unknown' ? contact.name : contact.phone_number || 'Unknown User'}
                             </h4>
 
                             {/* Channel Pill Badge */}
                             {ch === 'WHATSAPP' && (
-                              <span className="inline-flex items-center text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0">
+                              <span className={cn(
+                                "inline-flex items-center text-[10px] font-bold px-1.5 py-0.5 rounded-md border shrink-0",
+                                isDark ? "bg-emerald-950/60 text-emerald-300 border-emerald-800/60" : "bg-emerald-50 text-emerald-700 border-emerald-200"
+                              )}>
                                 WhatsApp
                               </span>
                             )}
                             {ch === 'INSTAGRAM' && (
-                              <span className="inline-flex items-center text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-purple-50 text-purple-700 border border-purple-200 shrink-0">
+                              <span className={cn(
+                                "inline-flex items-center text-[10px] font-bold px-1.5 py-0.5 rounded-md border shrink-0",
+                                isDark ? "bg-purple-950/60 text-purple-300 border-purple-800/60" : "bg-purple-50 text-purple-700 border-purple-200"
+                              )}>
                                 Instagram
                               </span>
                             )}
                             {ch === 'FACEBOOK' && (
-                              <span className="inline-flex items-center text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-blue-50 text-blue-700 border border-blue-200 shrink-0">
+                              <span className={cn(
+                                "inline-flex items-center text-[10px] font-bold px-1.5 py-0.5 rounded-md border shrink-0",
+                                isDark ? "bg-blue-950/60 text-blue-300 border-blue-800/60" : "bg-blue-50 text-blue-700 border-blue-200"
+                              )}>
                                 Messenger
                               </span>
                             )}
                             {ch === 'GMAIL' && (
-                              <span className="inline-flex items-center text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-amber-50 text-amber-700 border border-amber-200 shrink-0">
+                              <span className={cn(
+                                "inline-flex items-center text-[10px] font-bold px-1.5 py-0.5 rounded-md border shrink-0",
+                                isDark ? "bg-amber-950/60 text-amber-300 border-amber-800/60" : "bg-amber-50 text-amber-700 border-amber-200"
+                              )}>
                                 Email
                               </span>
                             )}
                           </div>
                           
                           {contact.phone_number && (
-                            <div className="flex items-center gap-1.5 text-xs text-slate-500 font-medium mt-1">
-                              <Phone size={11} className="text-slate-400 shrink-0" />
+                            <div className={cn("flex items-center gap-1.5 text-xs font-medium mt-1", isDark ? "text-slate-400" : "text-slate-500")}>
+                              <Phone size={11} className={isDark ? "text-slate-500 shrink-0" : "text-slate-400 shrink-0"} />
                               <span className="truncate">{contact.phone_number}</span>
                             </div>
                           )}
                           
                           {contact.email && (
-                            <div className="flex items-center gap-1.5 text-xs text-slate-500 font-medium mt-0.5">
-                              <Mail size={11} className="text-slate-400 shrink-0" />
+                            <div className={cn("flex items-center gap-1.5 text-xs font-medium mt-0.5", isDark ? "text-slate-400" : "text-slate-500")}>
+                              <Mail size={11} className={isDark ? "text-slate-500 shrink-0" : "text-slate-400 shrink-0"} />
                               <span className="truncate">{contact.email}</span>
                             </div>
                           )}
@@ -557,10 +664,10 @@ export default function CRMPage() {
                           {hasFollowUp && (
                             <div className={`mt-2 flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-bold ${
                               isFuOverdue 
-                                ? 'bg-rose-50 text-rose-700 border border-rose-200' 
-                                : 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                                ? (isDark ? 'bg-rose-950/60 text-rose-300 border border-rose-800' : 'bg-rose-50 text-rose-700 border border-rose-200')
+                                : (isDark ? 'bg-emerald-950/60 text-emerald-300 border border-emerald-800' : 'bg-emerald-50 text-emerald-800 border border-emerald-200')
                             }`}>
-                              <Clock size={11} className={isFuOverdue ? 'text-rose-500' : 'text-emerald-600'} />
+                              <Clock size={11} className={isFuOverdue ? 'text-rose-500' : 'text-emerald-500'} />
                               <span className="truncate">
                                 {isFuOverdue ? 'Overdue: ' : 'Due: '}
                                 {new Date(contact.next_followup_at).toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
@@ -568,7 +675,7 @@ export default function CRMPage() {
                             </div>
                           )}
 
-                          <div className="mt-2.5 pt-2.5 border-t border-slate-100 flex items-center justify-between">
+                          <div className={cn("mt-2.5 pt-2.5 border-t flex items-center justify-between", isDark ? "border-slate-700/80" : "border-slate-100")}>
                             <div className={`text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-md border ${stage.color}`}>
                               {stage.label}
                             </div>
@@ -576,7 +683,12 @@ export default function CRMPage() {
                             <div className="flex items-center gap-1">
                               <button 
                                 onClick={(e) => openInInbox(contact, e)}
-                                className="px-2 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-600 text-emerald-700 hover:text-white flex items-center gap-1 text-[11px] font-bold transition-all border border-emerald-200"
+                                className={cn(
+                                  "px-2 py-1 rounded-lg flex items-center gap-1 text-[11px] font-bold transition-all border",
+                                  isDark
+                                    ? "bg-emerald-950/60 hover:bg-emerald-600 text-emerald-300 hover:text-white border-emerald-800"
+                                    : "bg-emerald-50 hover:bg-emerald-600 text-emerald-700 hover:text-white border-emerald-200"
+                                )}
                                 title="Open Live Chat in Inbox"
                               >
                                 <MessageSquare size={11} />
@@ -589,7 +701,10 @@ export default function CRMPage() {
                     })}
                     
                     {stageContacts.length === 0 && (
-                      <div className="h-24 flex items-center justify-center border-2 border-dashed border-slate-200 rounded-xl text-xs font-bold text-slate-400 uppercase tracking-widest text-center px-4">
+                      <div className={cn(
+                        "h-24 flex items-center justify-center border-2 border-dashed rounded-xl text-xs font-bold uppercase tracking-widest text-center px-4",
+                        isDark ? "border-slate-800 text-slate-600" : "border-slate-200 text-slate-400"
+                      )}>
                         Drop here
                       </div>
                     )}

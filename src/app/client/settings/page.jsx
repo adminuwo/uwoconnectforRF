@@ -11,10 +11,12 @@ import { API_BASE_URL } from '@/config/apiConfig';
 import LearningCenterModal from '@/components/guides/LearningCenterModal';
 import { cn } from '@/lib/utils';
 import { useBrand } from '@/context/BrandContext';
+import { useTheme } from '@/context/ThemeContext';
 import PasswordStrengthIndicator from '@/components/auth/PasswordStrengthIndicator';
 import { evaluatePassword } from '@/lib/passwordValidation';
 
 const ClientSettingsPage = () => {
+  const { isDark } = useTheme();
   const searchParams = useSearchParams();
   const { resetTour } = useTour();
   const { refreshBrand } = useBrand();
@@ -509,7 +511,10 @@ const ClientSettingsPage = () => {
       <div className="w-full pb-20 px-3 sm:px-6 lg:px-8 space-y-6 animate-in fade-in duration-300">
         
         {/* ── Unified Settings Container ── */}
-        <div className="bg-white border border-slate-200/90 rounded-3xl shadow-sm overflow-hidden divide-y divide-slate-100">
+        <div className={cn(
+          "rounded-3xl shadow-sm overflow-hidden divide-y border transition-colors",
+          isDark ? "bg-[#0f172a] border-slate-800 divide-slate-800/80 text-slate-100" : "bg-white border-slate-200/90 divide-slate-100 text-slate-900"
+        )}>
           
           {/* 1. Header Bar */}
           <div className="settings-header-banner p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-5 bg-gradient-to-r from-slate-50/50 via-white to-emerald-50/20 dark:from-slate-900 dark:via-slate-900/70 dark:to-emerald-950/30 border-b border-slate-100 dark:border-slate-800/80">
@@ -655,7 +660,10 @@ const ClientSettingsPage = () => {
                 <button
                   type="button"
                   onClick={() => setIsUpgradeModalOpen(true)}
-                  className="px-4 py-2 bg-slate-900 hover:bg-black text-white rounded-xl text-xs font-bold transition shadow-xs cursor-pointer whitespace-nowrap"
+                  className={cn(
+                    "px-4 py-2 rounded-xl text-xs font-bold transition shadow-xs cursor-pointer whitespace-nowrap",
+                    isDark ? "bg-emerald-600 hover:bg-emerald-500 text-white" : "bg-emerald-600 hover:bg-emerald-700 text-white"
+                  )}
                 >
                   Upgrade Plan
                 </button>
@@ -1286,30 +1294,53 @@ const ClientSettingsPage = () => {
         {/* ── Dynamic Workspace Upgrade Plans Selection Modal ── */}
         {isUpgradeModalOpen && (
           <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in overflow-y-auto">
-            <div className="bg-white w-full max-w-4xl rounded-3xl shadow-2xl border border-slate-100 overflow-hidden my-8 animate-in zoom-in-95 duration-200">
+            <div className={cn(
+              "w-full max-w-4xl rounded-3xl shadow-2xl border overflow-hidden my-8 animate-in zoom-in-95 duration-200",
+              isDark ? "bg-[#0f172a] border-slate-800 text-slate-100" : "bg-white border-slate-100 text-slate-900"
+            )}>
               
               {/* Header */}
-              <div className="p-6 sm:p-8 border-b border-slate-100 dark:border-slate-800 bg-gradient-to-r from-emerald-50/60 via-white to-teal-50/60 dark:from-emerald-950/40 dark:via-slate-900 dark:to-teal-950/40 flex items-start justify-between">
+              <div className={cn(
+                "p-6 sm:p-8 border-b flex items-start justify-between",
+                isDark 
+                  ? "border-slate-800 bg-gradient-to-r from-emerald-950/40 via-slate-900 to-teal-950/40" 
+                  : "border-slate-100 bg-gradient-to-r from-emerald-50/60 via-white to-teal-50/60"
+              )}>
                 <div>
                   <div className="flex items-center gap-2 mb-1.5">
-                    <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-400 dark:border-emerald-800/60">
+                    <span className={cn(
+                      "px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border",
+                      isDark ? "bg-emerald-950/60 text-emerald-400 border-emerald-800/60" : "bg-emerald-50 text-emerald-700 border-emerald-200"
+                    )}>
                       Workspace Plans & Scale
                     </span>
-                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:border dark:border-slate-700">
+                    <span className={cn(
+                      "px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase border",
+                      isDark ? "bg-slate-800 text-slate-300 border-slate-700" : "bg-slate-100 text-slate-700 border-slate-200"
+                    )}>
                       Current: {client?.plan || 'Free'} Tier
                     </span>
                   </div>
-                  <h3 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+                  <h3 className={cn(
+                    "text-xl sm:text-2xl font-black tracking-tight",
+                    isDark ? "text-white" : "text-slate-900"
+                  )}>
                     Upgrade Your Workspace Plan
                   </h3>
-                  <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
+                  <p className={cn(
+                    "text-xs sm:text-sm mt-1",
+                    isDark ? "text-slate-400" : "text-slate-500"
+                  )}>
                     Choose the plan suited for your team size, communication channels, and automation volume.
                   </p>
                 </div>
 
                 <button
                   onClick={() => setIsUpgradeModalOpen(false)}
-                  className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition-all cursor-pointer"
+                  className={cn(
+                    "p-1.5 rounded-xl transition-all cursor-pointer",
+                    isDark ? "text-slate-400 hover:text-slate-200 hover:bg-slate-800" : "text-slate-400 hover:text-slate-700 hover:bg-slate-100"
+                  )}
                 >
                   <X size={20} />
                 </button>
@@ -1319,14 +1350,19 @@ const ClientSettingsPage = () => {
               <div className="px-6 sm:px-8 pt-6 pb-2 flex items-center justify-center gap-4">
                 <span className={cn(
                   "text-xs font-bold transition-colors cursor-pointer",
-                  billingCycle === 'MONTHLY' ? "text-slate-900" : "text-slate-400"
+                  billingCycle === 'MONTHLY' 
+                    ? (isDark ? "text-white" : "text-slate-900") 
+                    : (isDark ? "text-slate-500 hover:text-slate-400" : "text-slate-400 hover:text-slate-600")
                 )} onClick={() => setBillingCycle('MONTHLY')}>
                   Monthly Billing
                 </span>
                 <button
                   type="button"
                   onClick={() => setBillingCycle(prev => prev === 'MONTHLY' ? 'ANNUAL' : 'MONTHLY')}
-                  className="w-12 h-6 rounded-full bg-slate-200 p-0.5 relative transition-colors cursor-pointer hover:bg-slate-300"
+                  className={cn(
+                    "w-12 h-6 rounded-full p-0.5 relative transition-colors cursor-pointer",
+                    isDark ? "bg-slate-800 hover:bg-slate-700" : "bg-slate-200 hover:bg-slate-300"
+                  )}
                 >
                   <div className={cn(
                     "w-5 h-5 rounded-full bg-emerald-600 transition-all duration-200",
@@ -1335,10 +1371,15 @@ const ClientSettingsPage = () => {
                 </button>
                 <span className={cn(
                   "text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer",
-                  billingCycle === 'ANNUAL' ? "text-emerald-700" : "text-slate-400"
+                  billingCycle === 'ANNUAL' 
+                    ? (isDark ? "text-emerald-400" : "text-emerald-700") 
+                    : (isDark ? "text-slate-500 hover:text-slate-400" : "text-slate-400 hover:text-slate-600")
                 )} onClick={() => setBillingCycle('ANNUAL')}>
                   Annual Billing
-                  <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-emerald-100 text-emerald-800 border border-emerald-300">
+                  <span className={cn(
+                    "px-2 py-0.5 rounded-full text-[9px] font-black uppercase border",
+                    isDark ? "bg-emerald-950/60 text-emerald-300 border-emerald-800" : "bg-emerald-100 text-emerald-800 border-emerald-300"
+                  )}>
                     Save 15%
                   </span>
                 </span>
@@ -1359,8 +1400,8 @@ const ClientSettingsPage = () => {
                       className={cn(
                         "rounded-3xl p-6 flex flex-col justify-between transition-all relative border",
                         plan.is_popular 
-                          ? "bg-gradient-to-b from-emerald-50/60 to-white border-emerald-500 ring-2 ring-emerald-500/20 shadow-md" 
-                          : "bg-white hover:bg-slate-50/50 border-slate-200/90 shadow-2xs"
+                          ? (isDark ? "bg-emerald-950/20 border-emerald-500 ring-2 ring-emerald-500/20 shadow-md text-white" : "bg-gradient-to-b from-emerald-50/60 to-white border-emerald-500 ring-2 ring-emerald-500/20 shadow-md") 
+                          : (isDark ? "bg-[#1e293b] hover:bg-[#253248] border-slate-700/80 text-white shadow-2xs" : "bg-white hover:bg-slate-50/50 border-slate-200/90 shadow-2xs")
                       )}
                     >
                       {plan.is_popular && (
@@ -1371,33 +1412,45 @@ const ClientSettingsPage = () => {
 
                       <div>
                         <div className="flex items-center justify-between gap-2 mb-2">
-                          <h4 className="text-base font-extrabold text-slate-900">{plan.name}</h4>
-                          <span className="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase bg-slate-100 text-slate-700 border border-slate-200">
+                          <h4 className={cn("text-base font-extrabold", isDark ? "text-white" : "text-slate-900")}>{plan.name}</h4>
+                          <span className={cn(
+                            "px-2 py-0.5 rounded-md text-[10px] font-bold uppercase border",
+                            isDark ? "bg-slate-800 text-slate-300 border-slate-700" : "bg-slate-100 text-slate-700 border-slate-200"
+                          )}>
                             {plan.badge}
                           </span>
                         </div>
-                        <p className="text-xs text-slate-500 min-h-[32px] leading-relaxed">
+                        <p className={cn(
+                          "text-xs min-h-[32px] leading-relaxed",
+                          isDark ? "text-slate-400" : "text-slate-500"
+                        )}>
                           {plan.description}
                         </p>
 
                         {/* Price */}
-                        <div className="my-5 pb-4 border-b border-slate-100">
+                        <div className={cn(
+                          "my-5 pb-4 border-b",
+                          isDark ? "border-slate-800" : "border-slate-100"
+                        )}>
                           <div className="flex items-baseline gap-1.5">
-                            <span className="text-3xl font-black text-slate-900 tracking-tight">
+                            <span className={cn(
+                              "text-3xl font-black tracking-tight",
+                              isDark ? "text-white" : "text-slate-900"
+                            )}>
                               ₹{displayPrice.toLocaleString('en-IN')}
                             </span>
-                            <span className="text-xs font-semibold text-slate-500">/ month</span>
+                            <span className={cn("text-xs font-semibold", isDark ? "text-slate-400" : "text-slate-500")}>/ month</span>
                           </div>
-                          <span className="text-[11px] text-slate-400 font-medium">
+                          <span className={cn("text-[11px] font-medium", isDark ? "text-slate-500" : "text-slate-400")}>
                             {billingCycle === 'ANNUAL' ? 'Billed annually via Razorpay' : 'Billed monthly via Razorpay'}
                           </span>
                         </div>
 
                         {/* Features List */}
-                        <ul className="space-y-2.5 mb-6 text-xs text-slate-700">
+                        <ul className={cn("space-y-2.5 mb-6 text-xs", isDark ? "text-slate-300" : "text-slate-700")}>
                           {plan.features.map((feat, i) => (
                             <li key={i} className="flex items-start gap-2">
-                              <span className="text-emerald-600 font-bold shrink-0">✓</span>
+                              <span className="text-emerald-500 font-bold shrink-0">✓</span>
                               <span className="leading-snug">{feat}</span>
                             </li>
                           ))}
@@ -1409,7 +1462,10 @@ const ClientSettingsPage = () => {
                         {isCurrent ? (
                           <button
                             disabled
-                            className="w-full py-3 bg-slate-100 text-slate-500 rounded-xl font-bold text-xs cursor-not-allowed border border-slate-200 text-center"
+                            className={cn(
+                              "w-full py-3 rounded-xl font-bold text-xs cursor-not-allowed border text-center",
+                              isDark ? "bg-slate-800 text-slate-500 border-slate-700" : "bg-slate-100 text-slate-500 border-slate-200"
+                            )}
                           >
                             Current Active Plan
                           </button>
@@ -1425,7 +1481,7 @@ const ClientSettingsPage = () => {
                               "w-full py-3 rounded-xl font-bold text-xs uppercase tracking-wider transition-all shadow-xs cursor-pointer text-center",
                               plan.is_popular 
                                 ? "bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-600/20 shadow-md" 
-                                : "bg-slate-900 hover:bg-black text-white"
+                                : (isDark ? "bg-slate-800 hover:bg-slate-700 text-white border border-slate-700" : "bg-slate-900 hover:bg-black text-white")
                             )}
                           >
                             Upgrade with Razorpay
@@ -1439,15 +1495,21 @@ const ClientSettingsPage = () => {
               </div>
 
               {/* Footer */}
-              <div className="p-4 border-t border-slate-100 bg-slate-50/70 flex items-center justify-between text-xs text-slate-500">
+              <div className={cn(
+                "p-4 border-t flex items-center justify-between text-xs",
+                isDark ? "border-slate-800 bg-[#0b0f19] text-slate-400" : "border-slate-100 bg-slate-50/70 text-slate-500"
+              )}>
                 <div className="flex items-center gap-1.5">
-                  <ShieldCheck size={14} className="text-emerald-600" />
+                  <ShieldCheck size={14} className="text-emerald-500" />
                   <span>256-bit SSL Secure checkout via Razorpay Payments</span>
                 </div>
                 <button
                   type="button"
                   onClick={() => setIsUpgradeModalOpen(false)}
-                  className="px-4 py-1.5 text-xs font-bold text-slate-600 hover:bg-slate-200 rounded-lg cursor-pointer transition-colors"
+                  className={cn(
+                    "px-4 py-1.5 text-xs font-bold rounded-lg cursor-pointer transition-colors",
+                    isDark ? "text-slate-300 hover:bg-slate-800" : "text-slate-600 hover:bg-slate-200"
+                  )}
                 >
                   Close
                 </button>

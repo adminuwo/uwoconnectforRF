@@ -146,7 +146,7 @@ export default function AddMoneyModal({ isOpen, onClose, onSuccess }) {
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="bg-white rounded-[32px] w-full max-w-lg overflow-hidden shadow-2xl border border-slate-100 animate-in zoom-in-95 duration-200">
+      <div className="bg-white dark:bg-slate-900 rounded-[32px] w-full max-w-lg overflow-hidden shadow-2xl border border-slate-100 dark:border-slate-800 animate-in zoom-in-95 duration-200">
         
         {/* Header */}
         <div className="p-6 bg-gradient-to-r from-slate-900 via-slate-800 to-emerald-950 text-white relative flex items-center justify-between">
@@ -174,25 +174,25 @@ export default function AddMoneyModal({ isOpen, onClose, onSuccess }) {
         <div className="p-6 sm:p-8 space-y-6 text-left">
           
           {error && (
-            <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-semibold flex items-center gap-2">
-              <AlertCircle size={16} className="shrink-0 text-rose-600" />
+            <div className="p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 text-rose-800 dark:text-rose-300 text-xs font-semibold flex items-center gap-2">
+              <AlertCircle size={16} className="shrink-0 text-rose-600 dark:text-rose-400" />
               <span>{error}</span>
             </div>
           )}
 
           {successMsg && (
-            <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs font-extrabold flex items-center gap-2.5 animate-in zoom-in-95 duration-150">
-              <CheckCircle2 size={18} className="shrink-0 text-emerald-600" />
+            <div className="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-900 dark:text-emerald-300 text-xs font-extrabold flex items-center gap-2.5 animate-in zoom-in-95 duration-150">
+              <CheckCircle2 size={18} className="shrink-0 text-emerald-600 dark:text-emerald-400" />
               <div>
                 <span>{successMsg}</span>
-                <span className="block text-[11px] font-medium text-emerald-700 mt-0.5">⚡ Broadcast entitlement unlocked &amp; enabled!</span>
+                <span className="block text-[11px] font-medium text-emerald-700 dark:text-emerald-400 mt-0.5">⚡ Broadcast entitlement unlocked &amp; enabled!</span>
               </div>
             </div>
           )}
 
           {/* Preset Buttons */}
           <div className="space-y-2">
-            <label className="text-xs font-extrabold uppercase tracking-wider text-slate-500">Select Preset Amount</label>
+            <label className="text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">Select Preset Amount</label>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {PRESETS.map((amt) => (
                 <button
@@ -205,7 +205,7 @@ export default function AddMoneyModal({ isOpen, onClose, onSuccess }) {
                   className={`py-3 px-4 rounded-2xl border font-black text-sm transition-all cursor-pointer ${
                     selectedPreset === amt && !customAmount
                       ? 'bg-emerald-500 text-white border-emerald-600 shadow-md shadow-emerald-500/20 scale-[1.02]'
-                      : 'bg-slate-50 text-slate-800 border-slate-200 hover:border-emerald-300 hover:bg-slate-100'
+                      : 'bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border-slate-200 dark:border-slate-700 hover:border-emerald-300 hover:bg-slate-100 dark:hover:bg-slate-700'
                   }`}
                 >
                   ₹{amt.toLocaleString('en-IN')}
@@ -216,7 +216,7 @@ export default function AddMoneyModal({ isOpen, onClose, onSuccess }) {
 
           {/* Custom Amount Input */}
           <div className="space-y-2">
-            <label className="text-xs font-extrabold uppercase tracking-wider text-slate-500">Or Enter Custom Amount (₹)</label>
+            <label className="text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">Or Enter Custom Amount (₹)</label>
             <div className="relative">
               <span className="absolute left-4 top-1/2 -translate-y-1/2 font-black text-slate-400 text-base">₹</span>
               <input
@@ -228,22 +228,22 @@ export default function AddMoneyModal({ isOpen, onClose, onSuccess }) {
                   setCustomAmount(e.target.value);
                   setSelectedPreset(null);
                 }}
-                className="w-full pl-9 pr-4 py-3.5 rounded-2xl border border-slate-200 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 font-bold text-slate-900 outline-none text-sm transition-all"
+                className="w-full pl-9 pr-4 py-3.5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 font-bold outline-none text-sm transition-all"
               />
             </div>
           </div>
 
           {/* Wallet Summary Notice */}
-          <div className="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200/80 text-emerald-950 space-y-1">
+          <div className="p-4 rounded-2xl bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200/80 dark:border-emerald-800/60 text-emerald-950 dark:text-emerald-200 space-y-1">
             <div className="flex items-center justify-between text-xs font-bold">
               <span>Recharge Amount:</span>
-              <span className="text-sm font-black text-emerald-700">₹{(currentAmount || 0).toLocaleString('en-IN')}</span>
+              <span className="text-sm font-black text-emerald-600 dark:text-emerald-400">₹{(currentAmount || 0).toLocaleString('en-IN')}</span>
             </div>
-            <div className="flex items-center justify-between text-xs font-bold pt-1 border-t border-emerald-200/60">
+            <div className="flex items-center justify-between text-xs font-bold pt-1 border-t border-emerald-200/60 dark:border-emerald-800/40">
               <span>New Wallet Credit:</span>
-              <span className="text-xs font-extrabold text-slate-700">+ ₹{(currentAmount || 0).toLocaleString('en-IN')}</span>
+              <span className="text-xs font-extrabold text-slate-700 dark:text-slate-300">+ ₹{(currentAmount || 0).toLocaleString('en-IN')}</span>
             </div>
-            <p className="text-[11px] text-slate-500 pt-1">
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 pt-1">
               * Note: The ₹499/mo UWO Connect subscription is managed separately and will not be deducted from this credit.
             </p>
           </div>
@@ -253,7 +253,7 @@ export default function AddMoneyModal({ isOpen, onClose, onSuccess }) {
             <button
               type="button"
               onClick={onClose}
-              className="px-5 py-3 rounded-2xl text-slate-600 font-bold text-xs hover:bg-slate-100 transition-colors cursor-pointer"
+              className="px-5 py-3 rounded-2xl text-slate-600 dark:text-slate-400 font-bold text-xs hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
             >
               Cancel
             </button>
