@@ -22,7 +22,7 @@ export default function LandingLayout({ children, activePage = '' }) {
   const pathname = usePathname();
   const { brand, isWhiteLabel } = useBrand();
 
-  const [isDarkMode, setIsDarkMode] = useState(true);
+  const [isDarkMode, setIsDarkMode] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [loggedInUser, setLoggedInUser] = useState(null);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
@@ -39,15 +39,15 @@ export default function LandingLayout({ children, activePage = '' }) {
       }
     } catch (e) { }
 
-    // Default to dark mode unless explicitly set to light
+    // Default to light mode unless explicitly set to dark
     try {
-      const savedTheme = localStorage.getItem('uwo_landing_theme');
-      if (savedTheme === 'light') {
-        setIsDarkMode(false);
-        document.documentElement.classList.remove('dark');
-      } else {
+      const savedTheme = localStorage.getItem('uwo_landing_theme') || localStorage.getItem('uwo_theme');
+      if (savedTheme === 'dark') {
         setIsDarkMode(true);
         document.documentElement.classList.add('dark');
+      } else {
+        setIsDarkMode(false);
+        document.documentElement.classList.remove('dark');
       }
     } catch (e) { }
   }, []);
@@ -59,10 +59,6 @@ export default function LandingLayout({ children, activePage = '' }) {
     } else {
       document.documentElement.classList.remove('dark');
     }
-    // Cleanup on unmount
-    return () => {
-      document.documentElement.classList.remove('dark');
-    };
   }, [isDarkMode]);
 
   const toggleTheme = () => {
@@ -70,6 +66,7 @@ export default function LandingLayout({ children, activePage = '' }) {
     setIsDarkMode(newTheme);
     try {
       localStorage.setItem('uwo_landing_theme', newTheme ? 'dark' : 'light');
+      localStorage.setItem('uwo_theme', newTheme ? 'dark' : 'light');
     } catch (e) { }
   };
 

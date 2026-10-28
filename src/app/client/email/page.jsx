@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { API_BASE_URL } from '@/config/apiConfig';
 import {
   Mail,
@@ -260,9 +260,37 @@ const ClientEmailPage = () => {
     }
   };
 
+  const fetchAutoReplyRule = useCallback(async () => {
+    try {
+      const token = localStorage.getItem('uwo_token');
+      if (!token) return;
+      const res = await axios.get(`${API_BASE_URL}/api/email/auto-replies/`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const rules = res.data?.results || (Array.isArray(res.data) ? res.data : []);
+      if (rules && rules.length > 0) {
+        const activeRule = rules.find(r => r.is_active) || rules[0];
+        if (activeRule) {
+          if (activeRule.reply_subject) setAutoReplySubject(activeRule.reply_subject);
+          if (activeRule.reply_body) setAutoReplyBody(activeRule.reply_body);
+          if (typeof activeRule.is_active === 'boolean') setAutoReplyActive(activeRule.is_active);
+        }
+      }
+    } catch (err) {
+      console.warn('Auto-reply fetch notice:', err.message);
+    }
+  }, []);
+
   useEffect(() => {
     fetchClientData();
-  }, []);
+    fetchAutoReplyRule();
+  }, [fetchAutoReplyRule]);
+
+  useEffect(() => {
+    if (isAutoReplyModalOpen) {
+      fetchAutoReplyRule();
+    }
+  }, [isAutoReplyModalOpen, fetchAutoReplyRule]);
 
   useEffect(() => {
     const cacheKey = `${activeFolder}_${selectedProvider}`;
