@@ -172,26 +172,6 @@ export default function ClientInboxPage() {
 
       let rawConvos = Array.isArray(convoRes.data) ? convoRes.data : (convoRes.data?.results || []);
 
-      // If conversations table is empty for this client on initial load, fallback to contacts only for 'ALL' tab
-      if (rawConvos.length === 0 && offset === 0 && (!channel || channel === 'ALL')) {
-        const contactRes = await axios.get(
-          `${apiUrl}/api/contacts/?limit=${limit}&offset=0${searchParam}`,
-          { headers }
-        ).catch(() => ({ data: [] }));
-        const rawContacts = Array.isArray(contactRes.data) ? contactRes.data : (contactRes.data?.results || []);
-        
-        rawConvos = rawContacts.map(ct => ({
-          id: ct.id,
-          contact_name: ct.name || ct.phone_number || ct.platform_id || 'Customer',
-          contact_platform_id: ct.platform_id || ct.phone_number || ct.id,
-          contact_phone: ct.phone_number,
-          channel: (ct.preferred_channel || 'WHATSAPP').toUpperCase(),
-          last_message_summary: 'Tap to view messages...',
-          last_message_at: ct.updated_at || ct.created_at,
-          unread_count_admin: 0,
-          status: ct.stage || 'OPEN'
-        }));
-      }
 
       setHasMoreConvos(rawConvos.length >= limit);
 

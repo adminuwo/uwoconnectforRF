@@ -17,7 +17,7 @@ export function ThemeProvider({ children }) {
     setMounted(true);
     try {
       const savedTheme = localStorage.getItem('uwo_theme') || localStorage.getItem('uwo_landing_theme');
-      if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      if (savedTheme === 'dark') {
         setThemeState('dark');
         document.documentElement.classList.add('dark');
       } else {

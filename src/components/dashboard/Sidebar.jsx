@@ -301,6 +301,8 @@ const Sidebar = ({ role, isOpen, onClose, onToggle }) => {
     { name: 'Work Reports', href: '/admin/reports', icon: FileCheck },
     { name: 'Settings', href: '/admin/settings', icon: Settings },
     { name: 'Support', href: '/admin/support', icon: LifeBuoy },
+    { name: 'Contact Messages', href: '/admin/contact-messages', icon: Mail },
+    { name: 'User Feedback', href: '/admin/feedback', icon: MessagesSquare },
   ];
 
   const isAgencyUser = Boolean(

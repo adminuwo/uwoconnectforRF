@@ -12,7 +12,7 @@ export const UWO_PROJECTS = [
   { id: 'efv-framework', name: 'EFV™', url: 'https://efvframework.com/' },
 ];
 
-export default function ProjectsDropdown({ isDarkMode = true, align = 'right' }) {
+export default function ProjectsDropdown({ isDarkMode = false, align = 'right' }) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
 
@@ -110,7 +110,7 @@ export default function ProjectsDropdown({ isDarkMode = true, align = 'right' })
 }
 
 // Mobile Simple Accordion (Names Only)
-export function MobileProjectsAccordion({ isDarkMode = true, onItemClick }) {
+export function MobileProjectsAccordion({ isDarkMode = false, onItemClick }) {
   const [isExpanded, setIsExpanded] = useState(false);
 
   return (
