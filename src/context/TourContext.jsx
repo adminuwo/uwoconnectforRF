@@ -50,6 +50,23 @@ export const TourProvider = ({ children }) => {
     mountedRef.current = true;
     debugLog('Tour initialized');
 
+    // Never auto-start or navigate tour on auth or public pages
+    if (pathname && (pathname.startsWith('/auth') || pathname.startsWith('/public'))) {
+      setIsActive(false);
+      setIsNavigating(false);
+      return;
+    }
+
+    // Require an active authentication token to run tour
+    const token = localStorage.getItem('token') || localStorage.getItem('uwo_token');
+    if (!token) {
+      setIsActive(false);
+      setIsNavigating(false);
+      localStorage.removeItem(TOUR_ACTIVE_KEY);
+      localStorage.removeItem(TOUR_PENDING_KEY);
+      return;
+    }
+
     const pending = localStorage.getItem(TOUR_PENDING_KEY);
     const completed = localStorage.getItem(TOUR_COMPLETED_KEY);
     const savedStep = localStorage.getItem(TOUR_STEP_KEY);
@@ -69,17 +86,30 @@ export const TourProvider = ({ children }) => {
       setIsActive(true);
       setCurrentStep(stepIdx);
       const step = tourSteps[stepIdx];
-      if (step && step.page && step.page !== pathname) {
+      if (step && step.page && step.page !== pathname && !pathname.startsWith('/auth') && !pathname.startsWith('/public')) {
         setIsNavigating(true);
         prevPathRef.current = pathname;
         router.push(step.page);
       }
     }
-  }, []);
+  }, [pathname]);
+
+  // ── Immediately disarm and stop navigation if user visits auth/public pages ────
+  useEffect(() => {
+    if (pathname && (pathname.startsWith('/auth') || pathname.startsWith('/public'))) {
+      setIsActive(false);
+      setIsNavigating(false);
+    }
+  }, [pathname]);
 
   // ── Detect page change while tour is active ────────────────────────────────
   useEffect(() => {
     if (!isActive || !isNavigating) return;
+    if (pathname && (pathname.startsWith('/auth') || pathname.startsWith('/public'))) {
+      setIsActive(false);
+      setIsNavigating(false);
+      return;
+    }
     if (pathname !== prevPathRef.current) {
       prevPathRef.current = pathname;
       // Page has changed — wait a tick for DOM to settle then clear nav flag
@@ -90,6 +120,10 @@ export const TourProvider = ({ children }) => {
 
   // ── startTour ──────────────────────────────────────────────────────────────
   const startTour = useCallback((startIndex = 0) => {
+    if (pathname && (pathname.startsWith('/auth') || pathname.startsWith('/public'))) return;
+    const token = typeof window !== 'undefined' ? (localStorage.getItem('token') || localStorage.getItem('uwo_token')) : null;
+    if (!token) return;
+
     setCurrentStep(startIndex);
     setIsActive(true);
     setIsNavigating(false);
@@ -98,11 +132,12 @@ export const TourProvider = ({ children }) => {
       localStorage.setItem(TOUR_STEP_KEY, startIndex.toString());
       localStorage.removeItem(TOUR_COMPLETED_KEY);
     }
-  }, []);
+  }, [pathname]);
 
   // ── navigate to step ───────────────────────────────────────────────────────
   const goToStep = useCallback(
     (stepIndex) => {
+      if (pathname && (pathname.startsWith('/auth') || pathname.startsWith('/public'))) return;
       if (stepIndex < 0 || stepIndex >= totalSteps) return;
       const step = tourSteps[stepIndex];
       const needsNav = step.page && step.page !== pathname;

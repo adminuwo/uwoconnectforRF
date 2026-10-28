@@ -100,6 +100,32 @@ export default function AxiosNetworkFixer() {
           }
         }
 
+        // Handle 401 Unauthorized (Expired or invalid session token)
+        if (error.response?.status === 401) {
+          if (typeof window !== 'undefined') {
+            const currentPath = window.location.pathname;
+            const isAuthRoute = currentPath.startsWith('/auth') || currentPath.startsWith('/public');
+            const isAuthEndpoint = config.url && (config.url.includes('/api/auth/login') || config.url.includes('/api/auth/register'));
+
+            // Always purge stale expired credentials
+            if (!isAuthEndpoint) {
+              localStorage.removeItem('token');
+              localStorage.removeItem('uwo_token');
+              localStorage.removeItem('user');
+              localStorage.removeItem('cached_client_channels');
+            }
+
+            if (!isAuthRoute && !isAuthEndpoint && !window._uwo_redirecting_to_login) {
+              window._uwo_redirecting_to_login = true;
+              console.warn('[Session Expired]: Stale or expired token. Clearing session and redirecting to login...');
+              setTimeout(() => {
+                window.location.href = `/auth/login?expired=1&redirect=${encodeURIComponent(currentPath)}`;
+              }, 150);
+            }
+          }
+          return Promise.reject(error);
+        }
+
         return Promise.reject(error);
       }
     );

@@ -236,7 +236,29 @@ const ClientOverview = () => {
         if (statsRes.status === 'fulfilled' && statsRes.value?.data) {
           setStatsData(statsRes.value.data);
           if (statsRes.value.data.resourceCounts) {
-            setResourceCounts(prev => ({ ...prev, ...statsRes.value.data.resourceCounts }));
+            let resCounts = { ...statsRes.value.data.resourceCounts };
+            if (!resCounts.connectors || resCounts.connectors === 0) {
+              try {
+                const cached = JSON.parse(localStorage.getItem('cached_client_channels') || '{}');
+                const uClient = JSON.parse(localStorage.getItem('user') || '{}')?.client || {};
+                const src = Object.keys(cached).length > 0 ? cached : uClient;
+                let cCount = 0;
+                if (src.whatsapp_enabled || src.phone_number || src.whatsapp_access_token || src.whatsapp_config) cCount++;
+                if (src.facebook_enabled || src.facebook_config) cCount++;
+                if (src.instagram_enabled || src.instagram_config) cCount++;
+                if (src.gmail_enabled || src.gmail_config) cCount++;
+                if (src.outlook_enabled || src.outlook_config) cCount++;
+                if (src.youtube_enabled || src.youtube_config) cCount++;
+                if (src.google_news_enabled || src.google_news_config) cCount++;
+                if (src.google_calendar_enabled || src.google_calendar_config) cCount++;
+                if (src.google_sheets_enabled || src.google_sheets_config) cCount++;
+                if (src.google_docs_enabled || src.google_slides_enabled || src.google_docs_config) cCount++;
+                if (src.onedrive_enabled || src.onedrive_config) cCount++;
+                if (src.zoho_enabled || src.zoho_config) cCount++;
+                if (cCount > 0) resCounts.connectors = cCount;
+              } catch (e) {}
+            }
+            setResourceCounts(prev => ({ ...prev, ...resCounts }));
           }
         }
 
@@ -266,7 +288,13 @@ const ClientOverview = () => {
         setLoading(false);
       }
     };
+
     fetchDashboardData();
+
+    window.addEventListener('channelsUpdated', fetchDashboardData);
+    return () => {
+      window.removeEventListener('channelsUpdated', fetchDashboardData);
+    };
   }, []);
 
   const primaryMetrics = [
@@ -315,7 +343,7 @@ const ClientOverview = () => {
     },
   ];
 
-  if (loading) {
+  if (!mounted || loading) {
     return (
       <DashboardLayout role="CLIENT">
         <div className="h-[80vh] flex items-center justify-center">
