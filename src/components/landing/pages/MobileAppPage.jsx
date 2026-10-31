@@ -171,7 +171,7 @@ export default function MobileAppPage() {
             <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-gradient-to-tr from-[#0B8F78]/15 via-teal-500/10 to-transparent rounded-full blur-[140px] pointer-events-none" />
             <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-gradient-to-bl from-teal-500/15 via-blue-500/10 to-transparent rounded-full blur-[140px] pointer-events-none" />
 
-            <div className="w-full max-w-[1536px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 xl:gap-16 items-center relative z-10">
+            <div className="w-full max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 xl:gap-16 items-center relative z-10">
 
               {/* Left Column: Heading, Subtitle & Download CTAs */}
               <motion.div

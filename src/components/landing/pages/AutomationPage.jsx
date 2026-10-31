@@ -16,12 +16,24 @@ export default function AutomationPage() {
   const router = useRouter();
   const [activeStepIndex, setActiveStepIndex] = useState(0);
   const carouselRef = useRef(null);
+  const isFirstRender = useRef(true);
 
   useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
     if (carouselRef.current) {
       const activeCard = carouselRef.current.children[activeStepIndex];
       if (activeCard) {
-        activeCard.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        const container = carouselRef.current;
+        const cardLeft = activeCard.offsetLeft;
+        const cardWidth = activeCard.offsetWidth;
+        const containerWidth = container.offsetWidth;
+        container.scrollTo({
+          left: cardLeft - containerWidth / 2 + cardWidth / 2,
+          behavior: 'smooth'
+        });
       }
     }
   }, [activeStepIndex]);
@@ -250,66 +262,62 @@ export default function AutomationPage() {
                   </div>
                 </div>
 
-                {/* Surrounding Visual Capabilities (Light Mode only) */}
-                {!isDarkMode && (
-                  <>
-                    <motion.div animate={{ y: [0, -6, 0] }} transition={{ duration: 4, repeat: Infinity }} className="absolute -top-2 left-2 sm:left-6 z-20">
-                      <div className="px-3.5 py-2 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl text-xs font-extrabold text-[#0B8F78] flex items-center gap-2">
-                        <Activity size={16} />
-                        <span>WORKFLOWS</span>
-                      </div>
-                    </motion.div>
+                {/* Surrounding Visual Capabilities */}
+                <motion.div animate={{ y: [0, -6, 0] }} transition={{ duration: 4, repeat: Infinity }} className="absolute -top-2 left-2 sm:left-6 z-20">
+                  <div className="px-3.5 py-2 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl text-xs font-extrabold text-[#0B8F78] flex items-center gap-2">
+                    <Activity size={16} />
+                    <span>WORKFLOWS</span>
+                  </div>
+                </motion.div>
 
-                    <motion.div animate={{ y: [0, 6, 0] }} transition={{ duration: 4.5, repeat: Infinity, delay: 0.3 }} className="absolute -top-2 right-2 sm:right-6 z-20">
-                      <div className="px-3.5 py-2 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl text-xs font-extrabold text-blue-500 flex items-center gap-2">
-                        <Bot size={16} />
-                        <span>AI BOT</span>
-                      </div>
-                    </motion.div>
+                <motion.div animate={{ y: [0, 6, 0] }} transition={{ duration: 4.5, repeat: Infinity, delay: 0.3 }} className="absolute -top-2 right-2 sm:right-6 z-20">
+                  <div className="px-3.5 py-2 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl text-xs font-extrabold text-blue-500 flex items-center gap-2">
+                    <Bot size={16} />
+                    <span>AI BOT</span>
+                  </div>
+                </motion.div>
 
-                    <motion.div animate={{ y: [0, -5, 0] }} transition={{ duration: 4.2, repeat: Infinity, delay: 0.5 }} className="absolute top-1/4 -left-4 sm:left-0 z-20">
-                      <div className="px-3.5 py-2 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl text-xs font-extrabold text-amber-600 dark:text-amber-400 flex items-center gap-2">
-                        <Layers size={16} />
-                        <span>CATALOG</span>
-                      </div>
-                    </motion.div>
+                <motion.div animate={{ y: [0, -5, 0] }} transition={{ duration: 4.2, repeat: Infinity, delay: 0.5 }} className="absolute top-1/4 -left-4 sm:left-0 z-20">
+                  <div className="px-3.5 py-2 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl text-xs font-extrabold text-amber-600 dark:text-amber-400 flex items-center gap-2">
+                    <Layers size={16} />
+                    <span>CATALOG</span>
+                  </div>
+                </motion.div>
 
-                    <motion.div animate={{ y: [0, 5, 0] }} transition={{ duration: 4.8, repeat: Infinity, delay: 0.7 }} className="absolute top-1/4 -right-4 sm:right-0 z-20">
-                      <div className="px-3.5 py-2 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl text-xs font-extrabold text-pink-500 flex items-center gap-2">
-                        <FileCheck size={16} />
-                        <span>GST QUOTATIONS</span>
-                      </div>
-                    </motion.div>
+                <motion.div animate={{ y: [0, 5, 0] }} transition={{ duration: 4.8, repeat: Infinity, delay: 0.7 }} className="absolute top-1/4 -right-4 sm:right-0 z-20">
+                  <div className="px-3.5 py-2 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl text-xs font-extrabold text-pink-500 flex items-center gap-2">
+                    <FileCheck size={16} />
+                    <span>GST QUOTATIONS</span>
+                  </div>
+                </motion.div>
 
-                    <motion.div animate={{ y: [0, -6, 0] }} transition={{ duration: 4.4, repeat: Infinity, delay: 0.9 }} className="absolute top-1/2 -left-6 sm:left-2 z-20">
-                      <div className="px-3.5 py-2 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl text-xs font-extrabold text-indigo-500 flex items-center gap-2">
-                        <MessageSquare size={16} />
-                        <span>BROADCAST</span>
-                      </div>
-                    </motion.div>
+                <motion.div animate={{ y: [0, -6, 0] }} transition={{ duration: 4.4, repeat: Infinity, delay: 0.9 }} className="absolute top-1/2 -left-6 sm:left-2 z-20">
+                  <div className="px-3.5 py-2 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl text-xs font-extrabold text-indigo-500 flex items-center gap-2">
+                    <MessageSquare size={16} />
+                    <span>BROADCAST</span>
+                  </div>
+                </motion.div>
 
-                    <motion.div animate={{ y: [0, 6, 0] }} transition={{ duration: 5, repeat: Infinity, delay: 1.1 }} className="absolute bottom-12 left-2 sm:left-8 z-20">
-                      <div className="px-3.5 py-2 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl text-xs font-extrabold text-violet-500 flex items-center gap-2">
-                        <Zap size={16} />
-                        <span>KNOWLEDGEBASE</span>
-                      </div>
-                    </motion.div>
+                <motion.div animate={{ y: [0, 6, 0] }} transition={{ duration: 5, repeat: Infinity, delay: 1.1 }} className="absolute bottom-12 left-2 sm:left-8 z-20">
+                  <div className="px-3.5 py-2 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl text-xs font-extrabold text-violet-500 flex items-center gap-2">
+                    <Zap size={16} />
+                    <span>KNOWLEDGEBASE</span>
+                  </div>
+                </motion.div>
 
-                    <motion.div animate={{ y: [0, -6, 0] }} transition={{ duration: 4.2, repeat: Infinity, delay: 1.3 }} className="absolute bottom-12 right-2 sm:right-8 z-20">
-                      <div className="px-3.5 py-2 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl text-xs font-extrabold text-emerald-500 flex items-center gap-2">
-                        <Users size={16} />
-                        <span>CRM PIPELINE</span>
-                      </div>
-                    </motion.div>
+                <motion.div animate={{ y: [0, -6, 0] }} transition={{ duration: 4.2, repeat: Infinity, delay: 1.3 }} className="absolute bottom-12 right-2 sm:right-8 z-20">
+                  <div className="px-3.5 py-2 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl text-xs font-extrabold text-emerald-500 flex items-center gap-2">
+                    <Users size={16} />
+                    <span>CRM PIPELINE</span>
+                  </div>
+                </motion.div>
 
-                    <motion.div animate={{ scale: [1, 1.04, 1] }} transition={{ duration: 3, repeat: Infinity }} className="absolute -bottom-6 z-20">
-                      <div className="px-4 py-2.5 rounded-2xl bg-white/95 dark:bg-slate-900/95 border border-slate-200 dark:border-slate-800 shadow-xl flex items-center gap-2.5">
-                        <Receipt size={18} className="text-rose-500" />
-                        <span className="text-xs font-black text-slate-900 dark:text-white">UPI PAYMENTS &amp; TAX INVOICES</span>
-                      </div>
-                    </motion.div>
-                  </>
-                )}
+                <motion.div animate={{ scale: [1, 1.04, 1] }} transition={{ duration: 3, repeat: Infinity }} className="absolute -bottom-6 z-20">
+                  <div className="px-4 py-2.5 rounded-2xl bg-white/95 dark:bg-slate-900/95 border border-slate-200 dark:border-slate-800 shadow-xl flex items-center gap-2.5">
+                    <Receipt size={18} className="text-rose-500" />
+                    <span className="text-xs font-black text-slate-900 dark:text-white">UPI PAYMENTS &amp; TAX INVOICES</span>
+                  </div>
+                </motion.div>
 
               </motion.div>
 

@@ -363,7 +363,7 @@ html.dark [class*="divide-slate-200"] > * + * {
 }
 
 /* Footer in dark mode */
-.dark footer {
+.dark footer:not(.auth-footer) {
   background-color: #020617 !important;
   border-color: #1e293b !important;
 }
@@ -556,8 +556,26 @@ html:not(.dark) .glass-card-hover:hover {
   }
 }
 
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  animation: marquee 35s linear infinite;
+}
+
 .animate-float {
   animation: float 6s ease-in-out infinite;
+}
+
+.animate-float-delayed {
+  animation: float 6s ease-in-out 3s infinite;
 }
 
 .animate-slow-glow {

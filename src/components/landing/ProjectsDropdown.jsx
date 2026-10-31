@@ -40,24 +40,24 @@ export default function ProjectsDropdown({ isDarkMode = false, align = 'right' }
 
   return (
     <div className="relative inline-block text-left" ref={dropdownRef}>
-      {/* Navbar Trigger Button (Clean matching link style) */}
+      {/* Navbar Trigger Button (Clean matching link style, no wrapping) */}
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         aria-expanded={isOpen}
         aria-haspopup="true"
         className={cn(
-          "px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1 text-xs font-semibold cursor-pointer",
+          "px-2 xl:px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1 text-[11px] xl:text-xs font-semibold cursor-pointer whitespace-nowrap shrink-0",
           isOpen
             ? (isDarkMode ? "text-[#0B8F78] bg-slate-800 font-bold" : "text-[#0B8F78] bg-emerald-50 font-bold")
             : (isDarkMode ? "text-slate-200 hover:text-white hover:bg-slate-800/60" : "text-black font-bold hover:text-[#0B8F78] hover:bg-slate-100")
         )}
       >
-        <span className={isDarkMode ? "text-slate-200" : "text-black font-bold"}>Projects</span>
+        <span className={cn("whitespace-nowrap", isDarkMode ? "text-slate-200" : "text-black font-bold")}>Projects</span>
         <ChevronDown
           size={12}
           className={cn(
-            "transition-transform duration-200",
+            "transition-transform duration-200 shrink-0",
             isOpen ? "rotate-180 text-[#0B8F78]" : (isDarkMode ? "text-slate-300 opacity-70" : "text-black opacity-90")
           )}
         />

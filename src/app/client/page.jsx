@@ -30,6 +30,22 @@ const ClientOverview = () => {
   const [upcomingFollowUps, setUpcomingFollowUps] = useState([]);
   const [viewMode, setViewMode] = useState('agency'); // 'agency' | 'workspace'
 
+  const resolveCleanName = (u) => {
+    if (!u) return 'User';
+    const fullName = [u.first_name, u.last_name].filter(Boolean).join(' ').trim();
+    if (fullName && !fullName.includes('@') && !['test', 'user'].includes(fullName.toLowerCase())) return fullName;
+    if (u.name && !u.name.includes('@') && !['test', 'user'].includes(u.name.toLowerCase())) return u.name.trim();
+    if (u.first_name && !u.first_name.includes('@')) return u.first_name.trim();
+    if (u.client?.business_name) return u.client.business_name.trim();
+    if (u.business_name) return u.business_name.trim();
+    if (u.username && !u.username.includes('@')) return u.username.trim();
+    if (u.email && u.email.includes('@')) {
+      const part = u.email.split('@')[0].replace(/[._-]/g, ' ').trim();
+      return part ? part.charAt(0).toUpperCase() + part.slice(1) : 'User';
+    }
+    return 'User';
+  };
+
   useEffect(() => {
     setMounted(true);
     const token = localStorage.getItem('uwo_token') || localStorage.getItem('token');
@@ -46,7 +62,7 @@ const ClientOverview = () => {
           router.push('/admin');
           return;
         }
-        setUserName(u.name || u.first_name || u.username || u.business_name || 'User');
+        setUserName(resolveCleanName(u));
       } catch (e) {}
     }
   }, [router]);
@@ -56,8 +72,7 @@ const ClientOverview = () => {
       const u = e?.detail || (typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('user') || '{}') : {});
       if (u) {
         setUserState(u);
-        const name = u.name || (u.first_name ? `${u.first_name} ${u.last_name || ''}`.trim() : (u.username || u.business_name || 'User'));
-        if (name) setUserName(name);
+        setUserName(resolveCleanName(u));
       }
     };
     window.addEventListener('user_profile_updated', handleUserUpdate);

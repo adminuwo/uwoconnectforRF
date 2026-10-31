@@ -120,7 +120,7 @@ export default function AboutClient() {
           <div className="absolute top-[1800px] left-0 w-[600px] h-[600px] bg-emerald-500/5 blur-[160px] pointer-events-none rounded-full" />
 
           {/* MAIN WRAPPER */}
-          <div className="relative z-10 w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
+          <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
 
             {/* ══════════════════════════════════════════════════════════════ */}
             {/* 1. CORPORATE PROFILE HERO                                      */}
@@ -141,7 +141,6 @@ export default function AboutClient() {
                         : "bg-emerald-50 border-emerald-300 text-emerald-950"
                     )}>
                       <span className="relative flex h-2 w-2">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                         <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                       </span>
                       DPIIT Recognized Startup
@@ -214,8 +213,7 @@ export default function AboutClient() {
                       <img
                         src="/about-uwo/uwo-globe.png"
                         alt="UWO Global Footprint"
-                        className="w-48 h-48 sm:w-56 sm:h-56 object-contain drop-shadow-[0_10px_25px_rgba(11,143,120,0.3)] animate-pulse"
-                        style={{ animationDuration: '4s' }}
+                        className="w-48 h-48 sm:w-56 sm:h-56 object-contain drop-shadow-[0_10px_25px_rgba(11,143,120,0.3)] hover:scale-105 transition-transform duration-300"
                       />
 
                       <div className="mt-4 space-y-1">

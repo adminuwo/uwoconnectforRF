@@ -8,7 +8,8 @@ import {
   FileText, Download, Image as ImageIcon, Music, Film, Video, ExternalLink,
   Shield, ShieldAlert, ArrowRightLeft, History, BarChart3, Activity, Users, Eye, StickyNote,
   Clock, Tag, RefreshCw, AlertCircle, Bot, ChevronLeft, ChevronRight,
-  LayoutTemplate, X, UserPlus, CheckCircle2, Copy
+  LayoutTemplate, X, UserPlus, CheckCircle2, Copy,
+  Edit3, MailOpen, FolderPlus
 } from 'lucide-react';
 import axios from 'axios';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
@@ -16,6 +17,8 @@ import TransferModal from '@/components/inbox/TransferModal';
 import AuditLogDrawer from '@/components/inbox/AuditLogDrawer';
 import MonitoringAnalyticsModal from '@/components/inbox/MonitoringAnalyticsModal';
 import AddContactModal from '@/components/inbox/AddContactModal';
+import CreateOrEditGroupModal from '@/components/inbox/CreateOrEditGroupModal';
+import ManageConversationGroupsModal from '@/components/inbox/ManageConversationGroupsModal';
 import { cn } from '@/lib/utils';
 import { API_BASE_URL } from '@/config/apiConfig';
 import { useBrand } from '@/context/BrandContext';
@@ -61,7 +64,7 @@ const CHANNEL_TABS = [
 export default function ClientInboxPage() {
   const { brand } = useBrand();
   const { isDark } = useTheme();
-  const displayBrandLogo = brand?.logo_url || '/download (3).gif';
+  const displayBrandLogo = brand?.logo_url || '/logo.png';
 
   const [messages, setMessages] = useState([]);
   const [contacts, setContacts] = useState([]);
@@ -75,6 +78,20 @@ export default function ClientInboxPage() {
   const [mobileShowChat, setMobileShowChat] = useState(false);
   const [activeChannelFilter, setActiveChannelFilter] = useState('ALL');
   const [activeStatusFilter, setActiveStatusFilter] = useState('ALL');
+  const [selectedGroupId, setSelectedGroupId] = useState(null);
+  const [unreadCounts, setUnreadCounts] = useState({
+    total: 0,
+    whatsapp: 0,
+    facebook: 0,
+    instagram: 0,
+    gmail: 0,
+    groups: {}
+  });
+  const [chatGroups, setChatGroups] = useState([]);
+  const [isCreateGroupModalOpen, setIsCreateGroupModalOpen] = useState(false);
+  const [groupToEdit, setGroupToEdit] = useState(null);
+  const [isManageConvoGroupsModalOpen, setIsManageConvoGroupsModalOpen] = useState(false);
+  const [convoForGroupManagement, setConvoForGroupManagement] = useState(null);
   const [isInternalNote, setIsInternalNote] = useState(false);
   
   // Real-time Indicators State
@@ -143,8 +160,13 @@ export default function ClientInboxPage() {
     conversationsRef.current = conversations;
   }, [conversations]);
 
+  const selectedGroupIdRef = useRef(selectedGroupId);
+  useEffect(() => {
+    selectedGroupIdRef.current = selectedGroupId;
+  }, [selectedGroupId]);
+
   // Fast direct channel conversations fetcher
-  const fetchConversations = async (channel = 'ALL', offset = 0, append = false) => {
+  const fetchConversations = async (channel = 'ALL', offset = 0, append = false, groupIdOverride = undefined) => {
     try {
       if (append) {
         setIsLoadingMoreContacts(true);
@@ -159,19 +181,20 @@ export default function ClientInboxPage() {
       }
       const headers = { Authorization: `Bearer ${token}` };
       const apiUrl = API_BASE_URL;
-      const limit = 15;
+      const limit = 25;
 
+      const activeGrpId = groupIdOverride !== undefined ? groupIdOverride : selectedGroupIdRef.current;
       const channelParam = (channel && channel !== 'ALL') ? `&channel=${encodeURIComponent(channel)}` : '';
+      const groupParam = (activeGrpId && activeGrpId !== 'ALL') ? `&group_id=${encodeURIComponent(activeGrpId)}` : '';
       const searchParam = searchTerm ? `&search=${encodeURIComponent(searchTerm)}` : '';
 
       // 1. Fetch conversations ordered by -last_message_at
       const convoRes = await axios.get(
-        `${apiUrl}/api/conversations/?limit=${limit}&offset=${offset}${channelParam}${searchParam}`,
+        `${apiUrl}/api/conversations/?limit=${limit}&offset=${offset}${channelParam}${groupParam}${searchParam}`,
         { headers }
       ).catch(() => ({ data: [] }));
 
       let rawConvos = Array.isArray(convoRes.data) ? convoRes.data : (convoRes.data?.results || []);
-
 
       setHasMoreConvos(rawConvos.length >= limit);
 
@@ -194,13 +217,17 @@ export default function ClientInboxPage() {
 
       const formatted = rawConvos.map(c => {
         const rawAddr = c.contact_platform_id || c.contact_phone || c.id;
+        const unreadVal = c.unread_count_admin || c.unread_count_employee || c.unread_count || 0;
         return {
           id: c.id || rawAddr,
           name: formatDisplayName(c.contact_name, c.contact_phone, c.contact_platform_id),
           rawAddress: rawAddr,
           lastMessage: c.last_message_summary || 'Recent conversation',
           time: c.last_message_at || c.updated_at || c.created_at || new Date().toISOString(),
-          unread: c.unread_count_admin || c.unread_count_employee || 0,
+          unread: unreadVal,
+          isUnread: Boolean(unreadVal > 0 || c.is_unread),
+          custom_group_ids: Array.isArray(c.custom_group_ids) ? c.custom_group_ids : [],
+          custom_groups: Array.isArray(c.custom_groups) ? c.custom_groups : [],
           channel: (c.channel || 'WHATSAPP').toUpperCase(),
           assignedTo: c.assigned_to || null,
           handlerName: c.assigned_to_name || c.locked_by_name || null,
@@ -246,14 +273,115 @@ export default function ClientInboxPage() {
   const handleChannelTabClick = (channelId) => {
     setActiveChannelFilter(channelId);
     activeChannelFilterRef.current = channelId;
+    setSelectedGroupId(null);
+    selectedGroupIdRef.current = null;
+    setActiveStatusFilter('ALL');
     setConvoOffset(0);
-    fetchConversations(channelId, 0, false);
+    fetchConversations(channelId, 0, false, null);
   };
 
   const handleLoadMoreContacts = () => {
     const nextOffset = convoOffset + 15;
     setConvoOffset(nextOffset);
     fetchConversations(activeChannelFilter, nextOffset, true);
+  };
+
+  const fetchUnreadCounts = async () => {
+    try {
+      const token = getAuthToken();
+      if (!token) return;
+      const apiUrl = API_BASE_URL;
+      const res = await axios.get(`${apiUrl}/api/conversations/unread_counts/`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.data) {
+        setUnreadCounts(res.data);
+      }
+    } catch (err) {
+      console.warn('Failed to fetch unread counts:', err);
+    }
+  };
+
+  const fetchChatGroups = async () => {
+    try {
+      const token = getAuthToken();
+      if (!token) return;
+      const apiUrl = API_BASE_URL;
+      const res = await axios.get(`${apiUrl}/api/chat-groups/`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = Array.isArray(res.data) ? res.data : (res.data?.results || []);
+      setChatGroups(data);
+    } catch (err) {
+      console.warn('Failed to fetch chat groups:', err);
+    }
+  };
+
+  const handleMarkRead = async (convo) => {
+    if (!convo) return;
+    const convoId = convo.convoDbId || convo.id;
+    // Optimistic UI update
+    setConversations(prev => prev.map(c => {
+      if (c.id === convo.id || (c.convoDbId && c.convoDbId === convoId)) {
+        return { ...c, unread: 0, isUnread: false };
+      }
+      return c;
+    }));
+
+    try {
+      const token = getAuthToken();
+      if (!token) return;
+      const res = await axios.post(`${API_BASE_URL}/api/conversations/${convoId}/mark_read/`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.data?.unread_counts) {
+        setUnreadCounts(res.data.unread_counts);
+      } else {
+        fetchUnreadCounts();
+      }
+    } catch (err) {
+      console.warn('Failed to mark conversation read:', err);
+      fetchUnreadCounts();
+    }
+  };
+
+  const handleMarkUnread = async (convo) => {
+    if (!convo) return;
+    const convoId = convo.convoDbId || convo.id;
+    // Optimistic UI update
+    setConversations(prev => prev.map(c => {
+      if (c.id === convo.id || (c.convoDbId && c.convoDbId === convoId)) {
+        return { ...c, unread: Math.max(1, c.unread || 1), isUnread: true };
+      }
+      return c;
+    }));
+
+    try {
+      const token = getAuthToken();
+      if (!token) return;
+      const res = await axios.post(`${API_BASE_URL}/api/conversations/${convoId}/mark_unread/`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.data?.unread_counts) {
+        setUnreadCounts(res.data.unread_counts);
+      } else {
+        fetchUnreadCounts();
+      }
+    } catch (err) {
+      console.warn('Failed to mark conversation unread:', err);
+      fetchUnreadCounts();
+    }
+  };
+
+  const handleSelectConversation = (convo) => {
+    if (!convo) return;
+    selectedRawAddressRef.current = convo.rawAddress || convo.id;
+    setSelectedConvoId(convo.id);
+    setMobileShowChat(true);
+
+    if (convo.unread > 0 || convo.isUnread) {
+      handleMarkRead(convo);
+    }
   };
 
   const fetchTemplates = async () => {
@@ -294,6 +422,8 @@ export default function ClientInboxPage() {
 
       await fetchConversations(activeChannelFilterRef.current || 'ALL', 0, false);
       fetchTemplates();
+      fetchUnreadCounts();
+      fetchChatGroups();
 
       // Background loading of team and stats
       axios.get(`${apiUrl}/api/team/members/`, { headers }).then(res => setTeamMembers(Array.isArray(res.data) ? res.data : (res.data?.results || []))).catch(()=>{});
@@ -376,24 +506,58 @@ export default function ClientInboxPage() {
   // Instant reactive client-side filtered conversations
   const convoList = useMemo(() => {
     let list = conversations;
+
+    // 1. Channel Filter
     if (activeChannelFilter && activeChannelFilter !== 'ALL') {
       list = list.filter(c => (c.channel || '').toUpperCase() === activeChannelFilter.toUpperCase());
     }
+
+    // 2. Custom Group Filter
+    if (selectedGroupId) {
+      const gidStr = String(selectedGroupId);
+      list = list.filter(c => {
+        const ids = Array.isArray(c.custom_group_ids) ? c.custom_group_ids.map(String) : [];
+        const groupObjIds = Array.isArray(c.custom_groups) ? c.custom_groups.map(g => String(g.id || g._id || g)) : [];
+        return ids.includes(gidStr) || groupObjIds.includes(gidStr);
+      });
+    }
+
+    // 3. Status Filter (ALL, UNREAD, READ, UNASSIGNED, ASSIGNED)
+    if (activeStatusFilter === 'UNREAD') {
+      list = list.filter(c => (c.unread > 0 || c.isUnread));
+    } else if (activeStatusFilter === 'READ') {
+      list = list.filter(c => !(c.unread > 0 || c.isUnread));
+    } else if (activeStatusFilter === 'ASSIGNED') {
+      list = list.filter(c => Boolean(c.assignedTo));
+    } else if (activeStatusFilter === 'UNASSIGNED') {
+      list = list.filter(c => !c.assignedTo);
+    }
+
+    // 4. Search Filter
     if (searchTerm) {
       const q = searchTerm.toLowerCase();
       list = list.filter(c => 
         (c.name || '').toLowerCase().includes(q) ||
         (c.rawAddress || '').toLowerCase().includes(q) ||
-        (c.lastMessage || '').toLowerCase().includes(q)
+        (c.lastMessage || '').toLowerCase().includes(q) ||
+        (c.contactObj?.phone_number || '').toLowerCase().includes(q) ||
+        (c.contactObj?.platform_id || '').toLowerCase().includes(q)
       );
     }
     return list.map(c => ({
       ...c,
       messages: selectedConvoId === c.id ? messages : []
     })).sort((a, b) => new Date(b.time || 0) - new Date(a.time || 0));
-  }, [conversations, activeChannelFilter, searchTerm, selectedConvoId, messages]);
+  }, [conversations, activeChannelFilter, selectedGroupId, activeStatusFilter, searchTerm, selectedConvoId, messages]);
 
   const activeConvo = convoList.find(c => c.id === selectedConvoId) || (convoList.length > 0 ? convoList[0] : null);
+  const selectedGroupObj = chatGroups.find(g => String(g.id) === String(selectedGroupId));
+  const platformGroups = useMemo(() => {
+    return chatGroups.filter(g => {
+      if (activeChannelFilter === 'ALL') return true;
+      return !g.channel || g.channel === 'ALL' || g.channel.toUpperCase() === activeChannelFilter.toUpperCase();
+    });
+  }, [chatGroups, activeChannelFilter]);
 
   // Determine if the WhatsApp 24-hour customer window is open based on the latest incoming message
   const is24hWindowActive = useMemo(() => {
@@ -404,7 +568,7 @@ export default function ClientInboxPage() {
     return hoursSince < 24;
   }, [activeConvo, messages]);
 
-  // When activeChannelFilter changes or conversations initially load, auto-select first conversation of that channel
+  // When activeChannelFilter, selectedGroupId, or activeStatusFilter changes, auto-select first conversation
   useEffect(() => {
     if (convoList.length > 0) {
       const exists = convoList.some(c => c.id === selectedConvoIdRef.current);
@@ -415,7 +579,7 @@ export default function ClientInboxPage() {
     } else {
       setSelectedConvoId(null);
     }
-  }, [activeChannelFilter, conversations.length]);
+  }, [activeChannelFilter, selectedGroupId, activeStatusFilter, conversations.length]);
 
   // 2. Real-Time WebSocket Connection & Event Handlers with Auto-Reconnect
   useEffect(() => {
@@ -437,6 +601,26 @@ export default function ClientInboxPage() {
         try {
           const data = JSON.parse(event.data);
           
+          if (data.type === 'unread_counts_update') {
+            if (data.unread_counts) {
+              setUnreadCounts(data.unread_counts);
+            }
+            if (data.conversation_id) {
+              setConversations(prev => prev.map(c => {
+                if (c.id === data.conversation_id || c.convoDbId === data.conversation_id) {
+                  const newUnread = data.unread_count !== undefined ? data.unread_count : c.unread;
+                  return {
+                    ...c,
+                    unread: newUnread,
+                    isUnread: Boolean(newUnread > 0),
+                    custom_group_ids: data.custom_group_ids || c.custom_group_ids || []
+                  };
+                }
+                return c;
+              }));
+            }
+          }
+
           if (data.type === 'new_message') {
             const msg = data.message;
             const contactAddr = msg.message_type === 'INCOMING' ? msg.from_address : msg.to_address;
@@ -471,7 +655,10 @@ export default function ClientInboxPage() {
                 const updatedItem = {
                   ...prev[existingIdx],
                   lastMessage: msg.body || prev[existingIdx].lastMessage,
-                  time: msg.created_at || new Date().toISOString()
+                  time: msg.created_at || new Date().toISOString(),
+                  unread: msg.unread_count !== undefined ? msg.unread_count : (prev[existingIdx].unread || 0) + (msg.message_type === 'INCOMING' ? 1 : 0),
+                  isUnread: msg.message_type === 'INCOMING' || prev[existingIdx].isUnread,
+                  custom_group_ids: msg.custom_group_ids || prev[existingIdx].custom_group_ids || []
                 };
                 const remaining = prev.filter((_, idx) => idx !== existingIdx);
                 return [updatedItem, ...remaining];
@@ -483,6 +670,9 @@ export default function ClientInboxPage() {
                   lastMessage: msg.body || 'New message',
                   time: msg.created_at || new Date().toISOString(),
                   unread: 1,
+                  isUnread: true,
+                  custom_group_ids: msg.custom_group_ids || [],
+                  custom_groups: [],
                   channel: (msg.channel || 'WHATSAPP').toUpperCase(),
                   status: 'OPEN',
                   contactObj: { platform_id: contactAddr, phone_number: contactAddr, name: msg.sender_name || contactAddr },
@@ -491,6 +681,9 @@ export default function ClientInboxPage() {
                 return [newItem, ...prev];
               }
             });
+
+            // Refresh separate unread counts in real-time
+            fetchUnreadCounts();
           }
 
           if (data.type === 'message_status_update') {
@@ -1054,13 +1247,17 @@ export default function ClientInboxPage() {
                 {CHANNEL_TABS.map(tab => {
                   const Icon = tab.icon;
                   const isActive = activeChannelFilter === tab.id;
+                  const count = tab.id === 'ALL'
+                    ? unreadCounts.total
+                    : unreadCounts[tab.id.toLowerCase()] || 0;
+
                   return (
                     <button
                       key={tab.id}
                       type="button"
                       onClick={() => handleChannelTabClick(tab.id)}
                       className={cn(
-                        "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all whitespace-nowrap cursor-pointer shrink-0 border",
+                        "inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-bold transition-all whitespace-nowrap cursor-pointer shrink-0 border relative",
                         isActive 
                           ? cn(tab.activeClass, "border-transparent shadow-xs")
                           : isDark
@@ -1070,9 +1267,158 @@ export default function ClientInboxPage() {
                     >
                       <Icon size={13} className={isActive ? 'text-white' : tab.color || (isDark ? 'text-slate-400' : 'text-slate-500')} />
                       <span>{tab.label}</span>
+                      {count > 0 && (
+                        <span className={cn(
+                          "px-1.5 py-0.5 rounded-full text-[10px] font-extrabold leading-none min-w-[16px] text-center",
+                          isActive
+                            ? "bg-white text-slate-900 shadow-2xs"
+                            : "bg-emerald-600 text-white"
+                        )}>
+                          {count > 99 ? '99+' : count}
+                        </span>
+                      )}
                     </button>
                   );
                 })}
+              </div>
+
+              {/* Category Filter Tabs: All, Unread, Read, Unassigned, Assigned + Platform Custom Groups */}
+              <div className="flex items-center gap-1.5 overflow-x-auto py-1 scrollbar-none select-none -mx-0.5 px-0.5">
+                {[
+                  { id: 'ALL', label: 'All' },
+                  { 
+                    id: 'UNREAD', 
+                    label: 'Unread', 
+                    badge: activeChannelFilter === 'ALL' 
+                      ? unreadCounts.total 
+                      : (unreadCounts[activeChannelFilter.toLowerCase()] || 0)
+                  },
+                  { id: 'READ', label: 'Read' },
+                  { id: 'UNASSIGNED', label: 'Unassigned' },
+                  { id: 'ASSIGNED', label: 'Assigned' }
+                ].map((sf) => {
+                  const isStatusActive = selectedGroupId === null && activeStatusFilter === sf.id;
+                  return (
+                    <button
+                      key={sf.id}
+                      type="button"
+                      onClick={() => {
+                        setSelectedGroupId(null);
+                        selectedGroupIdRef.current = null;
+                        setActiveStatusFilter(sf.id);
+                        if (selectedGroupId !== null) {
+                          fetchConversations(activeChannelFilter, 0, false, null);
+                        }
+                      }}
+                      className={cn(
+                        "inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all whitespace-nowrap cursor-pointer shrink-0 border",
+                        isStatusActive
+                          ? isDark
+                            ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/40 font-bold shadow-2xs"
+                            : "bg-emerald-100 text-emerald-800 border-emerald-300 font-bold shadow-2xs"
+                          : isDark
+                            ? "bg-slate-800/40 text-slate-400 hover:text-slate-200 border-slate-700/60"
+                            : "bg-slate-100/70 text-slate-600 hover:text-slate-900 border-slate-200/80"
+                      )}
+                    >
+                      <span>{sf.label}</span>
+                      {sf.badge !== undefined && sf.badge > 0 && (
+                        <span className={cn(
+                          "px-1.5 py-0.5 rounded-full text-[9px] font-black leading-none",
+                          isStatusActive
+                            ? "bg-emerald-600 text-white"
+                            : "bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-200"
+                        )}>
+                          {sf.badge > 99 ? '99+' : sf.badge}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+
+                {/* Vertical Divider between status and custom groups */}
+                <span className="w-px h-4 bg-slate-200 dark:bg-slate-700 mx-0.5 shrink-0" />
+
+                {/* Custom Groups for current platform */}
+                {platformGroups.map(group => {
+                  const isGroupSelected = selectedGroupId === group.id;
+                  const groupData = unreadCounts.groups?.[group.id];
+                  const groupUnread = (typeof groupData === 'object' && groupData !== null) ? (groupData.unread_count || 0) : (groupData || group.unread_count || 0);
+                  const color = group.color || '#10B981';
+
+                  return (
+                    <div
+                      key={group.id}
+                      className={cn(
+                        "inline-flex items-center rounded-lg border text-[11px] font-bold transition-all whitespace-nowrap shrink-0 group relative overflow-hidden",
+                        isGroupSelected
+                          ? "shadow-2xs text-white"
+                          : isDark
+                            ? "bg-slate-800/80 text-slate-300 hover:bg-slate-700/80 border-slate-700"
+                            : "bg-white text-slate-700 hover:bg-slate-50 border-slate-200"
+                      )}
+                      style={isGroupSelected ? { backgroundColor: color, borderColor: color } : {}}
+                    >
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const nextGid = isGroupSelected ? null : group.id;
+                          setSelectedGroupId(nextGid);
+                          selectedGroupIdRef.current = nextGid;
+                          fetchConversations(activeChannelFilter, 0, false, nextGid);
+                        }}
+                        className="inline-flex items-center gap-1.5 px-2.5 py-1 cursor-pointer"
+                      >
+                        {!isGroupSelected && (
+                          <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: color }} />
+                        )}
+                        <span>{group.name}</span>
+                        {groupUnread > 0 && (
+                          <span className={cn(
+                            "px-1.5 py-0.2 rounded-full text-[9px] font-black leading-none min-w-[14px] text-center",
+                            isGroupSelected ? "bg-white text-slate-900" : "bg-emerald-600 text-white"
+                          )}>
+                            {groupUnread}
+                          </span>
+                        )}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setGroupToEdit(group);
+                          setIsCreateGroupModalOpen(true);
+                        }}
+                        title="Edit group"
+                        className={cn(
+                          "p-1 pr-1.5 opacity-60 hover:opacity-100 cursor-pointer transition-opacity",
+                          isGroupSelected ? "text-white" : isDark ? "text-slate-400" : "text-slate-500"
+                        )}
+                      >
+                        <Edit3 className="w-2.5 h-2.5" />
+                      </button>
+                    </div>
+                  );
+                })}
+
+                {/* + Group button right in the category row */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setGroupToEdit(null);
+                    setIsCreateGroupModalOpen(true);
+                  }}
+                  title={`Create new group for ${activeChannelFilter === 'ALL' ? 'All Platforms' : activeChannelFilter}`}
+                  className={cn(
+                    "inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold border border-dashed transition-all whitespace-nowrap cursor-pointer shrink-0",
+                    isDark
+                      ? "border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/10 hover:border-emerald-500"
+                      : "border-emerald-500/50 text-emerald-700 hover:bg-emerald-50 hover:border-emerald-600"
+                  )}
+                >
+                  <Plus className="w-3 h-3" />
+                  <span>Group</span>
+                </button>
               </div>
             </div>
 
@@ -1115,24 +1461,25 @@ export default function ClientInboxPage() {
                   const displayName = (!convo.name || convo.name.trim().toLowerCase() === 'unknown')
                     ? (convo.rawAddress || 'Customer')
                     : convo.name;
+                  const hasUnread = Boolean((convo.unread && convo.unread > 0) || convo.isUnread);
 
                   return (
                     <div
                       key={convo.id}
-                      onClick={() => {
-                        selectedRawAddressRef.current = convo.rawAddress || convo.id;
-                        setSelectedConvoId(convo.id);
-                        setMobileShowChat(true);
-                      }}
+                      onClick={() => handleSelectConversation(convo)}
                       className={cn(
-                        "p-3 sm:p-4 cursor-pointer transition-all border-l-4",
+                        "p-3 sm:p-3.5 cursor-pointer transition-all border-l-4 group relative",
                         isSelected 
                           ? isDark 
                             ? "bg-emerald-950/40 border-emerald-500" 
                             : "bg-emerald-50/80 border-emerald-500" 
-                          : isDark 
-                            ? "border-transparent hover:bg-slate-800/50" 
-                            : "border-transparent hover:bg-slate-50"
+                          : hasUnread
+                            ? isDark
+                              ? "bg-slate-800/40 border-emerald-400 hover:bg-slate-800/60"
+                              : "bg-emerald-50/30 border-emerald-400 hover:bg-emerald-50/50"
+                            : isDark 
+                              ? "border-transparent hover:bg-slate-800/50" 
+                              : "border-transparent hover:bg-slate-50"
                       )}
                     >
                       <div className="flex items-start justify-between gap-2">
@@ -1140,7 +1487,9 @@ export default function ClientInboxPage() {
                           <div className="relative shrink-0">
                             <div className={cn(
                               "w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-bold text-xs sm:text-sm",
-                              isDark ? "bg-slate-800 text-slate-200 border border-slate-700/80" : "bg-slate-200 text-slate-700"
+                              hasUnread 
+                                ? "bg-emerald-600 text-white shadow-xs"
+                                : isDark ? "bg-slate-800 text-slate-200 border border-slate-700/80" : "bg-slate-200 text-slate-700"
                             )}>
                               {displayName.charAt(0).toUpperCase()}
                             </div>
@@ -1149,13 +1498,21 @@ export default function ClientInboxPage() {
                             </span>
                           </div>
                           <div className="min-w-0 flex-1">
-                            <h4 className={cn("text-xs font-bold flex items-center gap-1.5 truncate", isDark ? "text-slate-100" : "text-slate-900")}>
+                            <h4 className={cn("text-xs flex items-center gap-1.5 truncate", 
+                              hasUnread ? "font-extrabold text-slate-900 dark:text-white" : "font-bold",
+                              isDark ? "text-slate-100" : "text-slate-900"
+                            )}>
                               <span className="truncate">{displayName}</span>
+                              {hasUnread && (
+                                <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" title="Unread conversation" />
+                              )}
                               {convo.isLocked && (
                                 <Lock className="w-3 h-3 text-amber-500 shrink-0" title="Locked by team handler" />
                               )}
                             </h4>
-                            <p className={cn("text-[11px] truncate mt-0.5", isDark ? "text-slate-400" : "text-slate-500")}>
+                            <p className={cn("text-[11px] truncate mt-0.5", 
+                              hasUnread ? "font-semibold text-slate-800 dark:text-slate-200" : isDark ? "text-slate-400" : "text-slate-500"
+                            )}>
                               {liveState?.isTyping ? (
                                 <span className="text-emerald-500 font-bold animate-pulse">
                                   ✍️ {liveState.typingUser || 'Employee'} is typing...
@@ -1164,36 +1521,114 @@ export default function ClientInboxPage() {
                                 convo.lastMessage
                               )}
                             </p>
+
+                            {/* Assigned Custom Group Badges */}
+                            {Array.isArray(convo.custom_group_ids) && convo.custom_group_ids.length > 0 && (
+                              <div className="flex items-center gap-1 mt-1.5 flex-wrap">
+                                {convo.custom_group_ids.map(gid => {
+                                  const grp = chatGroups.find(g => String(g.id) === String(gid));
+                                  if (!grp) return null;
+                                  return (
+                                    <span
+                                      key={grp.id}
+                                      className="inline-flex items-center gap-1 px-1.5 py-0.2 rounded-md text-[9px] font-bold border shadow-2xs"
+                                      style={{
+                                        backgroundColor: `${grp.color || '#10B981'}15`,
+                                        color: grp.color || '#10B981',
+                                        borderColor: `${grp.color || '#10B981'}40`
+                                      }}
+                                    >
+                                      <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: grp.color || '#10B981' }} />
+                                      <span className="truncate max-w-[85px]">{grp.name}</span>
+                                    </span>
+                                  );
+                                })}
+                              </div>
+                            )}
                           </div>
                         </div>
 
                         <div className="text-right shrink-0 flex flex-col items-end">
-                          <span className={cn("text-[10px] font-medium whitespace-nowrap", isDark ? "text-slate-500" : "text-slate-400")}>
-                            {new Date(convo.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                          </span>
-
-                          {/* Quick Bot ON/OFF Toggle Button */}
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleToggleBotForConvo(convo);
-                            }}
-                            title={convo.botPaused ? "Bot is Paused (Click to Turn Bot ON)" : "Bot is Active (Click to Turn Bot OFF / Take Over)"}
-                            className={cn(
-                              "mt-1.5 inline-flex items-center gap-1 text-[9px] sm:text-[10px] font-bold px-2 py-0.5 rounded-full border transition-all cursor-pointer shadow-2xs",
-                              convo.botPaused
-                                ? isDark 
-                                  ? "bg-amber-950/50 text-amber-300 border-amber-800/60 hover:bg-amber-900/60"
-                                  : "bg-amber-50 text-amber-700 border-amber-300 hover:bg-amber-100"
-                                : isDark
-                                  ? "bg-emerald-950/50 text-emerald-300 border-emerald-800/60 hover:bg-emerald-900/60"
-                                  : "bg-emerald-50 text-emerald-700 border-emerald-300 hover:bg-emerald-100"
+                          <div className="flex items-center gap-1.5">
+                            <span className={cn("text-[10px] font-medium whitespace-nowrap", isDark ? "text-slate-500" : "text-slate-400")}>
+                              {new Date(convo.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            </span>
+                            {hasUnread && (
+                              <span className="px-1.5 py-0.2 rounded-full text-[9px] font-black bg-emerald-600 text-white min-w-[16px] text-center shadow-2xs">
+                                {convo.unread > 99 ? '99+' : (convo.unread || 1)}
+                              </span>
                             )}
-                          >
-                            <Bot className={`w-3 h-3 ${convo.botPaused ? "text-amber-500" : (isDark ? "text-emerald-400" : "text-emerald-600")}`} />
-                            <span>{convo.botPaused ? "Bot OFF" : "Bot ON"}</span>
-                          </button>
+                          </div>
+
+                          <div className="flex items-center gap-1 mt-1.5">
+                            {/* Manual Mark Read / Mark Unread Quick Action */}
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (hasUnread) {
+                                  handleMarkRead(convo);
+                                } else {
+                                  handleMarkUnread(convo);
+                                }
+                              }}
+                              title={hasUnread ? "Mark as Read" : "Mark as Unread"}
+                              className={cn(
+                                "p-1 rounded-md border transition-colors cursor-pointer",
+                                isDark 
+                                  ? "bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700" 
+                                  : "bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200"
+                              )}
+                            >
+                              {hasUnread ? (
+                                <CheckCheck className="w-3 h-3 text-emerald-500" />
+                              ) : (
+                                <MailOpen className="w-3 h-3" />
+                              )}
+                            </button>
+
+                            {/* Manage Custom Groups Action */}
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setConvoForGroupManagement(convo);
+                                setIsManageConvoGroupsModalOpen(true);
+                              }}
+                              title="Assign to custom groups"
+                              className={cn(
+                                "p-1 rounded-md border transition-colors cursor-pointer",
+                                isDark 
+                                  ? "bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700" 
+                                  : "bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200"
+                              )}
+                            >
+                              <FolderPlus className="w-3 h-3 text-indigo-400" />
+                            </button>
+
+                            {/* Quick Bot ON/OFF Toggle Button */}
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleToggleBotForConvo(convo);
+                              }}
+                              title={convo.botPaused ? "Bot is Paused (Click to Turn Bot ON)" : "Bot is Active (Click to Turn Bot OFF / Take Over)"}
+                              className={cn(
+                                "inline-flex items-center gap-1 text-[9px] font-bold px-1.5 py-0.5 rounded-full border transition-all cursor-pointer shadow-2xs",
+                                convo.botPaused
+                                  ? isDark 
+                                    ? "bg-amber-950/50 text-amber-300 border-amber-800/60 hover:bg-amber-900/60"
+                                    : "bg-amber-50 text-amber-700 border-amber-300 hover:bg-amber-100"
+                                  : isDark
+                                    ? "bg-emerald-950/50 text-emerald-300 border-emerald-800/60 hover:bg-emerald-900/60"
+                                    : "bg-emerald-50 text-emerald-700 border-emerald-300 hover:bg-emerald-100"
+                              )}
+                            >
+                              <Bot className={`w-2.5 h-2.5 ${convo.botPaused ? "text-amber-500" : (isDark ? "text-emerald-400" : "text-emerald-600")}`} />
+                              <span>{convo.botPaused ? "OFF" : "ON"}</span>
+                            </button>
+                          </div>
 
                           {liveState?.viewer && liveState.viewer !== currentUser?.username && liveState.viewer !== currentUser?.email && (
                             <div className="mt-1 flex justify-end">
@@ -1211,8 +1646,56 @@ export default function ClientInboxPage() {
                   );
                 })
               ) : (
-                <div className={cn("text-center py-12 text-xs", isDark ? "text-slate-500" : "text-slate-400")}>
-                  No conversations match filters.
+                <div className={cn("text-center py-10 px-4 text-xs space-y-3", isDark ? "text-slate-400" : "text-slate-500")}>
+                  {selectedGroupId ? (
+                    <div className="space-y-3 max-w-xs mx-auto">
+                      <div 
+                        className="w-12 h-12 mx-auto rounded-2xl flex items-center justify-center text-white shadow-md transition-transform hover:scale-105"
+                        style={{ backgroundColor: selectedGroupObj?.color || '#10B981' }}
+                      >
+                        <FolderPlus className="w-6 h-6" />
+                      </div>
+                      <div>
+                        <h4 className="font-extrabold text-sm text-slate-800 dark:text-slate-100">
+                          No conversations in &quot;{selectedGroupObj?.name || 'this group'}&quot; yet
+                        </h4>
+                        <p className="text-[11px] text-slate-400 mt-1 leading-relaxed">
+                          Add numbers or chats to this group directly using the button below.
+                        </p>
+                      </div>
+                      <div className="flex flex-col gap-2 pt-1">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (selectedGroupObj) {
+                              setGroupToEdit(selectedGroupObj);
+                            }
+                            setIsCreateGroupModalOpen(true);
+                          }}
+                          className="w-full py-2 px-3 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm cursor-pointer transition-all flex items-center justify-center gap-1.5"
+                        >
+                          <Plus className="w-3.5 h-3.5" />
+                          <span>Select &amp; Add Numbers</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSelectedGroupId(null);
+                            selectedGroupIdRef.current = null;
+                            fetchConversations(activeChannelFilter, 0, false, null);
+                          }}
+                          className={cn(
+                            "w-full py-1.5 px-3 rounded-xl text-[11px] font-bold border transition-colors cursor-pointer",
+                            isDark ? "hover:bg-slate-800 text-slate-300 border-slate-700" : "hover:bg-slate-100 text-slate-600 border-slate-200"
+                          )}
+                        >
+                          View All Conversations
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div>No conversations match filters.</div>
+                  )}
                 </div>
               )}
               {conversations.length > 0 && hasMoreConvos && (
@@ -1331,11 +1814,97 @@ export default function ClientInboxPage() {
                           <span className={cn("truncate", isDark ? "text-slate-500" : "text-slate-400")}>Online</span>
                         )}
                       </div>
+
+                      {/* Assigned Custom Group Badges in Header */}
+                      {Array.isArray(activeConvo.custom_group_ids) && activeConvo.custom_group_ids.length > 0 && (
+                        <div className="flex items-center gap-1 mt-1 flex-wrap">
+                          {activeConvo.custom_group_ids.map(gid => {
+                            const grp = chatGroups.find(g => String(g.id) === String(gid));
+                            if (!grp) return null;
+                            return (
+                              <button
+                                key={grp.id}
+                                type="button"
+                                onClick={() => {
+                                  setConvoForGroupManagement(activeConvo);
+                                  setIsManageConvoGroupsModalOpen(true);
+                                }}
+                                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold border shadow-2xs cursor-pointer hover:opacity-80 transition-opacity"
+                                style={{
+                                  backgroundColor: `${grp.color || '#10B981'}15`,
+                                  color: grp.color || '#10B981',
+                                  borderColor: `${grp.color || '#10B981'}40`
+                                }}
+                              >
+                                <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: grp.color || '#10B981' }} />
+                                <span>{grp.name}</span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
                     </div>
                   </div>
 
                   {/* Action Buttons Toolbar */}
                   <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
+                    {/* Mark Read / Unread Action Button */}
+                    <button
+                      onClick={() => {
+                        if (activeConvo.unread > 0 || activeConvo.isUnread) {
+                          handleMarkRead(activeConvo);
+                        } else {
+                          handleMarkUnread(activeConvo);
+                        }
+                      }}
+                      className={cn(
+                        "px-2 sm:px-2.5 py-1 rounded-lg text-[10px] sm:text-[11px] font-bold border transition-all flex items-center gap-1 cursor-pointer shadow-2xs shrink-0",
+                        activeConvo.unread > 0 || activeConvo.isUnread
+                          ? isDark
+                            ? "bg-emerald-950/60 text-emerald-300 hover:bg-emerald-900/60 border-emerald-800/60"
+                            : "bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border-emerald-300"
+                          : isDark
+                            ? "bg-slate-800 text-slate-300 hover:bg-slate-700 border-slate-700"
+                            : "bg-slate-100 text-slate-700 hover:bg-slate-200 border-slate-200"
+                      )}
+                      title={activeConvo.unread > 0 || activeConvo.isUnread ? "Mark as Read" : "Mark as Unread"}
+                    >
+                      {activeConvo.unread > 0 || activeConvo.isUnread ? (
+                        <>
+                          <CheckCheck className="w-3.5 h-3.5 text-emerald-500" />
+                          <span className="hidden sm:inline">Mark Read</span>
+                        </>
+                      ) : (
+                        <>
+                          <MailOpen className="w-3.5 h-3.5 text-slate-400" />
+                          <span className="hidden sm:inline">Mark Unread</span>
+                        </>
+                      )}
+                    </button>
+
+                    {/* Manage Custom Groups Action Button */}
+                    <button
+                      onClick={() => {
+                        setConvoForGroupManagement(activeConvo);
+                        setIsManageConvoGroupsModalOpen(true);
+                      }}
+                      className={cn(
+                        "px-2 sm:px-2.5 py-1 rounded-lg text-[10px] sm:text-[11px] font-bold border transition-all flex items-center gap-1 cursor-pointer shadow-2xs shrink-0",
+                        isDark
+                          ? "bg-slate-800 text-slate-300 hover:bg-slate-700 border-slate-700"
+                          : "bg-slate-100 text-slate-700 hover:bg-slate-200 border-slate-200"
+                      )}
+                      title="Manage custom groups for this conversation"
+                    >
+                      <FolderPlus className="w-3.5 h-3.5 text-indigo-400" />
+                      <span className="hidden sm:inline">Groups</span>
+                      {Array.isArray(activeConvo.custom_group_ids) && activeConvo.custom_group_ids.length > 0 && (
+                        <span className="px-1.5 py-0.2 rounded-full text-[9px] font-extrabold bg-indigo-500 text-white leading-none">
+                          {activeConvo.custom_group_ids.length}
+                        </span>
+                      )}
+                    </button>
+
                     {/* Add Contact Action Button */}
                     <button
                       onClick={() => setIsAddContactOpen(true)}
@@ -2478,6 +3047,66 @@ export default function ClientInboxPage() {
           </div>
         </div>
       )}
+
+      {/* Create or Edit Custom Chat Group Modal */}
+      <CreateOrEditGroupModal
+        isOpen={isCreateGroupModalOpen}
+        onClose={() => {
+          setIsCreateGroupModalOpen(false);
+          setGroupToEdit(null);
+        }}
+        groupToEdit={groupToEdit}
+        defaultChannel={activeChannelFilter}
+        conversations={conversations}
+        onGroupSaved={(savedGroup) => {
+          fetchChatGroups();
+          fetchUnreadCounts();
+          const targetGid = savedGroup?.id || selectedGroupId;
+          if (targetGid) {
+            setSelectedGroupId(targetGid);
+            selectedGroupIdRef.current = targetGid;
+            fetchConversations(activeChannelFilterRef.current || 'ALL', 0, false, targetGid);
+          } else {
+            fetchConversations(activeChannelFilterRef.current || 'ALL', 0, false, null);
+          }
+        }}
+        onGroupDeleted={(deletedId) => {
+          if (selectedGroupId === deletedId) {
+            setSelectedGroupId(null);
+            selectedGroupIdRef.current = null;
+            fetchConversations(activeChannelFilterRef.current || 'ALL', 0, false, null);
+          }
+          fetchChatGroups();
+          fetchUnreadCounts();
+        }}
+        getAuthToken={getAuthToken}
+      />
+
+      {/* Manage Conversation Groups Modal */}
+      <ManageConversationGroupsModal
+        isOpen={isManageConvoGroupsModalOpen}
+        onClose={() => {
+          setIsManageConvoGroupsModalOpen(false);
+          setConvoForGroupManagement(null);
+        }}
+        conversation={convoForGroupManagement}
+        allGroups={chatGroups}
+        onGroupsUpdated={(convoId, updatedGroupIds) => {
+          setConversations(prev => prev.map(c => {
+            if (c.id === convoId || c.convoDbId === convoId) {
+              return { ...c, custom_group_ids: updatedGroupIds };
+            }
+            return c;
+          }));
+          fetchChatGroups();
+          fetchUnreadCounts();
+        }}
+        onOpenCreateGroup={() => {
+          setGroupToEdit(null);
+          setIsCreateGroupModalOpen(true);
+        }}
+        getAuthToken={getAuthToken}
+      />
     </DashboardLayout>
   );
 }

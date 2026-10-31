@@ -10,9 +10,9 @@
 export const GOOGLE_SCOPES_MAP = {
   gmail: [
     {
-      scope: 'https://www.googleapis.com/auth/gmail.modify',
-      title: 'Gmail Read, Compose, Send & Organize',
-      desc: 'Required to sync customer inquiries, dispatch automated auto-replies, and organize email labels.',
+      scope: 'https://www.googleapis.com/auth/gmail.readonly',
+      title: 'Gmail Read-Only Inbox Access',
+      desc: 'Required to read and sync incoming customer inquiries and support emails.',
       badge: 'Restricted',
       status: 'Active',
     },

@@ -430,7 +430,7 @@ const Sidebar = ({ role, isOpen, onClose, onToggle }) => {
         )}>
           {(() => {
             const displayBrandName = brand?.brand_name || "UWO Connect™";
-            const displayBrandLogo = brand?.logo_url || "/download (3).gif";
+            const displayBrandLogo = brand?.logo_url || "/logo.png";
 
             return isOpen ? (
               <div className="flex items-center gap-2.5 min-w-0 flex-1">

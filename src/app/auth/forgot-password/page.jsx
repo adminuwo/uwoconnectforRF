@@ -2,16 +2,18 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { Loader2, Check, KeyRound, ShieldCheck, Lock, ArrowLeft, Mail, AlertCircle, ArrowRight, Eye, EyeOff } from 'lucide-react';
+import { Loader2, Check, KeyRound, ShieldCheck, Lock, ArrowLeft, Mail, AlertCircle, ArrowRight, Eye, EyeOff, Sun, Moon } from 'lucide-react';
 import axios from 'axios';
 import { motion } from 'framer-motion';
 import AuthHeroSide from '@/components/auth/AuthHeroSide';
 import { useBrand } from '@/context/BrandContext';
+import { useTheme } from '@/context/ThemeContext';
 import PasswordStrengthIndicator from '@/components/auth/PasswordStrengthIndicator';
 import { evaluatePassword } from '@/lib/passwordValidation';
 
 const ForgotPasswordPage = () => {
   const { brand } = useBrand();
+  const { isDark, toggleTheme } = useTheme();
   const [step, setStep] = useState(1); // 1: Send OTP, 2: Verify OTP, 3: Reset Password, 4: Success
   const [email, setEmail] = useState('');
   const [otp, setOtp] = useState('');
@@ -104,11 +106,11 @@ const ForgotPasswordPage = () => {
   };
 
   return (
-    <div className="min-h-screen w-full flex flex-col justify-between items-center p-4 bg-[#f8fafc] font-sans relative overflow-hidden selection:bg-emerald-500 selection:text-white py-6">
+    <div className="min-h-screen w-full flex flex-col justify-between items-center p-4 bg-[#f8fafc] dark:bg-[#070B14] font-sans relative overflow-hidden selection:bg-emerald-500 selection:text-white py-6 transition-colors duration-300">
       {/* Subtle Background Elements */}
-      <div className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] bg-emerald-400/10 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-[-20%] right-[-10%] w-[600px] h-[600px] bg-blue-400/10 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMSIgY3k9IjEiIHI9IjEiIGZpbGw9InJnYmEoMCwwLDAsMC4wMykiLz48L3N2Zz4=')] opacity-50" />
+      <div className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] bg-emerald-400/10 dark:bg-emerald-500/10 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-[-20%] right-[-10%] w-[600px] h-[600px] bg-blue-400/10 dark:bg-blue-500/10 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMSIgY3k9IjEiIHI9IjEiIGZpbGw9InJnYmEoMCwwLDAsMC4wMykiLz48L3N2Zz4=')] opacity-50 dark:opacity-20" />
 
       {/* Top Brand Header */}
       <header className="relative z-20 w-full max-w-6xl mx-auto pt-2 pb-2 px-2 flex items-center justify-between">
@@ -116,22 +118,32 @@ const ForgotPasswordPage = () => {
           {brand?.logo_url && brand.logo_url !== "/download (3).gif" ? (
             <img src={brand.logo_url} alt="Logo" className="w-11 h-11 object-contain rounded-full shadow-lg" />
           ) : (
-            <div className="w-12 h-12 rounded-full overflow-hidden flex items-center justify-center bg-white shadow-[0_4px_20px_rgba(16,185,129,0.25)] border-[1.5px] border-emerald-100 shrink-0">
-              <img src="/uwo-icon.png" alt="UWO Connect Logo" className="w-full h-full object-contain p-1.5" />
+            <div className="w-12 h-12 rounded-full overflow-hidden flex items-center justify-center bg-white dark:bg-slate-800 shadow-[0_4px_20px_rgba(16,185,129,0.25)] border-[1.5px] border-emerald-100 dark:border-emerald-800/40 shrink-0">
+              <img src="/logo.png" alt="UWO Connect Logo" className="w-full h-full object-contain p-1.5" />
             </div>
           )}
-          <span className="font-extrabold text-slate-900 tracking-tight text-xl drop-shadow-sm group-hover:text-emerald-700 transition-colors">
+          <span className="font-extrabold text-slate-900 dark:text-white tracking-tight text-xl drop-shadow-sm group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
             {brand?.brand_name || brand?.name || "UWO Connect"}
           </span>
         </Link>
 
-        <Link
-          href="/auth/login"
-          className="text-xs font-bold text-slate-600 hover:text-slate-900 bg-white hover:bg-slate-50 border border-slate-200/80 px-4 py-2.5 rounded-2xl flex items-center gap-2 transition-all shadow-xs hover:shadow-sm"
-        >
-          <ArrowLeft size={14} />
-          <span>Back to Sign In</span>
-        </Link>
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={toggleTheme}
+            className="p-2.5 rounded-full bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 shadow-sm transition-all cursor-pointer"
+            aria-label="Toggle Theme"
+          >
+            {isDark ? <Sun size={16} /> : <Moon size={16} />}
+          </button>
+          <Link
+            href="/auth/login"
+            className="text-xs font-bold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/70 border border-slate-200/80 dark:border-slate-700 px-4 py-2.5 rounded-2xl flex items-center gap-2 transition-all shadow-xs hover:shadow-sm"
+          >
+            <ArrowLeft size={14} />
+            <span>Back to Sign In</span>
+          </Link>
+        </div>
       </header>
 
       {/* Main Split Card */}
@@ -140,7 +152,7 @@ const ForgotPasswordPage = () => {
           initial={{ opacity: 0, y: 20 }} 
           animate={{ opacity: 1, y: 0 }} 
           transition={{ duration: 0.6, ease: "easeOut" }}
-          className="w-full max-w-[1000px] bg-white rounded-[32px] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.05)] border border-slate-100 flex flex-col md:flex-row overflow-hidden relative z-10 my-auto"
+          className="w-full max-w-[1000px] bg-white dark:bg-[#0F172A] rounded-[32px] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.06)] dark:shadow-[0_20px_60px_-15px_rgba(0,0,0,0.6)] border border-slate-100 dark:border-slate-800 flex flex-col md:flex-row overflow-hidden relative z-10 my-auto transition-colors"
         >
           {/* Left Side: Abha & Dev Hero */}
           <AuthHeroSide
@@ -414,14 +426,14 @@ const ForgotPasswordPage = () => {
       </main>
 
       {/* Footer */}
-      <footer className="relative z-10 w-full max-w-6xl mx-auto py-3 px-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-slate-400 font-medium">
+      <footer className="relative z-10 w-full max-w-6xl mx-auto py-3 px-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-slate-400 dark:text-slate-500 font-medium auth-footer !bg-transparent !border-transparent">
         <div>
           &copy; {new Date().getFullYear()} {brand?.brand_name || brand?.name || 'UWO Connect'} · All rights reserved.
         </div>
         <div className="flex items-center gap-5">
-          <Link href="/privacy" className="hover:text-slate-600 transition-colors">Privacy Policy</Link>
-          <Link href="/terms" className="hover:text-slate-600 transition-colors">Terms of Use (EULA)</Link>
-          <Link href="/contact" className="hover:text-slate-600 transition-colors">Support</Link>
+          <Link href="/privacy" className="hover:text-slate-600 dark:hover:text-slate-300 transition-colors">Privacy Policy</Link>
+          <Link href="/terms" className="hover:text-slate-600 dark:hover:text-slate-300 transition-colors">Terms of Use (EULA)</Link>
+          <Link href="/contact" className="hover:text-slate-600 dark:hover:text-slate-300 transition-colors">Support</Link>
         </div>
       </footer>
     </div>

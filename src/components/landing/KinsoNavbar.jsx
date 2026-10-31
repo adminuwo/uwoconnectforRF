@@ -30,7 +30,7 @@ export default function KinsoNavbar({ isDark, setIsDark }) {
         <Link href="/" className="flex items-center gap-2.5 sm:gap-3 group shrink-0">
           <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl overflow-hidden shadow-md shadow-[#00AB56]/20 group-hover:scale-105 transition-transform duration-300 flex items-center justify-center bg-white p-0.5 border border-[#00AB56]/20 shrink-0">
             <img
-              src="/download (3).gif"
+              src="/logo.png"
               alt="Uwo Connect Logo"
               className="w-full h-full object-cover rounded-lg"
               width={40}

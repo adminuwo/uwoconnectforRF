@@ -370,14 +370,14 @@ export default function GmailConfigModal({ client, isOpen, onClose, onSaved }) {
                   <div className="p-3 bg-white rounded-xl border border-slate-200/80 space-y-1">
                     <div className="flex items-center justify-between">
                       <span className="font-mono text-[11px] font-bold text-slate-800">
-                        https://www.googleapis.com/auth/gmail.modify
+                        https://www.googleapis.com/auth/gmail.readonly
                       </span>
                       <span className="text-emerald-700 font-sans text-[10px] font-bold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
                         Verified Scope
                       </span>
                     </div>
                     <p className="text-[11px] text-slate-500">
-                      Allows UWOConnect to read customer support emails, dispatch AI and template auto-replies, and manage folder labels (inbox, sent, trash).
+                      Allows UWOConnect to read and sync customer support emails and search incoming messages (Read-Only).
                     </p>
                   </div>
                   <div className="p-2.5 bg-white rounded-xl border border-slate-200/80 font-mono text-[11px] text-slate-700 flex items-center justify-between">

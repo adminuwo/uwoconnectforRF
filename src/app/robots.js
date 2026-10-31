@@ -12,6 +12,7 @@ export default function robots() {
           '/about',
           '/contact',
           '/features',
+          '/solutions',
           '/pricing',
           '/how-it-works',
           '/platform',

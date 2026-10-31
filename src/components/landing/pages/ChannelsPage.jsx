@@ -397,18 +397,18 @@ export default function ChannelsPage() {
 
               {/* Right Screenshot Fragment */}
               <div className="lg:col-span-6">
-                <div className="rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-2xl bg-slate-950 relative min-h-[300px] flex items-center justify-center">
+                <div className="rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-2xl bg-white dark:bg-slate-950 relative min-h-[300px] flex items-center justify-center">
                   {!activeData.isAvailable ? (
                     <div className="p-8 text-center space-y-4 max-w-md mx-auto relative z-10">
                       <div className="w-16 h-16 rounded-2xl bg-red-500/10 text-red-500 flex items-center justify-center mx-auto border border-red-500/20 shadow-lg">
                         <YouTubeLogo size={36} />
                       </div>
                       <div className="space-y-2">
-                        <span className="text-[10px] font-black px-3 py-1 rounded-full bg-red-500/20 text-red-400 border border-red-500/30 uppercase tracking-widest inline-block">
+                        <span className="text-[10px] font-black px-3 py-1 rounded-full bg-red-500/20 text-red-500 dark:text-red-400 border border-red-500/30 uppercase tracking-widest inline-block">
                           ● COMING SOON
                         </span>
-                        <h4 className="text-xl font-extrabold text-white">YouTube Integration</h4>
-                        <p className="text-xs text-slate-400 leading-relaxed">
+                        <h4 className="text-xl font-extrabold text-slate-900 dark:text-white">YouTube Integration</h4>
+                        <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
                           Dev will automatically monitor video comments, auto-respond to viewer questions, and route subscriber inquiries straight into your inbox.
                         </p>
                       </div>

@@ -9,8 +9,8 @@ const DEFAULT_BRAND = {
   client_id: null,
   brand_name: 'UWO Connect',
   tagline: 'Multi-channel automation platform',
-  logo_url: '/download (3).gif',
-  favicon_url: '/download (3).gif',
+  logo_url: '/logo.png',
+  favicon_url: '/favicon.png',
   primary_color: '#059669',
   accent_color: '#10B981',
   support_email: 'support@uwoconnect.com',
@@ -84,10 +84,18 @@ export function BrandProvider({ children }) {
       const res = await axios.get(`${API_BASE_URL}/api/whitelabel/config?domain=${host}`);
       
       if (res.data && res.data.is_whitelabel) {
+        const cleanLogo = res.data.logo_url && !res.data.logo_url.includes('download (3).gif')
+          ? res.data.logo_url
+          : DEFAULT_BRAND.logo_url;
+        const cleanFavicon = res.data.favicon_url && !res.data.favicon_url.includes('download (3).gif')
+          ? res.data.favicon_url
+          : DEFAULT_BRAND.favicon_url;
         const mergedBrand = {
           ...DEFAULT_BRAND,
           ...res.data,
           brand_name: res.data.brand_name || DEFAULT_BRAND.brand_name,
+          logo_url: cleanLogo,
+          favicon_url: cleanFavicon,
         };
         setBrand(mergedBrand);
         applyBrandToDOM(mergedBrand);

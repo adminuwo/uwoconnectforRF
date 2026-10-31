@@ -86,14 +86,15 @@ export default function LandingLayout({ children, activePage = '' }) {
     }
   };
 
-  const brandName = isWhiteLabel && brand?.name ? brand.name : 'UWO Connect';
-  const logoUrl = isWhiteLabel && brand?.logo_url ? brand.logo_url : '/favicon.png';
+  const brandName = isWhiteLabel && (brand?.brand_name || brand?.name) ? (brand.brand_name || brand.name) : 'UWO Connect';
+  const logoUrl = isWhiteLabel && brand?.logo_url && !brand.logo_url.includes('download (3).gif') ? brand.logo_url : '/logo.png';
 
   const navLinks = [
     { label: 'Channels', href: '/channels', key: 'channels' },
     { label: 'Connectors', href: '/connectors', key: 'connectors' },
     { label: 'Automation', href: '/automation', key: 'automation' },
     { label: 'Features', href: '/features', key: 'features' },
+    { label: 'Solutions', href: '/solutions', key: 'solutions' },
     { label: 'How It Works', href: '/how-it-works', key: 'how-it-works' },
     { label: 'Pricing', href: '/pricing', key: 'pricing' },
     { label: 'About Us', href: '/about', key: 'about' },
@@ -124,10 +125,10 @@ export default function LandingLayout({ children, activePage = '' }) {
             : "bg-white/90 border-slate-200/80 text-slate-900 shadow-xs"
         )}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-2 xl:gap-4">
 
           {/* Logo & Brand Identity */}
-          <Link href="/" className="flex items-center gap-2.5 group cursor-pointer">
+          <Link href="/" className="flex items-center gap-2.5 group cursor-pointer shrink-0">
             <img
               src={logoUrl}
               alt={brandName}
@@ -135,21 +136,21 @@ export default function LandingLayout({ children, activePage = '' }) {
               height={34}
               className="w-8.5 h-8.5 object-contain group-hover:scale-105 transition-transform duration-200 shrink-0"
             />
-            <div className="text-left">
+            <div className="text-left shrink-0">
               <span className={cn(
-                "text-lg font-black tracking-tight leading-none block group-hover:text-[#0B8F78] transition-colors",
+                "text-base xl:text-lg font-black tracking-tight leading-none block group-hover:text-[#0B8F78] transition-colors whitespace-nowrap",
                 isDarkMode ? "text-white" : "text-slate-900"
               )}>
                 {brandName}
               </span>
-              <span className="text-[10px] font-bold tracking-widest text-[#0B8F78] uppercase block leading-none">
+              <span className="text-[9px] xl:text-[10px] font-bold tracking-widest text-[#0B8F78] uppercase block leading-none whitespace-nowrap mt-0.5">
                 AI MULTI-CHANNEL SAAS
               </span>
             </div>
           </Link>
 
-          {/* Desktop Navigation Links */}
-          <nav className="hidden lg:flex items-center gap-1.5 text-xs font-semibold">
+          {/* Desktop Navigation Links (No wrapping, responsive spacing) */}
+          <nav className="hidden lg:flex items-center gap-0.5 xl:gap-1.5 text-[11px] xl:text-xs font-semibold shrink-0">
             {navLinks.map((link) => {
               const active = checkIsActive(link.key, link.href);
               return (
@@ -157,7 +158,7 @@ export default function LandingLayout({ children, activePage = '' }) {
                   key={link.key}
                   href={link.href}
                   className={cn(
-                    "px-3 py-1.5 rounded-lg transition-colors",
+                    "px-2 xl:px-2.5 py-1.5 rounded-lg transition-colors whitespace-nowrap shrink-0",
                     active
                       ? (isDarkMode ? "text-[#0B8F78] bg-emerald-950/60 font-bold shadow-xs" : "text-[#0B8F78] bg-emerald-50 font-bold shadow-xs")
                       : (isDarkMode ? "text-slate-200 hover:text-white hover:bg-slate-800/60" : "text-slate-700 hover:text-slate-900 hover:bg-slate-100")
@@ -173,13 +174,13 @@ export default function LandingLayout({ children, activePage = '' }) {
           </nav>
 
           {/* Right Action Buttons */}
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-1.5 xl:gap-2.5 shrink-0">
             {/* Theme Toggle Button */}
             <button
               type="button"
               onClick={toggleTheme}
               className={cn(
-                "p-2 rounded-xl border transition-all duration-200 cursor-pointer flex items-center justify-center",
+                "p-2 rounded-xl border transition-all duration-200 cursor-pointer flex items-center justify-center shrink-0",
                 isDarkMode
                   ? "bg-slate-900 border-slate-800 text-amber-400 hover:bg-slate-800"
                   : "bg-slate-100 border-slate-200 text-slate-700 hover:bg-slate-200"
@@ -194,18 +195,18 @@ export default function LandingLayout({ children, activePage = '' }) {
               <button
                 type="button"
                 onClick={handleDashboardRedirect}
-                className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#0B8F78] to-[#0F766E] text-white text-xs font-bold shadow-md shadow-emerald-700/20 hover:scale-105 active:scale-95 transition-all cursor-pointer flex items-center gap-1.5"
+                className="px-3 xl:px-4 py-2 rounded-xl bg-gradient-to-r from-[#0B8F78] to-[#0F766E] text-white text-xs font-bold shadow-md shadow-emerald-700/20 hover:scale-105 active:scale-95 transition-all cursor-pointer flex items-center gap-1.5 whitespace-nowrap shrink-0"
               >
                 <span>Dashboard</span>
-                <ArrowRight size={14} />
+                <ArrowRight size={14} className="shrink-0" />
               </button>
             ) : (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5 xl:gap-2 shrink-0">
                 <button
                   type="button"
                   onClick={() => router.push('/auth/login')}
                   className={cn(
-                    "hidden sm:inline-flex px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer",
+                    "hidden sm:inline-flex px-2.5 xl:px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0",
                     isDarkMode ? "text-slate-300 hover:text-white" : "text-slate-700 hover:text-slate-900"
                   )}
                 >
@@ -214,10 +215,10 @@ export default function LandingLayout({ children, activePage = '' }) {
                 <button
                   type="button"
                   onClick={handleStartFree}
-                  className="hidden sm:inline-flex px-4 py-2 rounded-xl bg-[#0B8F78] hover:bg-[#097361] text-white text-xs font-bold shadow-md shadow-emerald-700/25 hover:scale-105 active:scale-95 transition-all cursor-pointer items-center gap-1.5"
+                  className="hidden sm:inline-flex px-3 xl:px-4 py-2 rounded-xl bg-[#0B8F78] hover:bg-[#097361] text-white text-xs font-bold shadow-md shadow-emerald-700/25 hover:scale-105 active:scale-95 transition-all cursor-pointer items-center gap-1.5 whitespace-nowrap shrink-0"
                 >
                   <span>Start Free</span>
-                  <ArrowRight size={14} />
+                  <ArrowRight size={14} className="shrink-0" />
                 </button>
               </div>
             )}
@@ -227,7 +228,7 @@ export default function LandingLayout({ children, activePage = '' }) {
               type="button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className={cn(
-                "lg:hidden p-2 rounded-xl border",
+                "lg:hidden p-2 rounded-xl border shrink-0",
                 isDarkMode ? "border-slate-800 text-slate-300" : "border-slate-200 text-slate-700"
               )}
               aria-label="Toggle Navigation Menu"
@@ -321,7 +322,7 @@ export default function LandingLayout({ children, activePage = '' }) {
           <div className="space-y-4 md:col-span-1 text-center md:text-left">
             <Link href="/" className="flex items-center justify-center md:justify-start gap-2.5">
               <img
-                src="/favicon.png"
+                src="/logo.png"
                 alt="UWO Connect"
                 width={28}
                 height={28}
@@ -349,6 +350,7 @@ export default function LandingLayout({ children, activePage = '' }) {
             </h5>
             <ul className="space-y-2">
               <li><Link href="/about" className="hover:text-[#0B8F78] transition-colors">About Us</Link></li>
+              <li><Link href="/solutions" className="hover:text-[#0B8F78] transition-colors">Solutions</Link></li>
               <li><Link href="/contact" className="hover:text-[#0B8F78] transition-colors">Contact</Link></li>
               <li><Link href="/book" className="hover:text-[#0B8F78] transition-colors">Book Demo</Link></li>
               <li><Link href="/#white-label" className="hover:text-[#0B8F78] transition-colors">White Label</Link></li>

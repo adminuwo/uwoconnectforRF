@@ -212,7 +212,7 @@ export default function OtpVerificationCard({
         <button
           type="button"
           onClick={onBack}
-          className="inline-flex items-center gap-2 text-xs font-semibold text-slate-500 hover:text-slate-800 transition-colors mb-5"
+          className="inline-flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white transition-colors mb-5"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Back to Registration</span>
@@ -222,21 +222,21 @@ export default function OtpVerificationCard({
       {/* Header Icon & Title */}
       <div className="text-center mb-6">
         <div 
-          className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-sm border border-emerald-100"
+          className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-sm border border-emerald-100 dark:border-emerald-800/40"
           style={{ backgroundColor: `${primaryColor}15`, color: primaryColor }}
         >
           <Mail className="w-7 h-7" />
         </div>
 
-        <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight mb-2">
+        <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-2">
           {title}
         </h2>
 
-        <p className="text-sm text-slate-500 leading-relaxed max-w-xs mx-auto">
+        <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed max-w-xs mx-auto">
           {subtitle || (
             <>
               We sent a 6-digit verification code to
-              <span className="block font-semibold text-slate-800 mt-1 text-sm bg-slate-100/80 py-1 px-3 rounded-lg border border-slate-200/60 inline-block">
+              <span className="block font-semibold text-slate-800 dark:text-slate-200 mt-1 text-sm bg-slate-100/80 dark:bg-slate-800/80 py-1 px-3 rounded-lg border border-slate-200/60 dark:border-slate-700/60 inline-block">
                 {maskEmail(email)}
               </span>
             </>
@@ -246,9 +246,9 @@ export default function OtpVerificationCard({
 
       {/* Development Debug Banner */}
       {debugCode && (
-        <div className="mb-5 p-3 rounded-xl bg-amber-50/80 border border-amber-200 text-amber-900 text-xs flex items-center justify-between">
+        <div className="mb-5 p-3 rounded-xl bg-amber-50/80 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-amber-900 dark:text-amber-200 text-xs flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="font-bold uppercase tracking-wider text-[10px] bg-amber-200 text-amber-900 px-1.5 py-0.5 rounded">DEV OTP</span>
+            <span className="font-bold uppercase tracking-wider text-[10px] bg-amber-200 dark:bg-amber-800 text-amber-900 dark:text-amber-100 px-1.5 py-0.5 rounded">DEV OTP</span>
             <span className="font-mono font-bold tracking-widest">{debugCode}</span>
           </div>
           <button
@@ -258,7 +258,7 @@ export default function OtpVerificationCard({
               setOtpValues(chars);
               inputRefs.current[5]?.focus();
             }}
-            className="text-[11px] font-semibold text-amber-800 underline hover:text-amber-950"
+            className="text-[11px] font-semibold text-amber-800 dark:text-amber-300 underline hover:text-amber-950 dark:hover:text-amber-100"
           >
             Auto-fill
           </button>
@@ -272,7 +272,7 @@ export default function OtpVerificationCard({
             initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
-            className="mb-5 p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-medium flex items-start gap-2.5 shadow-sm"
+            className="mb-5 p-3.5 rounded-xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 text-xs font-medium flex items-start gap-2.5 shadow-sm"
           >
             <AlertCircle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
             <div className="leading-snug">{error}</div>
@@ -284,7 +284,7 @@ export default function OtpVerificationCard({
             initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
-            className="mb-5 p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-medium flex items-start gap-2.5 shadow-sm"
+            className="mb-5 p-3.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-xs font-medium flex items-start gap-2.5 shadow-sm"
           >
             <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
             <div className="leading-snug">{successMsg}</div>
@@ -295,7 +295,7 @@ export default function OtpVerificationCard({
       {/* 6-Digit OTP Form */}
       <form onSubmit={handleVerify} className="space-y-6">
         <div>
-          <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-3 text-center">
+          <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-3 text-center">
             Enter 6-Digit Code
           </label>
           <div className="flex items-center justify-between gap-2 sm:gap-2.5 max-w-sm mx-auto">
@@ -314,8 +314,8 @@ export default function OtpVerificationCard({
                 autoComplete="one-time-code"
                 className={`w-11 h-14 sm:w-12 sm:h-16 text-center text-xl sm:text-2xl font-bold rounded-xl border transition-all duration-200 outline-none select-all ${
                   digit
-                    ? 'border-emerald-500 bg-white text-slate-900 shadow-sm ring-2 ring-emerald-500/10'
-                    : 'border-slate-200 bg-slate-50 text-slate-800 hover:border-slate-300 focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/15'
+                    ? 'border-emerald-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm ring-2 ring-emerald-500/10'
+                    : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-white hover:border-slate-300 dark:hover:border-slate-600 focus:bg-white dark:focus:bg-slate-800 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/15'
                 }`}
               />
             ))}
@@ -347,8 +347,8 @@ export default function OtpVerificationCard({
         </button>
 
         {/* Resend OTP Section */}
-        <div className="pt-2 text-center border-t border-slate-100">
-          <p className="text-xs text-slate-500 mb-2">
+        <div className="pt-2 text-center border-t border-slate-100 dark:border-slate-800">
+          <p className="text-xs text-slate-500 dark:text-slate-400 mb-2">
             Didn't receive the email? Check your spam folder or
           </p>
 
@@ -357,7 +357,7 @@ export default function OtpVerificationCard({
               type="button"
               onClick={handleResend}
               disabled={resending}
-              className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-600 hover:text-emerald-700 hover:underline transition-colors"
+              className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 hover:underline transition-colors"
             >
               {resending ? (
                 <>
@@ -372,17 +372,17 @@ export default function OtpVerificationCard({
               )}
             </button>
           ) : (
-            <div className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400">
+            <div className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400 dark:text-slate-500">
               <RefreshCw className="w-3.5 h-3.5 animate-spin-reverse opacity-40" />
               <span>
-                Resend code in <strong className="text-slate-600">{countdown}s</strong>
+                Resend code in <strong className="text-slate-600 dark:text-slate-300">{countdown}s</strong>
               </span>
             </div>
           )}
         </div>
 
         {/* Trust Badge */}
-        <div className="flex items-center justify-center gap-2 pt-2 text-[11px] font-semibold text-slate-400">
+        <div className="flex items-center justify-center gap-2 pt-2 text-[11px] font-semibold text-slate-400 dark:text-slate-500">
           <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
           <span>Encrypted 256-Bit Authentication Verification</span>
         </div>

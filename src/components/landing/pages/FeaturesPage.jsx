@@ -109,7 +109,7 @@ export default function FeaturesPage() {
             </motion.div>
 
             {/* Visual Character Duo Hero Concept */}
-            <div className="relative max-w-4xl mx-auto p-6 sm:p-10 rounded-3xl bg-white dark:bg-slate-900 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 shadow-xl overflow-hidden grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+            <div className="relative max-w-4xl mx-auto p-6 sm:p-10 rounded-3xl bg-white dark:bg-transparent text-slate-900 dark:text-white border border-slate-200 dark:border-transparent shadow-xl dark:shadow-none overflow-hidden grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
               
               {/* Left Side: Dev (Connect) */}
               <div className="text-center space-y-3">
